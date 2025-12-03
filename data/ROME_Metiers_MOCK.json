@@ -1,0 +1,46 @@
+{
+  "metiers": [
+    {
+      "codeMetier": "M1805",
+      "libelleMetier": "Études et développement informatique",
+      "famille": "M",
+      "domaine": "M1"
+    },
+    {
+      "codeMetier": "M1806",
+      "libelleMetier": "Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "famille": "M",
+      "domaine": "M1"
+    },
+    {
+      "codeMetier": "M1810",
+      "libelleMetier": "Production et exploitation de systèmes d'information",
+      "famille": "M",
+      "domaine": "M1"
+    },
+    {
+      "codeMetier": "I1401",
+      "libelleMetier": "Maintenance informatique et bureautique",
+      "famille": "I",
+      "domaine": "I1"
+    },
+    {
+      "codeMetier": "I1301",
+      "libelleMetier": "Installation et maintenance électronique",
+      "famille": "I",
+      "domaine": "I1"
+    },
+    {
+      "codeMetier": "J1103",
+      "libelleMetier": "Médecine généraliste et spécialisée",
+      "famille": "J",
+      "domaine": "J1"
+    },
+    {
+      "codeMetier": "K2111",
+      "libelleMetier": "Formation professionnelle",
+      "famille": "K",
+      "domaine": "K2"
+    }
+  ]
+}

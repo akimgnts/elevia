@@ -1,0 +1,54 @@
+{
+  "competences": [
+    {
+      "code": "C001",
+      "libelle": "Python",
+      "type": "savoir-faire"
+    },
+    {
+      "code": "C002",
+      "libelle": "SQL",
+      "type": "savoir-faire"
+    },
+    {
+      "code": "C003",
+      "libelle": "JavaScript",
+      "type": "savoir-faire"
+    },
+    {
+      "code": "C004",
+      "libelle": "Gestion de projet",
+      "type": "savoir-faire"
+    },
+    {
+      "code": "C005",
+      "libelle": "Anglais professionnel",
+      "type": "savoir"
+    },
+    {
+      "code": "C006",
+      "libelle": "Power BI",
+      "type": "savoir-faire"
+    },
+    {
+      "code": "C007",
+      "libelle": "Excel avancé",
+      "type": "savoir-faire"
+    },
+    {
+      "code": "C008",
+      "libelle": "Analyse de données",
+      "type": "savoir-faire"
+    },
+    {
+      "code": "C009",
+      "libelle": "Communication",
+      "type": "transversal"
+    },
+    {
+      "code": "C010",
+      "libelle": "Travail en équipe",
+      "type": "transversal"
+    }
+  ]
+}

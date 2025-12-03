@@ -1,0 +1,354 @@
+{
+  "stats": [
+    {
+      "codeROME": "M1805",
+      "zone": "75",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.6,
+      "nbOffres": 459,
+      "nbDemandeurs": 777,
+      "ratioOffresDemandeurs": 1.0,
+      "evolutionYoY": -0.063
+    },
+    {
+      "codeROME": "M1805",
+      "zone": "69",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.65,
+      "nbOffres": 110,
+      "nbDemandeurs": 250,
+      "ratioOffresDemandeurs": 1.11,
+      "evolutionYoY": -0.023
+    },
+    {
+      "codeROME": "M1805",
+      "zone": "13",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.49,
+      "nbOffres": 278,
+      "nbDemandeurs": 251,
+      "ratioOffresDemandeurs": 0.84,
+      "evolutionYoY": 0.246
+    },
+    {
+      "codeROME": "M1805",
+      "zone": "31",
+      "typeZone": "DEPARTEMENT",
+      "tension": 2.23,
+      "nbOffres": 377,
+      "nbDemandeurs": 698,
+      "ratioOffresDemandeurs": 0.62,
+      "evolutionYoY": -0.102
+    },
+    {
+      "codeROME": "M1805",
+      "zone": "44",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.52,
+      "nbOffres": 199,
+      "nbDemandeurs": 607,
+      "ratioOffresDemandeurs": 0.92,
+      "evolutionYoY": 0.058
+    },
+    {
+      "codeROME": "M1806",
+      "zone": "75",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.78,
+      "nbOffres": 137,
+      "nbDemandeurs": 630,
+      "ratioOffresDemandeurs": 1.37,
+      "evolutionYoY": 0.284
+    },
+    {
+      "codeROME": "M1806",
+      "zone": "69",
+      "typeZone": "DEPARTEMENT",
+      "tension": 2.19,
+      "nbOffres": 453,
+      "nbDemandeurs": 158,
+      "ratioOffresDemandeurs": 0.72,
+      "evolutionYoY": -0.045
+    },
+    {
+      "codeROME": "M1806",
+      "zone": "13",
+      "typeZone": "DEPARTEMENT",
+      "tension": 0.62,
+      "nbOffres": 68,
+      "nbDemandeurs": 116,
+      "ratioOffresDemandeurs": 0.39,
+      "evolutionYoY": 0.253
+    },
+    {
+      "codeROME": "M1806",
+      "zone": "31",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.91,
+      "nbOffres": 466,
+      "nbDemandeurs": 317,
+      "ratioOffresDemandeurs": 0.92,
+      "evolutionYoY": -0.155
+    },
+    {
+      "codeROME": "M1806",
+      "zone": "44",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.41,
+      "nbOffres": 215,
+      "nbDemandeurs": 185,
+      "ratioOffresDemandeurs": 0.42,
+      "evolutionYoY": -0.059
+    },
+    {
+      "codeROME": "M1810",
+      "zone": "75",
+      "typeZone": "DEPARTEMENT",
+      "tension": 0.66,
+      "nbOffres": 423,
+      "nbDemandeurs": 100,
+      "ratioOffresDemandeurs": 0.45,
+      "evolutionYoY": 0.129
+    },
+    {
+      "codeROME": "M1810",
+      "zone": "69",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.33,
+      "nbOffres": 467,
+      "nbDemandeurs": 293,
+      "ratioOffresDemandeurs": 0.56,
+      "evolutionYoY": 0.27
+    },
+    {
+      "codeROME": "M1810",
+      "zone": "13",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.62,
+      "nbOffres": 305,
+      "nbDemandeurs": 509,
+      "ratioOffresDemandeurs": 0.36,
+      "evolutionYoY": 0.125
+    },
+    {
+      "codeROME": "M1810",
+      "zone": "31",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.3,
+      "nbOffres": 244,
+      "nbDemandeurs": 180,
+      "ratioOffresDemandeurs": 0.89,
+      "evolutionYoY": 0.168
+    },
+    {
+      "codeROME": "M1810",
+      "zone": "44",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.18,
+      "nbOffres": 187,
+      "nbDemandeurs": 581,
+      "ratioOffresDemandeurs": 0.65,
+      "evolutionYoY": 0.209
+    },
+    {
+      "codeROME": "I1401",
+      "zone": "75",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.48,
+      "nbOffres": 475,
+      "nbDemandeurs": 560,
+      "ratioOffresDemandeurs": 0.54,
+      "evolutionYoY": 0.253
+    },
+    {
+      "codeROME": "I1401",
+      "zone": "69",
+      "typeZone": "DEPARTEMENT",
+      "tension": 0.93,
+      "nbOffres": 491,
+      "nbDemandeurs": 432,
+      "ratioOffresDemandeurs": 1.45,
+      "evolutionYoY": 0.294
+    },
+    {
+      "codeROME": "I1401",
+      "zone": "13",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.49,
+      "nbOffres": 446,
+      "nbDemandeurs": 294,
+      "ratioOffresDemandeurs": 1.21,
+      "evolutionYoY": 0.244
+    },
+    {
+      "codeROME": "I1401",
+      "zone": "31",
+      "typeZone": "DEPARTEMENT",
+      "tension": 2.16,
+      "nbOffres": 321,
+      "nbDemandeurs": 528,
+      "ratioOffresDemandeurs": 0.39,
+      "evolutionYoY": -0.031
+    },
+    {
+      "codeROME": "I1401",
+      "zone": "44",
+      "typeZone": "DEPARTEMENT",
+      "tension": 0.88,
+      "nbOffres": 459,
+      "nbDemandeurs": 513,
+      "ratioOffresDemandeurs": 0.49,
+      "evolutionYoY": -0.077
+    },
+    {
+      "codeROME": "I1301",
+      "zone": "75",
+      "typeZone": "DEPARTEMENT",
+      "tension": 0.64,
+      "nbOffres": 401,
+      "nbDemandeurs": 575,
+      "ratioOffresDemandeurs": 1.03,
+      "evolutionYoY": -0.042
+    },
+    {
+      "codeROME": "I1301",
+      "zone": "69",
+      "typeZone": "DEPARTEMENT",
+      "tension": 2.29,
+      "nbOffres": 355,
+      "nbDemandeurs": 791,
+      "ratioOffresDemandeurs": 1.07,
+      "evolutionYoY": 0.18
+    },
+    {
+      "codeROME": "I1301",
+      "zone": "13",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.36,
+      "nbOffres": 225,
+      "nbDemandeurs": 532,
+      "ratioOffresDemandeurs": 0.8,
+      "evolutionYoY": 0.101
+    },
+    {
+      "codeROME": "I1301",
+      "zone": "31",
+      "typeZone": "DEPARTEMENT",
+      "tension": 0.83,
+      "nbOffres": 190,
+      "nbDemandeurs": 263,
+      "ratioOffresDemandeurs": 0.96,
+      "evolutionYoY": -0.096
+    },
+    {
+      "codeROME": "I1301",
+      "zone": "44",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.74,
+      "nbOffres": 280,
+      "nbDemandeurs": 494,
+      "ratioOffresDemandeurs": 1.14,
+      "evolutionYoY": -0.116
+    },
+    {
+      "codeROME": "J1103",
+      "zone": "75",
+      "typeZone": "DEPARTEMENT",
+      "tension": 2.28,
+      "nbOffres": 226,
+      "nbDemandeurs": 166,
+      "ratioOffresDemandeurs": 0.41,
+      "evolutionYoY": -0.005
+    },
+    {
+      "codeROME": "J1103",
+      "zone": "69",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.23,
+      "nbOffres": 61,
+      "nbDemandeurs": 645,
+      "ratioOffresDemandeurs": 0.43,
+      "evolutionYoY": -0.104
+    },
+    {
+      "codeROME": "J1103",
+      "zone": "13",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.76,
+      "nbOffres": 177,
+      "nbDemandeurs": 630,
+      "ratioOffresDemandeurs": 0.75,
+      "evolutionYoY": 0.237
+    },
+    {
+      "codeROME": "J1103",
+      "zone": "31",
+      "typeZone": "DEPARTEMENT",
+      "tension": 0.97,
+      "nbOffres": 222,
+      "nbDemandeurs": 522,
+      "ratioOffresDemandeurs": 0.21,
+      "evolutionYoY": 0.006
+    },
+    {
+      "codeROME": "J1103",
+      "zone": "44",
+      "typeZone": "DEPARTEMENT",
+      "tension": 2.35,
+      "nbOffres": 481,
+      "nbDemandeurs": 746,
+      "ratioOffresDemandeurs": 0.73,
+      "evolutionYoY": 0.182
+    },
+    {
+      "codeROME": "K2111",
+      "zone": "75",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.25,
+      "nbOffres": 352,
+      "nbDemandeurs": 681,
+      "ratioOffresDemandeurs": 1.19,
+      "evolutionYoY": -0.149
+    },
+    {
+      "codeROME": "K2111",
+      "zone": "69",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.33,
+      "nbOffres": 177,
+      "nbDemandeurs": 304,
+      "ratioOffresDemandeurs": 1.19,
+      "evolutionYoY": -0.164
+    },
+    {
+      "codeROME": "K2111",
+      "zone": "13",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.4,
+      "nbOffres": 458,
+      "nbDemandeurs": 298,
+      "ratioOffresDemandeurs": 0.89,
+      "evolutionYoY": -0.105
+    },
+    {
+      "codeROME": "K2111",
+      "zone": "31",
+      "typeZone": "DEPARTEMENT",
+      "tension": 0.96,
+      "nbOffres": 333,
+      "nbDemandeurs": 771,
+      "ratioOffresDemandeurs": 0.26,
+      "evolutionYoY": -0.195
+    },
+    {
+      "codeROME": "K2111",
+      "zone": "44",
+      "typeZone": "DEPARTEMENT",
+      "tension": 1.64,
+      "nbOffres": 111,
+      "nbDemandeurs": 711,
+      "ratioOffresDemandeurs": 0.49,
+      "evolutionYoY": 0.195
+    }
+  ]
+}

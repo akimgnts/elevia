@@ -1,0 +1,2739 @@
+{
+  "resultats": [
+    {
+      "id": "MOCK0001",
+      "intitule": "Études et développement informatique - Offre 1",
+      "description": "Description détaillée de l'offre 1 pour Études et développement informatique",
+      "dateCreation": "2025-08-28T22:58:23.548203",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0002",
+      "intitule": "Études et développement informatique - Offre 2",
+      "description": "Description détaillée de l'offre 2 pour Études et développement informatique",
+      "dateCreation": "2025-08-29T22:58:23.548239",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0003",
+      "intitule": "Production et exploitation de systèmes d'information - Offre 3",
+      "description": "Description détaillée de l'offre 3 pour Production et exploitation de systèmes d'information",
+      "dateCreation": "2025-08-23T22:58:23.548257",
+      "romeCode": "M1810",
+      "appellationLibelle": "Production et exploitation de systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 30K€ et 69K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0004",
+      "intitule": "Formation professionnelle - Offre 4",
+      "description": "Description détaillée de l'offre 4 pour Formation professionnelle",
+      "dateCreation": "2025-10-11T22:58:23.548274",
+      "romeCode": "K2111",
+      "appellationLibelle": "Formation professionnelle",
+      "lieuTravail": {
+        "libelle": "Marseille (13)",
+        "commune": "Marseille",
+        "codePostal": "13001",
+        "departement": "13",
+        "region": "93",
+        "latitude": 43.2965,
+        "longitude": 5.3698,
+        "pays": "FR"
+      },
+      "typeContrat": "FRA",
+      "typeContratLibelle": "FRA",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 31K€ et 51K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0005",
+      "intitule": "Conseil et maîtrise d'ouvrage en systèmes d'information - Offre 5",
+      "description": "Description détaillée de l'offre 5 pour Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "dateCreation": "2025-09-27T22:58:23.548285",
+      "romeCode": "M1806",
+      "appellationLibelle": "Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "FRA",
+      "typeContratLibelle": "FRA",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 34K€ et 66K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0006",
+      "intitule": "Maintenance informatique et bureautique - Offre 6",
+      "description": "Description détaillée de l'offre 6 pour Maintenance informatique et bureautique",
+      "dateCreation": "2025-09-01T22:58:23.548297",
+      "romeCode": "I1401",
+      "appellationLibelle": "Maintenance informatique et bureautique",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0007",
+      "intitule": "Installation et maintenance électronique - Offre 7",
+      "description": "Description détaillée de l'offre 7 pour Installation et maintenance électronique",
+      "dateCreation": "2025-09-26T22:58:23.548308",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 27K€ et 72K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0008",
+      "intitule": "Production et exploitation de systèmes d'information - Offre 8",
+      "description": "Description détaillée de l'offre 8 pour Production et exploitation de systèmes d'information",
+      "dateCreation": "2025-11-07T22:58:23.548320",
+      "romeCode": "M1810",
+      "appellationLibelle": "Production et exploitation de systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Nantes (44)",
+        "commune": "Nantes",
+        "codePostal": "44000",
+        "departement": "44",
+        "region": "52",
+        "latitude": 47.2184,
+        "longitude": -1.5536,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 45K€ et 59K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0009",
+      "intitule": "Médecine généraliste et spécialisée - Offre 9",
+      "description": "Description détaillée de l'offre 9 pour Médecine généraliste et spécialisée",
+      "dateCreation": "2025-08-13T22:58:23.548334",
+      "romeCode": "J1103",
+      "appellationLibelle": "Médecine généraliste et spécialisée",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 34K€ et 60K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0010",
+      "intitule": "Installation et maintenance électronique - Offre 10",
+      "description": "Description détaillée de l'offre 10 pour Installation et maintenance électronique",
+      "dateCreation": "2025-09-14T22:58:23.548349",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 42K€ et 59K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0011",
+      "intitule": "Études et développement informatique - Offre 11",
+      "description": "Description détaillée de l'offre 11 pour Études et développement informatique",
+      "dateCreation": "2025-08-31T22:58:23.548360",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Nantes (44)",
+        "commune": "Nantes",
+        "codePostal": "44000",
+        "departement": "44",
+        "region": "52",
+        "latitude": 47.2184,
+        "longitude": -1.5536,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0012",
+      "intitule": "Production et exploitation de systèmes d'information - Offre 12",
+      "description": "Description détaillée de l'offre 12 pour Production et exploitation de systèmes d'information",
+      "dateCreation": "2025-10-15T22:58:23.548373",
+      "romeCode": "M1810",
+      "appellationLibelle": "Production et exploitation de systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 27K€ et 52K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0013",
+      "intitule": "Médecine généraliste et spécialisée - Offre 13",
+      "description": "Description détaillée de l'offre 13 pour Médecine généraliste et spécialisée",
+      "dateCreation": "2025-10-10T22:58:23.548386",
+      "romeCode": "J1103",
+      "appellationLibelle": "Médecine généraliste et spécialisée",
+      "lieuTravail": {
+        "libelle": "Nantes (44)",
+        "commune": "Nantes",
+        "codePostal": "44000",
+        "departement": "44",
+        "region": "52",
+        "latitude": 47.2184,
+        "longitude": -1.5536,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0014",
+      "intitule": "Maintenance informatique et bureautique - Offre 14",
+      "description": "Description détaillée de l'offre 14 pour Maintenance informatique et bureautique",
+      "dateCreation": "2025-10-06T22:58:23.548398",
+      "romeCode": "I1401",
+      "appellationLibelle": "Maintenance informatique et bureautique",
+      "lieuTravail": {
+        "libelle": "Marseille (13)",
+        "commune": "Marseille",
+        "codePostal": "13001",
+        "departement": "13",
+        "region": "93",
+        "latitude": 43.2965,
+        "longitude": 5.3698,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0015",
+      "intitule": "Maintenance informatique et bureautique - Offre 15",
+      "description": "Description détaillée de l'offre 15 pour Maintenance informatique et bureautique",
+      "dateCreation": "2025-09-17T22:58:23.548410",
+      "romeCode": "I1401",
+      "appellationLibelle": "Maintenance informatique et bureautique",
+      "lieuTravail": {
+        "libelle": "Marseille (13)",
+        "commune": "Marseille",
+        "codePostal": "13001",
+        "departement": "13",
+        "region": "93",
+        "latitude": 43.2965,
+        "longitude": 5.3698,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 44K€ et 50K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0016",
+      "intitule": "Études et développement informatique - Offre 16",
+      "description": "Description détaillée de l'offre 16 pour Études et développement informatique",
+      "dateCreation": "2025-09-17T22:58:23.548421",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Marseille (13)",
+        "commune": "Marseille",
+        "codePostal": "13001",
+        "departement": "13",
+        "region": "93",
+        "latitude": 43.2965,
+        "longitude": 5.3698,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 36K€ et 70K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0017",
+      "intitule": "Études et développement informatique - Offre 17",
+      "description": "Description détaillée de l'offre 17 pour Études et développement informatique",
+      "dateCreation": "2025-10-19T22:58:23.548433",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Nantes (44)",
+        "commune": "Nantes",
+        "codePostal": "44000",
+        "departement": "44",
+        "region": "52",
+        "latitude": 47.2184,
+        "longitude": -1.5536,
+        "pays": "FR"
+      },
+      "typeContrat": "FRA",
+      "typeContratLibelle": "FRA",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 33K€ et 54K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0018",
+      "intitule": "Formation professionnelle - Offre 18",
+      "description": "Description détaillée de l'offre 18 pour Formation professionnelle",
+      "dateCreation": "2025-09-26T22:58:23.548444",
+      "romeCode": "K2111",
+      "appellationLibelle": "Formation professionnelle",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 32K€ et 57K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0019",
+      "intitule": "Conseil et maîtrise d'ouvrage en systèmes d'information - Offre 19",
+      "description": "Description détaillée de l'offre 19 pour Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "dateCreation": "2025-09-27T22:58:23.548456",
+      "romeCode": "M1806",
+      "appellationLibelle": "Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Nantes (44)",
+        "commune": "Nantes",
+        "codePostal": "44000",
+        "departement": "44",
+        "region": "52",
+        "latitude": 47.2184,
+        "longitude": -1.5536,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 33K€ et 79K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0020",
+      "intitule": "Production et exploitation de systèmes d'information - Offre 20",
+      "description": "Description détaillée de l'offre 20 pour Production et exploitation de systèmes d'information",
+      "dateCreation": "2025-10-31T22:58:23.548467",
+      "romeCode": "M1810",
+      "appellationLibelle": "Production et exploitation de systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Nantes (44)",
+        "commune": "Nantes",
+        "codePostal": "44000",
+        "departement": "44",
+        "region": "52",
+        "latitude": 47.2184,
+        "longitude": -1.5536,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 27K€ et 58K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0021",
+      "intitule": "Installation et maintenance électronique - Offre 21",
+      "description": "Description détaillée de l'offre 21 pour Installation et maintenance électronique",
+      "dateCreation": "2025-10-26T22:58:23.548478",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 31K€ et 60K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0022",
+      "intitule": "Installation et maintenance électronique - Offre 22",
+      "description": "Description détaillée de l'offre 22 pour Installation et maintenance électronique",
+      "dateCreation": "2025-08-24T22:58:23.548488",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 39K€ et 78K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0023",
+      "intitule": "Études et développement informatique - Offre 23",
+      "description": "Description détaillée de l'offre 23 pour Études et développement informatique",
+      "dateCreation": "2025-08-23T22:58:23.548498",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0024",
+      "intitule": "Formation professionnelle - Offre 24",
+      "description": "Description détaillée de l'offre 24 pour Formation professionnelle",
+      "dateCreation": "2025-10-02T22:58:23.548509",
+      "romeCode": "K2111",
+      "appellationLibelle": "Formation professionnelle",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "FRA",
+      "typeContratLibelle": "FRA",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0025",
+      "intitule": "Études et développement informatique - Offre 25",
+      "description": "Description détaillée de l'offre 25 pour Études et développement informatique",
+      "dateCreation": "2025-10-10T22:58:23.548518",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 44K€ et 63K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0026",
+      "intitule": "Formation professionnelle - Offre 26",
+      "description": "Description détaillée de l'offre 26 pour Formation professionnelle",
+      "dateCreation": "2025-09-11T22:58:23.548530",
+      "romeCode": "K2111",
+      "appellationLibelle": "Formation professionnelle",
+      "lieuTravail": {
+        "libelle": "Nantes (44)",
+        "commune": "Nantes",
+        "codePostal": "44000",
+        "departement": "44",
+        "region": "52",
+        "latitude": 47.2184,
+        "longitude": -1.5536,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 37K€ et 77K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": true
+    },
+    {
+      "id": "MOCK0027",
+      "intitule": "Conseil et maîtrise d'ouvrage en systèmes d'information - Offre 27",
+      "description": "Description détaillée de l'offre 27 pour Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "dateCreation": "2025-09-17T22:58:23.548541",
+      "romeCode": "M1806",
+      "appellationLibelle": "Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Marseille (13)",
+        "commune": "Marseille",
+        "codePostal": "13001",
+        "departement": "13",
+        "region": "93",
+        "latitude": 43.2965,
+        "longitude": 5.3698,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 45K€ et 70K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0028",
+      "intitule": "Études et développement informatique - Offre 28",
+      "description": "Description détaillée de l'offre 28 pour Études et développement informatique",
+      "dateCreation": "2025-10-29T22:58:23.548552",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 31K€ et 55K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0029",
+      "intitule": "Maintenance informatique et bureautique - Offre 29",
+      "description": "Description détaillée de l'offre 29 pour Maintenance informatique et bureautique",
+      "dateCreation": "2025-10-23T22:58:23.548563",
+      "romeCode": "I1401",
+      "appellationLibelle": "Maintenance informatique et bureautique",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail partiel",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0030",
+      "intitule": "Médecine généraliste et spécialisée - Offre 30",
+      "description": "Description détaillée de l'offre 30 pour Médecine généraliste et spécialisée",
+      "dateCreation": "2025-10-12T22:58:23.548581",
+      "romeCode": "J1103",
+      "appellationLibelle": "Médecine généraliste et spécialisée",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0031",
+      "intitule": "Installation et maintenance électronique - Offre 31",
+      "description": "Description détaillée de l'offre 31 pour Installation et maintenance électronique",
+      "dateCreation": "2025-10-08T22:58:23.548593",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Marseille (13)",
+        "commune": "Marseille",
+        "codePostal": "13001",
+        "departement": "13",
+        "region": "93",
+        "latitude": 43.2965,
+        "longitude": 5.3698,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 28K€ et 71K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0032",
+      "intitule": "Conseil et maîtrise d'ouvrage en systèmes d'information - Offre 32",
+      "description": "Description détaillée de l'offre 32 pour Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "dateCreation": "2025-09-18T22:58:23.548606",
+      "romeCode": "M1806",
+      "appellationLibelle": "Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": true
+    },
+    {
+      "id": "MOCK0033",
+      "intitule": "Formation professionnelle - Offre 33",
+      "description": "Description détaillée de l'offre 33 pour Formation professionnelle",
+      "dateCreation": "2025-09-19T22:58:23.548616",
+      "romeCode": "K2111",
+      "appellationLibelle": "Formation professionnelle",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 25K€ et 67K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0034",
+      "intitule": "Installation et maintenance électronique - Offre 34",
+      "description": "Description détaillée de l'offre 34 pour Installation et maintenance électronique",
+      "dateCreation": "2025-09-06T22:58:23.548627",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 35K€ et 73K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0035",
+      "intitule": "Études et développement informatique - Offre 35",
+      "description": "Description détaillée de l'offre 35 pour Études et développement informatique",
+      "dateCreation": "2025-09-29T22:58:23.548638",
+      "romeCode": "M1805",
+      "appellationLibelle": "Études et développement informatique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": true
+    },
+    {
+      "id": "MOCK0036",
+      "intitule": "Maintenance informatique et bureautique - Offre 36",
+      "description": "Description détaillée de l'offre 36 pour Maintenance informatique et bureautique",
+      "dateCreation": "2025-09-05T22:58:23.548648",
+      "romeCode": "I1401",
+      "appellationLibelle": "Maintenance informatique et bureautique",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "FRA",
+      "typeContratLibelle": "FRA",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 25K€ et 79K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0037",
+      "intitule": "Médecine généraliste et spécialisée - Offre 37",
+      "description": "Description détaillée de l'offre 37 pour Médecine généraliste et spécialisée",
+      "dateCreation": "2025-11-06T22:58:23.548658",
+      "romeCode": "J1103",
+      "appellationLibelle": "Médecine généraliste et spécialisée",
+      "lieuTravail": {
+        "libelle": "Nantes (44)",
+        "commune": "Nantes",
+        "codePostal": "44000",
+        "departement": "44",
+        "region": "52",
+        "latitude": 47.2184,
+        "longitude": -1.5536,
+        "pays": "FR"
+      },
+      "typeContrat": "FRA",
+      "typeContratLibelle": "FRA",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 40K€ et 60K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0038",
+      "intitule": "Médecine généraliste et spécialisée - Offre 38",
+      "description": "Description détaillée de l'offre 38 pour Médecine généraliste et spécialisée",
+      "dateCreation": "2025-10-16T22:58:23.548668",
+      "romeCode": "J1103",
+      "appellationLibelle": "Médecine généraliste et spécialisée",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 35K€ et 54K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0039",
+      "intitule": "Médecine généraliste et spécialisée - Offre 39",
+      "description": "Description détaillée de l'offre 39 pour Médecine généraliste et spécialisée",
+      "dateCreation": "2025-08-12T22:58:23.548680",
+      "romeCode": "J1103",
+      "appellationLibelle": "Médecine généraliste et spécialisée",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 28K€ et 66K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0040",
+      "intitule": "Formation professionnelle - Offre 40",
+      "description": "Description détaillée de l'offre 40 pour Formation professionnelle",
+      "dateCreation": "2025-10-03T22:58:23.548691",
+      "romeCode": "K2111",
+      "appellationLibelle": "Formation professionnelle",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 38K€ et 63K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0041",
+      "intitule": "Installation et maintenance électronique - Offre 41",
+      "description": "Description détaillée de l'offre 41 pour Installation et maintenance électronique",
+      "dateCreation": "2025-08-26T22:58:23.548702",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Marseille (13)",
+        "commune": "Marseille",
+        "codePostal": "13001",
+        "departement": "13",
+        "region": "93",
+        "latitude": 43.2965,
+        "longitude": 5.3698,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 42K€ et 60K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0042",
+      "intitule": "Maintenance informatique et bureautique - Offre 42",
+      "description": "Description détaillée de l'offre 42 pour Maintenance informatique et bureautique",
+      "dateCreation": "2025-09-03T22:58:23.548711",
+      "romeCode": "I1401",
+      "appellationLibelle": "Maintenance informatique et bureautique",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0043",
+      "intitule": "Maintenance informatique et bureautique - Offre 43",
+      "description": "Description détaillée de l'offre 43 pour Maintenance informatique et bureautique",
+      "dateCreation": "2025-08-29T22:58:23.548719",
+      "romeCode": "I1401",
+      "appellationLibelle": "Maintenance informatique et bureautique",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 27K€ et 71K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0044",
+      "intitule": "Installation et maintenance électronique - Offre 44",
+      "description": "Description détaillée de l'offre 44 pour Installation et maintenance électronique",
+      "dateCreation": "2025-09-30T22:58:23.548730",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 26K€ et 64K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0045",
+      "intitule": "Conseil et maîtrise d'ouvrage en systèmes d'information - Offre 45",
+      "description": "Description détaillée de l'offre 45 pour Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "dateCreation": "2025-08-28T22:58:23.548743",
+      "romeCode": "M1806",
+      "appellationLibelle": "Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "CDI",
+      "typeContratLibelle": "Contrat à durée indéterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 40K€ et 59K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0046",
+      "intitule": "Conseil et maîtrise d'ouvrage en systèmes d'information - Offre 46",
+      "description": "Description détaillée de l'offre 46 pour Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "dateCreation": "2025-09-16T22:58:23.548754",
+      "romeCode": "M1806",
+      "appellationLibelle": "Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "FRA",
+      "typeContratLibelle": "FRA",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C004",
+          "libelle": "Gestion de projet",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0047",
+      "intitule": "Installation et maintenance électronique - Offre 47",
+      "description": "Description détaillée de l'offre 47 pour Installation et maintenance électronique",
+      "dateCreation": "2025-08-31T22:58:23.548763",
+      "romeCode": "I1301",
+      "appellationLibelle": "Installation et maintenance électronique",
+      "lieuTravail": {
+        "libelle": "Lyon (69)",
+        "commune": "Lyon",
+        "codePostal": "69001",
+        "departement": "69",
+        "region": "84",
+        "latitude": 45.764,
+        "longitude": 4.8357,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "D",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": null,
+      "competences": [
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C002",
+          "libelle": "SQL",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0048",
+      "intitule": "Production et exploitation de systèmes d'information - Offre 48",
+      "description": "Description détaillée de l'offre 48 pour Production et exploitation de systèmes d'information",
+      "dateCreation": "2025-10-02T22:58:23.548776",
+      "romeCode": "M1810",
+      "appellationLibelle": "Production et exploitation de systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "CDD",
+      "typeContratLibelle": "Contrat à durée déterminée",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 26K€ et 70K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C003",
+          "libelle": "JavaScript",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C005",
+          "libelle": "Anglais professionnel",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C009",
+          "libelle": "Communication",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C006",
+          "libelle": "Power BI",
+          "exigence": "SOUHAITEE"
+        },
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": false
+    },
+    {
+      "id": "MOCK0049",
+      "intitule": "Maintenance informatique et bureautique - Offre 49",
+      "description": "Description détaillée de l'offre 49 pour Maintenance informatique et bureautique",
+      "dateCreation": "2025-11-10T22:58:23.548788",
+      "romeCode": "I1401",
+      "appellationLibelle": "Maintenance informatique et bureautique",
+      "lieuTravail": {
+        "libelle": "Paris (75)",
+        "commune": "Paris",
+        "codePostal": "75001",
+        "departement": "75",
+        "region": "11",
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "pays": "FR"
+      },
+      "typeContrat": "LIB",
+      "typeContratLibelle": "LIB",
+      "experienceExige": "S",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 32K€ et 66K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C008",
+          "libelle": "Analyse de données",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "SOUHAITEE"
+        }
+      ],
+      "teletravail": null,
+      "alternance": false
+    },
+    {
+      "id": "MOCK0050",
+      "intitule": "Conseil et maîtrise d'ouvrage en systèmes d'information - Offre 50",
+      "description": "Description détaillée de l'offre 50 pour Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "dateCreation": "2025-10-18T22:58:23.548798",
+      "romeCode": "M1806",
+      "appellationLibelle": "Conseil et maîtrise d'ouvrage en systèmes d'information",
+      "lieuTravail": {
+        "libelle": "Toulouse (31)",
+        "commune": "Toulouse",
+        "codePostal": "31000",
+        "departement": "31",
+        "region": "76",
+        "latitude": 43.6047,
+        "longitude": 1.4442,
+        "pays": "FR"
+      },
+      "typeContrat": "MIS",
+      "typeContratLibelle": "MIS",
+      "experienceExige": "E",
+      "dureeTravailLibelle": "Temps plein",
+      "salaire": {
+        "libelle": "Entre 40K€ et 62K€ par an"
+      },
+      "competences": [
+        {
+          "code": "C001",
+          "libelle": "Python",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C010",
+          "libelle": "Travail en équipe",
+          "exigence": "EXIGEE"
+        },
+        {
+          "code": "C007",
+          "libelle": "Excel avancé",
+          "exigence": "EXIGEE"
+        }
+      ],
+      "teletravail": "Télétravail total",
+      "alternance": true
+    }
+  ]
+}
