@@ -73,6 +73,17 @@ export default function MatchPage() {
       .sort((a, b) => normalizeScore(b.score) - normalizeScore(a.score));
   }, [results]);
 
+  const nearMatches = useMemo(() => {
+    if (!results) return null;
+    return results
+      .filter((r) => {
+        const s = normalizeScore(r.score);
+        return s >= 70 && s < SCORE_THRESHOLD;
+      })
+      .sort((a, b) => normalizeScore(b.score) - normalizeScore(a.score))
+      .slice(0, 3);
+  }, [results]);
+
   const offersMap = useMemo(() => {
     if (!Array.isArray(offers)) return new Map<string, unknown>();
     const map = new Map<string, unknown>();
@@ -249,6 +260,54 @@ export default function MatchPage() {
           </div>
         )}
       </div>
+
+      {nearMatches && nearMatches.length > 0 ? (
+        <div style={{ marginTop: 24 }}>
+          <h2 style={{ marginBottom: 10, color: "#6b7280" }}>Correspondances proches (70–79%)</h2>
+          <div style={{ display: "grid", gap: 10 }}>
+            {nearMatches.map((r, idx) => {
+              const reasons = Array.isArray(r.reasons) ? r.reasons.slice(0, 3) : [];
+              const offerData = offersMap.get(r.offer_id ?? "");
+              return (
+                <div key={r.offer_id ?? idx} style={{ padding: 12, border: "1px solid #e5e7eb", borderRadius: 8, backgroundColor: "#fafafa" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                    <div>
+                      <strong>Offer</strong>: {r.offer_id ?? "(id manquant)"}
+                    </div>
+                    <div>
+                      <strong>Score</strong>: {formatScore(r.score)}
+                    </div>
+                  </div>
+
+                  {offerData !== undefined ? (
+                    <div style={{ marginTop: 8, padding: 8, backgroundColor: "#f3f4f6", borderRadius: 4, fontSize: 13 }}>
+                      <div><strong>Titre:</strong> {formatValue(getField(offerData, "title"))}</div>
+                      <div><strong>Entreprise:</strong> {formatValue(getField(offerData, "company"))}</div>
+                      <div><strong>Compétences:</strong> {formatList(getField(offerData, "skills"), 5)}</div>
+                      <div><strong>Langues:</strong> {formatValue(getField(offerData, "languages"))}</div>
+                      <div><strong>Études:</strong> {formatValue(getField(offerData, "education"))}</div>
+                      <div><strong>Pays:</strong> {formatValue(getField(offerData, "country"))}</div>
+                    </div>
+                  ) : null}
+
+                  <div style={{ marginTop: 8 }}>
+                    <strong>Reasons</strong>
+                    {reasons.length === 0 ? (
+                      <div style={{ opacity: 0.7, marginTop: 4 }}>—</div>
+                    ) : (
+                      <ul style={{ marginTop: 6, marginBottom: 0 }}>
+                        {reasons.map((x, i) => (
+                          <li key={i}>{x}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
