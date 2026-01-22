@@ -20,13 +20,13 @@ npm run dev
 
 | URL | Description |
 |-----|-------------|
-| http://localhost:5173 | Accueil |
-| http://localhost:5173/match | Match Runner |
+| http://localhost:3000 | Accueil |
+| http://localhost:3000/match | Match Runner |
 | http://localhost:8000/docs | Swagger API |
 
 ## Fonctionnement
 
-1. Ouvrir http://localhost:5173/match
+1. Ouvrir http://localhost:3000/match
 2. Cliquer "Lancer le match"
 3. Le front charge les fixtures locales (`/fixtures/profile_demo.json`, `/fixtures/offers_demo.json`)
 4. POST vers `/v1/match` (proxy Vite → API :8000)
