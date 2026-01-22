@@ -1,0 +1,2 @@
+date,snapshot_today,snapshot_yesterday,diff_file,total_today,total_yesterday,new,deleted,updated
+2026-01-21,fact_offers_2026-01-21.csv,fact_offers_2026-01-20_v2.csv,diff_2026-01-21_vs_2026-01-20.csv,6150,6150,0,0,0

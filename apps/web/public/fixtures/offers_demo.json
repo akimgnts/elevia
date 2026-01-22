@@ -1,0 +1,71 @@
+[
+  {
+    "id": "offer_vie_001",
+    "is_vie": true,
+    "country": "france",
+    "title": "Data Analyst VIE",
+    "company": "TechCorp Paris",
+    "skills": ["python", "sql", "excel", "tableau"],
+    "languages": ["français"],
+    "education": "bac+5"
+  },
+  {
+    "id": "offer_vie_002",
+    "is_vie": true,
+    "country": "allemagne",
+    "title": "Business Intelligence Analyst VIE",
+    "company": "DataGmbH Berlin",
+    "skills": ["sql", "powerbi", "excel"],
+    "languages": ["anglais"],
+    "education": "bac+5"
+  },
+  {
+    "id": "offer_vie_003",
+    "is_vie": true,
+    "country": "espagne",
+    "title": "Data Engineer VIE",
+    "company": "TechSpain Madrid",
+    "skills": ["python", "spark", "airflow"],
+    "languages": ["espagnol", "anglais"],
+    "education": "bac+5"
+  },
+  {
+    "id": "offer_non_vie_001",
+    "is_vie": false,
+    "country": "france",
+    "title": "Data Analyst CDI",
+    "company": "LocalCorp",
+    "skills": ["python", "sql"],
+    "languages": ["français"],
+    "education": "bac+3"
+  },
+  {
+    "id": "offer_vie_null",
+    "is_vie": null,
+    "country": "france",
+    "title": "Analyst Stage",
+    "company": "StageCorp",
+    "skills": ["excel"],
+    "languages": ["français"]
+  },
+  {
+    "id": "offer_vie_004",
+    "is_vie": true,
+    "country": "belgique",
+    "title": "Data Scientist VIE",
+    "company": "BelgiumData Bruxelles",
+    "skills": ["python", "pandas", "scikit-learn", "sql"],
+    "languages": ["français", "anglais"],
+    "education": "bac+5"
+  },
+  {
+    "id": "offer_vie_005",
+    "is_vie": true,
+    "country": "japon",
+    "title": "ML Engineer VIE",
+    "company": "TokyoTech",
+    "skills": ["java", "tensorflow", "kubernetes"],
+    "languages": ["japonais", "anglais"],
+    "education": "phd"
+  }
+]

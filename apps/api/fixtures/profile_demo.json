@@ -1,0 +1,7 @@
+{
+  "id": "candidate_demo_001",
+  "skills": ["python", "sql", "excel", "pandas", "powerbi"],
+  "languages": ["français", "anglais"],
+  "education": "bac+5",
+  "preferred_countries": ["france", "allemagne", "belgique"]
+}
