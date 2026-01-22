@@ -1,0 +1,26 @@
+# Core dependencies
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Data analysis & processing
+pandas>=2.0.0
+numpy>=1.24.0
+pyarrow>=12.0.0
+
+# Graph & network analysis
+networkx>=3.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Jupyter notebook
+jupyter>=1.0.0
+ipykernel>=6.25.0
+notebook>=7.0.0
+
+# API (Sprint 7)
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+httpx>=0.26.0
+pydantic>=2.5.0

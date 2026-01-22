@@ -1,0 +1,331 @@
+#!/usr/bin/env python3
+"""
+client_ft.py
+============
+Client OAuth2 générique pour l'API France Travail.
+
+Fonctionnalités :
+- Authentification OAuth2 automatique
+- Refresh automatique du token avant expiration
+- Gestion des erreurs (401, 429, 500, timeout)
+- Rate limiting avec exponential backoff
+- Logging intégré
+
+Usage :
+    from client_ft import FranceTravailClient
+
+    client = FranceTravailClient()
+    data = client.get("/partenaire/offresdemploi/v2/offres/search", params={"range": "0-149"})
+"""
+
+import os
+import time
+import requests
+from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class FranceTravailClient:
+    """Client OAuth2 pour l'API France Travail avec gestion automatique du token."""
+
+    def __init__(self):
+        """Initialise le client avec les credentials depuis .env"""
+        self.client_id = os.getenv("CLIENT_ID")
+        self.client_secret = os.getenv("CLIENT_SECRET")
+        self.token_url = os.getenv("TOKEN_URL")
+        self.base_url = os.getenv("BASE_URL", "https://api.francetravail.io/partenaire")
+        self.scopes = os.getenv("FT_SCOPES", "api_offresdemploiv2 o2dsoffre")
+        self.timeout = int(os.getenv("REQUEST_TIMEOUT", 10))
+        self.max_retries = int(os.getenv("MAX_RETRIES", 3))
+
+        # Token state
+        self._access_token: Optional[str] = None
+        self._token_expires_at: Optional[datetime] = None
+
+        # Validate config
+        if not all([self.client_id, self.client_secret, self.token_url]):
+            raise ValueError("Missing required environment variables (CLIENT_ID, CLIENT_SECRET, TOKEN_URL)")
+
+        # Clean base_url (remove trailing slash and fix double slashes)
+        self.base_url = self.base_url.rstrip("/")
+        if "//" in self.base_url and "https://" not in self.base_url:
+            self.base_url = self.base_url.replace("//", "/")
+
+    def _log(self, message: str, level: str = "INFO"):
+        """Log avec timestamp et emoji."""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        emoji = {
+            "INFO": "ℹ️",
+            "SUCCESS": "✅",
+            "WARNING": "⚠️",
+            "ERROR": "❌"
+        }.get(level, "•")
+        print(f"[{timestamp}] {emoji} [FT-Client] {message}")
+
+    def _authenticate(self) -> None:
+        """
+        Obtient un nouveau token OAuth2.
+
+        Raises:
+            Exception: Si l'authentification échoue après tous les retries
+        """
+        self._log("Authentification OAuth2...", "INFO")
+
+        data = {
+            "grant_type": "client_credentials",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "scope": self.scopes
+        }
+
+        for attempt in range(self.max_retries):
+            try:
+                response = requests.post(self.token_url, data=data, timeout=self.timeout)
+
+                # Log detailed error for debugging
+                if response.status_code != 200:
+                    self._log(f"Auth error {response.status_code}: {response.text[:200]}", "ERROR")
+
+                response.raise_for_status()
+
+                token_data = response.json()
+                self._access_token = token_data.get("access_token")
+                expires_in = token_data.get("expires_in", 1499)  # Default 25 min
+
+                if not self._access_token:
+                    raise ValueError("No access_token in response")
+
+                # Set expiration 30 seconds before actual expiry (safety margin)
+                self._token_expires_at = datetime.now() + timedelta(seconds=expires_in - 30)
+
+                self._log(f"Token obtenu (expire dans {expires_in}s)", "SUCCESS")
+                return
+
+            except requests.exceptions.RequestException as e:
+                if attempt < self.max_retries - 1:
+                    wait_time = 2 ** attempt
+                    self._log(f"Erreur auth (tentative {attempt+1}/{self.max_retries}), retry dans {wait_time}s...", "WARNING")
+                    time.sleep(wait_time)
+                else:
+                    self._log(f"Authentification échouée : {e}", "ERROR")
+                    raise Exception(f"OAuth2 authentication failed: {e}")
+
+    def _ensure_valid_token(self) -> None:
+        """Vérifie que le token est valide, sinon le renouvelle."""
+        if not self._access_token or not self._token_expires_at:
+            self._authenticate()
+        elif datetime.now() >= self._token_expires_at:
+            self._log("Token expiré, renouvellement...", "WARNING")
+            self._authenticate()
+
+    def get(
+        self,
+        endpoint: str,
+        params: Optional[Dict[str, Any]] = None,
+        retry: int = 0
+    ) -> Dict[str, Any]:
+        """
+        Effectue une requête GET sur l'API France Travail.
+
+        Args:
+            endpoint: Endpoint relatif (ex: "/partenaire/offresdemploi/v2/offres/search")
+            params: Query parameters optionnels
+            retry: Nombre de tentatives déjà effectuées (usage interne)
+
+        Returns:
+            Données JSON de la réponse
+
+        Raises:
+            Exception: Si toutes les tentatives échouent
+        """
+        self._ensure_valid_token()
+
+        headers = {
+            "Authorization": f"Bearer {self._access_token}",
+            "Accept": "application/json"
+        }
+
+        # Clean endpoint - remove leading slash, ensure no double slashes
+        endpoint = endpoint.lstrip("/")
+        url = f"{self.base_url}/{endpoint}"
+
+        # Fix any double slashes (except in https://)
+        url = url.replace("https://", "HTTPS_PLACEHOLDER")
+        url = url.replace("//", "/")
+        url = url.replace("HTTPS_PLACEHOLDER", "https://")
+
+        # Anotea API requires following HTTP 302 redirects
+        allow_redirects = "anotea" in url.lower()
+
+        try:
+            response = requests.get(
+                url,
+                headers=headers,
+                params=params or {},
+                timeout=self.timeout,
+                allow_redirects=allow_redirects
+            )
+
+            # Success (200 or 206 for pagination)
+            if response.status_code in [200, 206]:
+                return response.json()
+
+            # Unauthorized (401) - Token may be invalid, re-authenticate
+            elif response.status_code == 401:
+                if retry < self.max_retries:
+                    self._log("Erreur 401 (Unauthorized), renouvellement du token...", "WARNING")
+                    self._access_token = None  # Force re-authentication
+                    self._ensure_valid_token()
+                    return self.get(endpoint, params, retry + 1)
+                else:
+                    error_text = response.text[:200]
+                    raise Exception(f"HTTP 401 (Unauthorized) persistant: {error_text}")
+
+            # Rate limiting (429)
+            elif response.status_code == 429:
+                if retry < self.max_retries:
+                    wait_time = 2 ** retry
+                    self._log(f"Rate limit (429), attente {wait_time}s...", "WARNING")
+                    time.sleep(wait_time)
+                    return self.get(endpoint, params, retry + 1)
+                else:
+                    raise Exception("Rate limit dépassé après tous les retries")
+
+            # Server error (500+)
+            elif response.status_code >= 500:
+                if retry < self.max_retries:
+                    wait_time = 2 ** retry
+                    self._log(f"Erreur serveur {response.status_code}, retry {retry+1}/{self.max_retries}...", "WARNING")
+                    time.sleep(wait_time)
+                    return self.get(endpoint, params, retry + 1)
+                else:
+                    raise Exception(f"Erreur serveur {response.status_code} persistante")
+
+            # Other errors
+            else:
+                error_text = response.text[:200]
+                self._log(f"HTTP {response.status_code}: {error_text}", "ERROR")
+                raise Exception(f"HTTP {response.status_code}: {error_text}")
+
+        except requests.exceptions.Timeout:
+            if retry < self.max_retries:
+                self._log(f"Timeout, retry {retry+1}/{self.max_retries}...", "WARNING")
+                time.sleep(2)
+                return self.get(endpoint, params, retry + 1)
+            else:
+                raise Exception("Timeout persistant")
+
+        except requests.exceptions.RequestException as e:
+            self._log(f"Erreur réseau: {e}", "ERROR")
+            raise Exception(f"Erreur réseau : {e}")
+
+    def post(
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+        json_data: Optional[Dict[str, Any]] = None,
+        retry: int = 0
+    ) -> Dict[str, Any]:
+        """
+        Effectue une requête POST sur l'API France Travail.
+
+        Args:
+            endpoint: Endpoint relatif
+            data: Form data optionnelle
+            json_data: JSON body optionnel
+            retry: Nombre de tentatives déjà effectuées (usage interne)
+
+        Returns:
+            Données JSON de la réponse
+
+        Raises:
+            Exception: Si toutes les tentatives échouent
+        """
+        self._ensure_valid_token()
+
+        headers = {
+            "Authorization": f"Bearer {self._access_token}",
+            "Accept": "application/json"
+        }
+
+        endpoint = endpoint.lstrip("/")
+        url = f"{self.base_url}/{endpoint}"
+
+        # Fix double slashes
+        url = url.replace("https://", "HTTPS_PLACEHOLDER")
+        url = url.replace("//", "/")
+        url = url.replace("HTTPS_PLACEHOLDER", "https://")
+
+        # Anotea API requires following HTTP 302 redirects
+        allow_redirects = "anotea" in url.lower()
+
+        try:
+            if json_data:
+                headers["Content-Type"] = "application/json"
+                response = requests.post(url, headers=headers, json=json_data, timeout=self.timeout,
+                allow_redirects=allow_redirects)
+            else:
+                response = requests.post(url, headers=headers, data=data or {}, timeout=self.timeout,
+                allow_redirects=allow_redirects)
+
+            if response.status_code in [200, 201]:
+                return response.json()
+            elif response.status_code == 401 and retry < self.max_retries:
+                self._log("Erreur 401 (Unauthorized), renouvellement du token...", "WARNING")
+                self._access_token = None
+                self._ensure_valid_token()
+                return self.post(endpoint, data, json_data, retry + 1)
+            elif response.status_code == 429 and retry < self.max_retries:
+                wait_time = 2 ** retry
+                self._log(f"Rate limit (429), attente {wait_time}s...", "WARNING")
+                time.sleep(wait_time)
+                return self.post(endpoint, data, json_data, retry + 1)
+            else:
+                error_text = response.text[:200]
+                self._log(f"HTTP {response.status_code}: {error_text}", "ERROR")
+                raise Exception(f"HTTP {response.status_code}: {error_text}")
+
+        except requests.exceptions.RequestException as e:
+            if retry < self.max_retries:
+                time.sleep(2)
+                return self.post(endpoint, data, json_data, retry + 1)
+            else:
+                raise Exception(f"POST request failed: {e}")
+
+    @property
+    def token(self) -> Optional[str]:
+        """Retourne le token actuel (pour debugging)."""
+        self._ensure_valid_token()
+        return self._access_token
+
+
+# ============================================================================
+# EXEMPLE D'UTILISATION
+# ============================================================================
+
+if __name__ == "__main__":
+    # Test du client
+    client = FranceTravailClient()
+
+    print("🧪 Test du client France Travail\n")
+
+    # Test 1: Récupération d'offres
+    print("1️⃣ Test récupération offres (range 0-9)")
+    try:
+        data = client.get("/partenaire/offresdemploi/v2/offres/search", params={"range": "0-9"})
+        print(f"✅ {len(data.get('resultats', []))} offres récupérées\n")
+    except Exception as e:
+        print(f"❌ Erreur : {e}\n")
+
+    # Test 2: Vérification du refresh automatique du token
+    print("2️⃣ Test refresh automatique (2ème requête)")
+    try:
+        data = client.get("/partenaire/offresdemploi/v2/offres/search", params={"range": "10-19"})
+        print(f"✅ {len(data.get('resultats', []))} offres récupérées (token réutilisé)\n")
+    except Exception as e:
+        print(f"❌ Erreur : {e}\n")
+
+    print("✅ Tests terminés")

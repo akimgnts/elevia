@@ -1,0 +1,1591 @@
+{
+  "OFFRES": {
+    "title": "Offres d'emploi",
+    "version": "3.0.1",
+    "endpoints": [
+      {
+        "path": "/v2/offres/search",
+        "method": "GET",
+        "summary": "Rechercher des offres",
+        "parameters": [
+          "range",
+          "sort",
+          "domaine",
+          "codeROME",
+          "appellation",
+          "theme",
+          "secteurActivite",
+          "codeNAF",
+          "experience",
+          "typeContrat",
+          "natureContrat",
+          "origineOffre",
+          "qualification",
+          "tempsPlein",
+          "commune",
+          "distance",
+          "departement",
+          "inclureLimitrophes",
+          "region",
+          "paysContinent",
+          "niveauFormation",
+          "permis",
+          "motsCles",
+          "salaireMin",
+          "periodeSalaire",
+          "accesTravailleurHandicape",
+          "publieeDepuis",
+          "minCreationDate",
+          "maxCreationDate",
+          "offresMRS",
+          "experienceExigence",
+          "grandDomaine",
+          "partenaires",
+          "modeSelectionPartenaires",
+          "dureeHebdoMin",
+          "dureeHebdoMax",
+          "dureeContratMin",
+          "dureeContratMax",
+          "dureeHebdo ",
+          "offresManqueCandidats",
+          "entreprisesAdaptees",
+          "employeursHandiEngages",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/offres/{id}",
+        "method": "GET",
+        "summary": "Consulter un détail d'offre",
+        "parameters": [
+          "id",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/appellations",
+        "method": "GET",
+        "summary": "Appellations ROME",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/nafs",
+        "method": "GET",
+        "summary": "Codes nafs",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/communes",
+        "method": "GET",
+        "summary": "Communes",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/continents",
+        "method": "GET",
+        "summary": "Continents",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/departements",
+        "method": "GET",
+        "summary": "Départements",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/domaines",
+        "method": "GET",
+        "summary": "Domaines métiers",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/langues",
+        "method": "GET",
+        "summary": "Langues",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/metiers",
+        "method": "GET",
+        "summary": "Métiers ROME",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/naturesContrats",
+        "method": "GET",
+        "summary": "Natures de contrats",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/niveauxFormations",
+        "method": "GET",
+        "summary": "Niveaux de formations",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/pays",
+        "method": "GET",
+        "summary": "Pays",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/permis",
+        "method": "GET",
+        "summary": "Permis",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/regions",
+        "method": "GET",
+        "summary": "Régions",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/secteursActivites",
+        "method": "GET",
+        "summary": "Secteurs d'activités",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/themes",
+        "method": "GET",
+        "summary": "Thèmes",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v2/referentiel/typesContrats",
+        "method": "GET",
+        "summary": "Types de contrats",
+        "parameters": [
+          "Authorization"
+        ]
+      }
+    ],
+    "schemas": {
+      "Agence": {
+        "type": "object",
+        "properties": [
+          "telephone",
+          "courriel"
+        ],
+        "required": []
+      },
+      "Agregation": {
+        "type": "object",
+        "properties": [
+          "valeurPossible",
+          "nbResultats"
+        ],
+        "required": []
+      },
+      "Competence": {
+        "type": "object",
+        "properties": [
+          "code",
+          "libelle",
+          "exigence"
+        ],
+        "required": []
+      },
+      "ComplementSalaire": {
+        "type": "object",
+        "properties": [
+          "code",
+          "libelle"
+        ],
+        "required": []
+      },
+      "Contact": {
+        "type": "object",
+        "properties": [
+          "nom",
+          "coordonnees1",
+          "coordonnees2",
+          "coordonnees3",
+          "telephone",
+          "courriel",
+          "commentaire",
+          "urlRecruteur",
+          "urlPostulation"
+        ],
+        "required": []
+      },
+      "ContexteTravail": {
+        "type": "object",
+        "properties": [
+          "horaires",
+          "conditionsExercice"
+        ],
+        "required": []
+      },
+      "Entreprise": {
+        "type": "object",
+        "properties": [
+          "nom",
+          "description",
+          "logo",
+          "url",
+          "entrepriseAdaptee"
+        ],
+        "required": []
+      },
+      "FiltrePossible": {
+        "type": "object",
+        "properties": [
+          "filtre",
+          "agregation"
+        ],
+        "required": []
+      },
+      "Formation": {
+        "type": "object",
+        "properties": [
+          "codeFormation",
+          "domaineLibelle",
+          "niveauLibelle",
+          "commentaire",
+          "exigence"
+        ],
+        "required": []
+      },
+      "Langue": {
+        "type": "object",
+        "properties": [
+          "libelle",
+          "exigence"
+        ],
+        "required": []
+      },
+      "LieuTravail": {
+        "type": "object",
+        "properties": [
+          "libelle",
+          "latitude",
+          "longitude",
+          "codePostal",
+          "commune"
+        ],
+        "required": []
+      },
+      "Offre": {
+        "type": "object",
+        "properties": [
+          "id",
+          "intitule",
+          "description",
+          "dateCreation",
+          "dateActualisation",
+          "lieuTravail",
+          "romeCode",
+          "romeLibelle",
+          "appellationlibelle",
+          "entreprise",
+          "typeContrat",
+          "typeContratLibelle",
+          "natureContrat",
+          "experienceExige",
+          "experienceLibelle",
+          "experienceCommentaire",
+          "formations",
+          "langues",
+          "permis",
+          "outilsBureautiques",
+          "competences",
+          "salaire",
+          "dureeTravailLibelle",
+          "dureeTravailLibelleConverti",
+          "complementExercice",
+          "conditionExercice",
+          "alternance",
+          "contact",
+          "agence",
+          "nombrePostes",
+          "accessibleTH",
+          "deplacementCode",
+          "deplacementLibelle",
+          "qualificationCode",
+          "qualificationLibelle",
+          "codeNAF",
+          "secteurActivite",
+          "secteurActiviteLibelle",
+          "qualitesProfessionnelles",
+          "trancheEffectifEtab",
+          "origineOffre",
+          "offresManqueCandidats",
+          "contexteTravail",
+          "entrepriseAdaptee",
+          "employeurHandiEngage"
+        ],
+        "required": []
+      },
+      "OrigineOffre": {
+        "type": "object",
+        "properties": [
+          "origine",
+          "urlOrigine",
+          "partenaires"
+        ],
+        "required": []
+      },
+      "PartenaireOffre": {
+        "type": "object",
+        "properties": [
+          "nom",
+          "url",
+          "logo"
+        ],
+        "required": []
+      },
+      "Permis": {
+        "type": "object",
+        "properties": [
+          "libelle",
+          "exigence"
+        ],
+        "required": []
+      },
+      "QualitePro": {
+        "type": "object",
+        "properties": [
+          "libelle",
+          "description"
+        ],
+        "required": []
+      },
+      "ResultatRecherche": {
+        "type": "object",
+        "properties": [
+          "resultats",
+          "filtresPossibles"
+        ],
+        "required": []
+      },
+      "Salaire": {
+        "type": "object",
+        "properties": [
+          "libelle",
+          "commentaire",
+          "complement1",
+          "complement2",
+          "listeComplements"
+        ],
+        "required": []
+      },
+      "Referentiel": {
+        "type": "object",
+        "properties": [
+          "code",
+          "libelle"
+        ],
+        "required": []
+      },
+      "Commune": {
+        "type": "object",
+        "properties": [
+          "code",
+          "libelle",
+          "codePostal",
+          "codeDepartement"
+        ],
+        "required": []
+      },
+      "Departement": {
+        "type": "object",
+        "properties": [
+          "code",
+          "libelle",
+          "region"
+        ],
+        "required": []
+      },
+      "Region": {
+        "type": "object",
+        "properties": [
+          "code",
+          "libelle"
+        ],
+        "required": []
+      }
+    }
+  },
+  "COMPETENCES": {
+    "title": "ROME 4.0 - Compétences",
+    "version": "3.0.1",
+    "endpoints": [
+      {
+        "path": "/v1/competences/categorie-savoirs",
+        "method": "GET",
+        "summary": "Lister les catégories de savoirs",
+        "parameters": [
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/categorie-savoirs/{code}",
+        "method": "GET",
+        "summary": "Lire une catégorie de savoirs",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/competence",
+        "method": "GET",
+        "summary": "Lister les compétences",
+        "parameters": [
+          "code-ogr",
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/competence-detaillee",
+        "method": "GET",
+        "summary": "Lister les compétences",
+        "parameters": [
+          "code-ogr",
+          "riasec-majeur",
+          "riasec-mineur",
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/competence-detaillee/{code}",
+        "method": "GET",
+        "summary": "Lire une compétence détaillée",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/competence/{code}",
+        "method": "GET",
+        "summary": "Lire une compétence",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/domaine-competence",
+        "method": "GET",
+        "summary": "Lister les domaines de compétence",
+        "parameters": [
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/domaine-competence/{code}",
+        "method": "GET",
+        "summary": "Lire un domaine de compétence",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/enjeu",
+        "method": "GET",
+        "summary": "Lister les enjeux de compétences",
+        "parameters": [
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/enjeu/{code}",
+        "method": "GET",
+        "summary": "Lire un enjeu de compétences",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/macro-competence",
+        "method": "GET",
+        "summary": "Lister les macro-compétences",
+        "parameters": [
+          "code-ogr",
+          "riasec-majeur",
+          "riasec-mineur",
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/macro-competence/{code}",
+        "method": "GET",
+        "summary": "Lire une macro-compétence",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/macro-savoir-faire",
+        "method": "GET",
+        "summary": "Lister les macros savoir-faire",
+        "parameters": [
+          "code-ogr",
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/macro-savoir-faire/{code}",
+        "method": "GET",
+        "summary": "Lire une macro savoir-faire",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/macro-savoir-etre-professionnel",
+        "method": "GET",
+        "summary": "Lister les macros savoir-être professionnel",
+        "parameters": [
+          "code-ogr",
+          "qualite-professionnelle",
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/macro-savoir-etre-professionnel/{code}",
+        "method": "GET",
+        "summary": "Lire une macro savoir-être professionnel",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/objectif",
+        "method": "GET",
+        "summary": "Lister les objectifs",
+        "parameters": [
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/objectif/{code}",
+        "method": "GET",
+        "summary": "Lire un objectif",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/savoir",
+        "method": "GET",
+        "summary": "Lister les savoirs",
+        "parameters": [
+          "code-ogr",
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/savoir/{code}",
+        "method": "GET",
+        "summary": "Lire un savoir",
+        "parameters": [
+          "champs",
+          "date",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/competences/version",
+        "method": "GET",
+        "summary": "Récupérer la version actuelle du ROME",
+        "parameters": [
+          "champs",
+          "Authorization"
+        ]
+      }
+    ],
+    "schemas": {
+      "CategorieSavoir": {
+        "type": "object",
+        "properties": [
+          "categorie",
+          "code",
+          "dateFin",
+          "libelle",
+          "obsolete",
+          "savoirs",
+          "sousCategories"
+        ],
+        "required": []
+      },
+      "Savoir": {
+        "type": "object",
+        "properties": [],
+        "required": []
+      },
+      "Competence": {
+        "type": "object",
+        "properties": [
+          "code",
+          "codeOgr",
+          "competenceEsco",
+          "dateFin",
+          "libelle",
+          "obsolete",
+          "transitionEcologique",
+          "transitionNumerique",
+          "type"
+        ],
+        "required": []
+      },
+      "CompetenceEsco": {
+        "type": "object",
+        "properties": [
+          "libelle",
+          "uri"
+        ],
+        "required": []
+      },
+      "CompetenceDetaillee": {
+        "type": "object",
+        "properties": [],
+        "required": []
+      },
+      "MacroCompetence": {
+        "type": "object",
+        "properties": [],
+        "required": []
+      },
+      "Objectif": {
+        "type": "object",
+        "properties": [
+          "code",
+          "codeArborescence",
+          "dateFin",
+          "enjeu",
+          "libelle",
+          "macroCompetences",
+          "obsolete"
+        ],
+        "required": []
+      },
+      "Enjeu": {
+        "type": "object",
+        "properties": [
+          "code",
+          "codeArborescence",
+          "dateFin",
+          "domaineCompetence",
+          "libelle",
+          "objectifs",
+          "obsolete"
+        ],
+        "required": []
+      },
+      "DomaineCompetence": {
+        "type": "object",
+        "properties": [
+          "code",
+          "codeArborescence",
+          "dateFin",
+          "enjeux",
+          "libelle",
+          "obsolete"
+        ],
+        "required": []
+      },
+      "MacroSavoirEtreProfessionnel": {
+        "type": "object",
+        "properties": [],
+        "required": []
+      },
+      "MacroSavoirFaire": {
+        "type": "object",
+        "properties": [],
+        "required": []
+      },
+      "VersionRome": {
+        "type": "object",
+        "properties": [
+          "version",
+          "lastModifiedDate"
+        ],
+        "required": []
+      }
+    }
+  },
+  "MARCHE": {
+    "title": "Marché du travail",
+    "version": "3.0.1",
+    "endpoints": [
+      {
+        "path": "/v1/indicateur/stat-demandeurs",
+        "method": "POST",
+        "summary": "Stats des demandeurs d'emploi inscrits en fin de trimestre (DE_1)",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/indicateur/stat-demandeurs-entrant",
+        "method": "POST",
+        "summary": "Stats des demandeurs d'emploi nouveaux inscrits au cours du trimestre et des 12 derniers mois (DE_5)",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/indicateur/stat-dynamique-emploi",
+        "method": "POST",
+        "summary": "Stats sur l'Indicateur global de dynamique de l’emploi sur le territoire sélectionné (DYN_1)",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/indicateur/stat-embauches",
+        "method": "POST",
+        "summary": "Stats sur les embauches (EMB_1)",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/indicateur/stat-offres",
+        "method": "POST",
+        "summary": "Stats sur les offres d'emploi (OFF_1)",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/indicateur/stat-perspective-employeur",
+        "method": "POST",
+        "summary": "Stats sur les difficultés de recrutement (indicateur de tension) (PERSP_2)",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/indicateur/salaire-rome-fap/{codeTypeTerritoire}/{codeTerritoire}",
+        "method": "GET",
+        "summary": "Stats sur les salariés en poste par typologie de salaire (SAL_3)",
+        "parameters": [
+          "codeRome",
+          "codeTypeTerritoire",
+          "codeTerritoire",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/activite",
+        "method": "GET",
+        "summary": "Consulter une activité",
+        "parameters": [
+          "codeActivite",
+          "codeTypeActivite",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/activites",
+        "method": "GET",
+        "summary": "Lister les activités",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/activites/{codeTypeActivite}",
+        "method": "GET",
+        "summary": "Lister les activités pour un type d'activité",
+        "parameters": [
+          "filtreActivite",
+          "codeTypeActivite",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-activites",
+        "method": "GET",
+        "summary": "Lister les types d'activité",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-activite/{codeTypeActivite}",
+        "method": "GET",
+        "summary": "Consulter un type d'activité",
+        "parameters": [
+          "codeTypeActivite",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/caracteristique",
+        "method": "GET",
+        "summary": "Consulter une caractéristique",
+        "parameters": [
+          "codeCaracteristique",
+          "codeTypeCaracteristique",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/caracteristiques",
+        "method": "GET",
+        "summary": "Lister les caractéristiques",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/caracteristiques/{codeTypeCaracteristique}",
+        "method": "GET",
+        "summary": "Lister les caractéristiques par type d'activité",
+        "parameters": [
+          "codeTypeCaracteristique",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-caracteristiques",
+        "method": "GET",
+        "summary": "Lister les types de caractéristique",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-caracteristique/{codeTypeCaracteristique}",
+        "method": "GET",
+        "summary": "Consulter un type de caractéristique",
+        "parameters": [
+          "codeTypeCaracteristique",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/details-indicateurs",
+        "method": "GET",
+        "summary": "Consulter le détail d'un indicateur.",
+        "parameters": [
+          "codeFamille",
+          "codeIndicateur",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/famille-indicateur/{codeFamilleIndicateur}",
+        "method": "GET",
+        "summary": "Consulter une famille d'indicateur",
+        "parameters": [
+          "codeFamilleIndicateur",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/familles-indicateurs",
+        "method": "GET",
+        "summary": "Lister les familles d'indicateur",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/indicateurs",
+        "method": "GET",
+        "summary": "Lister les indicateurs",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/nomenclatures",
+        "method": "GET",
+        "summary": "Lister les nomenclatures",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/nomenclatures/{codeTypeNomenclature}",
+        "method": "GET",
+        "summary": "Lister les nomenclatures par type de nomenclature",
+        "parameters": [
+          "codeTypeNomenclature",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-nomenclatures",
+        "method": "GET",
+        "summary": "Lister les types nomenclatures",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/nomenclature",
+        "method": "GET",
+        "summary": "Consulter une nomenclature",
+        "parameters": [
+          "codeNomenclature",
+          "codeTypeNomenclature",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-nomenclature/{codeTypeNomenclature}",
+        "method": "GET",
+        "summary": "Consulter un type de nomenclature",
+        "parameters": [
+          "codeTypeNomenclature",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/periodes",
+        "method": "GET",
+        "summary": "Lister les périodes",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/periodes/{codeTypePeriode}",
+        "method": "GET",
+        "summary": "Lister les périodes par type de période",
+        "parameters": [
+          "codePeriode",
+          "nbPeriode",
+          "critereTemporel",
+          "codeTypePeriode",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-periodes",
+        "method": "GET",
+        "summary": "Lister les types périodes",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/periode",
+        "method": "GET",
+        "summary": "Consulter une période",
+        "parameters": [
+          "codePeriode",
+          "codeTypePeriode",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-periode/{codeTypePeriode}",
+        "method": "GET",
+        "summary": "Consulter un type de période",
+        "parameters": [
+          "codeTypePeriode",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/rechercherActivitesRomeFap",
+        "method": "GET",
+        "summary": "Référentiel des correspondances ROME/FAP",
+        "parameters": [
+          "codeRome",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/territoires",
+        "method": "GET",
+        "summary": "Lister les territoires",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/territoires/{codeTypeTerritoire}",
+        "method": "GET",
+        "summary": "Lister les territoires par type de territoire",
+        "parameters": [
+          "filtreTerritoire",
+          "codeTypeTerritoire",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-territoires",
+        "method": "GET",
+        "summary": "Lister les types de territoire",
+        "parameters": [
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/territoire",
+        "method": "GET",
+        "summary": "Consulter un territoire",
+        "parameters": [
+          "codeTerritoire",
+          "codeTypeTerritoire",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/territoires-communes/{codeTypeTerritoire}",
+        "method": "GET",
+        "summary": "Lister les communes avec Bassin et EPCI",
+        "parameters": [
+          "filtreTerritoire",
+          "codeTypeTerritoire",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/referentiel/type-territoire/{codeTypeTerritoire}",
+        "method": "GET",
+        "summary": "Consulter un type de territoire",
+        "parameters": [
+          "codeTypeTerritoire",
+          "Authorization"
+        ]
+      }
+    ],
+    "schemas": {
+      "CritereIndicateurAvecNomenclature": {
+        "type": "object",
+        "properties": [
+          "codeTypeTerritoire",
+          "codeTerritoire",
+          "codeTypeActivite",
+          "codeActivite",
+          "codeTypePeriode",
+          "codeTypeNomenclature",
+          "dernierePeriode",
+          "listeCodePeriode",
+          "listeCodeNomenclature",
+          "sansCaracteristiques",
+          "listeCaracteristiques"
+        ],
+        "required": [
+          "codeTypeTerritoire",
+          "codeTerritoire",
+          "codeTypeActivite",
+          "codeActivite",
+          "codeTypePeriode",
+          "codeTypeNomenclature"
+        ]
+      },
+      "Caracteristique": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeCaracteristique",
+          "codeCaracteristique",
+          "libelleCaracteristique",
+          "masque"
+        ],
+        "required": [
+          "codeTypeCaracteristique",
+          "codeCaracteristique",
+          "libelleCaracteristique"
+        ]
+      },
+      "IndicateurRetour": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeIndicateur",
+          "codeFamille",
+          "libIndicateur",
+          "libTerritoire",
+          "listeValeursParPeriode"
+        ],
+        "required": []
+      },
+      "ValeursParPeriode": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeTerritoire",
+          "codeTerritoire",
+          "libTerritoire",
+          "codeTypeActivite",
+          "codeActivite",
+          "libActivite",
+          "codeNomenclature",
+          "libNomenclature",
+          "codeTypePeriode",
+          "codePeriode",
+          "libPeriode",
+          "valeurPrincipaleNom",
+          "valeurPrincipaleNombre",
+          "valeurPrincipaleRang",
+          "valeurPrincipaleMontant",
+          "valeurPrincipaleTaux",
+          "valeurSecondaireNombre",
+          "valeurSecondairePourcentage",
+          "valeurSecondairePourcentage2",
+          "valeurSecondaireTaux",
+          "libPctParActivite",
+          "listeValeurParCaract"
+        ],
+        "required": []
+      },
+      "ValeursParCaracteristique": {
+        "type": "object",
+        "properties": [
+          "codeTypeCaract",
+          "codeCaract",
+          "libCaract",
+          "nombre",
+          "pourcentage",
+          "montant",
+          "taux"
+        ],
+        "required": []
+      },
+      "CritereIndicateurSansNomenclature": {
+        "type": "object",
+        "properties": [
+          "codeTypeTerritoire",
+          "codeTerritoire",
+          "codeTypeActivite",
+          "codeActivite",
+          "codeTypePeriode",
+          "dernierePeriode",
+          "listeCodePeriode",
+          "sansCaracteristiques",
+          "listeCaracteristiques"
+        ],
+        "required": [
+          "codeTypeTerritoire",
+          "codeTerritoire",
+          "codeTypeActivite",
+          "codeActivite",
+          "codeTypePeriode"
+        ]
+      },
+      "Activite": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeActivite",
+          "codeActivite",
+          "libelleActivite",
+          "attribut"
+        ],
+        "required": [
+          "codeTypeActivite",
+          "codeActivite",
+          "libelleActivite"
+        ]
+      },
+      "ListeActivite": {
+        "type": "object",
+        "properties": [
+          "activites"
+        ],
+        "required": []
+      },
+      "ListeTypeActivite": {
+        "type": "object",
+        "properties": [
+          "typeActivites"
+        ],
+        "required": []
+      },
+      "TypeActivite": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeActivite",
+          "libelleTypeActivite"
+        ],
+        "required": []
+      },
+      "ListeCaracteristique": {
+        "type": "object",
+        "properties": [
+          "caracteristiques"
+        ],
+        "required": []
+      },
+      "ListeTypeCaracteristique": {
+        "type": "object",
+        "properties": [
+          "typeCaracteristiques"
+        ],
+        "required": []
+      },
+      "TypeCaracteristique": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeCaracteristique",
+          "libelleTypeCaracteristique"
+        ],
+        "required": []
+      },
+      "ListeDetailIndicateur": {
+        "type": "object",
+        "properties": [
+          "listeIndicateurs"
+        ],
+        "required": []
+      },
+      "DetailIndicateur": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeIndicateur",
+          "libelleIndicateur",
+          "descriptif",
+          "codeFamille",
+          "disponibiliteIndicateur",
+          "listeTypesValeurs",
+          "listeTypesTerritoiresIndicateur",
+          "listeTypesActivitesIndicateur",
+          "listeTypesPeriodesIndicateur",
+          "listeTypesNomenclaturesIndicateur",
+          "listeCroisementsIndicateur",
+          "listeCaracteristiqueIndicateur",
+          "listeTypesCracteristiqueIndicateur"
+        ],
+        "required": []
+      },
+      "TypeValeur": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "valeurPrincipale",
+          "codeTypeValeur",
+          "numOrdre",
+          "libValeur",
+          "libelleValeurSpecifique"
+        ],
+        "required": []
+      },
+      "TypeTerritoire": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeTerritoire",
+          "libelleTypeTerritoire"
+        ],
+        "required": []
+      },
+      "TypePeriodeIndicateur": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypePeriode",
+          "libelleTypePeriode",
+          "profondeurMax"
+        ],
+        "required": []
+      },
+      "TypeNomenclatureIndicateur": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeNomenclature",
+          "libelleTypeNomenclature",
+          "listeValeursNomenclaturesIndicateur"
+        ],
+        "required": []
+      },
+      "ValeurNomenclatureIndicateur": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "valeurNomenclature",
+          "libelleNomenclature"
+        ],
+        "required": []
+      },
+      "CroisementIndicateur": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeTerritoire",
+          "codeTypeActivite",
+          "codeTypePeriode",
+          "codeTypeNomenclature",
+          "codeNomenclature"
+        ],
+        "required": []
+      },
+      "CaracteristiqueIndicateur": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeCaracteristique",
+          "codeCaracteristique",
+          "libelleCaracteristique"
+        ],
+        "required": [
+          "codeTypeCaracteristique",
+          "codeCaracteristique",
+          "libelleCaracteristique"
+        ]
+      },
+      "ListeNomenclature": {
+        "type": "object",
+        "properties": [
+          "nomenclatures"
+        ],
+        "required": []
+      },
+      "Nomenclature": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeNomenclature",
+          "codeNomenclature",
+          "libelleNomenclature"
+        ],
+        "required": []
+      },
+      "ListeTypeNomenclature": {
+        "type": "object",
+        "properties": [
+          "typeNomenclatures"
+        ],
+        "required": []
+      },
+      "TypeNomenclature": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeNomenclature",
+          "libelleTypeNomenclature"
+        ],
+        "required": []
+      },
+      "ListePeriode": {
+        "type": "object",
+        "properties": [
+          "periodes"
+        ],
+        "required": []
+      },
+      "Periode": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypePeriode",
+          "codePeriode",
+          "ordrePeriode",
+          "libellePeriode"
+        ],
+        "required": [
+          "codeTypePeriode",
+          "codePeriode",
+          "ordrePeriode",
+          "libellePeriode"
+        ]
+      },
+      "ListeTypePeriode": {
+        "type": "object",
+        "properties": [
+          "typePeriodes"
+        ],
+        "required": []
+      },
+      "TypePeriode": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypePeriode",
+          "libelleTypePeriode"
+        ],
+        "required": [
+          "codeTypePeriode",
+          "libelleTypePeriode"
+        ]
+      },
+      "ListeRomeFap": {
+        "type": "object",
+        "properties": [
+          "romeFapList"
+        ],
+        "required": []
+      },
+      "RomeFap": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeRome",
+          "codeFap"
+        ],
+        "required": []
+      },
+      "ListeTerritoire": {
+        "type": "object",
+        "properties": [
+          "territoires"
+        ],
+        "required": []
+      },
+      "Territoire": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeTerritoire",
+          "codeTerritoire",
+          "libelleTerritoire",
+          "codeTypeTerritoireParent",
+          "codeTerritoireParent"
+        ],
+        "required": []
+      },
+      "ListeTypeTerritoire": {
+        "type": "object",
+        "properties": [
+          "typeTerritoires"
+        ],
+        "required": []
+      },
+      "ListeTerritoireCommune": {
+        "type": "object",
+        "properties": [
+          "territoiresCommunes"
+        ],
+        "required": []
+      },
+      "TerritoireCommune": {
+        "type": "object",
+        "properties": [
+          "datMaj",
+          "codeTypeTerritoire",
+          "codeTerritoire",
+          "libelleTerritoire",
+          "codeTypeTerritoireParent",
+          "codeTerritoireParent",
+          "codeTerritoireParentEPCI",
+          "codeTerritoireParentBassin"
+        ],
+        "required": []
+      }
+    }
+  },
+  "SITUATIONS": {
+    "title": "ROME V4.0 - Situations de travail",
+    "version": "3.0.1",
+    "endpoints": [
+      {
+        "path": "/v1/situations-travail/contexte-travail",
+        "method": "GET",
+        "summary": "Lister les contextes de travail",
+        "parameters": [
+          "champs",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/situations-travail/contexte-travail/{code}",
+        "method": "GET",
+        "summary": "Lire un contexte de travail",
+        "parameters": [
+          "champs",
+          "code",
+          "Authorization"
+        ]
+      },
+      {
+        "path": "/v1/situations-travail/version",
+        "method": "GET",
+        "summary": "Récupérer la version actuelle du ROME",
+        "parameters": [
+          "champs",
+          "Authorization"
+        ]
+      }
+    ],
+    "schemas": {
+      "ContexteTravail": {
+        "type": "object",
+        "properties": [
+          "categorie",
+          "code",
+          "libelle"
+        ],
+        "required": []
+      },
+      "VersionRome": {
+        "type": "object",
+        "properties": [
+          "version",
+          "lastModifiedDate"
+        ],
+        "required": []
+      }
+    }
+  }
+}
