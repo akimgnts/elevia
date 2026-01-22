@@ -24,11 +24,18 @@ function normalizeResults(data: ApiResponse): MatchItem[] {
   return data.results ?? data.items ?? data.matches ?? [];
 }
 
+function normalizeScore(score: unknown): number {
+  if (typeof score !== "number") return 0;
+  return score > 1.01 ? score : score * 100;
+}
+
 function formatScore(score: unknown): string {
   if (typeof score !== "number") return "—";
   if (score > 1.01) return `${Math.round(score)}%`;
   return `${Math.round(score * 100)}%`;
 }
+
+const SCORE_THRESHOLD = 80;
 
 export default function MatchPage() {
   const [profile, setProfile] = useState<unknown>(null);
@@ -39,6 +46,13 @@ export default function MatchPage() {
   const [results, setResults] = useState<MatchItem[] | null>(null);
 
   const canRun = useMemo(() => Boolean(profile && offers), [profile, offers]);
+
+  const filteredResults = useMemo(() => {
+    if (!results) return null;
+    return results
+      .filter((r) => normalizeScore(r.score) >= SCORE_THRESHOLD)
+      .sort((a, b) => normalizeScore(b.score) - normalizeScore(a.score));
+  }, [results]);
 
   async function handleLoadFixtures() {
     setError(null);
@@ -120,15 +134,15 @@ export default function MatchPage() {
       <div style={{ marginTop: 24 }}>
         <h2 style={{ marginBottom: 10 }}>Résultats</h2>
 
-        {results && results.length === 0 && (
+        {filteredResults && filteredResults.length === 0 && (
           <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-            Aucun match trouvé (résultat vide).
+            Aucun match avec un score supérieur ou égal à {SCORE_THRESHOLD}%.
           </div>
         )}
 
-        {results && results.length > 0 && (
+        {filteredResults && filteredResults.length > 0 && (
           <div style={{ display: "grid", gap: 10 }}>
-            {results.slice(0, 50).map((r, idx) => {
+            {filteredResults.slice(0, 50).map((r, idx) => {
               const reasons = Array.isArray(r.reasons) ? r.reasons.slice(0, 3) : [];
               return (
                 <div key={r.offer_id ?? idx} style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
@@ -159,7 +173,7 @@ export default function MatchPage() {
           </div>
         )}
 
-        {!results && (
+        {!filteredResults && (
           <div style={{ padding: 12, border: "1px dashed #bbb", borderRadius: 8, opacity: 0.85 }}>
             Rien à afficher pour l'instant.
           </div>
