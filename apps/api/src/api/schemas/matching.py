@@ -1,6 +1,6 @@
 """
 matching.py - Schémas Pydantic pour l'API Matching
-Sprint 7
+Sprint 7 + Sprint 11 (diagnostic)
 
 Validation structure + types uniquement.
 La sémantique métier est gérée par le moteur Sprint 6.
@@ -10,12 +10,31 @@ from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 
 
+class DiagnosticCriterion(BaseModel):
+    """Résultat diagnostic pour un critère."""
+    status: str  # OK, PARTIAL, KO
+    details: Optional[str] = None
+    missing: List[str] = Field(default_factory=list)
+
+
+class DiagnosticResult(BaseModel):
+    """Diagnostic complet pour une offre."""
+    global_verdict: str  # OK, PARTIAL, KO
+    top_blocking_reasons: List[str] = Field(default_factory=list, max_length=3)
+    hard_skills: DiagnosticCriterion
+    soft_skills: DiagnosticCriterion
+    languages: DiagnosticCriterion
+    education: DiagnosticCriterion
+    vie_eligibility: DiagnosticCriterion
+
+
 class ResultItem(BaseModel):
     """Un résultat de matching pour une offre."""
     offer_id: str
     score: int = Field(..., ge=0, le=100)
     breakdown: Dict[str, float]
     reasons: List[str] = Field(..., max_length=3)
+    diagnostic: Optional[DiagnosticResult] = None
 
 
 class MatchingRequest(BaseModel):
