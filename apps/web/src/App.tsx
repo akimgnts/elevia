@@ -1,16 +1,12 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import HomePage from './pages/HomePage'
-import MatchPage from './pages/MatchPage'
+import { Navigate, Route, Routes } from "react-router-dom";
+import MatchPage from "./pages/MatchPage";
 
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/match" element={<MatchPage />} />
-      </Routes>
-    </BrowserRouter>
-  )
+    <Routes>
+      <Route path="/" element={<Navigate to="/match" replace />} />
+      <Route path="/match" element={<MatchPage />} />
+      <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
+    </Routes>
+  );
 }
-
-export default App
