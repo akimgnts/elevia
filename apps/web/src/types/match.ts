@@ -1,20 +1,25 @@
+/**
+ * Types pour le contrat /v1/match
+ * Aligné sur backend SHA 8d64e59
+ */
+
 export type MatchReason = string;
 
+export type MatchRequest = {
+  profile: unknown;
+  offers: unknown[];
+};
+
 export type MatchItem = {
-  offer_id?: string;
-  score?: number;
+  offer_id: string;
+  score: number;
   reasons?: MatchReason[];
-  [k: string]: unknown;
 };
 
-export type MatchApiResponse =
-  | { results?: MatchItem[]; items?: MatchItem[]; matches?: MatchItem[] }
-  | MatchItem[];
-import type { Offer } from "./offer";
-
-export type MatchResult = {
-  profile_id: string;
-  generated_at: string; // ISO date
-  matches: Offer[];
+export type MatchResponse = {
+  profile_id: string | null;
+  threshold: number;
+  received_offers: number;
+  results: MatchItem[];
+  message: string | null;
 };
-

@@ -1,22 +1,6 @@
 import { useMemo, useState } from "react";
 import { runMatch } from "../services/match.service";
-
-/* ======================
-   Types
-====================== */
-
-type MatchReason = string;
-
-type MatchItem = {
-  offer_id?: string;
-  score?: number;
-  reasons?: MatchReason[];
-  [k: string]: unknown;
-};
-
-type ApiResponse =
-  | { results?: MatchItem[]; items?: MatchItem[]; matches?: MatchItem[] }
-  | MatchItem[];
+import type { MatchItem, MatchResponse } from "../types/match";
 
 /* ======================
    Helpers data
@@ -32,21 +16,8 @@ async function loadJson<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-function normalizeResults(data: ApiResponse): MatchItem[] {
-  if (Array.isArray(data)) return data;
-  return data.results ?? data.items ?? data.matches ?? [];
-}
-
-function normalizeScore(score: unknown): number {
-  if (typeof score !== "number") return 0;
-  return score > 1.01 ? score : score * 100;
-}
-
-function formatScore(score: unknown): string {
-  if (typeof score !== "number") return "—";
-  return score > 1.01
-    ? `${Math.round(score)}%`
-    : `${Math.round(score * 100)}%`;
+function formatScore(score: number): string {
+  return `${Math.round(score)}%`;
 }
 
 const SCORE_THRESHOLD = 80;
@@ -76,34 +47,30 @@ function formatValue(val: unknown): string {
 
 export default function MatchPage() {
   const [profile, setProfile] = useState<unknown>(null);
-  const [offers, setOffers] = useState<unknown>(null);
+  const [offers, setOffers] = useState<unknown[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [results, setResults] = useState<MatchItem[] | null>(null);
+  const [response, setResponse] = useState<MatchResponse | null>(null);
 
-  const canRun = useMemo(() => Boolean(profile && offers), [profile, offers]);
+  const canRun = useMemo(() => Boolean(profile && offers.length > 0), [profile, offers]);
 
   const filteredResults = useMemo(() => {
-    if (!results) return null;
-    return results
-      .filter((r) => normalizeScore(r.score) >= SCORE_THRESHOLD)
-      .sort((a, b) => normalizeScore(b.score) - normalizeScore(a.score));
-  }, [results]);
+    if (!response) return null;
+    return response.results
+      .filter((r) => r.score >= SCORE_THRESHOLD)
+      .sort((a, b) => b.score - a.score);
+  }, [response]);
 
   const nearMatches = useMemo(() => {
-    if (!results) return null;
-    return results
-      .filter((r) => {
-        const s = normalizeScore(r.score);
-        return s >= 70 && s < SCORE_THRESHOLD;
-      })
-      .sort((a, b) => normalizeScore(b.score) - normalizeScore(a.score))
+    if (!response) return null;
+    return response.results
+      .filter((r) => r.score >= 70 && r.score < SCORE_THRESHOLD)
+      .sort((a, b) => b.score - a.score)
       .slice(0, 3);
-  }, [results]);
+  }, [response]);
 
   const offersMap = useMemo(() => {
-    if (!Array.isArray(offers)) return new Map<string, unknown>();
     const map = new Map<string, unknown>();
     for (const o of offers) {
       const id = getField(o, "id") ?? getField(o, "offer_id");
@@ -118,10 +85,10 @@ export default function MatchPage() {
 
   async function handleLoadFixtures() {
     setError(null);
-    setResults(null);
+    setResponse(null);
     try {
       const p = await loadJson("/fixtures/profile_demo.json");
-      const o = await loadJson("/fixtures/offers_demo.json");
+      const o = await loadJson<unknown[]>("/fixtures/offers_demo.json");
       setProfile(p);
       setOffers(o);
     } catch (e) {
@@ -134,11 +101,11 @@ export default function MatchPage() {
 
     setLoading(true);
     setError(null);
-    setResults(null);
+    setResponse(null);
 
     try {
-      const data = (await runMatch({ profile, offers })) as ApiResponse;
-      setResults(normalizeResults(data));
+      const data = await runMatch({ profile, offers });
+      setResponse(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur inconnue");
     } finally {
@@ -167,24 +134,30 @@ export default function MatchPage() {
 
       <div style={{ marginTop: 16 }}>
         <div>Fixtures profil: {profile ? "✅" : "—"}</div>
-        <div>Fixtures offres: {offers ? "✅" : "—"}</div>
+        <div>Fixtures offres: {offers.length > 0 ? `✅ (${offers.length})` : "—"}</div>
       </div>
 
       {error && (
         <div style={{ marginTop: 16, color: "#e11d48" }}>{error}</div>
       )}
 
+      {response && (
+        <div style={{ marginTop: 16, padding: 10, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, fontSize: 13 }}>
+          <strong>Résumé API:</strong> received_offers={response.received_offers}, results={response.results.length}, threshold={response.threshold}
+        </div>
+      )}
+
       {filteredResults && (
         <div style={{ marginTop: 24 }}>
-          <h2>Résultats</h2>
+          <h2>Résultats (≥{SCORE_THRESHOLD}%)</h2>
 
           {filteredResults.length === 0 && (
             <div>Aucun match ≥ {SCORE_THRESHOLD}%</div>
           )}
 
           <div style={{ display: "grid", gap: 12 }}>
-            {filteredResults.map((r, i) => {
-              const offer = offersMap.get(r.offer_id ?? "");
+            {filteredResults.map((r: MatchItem, i: number) => {
+              const offer = offersMap.get(r.offer_id);
               return (
                 <div
                   key={r.offer_id ?? i}
@@ -207,7 +180,7 @@ export default function MatchPage() {
                     {formatValue(getField(offer, "country"))}
                   </div>
 
-                  {Array.isArray(r.reasons) && r.reasons.length > 0 && (
+                  {r.reasons && r.reasons.length > 0 && (
                     <ul style={{ marginTop: 8 }}>
                       {r.reasons.slice(0, 3).map((x, idx) => (
                         <li key={idx}>{x}</li>
@@ -224,9 +197,14 @@ export default function MatchPage() {
       {nearMatches && nearMatches.length > 0 && (
         <div style={{ marginTop: 32, opacity: 0.8 }}>
           <h3>Correspondances proches (70–79%)</h3>
-          {nearMatches.map((r, i) => (
-            <div key={i}>{formatScore(r.score)}</div>
-          ))}
+          {nearMatches.map((r: MatchItem, i: number) => {
+            const offer = offersMap.get(r.offer_id);
+            return (
+              <div key={i} style={{ marginBottom: 8 }}>
+                <strong>{formatScore(r.score)}</strong> — {formatValue(getField(offer, "title"))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

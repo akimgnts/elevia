@@ -1,23 +1,43 @@
 {
-  "profile_id": "profile-001",
-  "generated_at": "2026-01-22T13:00:00Z",
-  "matches": [
+  "profile_id": "candidate_demo_001",
+  "threshold": 80,
+  "received_offers": 7,
+  "results": [
     {
-      "id": "vie-001",
-      "title": "VIE Business Analyst",
-      "company": "Example Corp",
-      "country": "Germany",
-      "score": 92,
-      "skills": ["sql", "power bi", "analysis"]
+      "offer_id": "offer_vie_002",
+      "score": 100,
+      "reasons": ["Compétences clés alignées : excel, powerbi, sql", "Langue requise compatible", "Niveau d'études cohérent"]
     },
     {
-      "id": "vie-002",
-      "title": "VIE Data Analyst",
-      "company": "Demo Group",
-      "country": "Spain",
-      "score": 84,
-      "skills": ["python", "dashboarding", "data viz"]
+      "offer_id": "offer_vie_004",
+      "score": 72,
+      "reasons": ["Compétences clés alignées : pandas, python, sql", "Langue requise compatible", "Niveau d'études cohérent"]
+    },
+    {
+      "offer_id": "offer_vie_001",
+      "score": 65,
+      "reasons": ["Compétences clés alignées : excel, python, sql", "Langue requise compatible", "Niveau d'études cohérent"]
+    },
+    {
+      "offer_id": "offer_vie_003",
+      "score": 28,
+      "reasons": ["Compétences clés alignées : python", "Niveau d'études cohérent"]
+    },
+    {
+      "offer_id": "offer_vie_005",
+      "score": 10,
+      "reasons": []
+    },
+    {
+      "offer_id": "offer_non_vie_001",
+      "score": 0,
+      "reasons": ["Rejeté: is_vie n'est pas True"]
+    },
+    {
+      "offer_id": "offer_vie_null",
+      "score": 0,
+      "reasons": ["Rejeté: is_vie n'est pas True"]
     }
-  ]
+  ],
+  "message": null
 }
-
