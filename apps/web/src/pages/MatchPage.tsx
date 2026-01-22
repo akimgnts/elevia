@@ -37,6 +37,25 @@ function formatScore(score: unknown): string {
 
 const SCORE_THRESHOLD = 80;
 
+function getField(obj: unknown, key: string): unknown {
+  if (obj && typeof obj === "object" && key in obj) {
+    return (obj as Record<string, unknown>)[key];
+  }
+  return undefined;
+}
+
+function formatList(val: unknown, max = 5): string {
+  if (!Array.isArray(val) || val.length === 0) return "Non renseigné";
+  const items = val.slice(0, max).map(String);
+  return items.join(", ") + (val.length > max ? "…" : "");
+}
+
+function formatValue(val: unknown): string {
+  if (val === undefined || val === null || val === "") return "Non renseigné";
+  if (Array.isArray(val)) return formatList(val);
+  return String(val);
+}
+
 export default function MatchPage() {
   const [profile, setProfile] = useState<unknown>(null);
   const [offers, setOffers] = useState<unknown>(null);
@@ -53,6 +72,16 @@ export default function MatchPage() {
       .filter((r) => normalizeScore(r.score) >= SCORE_THRESHOLD)
       .sort((a, b) => normalizeScore(b.score) - normalizeScore(a.score));
   }, [results]);
+
+  const offersMap = useMemo(() => {
+    if (!Array.isArray(offers)) return new Map<string, unknown>();
+    const map = new Map<string, unknown>();
+    for (const o of offers) {
+      const id = getField(o, "id") ?? getField(o, "offer_id");
+      if (id) map.set(String(id), o);
+    }
+    return map;
+  }, [offers]);
 
   async function handleLoadFixtures() {
     setError(null);
@@ -124,6 +153,19 @@ export default function MatchPage() {
         <div>Fixtures offres: {offers ? "✅" : "—"}</div>
       </div>
 
+      {profile !== null && typeof profile === "object" ? (
+        <div style={{ marginTop: 20, padding: 12, backgroundColor: "#f0fdf4", borderRadius: 8, fontSize: 14 }}>
+          <strong>Profil utilisé</strong>
+          <div style={{ marginTop: 8, display: "grid", gap: 4 }}>
+            <div><strong>ID:</strong> {formatValue(getField(profile, "id"))}</div>
+            <div><strong>Compétences:</strong> {formatList(getField(profile, "skills"), 5)}</div>
+            <div><strong>Langues:</strong> {formatValue(getField(profile, "languages"))}</div>
+            <div><strong>Études:</strong> {formatValue(getField(profile, "education"))}</div>
+            <div><strong>Pays préférés:</strong> {formatValue(getField(profile, "preferred_countries"))}</div>
+          </div>
+        </div>
+      ) : null}
+
       {error && (
         <div style={{ marginTop: 16, padding: 12, border: "1px solid #e11d48", borderRadius: 8 }}>
           <strong>Erreur</strong>
@@ -160,6 +202,7 @@ export default function MatchPage() {
           <div style={{ display: "grid", gap: 10 }}>
             {filteredResults.slice(0, 50).map((r, idx) => {
               const reasons = Array.isArray(r.reasons) ? r.reasons.slice(0, 3) : [];
+              const offerData = offersMap.get(r.offer_id ?? "");
               return (
                 <div key={r.offer_id ?? idx} style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
@@ -170,6 +213,17 @@ export default function MatchPage() {
                       <strong>Score</strong>: {formatScore(r.score)}
                     </div>
                   </div>
+
+                  {offerData !== undefined ? (
+                    <div style={{ marginTop: 8, padding: 8, backgroundColor: "#fafafa", borderRadius: 4, fontSize: 13 }}>
+                      <div><strong>Titre:</strong> {formatValue(getField(offerData, "title"))}</div>
+                      <div><strong>Entreprise:</strong> {formatValue(getField(offerData, "company"))}</div>
+                      <div><strong>Compétences:</strong> {formatList(getField(offerData, "skills"), 5)}</div>
+                      <div><strong>Langues:</strong> {formatValue(getField(offerData, "languages"))}</div>
+                      <div><strong>Études:</strong> {formatValue(getField(offerData, "education"))}</div>
+                      <div><strong>Pays:</strong> {formatValue(getField(offerData, "country"))}</div>
+                    </div>
+                  ) : null}
 
                   <div style={{ marginTop: 8 }}>
                     <strong>Reasons</strong>
