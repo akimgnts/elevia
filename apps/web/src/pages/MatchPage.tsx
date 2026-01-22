@@ -200,6 +200,15 @@ export default function MatchPage() {
         </div>
       )}
 
+      {results && (
+        <div style={{ marginTop: 12, padding: 10, backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: 6, fontSize: 13 }}>
+          <strong>Offres reçues (debug):</strong> {results.length}
+          <div style={{ marginTop: 4, color: "#92400e" }}>
+            IDs: {results.map((r) => r.offer_id ?? "?").join(", ") || "—"}
+          </div>
+        </div>
+      )}
+
       <div style={{ marginTop: 24 }}>
         <h2 style={{ marginBottom: 10 }}>Résultats</h2>
 
