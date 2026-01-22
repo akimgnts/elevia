@@ -1,0 +1,27 @@
+[
+  {
+    "id": "vie-001",
+    "title": "VIE Business Analyst",
+    "company": "Example Corp",
+    "country": "Germany",
+    "score": 92,
+    "skills": ["sql", "power bi", "analysis"]
+  },
+  {
+    "id": "vie-002",
+    "title": "VIE Data Analyst",
+    "company": "Demo Group",
+    "country": "Spain",
+    "score": 84,
+    "skills": ["python", "dashboarding", "data viz"]
+  },
+  {
+    "id": "vie-003",
+    "title": "VIE Marketing Analyst",
+    "company": "Sample SA",
+    "country": "Belgium",
+    "score": 76,
+    "skills": ["marketing", "excel", "reporting"]
+  }
+]
+

@@ -347,6 +347,55 @@ class MatchingEngine:
         # Garantir max 3 raisons (spec ligne 163)
         return reasons[:3]
 
+    def score_offer(
+        self,
+        profile: ExtractedProfile,
+        offer: Dict,
+    ) -> MatchResult:
+        """
+        Score une offre SANS filtrage.
+
+        Retourne toujours un score (même 0 si hard filter échoue).
+        Utilisé par l'API pour retourner toutes les offres scorées.
+        """
+        offer_id = offer.get("id") or offer.get("offer_id") or offer.get("offer_uid", "unknown")
+
+        # Check hard filter (pour info, pas pour filtrer)
+        passed_hard, rejection = self._hard_filter(offer)
+        if not passed_hard:
+            return MatchResult(
+                offer_id=str(offer_id),
+                score=0,
+                breakdown={"skills": 0.0, "languages": 0.0, "education": 0.0, "country": 0.0},
+                reasons=[f"Rejeté: {rejection}"]
+            )
+
+        # Calcul scores
+        skills_score, matched_skills = self._score_skills(profile, offer)
+        languages_score = self._score_languages(profile, offer)
+        education_score = self._score_education(profile, offer)
+        country_score = self._score_country(profile, offer)
+
+        final_score = self._compute_final_score(
+            skills_score, languages_score, education_score, country_score
+        )
+
+        reasons = self._generate_reasons(
+            matched_skills, languages_score, education_score, country_score
+        )
+
+        return MatchResult(
+            offer_id=str(offer_id),
+            score=final_score,
+            breakdown={
+                "skills": round(skills_score, 2),
+                "languages": round(languages_score, 2),
+                "education": round(education_score, 2),
+                "country": round(country_score, 2),
+            },
+            reasons=reasons,
+        )
+
     def match(
         self,
         profile: Dict,

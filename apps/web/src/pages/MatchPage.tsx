@@ -1,4 +1,9 @@
 import { useMemo, useState } from "react";
+import { runMatch } from "../services/match.service";
+
+/* ======================
+   Types
+====================== */
 
 type MatchReason = string;
 
@@ -13,9 +18,17 @@ type ApiResponse =
   | { results?: MatchItem[]; items?: MatchItem[]; matches?: MatchItem[] }
   | MatchItem[];
 
+/* ======================
+   Helpers data
+====================== */
+
 async function loadJson<T>(path: string): Promise<T> {
-  const res = await fetch(path, { headers: { "Cache-Control": "no-cache" } });
-  if (!res.ok) throw new Error(`Impossible de charger ${path} (${res.status})`);
+  const res = await fetch(path, {
+    headers: { "Cache-Control": "no-cache" },
+  });
+  if (!res.ok) {
+    throw new Error(`Impossible de charger ${path} (${res.status})`);
+  }
   return res.json() as Promise<T>;
 }
 
@@ -31,8 +44,9 @@ function normalizeScore(score: unknown): number {
 
 function formatScore(score: unknown): string {
   if (typeof score !== "number") return "—";
-  if (score > 1.01) return `${Math.round(score)}%`;
-  return `${Math.round(score * 100)}%`;
+  return score > 1.01
+    ? `${Math.round(score)}%`
+    : `${Math.round(score * 100)}%`;
 }
 
 const SCORE_THRESHOLD = 80;
@@ -55,6 +69,10 @@ function formatValue(val: unknown): string {
   if (Array.isArray(val)) return formatList(val);
   return String(val);
 }
+
+/* ======================
+   Page
+====================== */
 
 export default function MatchPage() {
   const [profile, setProfile] = useState<unknown>(null);
@@ -94,12 +112,16 @@ export default function MatchPage() {
     return map;
   }, [offers]);
 
+  /* ======================
+     Actions
+  ====================== */
+
   async function handleLoadFixtures() {
     setError(null);
     setResults(null);
     try {
-      const p = await loadJson<unknown>("/fixtures/profile_demo.json");
-      const o = await loadJson<unknown>("/fixtures/offers_demo.json");
+      const p = await loadJson("/fixtures/profile_demo.json");
+      const o = await loadJson("/fixtures/offers_demo.json");
       setProfile(p);
       setOffers(o);
     } catch (e) {
@@ -109,28 +131,14 @@ export default function MatchPage() {
 
   async function handleRunMatch() {
     if (!canRun) return;
+
     setLoading(true);
     setError(null);
     setResults(null);
 
     try {
-      const res = await fetch("/v1/match", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          profile,
-          offers,
-        }),
-      });
-
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(`API /v1/match (${res.status}) ${txt}`);
-      }
-
-      const data = (await res.json()) as ApiResponse;
-      const items = normalizeResults(data);
-      setResults(items);
+      const data = (await runMatch({ profile, offers })) as ApiResponse;
+      setResults(normalizeResults(data));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur inconnue");
     } finally {
@@ -138,185 +146,89 @@ export default function MatchPage() {
     }
   }
 
+  /* ======================
+     Render
+  ====================== */
+
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: 24, fontFamily: "ui-sans-serif, system-ui" }}>
-      <h1 style={{ margin: 0 }}>Match Runner (MVP)</h1>
-      <p style={{ marginTop: 8, opacity: 0.8 }}>
-        Charge les fixtures, puis lance le match. On affiche score + 3 raisons max.
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: 24 }}>
+      <h1>Match Runner (MVP)</h1>
+
+      <p style={{ opacity: 0.8 }}>
+        Charge les fixtures, puis lance le match.
       </p>
 
-      <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
-        <button onClick={handleLoadFixtures} style={{ padding: "10px 14px" }}>
-          Charger fixtures
-        </button>
-
-        <button
-          onClick={handleRunMatch}
-          disabled={!canRun || loading}
-          style={{ padding: "10px 14px", cursor: !canRun || loading ? "not-allowed" : "pointer" }}
-        >
-          {loading ? "Match en cours..." : "Lancer le match"}
+      <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+        <button onClick={handleLoadFixtures}>Charger fixtures</button>
+        <button onClick={handleRunMatch} disabled={!canRun || loading}>
+          {loading ? "Match en cours…" : "Lancer le match"}
         </button>
       </div>
 
-      <div style={{ marginTop: 16, fontSize: 14, opacity: 0.85 }}>
+      <div style={{ marginTop: 16 }}>
         <div>Fixtures profil: {profile ? "✅" : "—"}</div>
         <div>Fixtures offres: {offers ? "✅" : "—"}</div>
       </div>
 
-      {profile !== null && typeof profile === "object" ? (
-        <div style={{ marginTop: 20, padding: 12, backgroundColor: "#f0fdf4", borderRadius: 8, fontSize: 14 }}>
-          <strong>Profil utilisé</strong>
-          <div style={{ marginTop: 8, display: "grid", gap: 4 }}>
-            <div><strong>ID:</strong> {formatValue(getField(profile, "id"))}</div>
-            <div><strong>Compétences:</strong> {formatList(getField(profile, "skills"), 5)}</div>
-            <div><strong>Langues:</strong> {formatValue(getField(profile, "languages"))}</div>
-            <div><strong>Études:</strong> {formatValue(getField(profile, "education"))}</div>
-            <div><strong>Pays préférés:</strong> {formatValue(getField(profile, "preferred_countries"))}</div>
-          </div>
-        </div>
-      ) : null}
-
       {error && (
-        <div style={{ marginTop: 16, padding: 12, border: "1px solid #e11d48", borderRadius: 8 }}>
-          <strong>Erreur</strong>
-          <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{error}</div>
-        </div>
+        <div style={{ marginTop: 16, color: "#e11d48" }}>{error}</div>
       )}
 
-      {results && (
-        <div style={{ marginTop: 20, padding: 12, backgroundColor: "#f8fafc", borderRadius: 8, fontSize: 14 }}>
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            <span><strong>Total reçu:</strong> {results.length}</span>
-            <span><strong>Affichés (≥{SCORE_THRESHOLD}%):</strong> {filteredResults?.length ?? 0}</span>
-            <span><strong>Seuil:</strong> {SCORE_THRESHOLD}%</span>
-          </div>
-          {filteredResults && filteredResults.length > 0 && (
-            <div style={{ marginTop: 8 }}>
-              <strong>Top 5:</strong>{" "}
-              {filteredResults.slice(0, 5).map((r) => `${Math.round(normalizeScore(r.score))}%`).join(", ")}
-            </div>
-          )}
-        </div>
-      )}
-
-      {results && (
-        <div style={{ marginTop: 12, padding: 10, backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: 6, fontSize: 13 }}>
-          <strong>Offres reçues (debug):</strong> {results.length}
-          <div style={{ marginTop: 4, color: "#92400e" }}>
-            IDs: {results.map((r) => r.offer_id ?? "?").join(", ") || "—"}
-          </div>
-        </div>
-      )}
-
-      <div style={{ marginTop: 24 }}>
-        <h2 style={{ marginBottom: 10 }}>Résultats</h2>
-
-        {filteredResults && filteredResults.length === 0 && (
-          <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-            Aucun match avec un score supérieur ou égal à {SCORE_THRESHOLD}%.
-          </div>
-        )}
-
-        {filteredResults && filteredResults.length > 0 && (
-          <div style={{ display: "grid", gap: 10 }}>
-            {filteredResults.slice(0, 50).map((r, idx) => {
-              const reasons = Array.isArray(r.reasons) ? r.reasons.slice(0, 3) : [];
-              const offerData = offersMap.get(r.offer_id ?? "");
-              return (
-                <div key={r.offer_id ?? idx} style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                    <div>
-                      <strong>Offer</strong>: {r.offer_id ?? "(id manquant)"}
-                    </div>
-                    <div>
-                      <strong>Score</strong>: {formatScore(r.score)}
-                    </div>
-                  </div>
-
-                  {offerData !== undefined ? (
-                    <div style={{ marginTop: 8, padding: 8, backgroundColor: "#fafafa", borderRadius: 4, fontSize: 13 }}>
-                      <div><strong>Titre:</strong> {formatValue(getField(offerData, "title"))}</div>
-                      <div><strong>Entreprise:</strong> {formatValue(getField(offerData, "company"))}</div>
-                      <div><strong>Compétences:</strong> {formatList(getField(offerData, "skills"), 5)}</div>
-                      <div><strong>Langues:</strong> {formatValue(getField(offerData, "languages"))}</div>
-                      <div><strong>Études:</strong> {formatValue(getField(offerData, "education"))}</div>
-                      <div><strong>Pays:</strong> {formatValue(getField(offerData, "country"))}</div>
-                    </div>
-                  ) : null}
-
-                  <div style={{ marginTop: 8 }}>
-                    <strong>Reasons</strong>
-                    {reasons.length === 0 ? (
-                      <div style={{ opacity: 0.7, marginTop: 4 }}>—</div>
-                    ) : (
-                      <ul style={{ marginTop: 6, marginBottom: 0 }}>
-                        {reasons.map((x, i) => (
-                          <li key={i}>{x}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {!filteredResults && (
-          <div style={{ padding: 12, border: "1px dashed #bbb", borderRadius: 8, opacity: 0.85 }}>
-            Rien à afficher pour l'instant.
-          </div>
-        )}
-      </div>
-
-      {nearMatches && nearMatches.length > 0 ? (
+      {filteredResults && (
         <div style={{ marginTop: 24 }}>
-          <h2 style={{ marginBottom: 10, color: "#6b7280" }}>Correspondances proches (70–79%)</h2>
-          <div style={{ display: "grid", gap: 10 }}>
-            {nearMatches.map((r, idx) => {
-              const reasons = Array.isArray(r.reasons) ? r.reasons.slice(0, 3) : [];
-              const offerData = offersMap.get(r.offer_id ?? "");
+          <h2>Résultats</h2>
+
+          {filteredResults.length === 0 && (
+            <div>Aucun match ≥ {SCORE_THRESHOLD}%</div>
+          )}
+
+          <div style={{ display: "grid", gap: 12 }}>
+            {filteredResults.map((r, i) => {
+              const offer = offersMap.get(r.offer_id ?? "");
               return (
-                <div key={r.offer_id ?? idx} style={{ padding: 12, border: "1px solid #e5e7eb", borderRadius: 8, backgroundColor: "#fafafa" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                    <div>
-                      <strong>Offer</strong>: {r.offer_id ?? "(id manquant)"}
-                    </div>
-                    <div>
-                      <strong>Score</strong>: {formatScore(r.score)}
-                    </div>
+                <div
+                  key={r.offer_id ?? i}
+                  style={{ padding: 12, border: "1px solid #ddd" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <strong>
+                      {formatValue(getField(offer, "title"))}
+                    </strong>
+                    <strong>{formatScore(r.score)}</strong>
                   </div>
 
-                  {offerData !== undefined ? (
-                    <div style={{ marginTop: 8, padding: 8, backgroundColor: "#f3f4f6", borderRadius: 4, fontSize: 13 }}>
-                      <div><strong>Titre:</strong> {formatValue(getField(offerData, "title"))}</div>
-                      <div><strong>Entreprise:</strong> {formatValue(getField(offerData, "company"))}</div>
-                      <div><strong>Compétences:</strong> {formatList(getField(offerData, "skills"), 5)}</div>
-                      <div><strong>Langues:</strong> {formatValue(getField(offerData, "languages"))}</div>
-                      <div><strong>Études:</strong> {formatValue(getField(offerData, "education"))}</div>
-                      <div><strong>Pays:</strong> {formatValue(getField(offerData, "country"))}</div>
-                    </div>
-                  ) : null}
-
-                  <div style={{ marginTop: 8 }}>
-                    <strong>Reasons</strong>
-                    {reasons.length === 0 ? (
-                      <div style={{ opacity: 0.7, marginTop: 4 }}>—</div>
-                    ) : (
-                      <ul style={{ marginTop: 6, marginBottom: 0 }}>
-                        {reasons.map((x, i) => (
-                          <li key={i}>{x}</li>
-                        ))}
-                      </ul>
-                    )}
+                  <div style={{ fontSize: 13, opacity: 0.8 }}>
+                    {formatValue(getField(offer, "company"))} —{" "}
+                    {formatValue(getField(offer, "country"))}
                   </div>
+
+                  {Array.isArray(r.reasons) && r.reasons.length > 0 && (
+                    <ul style={{ marginTop: 8 }}>
+                      {r.reasons.slice(0, 3).map((x, idx) => (
+                        <li key={idx}>{x}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
-      ) : null}
+      )}
+
+      {nearMatches && nearMatches.length > 0 && (
+        <div style={{ marginTop: 32, opacity: 0.8 }}>
+          <h3>Correspondances proches (70–79%)</h3>
+          {nearMatches.map((r, i) => (
+            <div key={i}>{formatScore(r.score)}</div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

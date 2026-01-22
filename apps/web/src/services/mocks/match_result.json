@@ -1,0 +1,23 @@
+{
+  "profile_id": "profile-001",
+  "generated_at": "2026-01-22T13:00:00Z",
+  "matches": [
+    {
+      "id": "vie-001",
+      "title": "VIE Business Analyst",
+      "company": "Example Corp",
+      "country": "Germany",
+      "score": 92,
+      "skills": ["sql", "power bi", "analysis"]
+    },
+    {
+      "id": "vie-002",
+      "title": "VIE Data Analyst",
+      "company": "Demo Group",
+      "country": "Spain",
+      "score": 84,
+      "skills": ["python", "dashboarding", "data viz"]
+    }
+  ]
+}
+

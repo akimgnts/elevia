@@ -10,11 +10,12 @@ from typing import Dict, Any
 
 from ..schemas.matching import MatchingRequest, MatchingResponse, ResultItem
 
-# Import moteur Sprint 6 (LECTURE SEULE - ne pas modifier)
+# Import moteur Sprint 6
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from matching import MatchingEngine
+from matching.extractors import extract_profile
 
 
 router = APIRouter(tags=["matching"])
@@ -39,7 +40,8 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
     """
     Match un profil candidat contre une liste d'offres.
 
-    Le moteur Sprint 6 est appelé tel quel, sans modification.
+    Retourne TOUTES les offres scorées (pas de filtrage côté API).
+    Le filtrage (>=80, 70-79) est un choix d'affichage côté front.
     """
     try:
         # Construire le moteur avec IDF sur les offres fournies
@@ -48,28 +50,29 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
             context_coeffs=request.context_coeffs
         )
 
-        # Exécuter le matching
-        output = engine.match(
-            profile=request.profile,
-            offers=request.offers
-        )
+        # Extraire le profil une seule fois
+        extracted_profile = extract_profile(request.profile)
 
-        # Convertir en réponse Pydantic
-        results = [
-            ResultItem(
-                offer_id=r.offer_id,
-                score=r.score,
-                breakdown=r.breakdown,
-                reasons=r.reasons
-            )
-            for r in output.results
-        ]
+        # Scorer TOUTES les offres (sans filtrage)
+        results = []
+        for offer in request.offers:
+            match_result = engine.score_offer(extracted_profile, offer)
+            results.append(ResultItem(
+                offer_id=match_result.offer_id,
+                score=match_result.score,
+                breakdown=match_result.breakdown,
+                reasons=match_result.reasons
+            ))
+
+        # Tri par score décroissant
+        results.sort(key=lambda r: r.score, reverse=True)
 
         return MatchingResponse(
-            profile_id=output.profile_id,
-            threshold=output.threshold,
+            profile_id=extracted_profile.profile_id,
+            threshold=80,
+            received_offers=len(request.offers),
             results=results,
-            message=output.message
+            message=None
         )
 
     except Exception as e:

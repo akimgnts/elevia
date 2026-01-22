@@ -69,8 +69,9 @@ class MatchingRequest(BaseModel):
 
 class MatchingResponse(BaseModel):
     """Réponse de matching."""
-    profile_id: str
+    profile_id: Optional[str] = None
     threshold: int
+    received_offers: int
     results: List[ResultItem]
     message: Optional[str] = None
 
@@ -80,6 +81,7 @@ class MatchingResponse(BaseModel):
                 {
                     "profile_id": "candidate_001",
                     "threshold": 80,
+                    "received_offers": 7,
                     "results": [
                         {
                             "offer_id": "offer_001",
