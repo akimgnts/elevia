@@ -131,6 +131,22 @@ export default function MatchPage() {
         </div>
       )}
 
+      {results && (
+        <div style={{ marginTop: 20, padding: 12, backgroundColor: "#f8fafc", borderRadius: 8, fontSize: 14 }}>
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            <span><strong>Total reçu:</strong> {results.length}</span>
+            <span><strong>Affichés (≥{SCORE_THRESHOLD}%):</strong> {filteredResults?.length ?? 0}</span>
+            <span><strong>Seuil:</strong> {SCORE_THRESHOLD}%</span>
+          </div>
+          {filteredResults && filteredResults.length > 0 && (
+            <div style={{ marginTop: 8 }}>
+              <strong>Top 5:</strong>{" "}
+              {filteredResults.slice(0, 5).map((r) => `${Math.round(normalizeScore(r.score))}%`).join(", ")}
+            </div>
+          )}
+        </div>
+      )}
+
       <div style={{ marginTop: 24 }}>
         <h2 style={{ marginBottom: 10 }}>Résultats</h2>
 
