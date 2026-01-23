@@ -1,0 +1,37 @@
+{
+  "version": "0.1",
+  "description": "Référentiel des capacités V.I.E - Source de vérité",
+  "capabilities": [
+    {
+      "name": "data_visualization",
+      "description": "Création de visualisations de données",
+      "tools_mapping": ["PowerBI", "Tableau", "Looker", "Qlik", "Dataviz", "Data Studio", "Metabase"]
+    },
+    {
+      "name": "spreadsheet_logic",
+      "description": "Maîtrise des tableurs et logique associée",
+      "tools_mapping": ["Excel", "VBA", "Google Sheets", "TCD", "Pivot Table", "Macros", "LibreOffice Calc"]
+    },
+    {
+      "name": "crm_management",
+      "description": "Gestion de la relation client via CRM",
+      "tools_mapping": ["Salesforce", "HubSpot", "Zoho", "Pipedrive", "Dynamics 365", "Freshsales"]
+    },
+    {
+      "name": "programming_scripting",
+      "description": "Programmation et scripting",
+      "tools_mapping": ["Python", "R", "JavaScript", "SQL", "Bash", "PowerShell", "Java", "C#", "TypeScript"]
+    },
+    {
+      "name": "project_management",
+      "description": "Gestion de projet et méthodologies",
+      "tools_mapping": ["Jira", "Asana", "Trello", "Notion", "Monday", "Agile", "Scrum", "Kanban", "MS Project"]
+    }
+  ],
+  "levels": ["beginner", "intermediate", "expert"],
+  "score_thresholds": {
+    "beginner": {"min": 0, "max": 39},
+    "intermediate": {"min": 40, "max": 70},
+    "expert": {"min": 71, "max": 100}
+  }
+}

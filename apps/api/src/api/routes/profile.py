@@ -1,0 +1,152 @@
+"""
+profile.py - Routes FastAPI pour l'ingestion de profil
+Sprint 12
+
+Endpoint POST /profile/ingest_cv pour extraire un profil structuré depuis un CV.
+"""
+
+import logging
+from fastapi import APIRouter, HTTPException
+from pydantic import ValidationError
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from profile import (
+    CvIngestRequest,
+    CvExtractionResponse,
+    extract_profile_from_cv,
+    ExtractionError,
+    ProviderNotConfiguredError,
+)
+
+
+logger = logging.getLogger(__name__)
+router = APIRouter(tags=["profile"])
+
+
+@router.post(
+    "/ingest_cv",
+    response_model=CvExtractionResponse,
+    summary="Extrait un profil structuré depuis un CV",
+    description="""
+Prend un CV brut (texte) en entrée et retourne un profil structuré.
+
+**Pipeline:**
+1. Le CV est envoyé à un LLM pour extraction
+2. La réponse LLM est validée par Pydantic (barrière anti-hallucination)
+3. Seules les capacités du référentiel V0.1 sont acceptées
+
+**Capacités reconnues (V0.1):**
+- data_visualization: PowerBI, Tableau, Looker, Qlik...
+- spreadsheet_logic: Excel, VBA, Google Sheets...
+- crm_management: Salesforce, HubSpot, Zoho...
+- programming_scripting: Python, SQL, JavaScript...
+- project_management: Jira, Asana, Trello, Agile...
+
+**Erreurs possibles:**
+- 422: CV vide, JSON invalide, capacité hors référentiel
+- 503: Provider LLM non configuré
+""",
+    responses={
+        200: {
+            "description": "Profil extrait avec succès",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "candidate_info": {
+                            "first_name": "Jean",
+                            "last_name": "Dupont",
+                            "email": "jean.dupont@example.com",
+                            "years_of_experience": 5
+                        },
+                        "detected_capabilities": [
+                            {
+                                "name": "programming_scripting",
+                                "level": "expert",
+                                "score": 85,
+                                "proofs": ["5 ans de Python"],
+                                "tools_detected": ["Python", "SQL"]
+                            }
+                        ],
+                        "languages": [
+                            {"code": "fr", "level": "C2", "raw_text": "Français natif"}
+                        ],
+                        "education_summary": {
+                            "level": "BAC+5",
+                            "raw_text": "Master Data Science"
+                        }
+                    }
+                }
+            }
+        },
+        422: {
+            "description": "Validation échouée (CV vide, JSON invalide, schéma non respecté)"
+        },
+        503: {
+            "description": "Provider LLM non disponible"
+        }
+    }
+)
+async def ingest_cv(request: CvIngestRequest) -> CvExtractionResponse:
+    """
+    Extrait un profil structuré depuis le texte d'un CV.
+
+    Le LLM propose, Pydantic garde la vérité.
+    Toute capacité hors du référentiel V0.1 est rejetée.
+    """
+    # Vérification taille (déjà faite par Pydantic mais double check)
+    if len(request.cv_text.strip()) < 10:
+        raise HTTPException(
+            status_code=422,
+            detail="Le CV est trop court (minimum 10 caractères)"
+        )
+
+    try:
+        # Appel au LLM
+        raw_data = extract_profile_from_cv(request.cv_text)
+
+        # Validation Pydantic (barrière anti-hallucination)
+        validated = CvExtractionResponse.model_validate(raw_data)
+
+        return validated
+
+    except ProviderNotConfiguredError as e:
+        logger.error(f"Provider LLM non configuré: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="Le service d'extraction n'est pas disponible. Contactez l'administrateur."
+        )
+
+    except ExtractionError as e:
+        logger.error(f"Extraction échouée: {e}")
+        logger.error(f"Raw LLM output: {e.raw_output}")
+        raise HTTPException(
+            status_code=422,
+            detail="L'extraction du CV a échoué. Le format de sortie n'est pas valide."
+        )
+
+    except ValidationError as e:
+        logger.error(f"Validation Pydantic échouée: {e}")
+        # Extraire les erreurs pour un message clair
+        errors = []
+        for error in e.errors():
+            loc = " -> ".join(str(x) for x in error["loc"])
+            msg = error["msg"]
+            errors.append(f"{loc}: {msg}")
+
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "Le profil extrait ne respecte pas le schéma attendu",
+                "errors": errors[:5]  # Limiter à 5 erreurs
+            }
+        )
+
+    except Exception as e:
+        logger.exception(f"Erreur inattendue lors de l'ingestion CV: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Une erreur inattendue s'est produite"
+        )

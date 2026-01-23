@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routes.matching import router as matching_router
+from .routes.profile import router as profile_router
 
 
 app = FastAPI(
@@ -41,6 +42,7 @@ app.add_middleware(
 
 # Routes
 app.include_router(matching_router, prefix="/v1")
+app.include_router(profile_router, prefix="/profile")
 
 
 @app.get("/health", tags=["health"])
@@ -57,5 +59,6 @@ async def root():
         "version": "0.1.0",
         "docs": "/docs",
         "health": "/health",
-        "matching": "/v1/match"
+        "matching": "/v1/match",
+        "profile_ingest": "/profile/ingest_cv"
     }
