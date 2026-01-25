@@ -2,12 +2,14 @@
 """
 run_ingestion.py - Autonomous Ingestion Orchestrator
 Sprint 19 - Autonomie technique ingestion
+Sprint 20 - Business France fallback on cached raw
 
 Production-grade orchestrator with:
 - JSON structured logging (stdout, Railway compatible)
 - Slack webhook alerting on failure
 - Post-run sanity checks
 - Proper exit codes for CRON monitoring
+- Business France fallback to cached raw on API failure (Sprint 20)
 
 Usage:
     python scripts/run_ingestion.py
@@ -17,9 +19,15 @@ Environment variables:
     SLACK_WEBHOOK_URL: Slack webhook for failure alerts (optional)
     FT_CLIENT_ID: France Travail API client ID
     FT_CLIENT_SECRET: France Travail API client secret
+    BF_USE_SAMPLE: Set to "1" to use sample file instead of live API
 
 CRON (Railway):
     0 2 * * *  # Daily at 02:00 UTC
+
+Resilience (Sprint 20):
+    - If Business France API fails, falls back to most recent cached raw JSONL
+    - Pipeline continues as long as total_offers > 0
+    - Exit code 1 ONLY if total_offers == 0 or DB write fails
 """
 
 import json
@@ -68,6 +76,10 @@ SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 FT_TOKEN_URL = "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=%2Fpartenaire"
 FT_API_BASE = "https://api.francetravail.io/partenaire"
 FT_SCOPES = "api_offresdemploiv2 o2dsoffre"
+
+# Business France config
+BF_USE_SAMPLE = os.environ.get("BF_USE_SAMPLE", "1") == "1"  # Default to sample mode
+SAMPLE_FILE = DATA_DIR / "sample_vie_offers.json"
 
 
 # ==============================================================================
@@ -283,39 +295,85 @@ def persist_ft_offers(offers: list, timestamp: str) -> int:
 
 
 # ==============================================================================
-# BUSINESS FRANCE INGESTION
+# BUSINESS FRANCE INGESTION (Sprint 20 - Fallback on cached raw)
 # ==============================================================================
 
-def ingest_business_france(logger: StructuredLogger) -> int:
+def scrape_bf_live(logger: StructuredLogger) -> tuple[list, Optional[Path], Optional[str]]:
     """
-    Ingest Business France offers from most recent raw file.
+    Try to scrape fresh Business France data.
 
-    Returns number of offers ingested.
+    Returns:
+        (offers_list, raw_file_path, error_message)
+        - If success: (offers, raw_file, None)
+        - If failure: ([], None, error_message)
     """
-    start_time = time.time()
+    # In sample mode, load from sample file
+    if BF_USE_SAMPLE:
+        if not SAMPLE_FILE.exists():
+            return [], None, f"Sample file not found: {SAMPLE_FILE}"
 
-    # Find most recent raw file
+        try:
+            with open(SAMPLE_FILE, "r", encoding="utf-8") as f:
+                offers = json.load(f)
+
+            if not isinstance(offers, list):
+                return [], None, "Sample file is not a list"
+
+            # Write to raw JSONL (immutable per run)
+            now = datetime.now(timezone.utc)
+            run_id = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+            fetched_at = now.isoformat()
+
+            RAW_BF_DIR.mkdir(parents=True, exist_ok=True)
+            raw_file = RAW_BF_DIR / f"{run_id}.jsonl"
+
+            # Avoid overwriting existing file
+            if raw_file.exists():
+                raw_file = RAW_BF_DIR / f"{run_id}-{int(time.time())}.jsonl"
+
+            with open(raw_file, "w", encoding="utf-8") as f:
+                for offer in offers:
+                    if "source" not in offer:
+                        offer["source"] = "business_france"
+                    record = {
+                        "run_id": run_id,
+                        "fetched_at": fetched_at,
+                        "source_url": f"file://{SAMPLE_FILE}",
+                        "payload": offer,
+                    }
+                    f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+            return offers, raw_file, None
+
+        except json.JSONDecodeError as e:
+            return [], None, f"JSONDecodeError: {e}"
+        except Exception as e:
+            return [], None, f"Error reading sample: {e}"
+
+    # Live API mode (not implemented - would require actual BF API access)
+    # For now, return error to trigger fallback
+    return [], None, "Live BF API not configured (BF_USE_SAMPLE=0 but no API available)"
+
+
+def load_bf_from_cache(logger: StructuredLogger) -> tuple[list, Optional[Path]]:
+    """
+    Load Business France offers from the most recent cached raw JSONL file.
+
+    Returns:
+        (offers_list, raw_file_path)
+    """
     if not RAW_BF_DIR.exists():
-        logger.log("ingest_business_france", "success", offers_processed=0,
-                   duration_ms=int((time.time() - start_time) * 1000),
-                   extra={"reason": "no_raw_directory"})
-        return 0
+        return [], None
 
     raw_files = list(RAW_BF_DIR.glob("*.jsonl"))
     if not raw_files:
-        logger.log("ingest_business_france", "success", offers_processed=0,
-                   duration_ms=int((time.time() - start_time) * 1000),
-                   extra={"reason": "no_raw_files"})
-        return 0
+        return [], None
 
     # Sort by modification time, most recent first
     raw_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
     raw_file = raw_files[0]
 
-    # Read and parse raw JSONL
     offers = []
-    timestamp = datetime.now(timezone.utc).isoformat()
-
     with open(raw_file, "r", encoding="utf-8") as f:
         for line in f:
             try:
@@ -325,19 +383,71 @@ def ingest_business_france(logger: StructuredLogger) -> int:
             except json.JSONDecodeError:
                 continue
 
-    if not offers:
-        logger.log("ingest_business_france", "success", offers_processed=0,
-                   duration_ms=int((time.time() - start_time) * 1000))
-        return 0
+    return offers, raw_file
 
-    # Persist to SQLite
-    count = persist_bf_offers(offers, timestamp)
 
+def ingest_business_france(logger: StructuredLogger) -> int:
+    """
+    Ingest Business France offers with fallback to cached raw.
+
+    Sprint 20 behavior:
+    1. Try to scrape fresh data (live API or sample file)
+    2. If that fails, fall back to most recent cached raw JSONL
+    3. Log clearly whether using live data or fallback
+    4. Only return 0 if both live AND cache are empty/unavailable
+
+    Returns number of offers ingested.
+    """
+    start_time = time.time()
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    # Step 1: Try live scraping
+    offers, raw_file, scrape_error = scrape_bf_live(logger)
+
+    if offers and raw_file:
+        # Success: live data obtained
+        count = persist_bf_offers(offers, timestamp)
+        duration_ms = int((time.time() - start_time) * 1000)
+        logger.log("ingest_business_france", "success",
+                   duration_ms=duration_ms,
+                   offers_processed=count,
+                   extra={"source": "live", "raw_file": str(raw_file.name)})
+        return count
+
+    # Step 2: Live failed, try fallback to cached raw
+    logger.log("scrape_business_france", "error",
+               error=scrape_error or "Unknown scrape error",
+               extra={"attempting_fallback": True})
+
+    cached_offers, cached_file = load_bf_from_cache(logger)
+
+    if cached_offers and cached_file:
+        # Fallback: using cached data
+        count = persist_bf_offers(cached_offers, timestamp)
+        duration_ms = int((time.time() - start_time) * 1000)
+
+        # Log with status="fallback" as required by Sprint 20
+        logger.log("ingest_business_france", "fallback",
+                   duration_ms=duration_ms,
+                   offers_processed=count,
+                   extra={
+                       "source": "cached_raw",
+                       "raw_file": str(cached_file.name),
+                       "original_error": scrape_error,
+                   })
+        return count
+
+    # Step 3: Both live and cache failed
     duration_ms = int((time.time() - start_time) * 1000)
-    logger.log("ingest_business_france", "success", duration_ms=duration_ms, offers_processed=count,
-               extra={"raw_file": str(raw_file.name)})
-
-    return count
+    logger.log("ingest_business_france", "error",
+               duration_ms=duration_ms,
+               offers_processed=0,
+               error="Both live scrape and cache fallback failed",
+               extra={
+                   "scrape_error": scrape_error,
+                   "cache_available": False,
+               })
+    return 0
 
 
 def persist_bf_offers(offers: list, timestamp: str) -> int:
@@ -485,76 +595,110 @@ def run_sanity_checks(logger: StructuredLogger) -> bool:
 
 
 # ==============================================================================
-# MAIN ORCHESTRATOR
+# MAIN ORCHESTRATOR (Sprint 20 - Resilient pipeline)
 # ==============================================================================
 
 def run_ingestion() -> int:
     """
     Main ingestion orchestrator.
 
-    Returns exit code: 0 = success, 1 = failure
+    Sprint 20 behavior:
+    - Pipeline continues even if one source fails
+    - Exit code 0 as long as total_offers > 0 after sanity check
+    - Exit code 1 ONLY if:
+      - total_offers == 0 (catalog would be empty)
+      - DB write fails
+      - Unexpected uncaught exception
+
+    Returns exit code: 0 = success/partial, 1 = failure
     """
     run_id = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     logger = StructuredLogger("ingestion_pipeline", run_id)
 
     total_start = time.time()
-    exit_code = 0
     ft_count = 0
     bf_count = 0
-    failed_step = None
-    error_msg = None
+    ft_error = None
+    bf_error = None
 
     try:
-        # Step 1: France Travail
         logger.log("pipeline", "started")
 
+        # Step 1: France Travail (error = non-blocking)
         try:
             ft_count = ingest_france_travail(logger)
         except Exception as e:
-            failed_step = "scrape_france_travail"
-            error_msg = str(e)
+            ft_error = str(e)
             logger.log("scrape_france_travail", "error", error=f"{e}\n{traceback.format_exc()}")
-            # Continue to try Business France
+            # Continue to Business France
 
-        # Step 2: Business France
+        # Step 2: Business France with fallback (error = non-blocking if cache available)
         try:
             bf_count = ingest_business_france(logger)
         except Exception as e:
-            if not failed_step:  # Don't overwrite if FT already failed
-                failed_step = "ingest_business_france"
-                error_msg = str(e)
+            bf_error = str(e)
             logger.log("ingest_business_france", "error", error=f"{e}\n{traceback.format_exc()}")
 
-        # Step 3: Sanity checks
+        # Step 3: Sanity checks (this determines exit code)
         sanity_ok = run_sanity_checks(logger)
-
-        if not sanity_ok:
-            failed_step = failed_step or "sanity_check"
-            error_msg = error_msg or "Sanity checks failed"
-            exit_code = 1
 
         # Summary
         total_duration_ms = int((time.time() - total_start) * 1000)
         total_offers = ft_count + bf_count
 
-        if failed_step:
-            logger.log("pipeline", "error", duration_ms=total_duration_ms,
-                       offers_processed=total_offers, error=error_msg,
-                       extra={"failed_step": failed_step, "france_travail": ft_count, "business_france": bf_count})
-            send_slack_alert(run_id, failed_step, error_msg or "Unknown error")
-            exit_code = 1
-        else:
-            logger.log("pipeline", "success", duration_ms=total_duration_ms,
+        # Determine final status based on Sprint 20 rules:
+        # - Exit 0 if catalog has data (even if one source failed)
+        # - Exit 1 ONLY if catalog is empty
+        if not sanity_ok:
+            # Sanity check failed = catalog empty or DB error
+            error_summary = []
+            if ft_error:
+                error_summary.append(f"FT: {ft_error}")
+            if bf_error:
+                error_summary.append(f"BF: {bf_error}")
+            error_msg = "; ".join(error_summary) if error_summary else "Sanity check failed"
+
+            logger.log("pipeline", "error",
+                       duration_ms=total_duration_ms,
                        offers_processed=total_offers,
-                       extra={"france_travail": ft_count, "business_france": bf_count})
+                       error=error_msg,
+                       extra={
+                           "france_travail": ft_count,
+                           "business_france": bf_count,
+                           "ft_error": ft_error,
+                           "bf_error": bf_error,
+                       })
+            send_slack_alert(run_id, "pipeline", error_msg)
+            return 1
+
+        # Sanity check passed = catalog has data
+        # Log partial success if one source had issues
+        if ft_error or bf_error:
+            logger.log("pipeline", "partial",
+                       duration_ms=total_duration_ms,
+                       offers_processed=total_offers,
+                       extra={
+                           "france_travail": ft_count,
+                           "business_france": bf_count,
+                           "ft_error": ft_error,
+                           "bf_error": bf_error,
+                       })
+        else:
+            logger.log("pipeline", "success",
+                       duration_ms=total_duration_ms,
+                       offers_processed=total_offers,
+                       extra={
+                           "france_travail": ft_count,
+                           "business_france": bf_count,
+                       })
+
+        return 0
 
     except Exception as e:
         # Catch-all for unexpected errors
         logger.log("pipeline", "error", error=f"Unexpected error: {e}\n{traceback.format_exc()}")
         send_slack_alert(run_id, "pipeline", str(e))
-        exit_code = 1
-
-    return exit_code
+        return 1
 
 
 if __name__ == "__main__":
