@@ -3,6 +3,7 @@
 run_ingestion.py - Autonomous Ingestion Orchestrator
 Sprint 19 - Autonomie technique ingestion
 Sprint 20 - Business France fallback on cached raw
+Sprint 20.1 - BF fallback survival patch (hardened cache)
 
 Production-grade orchestrator with:
 - JSON structured logging (stdout, Railway compatible)
@@ -10,6 +11,7 @@ Production-grade orchestrator with:
 - Post-run sanity checks
 - Proper exit codes for CRON monitoring
 - Business France fallback to cached raw on API failure (Sprint 20)
+- Anti-poisoning, atomic writes, staleness tracking (Sprint 20.1)
 
 Usage:
     python scripts/run_ingestion.py
@@ -24,8 +26,11 @@ Environment variables:
 CRON (Railway):
     0 2 * * *  # Daily at 02:00 UTC
 
-Resilience (Sprint 20):
+Resilience (Sprint 20 + 20.1):
     - If Business France API fails, falls back to most recent cached raw JSONL
+    - Anti-poisoning: never overwrite valid cache with invalid/empty data
+    - Atomic writes: tmp + fsync + replace pattern
+    - Staleness alerts: warning >24h, critical >72h
     - Pipeline continues as long as total_offers > 0
     - Exit code 1 ONLY if total_offers == 0 or DB write fails
 """
@@ -80,6 +85,18 @@ FT_SCOPES = "api_offresdemploiv2 o2dsoffre"
 # Business France config
 BF_USE_SAMPLE = os.environ.get("BF_USE_SAMPLE", "1") == "1"  # Default to sample mode
 SAMPLE_FILE = DATA_DIR / "sample_vie_offers.json"
+BF_CACHE_FILE = RAW_BF_DIR / "bf_cache.jsonl"  # Single cache file for atomic ops
+
+# Import hardened cache utilities (Sprint 20.1)
+from bf_cache import (
+    validate_offers_minimal,
+    atomic_write_jsonl,
+    read_jsonl_best_effort,
+    cache_age_hours,
+    get_staleness_level,
+    CACHE_WARNING_HOURS,
+    CACHE_CRITICAL_HOURS,
+)
 
 
 # ==============================================================================
@@ -295,155 +312,184 @@ def persist_ft_offers(offers: list, timestamp: str) -> int:
 
 
 # ==============================================================================
-# BUSINESS FRANCE INGESTION (Sprint 20 - Fallback on cached raw)
+# BUSINESS FRANCE INGESTION (Sprint 20.1 - Hardened fallback)
 # ==============================================================================
 
-def scrape_bf_live(logger: StructuredLogger) -> tuple[list, Optional[Path], Optional[str]]:
+def scrape_bf_live(logger: StructuredLogger) -> tuple[list, Optional[str]]:
     """
     Try to scrape fresh Business France data.
 
+    Sprint 20.1: Returns offers WITHOUT writing cache yet.
+    Cache write happens only after validation in ingest_business_france.
+
     Returns:
-        (offers_list, raw_file_path, error_message)
-        - If success: (offers, raw_file, None)
-        - If failure: ([], None, error_message)
+        (offers_list, error_message)
+        - If success: (offers, None)
+        - If failure: ([], error_message)
     """
     # In sample mode, load from sample file
     if BF_USE_SAMPLE:
         if not SAMPLE_FILE.exists():
-            return [], None, f"Sample file not found: {SAMPLE_FILE}"
+            return [], f"Sample file not found: {SAMPLE_FILE}"
 
         try:
             with open(SAMPLE_FILE, "r", encoding="utf-8") as f:
                 offers = json.load(f)
 
             if not isinstance(offers, list):
-                return [], None, "Sample file is not a list"
+                return [], "Sample file is not a list"
 
-            # Write to raw JSONL (immutable per run)
-            now = datetime.now(timezone.utc)
-            run_id = now.strftime("%Y-%m-%dT%H:%M:%SZ")
-            fetched_at = now.isoformat()
-
-            RAW_BF_DIR.mkdir(parents=True, exist_ok=True)
-            raw_file = RAW_BF_DIR / f"{run_id}.jsonl"
-
-            # Avoid overwriting existing file
-            if raw_file.exists():
-                raw_file = RAW_BF_DIR / f"{run_id}-{int(time.time())}.jsonl"
-
-            with open(raw_file, "w", encoding="utf-8") as f:
-                for offer in offers:
-                    if "source" not in offer:
-                        offer["source"] = "business_france"
-                    record = {
-                        "run_id": run_id,
-                        "fetched_at": fetched_at,
-                        "source_url": f"file://{SAMPLE_FILE}",
-                        "payload": offer,
-                    }
-                    f.write(json.dumps(record, ensure_ascii=False) + "\n")
-
-            return offers, raw_file, None
+            return offers, None
 
         except json.JSONDecodeError as e:
-            return [], None, f"JSONDecodeError: {e}"
+            return [], f"JSONDecodeError: {e}"
         except Exception as e:
-            return [], None, f"Error reading sample: {e}"
+            return [], f"Error reading sample: {e}"
 
     # Live API mode (not implemented - would require actual BF API access)
-    # For now, return error to trigger fallback
-    return [], None, "Live BF API not configured (BF_USE_SAMPLE=0 but no API available)"
+    return [], "Live BF API not configured (BF_USE_SAMPLE=0 but no API available)"
 
 
-def load_bf_from_cache(logger: StructuredLogger) -> tuple[list, Optional[Path]]:
+def load_bf_from_cache(logger: StructuredLogger) -> tuple[list, Optional[Path], Optional[float]]:
     """
-    Load Business France offers from the most recent cached raw JSONL file.
+    Load Business France offers from cache with validation.
+
+    Sprint 20.1: Uses read_jsonl_best_effort for safe reading,
+    validates offers, and computes staleness.
 
     Returns:
-        (offers_list, raw_file_path)
+        (offers_list, cache_file_path, cache_age_hours)
     """
-    if not RAW_BF_DIR.exists():
-        return [], None
+    # Try the single cache file first (Sprint 20.1 pattern)
+    if BF_CACHE_FILE.exists():
+        offers, valid_count, skipped = read_jsonl_best_effort(BF_CACHE_FILE, min_valid=1)
+        age_hours = cache_age_hours(BF_CACHE_FILE)
 
-    raw_files = list(RAW_BF_DIR.glob("*.jsonl"))
-    if not raw_files:
-        return [], None
+        if skipped > 0:
+            logger.log("load_bf_cache", "warning",
+                       extra={"skipped_lines": skipped, "valid_count": valid_count})
 
-    # Sort by modification time, most recent first
-    raw_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
-    raw_file = raw_files[0]
+        if offers and validate_offers_minimal(offers):
+            return offers, BF_CACHE_FILE, age_hours
 
-    offers = []
-    with open(raw_file, "r", encoding="utf-8") as f:
-        for line in f:
-            try:
-                record = json.loads(line)
-                payload = record.get("payload", {})
-                offers.append(payload)
-            except json.JSONDecodeError:
-                continue
+    # Fallback: try legacy per-run files (backwards compatibility)
+    if RAW_BF_DIR.exists():
+        raw_files = [f for f in RAW_BF_DIR.glob("*.jsonl") if f.name != "bf_cache.jsonl"]
+        if raw_files:
+            raw_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+            legacy_file = raw_files[0]
 
-    return offers, raw_file
+            offers, valid_count, skipped = read_jsonl_best_effort(legacy_file, min_valid=1)
+            age_hours = cache_age_hours(legacy_file)
+
+            if offers and validate_offers_minimal(offers):
+                return offers, legacy_file, age_hours
+
+    return [], None, None
 
 
 def ingest_business_france(logger: StructuredLogger) -> int:
     """
-    Ingest Business France offers with fallback to cached raw.
+    Ingest Business France offers with hardened fallback.
 
-    Sprint 20 behavior:
+    Sprint 20.1 behavior:
     1. Try to scrape fresh data (live API or sample file)
-    2. If that fails, fall back to most recent cached raw JSONL
-    3. Log clearly whether using live data or fallback
-    4. Only return 0 if both live AND cache are empty/unavailable
+    2. Validate scraped data before writing to cache (anti-poisoning)
+    3. If valid, atomically write to cache, then persist to DB
+    4. If invalid/failed, fall back to validated cache with staleness tracking
+    5. Log with bf_source and cache_age_hours for observability
 
     Returns number of offers ingested.
     """
     start_time = time.time()
-    timestamp = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(timezone.utc)
+    timestamp = now.isoformat()
+    run_id = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # Step 1: Try live scraping
-    offers, raw_file, scrape_error = scrape_bf_live(logger)
+    offers, scrape_error = scrape_bf_live(logger)
 
-    if offers and raw_file:
-        # Success: live data obtained
-        count = persist_bf_offers(offers, timestamp)
-        duration_ms = int((time.time() - start_time) * 1000)
-        logger.log("ingest_business_france", "success",
-                   duration_ms=duration_ms,
-                   offers_processed=count,
-                   extra={"source": "live", "raw_file": str(raw_file.name)})
-        return count
+    if offers:
+        # Step 2: Validate before writing cache (anti-poisoning)
+        if validate_offers_minimal(offers):
+            # Atomic write to cache
+            RAW_BF_DIR.mkdir(parents=True, exist_ok=True)
+            cache_written = atomic_write_jsonl(BF_CACHE_FILE, offers, run_id, timestamp)
 
-    # Step 2: Live failed, try fallback to cached raw
-    logger.log("scrape_business_france", "error",
-               error=scrape_error or "Unknown scrape error",
-               extra={"attempting_fallback": True})
+            if not cache_written:
+                logger.log("write_bf_cache", "warning",
+                           error="Atomic cache write failed, continuing with DB persist")
 
-    cached_offers, cached_file = load_bf_from_cache(logger)
+            # Persist to DB
+            count = persist_bf_offers(offers, timestamp)
+            duration_ms = int((time.time() - start_time) * 1000)
+
+            logger.log("scrape_business_france", "success",
+                       duration_ms=duration_ms,
+                       offers_processed=count,
+                       extra={
+                           "bf_source": "live",
+                           "cache_written": cache_written,
+                       })
+            return count
+        else:
+            # Live data is invalid - don't poison the cache
+            scrape_error = "Live data failed validation (empty or missing IDs)"
+            logger.log("scrape_business_france", "error",
+                       error=scrape_error,
+                       extra={"bf_source": "live", "validation_failed": True})
+
+    # Step 3: Live failed or invalid, try fallback to cached raw
+    if scrape_error:
+        logger.log("scrape_business_france", "error",
+                   error=scrape_error,
+                   extra={"attempting_fallback": True})
+
+    cached_offers, cached_file, age_hours = load_bf_from_cache(logger)
 
     if cached_offers and cached_file:
-        # Fallback: using cached data
+        # Check staleness
+        staleness = get_staleness_level(age_hours)
+        age_hours_rounded = round(age_hours, 1) if age_hours else None
+
+        if staleness == "critical":
+            # Send Slack alert for critically stale cache
+            send_slack_alert(
+                run_id,
+                "bf_cache_staleness",
+                f"BF cache is critically stale ({age_hours_rounded}h > {CACHE_CRITICAL_HOURS}h)"
+            )
+            logger.log("bf_cache_staleness", "critical",
+                       extra={"cache_age_hours": age_hours_rounded, "threshold": CACHE_CRITICAL_HOURS})
+
+        elif staleness == "warning":
+            logger.log("bf_cache_staleness", "warning",
+                       extra={"cache_age_hours": age_hours_rounded, "threshold": CACHE_WARNING_HOURS})
+
+        # Persist cached offers to DB
         count = persist_bf_offers(cached_offers, timestamp)
         duration_ms = int((time.time() - start_time) * 1000)
 
-        # Log with status="fallback" as required by Sprint 20
-        logger.log("ingest_business_france", "fallback",
+        logger.log("scrape_business_france", "fallback",
                    duration_ms=duration_ms,
                    offers_processed=count,
                    extra={
-                       "source": "cached_raw",
+                       "bf_source": "cache",
                        "raw_file": str(cached_file.name),
+                       "cache_age_hours": age_hours_rounded,
+                       "staleness": staleness,
                        "original_error": scrape_error,
                    })
         return count
 
-    # Step 3: Both live and cache failed
+    # Step 4: Both live and cache failed
     duration_ms = int((time.time() - start_time) * 1000)
-    logger.log("ingest_business_france", "error",
+    logger.log("scrape_business_france", "error",
                duration_ms=duration_ms,
                offers_processed=0,
                error="Both live scrape and cache fallback failed",
                extra={
+                   "bf_source": "none",
                    "scrape_error": scrape_error,
                    "cache_available": False,
                })
