@@ -1,11 +1,14 @@
 """
 matching.py - Route FastAPI pour le matching
 Sprint 7 + Sprint 11 (filtrage légal V.I.E)
+Sprint 21 - Inaccessible offers visibility
 
 Expose le moteur Sprint 6 via POST /v1/match
 Applique le filtrage légal V.I.E (Sprint 11)
+Expose les offres inaccessibles avec annotations (Sprint 21)
 """
 
+import re
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any, List
 
@@ -15,6 +18,8 @@ from ..schemas.matching import (
     ResultItem,
     DiagnosticResult,
     DiagnosticCriterion,
+    InaccessibleOffer,
+    MatchingMeta,
 )
 
 # Import moteur Sprint 6 + diagnostic Sprint 9
@@ -29,7 +34,57 @@ router = APIRouter(tags=["matching"])
 
 
 # ============================================================================
-# FILTRE LÉGAL V.I.E (Sprint 11)
+# SPRINT 21 - Reason to Code Mapping
+# ============================================================================
+
+def _map_reasons_to_codes(reasons: List[str]) -> List[str]:
+    """
+    Map human-readable reasons to stable machine codes.
+
+    Sprint 21: Temporary local mapping until codes are embedded in diagnostic.
+    Uses keyword/regex matching for deterministic code generation.
+
+    Codes:
+    - AGE_LIMIT: Age-related restrictions (28 ans, age limit)
+    - NATIONALITY_INELIGIBLE: Nationality not in EU/EEA
+    - COUNTRY_INELIGIBLE: Destination country restrictions
+    - VISA_RESTRICTION: Visa or work permit issues
+    - VIE_INELIGIBLE: Generic VIE ineligibility (fallback)
+    """
+    codes = []
+    seen = set()
+
+    patterns = [
+        (r"(?i)\b(âge|age|28\s*ans|limite.*âge|age.*limit)", "AGE_LIMIT"),
+        (r"(?i)\b(nationalité|nationality|citoyen|citizen|eu|eea|ue|eee)", "NATIONALITY_INELIGIBLE"),
+        (r"(?i)\b(pays|country|destination|zone)", "COUNTRY_INELIGIBLE"),
+        (r"(?i)\b(visa|permis.*travail|work.*permit|autorisation)", "VISA_RESTRICTION"),
+    ]
+
+    for reason in reasons:
+        matched = False
+        for pattern, code in patterns:
+            if re.search(pattern, reason):
+                if code not in seen:
+                    codes.append(code)
+                    seen.add(code)
+                matched = True
+                break
+
+        # Fallback if no pattern matched
+        if not matched and "VIE_INELIGIBLE" not in seen:
+            codes.append("VIE_INELIGIBLE")
+            seen.add("VIE_INELIGIBLE")
+
+    # Ensure at least one code
+    if not codes:
+        codes.append("VIE_INELIGIBLE")
+
+    return codes
+
+
+# ============================================================================
+# FILTRE LÉGAL V.I.E (Sprint 11 - kept for backwards compatibility)
 # ============================================================================
 
 def filter_legal_vie_offers(results: List[ResultItem]) -> List[ResultItem]:
@@ -41,6 +96,8 @@ def filter_legal_vie_offers(results: List[ResultItem]) -> List[ResultItem]:
     - Aucun fallback, aucune trace côté client
 
     Cette fonction est une barrière légale, pas un choix UX.
+
+    Note: Sprint 21 refactored this into the main loop, but kept for backwards compat.
     """
     return [
         r for r in results
@@ -67,19 +124,24 @@ Exécute le matching V1 déterministe et explicable.
 - Aucun mot IA/probabilité dans les explications
 
 **Filtrage légal (Sprint 11):**
-- Les offres KO V.I.E Eligibility sont automatiquement exclues
+- Les offres KO V.I.E Eligibility sont automatiquement exclues des résultats
 - Un candidat ne verra jamais une offre pour laquelle il est légalement inéligible
+
+**Inaccessible offers (Sprint 21):**
+- Les offres KO sont retournées dans `inaccessible_offers` avec annotations
+- `meta.filtered.legal_vie` indique le nombre d'offres filtrées
+- Les offres KO ne sont PAS scorées (performance)
 """
 )
 async def match_profile(request: MatchingRequest) -> MatchingResponse:
     """
     Match un profil candidat contre une liste d'offres.
 
-    Pipeline:
-    1. Score toutes les offres
-    2. Calcule le diagnostic pour chaque offre
-    3. Filtre les offres KO V.I.E (barrière légale)
-    4. Retourne les offres autorisées avec leur diagnostic
+    Pipeline (Sprint 21):
+    1. Calcule le diagnostic pour chaque offre
+    2. Si KO V.I.E → ajoute à inaccessible_offers (pas de score)
+    3. Si OK V.I.E → score et ajoute à results
+    4. Retourne results (accessibles) + inaccessible_offers + meta
     """
     try:
         # Construire le moteur avec IDF sur les offres fournies
@@ -91,16 +153,45 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
         # Extraire le profil une seule fois
         extracted_profile = extract_profile(request.profile)
 
-        # Scorer et diagnostiquer TOUTES les offres
-        results = []
-        for offer in request.offers:
-            # 1. Score
-            match_result = engine.score_offer(extracted_profile, offer)
+        # Sprint 21: Separate accessible and inaccessible offers
+        results: List[ResultItem] = []
+        inaccessible_offers: List[InaccessibleOffer] = []
 
-            # 2. Diagnostic (Sprint 9)
+        for offer in request.offers:
+            # 1. Diagnostic FIRST (Sprint 21: before scoring)
             diag = compute_diagnostic(request.profile, offer)
 
-            # 3. Convertir en schema
+            # 2. Check VIE eligibility - Sprint 21: collect KO offers
+            if diag.vie_eligibility.status.value == "KO":
+                # Collect reasons from vie_eligibility
+                reasons = []
+                if diag.vie_eligibility.details:
+                    reasons.append(diag.vie_eligibility.details)
+                reasons.extend(diag.vie_eligibility.missing)
+
+                # Also include top blocking reasons if VIE-related
+                for reason in diag.top_blocking_reasons:
+                    if reason not in reasons:
+                        reasons.append(reason)
+
+                # Map to stable codes
+                codes = _map_reasons_to_codes(reasons)
+
+                # Get offer ID
+                offer_id = offer.get("id") or offer.get("offer_id") or str(hash(str(offer)))
+
+                inaccessible_offers.append(InaccessibleOffer(
+                    offer_id=str(offer_id),
+                    is_accessible=False,
+                    inaccessibility_codes=codes,
+                    inaccessibility_reasons=reasons[:5],  # Limit to 5 reasons
+                ))
+                continue  # Don't score KO offers (Sprint 21 requirement)
+
+            # 3. Score only accessible offers
+            match_result = engine.score_offer(extracted_profile, offer)
+
+            # 4. Convertir diagnostic en schema
             diagnostic_result = DiagnosticResult(
                 global_verdict=diag.global_verdict.value,
                 top_blocking_reasons=diag.top_blocking_reasons,
@@ -139,18 +230,23 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
                 diagnostic=diagnostic_result,
             ))
 
-        # Tri par score décroissant (AVANT filtrage)
+        # Tri par score décroissant (accessible offers only)
         results.sort(key=lambda r: r.score, reverse=True)
 
-        # FILTRAGE LÉGAL V.I.E (Sprint 11)
-        # Les offres KO V.I.E sont retirées définitivement
-        legal_results = filter_legal_vie_offers(results)
+        # Sprint 21: Build meta with filtered counts
+        legal_vie_count = len(inaccessible_offers)
+        meta = MatchingMeta(
+            total_processed=len(request.offers),
+            filtered={"legal_vie": legal_vie_count} if legal_vie_count > 0 else None,
+        )
 
         return MatchingResponse(
             profile_id=extracted_profile.profile_id,
             threshold=80,
             received_offers=len(request.offers),
-            results=legal_results,
+            results=results,
+            inaccessible_offers=inaccessible_offers,
+            meta=meta,
             message=None
         )
 

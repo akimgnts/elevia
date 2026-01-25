@@ -1,12 +1,13 @@
 """
 matching.py - Schémas Pydantic pour l'API Matching
 Sprint 7 + Sprint 11 (diagnostic)
+Sprint 21 - Inaccessible offers visibility
 
 Validation structure + types uniquement.
 La sémantique métier est gérée par le moteur Sprint 6.
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Literal
 from pydantic import BaseModel, Field
 
 
@@ -86,12 +87,54 @@ class MatchingRequest(BaseModel):
     }
 
 
+# ==============================================================================
+# SPRINT 21 - Inaccessible Offers
+# ==============================================================================
+
+class InaccessibleOffer(BaseModel):
+    """
+    An offer that is legally inaccessible to the candidate.
+    Sprint 21: Visible but not scored.
+    """
+    offer_id: str
+    is_accessible: Literal[False] = False
+    inaccessibility_codes: List[str] = Field(
+        default_factory=list,
+        description="Stable machine codes for filtering reasons (e.g., AGE_LIMIT, NATIONALITY_INELIGIBLE)"
+    )
+    inaccessibility_reasons: List[str] = Field(
+        default_factory=list,
+        description="Human-readable reasons from diagnostic"
+    )
+
+
+class MatchingMeta(BaseModel):
+    """
+    Metadata for the matching response.
+    Sprint 21: Includes filtered counts.
+    """
+    total_processed: int = Field(..., description="Total offers processed")
+    filtered: Optional[Dict[str, int]] = Field(
+        default=None,
+        description="Filtered counts by reason (e.g., {'legal_vie': 3})"
+    )
+
+
 class MatchingResponse(BaseModel):
     """Réponse de matching."""
     profile_id: Optional[str] = None
     threshold: int
     received_offers: int
     results: List[ResultItem]
+    # Sprint 21: Inaccessible offers + meta
+    inaccessible_offers: List[InaccessibleOffer] = Field(
+        default_factory=list,
+        description="Offers that are legally inaccessible (VIE ineligible)"
+    )
+    meta: Optional[MatchingMeta] = Field(
+        default=None,
+        description="Response metadata including filter counts"
+    )
     message: Optional[str] = None
 
     model_config = {
@@ -118,6 +161,18 @@ class MatchingResponse(BaseModel):
                             ]
                         }
                     ],
+                    "inaccessible_offers": [
+                        {
+                            "offer_id": "offer_002",
+                            "is_accessible": False,
+                            "inaccessibility_codes": ["AGE_LIMIT"],
+                            "inaccessibility_reasons": ["Âge supérieur à 28 ans"]
+                        }
+                    ],
+                    "meta": {
+                        "total_processed": 7,
+                        "filtered": {"legal_vie": 1}
+                    },
                     "message": None
                 }
             ]
