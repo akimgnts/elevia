@@ -1,8 +1,22 @@
 import * as React from "react";
+import { cn } from "../../lib/cn";
 
-type DivProps = React.HTMLAttributes<HTMLDivElement>;
+export type CardProps = React.HTMLAttributes<HTMLDivElement> & {
+  elevated?: boolean;
+};
 
-export function Card({ children, ...props }: DivProps) {
-  return <div {...props}>{children}</div>;
-}
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, elevated = true, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "rounded-card border border-slate-200 bg-white/90 backdrop-blur-sm",
+        elevated ? "shadow-soft" : "shadow-card",
+        className
+      )}
+      {...props}
+    />
+  )
+);
 
+Card.displayName = "Card";
