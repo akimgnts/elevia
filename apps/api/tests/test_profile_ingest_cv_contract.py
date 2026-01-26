@@ -8,6 +8,7 @@ Vérifie que:
 - L'endpoint rejette les CV vides
 """
 
+import os
 import pytest
 from pydantic import ValidationError
 from fastapi.testclient import TestClient
@@ -28,6 +29,16 @@ from profile.schemas import (
 )
 
 client = TestClient(app)
+
+
+# ============================================================================
+# AUTOUSE FIXTURE - Force LLM_PROVIDER=mock for all tests
+# ============================================================================
+
+@pytest.fixture(autouse=True)
+def force_llm_mock(monkeypatch):
+    """Force LLM_PROVIDER=mock for all tests in this module."""
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
 
 
 # ============================================================================
