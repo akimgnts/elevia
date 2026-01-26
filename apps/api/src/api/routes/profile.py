@@ -1,13 +1,33 @@
 """
 profile.py - Routes FastAPI pour l'ingestion de profil
 Sprint 12
+Sprint 21 - Observability logging
 
 Endpoint POST /profile/ingest_cv pour extraire un profil structuré depuis un CV.
 """
 
+import json
 import logging
+import time
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import ValidationError
+
+from ..utils.obs_logger import obs_log
+
+
+def _log_survival_metric(metric: dict) -> None:
+    """Append metric to JSONL log (stdout fallback)."""
+    log_dir = Path(__file__).parent.parent.parent.parent / "logs"
+    log_dir.mkdir(exist_ok=True)
+    log_file = log_dir / "survival_metrics.log"
+    try:
+        with open(log_file, "a") as f:
+            f.write(json.dumps(metric) + "\n")
+    except Exception:
+        print(json.dumps(metric))
 
 import sys
 from pathlib import Path
@@ -96,8 +116,13 @@ async def ingest_cv(request: CvIngestRequest) -> CvExtractionResponse:
     Le LLM propose, Pydantic garde la vérité.
     Toute capacité hors du référentiel V0.1 est rejetée.
     """
+    run_id = str(uuid.uuid4())[:8]
+    start_time = time.time()
+
     # Vérification taille (déjà faite par Pydantic mais double check)
     if len(request.cv_text.strip()) < 10:
+        obs_log("cv_ingested", run_id=run_id, status="error", error_code="CV_TOO_SHORT",
+                duration_ms=int((time.time() - start_time) * 1000))
         raise HTTPException(
             status_code=422,
             detail="Le CV est trop court (minimum 10 caractères)"
@@ -110,10 +135,16 @@ async def ingest_cv(request: CvIngestRequest) -> CvExtractionResponse:
         # Validation Pydantic (barrière anti-hallucination)
         validated = CvExtractionResponse.model_validate(raw_data)
 
+        duration_ms = int((time.time() - start_time) * 1000)
+        obs_log("cv_ingested", run_id=run_id, status="success", duration_ms=duration_ms,
+                extra={"capabilities_count": len(validated.detected_capabilities)})
+
         return validated
 
     except ProviderNotConfiguredError as e:
         logger.error(f"Provider LLM non configuré: {e}")
+        obs_log("cv_ingested", run_id=run_id, status="error", error_code="PROVIDER_NOT_CONFIGURED",
+                duration_ms=int((time.time() - start_time) * 1000))
         raise HTTPException(
             status_code=503,
             detail="Le service d'extraction n'est pas disponible. Contactez l'administrateur."
@@ -122,6 +153,8 @@ async def ingest_cv(request: CvIngestRequest) -> CvExtractionResponse:
     except ExtractionError as e:
         logger.error(f"Extraction échouée: {e}")
         logger.error(f"Raw LLM output: {e.raw_output}")
+        obs_log("cv_ingested", run_id=run_id, status="error", error_code="EXTRACTION_FAILED",
+                duration_ms=int((time.time() - start_time) * 1000))
         raise HTTPException(
             status_code=422,
             detail="L'extraction du CV a échoué. Le format de sortie n'est pas valide."
@@ -129,19 +162,23 @@ async def ingest_cv(request: CvIngestRequest) -> CvExtractionResponse:
 
     except ValidationError as e:
         logger.error(f"Validation Pydantic échouée: {e}")
-        # Extraire les erreurs pour un message clair
+        ts = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        _log_survival_metric({
+            "type": "pydantic_reject",
+            "ts_server": ts,
+            "endpoint": "/profile/ingest_cv",
+            "reason": str(e.errors()[0]["msg"]) if e.errors() else "unknown",
+            "model": "CvExtractionResponse",
+            "retry_used": False,
+            "meta": {"api_version": "api@0.1.0", "timestamp": ts}
+        })
         errors = []
         for error in e.errors():
             loc = " -> ".join(str(x) for x in error["loc"])
-            msg = error["msg"]
-            errors.append(f"{loc}: {msg}")
-
+            errors.append(f"{loc}: {error['msg']}")
         raise HTTPException(
             status_code=422,
-            detail={
-                "message": "Le profil extrait ne respecte pas le schéma attendu",
-                "errors": errors[:5]  # Limiter à 5 erreurs
-            }
+            detail={"message": "Le profil extrait ne respecte pas le schéma attendu", "errors": errors[:5]}
         )
 
     except Exception as e:

@@ -4,6 +4,7 @@ offers.py - Routes FastAPI pour les offres VIE
 Sprint 14 - VERROU #3 (Stabilization)
 Sprint: Live Data Switch - Added /offers/catalog with SQLite + fallback
 Sprint 15.1 - Data Quality + Hardened Contract
+Sprint 21 - Observability logging
 
 Endpoints:
 - GET /offers/sample - Static sample offers (legacy)
@@ -21,12 +22,16 @@ import hashlib
 import json
 import logging
 import sqlite3
+import time
+import uuid
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
+
+from ..utils.obs_logger import obs_log
 
 
 # ============================================================================
@@ -367,10 +372,15 @@ async def get_catalog_offers(
 
     Returns { offers, meta } with OfferNormalized contract. NEVER crashes.
     """
+    run_id = str(uuid.uuid4())[:8]
+    start_time = time.time()
+
     # Validate source manually (returns 400, not 422)
     ALLOWED_SOURCES = {"all", "france_travail", "business_france"}
     source_clean = (source or "all").strip().lower()
     if source_clean not in ALLOWED_SOURCES:
+        obs_log("catalog_fetch", run_id=run_id, status="error", error_code="INVALID_SOURCE",
+                duration_ms=int((time.time() - start_time) * 1000))
         return JSONResponse(
             status_code=400,
             content={
@@ -387,6 +397,9 @@ async def get_catalog_offers(
 
     if fallback_reason is None and offers:
         # Success: live-db
+        duration_ms = int((time.time() - start_time) * 1000)
+        obs_log("catalog_fetch", run_id=run_id, status="success", duration_ms=duration_ms,
+                extra={"data_source": "live-db", "returned": len(offers), "source_filter": source_clean})
         return JSONResponse(
             content={
                 "offers": offers,
@@ -407,6 +420,12 @@ async def get_catalog_offers(
     # Normalize and filter fallback offers (ALWAYS applies _normalize_offer)
     normalized = _normalize_fallback_offers(static_offers, source_enum)
     result_offers = normalized[:limit]
+
+    duration_ms = int((time.time() - start_time) * 1000)
+    obs_log("catalog_fetch", run_id=run_id, status="success", duration_ms=duration_ms,
+            extra={"data_source": "static-fallback", "returned": len(result_offers),
+                   "source_filter": source_clean,
+                   "fallback_reason": fallback_reason.value if fallback_reason else None})
 
     return JSONResponse(
         content={

@@ -1,0 +1,14 @@
+{
+  "profile_id": "golden_05",
+  "skills": ["sales", "negotiation", "crm", "prospection", "presentation"],
+  "languages": [
+    {"code": "fr", "level": "C2"},
+    {"code": "en", "level": "B2"},
+    {"code": "zh", "level": "A2"}
+  ],
+  "education_level": "BAC+3",
+  "nationality": "FR",
+  "age": 23,
+  "years_of_experience": 1,
+  "cv_text": "Commercial junior, 1 an d'expérience en B2B. Prospection, négociation, CRM. Licence Commerce International. Français natif, anglais professionnel, notions de chinois."
+}

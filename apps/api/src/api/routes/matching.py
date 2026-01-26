@@ -1,7 +1,7 @@
 """
 matching.py - Route FastAPI pour le matching
 Sprint 7 + Sprint 11 (filtrage légal V.I.E)
-Sprint 21 - Inaccessible offers visibility
+Sprint 21 - Inaccessible offers visibility + Observability
 
 Expose le moteur Sprint 6 via POST /v1/match
 Applique le filtrage légal V.I.E (Sprint 11)
@@ -9,8 +9,12 @@ Expose les offres inaccessibles avec annotations (Sprint 21)
 """
 
 import re
+import time
+import uuid
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any, List
+
+from ..utils.obs_logger import obs_log
 
 from ..schemas.matching import (
     MatchingRequest,
@@ -143,6 +147,9 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
     3. Si OK V.I.E → score et ajoute à results
     4. Retourne results (accessibles) + inaccessible_offers + meta
     """
+    run_id = str(uuid.uuid4())[:8]
+    start_time = time.time()
+
     try:
         # Construire le moteur avec IDF sur les offres fournies
         engine = MatchingEngine(
@@ -240,6 +247,13 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
             filtered={"legal_vie": legal_vie_count} if legal_vie_count > 0 else None,
         )
 
+        duration_ms = int((time.time() - start_time) * 1000)
+        obs_log("match_run", run_id=run_id, profile_id=extracted_profile.profile_id,
+                status="success", duration_ms=duration_ms,
+                extra={"offers_processed": len(request.offers),
+                       "results_count": len(results),
+                       "inaccessible_count": len(inaccessible_offers)})
+
         return MatchingResponse(
             profile_id=extracted_profile.profile_id,
             threshold=80,
@@ -251,6 +265,9 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
         )
 
     except Exception as e:
+        duration_ms = int((time.time() - start_time) * 1000)
+        obs_log("match_run", run_id=run_id, status="error", error_code="MATCH_ERROR",
+                duration_ms=duration_ms, extra={"error": str(e)[:100]})
         raise HTTPException(
             status_code=500,
             detail=f"Erreur matching: {str(e)}"

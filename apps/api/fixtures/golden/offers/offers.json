@@ -1,0 +1,202 @@
+[
+  {
+    "id": "VIE-001",
+    "title": "Data Analyst - Singapore",
+    "description": "Analyse de données pour notre filiale à Singapour. Python, SQL, PowerBI requis.",
+    "skills_required": ["python", "sql", "data_visualization", "powerbi"],
+    "languages_required": [{"code": "en", "level": "B2"}],
+    "country": "SG",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-002",
+    "title": "Développeur Full Stack - New York",
+    "description": "Développement d'applications web. React, Node.js, Python.",
+    "skills_required": ["python", "javascript", "react", "nodejs"],
+    "languages_required": [{"code": "en", "level": "C1"}],
+    "country": "US",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-003",
+    "title": "Marketing Manager - Londres",
+    "description": "Gestion de campagnes marketing digital. SEO, Google Analytics.",
+    "skills_required": ["marketing_digital", "seo", "google_analytics"],
+    "languages_required": [{"code": "en", "level": "C1"}],
+    "country": "GB",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-004",
+    "title": "Analyste Financier - Hong Kong",
+    "description": "Modélisation financière et reporting. Excel, SAP requis.",
+    "skills_required": ["excel", "financial_modeling", "sap"],
+    "languages_required": [{"code": "en", "level": "C1"}],
+    "country": "HK",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-005",
+    "title": "Commercial Export - Shanghai",
+    "description": "Développement commercial B2B en Chine. Prospection et négociation.",
+    "skills_required": ["sales", "negotiation", "crm"],
+    "languages_required": [{"code": "en", "level": "B2"}, {"code": "zh", "level": "A2"}],
+    "country": "CN",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-006",
+    "title": "Data Scientist - Berlin",
+    "description": "Machine learning et analyse prédictive. Python, TensorFlow.",
+    "skills_required": ["python", "machine_learning", "tensorflow", "sql"],
+    "languages_required": [{"code": "en", "level": "B2"}, {"code": "de", "level": "B1"}],
+    "country": "DE",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-007",
+    "title": "Chef de Projet IT - Tokyo",
+    "description": "Gestion de projets informatiques. Agile, Jira.",
+    "skills_required": ["project_management", "agile", "jira"],
+    "languages_required": [{"code": "en", "level": "C1"}],
+    "country": "JP",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-008",
+    "title": "Business Analyst - Dubai",
+    "description": "Analyse des processus métier. Excel, SQL, PowerBI.",
+    "skills_required": ["excel", "sql", "data_visualization", "powerbi"],
+    "languages_required": [{"code": "en", "level": "B2"}],
+    "country": "AE",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-009",
+    "title": "Développeur Backend - Amsterdam",
+    "description": "Développement d'APIs RESTful. Python, Django, PostgreSQL.",
+    "skills_required": ["python", "django", "sql", "git"],
+    "languages_required": [{"code": "en", "level": "B2"}],
+    "country": "NL",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-010",
+    "title": "Growth Marketing - San Francisco",
+    "description": "Growth hacking et marketing digital. SEO, Google Ads.",
+    "skills_required": ["marketing_digital", "seo", "google_analytics"],
+    "languages_required": [{"code": "en", "level": "C1"}],
+    "country": "US",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-011",
+    "title": "Contrôleur de Gestion - Milan",
+    "description": "Contrôle de gestion et reporting financier. SAP, Excel.",
+    "skills_required": ["excel", "financial_modeling", "sap", "accounting"],
+    "languages_required": [{"code": "en", "level": "B2"}, {"code": "it", "level": "A2"}],
+    "country": "IT",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-012",
+    "title": "Ingénieur DevOps - Stockholm",
+    "description": "Infrastructure cloud et CI/CD. AWS, Docker, Kubernetes.",
+    "skills_required": ["aws", "docker", "kubernetes", "git"],
+    "languages_required": [{"code": "en", "level": "B2"}],
+    "country": "SE",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-013",
+    "title": "Product Manager - Boston",
+    "description": "Gestion de produit digital. Agile, Jira, UX.",
+    "skills_required": ["project_management", "agile", "jira"],
+    "languages_required": [{"code": "en", "level": "C1"}],
+    "country": "US",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-014",
+    "title": "Consultant CRM - Madrid",
+    "description": "Implémentation Salesforce et formation. CRM, Excel.",
+    "skills_required": ["crm", "salesforce", "excel"],
+    "languages_required": [{"code": "en", "level": "B2"}, {"code": "es", "level": "B1"}],
+    "country": "ES",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-015",
+    "title": "Data Engineer - Sydney",
+    "description": "Construction de pipelines de données. Python, Spark, AWS.",
+    "skills_required": ["python", "sql", "aws", "spark"],
+    "languages_required": [{"code": "en", "level": "B2"}],
+    "country": "AU",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-016",
+    "title": "UX Designer - Lisbonne",
+    "description": "Design d'interfaces utilisateur. Figma, Adobe XD.",
+    "skills_required": ["ux_design", "figma", "adobe_xd"],
+    "languages_required": [{"code": "en", "level": "B2"}],
+    "country": "PT",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-017",
+    "title": "Acheteur International - Munich",
+    "description": "Négociation et gestion fournisseurs. Procurement, Excel.",
+    "skills_required": ["negotiation", "excel", "procurement"],
+    "languages_required": [{"code": "en", "level": "B2"}, {"code": "de", "level": "B1"}],
+    "country": "DE",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-018",
+    "title": "Content Manager - Dublin",
+    "description": "Création de contenu et SEO. Rédaction, WordPress.",
+    "skills_required": ["content_writing", "seo", "wordpress"],
+    "languages_required": [{"code": "en", "level": "C1"}],
+    "country": "IE",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-019",
+    "title": "Supply Chain Analyst - Bruxelles",
+    "description": "Optimisation de la chaîne logistique. Excel, SAP.",
+    "skills_required": ["excel", "sap", "supply_chain"],
+    "languages_required": [{"code": "en", "level": "B2"}, {"code": "fr", "level": "C1"}],
+    "country": "BE",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "VIE-020",
+    "title": "Développeur Mobile - Tel Aviv",
+    "description": "Développement iOS et Android. Swift, Kotlin, React Native.",
+    "skills_required": ["mobile_development", "swift", "kotlin", "react_native"],
+    "languages_required": [{"code": "en", "level": "B2"}],
+    "country": "IL",
+    "is_vie": true,
+    "source": "business_france"
+  }
+]

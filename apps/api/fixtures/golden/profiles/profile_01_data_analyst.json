@@ -1,0 +1,13 @@
+{
+  "profile_id": "golden_01",
+  "skills": ["python", "sql", "data_visualization", "excel", "powerbi"],
+  "languages": [
+    {"code": "fr", "level": "C2"},
+    {"code": "en", "level": "B2"}
+  ],
+  "education_level": "BAC+5",
+  "nationality": "FR",
+  "age": 25,
+  "years_of_experience": 3,
+  "cv_text": "Data Analyst expérimenté, 3 ans d'expérience en analyse de données. Maîtrise Python, SQL, PowerBI. Master en Data Science. Français natif, anglais professionnel."
+}
