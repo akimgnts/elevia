@@ -1,0 +1,6 @@
+# Ignore raw archives and temp folders
+*.zip
+*.tar.gz
+*/tmp/
+*/temp/
+*/.DS_Store
