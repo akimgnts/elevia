@@ -1,4 +1,5 @@
 import { PageContainer } from "../layout/PageContainer";
+import { layout, typography, card } from "../../styles/uiTokens";
 
 const points = [
   {
@@ -17,23 +18,20 @@ const points = [
 
 export function WhyElevia() {
   return (
-    <section id="why-elevia" className="bg-gradient-to-b from-[#F0FDFE] via-white to-[#F9FAFB] py-16 md:py-20">
+    <section id="why-elevia" className={layout.section}>
       <PageContainer>
         <div className="grid gap-10 md:grid-cols-[1.1fr_1fr]">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900">Pourquoi Elevia</h2>
-            <p className="mt-3 text-slate-600">
+            <h2 className={typography.h2}>Pourquoi Elevia</h2>
+            <p className={`mt-3 ${typography.lead}`}>
               Un système calibré pour des candidatures internationales réalistes et actionnables.
             </p>
           </div>
           <div className="space-y-4">
             {points.map((point) => (
-              <div
-                key={point.title}
-                className="rounded-2xl border border-white/40 bg-white/80 p-5 shadow-[0_4px_25px_rgba(0,0,0,0.05)] backdrop-blur-xl"
-              >
+              <div key={point.title} className={card.subtle}>
                 <div className="text-sm font-semibold text-slate-900">{point.title}</div>
-                <p className="mt-2 text-sm text-slate-600">{point.description}</p>
+                <p className={`mt-2 ${typography.body}`}>{point.description}</p>
               </div>
             ))}
           </div>

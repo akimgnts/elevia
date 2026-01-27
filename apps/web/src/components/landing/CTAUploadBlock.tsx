@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageContainer } from "../layout/PageContainer";
+import { layout, typography, card, button } from "../../styles/uiTokens";
 
 export function CTAUploadBlock() {
   const navigate = useNavigate();
@@ -15,36 +16,30 @@ export function CTAUploadBlock() {
     const file = event.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
-    setTimeout(() => navigate("/analyse"), 800);
+    setTimeout(() => navigate("/analyze"), 800);
   };
 
   return (
-    <section className="bg-gradient-to-b from-[#F0FDFE] via-white to-[#ECFDF5] py-16 md:py-20">
+    <section className={layout.section}>
       <PageContainer>
-        <div className="rounded-3xl border border-white/40 bg-white/80 p-8 shadow-[0_4px_25px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+        <div className={card.hero}>
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-slate-900">Drop ton CV</h3>
-              <p className="mt-2 text-slate-600">
+              <h3 className={typography.h3}>Drop ton CV</h3>
+              <p className={`mt-2 ${typography.body}`}>
                 PDF ou DOCX. Tu gardes le contrôle, aucun envoi automatique.
               </p>
               {fileName && (
-                <div className="mt-3 text-sm font-semibold text-slate-600">
+                <div className="mt-3 text-sm font-semibold text-emerald-600">
                   Fichier sélectionné : {fileName}
                 </div>
               )}
             </div>
             <div className="flex flex-wrap gap-3">
-              <button
-                onClick={handlePick}
-                className="rounded-xl bg-gradient-to-r from-[#06B6D4] to-[#22C55E] px-8 py-3 text-sm font-semibold text-white shadow-md"
-              >
+              <button onClick={handlePick} className={button.primary}>
                 Drop ton CV
               </button>
-              <button
-                onClick={() => navigate("/demo")}
-                className="rounded-xl border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700"
-              >
+              <button onClick={() => navigate("/demo")} className={button.secondary}>
                 Voir une démo
               </button>
             </div>

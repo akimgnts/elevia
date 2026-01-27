@@ -12,7 +12,7 @@ const PricingSection = lazy(() => import("../components/landing/PricingSection")
 
 export default function LandingPage() {
   return (
-    <div className="relative bg-white text-slate-900">
+    <div className="relative min-h-screen bg-gradient-to-b from-gray-50 to-white text-slate-900">
       <HeroVisualLayer />
       <Navbar />
       <main>
@@ -20,10 +20,10 @@ export default function LandingPage() {
         <HowItWorks />
         <CTAUploadBlock />
         <WhyElevia />
-        <Suspense fallback={<div className="py-10 text-center text-sm text-slate-500">Chargement…</div>}>
+        <Suspense fallback={<div className="py-12 text-center text-sm text-gray-400">Chargement…</div>}>
           <Testimonials />
         </Suspense>
-        <Suspense fallback={<div className="py-10 text-center text-sm text-slate-500">Chargement…</div>}>
+        <Suspense fallback={<div className="py-12 text-center text-sm text-gray-400">Chargement…</div>}>
           <PricingSection />
         </Suspense>
       </main>
