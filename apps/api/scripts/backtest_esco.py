@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 backtest_esco.py - ESCO Silent Backtest Runner
-Sprint 24 - Phase 2
+Sprint 24 - Phase 3
 
 Runs ESCO mapping on golden set profiles × offers and outputs coverage metrics.
+Uses improved extractors from esco.extract module.
 """
 
 import argparse
@@ -23,12 +24,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from esco.loader import get_esco_store
 from esco.mapper import map_skills
 from esco.metrics import esco_coverage
+from esco.extract import extract_raw_skills_from_offer, extract_raw_skills_from_profile
 
 
 # Default paths relative to apps/api/
 DEFAULT_PROFILES_DIR = Path(__file__).parent.parent / "fixtures" / "golden" / "profiles"
 DEFAULT_OFFERS_FILE = Path(__file__).parent.parent / "fixtures" / "golden" / "offers" / "offers.json"
-DEFAULT_OUTPUT_DIR = Path(__file__).parent.parent / "data"
+DEFAULT_OUTPUT_DIR = (
+    Path(__file__).parent.parent / "data" / "processed" / "backtests"
+)
 
 
 def _utc_now() -> str:
@@ -95,48 +99,15 @@ def load_offers(offers_file: Path) -> List[Dict[str, Any]]:
     return offers
 
 
+# Use improved extractors from esco.extract module
 def extract_profile_skills(profile: Dict[str, Any]) -> List[str]:
-    """Extract raw skills from profile."""
-    skills = []
-
-    # Try different possible skill fields
-    if "skills" in profile:
-        skills.extend(profile["skills"])
-    if "capabilities" in profile:
-        for cap in profile.get("capabilities", []):
-            if isinstance(cap, dict) and "name" in cap:
-                skills.append(cap["name"])
-            elif isinstance(cap, str):
-                skills.append(cap)
-    if "detected_tools" in profile:
-        skills.extend(profile["detected_tools"])
-    if "unmapped_skills" in profile:
-        for us in profile.get("unmapped_skills", []):
-            if isinstance(us, dict) and "raw_text" in us:
-                skills.append(us["raw_text"])
-            elif isinstance(us, str):
-                skills.append(us)
-
-    return list(set(skills))  # Deduplicate
+    """Extract raw skills from profile using improved extractor."""
+    return extract_raw_skills_from_profile(profile)
 
 
 def extract_offer_skills(offer: Dict[str, Any]) -> List[str]:
-    """Extract raw skills from offer."""
-    skills = []
-
-    # Try different possible skill fields
-    if "skills_required" in offer:
-        skills.extend(offer["skills_required"])
-    if "skills" in offer:
-        skills.extend(offer["skills"])
-    if "competences" in offer:
-        for comp in offer.get("competences", []):
-            if isinstance(comp, dict) and "label" in comp:
-                skills.append(comp["label"])
-            elif isinstance(comp, str):
-                skills.append(comp)
-
-    return list(set(skills))  # Deduplicate
+    """Extract raw skills from offer using improved extractor."""
+    return extract_raw_skills_from_offer(offer)
 
 
 def run_backtest(
@@ -190,7 +161,7 @@ def run_backtest(
     # Prepare output
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output_file = output_dir / f"esco_phase2_{timestamp}.csv"
+    output_file = output_dir / f"esco_phase3_{timestamp}.csv"
 
     rows_written = 0
 
@@ -214,13 +185,21 @@ def run_backtest(
         for profile in profiles:
             profile_id = profile.get("profile_id", "unknown")
             profile_skills = extract_profile_skills(profile)
-            profile_mapping = map_skills(profile_skills, store=store)
+            profile_mapping = map_skills(
+                profile_skills,
+                store=store,
+                enable_fuzzy=False,
+            )
             profile_esco_ids = {m["esco_id"] for m in profile_mapping["mapped"]}
 
             for offer in offers:
                 offer_id = offer.get("id", "unknown")
                 offer_skills = extract_offer_skills(offer)
-                offer_mapping = map_skills(offer_skills, store=store)
+                offer_mapping = map_skills(
+                    offer_skills,
+                    store=store,
+                    enable_fuzzy=False,
+                )
                 offer_esco_ids = {m["esco_id"] for m in offer_mapping["mapped"]}
 
                 # Compute coverage

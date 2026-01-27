@@ -1,0 +1,101 @@
+profile_id,offer_id,match_score_current,esco_coverage,esco_matched_count,esco_offer_total,missing_top5,mapped_profile_count,mapped_offer_count
+golden_01,VIE-001,NA,1.0,6,6,,9,6
+golden_01,VIE-002,NA,0.2,1,5,cycle de développement logiciel; JavaScript; développer un prototype de logiciel; JavaScript Framework,9,5
+golden_01,VIE-003,NA,0.2,1,5,analyse marketing; techniques de marketing numérique; gestion de projets; optimisation des moteurs de recherche,9,5
+golden_01,VIE-004,NA,0.25,1,4,effectuer une analyse financière de stratégies de prix; analyse financière; gérer le système normalisé de planification des ressources d'une entreprise,9,4
+golden_01,VIE-005,NA,0.0,0,5,cycle de développement logiciel; argumentaire de vente; négocier des conditions avec les fournisseurs; négocier les prix; gestion de la relation client,9,5
+golden_01,VIE-006,NA,0.8,4,5,apprentissage automatique,9,5
+golden_01,VIE-007,NA,0.0,0,5,gestion de projets par méthode Agile; informatique décisionnelle; programmation informatique; développement par itérations; gestion de projets,9,5
+golden_01,VIE-008,NA,1.0,5,5,,9,5
+golden_01,VIE-009,NA,0.3333,2,6,cycle de développement logiciel; développer un prototype de logiciel; outils de gestion de configuration logicielle; PostgreSQL,9,6
+golden_01,VIE-010,NA,0.25,1,4,analyse marketing; techniques de marketing numérique; optimisation des moteurs de recherche,9,4
+golden_01,VIE-011,NA,0.1667,1,6,effectuer une analyse financière de stratégies de prix; gestion de projets; analyse financière; comptabilité; gérer le système normalisé de planification des ressources d'une entreprise,9,6
+golden_01,VIE-012,NA,0.0,0,3,circuits intégrés; outils de gestion de configuration logicielle; DevOps,9,3
+golden_01,VIE-013,NA,0.0,0,5,créer un prototype de solution en matière d’expérience utilisateur; gestion de projets par méthode Agile; développement par itérations; techniques de marketing numérique; gestion de projets,9,5
+golden_01,VIE-014,NA,0.3333,1,3,conseiller d’autres personnes; gestion de la relation client,9,3
+golden_01,VIE-015,NA,0.8,4,5,SPARK,9,5
+golden_01,VIE-016,NA,0.0,0,4,créer un prototype de solution en matière d’expérience utilisateur; schéma de conception d’interface utilisateur; mettre en œuvre le design front end d’un site web; concevoir une interface utilisateur,9,4
+golden_01,VIE-017,NA,0.1667,1,6,négocier des conditions avec les fournisseurs; coordonner les activités d'achat; gestion de projets; négocier les prix; gérer un cycle d’achat,9,6
+golden_01,VIE-018,NA,0.0,0,3,WordPress; gestion de projets; optimisation des moteurs de recherche,9,3
+golden_01,VIE-019,NA,0.5,2,4,logistique; gérer le système normalisé de planification des ressources d'une entreprise,9,4
+golden_01,VIE-020,NA,0.0,0,4,cycle de développement logiciel; développer un prototype de logiciel; JavaScript Framework; iOS,9,4
+golden_02,VIE-001,NA,0.3333,2,6,exploration de données; logiciel de visualisation des données; analyse de données; utiliser un logiciel d’analyse de données spécifique,12,6
+golden_02,VIE-002,NA,0.8,4,5,cycle de développement logiciel,12,5
+golden_02,VIE-003,NA,0.0,0,5,analyse marketing; techniques de marketing numérique; gestion de projets; utiliser un logiciel d’analyse de données spécifique; optimisation des moteurs de recherche,12,5
+golden_02,VIE-004,NA,0.0,0,4,utiliser un logiciel de tableur; effectuer une analyse financière de stratégies de prix; analyse financière; gérer le système normalisé de planification des ressources d'une entreprise,12,4
+golden_02,VIE-005,NA,0.0,0,5,cycle de développement logiciel; argumentaire de vente; négocier des conditions avec les fournisseurs; négocier les prix; gestion de la relation client,12,5
+golden_02,VIE-006,NA,0.4,2,5,exploration de données; apprentissage automatique; analyse de données,12,5
+golden_02,VIE-007,NA,0.4,2,5,gestion de projets par méthode Agile; développement par itérations; gestion de projets,12,5
+golden_02,VIE-008,NA,0.2,1,5,utiliser un logiciel de tableur; logiciel de visualisation des données; analyse de données; utiliser un logiciel d’analyse de données spécifique,12,5
+golden_02,VIE-009,NA,0.6667,4,6,cycle de développement logiciel; PostgreSQL,12,6
+golden_02,VIE-010,NA,0.0,0,4,analyse marketing; techniques de marketing numérique; utiliser un logiciel d’analyse de données spécifique; optimisation des moteurs de recherche,12,4
+golden_02,VIE-011,NA,0.0,0,6,utiliser un logiciel de tableur; effectuer une analyse financière de stratégies de prix; gestion de projets; analyse financière; comptabilité,12,6
+golden_02,VIE-012,NA,0.3333,1,3,circuits intégrés; DevOps,12,3
+golden_02,VIE-013,NA,0.0,0,5,créer un prototype de solution en matière d’expérience utilisateur; gestion de projets par méthode Agile; développement par itérations; techniques de marketing numérique; gestion de projets,12,5
+golden_02,VIE-014,NA,0.0,0,3,conseiller d’autres personnes; utiliser un logiciel de tableur; gestion de la relation client,12,3
+golden_02,VIE-015,NA,0.4,2,5,exploration de données; analyse de données; SPARK,12,5
+golden_02,VIE-016,NA,0.0,0,4,créer un prototype de solution en matière d’expérience utilisateur; schéma de conception d’interface utilisateur; mettre en œuvre le design front end d’un site web; concevoir une interface utilisateur,12,4
+golden_02,VIE-017,NA,0.0,0,6,utiliser un logiciel de tableur; négocier des conditions avec les fournisseurs; coordonner les activités d'achat; gestion de projets; négocier les prix,12,6
+golden_02,VIE-018,NA,0.0,0,3,WordPress; gestion de projets; optimisation des moteurs de recherche,12,3
+golden_02,VIE-019,NA,0.0,0,4,utiliser un logiciel de tableur; analyse de données; logistique; gérer le système normalisé de planification des ressources d'une entreprise,12,4
+golden_02,VIE-020,NA,0.5,2,4,cycle de développement logiciel; iOS,12,4
+golden_03,VIE-001,NA,0.1667,1,6,exploration de données; SQL; logiciel de visualisation des données; analyse de données; Python (programmation informatique),9,6
+golden_03,VIE-002,NA,0.0,0,5,cycle de développement logiciel; JavaScript; développer un prototype de logiciel; JavaScript Framework; Python (programmation informatique),9,5
+golden_03,VIE-003,NA,0.8,4,5,gestion de projets,9,5
+golden_03,VIE-004,NA,0.25,1,4,effectuer une analyse financière de stratégies de prix; analyse financière; gérer le système normalisé de planification des ressources d'une entreprise,9,4
+golden_03,VIE-005,NA,0.2,1,5,cycle de développement logiciel; argumentaire de vente; négocier des conditions avec les fournisseurs; négocier les prix,9,5
+golden_03,VIE-006,NA,0.0,0,5,exploration de données; apprentissage automatique; SQL; analyse de données; Python (programmation informatique),9,5
+golden_03,VIE-007,NA,0.0,0,5,gestion de projets par méthode Agile; informatique décisionnelle; programmation informatique; développement par itérations; gestion de projets,9,5
+golden_03,VIE-008,NA,0.4,2,5,SQL; logiciel de visualisation des données; analyse de données,9,5
+golden_03,VIE-009,NA,0.0,0,6,cycle de développement logiciel; SQL; développer un prototype de logiciel; outils de gestion de configuration logicielle; PostgreSQL,9,6
+golden_03,VIE-010,NA,1.0,4,4,,9,4
+golden_03,VIE-011,NA,0.1667,1,6,effectuer une analyse financière de stratégies de prix; gestion de projets; analyse financière; comptabilité; gérer le système normalisé de planification des ressources d'une entreprise,9,6
+golden_03,VIE-012,NA,0.0,0,3,circuits intégrés; outils de gestion de configuration logicielle; DevOps,9,3
+golden_03,VIE-013,NA,0.2,1,5,créer un prototype de solution en matière d’expérience utilisateur; gestion de projets par méthode Agile; développement par itérations; gestion de projets,9,5
+golden_03,VIE-014,NA,0.6667,2,3,conseiller d’autres personnes,9,3
+golden_03,VIE-015,NA,0.0,0,5,exploration de données; SQL; analyse de données; SPARK; Python (programmation informatique),9,5
+golden_03,VIE-016,NA,0.0,0,4,créer un prototype de solution en matière d’expérience utilisateur; schéma de conception d’interface utilisateur; mettre en œuvre le design front end d’un site web; concevoir une interface utilisateur,9,4
+golden_03,VIE-017,NA,0.1667,1,6,négocier des conditions avec les fournisseurs; coordonner les activités d'achat; gestion de projets; négocier les prix; gérer un cycle d’achat,9,6
+golden_03,VIE-018,NA,0.3333,1,3,WordPress; gestion de projets,9,3
+golden_03,VIE-019,NA,0.25,1,4,analyse de données; logistique; gérer le système normalisé de planification des ressources d'une entreprise,9,4
+golden_03,VIE-020,NA,0.0,0,4,cycle de développement logiciel; développer un prototype de logiciel; JavaScript Framework; iOS,9,4
+golden_04,VIE-001,NA,0.0,0,6,exploration de données; SQL; logiciel de visualisation des données; analyse de données; utiliser un logiciel d’analyse de données spécifique,7,6
+golden_04,VIE-002,NA,0.0,0,5,cycle de développement logiciel; JavaScript; développer un prototype de logiciel; JavaScript Framework; Python (programmation informatique),7,5
+golden_04,VIE-003,NA,0.0,0,5,analyse marketing; techniques de marketing numérique; gestion de projets; utiliser un logiciel d’analyse de données spécifique; optimisation des moteurs de recherche,7,5
+golden_04,VIE-004,NA,1.0,4,4,,7,4
+golden_04,VIE-005,NA,0.0,0,5,cycle de développement logiciel; argumentaire de vente; négocier des conditions avec les fournisseurs; négocier les prix; gestion de la relation client,7,5
+golden_04,VIE-006,NA,0.0,0,5,exploration de données; apprentissage automatique; SQL; analyse de données; Python (programmation informatique),7,5
+golden_04,VIE-007,NA,0.0,0,5,gestion de projets par méthode Agile; informatique décisionnelle; programmation informatique; développement par itérations; gestion de projets,7,5
+golden_04,VIE-008,NA,0.2,1,5,SQL; logiciel de visualisation des données; analyse de données; utiliser un logiciel d’analyse de données spécifique,7,5
+golden_04,VIE-009,NA,0.0,0,6,cycle de développement logiciel; SQL; développer un prototype de logiciel; outils de gestion de configuration logicielle; PostgreSQL,7,6
+golden_04,VIE-010,NA,0.0,0,4,analyse marketing; techniques de marketing numérique; utiliser un logiciel d’analyse de données spécifique; optimisation des moteurs de recherche,7,4
+golden_04,VIE-011,NA,0.8333,5,6,gestion de projets,7,6
+golden_04,VIE-012,NA,0.0,0,3,circuits intégrés; outils de gestion de configuration logicielle; DevOps,7,3
+golden_04,VIE-013,NA,0.0,0,5,créer un prototype de solution en matière d’expérience utilisateur; gestion de projets par méthode Agile; développement par itérations; techniques de marketing numérique; gestion de projets,7,5
+golden_04,VIE-014,NA,0.3333,1,3,conseiller d’autres personnes; gestion de la relation client,7,3
+golden_04,VIE-015,NA,0.0,0,5,exploration de données; SQL; analyse de données; SPARK; Python (programmation informatique),7,5
+golden_04,VIE-016,NA,0.0,0,4,créer un prototype de solution en matière d’expérience utilisateur; schéma de conception d’interface utilisateur; mettre en œuvre le design front end d’un site web; concevoir une interface utilisateur,7,4
+golden_04,VIE-017,NA,0.1667,1,6,négocier des conditions avec les fournisseurs; coordonner les activités d'achat; gestion de projets; négocier les prix; gérer un cycle d’achat,7,6
+golden_04,VIE-018,NA,0.0,0,3,WordPress; gestion de projets; optimisation des moteurs de recherche,7,3
+golden_04,VIE-019,NA,0.5,2,4,analyse de données; logistique,7,4
+golden_04,VIE-020,NA,0.0,0,4,cycle de développement logiciel; développer un prototype de logiciel; JavaScript Framework; iOS,7,4
+golden_05,VIE-001,NA,0.0,0,6,exploration de données; SQL; logiciel de visualisation des données; analyse de données; utiliser un logiciel d’analyse de données spécifique,8,6
+golden_05,VIE-002,NA,0.0,0,5,cycle de développement logiciel; JavaScript; développer un prototype de logiciel; JavaScript Framework; Python (programmation informatique),8,5
+golden_05,VIE-003,NA,0.0,0,5,analyse marketing; techniques de marketing numérique; gestion de projets; utiliser un logiciel d’analyse de données spécifique; optimisation des moteurs de recherche,8,5
+golden_05,VIE-004,NA,0.0,0,4,utiliser un logiciel de tableur; effectuer une analyse financière de stratégies de prix; analyse financière; gérer le système normalisé de planification des ressources d'une entreprise,8,4
+golden_05,VIE-005,NA,0.8,4,5,cycle de développement logiciel,8,5
+golden_05,VIE-006,NA,0.0,0,5,exploration de données; apprentissage automatique; SQL; analyse de données; Python (programmation informatique),8,5
+golden_05,VIE-007,NA,0.0,0,5,gestion de projets par méthode Agile; informatique décisionnelle; programmation informatique; développement par itérations; gestion de projets,8,5
+golden_05,VIE-008,NA,0.0,0,5,utiliser un logiciel de tableur; SQL; logiciel de visualisation des données; analyse de données; utiliser un logiciel d’analyse de données spécifique,8,5
+golden_05,VIE-009,NA,0.0,0,6,cycle de développement logiciel; SQL; développer un prototype de logiciel; outils de gestion de configuration logicielle; PostgreSQL,8,6
+golden_05,VIE-010,NA,0.0,0,4,analyse marketing; techniques de marketing numérique; utiliser un logiciel d’analyse de données spécifique; optimisation des moteurs de recherche,8,4
+golden_05,VIE-011,NA,0.0,0,6,utiliser un logiciel de tableur; effectuer une analyse financière de stratégies de prix; gestion de projets; analyse financière; comptabilité,8,6
+golden_05,VIE-012,NA,0.0,0,3,circuits intégrés; outils de gestion de configuration logicielle; DevOps,8,3
+golden_05,VIE-013,NA,0.0,0,5,créer un prototype de solution en matière d’expérience utilisateur; gestion de projets par méthode Agile; développement par itérations; techniques de marketing numérique; gestion de projets,8,5
+golden_05,VIE-014,NA,0.3333,1,3,conseiller d’autres personnes; utiliser un logiciel de tableur,8,3
+golden_05,VIE-015,NA,0.0,0,5,exploration de données; SQL; analyse de données; SPARK; Python (programmation informatique),8,5
+golden_05,VIE-016,NA,0.0,0,4,créer un prototype de solution en matière d’expérience utilisateur; schéma de conception d’interface utilisateur; mettre en œuvre le design front end d’un site web; concevoir une interface utilisateur,8,4
+golden_05,VIE-017,NA,0.3333,2,6,utiliser un logiciel de tableur; coordonner les activités d'achat; gestion de projets; gérer un cycle d’achat,8,6
+golden_05,VIE-018,NA,0.0,0,3,WordPress; gestion de projets; optimisation des moteurs de recherche,8,3
+golden_05,VIE-019,NA,0.0,0,4,utiliser un logiciel de tableur; analyse de données; logistique; gérer le système normalisé de planification des ressources d'une entreprise,8,4
+golden_05,VIE-020,NA,0.0,0,4,cycle de développement logiciel; développer un prototype de logiciel; JavaScript Framework; iOS,8,4

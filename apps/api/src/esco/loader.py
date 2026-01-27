@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
+from .normalize import canon
 # Constants
 ESCO_VERSION = "v1.2.1-fr"
 ESCO_LOCALE = "fr"
@@ -69,12 +70,10 @@ def _read_csv(filepath: Path) -> List[Dict[str, str]]:
 
 def _canon_for_index(text: str) -> str:
     """
-    Simple canonicalization for index building.
-    Lowercase, strip, collapse whitespace.
+    Canonicalize labels for index building.
+    Uses the same normalization as the mapper to avoid mismatches.
     """
-    if not text:
-        return ""
-    return " ".join(text.lower().strip().split())
+    return canon(text)
 
 
 def _parse_alt_labels(alt_labels_str: str) -> List[str]:

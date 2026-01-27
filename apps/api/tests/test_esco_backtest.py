@@ -7,6 +7,7 @@ import csv
 import json
 import tempfile
 from pathlib import Path
+from statistics import median
 
 import pytest
 
@@ -289,3 +290,40 @@ class TestGoldenSetIntegration:
         # Should have rows (up to 5 profiles × 20 offers = 100)
         assert len(rows) > 0
         assert len(rows) <= 100
+
+    def test_golden_offer_extraction_has_min_tokens(self, golden_offers_file):
+        """Extracted skills from golden offers should be non-trivial."""
+        offers = load_offers(golden_offers_file)
+        # Check a few offers to ensure extraction yields enough tokens
+        for offer in offers[:5]:
+            tokens = extract_offer_skills(offer)
+            assert len(tokens) >= 5
+
+    def test_median_offer_mapping_improves_vs_phase2(self, golden_profiles_dir, golden_offers_file, tmp_path):
+        """Median mapped_offer_count and esco_offer_total should improve vs phase2 baseline."""
+        phase2_path = Path(__file__).parent.parent / "data" / "processed" / "backtests" / "esco_phase2_20260127_0346.csv"
+        if not phase2_path.exists():
+            pytest.skip("Phase 2 baseline CSV not available")
+
+        with open(phase2_path, "r", encoding="utf-8") as f:
+            rows2 = list(csv.DictReader(f))
+        baseline_offer = median(int(r["esco_offer_total"]) for r in rows2)
+        baseline_mapped = median(int(r["mapped_offer_count"]) for r in rows2)
+
+        output_dir = tmp_path / "output"
+        output_file = run_backtest(
+            profiles_dir=golden_profiles_dir,
+            offers_file=golden_offers_file,
+            output_dir=output_dir,
+            max_profiles=5,
+            max_offers=20,
+        )
+
+        with open(output_file, "r", encoding="utf-8") as f:
+            rows3 = list(csv.DictReader(f))
+
+        current_offer = median(int(r["esco_offer_total"]) for r in rows3)
+        current_mapped = median(int(r["mapped_offer_count"]) for r in rows3)
+
+        assert current_offer > baseline_offer
+        assert current_mapped > baseline_mapped
