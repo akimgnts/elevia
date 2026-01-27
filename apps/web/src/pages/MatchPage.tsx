@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { runMatch } from "../services/match.service";
+import { useProfileStore } from "../store/profileStore";
 import type { MatchItem, MatchResponse } from "../types/match";
 
 /* ======================
@@ -77,6 +79,7 @@ function sortByProductRules(results: MatchItem[]): MatchItem[] {
 ====================== */
 
 export default function MatchPage() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<unknown>(null);
   const [offers, setOffers] = useState<unknown[]>([]);
 
@@ -180,11 +183,25 @@ export default function MatchPage() {
         Charge les fixtures, puis lance le match.
       </p>
 
-      <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+      <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
         <button onClick={handleLoadFixtures}>Charger fixtures</button>
         <button onClick={handleRunMatch} disabled={!canRun || loading}>
           {loading ? "Match en cours…" : "Lancer le match"}
         </button>
+        {profile !== null && (
+          <button
+            onClick={async () => {
+              await useProfileStore.getState().setIngestResult(profile);
+              navigate("/profile");
+            }}
+            style={{ backgroundColor: "#2563eb", color: "white" }}
+          >
+            Sauver profil
+          </button>
+        )}
+        <Link to="/dashboard" style={{ padding: "8px 12px", textDecoration: "none" }}>
+          Dashboard →
+        </Link>
       </div>
 
       <div style={{ marginTop: 16 }}>

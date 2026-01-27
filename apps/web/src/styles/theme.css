@@ -1,0 +1,63 @@
+@layer base {
+  html {
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  body {
+    @apply text-slate-800 bg-slate-50;
+  }
+}
+
+@layer components {
+  .card-boost {
+    @apply bg-white/90 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-md transition-all duration-300;
+  }
+
+  .card-boost-hover {
+    @apply card-boost hover:bg-white hover:shadow-lg hover:-translate-y-1 hover:scale-[1.01];
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-[#06B6D4] to-[#22C55E] text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:shadow-glow transform hover:scale-[1.02] active:scale-95 transition-all duration-300;
+  }
+
+  .btn-secondary {
+    @apply bg-white border border-slate-300 text-slate-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all duration-300;
+  }
+
+  .btn-outline {
+    @apply bg-transparent border-2 border-cyan-500 text-cyan-600 px-6 py-3 rounded-xl font-semibold hover:bg-cyan-500 hover:text-white transition-all duration-300;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-[#06B6D4] to-[#22C55E] bg-clip-text text-transparent;
+  }
+
+  .gradient-text-reverse {
+    @apply bg-gradient-to-r from-[#22C55E] to-[#06B6D4] bg-clip-text text-transparent;
+  }
+
+  .badge-default {
+    @apply bg-slate-100 text-slate-700 border border-slate-200;
+  }
+
+  .badge-excellent {
+    @apply bg-lime-100 text-lime-800 border border-lime-200;
+  }
+
+  .badge-good {
+    @apply bg-cyan-100 text-cyan-800 border border-cyan-200;
+  }
+
+  .badge-medium {
+    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+  }
+
+  .badge-low {
+    @apply bg-red-100 text-red-700 border border-red-200;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-700 border border-blue-200;
+  }
+}
