@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageContainer } from "../layout/PageContainer";
-import { layout, typography, card, button } from "../../styles/uiTokens";
+import { layout, typography, card, cardPadding, button } from "../../styles/uiTokens";
 
 export function CTAUploadBlock() {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export function CTAUploadBlock() {
   return (
     <section className={layout.section}>
       <PageContainer>
-        <div className={card.hero}>
+        <div className={`${card.hero} ${cardPadding.lg}`}>
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h3 className={typography.h3}>Drop ton CV</h3>
@@ -30,12 +30,12 @@ export function CTAUploadBlock() {
                 PDF ou DOCX. Tu gardes le contrôle, aucun envoi automatique.
               </p>
               {fileName && (
-                <div className="mt-3 text-sm font-semibold text-emerald-600">
+                <p className="mt-3 text-sm font-semibold text-brand-lime">
                   Fichier sélectionné : {fileName}
-                </div>
+                </p>
               )}
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex shrink-0 flex-wrap gap-3">
               <button onClick={handlePick} className={button.primary}>
                 Drop ton CV
               </button>

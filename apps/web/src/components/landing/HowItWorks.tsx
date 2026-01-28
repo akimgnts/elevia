@@ -1,17 +1,20 @@
 import { PageContainer } from "../layout/PageContainer";
-import { layout, typography, card } from "../../styles/uiTokens";
+import { layout, typography, card, cardPadding } from "../../styles/uiTokens";
 
 const steps = [
   {
-    title: "1. Drop ton CV",
+    step: "01",
+    title: "Drop ton CV",
     description: "Une extraction claire, sans bruit ni perte d'information.",
   },
   {
-    title: "2. Matching intelligent",
+    step: "02",
+    title: "Matching intelligent",
     description: "Score + raisons pour comprendre chaque recommandation.",
   },
   {
-    title: "3. Plan d'action",
+    step: "03",
+    title: "Plan d'action",
     description: "Priorités, formations, lettres personnalisées en un flux.",
   },
 ];
@@ -20,18 +23,19 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className={layout.section}>
       <PageContainer>
-        <div className="text-center">
+        <header className="text-center">
           <h2 className={typography.h2}>Comment ça marche</h2>
-          <p className={`mt-3 ${typography.body}`}>
+          <p className={`mt-3 ${typography.body} mx-auto max-w-lg`}>
             Un parcours court et précis, pensé pour la réalité des candidatures V.I.E.
           </p>
-        </div>
+        </header>
         <div className={`mt-10 grid md:grid-cols-3 ${layout.gridGap}`}>
           {steps.map((step) => (
-            <div key={step.title} className={card.base}>
-              <div className={typography.label}>{step.title}</div>
-              <p className={`mt-3 ${typography.body}`}>{step.description}</p>
-            </div>
+            <article key={step.step} className={`${card.base} ${cardPadding.md}`}>
+              <span className="text-xs font-semibold text-brand-cyan">{step.step}</span>
+              <h3 className="mt-2 text-sm font-semibold text-slate-900">{step.title}</h3>
+              <p className={`mt-2 ${typography.body}`}>{step.description}</p>
+            </article>
           ))}
         </div>
       </PageContainer>

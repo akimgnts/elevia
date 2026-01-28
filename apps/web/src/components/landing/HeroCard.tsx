@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { card, badge as badgeToken, typography } from "../../styles/uiTokens";
+import { card, cardPadding, badge as badgeToken, typography } from "../../styles/uiTokens";
 
 export type HeroCardProps = {
   title: string;
@@ -12,17 +12,20 @@ export type HeroCardProps = {
 };
 
 export function HeroCard({ title, badge, subtitle, tags, cta, featured, className }: HeroCardProps) {
+  const cardStyle = featured ? card.hero : card.base;
+  const padding = featured ? cardPadding.lg : cardPadding.md;
+
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
-      className={`transform-gpu will-change-transform ${featured ? card.hero : card.base} ${className ?? ""}`}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.15 }}
+      className={`transform-gpu will-change-transform ${cardStyle} ${padding} ${className ?? ""}`}
     >
-      <div className="flex items-start justify-between">
-        <div className={featured ? "text-lg font-semibold text-slate-900" : typography.label}>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className={featured ? "text-lg font-semibold text-slate-900" : "text-sm font-semibold text-slate-800"}>
           {title}
-        </div>
-        <div className={badgeToken.brand}>{badge}</div>
+        </h3>
+        <span className={badgeToken.brand}>{badge}</span>
       </div>
       <p className={`mt-2 ${typography.body}`}>{subtitle}</p>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -32,7 +35,7 @@ export function HeroCard({ title, badge, subtitle, tags, cta, featured, classNam
           </span>
         ))}
       </div>
-      <button className="mt-5 text-sm font-semibold text-cyan-600 hover:text-cyan-700 transition-colors">
+      <button className="mt-5 text-sm font-semibold text-brand-cyan hover:text-cyan-700 transition-colors">
         {cta} →
       </button>
     </motion.div>
