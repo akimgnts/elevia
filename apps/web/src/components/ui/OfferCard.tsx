@@ -7,22 +7,26 @@ export type OfferCardProps = {
   title: string;
   company: string;
   location: string;
+  preview?: string;
   score?: number;
   tags?: string[];
   className?: string;
 };
 
-export function OfferCard({ title, company, location, score, tags = [], className }: OfferCardProps) {
+export function OfferCard({ title, company, location, preview, score, tags = [], className }: OfferCardProps) {
   return (
     <GlassCard className={cn("p-5", className)}>
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0 flex-1">
           <div className="text-lg font-semibold text-slate-900">{title}</div>
           <div className="text-sm text-slate-600">{company}</div>
           <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
-            <MapPin className="h-3.5 w-3.5" />
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
             {location}
           </div>
+          {preview && (
+            <p className="mt-2 line-clamp-2 text-sm text-slate-500">{preview}</p>
+          )}
         </div>
         <div className="flex flex-col items-end gap-2">
           {typeof score === "number" ? (

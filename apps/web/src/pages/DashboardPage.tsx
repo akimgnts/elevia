@@ -9,6 +9,7 @@ import { Badge } from "../components/ui/Badge";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { fetchSampleOffers, runMatch, type MatchResponse } from "../lib/api";
+import { buildOfferPreview } from "../lib/text";
 import { useProfileStore } from "../store/profileStore";
 import { typography, spacing, layout } from "../styles/uiTokens";
 
@@ -16,6 +17,9 @@ interface SampleOffer {
   id?: string;
   offer_id?: string;
   title?: string;
+  description?: string;
+  display_description?: string;
+  // TODO: future structured_summary field (AI-generated, Option 2)
   company?: string;
   company_name?: string;
   country?: string;
@@ -76,6 +80,10 @@ export default function DashboardPage() {
       title: (offer?.title as string) || "Offre",
       company: (offer?.company as string) || (offer?.company_name as string) || "Entreprise",
       location,
+      preview: buildOfferPreview(
+        offer?.display_description as string | undefined,
+        offer?.description as string | undefined
+      ),
       score: Math.round(result.score),
       tags: ["V.I.E"],
     };
@@ -175,6 +183,7 @@ export default function DashboardPage() {
                     title={offer.title}
                     company={offer.company}
                     location={offer.location}
+                    preview={offer.preview}
                     score={offer.score}
                     tags={offer.tags}
                   />
