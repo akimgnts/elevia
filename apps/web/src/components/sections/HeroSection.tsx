@@ -32,7 +32,7 @@ export function HeroSection() {
             </div>
           </motion.div>
           <motion.div variants={fadeInUp} className="grid gap-4 md:grid-cols-2">
-            <HeroCard title="Match IA" value="92%" subtitle="+12% ce mois" />
+            <HeroCard title="Match" value="92%" subtitle="+12% ce mois" />
             <HeroCard title="Offres activées" value="48" subtitle="3 nouvelles aujourd'hui" />
             <HeroCard title="Temps gagné" value="6h" subtitle="/ semaine" />
             <HeroCard title="Entreprises" value="29" subtitle="ciblées" />

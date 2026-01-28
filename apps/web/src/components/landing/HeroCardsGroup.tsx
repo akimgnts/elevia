@@ -12,9 +12,9 @@ const cards = [
   },
   {
     title: "Offres V.I.E",
-    badge: "Match IA 94%",
+    badge: "Match 94%",
     subtitle: "Recommandations • Score + raisons",
-    tags: ["V.I.E", "Score IA", "Raisons"],
+    tags: ["V.I.E", "Score", "Raisons"],
     cta: "Voir",
     featured: true,
   },

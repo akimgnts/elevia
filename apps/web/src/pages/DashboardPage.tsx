@@ -8,14 +8,25 @@ import { GlassCard } from "../components/ui/GlassCard";
 import { Badge } from "../components/ui/Badge";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
-import { fetchCatalogOffers, runMatch, type MatchResponse, type OfferNormalized } from "../lib/api";
+import { fetchSampleOffers, runMatch, type MatchResponse } from "../lib/api";
 import { useProfileStore } from "../store/profileStore";
 import { typography, spacing, layout } from "../styles/uiTokens";
+
+interface SampleOffer {
+  id?: string;
+  offer_id?: string;
+  title?: string;
+  company?: string;
+  company_name?: string;
+  country?: string;
+  location_label?: string;
+  [key: string]: unknown;
+}
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { userProfile } = useProfileStore();
-  const [offers, setOffers] = useState<OfferNormalized[]>([]);
+  const [offers, setOffers] = useState<SampleOffer[]>([]);
   const [matchResponse, setMatchResponse] = useState<MatchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,9 +38,10 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const catalog = await fetchCatalogOffers(200, "all");
-        setOffers(catalog.offers);
-        const match = await runMatch(userProfile, catalog.offers);
+        const sample = await fetchSampleOffers(200);
+        const sampleOffers = sample.offers as SampleOffer[];
+        setOffers(sampleOffers);
+        const match = await runMatch(userProfile, sampleOffers);
         setMatchResponse(match);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -42,9 +54,10 @@ export default function DashboardPage() {
   }, [userProfile]);
 
   const offersMap = useMemo(() => {
-    const map = new Map<string, OfferNormalized>();
+    const map = new Map<string, SampleOffer>();
     for (const offer of offers) {
-      map.set(offer.id, offer);
+      const key = offer.id || offer.offer_id || "";
+      if (key) map.set(key, offer);
     }
     return map;
   }, [offers]);
@@ -57,20 +70,14 @@ export default function DashboardPage() {
 
   const topMatches = results.slice(0, 3).map((result) => {
     const offer = offersMap.get(result.offer_id);
-    const location = [offer?.city, offer?.country].filter(Boolean).join(", ");
+    const location = offer?.country || offer?.location_label || "Localisation à préciser";
     return {
       id: result.offer_id,
-      title: offer?.title || "Offre",
-      company: offer?.company || "Entreprise",
-      location: location || "Localisation à préciser",
+      title: (offer?.title as string) || "Offre",
+      company: (offer?.company as string) || (offer?.company_name as string) || "Entreprise",
+      location,
       score: Math.round(result.score),
-      tags: [
-        offer?.source === "business_france"
-          ? "Business France"
-          : offer?.source === "france_travail"
-            ? "France Travail"
-            : "Source inconnue",
-      ].filter(Boolean),
+      tags: ["V.I.E"],
     };
   });
 

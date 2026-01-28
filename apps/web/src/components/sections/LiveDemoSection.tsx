@@ -32,7 +32,7 @@ export function LiveDemoSection() {
             <BaseListingCard
               title="Opportunités instantanées"
               description="3 offres V.I.E à 80%+ disponibles maintenant."
-              meta="Match IA"
+              meta="Match"
             />
           </div>
         </div>

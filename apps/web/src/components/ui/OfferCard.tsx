@@ -32,7 +32,7 @@ export function OfferCard({ title, company, location, score, tags = [], classNam
           )}
           <div className="flex items-center gap-1 text-xs text-cyan-600">
             <Sparkles className="h-3.5 w-3.5" />
-            Match IA
+            Match
           </div>
         </div>
       </div>
