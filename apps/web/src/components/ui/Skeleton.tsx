@@ -5,7 +5,7 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
   return (
     <div
       className={cn(
-        "animate-pulse rounded-xl bg-slate-200/70",
+        "animate-pulse rounded-card bg-slate-100",
         className
       )}
       {...props}

@@ -10,6 +10,7 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { fetchCatalogOffers, runMatch, type MatchResponse, type OfferNormalized } from "../lib/api";
 import { useProfileStore } from "../store/profileStore";
+import { typography, spacing, layout } from "../styles/uiTokens";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -75,17 +76,17 @@ export default function DashboardPage() {
 
   if (!userProfile) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <PageContainer className="pt-16 pb-16">
+      <div className={`min-h-screen ${layout.pageBg}`}>
+        <PageContainer className={spacing.pageTop}>
           <EmptyState
             title="Aucun profil détecté"
             description="Analysez votre CV pour activer le matching réel."
             actionLabel="Analyser mon CV"
             onAction={() => navigate("/analyze")}
           />
-          <div className="mt-4 text-center text-sm text-slate-500">
-            <Link to="/analyze" className="underline">
-              Aller à l’analyse
+          <div className="mt-4 text-center">
+            <Link to="/analyze" className={`${typography.body} underline`}>
+              Aller à l'analyse
             </Link>
           </div>
         </PageContainer>
@@ -94,23 +95,27 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <PageContainer className="pt-10 pb-16">
-        <div className="mb-8">
-          <div className="text-sm font-semibold text-slate-500">Dashboard</div>
-          <h1 className="text-3xl font-bold text-slate-900">Votre cockpit Elevia</h1>
-          <p className="mt-2 text-slate-600">
-            Synthèse IA, tendances marché et offres prioritaires.
+    <div className={`min-h-screen ${layout.pageBg}`}>
+      <PageContainer className={spacing.pageTop}>
+        {/* Page header */}
+        <header className="mb-10">
+          <p className={typography.overline}>Dashboard</p>
+          <h1 className={`mt-1 ${typography.h2}`}>Votre cockpit Elevia</h1>
+          <p className={`mt-2 ${typography.body}`}>
+            Synthèse, tendances marché et offres prioritaires.
           </p>
-        </div>
+        </header>
 
+        {/* Error / Loading states */}
         {error && <ErrorState description={error} />}
         {loading && !error && (
-          <div className="text-sm text-slate-500">Chargement des données…</div>
+          <p className={typography.body}>Chargement des données…</p>
         )}
 
+        {/* Main grid: 2 columns on lg */}
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-          <div className="grid gap-6 md:grid-cols-2">
+          {/* Left column */}
+          <div className={`grid gap-5 md:grid-cols-2`}>
             <KpiCard
               label="Score moyen"
               value={`${averageScore}%`}
@@ -122,19 +127,23 @@ export default function DashboardPage() {
               delta={matchResponse?.received_offers ? "+12" : undefined}
               accent="lime"
             />
-            <GlassCard className="col-span-full p-6">
+
+            {/* Radar card */}
+            <GlassCard className="col-span-full p-5">
               <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-slate-700">Radar marché</div>
+                <span className={typography.label}>Radar marché</span>
                 <Badge variant="info">Temps réel</Badge>
               </div>
-              <div className="mt-4 h-40 rounded-xl bg-gradient-to-br from-cyan-50 to-lime-50" />
-              <p className="mt-4 text-sm text-slate-600">
+              <div className="mt-4 h-36 rounded-card bg-gradient-to-br from-slate-50 to-slate-100" />
+              <p className={`mt-4 ${typography.body}`}>
                 Les secteurs data & supply gagnent en traction sur 3 zones.
               </p>
             </GlassCard>
-            <GlassCard className="col-span-full p-6">
-              <div className="text-sm font-semibold text-slate-700">Insights IA</div>
-              <div className="mt-4 space-y-3">
+
+            {/* Insights card */}
+            <GlassCard className="col-span-full p-5">
+              <span className={typography.label}>Insights</span>
+              <div className={`mt-4 ${spacing.stack}`}>
                 <BaseListingCard
                   title="Compétences à renforcer"
                   description="Data storytelling, stakeholder management."
@@ -147,10 +156,12 @@ export default function DashboardPage() {
             </GlassCard>
           </div>
 
-          <div className="space-y-6">
-            <GlassCard className="p-6">
-              <div className="text-sm font-semibold text-slate-700">Top matches</div>
-              <div className="mt-4 space-y-4">
+          {/* Right column */}
+          <div className="space-y-5">
+            {/* Top matches */}
+            <GlassCard className="p-5">
+              <span className={typography.label}>Top matches</span>
+              <div className={`mt-4 ${spacing.stack}`}>
                 {topMatches.map((offer) => (
                   <OfferCard
                     key={offer.id}
@@ -163,13 +174,15 @@ export default function DashboardPage() {
                 ))}
               </div>
             </GlassCard>
-            <GlassCard className="p-6">
-              <div className="text-sm font-semibold text-slate-700">Activité récente</div>
-              <div className="mt-4 space-y-3 text-sm text-slate-600">
-                <div>• 3 nouvelles offres analysées (Canada, Allemagne).</div>
-                <div>• Profil enrichi avec 2 compétences validées.</div>
-                <div>• Relance de 2 candidatures en attente.</div>
-              </div>
+
+            {/* Recent activity */}
+            <GlassCard className="p-5">
+              <span className={typography.label}>Activité récente</span>
+              <ul className={`mt-4 ${spacing.stack} ${typography.body}`}>
+                <li>• 3 nouvelles offres analysées (Canada, Allemagne).</li>
+                <li>• Profil enrichi avec 2 compétences validées.</li>
+                <li>• Relance de 2 candidatures en attente.</li>
+              </ul>
             </GlassCard>
           </div>
         </div>
