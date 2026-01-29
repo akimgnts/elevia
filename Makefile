@@ -8,7 +8,7 @@
 #   make gate-3           # Pre-merge checks (branch sync, conflicts)
 #   make gates            # Run all gates sequentially
 
-.PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test help
+.PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test test-api help
 
 # Default target
 help:
@@ -23,6 +23,7 @@ help:
 	@echo "  make lint           - Run linting"
 	@echo "  make test-fast      - Run fast tests"
 	@echo "  make test           - Run full test suite"
+	@echo "  make test-api       - Alias for make test"
 
 # Agents review (per REVIEW_MATRIX)
 agents-review:
@@ -52,9 +53,12 @@ lint:
 # Fast tests (used by gate-1)
 test-fast:
 	@echo "Running fast tests..."
-	@cd apps/api && (command -v pytest > /dev/null && pytest tests/ -x -q --timeout=30 || echo "Tests skipped (pytest not installed)")
+	@cd apps/api && python3 -m pytest tests/ -x -q --timeout=30
 
 # Full test suite (used by gate-2)
 test:
 	@echo "Running full test suite..."
-	@cd apps/api && (command -v pytest > /dev/null && pytest tests/ -v || echo "Tests skipped (pytest not installed)")
+	@cd apps/api && python3 -m pytest tests/ -v
+
+# Alias
+test-api: test

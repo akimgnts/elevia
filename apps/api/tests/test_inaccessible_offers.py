@@ -290,7 +290,8 @@ def test_scoring_only_called_for_ok_offers(client, eligible_profile, sample_offe
             offer_id="test",
             score=85,
             breakdown={"skills": 0.8, "languages": 0.9, "education": 1.0, "country": 1.0},
-            reasons=["Test reason"]
+            reasons=["Test reason"],
+            match_debug={},
         )
         MockEngine.return_value = mock_engine
 
