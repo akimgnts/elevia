@@ -5,10 +5,19 @@ Sprint 7
 Point d'entrée de l'API.
 """
 
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Charger .env AVANT tout import qui utilise les variables d'environnement
+env_path = Path(__file__).parent.parent.parent / ".env"
+load_dotenv(env_path)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routes.matching import router as matching_router
+from .routes.metrics import router as metrics_router
+from .routes.offers import router as offers_router
 from .routes.profile import router as profile_router
 
 
@@ -42,6 +51,8 @@ app.add_middleware(
 
 # Routes
 app.include_router(matching_router, prefix="/v1")
+app.include_router(metrics_router, prefix="/metrics")
+app.include_router(offers_router, prefix="/offers")
 app.include_router(profile_router, prefix="/profile")
 
 

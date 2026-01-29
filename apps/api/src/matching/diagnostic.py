@@ -43,11 +43,20 @@ def _diagnose_hard_skills(profile: Dict, offer: Dict) -> CriterionResult:
     - PARTIAL si missing > 0
     - OK sinon
     """
-    # Extraction skills profil
+    # Extraction skills profil (support both formats)
     raw_profile_skills = profile.get("skills", [])
-    if isinstance(raw_profile_skills, str):
+    detected_caps = profile.get("detected_capabilities", [])
+
+    if detected_caps and isinstance(detected_caps, list):
+        # Extract skill names from detected_capabilities objects
+        raw_profile_skills = [
+            cap.get("name") if isinstance(cap, dict) else cap
+            for cap in detected_caps
+        ]
+    elif isinstance(raw_profile_skills, str):
         raw_profile_skills = [s.strip() for s in raw_profile_skills.split(",") if s.strip()]
-    profile_skills = set(normalize_skill(s) for s in raw_profile_skills if s)
+
+    profile_skills = set(normalize_skill(s) for s in raw_profile_skills if s and isinstance(s, str))
 
     # Extraction skills offre
     raw_offer_skills = offer.get("skills", [])
@@ -94,11 +103,17 @@ def _diagnose_languages(profile: Dict, offer: Dict) -> CriterionResult:
     - KO si au moins une langue requise est manquante
     - OK sinon
     """
-    # Extraction langues profil
+    # Extraction langues profil (support both formats)
     raw_profile_langs = profile.get("languages", [])
     if isinstance(raw_profile_langs, str):
         raw_profile_langs = [l.strip() for l in raw_profile_langs.split(",") if l.strip()]
-    profile_langs = set(normalize_language(l) for l in raw_profile_langs if l)
+    elif isinstance(raw_profile_langs, list) and raw_profile_langs and isinstance(raw_profile_langs[0], dict):
+        # Extract language codes from objects
+        raw_profile_langs = [
+            lang.get("code") if isinstance(lang, dict) else lang
+            for lang in raw_profile_langs
+        ]
+    profile_langs = set(normalize_language(l) for l in raw_profile_langs if l and isinstance(l, str))
 
     # Extraction langues offre
     raw_offer_langs = offer.get("languages", [])
@@ -138,9 +153,15 @@ def _diagnose_education(profile: Dict, offer: Dict) -> CriterionResult:
     - OK sinon
     - JAMAIS KO (expérience compensatoire possible)
     """
-    profile_level = parse_education_level(profile.get("education"))
+    # Support both formats: "education" and "education_summary": {level}
+    profile_edu = profile.get("education")
+    if profile_edu is None:
+        edu_summary = profile.get("education_summary", {})
+        if isinstance(edu_summary, dict):
+            profile_edu = edu_summary.get("level")
+    profile_level = parse_education_level(profile_edu)
     required_level = parse_education_level(
-        offer.get("education") or offer.get("education_required")
+        offer.get("education") or offer.get("education_required") or offer.get("education_level")
     )
 
     # Si offre n'a pas de niveau requis → OK

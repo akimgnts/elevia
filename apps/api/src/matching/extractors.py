@@ -153,19 +153,42 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
     profile_id = raw_profile.get("id", raw_profile.get("profile_id", "unknown"))
 
     # Skills normalisées
+    # Support both formats: "skills": ["str"] and "detected_capabilities": [{name, level}]
     raw_skills = raw_profile.get("skills", [])
-    if isinstance(raw_skills, str):
+    detected_caps = raw_profile.get("detected_capabilities", [])
+
+    if detected_caps and isinstance(detected_caps, list):
+        # Extract skill names from detected_capabilities objects
+        raw_skills = [
+            cap.get("name") if isinstance(cap, dict) else cap
+            for cap in detected_caps
+        ]
+    elif isinstance(raw_skills, str):
         raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
-    skills = frozenset(normalize_skill(s) for s in raw_skills if s)
+
+    skills = frozenset(normalize_skill(s) for s in raw_skills if s and isinstance(s, str))
 
     # Langues normalisées
+    # Support both formats: "languages": ["str"] and "languages": [{code, level}]
     raw_languages = raw_profile.get("languages", [])
     if isinstance(raw_languages, str):
         raw_languages = [l.strip() for l in raw_languages.split(",") if l.strip()]
-    languages = frozenset(normalize_language(l) for l in raw_languages if l)
+    elif isinstance(raw_languages, list) and raw_languages and isinstance(raw_languages[0], dict):
+        # Extract language codes from objects
+        raw_languages = [
+            lang.get("code") if isinstance(lang, dict) else lang
+            for lang in raw_languages
+        ]
+    languages = frozenset(normalize_language(l) for l in raw_languages if l and isinstance(l, str))
 
     # Niveau d'études
-    education_level = parse_education_level(raw_profile.get("education"))
+    # Support both formats: "education": "str" and "education_summary": {level}
+    education_raw = raw_profile.get("education")
+    if education_raw is None:
+        edu_summary = raw_profile.get("education_summary", {})
+        if isinstance(edu_summary, dict):
+            education_raw = edu_summary.get("level")
+    education_level = parse_education_level(education_raw)
 
     # Pays préférés canonisés
     raw_countries = raw_profile.get("preferred_countries", [])
