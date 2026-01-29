@@ -209,6 +209,62 @@ export async function postCorrectionMetric(event: CorrectionEvent): Promise<void
   }
 }
 
+// ============================================================================
+// Inbox
+// ============================================================================
+
+export interface InboxItem {
+  offer_id: string;
+  title: string;
+  company: string | null;
+  country: string | null;
+  city: string | null;
+  score: number;
+  reasons: string[];
+}
+
+export interface InboxResponse {
+  profile_id: string;
+  items: InboxItem[];
+  total_matched: number;
+  total_decided: number;
+}
+
+export async function fetchInbox(
+  profile: unknown,
+  profileId: string,
+  minScore = 65,
+  limit = 20
+): Promise<InboxResponse> {
+  const url = `${API_BASE}/inbox`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile_id: profileId, profile, min_score: minScore, limit }),
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+export async function postDecision(
+  offerId: string,
+  profileId: string,
+  status: "SHORTLISTED" | "DISMISSED"
+): Promise<void> {
+  const url = `${API_BASE}/offers/${encodeURIComponent(offerId)}/decision`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile_id: profileId, status }),
+  });
+  if (!res.ok) {
+    console.warn(`[inbox] decision failed: ${res.status}`);
+  }
+}
+
 /**
  * Ingest CV text and extract structured profile.
  * POST /profile/ingest_cv

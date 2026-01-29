@@ -8,6 +8,7 @@ import LandingPage from "./pages/LandingPage";
 import OfferDetailPage from "./pages/OfferDetailPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DemoPage from "./pages/DemoPage";
+import InboxPage from "./pages/InboxPage";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/match" element={<MatchPage />} />
       <Route path="/offres" element={<OffersPage />} />
+      <Route path="/inbox" element={<InboxPage />} />
       <Route path="/offers/:offerId" element={<OfferDetailPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
