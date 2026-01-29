@@ -7,6 +7,7 @@ Includes skill alias expansion to match ESCO vocabulary better.
 """
 
 import re
+import unicodedata
 from typing import Any, Dict, List, Set
 
 # Skill aliases: map common short forms to EXACT ESCO labels
@@ -157,51 +158,76 @@ MIN_TOKEN_LENGTH = 2
 # Regex patterns for splitting
 SPLIT_PATTERN = re.compile(r"[,;/|•\-–—\n\t()[\]{}]+")
 WHITESPACE_PATTERN = re.compile(r"\s+")
+PUNCT_PATTERN = re.compile(r"[^\w\s]", re.UNICODE)
+
+# Always-capture obvious skills
+WHITELIST_SKILLS = {
+    "python",
+    "excel",
+    "react",
+    "javascript",
+    "sql",
+    "aws",
+    "sap",
+}
+
+# Optional controlled bigrams
+BIGRAM_WHITELIST = {
+    "data analysis",
+    "project management",
+}
 
 
-def _normalize_token(token: str) -> str:
-    """Normalize a single token: lowercase, strip, remove punctuation."""
-    # Lowercase and strip
-    token = token.lower().strip()
-    # Remove leading/trailing punctuation but keep internal
-    token = token.strip(".,;:!?\"'`()[]{}<>")
-    return token
+def _strip_accents(text: str) -> str:
+    """Remove accents for normalization."""
+    if not text:
+        return ""
+    nfkd = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in nfkd if not unicodedata.combining(c))
+
+
+def _normalize_text(text: str) -> str:
+    """Normalize full text: lowercase, strip accents, punctuation -> spaces."""
+    if not text:
+        return ""
+    text = _strip_accents(text.lower())
+    text = PUNCT_PATTERN.sub(" ", text)
+    text = WHITESPACE_PATTERN.sub(" ", text).strip()
+    return text
 
 
 def _split_text(text: str) -> List[str]:
-    """Split text into candidate tokens using multiple delimiters."""
+    """Split text into candidate tokens without sub-phrase generation."""
     if not text:
         return []
 
-    # First split by common delimiters
-    parts = SPLIT_PATTERN.split(text)
+    normalized = _normalize_text(text)
+    if not normalized:
+        return []
 
     tokens: List[str] = []
-    for part in parts:
-        part = part.strip()
-        if not part:
+    words = [w for w in normalized.split(" ") if w]
+
+    for word in words:
+        if len(word) < MIN_TOKEN_LENGTH:
             continue
+        if word in STOPWORDS:
+            continue
+        if word.isdigit():
+            continue
+        tokens.append(word)
 
-        # Split by whitespace to get individual words
-        words = [w for w in WHITESPACE_PATTERN.split(part) if w]
-        normalized_words = [_normalize_token(w) for w in words if _normalize_token(w)]
+    # Controlled bigrams only
+    if BIGRAM_WHITELIST and len(words) >= 2:
+        for i in range(len(words) - 1):
+            phrase = f"{words[i]} {words[i + 1]}"
+            if phrase in BIGRAM_WHITELIST:
+                tokens.append(phrase)
 
-        for word in normalized_words:
-            if len(word) >= MIN_TOKEN_LENGTH and word not in STOPWORDS:
-                tokens.append(word)
-
-        # Generate n-grams to capture ESCO-style multi-word labels
-        max_ngram = 7 if len(normalized_words) <= 12 else 4
-        for n in range(2, max_ngram + 1):
-            if len(normalized_words) < n:
-                continue
-            for i in range(len(normalized_words) - n + 1):
-                chunk = normalized_words[i : i + n]
-                if all(c in STOPWORDS for c in chunk):
-                    continue
-                phrase = " ".join(chunk).strip()
-                if phrase and len(phrase) >= MIN_TOKEN_LENGTH:
-                    tokens.append(phrase)
+    # Whitelist capture (if present in text)
+    for skill in WHITELIST_SKILLS:
+        if re.search(rf"\\b{re.escape(skill)}\\b", normalized):
+            tokens.append(skill)
 
     return tokens
 
@@ -219,20 +245,11 @@ def _extract_from_list(items: List[Any]) -> List[str]:
     tokens = []
     for item in items:
         if isinstance(item, str):
-            # String item - normalize it
-            normalized = _normalize_token(item)
-            if normalized and len(normalized) >= MIN_TOKEN_LENGTH and normalized not in STOPWORDS:
-                tokens.append(normalized)
-            # Also try splitting it
             tokens.extend(_split_text(item))
         elif isinstance(item, dict):
-            # Dict item - try common keys
             for key in ("name", "label", "skill", "competence", "raw_text"):
                 if key in item and item[key]:
                     value = str(item[key])
-                    normalized = _normalize_token(value)
-                    if normalized and len(normalized) >= MIN_TOKEN_LENGTH:
-                        tokens.append(normalized)
                     tokens.extend(_split_text(value))
     return tokens
 
