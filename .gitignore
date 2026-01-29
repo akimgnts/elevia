@@ -31,5 +31,10 @@ build/
 # Data / local state
 apps/api/data/db/
 apps/api/data/raw/
+apps/api/data/processed/backtests/
+apps/api/data/sample_*.json
 *.sqlite
 *.db
+
+# Claude tooling
+.claude/
