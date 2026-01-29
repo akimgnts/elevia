@@ -1,0 +1,23 @@
+# Top-20 unmapped tokens from ESCO Phase 3 backtest (2026-01-29)
+# These are raw skill tokens that did NOT map to any ESCO concept.
+# Used as regression fixture: if the mapper improves, this list should shrink.
+powerbi
+power bi
+tableau
+airflow
+spark
+docker
+kubernetes
+figma
+jira
+salesforce
+crm
+sap
+scrum
+git
+tensorflow
+wordpress
+django
+html
+css
+typescript
