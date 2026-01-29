@@ -234,6 +234,7 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
                 score=match_result.score,
                 breakdown=match_result.breakdown,
                 reasons=match_result.reasons,
+                match_debug=match_result.match_debug,
                 diagnostic=diagnostic_result,
             ))
 

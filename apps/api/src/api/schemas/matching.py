@@ -35,6 +35,7 @@ class ResultItem(BaseModel):
     score: int = Field(..., ge=0, le=100)
     breakdown: Dict[str, float]
     reasons: List[str] = Field(..., max_length=3)
+    match_debug: Optional[Dict[str, Any]] = None
     diagnostic: Optional[DiagnosticResult] = None
 
 

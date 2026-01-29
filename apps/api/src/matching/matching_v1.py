@@ -12,7 +12,7 @@ Ce moteur:
 - explique chaque décision avec des faits observables
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 
 from .extractors import (
@@ -23,7 +23,7 @@ from .extractors import (
     normalize_skill,
     normalize_language,
 )
-from .idf import compute_idf, get_skill_idf
+from .idf import compute_idf
 
 
 # ============================================================================
@@ -52,6 +52,7 @@ class MatchResult:
     score: int
     breakdown: Dict[str, float]
     reasons: List[str]
+    match_debug: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -159,50 +160,36 @@ class MatchingEngine:
 
     def _score_skills(
         self, profile: ExtractedProfile, offer: Dict
-    ) -> Tuple[float, List[str]]:
+    ) -> Tuple[float, List[str], List[str]]:
         """
         Score skills (signal principal) - spec lignes 100-114.
 
-        Formule: skills_score = Σ(idf * contexte) / Σ(idf * contexte_offre)
+        Formule: skills_score = matched_skills / required_skills
 
         Returns:
-            (score, matched_skills)
+            (score, matched_skills, missing_skills)
         """
         raw_skills = offer.get("skills", [])
         if isinstance(raw_skills, str):
             raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
 
-        offer_skills = set(normalize_skill(s) for s in raw_skills if s)
+        offer_skills_set = set(normalize_skill(s) for s in raw_skills if s)
+        offer_skills = sorted(offer_skills_set)
 
         # Spec ligne 113: "Si l'offre n'a aucune skill → skills_score = 0"
         if not offer_skills:
-            return 0.0, []
+            return 0.0, [], []
 
         # Intersection profil ∩ offre
-        matched_skills = profile.skills & offer_skills
+        matched_skills_set = profile.skills & offer_skills_set
+        matched_skills = sorted(matched_skills_set)
+        missing_skills = [s for s in offer_skills if s not in matched_skills_set]
 
         if not matched_skills:
-            return 0.0, []
+            return 0.0, [], missing_skills
 
-        # Calcul score pondéré
-        numerator = 0.0
-        denominator = 0.0
-
-        for skill in offer_skills:
-            idf = get_skill_idf(skill, self.idf_table)
-            context = self._get_context_coeff(skill)
-            weighted = idf * context
-
-            denominator += weighted
-
-            if skill in matched_skills:
-                numerator += weighted
-
-        if denominator == 0:
-            return 0.0, list(matched_skills)
-
-        score = numerator / denominator
-        return score, sorted(matched_skills)
+        score = len(matched_skills) / len(offer_skills)
+        return score, matched_skills, missing_skills
 
     def _score_languages(
         self, profile: ExtractedProfile, offer: Dict
@@ -294,6 +281,58 @@ class MatchingEngine:
         )
         return int(round(100 * total))
 
+    def _build_match_debug(
+        self,
+        matched_skills: List[str],
+        missing_skills: List[str],
+        skills_score: float,
+        languages_score: float,
+        education_score: float,
+        country_score: float,
+        profile: ExtractedProfile,
+        offer: Dict,
+    ) -> Dict[str, Any]:
+        """Build a transparent debug payload for scoring."""
+        total = (
+            WEIGHT_SKILLS * skills_score +
+            WEIGHT_LANGUAGES * languages_score +
+            WEIGHT_EDUCATION * education_score +
+            WEIGHT_COUNTRY * country_score
+        )
+
+        language_match = languages_score == 1.0
+        education_match = education_score == 1.0
+        if not profile.preferred_countries:
+            country_match = True
+        else:
+            offer_country = offer.get("country") or offer.get("pays") or ""
+            country_match = canonize_country(offer_country) in profile.preferred_countries
+
+        return {
+            "skills": {
+                "matched": matched_skills,
+                "missing": missing_skills,
+                "weight": int(WEIGHT_SKILLS * 100),
+                "score": round(skills_score * WEIGHT_SKILLS * 100, 1),
+            },
+            "language": {
+                "match": language_match,
+                "weight": int(WEIGHT_LANGUAGES * 100),
+                "score": round(languages_score * WEIGHT_LANGUAGES * 100, 1),
+            },
+            "education": {
+                "match": education_match,
+                "weight": int(WEIGHT_EDUCATION * 100),
+                "score": round(education_score * WEIGHT_EDUCATION * 100, 1),
+            },
+            "country": {
+                "match": country_match,
+                "weight": int(WEIGHT_COUNTRY * 100),
+                "score": round(country_score * WEIGHT_COUNTRY * 100, 1),
+            },
+            "total": round(total * 100, 1),
+        }
+
     def _early_skip(self, skills_score: float) -> bool:
         """
         Early-skip mathématique - spec lignes 155-158.
@@ -367,11 +406,12 @@ class MatchingEngine:
                 offer_id=str(offer_id),
                 score=0,
                 breakdown={"skills": 0.0, "languages": 0.0, "education": 0.0, "country": 0.0},
-                reasons=[f"Rejeté: {rejection}"]
+                reasons=[f"Rejeté: {rejection}"],
+                match_debug=None,
             )
 
         # Calcul scores
-        skills_score, matched_skills = self._score_skills(profile, offer)
+        skills_score, matched_skills, missing_skills = self._score_skills(profile, offer)
         languages_score = self._score_languages(profile, offer)
         education_score = self._score_education(profile, offer)
         country_score = self._score_country(profile, offer)
@@ -394,6 +434,16 @@ class MatchingEngine:
                 "country": round(country_score, 2),
             },
             reasons=reasons,
+            match_debug=self._build_match_debug(
+                matched_skills,
+                missing_skills,
+                skills_score,
+                languages_score,
+                education_score,
+                country_score,
+                profile,
+                offer,
+            ),
         )
 
     def match(
@@ -427,7 +477,7 @@ class MatchingEngine:
                 continue
 
             # 3. Score skills (signal principal)
-            skills_score, matched_skills = self._score_skills(extracted_profile, offer)
+            skills_score, matched_skills, missing_skills = self._score_skills(extracted_profile, offer)
 
             # 4. Early-skip mathématique (spec ligne 63)
             if self._early_skip(skills_score):
@@ -464,6 +514,16 @@ class MatchingEngine:
                     "country": round(country_score, 2),
                 },
                 reasons=reasons,
+                match_debug=self._build_match_debug(
+                    matched_skills,
+                    missing_skills,
+                    skills_score,
+                    languages_score,
+                    education_score,
+                    country_score,
+                    extracted_profile,
+                    offer,
+                ),
             ))
 
         # Tri par score décroissant
@@ -496,6 +556,7 @@ class MatchingEngine:
                     "score": r.score,
                     "breakdown": r.breakdown,
                     "reasons": r.reasons,
+                    "match_debug": r.match_debug,
                 }
                 for r in output.results
             ],
