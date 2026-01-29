@@ -12,6 +12,7 @@ import {
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { fetchCatalogOffers, type OfferNormalized } from "../lib/api";
+import { buildOfferPreview } from "../lib/text";
 
 export default function OffersPage() {
   const [offers, setOffers] = useState<OfferNormalized[]>([]);
@@ -103,6 +104,7 @@ export default function OffersPage() {
                 title={offer.title || "Offre"}
                 company={offer.company || "Entreprise"}
                 location={location || "Localisation à préciser"}
+                preview={buildOfferPreview(offer.display_description, offer.description)}
                 score={undefined}
                 tags={[
                   offer.source === "business_france"
@@ -111,6 +113,7 @@ export default function OffersPage() {
                       ? "France Travail"
                       : "Source inconnue",
                 ]}
+                href={`/offers/${encodeURIComponent(offer.id)}`}
               />
             );
           })}

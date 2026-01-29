@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { MapPin, Sparkles } from "lucide-react";
 import { Badge, ScoreBadge } from "./Badge";
 import { GlassCard } from "./GlassCard";
@@ -10,12 +11,13 @@ export type OfferCardProps = {
   preview?: string;
   score?: number;
   tags?: string[];
+  href?: string;
   className?: string;
 };
 
-export function OfferCard({ title, company, location, preview, score, tags = [], className }: OfferCardProps) {
-  return (
-    <GlassCard className={cn("p-5", className)}>
+export function OfferCard({ title, company, location, preview, score, tags = [], href, className }: OfferCardProps) {
+  const card = (
+    <GlassCard className={cn("p-5", href && "transition-shadow hover:shadow-md", className)}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="text-lg font-semibold text-slate-900">{title}</div>
@@ -51,4 +53,14 @@ export function OfferCard({ title, company, location, preview, score, tags = [],
       )}
     </GlassCard>
   );
+
+  if (href) {
+    return (
+      <Link to={href} className="block no-underline">
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }

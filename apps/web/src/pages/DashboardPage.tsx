@@ -186,6 +186,7 @@ export default function DashboardPage() {
                     preview={offer.preview}
                     score={offer.score}
                     tags={offer.tags}
+                    href={`/offers/${encodeURIComponent(offer.id)}`}
                   />
                 ))}
               </div>

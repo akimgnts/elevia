@@ -20,7 +20,7 @@ export default function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/match" element={<MatchPage />} />
       <Route path="/offres" element={<OffersPage />} />
-      <Route path="/offer/:id" element={<OfferDetailPage />} />
+      <Route path="/offers/:offerId" element={<OfferDetailPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
