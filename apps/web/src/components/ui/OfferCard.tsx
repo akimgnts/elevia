@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, Sparkles } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Badge, ScoreBadge } from "./Badge";
 import { GlassCard } from "./GlassCard";
 import { cn } from "../../lib/cn";
@@ -36,8 +36,7 @@ export function OfferCard({ title, company, location, preview, score, tags = [],
           ) : (
             <Badge variant="default">—</Badge>
           )}
-          <div className="flex items-center gap-1 text-xs text-cyan-600">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="text-xs text-slate-400">
             Match
           </div>
         </div>

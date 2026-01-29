@@ -6,7 +6,7 @@ export function FinalCTASection() {
   return (
     <SectionWrapper>
       <PageContainer>
-        <div className="rounded-3xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-lime-50 px-8 py-12 text-center shadow-soft">
+        <div className="rounded-3xl border border-slate-200 bg-white px-8 py-12 text-center shadow-soft">
           <h2 className="text-2xl font-bold text-slate-900 md:text-3xl">Prêt à activer votre prochaine mission ?</h2>
           <p className="mt-3 text-slate-600">
             Commencez gratuitement et recevez vos premières recommandations en moins de 3 minutes.

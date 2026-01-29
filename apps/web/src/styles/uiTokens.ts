@@ -61,8 +61,8 @@ export const cardPadding = {
 
 // Button tokens
 export const button = {
-  /** Primary CTA with brand gradient */
-  primary: "rounded-button bg-gradient-to-r from-brand-cyan to-brand-lime px-6 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-shadow",
+  /** Primary CTA — solid brand cyan */
+  primary: "rounded-button bg-brand-cyan px-6 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-shadow",
   /** Secondary button */
   secondary: "rounded-button border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors",
   /** Ghost: minimal presence */
@@ -71,8 +71,8 @@ export const button = {
 
 // Badge tokens
 export const badge = {
-  /** Brand badge with gradient */
-  brand: "rounded-full bg-gradient-to-r from-brand-cyan to-brand-lime px-3 py-1 text-xs font-semibold text-white",
+  /** Brand badge — solid cyan */
+  brand: "rounded-full bg-brand-cyan px-3 py-1 text-xs font-semibold text-white",
   /** Neutral badge */
   neutral: "rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600",
   /** Subtle badge */

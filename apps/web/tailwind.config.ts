@@ -37,7 +37,7 @@ const config: Config = {
         md: "0 8px 24px rgba(0,0,0,0.08)",
         lg: "0 16px 48px rgba(0,0,0,0.10)",
         soft: "0 8px 24px rgba(0,0,0,0.05)",
-        glow: "0 0 24px rgba(6,182,212,0.20)",
+        glow: "0 0 16px rgba(6,182,212,0.10)",
         card: "0 1px 3px rgba(0,0,0,0.06)",
       },
       // Border radius scale: consistent curves
