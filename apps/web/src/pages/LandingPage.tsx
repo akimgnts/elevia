@@ -6,7 +6,7 @@ import { CTAUploadBlock } from "../components/landing/CTAUploadBlock";
 import { WhyElevia } from "../components/landing/WhyElevia";
 import { HeroVisualLayer } from "../components/landing/HeroVisualLayer";
 import { LandingFooter } from "../components/landing/LandingFooter";
-import { layout, typography } from "../styles/uiTokens";
+import { layout } from "../styles/uiTokens";
 
 // Lazy loading pour la performance
 const Testimonials = lazy(() => import("../components/landing/Testimonials").then((m) => ({ default: m.Testimonials })));
