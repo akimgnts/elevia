@@ -65,6 +65,7 @@ def test_inbox_returns_schema(client, profile_demo):
         assert "reasons" in item
         assert "title" in item
         assert "rome" in item
+        assert "rome_competences" in item
 
 
 # ============================================================================
@@ -197,6 +198,19 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo, tmp_path):
             linked_at TEXT NOT NULL
         )
     """)
+    seed_conn.execute("""
+        CREATE TABLE dim_rome_competence (
+            competence_code TEXT PRIMARY KEY,
+            competence_label TEXT NOT NULL,
+            esco_uri TEXT
+        )
+    """)
+    seed_conn.execute("""
+        CREATE TABLE bridge_rome_metier_competence (
+            rome_code TEXT NOT NULL,
+            competence_code TEXT NOT NULL
+        )
+    """)
 
     ft_offer = {
         "id": "FT-TEST-001",
@@ -221,6 +235,18 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo, tmp_path):
         "publication_date": "2025-01-02",
         "contract_duration": 12,
         "start_date": "2025-04-01",
+    }
+    ft_offer_no_link = {
+        "id": "FT-TEST-002",
+        "source": "france_travail",
+        "title": "Assistant RH",
+        "description": "Gestion administrative RH.",
+        "company": "PeopleLab",
+        "city": "Lyon",
+        "country": "FR",
+        "publication_date": "2025-01-03",
+        "contract_duration": 12,
+        "start_date": "2025-04-15",
     }
 
     seed_conn.execute(
@@ -262,8 +288,45 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo, tmp_path):
         ),
     )
     seed_conn.execute(
+        """
+        INSERT INTO fact_offers
+        (id, source, title, description, company, city, country, publication_date, contract_duration, start_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            ft_offer_no_link["id"],
+            ft_offer_no_link["source"],
+            ft_offer_no_link["title"],
+            ft_offer_no_link["description"],
+            ft_offer_no_link["company"],
+            ft_offer_no_link["city"],
+            ft_offer_no_link["country"],
+            ft_offer_no_link["publication_date"],
+            ft_offer_no_link["contract_duration"],
+            ft_offer_no_link["start_date"],
+        ),
+    )
+    seed_conn.execute(
         "INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at) VALUES (?, ?, ?, ?)",
         ("FT-TEST-001", "M1607", "Conseiller en emploi", "2025-01-15T10:00:00Z"),
+    )
+    seed_conn.executemany(
+        "INSERT INTO dim_rome_competence (competence_code, competence_label, esco_uri) VALUES (?, ?, ?)",
+        [
+            ("C001", "Analyse de données", "esco:skill/C001"),
+            ("C002", "Reporting financier", "esco:skill/C002"),
+            ("C003", "Modélisation", "esco:skill/C003"),
+            ("C004", "Visualisation", "esco:skill/C004"),
+        ],
+    )
+    seed_conn.executemany(
+        "INSERT INTO bridge_rome_metier_competence (rome_code, competence_code) VALUES (?, ?)",
+        [
+            ("M1607", "C004"),
+            ("M1607", "C002"),
+            ("M1607", "C001"),
+            ("M1607", "C003"),
+        ],
     )
     seed_conn.commit()
 
@@ -303,12 +366,23 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo, tmp_path):
     items_by_id = {item["offer_id"]: item for item in data["items"]}
     assert "FT-TEST-001" in items_by_id
     assert "BF-TEST-001" in items_by_id
+    assert "FT-TEST-002" in items_by_id
 
     ft_item = items_by_id["FT-TEST-001"]
     bf_item = items_by_id["BF-TEST-001"]
+    ft_no_link_item = items_by_id["FT-TEST-002"]
 
     assert ft_item["rome"] == {"rome_code": "M1607", "rome_label": "Conseiller en emploi"}
     assert bf_item["rome"] is None
+    assert ft_no_link_item["rome"] is None
+
+    assert ft_item["rome_competences"] == [
+        {"competence_code": "C001", "competence_label": "Analyse de données", "esco_uri": "esco:skill/C001"},
+        {"competence_code": "C002", "competence_label": "Reporting financier", "esco_uri": "esco:skill/C002"},
+        {"competence_code": "C003", "competence_label": "Modélisation", "esco_uri": "esco:skill/C003"},
+    ]
+    assert bf_item["rome_competences"] == []
+    assert ft_no_link_item["rome_competences"] == []
 
     after_conn = sqlite3.connect(db_path)
     after_rows = [
