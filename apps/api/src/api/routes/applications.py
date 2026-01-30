@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
+import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -19,6 +20,7 @@ from ..schemas.applications import (
 )
 from ..utils.db import get_connection
 
+logger = logging.getLogger(__name__)
 router = APIRouter(tags=["applications"])
 
 STATUS_VALUES = {s.value for s in ApplicationStatus}
@@ -123,6 +125,7 @@ async def upsert_application(payload: ApplicationCreate) -> JSONResponse:
                 (app_id, payload.offer_id, status, note, next_follow_up_date, now, now),
             )
             conn.commit()
+            logger.info("application_create", extra={"offer_id": payload.offer_id, "status": status})
             created = True
         else:
             app_id = row[0]
@@ -132,6 +135,7 @@ async def upsert_application(payload: ApplicationCreate) -> JSONResponse:
                 (status, note, next_follow_up_date, now, payload.offer_id),
             )
             conn.commit()
+            logger.info("application_update", extra={"offer_id": payload.offer_id, "status": status})
             created = False
 
         item = conn.execute(
@@ -186,6 +190,7 @@ async def patch_application(offer_id: str, payload: ApplicationUpdate) -> Applic
             (status, payload.note, next_follow_up_date, now, offer_id),
         )
         conn.commit()
+        logger.info("application_patch", extra={"offer_id": offer_id, "status": status})
 
         item = conn.execute(
             "SELECT id, offer_id, status, note, next_follow_up_date, created_at, updated_at "
@@ -221,6 +226,7 @@ async def delete_application(offer_id: str) -> None:
             raise HTTPException(status_code=404, detail={"message": "Application not found"})
         conn.execute("DELETE FROM application_tracker WHERE offer_id = ?", (offer_id,))
         conn.commit()
+        logger.info("application_delete", extra={"offer_id": offer_id})
     finally:
         conn.close()
     return None

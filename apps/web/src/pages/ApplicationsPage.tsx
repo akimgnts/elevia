@@ -55,8 +55,8 @@ export default function ApplicationsPage() {
 
   const handleSave = async (offerId: string) => {
     await patchApplication(offerId, {
-      note: noteDrafts[offerId] ?? "",
-      next_follow_up_date: dateDrafts[offerId] ?? null,
+      note: (noteDrafts[offerId] ?? "").trim(),
+      next_follow_up_date: dateDrafts[offerId] ? dateDrafts[offerId] : null,
     });
     await refresh();
   };

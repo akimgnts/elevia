@@ -5,7 +5,7 @@ This template provides a minimal setup to get React working in Vite with HMR and
 ## Web workflow (canonical)
 
 Prerequisites:
-- Node.js + npm (version aligned with repository expectations)
+- Node.js + npm (use `.nvmrc` / Node >= 20.19.0)
 
 Install:
 ```bash
