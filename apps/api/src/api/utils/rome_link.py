@@ -1,31 +1,30 @@
 """
-rome_link.py - Read-only accessor for ROME link enrichment.
+rome_link.py - Read-only utility to fetch ROME link for an offer.
+
+Not wired into any endpoint yet. Pure utility for future use.
 """
 
 import sqlite3
-from pathlib import Path
-from typing import Optional, Dict
-
-DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
+from typing import Optional, TypedDict
 
 
-def get_rome_link(offer_id: str) -> Optional[Dict[str, str]]:
-    """
-    Return ROME link info for an offer_id if present.
-    Does not create or modify any tables.
-    """
-    if not DB_PATH.exists():
-        return None
+class RomeLink(TypedDict):
+    rome_code: Optional[str]
+    rome_label: Optional[str]
 
-    conn = sqlite3.connect(str(DB_PATH), timeout=2)
-    conn.row_factory = sqlite3.Row
+
+def get_offer_rome_link(conn: sqlite3.Connection, offer_id: str) -> Optional[RomeLink]:
+    """Return the ROME link for an offer, or None if not enriched yet."""
     try:
         row = conn.execute(
             "SELECT rome_code, rome_label FROM offer_rome_link WHERE offer_id = ?",
             (offer_id,),
         ).fetchone()
-        if not row:
-            return None
-        return {"rome_code": row["rome_code"], "rome_label": row["rome_label"]}
-    finally:
-        conn.close()
+    except sqlite3.OperationalError:
+        # Table doesn't exist
+        return None
+
+    if row is None:
+        return None
+
+    return RomeLink(rome_code=row[0], rome_label=row[1])

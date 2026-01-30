@@ -1,56 +1,57 @@
-ROME Offer Link (Read-Only Enrichment)
-======================================
+# ROME Offer Link (Read-Only Enrichment)
 
-What this does
---------------
-- Links France Travail offers (fact_offers.source = "france_travail") to a ROME metier.
-- Reads ROME code from fact_offers.payload_json.
-- Writes link results to a new additive table offer_rome_link.
+## Purpose
 
-What this does NOT do
----------------------
-- Does NOT modify fact_offers.
-- Does NOT change ingestion, matching, scoring, or inbox logic.
-- Does NOT infer or guess ROME codes.
-- Does NOT alter the ROME referential tables.
+Links France Travail offers to their ROME métier classification.
+This is a **read-only enrichment layer** — it does not modify offers, scoring, or matching.
 
-Tables
-------
-Existing (created by ingest_rome.py):
-- dim_rome_metier
-- dim_rome_competence
-- bridge_rome_metier_competence
+## Tables used
 
-New (created by enrichment script):
-- offer_rome_link
-  - offer_id TEXT PRIMARY KEY
-  - rome_code TEXT NULL
-  - rome_label TEXT NULL
-  - linked_at TEXT NOT NULL
+| Table | Role |
+|-------|------|
+| `fact_offers` | **Read only** — source of FT offer payloads |
+| `dim_rome_metier` | **Read only** — validates ROME codes (populated by `ingest_rome.py`) |
+| `offer_rome_link` | **Write** — stores the offer → ROME link |
 
-Foreign keys:
-- offer_id -> fact_offers(id)
-- rome_code -> dim_rome_metier(rome_code)
+### offer_rome_link schema
 
-How it works (deterministic)
-----------------------------
-1) Read payload_json for each France Travail offer.
-2) Extract first valid ROME code:
-   - Check explicit paths (romeCode, codeRome, code_rome, rome_code, code_metier, metierRome.code)
-   - Then scan nested keys containing "rome" for a value matching format A1234
-3) If rome_code exists in dim_rome_metier, link it with label.
-4) Otherwise store offer_id with rome_code = NULL.
+| Column | Type | Description |
+|--------|------|-------------|
+| `offer_id` | TEXT PK | References fact_offers.id |
+| `rome_code` | TEXT NULL | Extracted ROME code (e.g. `M1607`), NULL if not found |
+| `rome_label` | TEXT NULL | Label from dim_rome_metier or payload fallback |
+| `linked_at` | TEXT NOT NULL | ISO timestamp of last enrichment |
 
-How to run
-----------
-From repo root:
+## How to run
 
-python3 apps/api/scripts/enrich_offers_with_rome.py
+```bash
+cd apps/api
+python3 scripts/enrich_offers_with_rome.py
+```
 
-Expected output:
-[ROME_LINK] scanned=<n> linked=<n> skipped=<n>
+No environment variables needed — this is a local DB-only job.
 
-Read-only accessor (optional)
------------------------------
-- apps/api/src/api/utils/rome_link.py provides get_rome_link(offer_id)
-- Not wired into API or matching.
+### Prerequisites
+
+- `data/db/offers.db` must exist with `fact_offers` populated
+- For validated labels, run `ingest_rome.py` first to populate `dim_rome_metier`
+- If `dim_rome_metier` is empty, codes are still extracted but labels come from the payload
+
+## Extraction logic
+
+From each France Travail offer's `payload_json`:
+1. Check `romeCode` key (primary), then `codeRome` (fallback)
+2. Validate format: `^[A-Z]\d{4}$`
+3. If valid and exists in `dim_rome_metier` → use label from referential
+4. If valid but not in referential → use `romeLibelle` from payload
+5. If not found or invalid → `rome_code = NULL`
+
+Every FT offer gets a row in `offer_rome_link` (explicit NULL = processed but no code).
+
+## What it does NOT do
+
+- Does not modify `fact_offers`
+- Does not change matching scores or inbox results
+- Does not call any external API
+- Does not process Business France offers (FT only)
+- Not wired into any API endpoint yet

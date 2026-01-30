@@ -1,208 +1,280 @@
 #!/usr/bin/env python3
 """
-enrich_offers_with_rome.py - Read-only ROME enrichment for France Travail offers.
+enrich_offers_with_rome.py - Link France Travail offers to ROME métiers
+========================================================================
 
-Creates and populates offer_rome_link table by extracting ROME codes
-from fact_offers.payload_json and linking to dim_rome_metier.
+Read-only enrichment: reads fact_offers payload_json for FT offers,
+extracts romeCode, validates against dim_rome_metier, and UPSERTs
+into offer_rome_link.
 
-This script is additive: it does NOT modify fact_offers.
+Does NOT modify fact_offers or any existing table.
+Does NOT call any external API (pure local DB job).
+
+Usage:
+    python3 apps/api/scripts/enrich_offers_with_rome.py
 """
 
 import json
 import re
 import sqlite3
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Tuple
 
 API_ROOT = Path(__file__).parent.parent
-DATA_DIR = API_ROOT / "data"
-DB_PATH = DATA_DIR / "db" / "offers.db"
+DB_PATH = API_ROOT / "data" / "db" / "offers.db"
 
-ROME_CODE_PATTERN = re.compile(r"^[A-Z]\\d{4}$")
+ROME_CODE_RE = re.compile(r"^[A-Z]\d{4}$")
 
-# Explicit paths to check first (deterministic).
-ROME_CODE_PATHS: Tuple[Tuple[str, ...], ...] = (
-    ("romeCode",),
-    ("codeRome",),
-    ("code_rome",),
-    ("rome_code",),
-    ("code_metier",),
-    ("metierRome", "code"),
-    ("metierRome", "codeRome"),
-)
+# Keys to check in payload_json, in priority order (top-level)
+ROME_CODE_KEYS = ("romeCode", "codeRome")
+# Nested keys where value is a dict with a "code" sub-key
+ROME_NESTED_KEYS = ("metierRome", "appellationRome")
 
-
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-def _iter_dict_items(obj: Any) -> Iterable[Tuple[str, Any]]:
-    if isinstance(obj, dict):
-        return obj.items()
-    return []
+SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS offer_rome_link (
+    offer_id   TEXT PRIMARY KEY,
+    rome_code  TEXT,
+    rome_label TEXT,
+    linked_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_offer_rome_link_rome_code ON offer_rome_link(rome_code);
+"""
 
 
-def _get_by_path(payload: Dict[str, Any], path: Tuple[str, ...]) -> Optional[Any]:
-    current: Any = payload
-    for key in path:
-        if not isinstance(current, dict):
-            return None
-        if key not in current:
-            return None
-        current = current[key]
-    return current
-
-
-def _is_valid_rome_code(value: Any) -> Optional[str]:
-    if not isinstance(value, str):
-        return None
-    code = value.strip().upper()
-    if ROME_CODE_PATTERN.match(code):
-        return code
-    return None
-
-
-def extract_rome_code(payload: Dict[str, Any]) -> Optional[str]:
-    """
-    Extract the first valid ROME code from payload_json.
-    Deterministic order:
-    1) Explicit known paths
-    2) Any key containing 'rome' with value matching format
-    """
-    if not isinstance(payload, dict):
-        return None
-
-    # 1) Explicit paths
-    for path in ROME_CODE_PATHS:
-        value = _get_by_path(payload, path)
-        code = _is_valid_rome_code(value)
-        if code:
-            return code
-
-    # 2) Recursive search for keys containing "rome"
-    stack = [payload]
-    while stack:
-        current = stack.pop()
-        if isinstance(current, dict):
-            for key, value in _iter_dict_items(current):
-                if isinstance(value, (dict, list)):
-                    stack.append(value)
-                if isinstance(key, str) and "rome" in key.lower():
-                    code = _is_valid_rome_code(value)
-                    if code:
-                        return code
-        elif isinstance(current, list):
-            for item in current:
-                if isinstance(item, (dict, list)):
-                    stack.append(item)
-
-    return None
-
-
-def ensure_link_table(conn: sqlite3.Connection) -> None:
-    """Create offer_rome_link table if it doesn't exist."""
-    conn.execute("PRAGMA foreign_keys = ON;")
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS offer_rome_link (
-            offer_id   TEXT PRIMARY KEY,
-            rome_code  TEXT NULL,
-            rome_label TEXT NULL,
-            linked_at  TEXT NOT NULL,
-            FOREIGN KEY (offer_id) REFERENCES fact_offers(id),
-            FOREIGN KEY (rome_code) REFERENCES dim_rome_metier(rome_code)
-        );
-        """
-    )
-    conn.execute("CREATE INDEX IF NOT EXISTS idx_offer_rome_code ON offer_rome_link(rome_code);")
+def ensure_schema(conn: sqlite3.Connection) -> None:
+    conn.executescript(SCHEMA_SQL)
     conn.commit()
 
 
-def _lookup_rome_label(conn: sqlite3.Connection, rome_code: str) -> Optional[str]:
-    row = conn.execute(
-        "SELECT rome_label FROM dim_rome_metier WHERE rome_code = ?",
-        (rome_code,),
-    ).fetchone()
-    return row[0] if row else None
+def extract_rome_code(payload: dict) -> str | None:
+    """Extract a valid ROME code from FT payload. Returns None if not found.
+
+    Checks top-level string keys first (romeCode, codeRome),
+    then nested dict keys (metierRome.code, appellationRome.code).
+    """
+    for key in ROME_CODE_KEYS:
+        val = payload.get(key)
+        if isinstance(val, str) and ROME_CODE_RE.match(val.strip()):
+            return val.strip()
+    for key in ROME_NESTED_KEYS:
+        val = payload.get(key)
+        if isinstance(val, dict):
+            code = val.get("code", "")
+            if isinstance(code, str) and ROME_CODE_RE.match(code.strip()):
+                return code.strip()
+    return None
 
 
-def enrich_offers(conn: sqlite3.Connection) -> Dict[str, int]:
+# Alias for external callers (test_rome_enrichment.py)
+ensure_link_table = ensure_schema
+
+
+def enrich_offers(conn: sqlite3.Connection) -> dict[str, int]:
+    """Run enrichment on an open connection. Returns stats dict.
+
+    Designed to be callable from tests without going through CLI main().
     """
-    Populate offer_rome_link for France Travail offers.
-    Returns counters for logging.
-    """
-    conn.execute("PRAGMA foreign_keys = ON;")
-    ensure_link_table(conn)
+    import json as _json
+    from datetime import datetime as _dt, timezone as _tz
+
+    now_iso = _dt.now(_tz.utc).isoformat()
+    metiers = load_rome_metiers(conn)
 
     rows = conn.execute(
         "SELECT id, payload_json FROM fact_offers WHERE source = 'france_travail'"
     ).fetchall()
 
-    scanned = 0
-    linked = 0
-    skipped = 0
-    now = _utc_now()
+    scanned = linked = null_linked = errors = 0
+    cursor = conn.cursor()
 
-    for offer_id, payload_json in rows:
+    for row in rows:
+        offer_id = row["id"]
         scanned += 1
-        rome_code = None
-        rome_label = None
 
         try:
-            payload = json.loads(payload_json) if payload_json else {}
-        except json.JSONDecodeError:
-            payload = {}
+            payload = _json.loads(row["payload_json"])
+        except (_json.JSONDecodeError, TypeError):
+            errors += 1
+            cursor.execute(
+                """INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
+                   VALUES (?, NULL, NULL, ?)
+                   ON CONFLICT(offer_id) DO UPDATE SET
+                       rome_code=excluded.rome_code, rome_label=excluded.rome_label, linked_at=excluded.linked_at""",
+                (offer_id, now_iso),
+            )
+            continue
 
-        candidate = extract_rome_code(payload)
-        if candidate:
-            label = _lookup_rome_label(conn, candidate)
-            if label:
-                rome_code = candidate
-                rome_label = label
-                linked += 1
-            else:
-                skipped += 1
+        code = extract_rome_code(payload)
+
+        if code:
+            label = metiers.get(code) if metiers else None
+            if label is None:
+                label = (payload.get("romeLibelle") or "").strip() or None
+            cursor.execute(
+                """INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
+                   VALUES (?, ?, ?, ?)
+                   ON CONFLICT(offer_id) DO UPDATE SET
+                       rome_code=excluded.rome_code, rome_label=excluded.rome_label, linked_at=excluded.linked_at""",
+                (offer_id, code, label, now_iso),
+            )
+            linked += 1
         else:
-            skipped += 1
-
-        conn.execute(
-            """
-            INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
-            VALUES (?, ?, ?, ?)
-            ON CONFLICT(offer_id) DO UPDATE SET
-                rome_code = excluded.rome_code,
-                rome_label = excluded.rome_label,
-                linked_at = excluded.linked_at
-            """,
-            (offer_id, rome_code, rome_label, now),
-        )
+            cursor.execute(
+                """INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
+                   VALUES (?, NULL, NULL, ?)
+                   ON CONFLICT(offer_id) DO UPDATE SET
+                       rome_code=excluded.rome_code, rome_label=excluded.rome_label, linked_at=excluded.linked_at""",
+                (offer_id, now_iso),
+            )
+            null_linked += 1
 
     conn.commit()
+    return {"scanned": scanned, "linked": linked, "null_linked": null_linked, "errors": errors}
 
-    return {
+
+def load_rome_metiers(conn: sqlite3.Connection) -> dict[str, str]:
+    """Load all ROME codes → labels from dim_rome_metier."""
+    try:
+        rows = conn.execute("SELECT rome_code, rome_label FROM dim_rome_metier").fetchall()
+        return {r[0]: r[1] for r in rows}
+    except sqlite3.OperationalError:
+        # Table doesn't exist yet (ROME ingestion not run)
+        return {}
+
+
+def run_enrichment() -> None:
+    print("=" * 60)
+    print("ELEVIA — OFFER ↔ ROME LINK ENRICHMENT")
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+    print(f"Started at: {now_iso}")
+    print("=" * 60)
+
+    if not DB_PATH.exists():
+        print(f"[ERROR] Database not found: {DB_PATH}")
+        sys.exit(1)
+
+    conn = sqlite3.connect(str(DB_PATH), timeout=5)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    ensure_schema(conn)
+
+    # Load ROME lookup
+    metiers = load_rome_metiers(conn)
+    print(f"[INFO] Loaded {len(metiers)} ROME métiers from dim_rome_metier")
+    if not metiers:
+        print("[WARN] dim_rome_metier is empty — codes won't be validated against it")
+        print("[WARN] All extracted codes will still be linked (label from payload)")
+
+    # Load FT offers
+    rows = conn.execute(
+        "SELECT id, payload_json FROM fact_offers WHERE source = 'france_travail'"
+    ).fetchall()
+    print(f"[INFO] Found {len(rows)} France Travail offers to process")
+
+    scanned = 0
+    linked = 0
+    null_linked = 0
+    errors = 0
+
+    cursor = conn.cursor()
+    for row in rows:
+        offer_id = row["id"]
+        scanned += 1
+
+        try:
+            payload = json.loads(row["payload_json"])
+        except (json.JSONDecodeError, TypeError):
+            errors += 1
+            cursor.execute(
+                """INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
+                   VALUES (?, NULL, NULL, ?)
+                   ON CONFLICT(offer_id) DO UPDATE SET
+                       rome_code = excluded.rome_code,
+                       rome_label = excluded.rome_label,
+                       linked_at = excluded.linked_at""",
+                (offer_id, now_iso),
+            )
+            continue
+
+        code = extract_rome_code(payload)
+
+        if code and metiers:
+            # Validate against dim_rome_metier
+            if code in metiers:
+                label = metiers[code]
+                cursor.execute(
+                    """INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
+                       VALUES (?, ?, ?, ?)
+                       ON CONFLICT(offer_id) DO UPDATE SET
+                           rome_code = excluded.rome_code,
+                           rome_label = excluded.rome_label,
+                           linked_at = excluded.linked_at""",
+                    (offer_id, code, label, now_iso),
+                )
+                linked += 1
+            else:
+                # Code found but not in dim_rome_metier — use payload label as fallback
+                fallback_label = (payload.get("romeLibelle") or "").strip() or None
+                cursor.execute(
+                    """INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
+                       VALUES (?, ?, ?, ?)
+                       ON CONFLICT(offer_id) DO UPDATE SET
+                           rome_code = excluded.rome_code,
+                           rome_label = excluded.rome_label,
+                           linked_at = excluded.linked_at""",
+                    (offer_id, code, fallback_label, now_iso),
+                )
+                linked += 1
+        elif code and not metiers:
+            # No dim_rome_metier loaded — use payload label
+            fallback_label = (payload.get("romeLibelle") or "").strip() or None
+            cursor.execute(
+                """INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
+                   VALUES (?, ?, ?, ?)
+                   ON CONFLICT(offer_id) DO UPDATE SET
+                       rome_code = excluded.rome_code,
+                       rome_label = excluded.rome_label,
+                       linked_at = excluded.linked_at""",
+                (offer_id, code, fallback_label, now_iso),
+            )
+            linked += 1
+        else:
+            # No rome code found
+            cursor.execute(
+                """INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at)
+                   VALUES (?, NULL, NULL, ?)
+                   ON CONFLICT(offer_id) DO UPDATE SET
+                       rome_code = excluded.rome_code,
+                       rome_label = excluded.rome_label,
+                       linked_at = excluded.linked_at""",
+                (offer_id, now_iso),
+            )
+            null_linked += 1
+
+    conn.commit()
+    conn.close()
+
+    print("\n" + "=" * 60)
+    print("ENRICHMENT SUMMARY")
+    print("=" * 60)
+    print(f"  Scanned:     {scanned}")
+    print(f"  Linked:      {linked}")
+    print(f"  Null-linked: {null_linked}")
+    print(f"  Errors:      {errors}")
+    print(f"  DB:          {DB_PATH}")
+
+    log_line = {
+        "timestamp": now_iso,
+        "job": "offer_rome_enrichment",
         "scanned": scanned,
         "linked": linked,
-        "skipped": skipped,
+        "null_linked": null_linked,
+        "errors": errors,
     }
-
-
-def main() -> int:
-    if not DB_PATH.exists():
-        print(f"[ERROR] Database not found at {DB_PATH}")
-        return 1
-
-    conn = sqlite3.connect(str(DB_PATH), timeout=10)
-    try:
-        stats = enrich_offers(conn)
-    finally:
-        conn.close()
-
-    print(
-        f"[ROME_LINK] scanned={stats['scanned']} linked={stats['linked']} skipped={stats['skipped']}"
-    )
-    return 0
+    print(f"\n[LOG] {json.dumps(log_line)}")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    run_enrichment()
