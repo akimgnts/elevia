@@ -140,7 +140,7 @@ def test_invalid_status_returns_400(client):
         "offer_id": "offer-7",
         "status": "invalid",
     })
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_invalid_date_returns_400(client):

@@ -456,12 +456,15 @@ export default function InboxPage() {
                 </span>
                 <span className="text-sm font-medium">Offres</span>
               </button>
-              <button className="flex items-center gap-2 px-5 py-2.5 text-slate-500 hover:bg-slate-50 rounded-full transition-colors group">
+              <Link
+                to="/applications"
+                className="flex items-center gap-2 px-5 py-2.5 text-slate-500 hover:bg-slate-50 rounded-full transition-colors group"
+              >
                 <span className="iconify text-lg group-hover:scale-110 transition-transform">
                   <MessageSquare className="w-5 h-5" />
                 </span>
-                <span className="text-sm font-medium">Relances</span>
-              </button>
+                <span className="text-sm font-medium">Candidatures</span>
+              </Link>
             </nav>
 
             <div className="flex items-center gap-4">

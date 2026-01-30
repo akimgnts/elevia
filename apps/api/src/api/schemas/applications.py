@@ -25,13 +25,13 @@ class ApplicationItem(BaseModel):
 
 class ApplicationCreate(BaseModel):
     offer_id: str
-    status: str
+    status: ApplicationStatus
     note: Optional[str] = None
     next_follow_up_date: Optional[str] = None
 
 
 class ApplicationUpdate(BaseModel):
-    status: Optional[str] = None
+    status: Optional[ApplicationStatus] = None
     note: Optional[str] = None
     next_follow_up_date: Optional[str] = None
 
