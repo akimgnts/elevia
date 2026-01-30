@@ -71,3 +71,25 @@ Every FT offer gets a row in `offer_rome_link` (explicit NULL = processed but no
 - Only populated for France Travail offers when a valid link exists in `offer_rome_link`
 - `rome` is `null` for Business France offers or missing links
 - This does not affect scoring or decision logic
+
+## Inbox competence preview (read-only)
+
+`POST /inbox` also includes a read-only competence preview for FT offers:
+
+```json
+{
+  "rome_competences": [
+    {
+      "competence_code": "C001",
+      "competence_label": "Analyse de données",
+      "esco_uri": "esco:skill/C001"
+    }
+  ]
+}
+```
+
+- Always present on items (empty list when not applicable)
+- Only populated for France Travail offers with a valid `rome_code`
+- Deterministic ordering: by `competence_code` ascending, limited to 3 per ROME
+- Uses only `bridge_rome_metier_competence` + `dim_rome_competence`
+- Read-only: does not modify `fact_offers` or scoring
