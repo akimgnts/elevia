@@ -18,6 +18,7 @@ sys.path.insert(0, str(API_ROOT / "src"))
 sys.path.insert(0, str(API_ROOT / "scripts"))
 
 from api.main import app
+from api.routes import matching as matching_routes
 from api.utils import db as db_utils
 from api.utils.offer_skills import ensure_offer_skills_table, get_offer_skills_by_offer_ids
 from matching.matching_v1 import MatchingEngine, PARTIAL_MAX_SCORE
@@ -187,6 +188,7 @@ def test_backfill_idempotent(tmp_path):
 
     assert stats1["offers_scanned"] == 1
     assert stats2["offers_scanned"] == 1
+    assert count1 > 0
     assert count1 == count2
     assert before == after
 
@@ -196,6 +198,7 @@ def test_backfill_idempotent(tmp_path):
 def test_matching_route_attaches_offer_skills(monkeypatch, tmp_path):
     db_path = tmp_path / "offers.db"
     monkeypatch.setattr(db_utils, "DB_PATH", db_path)
+    monkeypatch.setattr(matching_routes, "get_connection", db_utils.get_connection)
     db_utils._initialized = False
 
     conn = db_utils.get_connection()
