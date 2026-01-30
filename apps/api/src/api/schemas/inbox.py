@@ -13,6 +13,11 @@ class InboxRequest(BaseModel):
     limit: int = Field(default=20, ge=1, le=100)
 
 
+class RomeLink(BaseModel):
+    rome_code: str
+    rome_label: str
+
+
 class InboxItem(BaseModel):
     offer_id: str
     title: str
@@ -21,6 +26,7 @@ class InboxItem(BaseModel):
     city: Optional[str] = None
     score: int = Field(..., ge=0, le=100)
     reasons: List[str] = Field(default_factory=list)
+    rome: Optional[RomeLink] = None
 
 
 class InboxResponse(BaseModel):

@@ -16,8 +16,10 @@ from ..schemas.inbox import (
     InboxItem,
     InboxRequest,
     InboxResponse,
+    RomeLink,
 )
 from ..utils.db import get_connection
+from ..utils.rome_link import get_offer_rome_links
 
 # Import matching engine
 import sys
@@ -80,6 +82,7 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
     extracted = extract_profile(req.profile)
 
     items: List[InboxItem] = []
+    source_map: Dict[str, str] = {str(offer.get("id") or ""): offer.get("source") or "" for offer in catalog}
     for offer in catalog:
         oid = str(offer.get("id") or "")
         if oid in decided_ids:
@@ -105,6 +108,22 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
     items.sort(key=lambda x: x.score, reverse=True)
     total_matched = len(items)
     items = items[: req.limit]
+
+    ft_ids = [item.offer_id for item in items if source_map.get(item.offer_id) == "france_travail"]
+    rome_links: Dict[str, Dict[str, str]] = {}
+    if ft_ids:
+        conn = get_connection()
+        try:
+            rome_links = get_offer_rome_links(conn, ft_ids)
+        finally:
+            conn.close()
+
+    for item in items:
+        link = rome_links.get(item.offer_id)
+        if link and link.get("rome_code") and link.get("rome_label"):
+            item.rome = RomeLink(rome_code=link["rome_code"], rome_label=link["rome_label"])
+        else:
+            item.rome = None
 
     return InboxResponse(
         profile_id=req.profile_id,

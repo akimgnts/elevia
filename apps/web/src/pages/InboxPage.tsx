@@ -827,6 +827,12 @@ export default function InboxPage() {
                 <div className="text-xs text-slate-400 mb-4">
                   {[offer.company, offer.city, offer.country].filter(Boolean).join(" · ") || "—"}
                 </div>
+                {offer.rome && (
+                  <div className="text-xs text-slate-500 mb-4">
+                    <span className="font-medium text-slate-600">ROME:</span> {offer.rome.rome_code} —{" "}
+                    {offer.rome.rome_label}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                   <button

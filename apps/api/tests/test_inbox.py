@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 from api.utils.db import DB_PATH, get_connection
+from api.routes import inbox as inbox_routes
 
 
 @pytest.fixture
@@ -63,6 +64,7 @@ def test_inbox_returns_schema(client, profile_demo):
         assert "score" in item
         assert "reasons" in item
         assert "title" in item
+        assert "rome" in item
 
 
 # ============================================================================
@@ -162,3 +164,149 @@ def test_decision_upsert(client):
     conn.close()
     assert row["status"] == "DISMISSED"
     assert row["note"] == "changed mind"
+
+
+# ============================================================================
+# 6. Inbox includes ROME link for FT offers (read-only)
+# ============================================================================
+
+
+def test_inbox_includes_rome_link(monkeypatch, client, profile_demo):
+    conn = sqlite3.connect(":memory:", check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    conn.execute("""
+        CREATE TABLE fact_offers (
+            id TEXT PRIMARY KEY,
+            source TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            company TEXT,
+            city TEXT,
+            country TEXT,
+            publication_date TEXT,
+            contract_duration INTEGER,
+            start_date TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE offer_rome_link (
+            offer_id TEXT PRIMARY KEY,
+            rome_code TEXT,
+            rome_label TEXT,
+            linked_at TEXT NOT NULL
+        )
+    """)
+
+    ft_offer = {
+        "id": "FT-TEST-001",
+        "source": "france_travail",
+        "title": "Data Analyst",
+        "description": "Analyse de données, reporting, SQL.",
+        "company": "DataBridge",
+        "city": "Paris",
+        "country": "FR",
+        "publication_date": "2025-01-01",
+        "contract_duration": 12,
+        "start_date": "2025-03-01",
+    }
+    bf_offer = {
+        "id": "BF-TEST-001",
+        "source": "business_france",
+        "title": "Développeur Full Stack",
+        "description": "React, Node.js, API.",
+        "company": "NovaStack",
+        "city": "Berlin",
+        "country": "DE",
+        "publication_date": "2025-01-02",
+        "contract_duration": 12,
+        "start_date": "2025-04-01",
+    }
+
+    conn.execute(
+        """
+        INSERT INTO fact_offers
+        (id, source, title, description, company, city, country, publication_date, contract_duration, start_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            ft_offer["id"],
+            ft_offer["source"],
+            ft_offer["title"],
+            ft_offer["description"],
+            ft_offer["company"],
+            ft_offer["city"],
+            ft_offer["country"],
+            ft_offer["publication_date"],
+            ft_offer["contract_duration"],
+            ft_offer["start_date"],
+        ),
+    )
+    conn.execute(
+        """
+        INSERT INTO fact_offers
+        (id, source, title, description, company, city, country, publication_date, contract_duration, start_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            bf_offer["id"],
+            bf_offer["source"],
+            bf_offer["title"],
+            bf_offer["description"],
+            bf_offer["company"],
+            bf_offer["city"],
+            bf_offer["country"],
+            bf_offer["publication_date"],
+            bf_offer["contract_duration"],
+            bf_offer["start_date"],
+        ),
+    )
+    conn.execute(
+        "INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at) VALUES (?, ?, ?, ?)",
+        ("FT-TEST-001", "M1607", "Conseiller en emploi", "2025-01-15T10:00:00Z"),
+    )
+    conn.commit()
+
+    before_rows = [
+        tuple(row)
+        for row in conn.execute(
+            "SELECT id, source, title, description, company, city, country, publication_date, contract_duration, start_date FROM fact_offers"
+        ).fetchall()
+    ]
+
+    def _catalog_stub():
+        rows = conn.execute(
+            "SELECT id, source, title, description, company, city, country, publication_date, contract_duration, start_date FROM fact_offers"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    monkeypatch.setattr(inbox_routes, "_load_catalog_offers", _catalog_stub)
+    monkeypatch.setattr(inbox_routes, "_load_decided_ids", lambda _: set())
+    monkeypatch.setattr(inbox_routes, "get_connection", lambda: conn)
+
+    resp = client.post("/inbox", json={
+        "profile_id": "rome-test",
+        "profile": profile_demo,
+        "min_score": 0,
+        "limit": 10,
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+
+    items_by_id = {item["offer_id"]: item for item in data["items"]}
+    assert "FT-TEST-001" in items_by_id
+    assert "BF-TEST-001" in items_by_id
+
+    ft_item = items_by_id["FT-TEST-001"]
+    bf_item = items_by_id["BF-TEST-001"]
+
+    assert ft_item["rome"] == {"rome_code": "M1607", "rome_label": "Conseiller en emploi"}
+    assert bf_item["rome"] is None
+
+    after_rows = [
+        tuple(row)
+        for row in conn.execute(
+            "SELECT id, source, title, description, company, city, country, publication_date, contract_duration, start_date FROM fact_offers"
+        ).fetchall()
+    ]
+    assert before_rows == after_rows
+    conn.close()

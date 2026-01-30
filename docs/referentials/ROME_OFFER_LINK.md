@@ -54,4 +54,20 @@ Every FT offer gets a row in `offer_rome_link` (explicit NULL = processed but no
 - Does not change matching scores or inbox results
 - Does not call any external API
 - Does not process Business France offers (FT only)
-- Not wired into any API endpoint yet
+
+## Inbox exposure (read-only)
+
+`POST /inbox` now includes an optional `rome` field on each item:
+
+```json
+{
+  "rome": {
+    "rome_code": "M1607",
+    "rome_label": "Conseiller en emploi"
+  }
+}
+```
+
+- Only populated for France Travail offers when a valid link exists in `offer_rome_link`
+- `rome` is `null` for Business France offers or missing links
+- This does not affect scoring or decision logic

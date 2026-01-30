@@ -221,6 +221,7 @@ export interface InboxItem {
   city: string | null;
   score: number;
   reasons: string[];
+  rome?: { rome_code: string; rome_label: string } | null;
 }
 
 export interface InboxResponse {
