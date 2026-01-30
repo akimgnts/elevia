@@ -222,6 +222,11 @@ export interface InboxItem {
   score: number;
   reasons: string[];
   rome?: { rome_code: string; rome_label: string } | null;
+  rome_competences?: Array<{
+    competence_code: string;
+    competence_label: string;
+    esco_uri?: string | null;
+  }> | null;
 }
 
 export interface InboxResponse {

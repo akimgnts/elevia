@@ -18,6 +18,12 @@ class RomeLink(BaseModel):
     rome_label: str
 
 
+class RomeCompetence(BaseModel):
+    competence_code: str
+    competence_label: str
+    esco_uri: Optional[str] = None
+
+
 class InboxItem(BaseModel):
     offer_id: str
     title: str
@@ -27,6 +33,7 @@ class InboxItem(BaseModel):
     score: int = Field(..., ge=0, le=100)
     reasons: List[str] = Field(default_factory=list)
     rome: Optional[RomeLink] = None
+    rome_competences: List[RomeCompetence] = Field(default_factory=list)
 
 
 class InboxResponse(BaseModel):

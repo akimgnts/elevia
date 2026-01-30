@@ -833,6 +833,18 @@ export default function InboxPage() {
                     {offer.rome.rome_label}
                   </div>
                 )}
+                {offer.rome_competences && offer.rome_competences.length > 0 && (
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {offer.rome_competences.slice(0, 3).map((competence) => (
+                      <span
+                        key={competence.competence_code}
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500"
+                      >
+                        {competence.competence_label}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                   <button

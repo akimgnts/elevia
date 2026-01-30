@@ -16,10 +16,11 @@ from ..schemas.inbox import (
     InboxItem,
     InboxRequest,
     InboxResponse,
+    RomeCompetence,
     RomeLink,
 )
 from ..utils.db import get_connection
-from ..utils.rome_link import get_offer_rome_links
+from ..utils.rome_link import get_offer_rome_links, get_rome_competences_for_rome_codes
 
 # Import matching engine
 import sys
@@ -111,10 +112,14 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
 
     ft_ids = [item.offer_id for item in items if source_map.get(item.offer_id) == "france_travail"]
     rome_links: Dict[str, Dict[str, str]] = {}
+    rome_competences: Dict[str, List[Dict[str, str]]] = {}
     if ft_ids:
         conn = get_connection()
         try:
             rome_links = get_offer_rome_links(conn, ft_ids)
+            rome_codes = [link["rome_code"] for link in rome_links.values() if link.get("rome_code")]
+            if rome_codes:
+                rome_competences = get_rome_competences_for_rome_codes(conn, rome_codes, limit_per_rome=3)
         finally:
             conn.close()
 
@@ -124,6 +129,13 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
             item.rome = RomeLink(rome_code=link["rome_code"], rome_label=link["rome_label"])
         else:
             item.rome = None
+        if item.rome and item.rome.rome_code:
+            item.rome_competences = [
+                RomeCompetence(**competence)
+                for competence in rome_competences.get(item.rome.rome_code, [])
+            ]
+        else:
+            item.rome_competences = []
 
     return InboxResponse(
         profile_id=req.profile_id,

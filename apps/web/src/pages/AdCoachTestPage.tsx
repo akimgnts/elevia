@@ -7,7 +7,6 @@ import {
   FileText,
   Inbox,
   Menu,
-  MessageSquare,
   Moon,
   Send,
   Sparkles,
