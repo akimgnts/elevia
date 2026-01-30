@@ -9,6 +9,7 @@ import OfferDetailPage from "./pages/OfferDetailPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DemoPage from "./pages/DemoPage";
 import InboxPage from "./pages/InboxPage";
+import AdCoachTestPage from "./pages/AdCoachTestPage";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Route path="/analyze" element={<AnalyzePage />} />
       <Route path="/analyse" element={<Navigate to="/analyze" replace />} />
       <Route path="/demo" element={<DemoPage />} />
+      <Route path="/adcoach-test" element={<AdCoachTestPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/match" element={<MatchPage />} />
