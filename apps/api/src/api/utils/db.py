@@ -27,6 +27,17 @@ def get_connection() -> sqlite3.Connection:
                 PRIMARY KEY (profile_id, offer_id)
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS application_tracker (
+                id TEXT PRIMARY KEY,
+                offer_id TEXT NOT NULL UNIQUE,
+                status TEXT NOT NULL CHECK(status IN ('shortlisted', 'applied', 'dismissed')),
+                note TEXT,
+                next_follow_up_date TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        """)
         conn.commit()
         _initialized = True
 

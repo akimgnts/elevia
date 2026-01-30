@@ -10,6 +10,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import DemoPage from "./pages/DemoPage";
 import InboxPage from "./pages/InboxPage";
 import AdCoachTestPage from "./pages/AdCoachTestPage";
+import ApplicationsPage from "./pages/ApplicationsPage";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
       <Route path="/match" element={<MatchPage />} />
       <Route path="/offres" element={<OffersPage />} />
       <Route path="/inbox" element={<InboxPage />} />
+      <Route path="/applications" element={<ApplicationsPage />} />
       <Route path="/offers/:offerId" element={<OfferDetailPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

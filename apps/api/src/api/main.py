@@ -20,6 +20,7 @@ from .routes.metrics import router as metrics_router
 from .routes.offers import router as offers_router
 from .routes.profile import router as profile_router
 from .routes.inbox import router as inbox_router
+from .routes.applications import router as applications_router
 
 
 app = FastAPI(
@@ -56,6 +57,7 @@ app.include_router(metrics_router, prefix="/metrics")
 app.include_router(offers_router, prefix="/offers")
 app.include_router(profile_router, prefix="/profile")
 app.include_router(inbox_router)
+app.include_router(applications_router)
 
 
 @app.get("/health", tags=["health"])
