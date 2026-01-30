@@ -36,6 +36,10 @@ class ResultItem(BaseModel):
     breakdown: Dict[str, float]
     reasons: List[str] = Field(..., max_length=3)
     match_debug: Optional[Dict[str, Any]] = None
+    score_is_partial: bool = Field(
+        default=False,
+        description="True if the score is partial due to missing offer skills"
+    )
     diagnostic: Optional[DiagnosticResult] = None
 
 

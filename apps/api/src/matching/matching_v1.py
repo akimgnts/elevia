@@ -36,6 +36,7 @@ WEIGHT_EDUCATION = 0.10
 WEIGHT_COUNTRY = 0.05
 
 THRESHOLD = 80  # Seuil strict (spec ligne 46)
+PARTIAL_MAX_SCORE = 30  # Max score when skills are unavailable
 
 CONTEXT_CLAMP_MIN = 0.8  # Clamp contexte (spec ligne 107)
 CONTEXT_CLAMP_MAX = 1.2
@@ -53,6 +54,7 @@ class MatchResult:
     breakdown: Dict[str, float]
     reasons: List[str]
     match_debug: Optional[Dict[str, Any]] = None
+    score_is_partial: bool = False
 
 
 @dataclass
@@ -160,14 +162,14 @@ class MatchingEngine:
 
     def _score_skills(
         self, profile: ExtractedProfile, offer: Dict
-    ) -> Tuple[float, List[str], List[str]]:
+    ) -> Tuple[float, List[str], List[str], bool]:
         """
         Score skills (signal principal) - spec lignes 100-114.
 
         Formule: skills_score = matched_skills / required_skills
 
         Returns:
-            (score, matched_skills, missing_skills)
+            (score, matched_skills, missing_skills, skills_missing)
         """
         raw_skills = offer.get("skills", [])
         if isinstance(raw_skills, str):
@@ -178,7 +180,7 @@ class MatchingEngine:
 
         # Spec ligne 113: "Si l'offre n'a aucune skill → skills_score = 0"
         if not offer_skills:
-            return 0.0, [], []
+            return 0.0, [], [], True
 
         # Intersection profil ∩ offre
         matched_skills_set = profile.skills & offer_skills_set
@@ -186,10 +188,10 @@ class MatchingEngine:
         missing_skills = [s for s in offer_skills if s not in matched_skills_set]
 
         if not matched_skills:
-            return 0.0, [], missing_skills
+            return 0.0, [], missing_skills, False
 
         score = len(matched_skills) / len(offer_skills)
-        return score, matched_skills, missing_skills
+        return score, matched_skills, missing_skills, False
 
     def _score_languages(
         self, profile: ExtractedProfile, offer: Dict
@@ -262,6 +264,7 @@ class MatchingEngine:
         languages_score: float,
         education_score: float,
         country_score: float,
+        score_is_partial: bool = False,
     ) -> int:
         """
         Calcule le score final - spec lignes 87-94.
@@ -279,7 +282,10 @@ class MatchingEngine:
             WEIGHT_EDUCATION * education_score +
             WEIGHT_COUNTRY * country_score
         )
-        return int(round(100 * total))
+        score = int(round(100 * total))
+        if score_is_partial:
+            return min(score, PARTIAL_MAX_SCORE)
+        return score
 
     def _build_match_debug(
         self,
@@ -355,6 +361,7 @@ class MatchingEngine:
         languages_score: float,
         education_score: float,
         country_score: float,
+        skills_missing: bool = False,
     ) -> List[str]:
         """
         Génère les explications (2-3 max) - spec lignes 163-183.
@@ -369,6 +376,8 @@ class MatchingEngine:
         reasons = []
 
         # 1. Compétences (priorité max)
+        if skills_missing and len(reasons) < 3:
+            reasons.append("Compétences indisponibles pour cette offre")
         if matched_skills:
             top_skills = matched_skills[:4]  # Top 2-4
             reasons.append(f"Compétences clés alignées : {', '.join(top_skills)}")
@@ -411,17 +420,17 @@ class MatchingEngine:
             )
 
         # Calcul scores
-        skills_score, matched_skills, missing_skills = self._score_skills(profile, offer)
+        skills_score, matched_skills, missing_skills, skills_missing = self._score_skills(profile, offer)
         languages_score = self._score_languages(profile, offer)
         education_score = self._score_education(profile, offer)
         country_score = self._score_country(profile, offer)
 
         final_score = self._compute_final_score(
-            skills_score, languages_score, education_score, country_score
+            skills_score, languages_score, education_score, country_score, skills_missing
         )
 
         reasons = self._generate_reasons(
-            matched_skills, languages_score, education_score, country_score
+            matched_skills, languages_score, education_score, country_score, skills_missing
         )
 
         return MatchResult(
@@ -444,6 +453,7 @@ class MatchingEngine:
                 profile,
                 offer,
             ),
+            score_is_partial=skills_missing,
         )
 
     def match(
@@ -477,7 +487,7 @@ class MatchingEngine:
                 continue
 
             # 3. Score skills (signal principal)
-            skills_score, matched_skills, missing_skills = self._score_skills(extracted_profile, offer)
+            skills_score, matched_skills, missing_skills, skills_missing = self._score_skills(extracted_profile, offer)
 
             # 4. Early-skip mathématique (spec ligne 63)
             if self._early_skip(skills_score):
@@ -490,7 +500,7 @@ class MatchingEngine:
 
             # 6. Score final
             final_score = self._compute_final_score(
-                skills_score, languages_score, education_score, country_score
+                skills_score, languages_score, education_score, country_score, skills_missing
             )
 
             # 7. Seuil strict (spec ligne 46)
@@ -499,7 +509,7 @@ class MatchingEngine:
 
             # 8. Génération explications (uniquement si retenue - spec ligne 159)
             reasons = self._generate_reasons(
-                matched_skills, languages_score, education_score, country_score
+                matched_skills, languages_score, education_score, country_score, skills_missing
             )
 
             # 9. Ajout au résultat
@@ -524,6 +534,7 @@ class MatchingEngine:
                     extracted_profile,
                     offer,
                 ),
+                score_is_partial=skills_missing,
             ))
 
         # Tri par score décroissant
@@ -557,6 +568,7 @@ class MatchingEngine:
                     "breakdown": r.breakdown,
                     "reasons": r.reasons,
                     "match_debug": r.match_debug,
+                    "score_is_partial": r.score_is_partial,
                 }
                 for r in output.results
             ],

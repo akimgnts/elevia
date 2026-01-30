@@ -7,6 +7,7 @@ Conforme à: docs/features/06_MATCHING_MINIMAL_EXPLICABLE.md
 """
 
 from typing import Dict, List, Set, Optional
+import re
 from dataclasses import dataclass
 
 
@@ -33,9 +34,23 @@ class ExtractedProfile:
     preferred_countries: frozenset  # Set immuable de pays canonisés
 
 
+_SKILL_WS_RE = re.compile(r"\s+")
+_SKILL_PUNCT_RE = re.compile(r"[^\w\s\+#]", flags=re.UNICODE)
+
+
+def normalize_skill_label(skill: str) -> str:
+    """Normalise un label de compétence (lowercase, trim, espace/punct)."""
+    if not skill:
+        return ""
+    value = skill.lower().strip()
+    value = _SKILL_PUNCT_RE.sub(" ", value)
+    value = _SKILL_WS_RE.sub(" ", value).strip()
+    return value
+
+
 def normalize_skill(skill: str) -> str:
-    """Normalise une compétence (lowercase, strip)."""
-    return skill.lower().strip()
+    """Normalise une compétence (lowercase, trim, espace/punct)."""
+    return normalize_skill_label(skill)
 
 
 def normalize_language(lang: str) -> str:

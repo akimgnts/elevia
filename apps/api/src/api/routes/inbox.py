@@ -20,6 +20,7 @@ from ..schemas.inbox import (
     RomeLink,
 )
 from ..utils.db import get_connection
+from ..utils.offer_skills import get_offer_skills_by_offer_ids
 from ..utils.rome_link import get_offer_rome_links, get_rome_competences_for_rome_codes
 
 # Import matching engine
@@ -60,8 +61,17 @@ def _load_catalog_offers() -> List[Dict]:
             "SELECT id, source, title, description, company, city, country, "
             "publication_date, contract_duration, start_date FROM fact_offers"
         ).fetchall()
+        offers = [dict(r) for r in rows]
+
+        offer_ids = [str(o.get("id") or "") for o in offers]
+        skills_map = get_offer_skills_by_offer_ids(conn, offer_ids)
+        for offer in offers:
+            offer_id = str(offer.get("id") or "")
+            if offer_id in skills_map:
+                offer["skills"] = skills_map[offer_id]
+
         conn.close()
-        return [dict(r) for r in rows]
+        return offers
     except Exception as e:
         logger.warning(f"[inbox] Failed to load catalog: {e}")
         return []

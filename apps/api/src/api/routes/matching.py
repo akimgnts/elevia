@@ -15,6 +15,8 @@ from fastapi import APIRouter, HTTPException
 from typing import Dict, Any, List
 
 from ..utils.obs_logger import obs_log
+from ..utils.db import get_connection
+from ..utils.offer_skills import get_offer_skills_by_offer_ids
 
 from ..schemas.matching import (
     MatchingRequest,
@@ -35,6 +37,33 @@ from matching.extractors import extract_profile
 
 
 router = APIRouter(tags=["matching"])
+
+
+def _attach_offer_skills(offers: List[Dict[str, Any]]) -> None:
+    """Attach offer skills from DB when missing in payload (batch lookup)."""
+    offer_ids: List[str] = []
+    for offer in offers:
+        offer_id = offer.get("id") or offer.get("offer_id") or offer.get("offer_uid")
+        if offer_id:
+            offer_ids.append(str(offer_id))
+
+    if not offer_ids:
+        return
+
+    conn = get_connection()
+    try:
+        skills_map = get_offer_skills_by_offer_ids(conn, offer_ids)
+    except Exception:
+        skills_map = {}
+    finally:
+        conn.close()
+
+    for offer in offers:
+        if offer.get("skills"):
+            continue
+        offer_id = offer.get("id") or offer.get("offer_id") or offer.get("offer_uid")
+        if offer_id and str(offer_id) in skills_map:
+            offer["skills"] = skills_map[str(offer_id)]
 
 
 # ============================================================================
@@ -151,6 +180,9 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
     start_time = time.time()
 
     try:
+        # Attach offer skills from DB if missing
+        _attach_offer_skills(request.offers)
+
         # Construire le moteur avec IDF sur les offres fournies
         engine = MatchingEngine(
             offers=request.offers,
@@ -235,6 +267,7 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
                 breakdown=match_result.breakdown,
                 reasons=match_result.reasons,
                 match_debug=match_result.match_debug,
+                score_is_partial=match_result.score_is_partial,
                 diagnostic=diagnostic_result,
             ))
 

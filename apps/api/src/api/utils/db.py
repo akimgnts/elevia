@@ -5,6 +5,8 @@ db.py - SQLite connection utility for inbox decisions.
 import sqlite3
 from pathlib import Path
 
+from .offer_skills import ensure_offer_skills_table
+
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
 
 _initialized = False
@@ -38,6 +40,7 @@ def get_connection() -> sqlite3.Connection:
                 updated_at TEXT NOT NULL
             )
         """)
+        ensure_offer_skills_table(conn)
         conn.commit()
         _initialized = True
 

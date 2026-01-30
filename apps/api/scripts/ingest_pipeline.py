@@ -25,6 +25,10 @@ from pathlib import Path
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from api.utils.offer_skills import ensure_offer_skills_table
+from esco.extract import extract_raw_skills_from_offer
+from matching.extractors import normalize_skill_label
+
 try:
     import requests
 except ImportError:
@@ -184,6 +188,7 @@ def upsert_offers(offers: list, source: str, timestamp: str) -> int:
     conn = sqlite3.connect(str(DB_PATH), timeout=5)
     cursor = conn.cursor()
     count = 0
+    ensure_offer_skills_table(conn)
 
     try:
         for offer in offers:
@@ -256,6 +261,13 @@ def upsert_offers(offers: list, source: str, timestamp: str) -> int:
             ))
             count += 1
 
+            skills_from_payload = (
+                _extract_ft_skills(offer) if source == "france_travail" else _extract_bf_skills(offer)
+            )
+            if skills_from_payload:
+                source_label = "france_travail" if source == "france_travail" else "manual"
+                _insert_offer_skills(cursor, offer_id, skills_from_payload, source=source_label, timestamp=timestamp)
+
         conn.commit()
         print(f"[DB] Upserted {count} offers into fact_offers")
         return count
@@ -266,6 +278,57 @@ def upsert_offers(offers: list, source: str, timestamp: str) -> int:
         return 0
     finally:
         conn.close()
+
+
+def _extract_ft_skills(offer: dict) -> list[str]:
+    """Extract and normalize FT skills from payload."""
+    skills = []
+    competences = offer.get("competences", [])
+    if isinstance(competences, list):
+        for comp in competences:
+            if isinstance(comp, dict):
+                label = comp.get("libelle") or comp.get("label")
+                if label:
+                    skills.append(str(label))
+            elif isinstance(comp, str):
+                skills.append(comp)
+
+    if not skills:
+        payload = {
+            "title": offer.get("intitule") or offer.get("appellationlibelle"),
+            "description": offer.get("description"),
+            "skills": competences,
+        }
+        skills = extract_raw_skills_from_offer(payload)
+
+    normalized = [normalize_skill_label(s) for s in skills if s]
+    return sorted({s for s in normalized if s})
+
+
+def _extract_bf_skills(offer: dict) -> list[str]:
+    """Extract and normalize BF skills from payload."""
+    skills = extract_raw_skills_from_offer(offer)
+    normalized = [normalize_skill_label(s) for s in skills if s]
+    return sorted({s for s in normalized if s})
+
+
+def _insert_offer_skills(
+    cursor: sqlite3.Cursor,
+    offer_id: str,
+    skills: list[str],
+    source: str,
+    timestamp: str,
+) -> None:
+    """Insert skills into fact_offer_skills (idempotent)."""
+    for skill in skills:
+        cursor.execute(
+            """
+            INSERT OR IGNORE INTO fact_offer_skills
+            (offer_id, skill, source, confidence, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (offer_id, skill, source, None, timestamp),
+        )
 
 
 def run_pipeline() -> None:

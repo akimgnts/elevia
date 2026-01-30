@@ -22,13 +22,20 @@ import sqlite3
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 # Paths
 API_ROOT = Path(__file__).parent.parent
 DATA_DIR = API_ROOT / "data"
 RAW_BF_DIR = DATA_DIR / "raw" / "business_france"
 DB_PATH = DATA_DIR / "db" / "offers.db"
+
+# Add src to path for shared utilities
+sys.path.insert(0, str(API_ROOT / "src"))
+
+from api.utils.offer_skills import ensure_offer_skills_table
+from esco.extract import extract_raw_skills_from_offer
+from matching.extractors import normalize_skill_label
 
 # Required DB columns (fail if missing)
 REQUIRED_COLUMNS = {
@@ -276,6 +283,7 @@ def upsert_offers(offers: list[dict], available_columns: set) -> int:
     cursor = conn.cursor()
     count = 0
     timestamp = datetime.now(timezone.utc).isoformat()
+    ensure_offer_skills_table(conn)
 
     # Build column list dynamically
     base_columns = ["id", "source", "title", "description", "company", "city",
@@ -314,6 +322,11 @@ def upsert_offers(offers: list[dict], available_columns: set) -> int:
             cursor.execute(sql, values)
             count += 1
 
+            # Skills enrichment (read-only additive)
+            skills_from_payload = _extract_bf_skills(offer)
+            if skills_from_payload:
+                _insert_offer_skills(cursor, offer["id"], skills_from_payload, "manual", timestamp)
+
         conn.commit()
         return count
 
@@ -323,6 +336,32 @@ def upsert_offers(offers: list[dict], available_columns: set) -> int:
         return 0
     finally:
         conn.close()
+
+
+def _extract_bf_skills(offer: dict) -> List[str]:
+    """Extract and normalize Business France skills from payload."""
+    skills = extract_raw_skills_from_offer(offer)
+    normalized = [normalize_skill_label(s) for s in skills if s]
+    return sorted({s for s in normalized if s})
+
+
+def _insert_offer_skills(
+    cursor: sqlite3.Cursor,
+    offer_id: str,
+    skills: List[str],
+    source: str,
+    timestamp: str,
+) -> None:
+    """Insert skills into fact_offer_skills (idempotent)."""
+    for skill in skills:
+        cursor.execute(
+            """
+            INSERT OR IGNORE INTO fact_offer_skills
+            (offer_id, skill, source, confidence, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (offer_id, skill, source, None, timestamp),
+        )
 
 
 # ==============================================================================

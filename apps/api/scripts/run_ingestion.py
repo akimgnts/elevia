@@ -43,7 +43,7 @@ import time
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from uuid import uuid4
 
 try:
@@ -59,6 +59,14 @@ except ImportError:
     }))
     sys.exit(1)
 
+
+# Add src to path for shared utilities
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from api.utils.offer_skills import ensure_offer_skills_table
+from api.utils.rome_link import get_offer_rome_link, get_rome_competences_for_rome_codes
+from esco.extract import extract_raw_skills_from_offer
+from matching.extractors import normalize_skill_label
 
 # ==============================================================================
 # CONFIGURATION
@@ -301,6 +309,27 @@ def persist_ft_offers(offers: list, timestamp: str) -> int:
                   publication_date, None, None, payload_json, timestamp))
             count += 1
 
+            # ------------------------------------------------------------------
+            # Skills enrichment (read-only additive)
+            # ------------------------------------------------------------------
+            # ROME competences (if available)
+            rome_link = get_offer_rome_link(conn, offer_id)
+            if rome_link and rome_link.get("rome_code"):
+                rome_map = get_rome_competences_for_rome_codes(conn, [rome_link["rome_code"]], limit_per_rome=3)
+                rome_competences = rome_map.get(rome_link["rome_code"], [])
+                rome_skills = [
+                    normalize_skill_label(c["competence_label"])
+                    for c in rome_competences
+                    if c.get("competence_label")
+                ]
+                rome_skills = [s for s in rome_skills if s]
+                if rome_skills:
+                    _insert_offer_skills(cursor, offer_id, rome_skills, "rome", timestamp)
+
+            skills_from_payload = _extract_ft_skills(offer)
+            if skills_from_payload:
+                _insert_offer_skills(cursor, offer_id, skills_from_payload, "france_travail", timestamp)
+
         conn.commit()
     except Exception:
         conn.rollback()
@@ -541,6 +570,13 @@ def persist_bf_offers(offers: list, timestamp: str) -> int:
                   publication_date, contract_duration, start_date, payload_json, timestamp))
             count += 1
 
+            # ------------------------------------------------------------------
+            # Skills enrichment (read-only additive)
+            # ------------------------------------------------------------------
+            skills_from_payload = _extract_bf_skills(offer)
+            if skills_from_payload:
+                _insert_offer_skills(cursor, offer_id, skills_from_payload, "manual", timestamp)
+
         conn.commit()
     except Exception:
         conn.rollback()
@@ -558,9 +594,6 @@ def persist_bf_offers(offers: list, timestamp: str) -> int:
 def ensure_db_exists() -> None:
     """Initialize database if it doesn't exist."""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    if DB_PATH.exists():
-        return
 
     conn = sqlite3.connect(str(DB_PATH), timeout=10)
     cursor = conn.cursor()
@@ -583,9 +616,63 @@ def ensure_db_exists() -> None:
         )
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_fact_offers_source ON fact_offers(source)")
+    ensure_offer_skills_table(conn)
 
     conn.commit()
     conn.close()
+
+
+def _extract_ft_skills(offer: Dict[str, Any]) -> List[str]:
+    """Extract and normalize FT skills from payload."""
+    skills: List[str] = []
+
+    competences = offer.get("competences", [])
+    if isinstance(competences, list):
+        for comp in competences:
+            if isinstance(comp, dict):
+                label = comp.get("libelle") or comp.get("label")
+                if label:
+                    skills.append(str(label))
+            elif isinstance(comp, str):
+                skills.append(comp)
+
+    # Fallback: extract from title/description if no competences
+    if not skills:
+        payload = {
+            "title": offer.get("intitule") or offer.get("appellationlibelle"),
+            "description": offer.get("description"),
+            "skills": competences,
+        }
+        skills = extract_raw_skills_from_offer(payload)
+
+    normalized = [normalize_skill_label(s) for s in skills if s]
+    return sorted({s for s in normalized if s})
+
+
+def _extract_bf_skills(offer: Dict[str, Any]) -> List[str]:
+    """Extract and normalize Business France skills from payload."""
+    skills = extract_raw_skills_from_offer(offer)
+    normalized = [normalize_skill_label(s) for s in skills if s]
+    return sorted({s for s in normalized if s})
+
+
+def _insert_offer_skills(
+    cursor: sqlite3.Cursor,
+    offer_id: str,
+    skills: List[str],
+    source: str,
+    timestamp: str,
+) -> None:
+    """Insert skills into fact_offer_skills (idempotent)."""
+    for skill in skills:
+        cursor.execute(
+            """
+            INSERT OR IGNORE INTO fact_offer_skills
+            (offer_id, skill, source, confidence, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (offer_id, skill, source, None, timestamp),
+        )
 
 
 def run_sanity_checks(logger: StructuredLogger) -> bool:
