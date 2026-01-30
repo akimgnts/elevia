@@ -171,10 +171,11 @@ def test_decision_upsert(client):
 # ============================================================================
 
 
-def test_inbox_includes_rome_link(monkeypatch, client, profile_demo):
-    conn = sqlite3.connect(":memory:", check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    conn.execute("""
+def test_inbox_includes_rome_link(monkeypatch, client, profile_demo, tmp_path):
+    db_path = tmp_path / "offers.db"
+    seed_conn = sqlite3.connect(db_path)
+    seed_conn.row_factory = sqlite3.Row
+    seed_conn.execute("""
         CREATE TABLE fact_offers (
             id TEXT PRIMARY KEY,
             source TEXT NOT NULL,
@@ -188,7 +189,7 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo):
             start_date TEXT
         )
     """)
-    conn.execute("""
+    seed_conn.execute("""
         CREATE TABLE offer_rome_link (
             offer_id TEXT PRIMARY KEY,
             rome_code TEXT,
@@ -222,7 +223,7 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo):
         "start_date": "2025-04-01",
     }
 
-    conn.execute(
+    seed_conn.execute(
         """
         INSERT INTO fact_offers
         (id, source, title, description, company, city, country, publication_date, contract_duration, start_date)
@@ -241,7 +242,7 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo):
             ft_offer["start_date"],
         ),
     )
-    conn.execute(
+    seed_conn.execute(
         """
         INSERT INTO fact_offers
         (id, source, title, description, company, city, country, publication_date, contract_duration, start_date)
@@ -260,28 +261,35 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo):
             bf_offer["start_date"],
         ),
     )
-    conn.execute(
+    seed_conn.execute(
         "INSERT INTO offer_rome_link (offer_id, rome_code, rome_label, linked_at) VALUES (?, ?, ?, ?)",
         ("FT-TEST-001", "M1607", "Conseiller en emploi", "2025-01-15T10:00:00Z"),
     )
-    conn.commit()
+    seed_conn.commit()
 
     before_rows = [
         tuple(row)
-        for row in conn.execute(
+        for row in seed_conn.execute(
             "SELECT id, source, title, description, company, city, country, publication_date, contract_duration, start_date FROM fact_offers"
         ).fetchall()
     ]
 
     def _catalog_stub():
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
         rows = conn.execute(
             "SELECT id, source, title, description, company, city, country, publication_date, contract_duration, start_date FROM fact_offers"
         ).fetchall()
+        conn.close()
         return [dict(r) for r in rows]
 
     monkeypatch.setattr(inbox_routes, "_load_catalog_offers", _catalog_stub)
     monkeypatch.setattr(inbox_routes, "_load_decided_ids", lambda _: set())
-    monkeypatch.setattr(inbox_routes, "get_connection", lambda: conn)
+    monkeypatch.setattr(
+        inbox_routes,
+        "get_connection",
+        lambda: sqlite3.connect(db_path, check_same_thread=False),
+    )
 
     resp = client.post("/inbox", json={
         "profile_id": "rome-test",
@@ -302,11 +310,13 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo):
     assert ft_item["rome"] == {"rome_code": "M1607", "rome_label": "Conseiller en emploi"}
     assert bf_item["rome"] is None
 
+    after_conn = sqlite3.connect(db_path)
     after_rows = [
         tuple(row)
-        for row in conn.execute(
+        for row in after_conn.execute(
             "SELECT id, source, title, description, company, city, country, publication_date, contract_duration, start_date FROM fact_offers"
         ).fetchall()
     ]
+    after_conn.close()
     assert before_rows == after_rows
-    conn.close()
+    seed_conn.close()
