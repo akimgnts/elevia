@@ -2,6 +2,30 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Web workflow (canonical)
+
+Prerequisites:
+- Node.js + npm (version aligned with repository expectations)
+
+Install:
+```bash
+cd apps/web
+npm ci
+```
+
+Dev:
+```bash
+npm run dev
+```
+
+Build:
+```bash
+npm run build
+```
+
+Common failures:
+- `react-router-dom` (or other deps) missing → run `npm ci` (ensures `node_modules` matches `package-lock.json`).
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
