@@ -16,6 +16,7 @@ import {
   Search,
 } from "lucide-react";
 import { fetchInbox, postDecision } from "../lib/api";
+import { listApplications, upsertApplication } from "../api/applications";
 import type { InboxItem } from "../lib/api";
 import { useProfileStore } from "../store/profileStore";
 
@@ -160,6 +161,7 @@ export default function InboxPage() {
   });
   const [decisions, setDecisions] = useState<Record<string, DecisionRecord>>({});
   const [applications, setApplications] = useState<Record<string, ApplicationRecord>>({});
+  const [applicationStatusMap, setApplicationStatusMap] = useState<Record<string, string>>({});
   const [snapshots, setSnapshots] = useState<ScoreSnapshot[]>([]);
 
   const lineChartRef = useRef<HTMLCanvasElement | null>(null);
@@ -220,6 +222,22 @@ export default function InboxPage() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    const fetchTracker = async () => {
+      try {
+        const data = await listApplications();
+        const nextMap: Record<string, string> = {};
+        data.items.forEach((item) => {
+          nextMap[item.offer_id] = item.status;
+        });
+        setApplicationStatusMap(nextMap);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
+      }
+    };
+    fetchTracker();
+  }, []);
+
   const handleDecision = (offerId: string, status: DecisionStatus, score: number) => {
     setDecisions((prev) => ({
       ...prev,
@@ -242,6 +260,23 @@ export default function InboxPage() {
         reasons: item.reasons,
       },
     }));
+  };
+
+  const handleShortlistTracker = async (offerId: string) => {
+    if (applicationStatusMap[offerId]) {
+      return;
+    }
+    try {
+      await upsertApplication({
+        offer_id: offerId,
+        status: "shortlisted",
+        note: null,
+        next_follow_up_date: null,
+      });
+      setApplicationStatusMap((prev) => ({ ...prev, [offerId]: "shortlisted" }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    }
   };
 
   const handleResponded = (offerId: string) => {
@@ -851,10 +886,19 @@ export default function InboxPage() {
 
                 <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                   <button
-                    className="flex items-center gap-1.5 text-slate-500"
-                    onClick={() => handleDecision(offer.offer_id, "SHORTLISTED", offer.score)}
+                    className={`flex items-center gap-1.5 ${
+                      applicationStatusMap[offer.offer_id] ? "text-emerald-600" : "text-slate-500"
+                    }`}
+                    onClick={() => handleShortlistTracker(offer.offer_id)}
+                    disabled={Boolean(applicationStatusMap[offer.offer_id])}
                   >
-                    <span className="text-xs font-medium">Shortlist</span>
+                    <span className="text-xs font-medium">
+                      {applicationStatusMap[offer.offer_id] === "shortlisted"
+                        ? "Shortlisted"
+                        : applicationStatusMap[offer.offer_id]
+                          ? applicationStatusMap[offer.offer_id]
+                          : "Shortlist"}
+                    </span>
                   </button>
                   <button
                     className="flex items-center gap-1.5 text-slate-500"
