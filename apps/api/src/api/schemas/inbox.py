@@ -32,6 +32,8 @@ class InboxItem(BaseModel):
     city: Optional[str] = None
     score: int = Field(..., ge=0, le=100)
     reasons: List[str] = Field(default_factory=list)
+    matched_skills: List[str] = Field(default_factory=list)
+    missing_skills: List[str] = Field(default_factory=list)
     rome: Optional[RomeLink] = None
     rome_competences: List[RomeCompetence] = Field(default_factory=list)
 

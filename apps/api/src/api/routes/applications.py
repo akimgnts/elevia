@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 import logging
+import os
+import time
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -25,6 +27,10 @@ router = APIRouter(tags=["applications"])
 
 STATUS_VALUES = {s.value for s in ApplicationStatus}
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+def _timing_enabled() -> bool:
+    value = os.getenv("ELEVIA_DEBUG_API_TIMING", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
 
 
 def _utc_now() -> str:
@@ -53,6 +59,7 @@ def _validate_date(value: Optional[str]) -> Optional[str]:
 
 @router.get("/applications", response_model=ApplicationListResponse)
 async def list_applications() -> ApplicationListResponse:
+    t0 = time.perf_counter()
     conn = get_connection()
     try:
         rows = conn.execute(
@@ -61,6 +68,9 @@ async def list_applications() -> ApplicationListResponse:
         ).fetchall()
     finally:
         conn.close()
+
+    if _timing_enabled():
+        logger.info("applications_timing action=list total=%s count=%s", int((time.perf_counter() - t0) * 1000), len(rows))
 
     items = [
         ApplicationItem(
@@ -79,6 +89,7 @@ async def list_applications() -> ApplicationListResponse:
 
 @router.get("/applications/{offer_id}", response_model=ApplicationItem)
 async def get_application(offer_id: str) -> ApplicationItem:
+    t0 = time.perf_counter()
     conn = get_connection()
     try:
         row = conn.execute(
@@ -91,6 +102,9 @@ async def get_application(offer_id: str) -> ApplicationItem:
 
     if row is None:
         raise HTTPException(status_code=404, detail={"message": "Application not found"})
+
+    if _timing_enabled():
+        logger.info("applications_timing action=get total=%s", int((time.perf_counter() - t0) * 1000))
 
     return ApplicationItem(
         id=row[0],
@@ -105,6 +119,7 @@ async def get_application(offer_id: str) -> ApplicationItem:
 
 @router.post("/applications", response_model=ApplicationItem)
 async def upsert_application(payload: ApplicationCreate) -> JSONResponse:
+    t0 = time.perf_counter()
     status = _validate_status(payload.status)
     note = payload.note
     next_follow_up_date = _validate_date(payload.next_follow_up_date)
@@ -149,6 +164,9 @@ async def upsert_application(payload: ApplicationCreate) -> JSONResponse:
     if item is None:
         raise HTTPException(status_code=500, detail={"message": "Failed to upsert application"})
 
+    if _timing_enabled():
+        logger.info("applications_timing action=upsert total=%s", int((time.perf_counter() - t0) * 1000))
+
     result = ApplicationItem(
         id=item[0],
         offer_id=item[1],
@@ -164,6 +182,7 @@ async def upsert_application(payload: ApplicationCreate) -> JSONResponse:
 
 @router.patch("/applications/{offer_id}", response_model=ApplicationItem)
 async def patch_application(offer_id: str, payload: ApplicationUpdate) -> ApplicationItem:
+    t0 = time.perf_counter()
     if payload.status is None and payload.note is None and payload.next_follow_up_date is None:
         raise HTTPException(status_code=400, detail={"message": "No fields to update"})
 
@@ -203,6 +222,9 @@ async def patch_application(offer_id: str, payload: ApplicationUpdate) -> Applic
     if item is None:
         raise HTTPException(status_code=404, detail={"message": "Application not found"})
 
+    if _timing_enabled():
+        logger.info("applications_timing action=patch total=%s", int((time.perf_counter() - t0) * 1000))
+
     return ApplicationItem(
         id=item[0],
         offer_id=item[1],
@@ -216,6 +238,7 @@ async def patch_application(offer_id: str, payload: ApplicationUpdate) -> Applic
 
 @router.delete("/applications/{offer_id}", status_code=204)
 async def delete_application(offer_id: str) -> None:
+    t0 = time.perf_counter()
     conn = get_connection()
     try:
         row = conn.execute(
@@ -229,4 +252,6 @@ async def delete_application(offer_id: str) -> None:
         logger.info("application_delete", extra={"offer_id": offer_id})
     finally:
         conn.close()
+    if _timing_enabled():
+        logger.info("applications_timing action=delete total=%s", int((time.perf_counter() - t0) * 1000))
     return None

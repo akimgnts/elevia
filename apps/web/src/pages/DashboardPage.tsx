@@ -8,30 +8,15 @@ import { GlassCard } from "../components/ui/GlassCard";
 import { Badge } from "../components/ui/Badge";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
-import { fetchSampleOffers, runMatch, type MatchResponse } from "../lib/api";
-import { buildOfferPreview } from "../lib/text";
+import { fetchInbox, type InboxItem } from "../lib/api";
+import { buildMatchingProfile } from "../lib/profileMatching";
 import { useProfileStore } from "../store/profileStore";
 import { typography, spacing, layout } from "../styles/uiTokens";
 
-interface SampleOffer {
-  id?: string;
-  offer_id?: string;
-  title?: string;
-  description?: string;
-  display_description?: string;
-  // TODO: future structured_summary field (AI-generated, Option 2)
-  company?: string;
-  company_name?: string;
-  country?: string;
-  location_label?: string;
-  [key: string]: unknown;
-}
-
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { userProfile } = useProfileStore();
-  const [offers, setOffers] = useState<SampleOffer[]>([]);
-  const [matchResponse, setMatchResponse] = useState<MatchResponse | null>(null);
+  const { userProfile, profileHash } = useProfileStore();
+  const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,11 +27,13 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const sample = await fetchSampleOffers(200);
-        const sampleOffers = sample.offers as SampleOffer[];
-        setOffers(sampleOffers);
-        const match = await runMatch(userProfile, sampleOffers);
-        setMatchResponse(match);
+        const profileId = profileHash ?? "anonymous";
+        if (import.meta.env.DEV) {
+          console.info("[dashboard] profile_id", profileId);
+        }
+        const matchingProfile = buildMatchingProfile(userProfile as Record<string, unknown>, profileId);
+        const inbox = await fetchInbox(matchingProfile, profileId, 0, 60);
+        setItems(inbox.items);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
@@ -57,34 +44,24 @@ export default function DashboardPage() {
     loadData();
   }, [userProfile]);
 
-  const offersMap = useMemo(() => {
-    const map = new Map<string, SampleOffer>();
-    for (const offer of offers) {
-      const key = offer.id || offer.offer_id || "";
-      if (key) map.set(key, offer);
-    }
-    return map;
-  }, [offers]);
-
-  const results = matchResponse?.results ?? [];
   const averageScore =
-    results.length > 0
-      ? Math.round(results.reduce((sum, r) => sum + r.score, 0) / results.length)
+    items.length > 0
+      ? Math.round(items.reduce((sum, r) => sum + r.score, 0) / items.length)
       : 0;
 
-  const topMatches = results.slice(0, 3).map((result) => {
-    const offer = offersMap.get(result.offer_id);
-    const location = offer?.country || offer?.location_label || "Localisation à préciser";
+  const topMatches = items.slice(0, 3).map((offer) => {
+    const location = offer.country || offer.city || "Localisation à préciser";
+    const preview =
+      offer.matched_skills && offer.matched_skills.length > 0
+        ? `Compétences alignées: ${offer.matched_skills.slice(0, 3).join(", ")}`
+        : "Aucune compétence détectée en commun.";
     return {
-      id: result.offer_id,
-      title: (offer?.title as string) || "Offre",
-      company: (offer?.company as string) || (offer?.company_name as string) || "Entreprise",
+      id: offer.offer_id,
+      title: offer.title || "Offre",
+      company: offer.company || "Entreprise",
       location,
-      preview: buildOfferPreview(
-        offer?.display_description as string | undefined,
-        offer?.description as string | undefined
-      ),
-      score: Math.round(result.score),
+      preview,
+      score: Math.round(offer.score),
       tags: ["V.I.E"],
     };
   });

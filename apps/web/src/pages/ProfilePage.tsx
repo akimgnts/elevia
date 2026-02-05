@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfileStore } from "../store/profileStore";
+import { buildMatchingProfile } from "../lib/profileMatching";
 import { buildCorrectionEvent, postCorrectionMetric } from "../lib/api";
 
 const CAPABILITY_LEVELS = ["beginner", "intermediate", "expert"] as const;
@@ -61,6 +62,7 @@ export default function ProfilePage() {
 
   const profile = userProfile as ProfileData;
   const aiProfileData = aiProfile as ProfileData;
+  const matchingProfile = buildMatchingProfile(profile, profileHash || "anonymous");
 
   // Compute diff
   const aiCapNames = new Set((aiProfileData.detected_capabilities || []).map((c) => c.name));
@@ -227,7 +229,7 @@ export default function ProfilePage() {
         <div style={{ marginBottom: 24 }}>
           <h3>Compétences hors référentiel ({profile.unmapped_skills_high_confidence.length})</h3>
           <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 8 }}>
-            Ces compétences ne sont pas utilisées pour le matching mais sont conservées pour améliorer le référentiel.
+            Ces compétences sont utilisées dans le matching si elles figurent dans votre profil.
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {profile.unmapped_skills_high_confidence.map((skill) => (
@@ -241,6 +243,42 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Matching profile truth */}
+      <div style={{ marginBottom: 24, padding: 16, backgroundColor: "#f8fafc", borderRadius: 8 }}>
+        <h3 style={{ marginTop: 0 }}>Profil utilisé pour le matching</h3>
+        <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 8 }}>
+          Ce sont les données réellement utilisées pour calculer vos scores.
+        </div>
+        <div style={{ display: "grid", gap: 8 }}>
+          <div style={{ fontSize: 13 }}>
+            <strong>Skills utilisées pour le matching ({matchingProfile.matching_skills.length}):</strong>{" "}
+            {matchingProfile.matching_skills.length > 0 ? matchingProfile.matching_skills.join(", ") : "—"}
+          </div>
+          <div style={{ fontSize: 13 }}>
+            <strong>Langues:</strong>{" "}
+            {Array.isArray(matchingProfile.languages) && matchingProfile.languages.length > 0
+              ? matchingProfile.languages
+                  .map((lang) => (typeof lang === "string" ? lang : lang?.code || ""))
+                  .filter(Boolean)
+                  .join(", ")
+              : "—"}
+          </div>
+          <div style={{ fontSize: 13 }}>
+            <strong>Niveau d'études:</strong>{" "}
+            {matchingProfile.education || matchingProfile.education_summary?.level || "—"}
+          </div>
+          <div style={{ fontSize: 13 }}>
+            <strong>Pays préférés:</strong>{" "}
+            {matchingProfile.preferred_countries && matchingProfile.preferred_countries.length > 0
+              ? matchingProfile.preferred_countries.join(", ")
+              : "—"}
+          </div>
+        </div>
+        <div style={{ fontSize: 12, opacity: 0.6, marginTop: 8 }}>
+          Les capacités détectées restent un signal secondaire d'UX, pas la base du matching.
+        </div>
+      </div>
 
       {/* Diff Summary */}
       {hasChanges && (

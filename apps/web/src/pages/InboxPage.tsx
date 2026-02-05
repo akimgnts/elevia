@@ -1,28 +1,35 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import Chart from "chart.js/auto";
 import {
-  Bell,
-  Building2,
+  AlertCircle,
+  Bug,
   Check,
   ChevronDown,
-  ChevronRight,
+  FileText,
   Filter,
-  Gem,
-  Heart,
-  LayoutDashboard,
-  MessageSquare,
-  MoreHorizontal,
+  Inbox,
+  MapPin,
+  RefreshCw,
   Search,
+  Sparkles,
+  X,
 } from "lucide-react";
 import { fetchInbox, postDecision } from "../lib/api";
-import { listApplications, upsertApplication } from "../api/applications";
-import type { InboxItem } from "../lib/api";
+import { buildMatchingProfile, type SkillsSource } from "../lib/profileMatching";
+import { upsertApplication, listApplications } from "../api/applications";
 import { useProfileStore } from "../store/profileStore";
+import { SEED_PROFILE } from "../fixtures/seedProfile";
+
+// ============================================================================
+// Constants
+// ============================================================================
 
 const STORAGE_PREFIX = "elevia_inbox";
-const DEFAULT_THRESHOLD = 65;
-const SNAPSHOT_LIMIT = 7;
+const DEFAULT_THRESHOLD = import.meta.env.DEV ? 0 : 65;
+const THRESHOLD_OPTIONS = [0, 40, 50, 65, 75, 85];
+
+// Debug mode: localStorage.setItem("elevia_debug_inbox", "1")
+const DEBUG_INBOX = import.meta.env.DEV && localStorage.getItem("elevia_debug_inbox") === "1";
 
 type DecisionStatus = "SHORTLISTED" | "DISMISSED";
 
@@ -32,25 +39,32 @@ type DecisionRecord = {
   updated_at: string;
 };
 
-type ApplicationStatus = "APPLIED" | "RESPONDED";
-
-type ApplicationRecord = {
-  status: ApplicationStatus;
-  applied_at: string;
-  responded_at?: string;
-  score?: number;
-  title?: string;
-  company?: string | null;
-  city?: string | null;
-  country?: string | null;
-  reasons?: string[];
+type NormalizedInboxItem = {
+  offer_id: string;
+  title: string;
+  company: string | null;
+  country: string | null;
+  city: string | null;
+  score: number;
+  reasons: string[];
+  matched_skills: string[];
+  missing_skills: string[];
+  rome: { rome_code: string; rome_label: string } | null;
+  is_vie?: boolean;
+  skills_source?: string;
 };
 
-type ScoreSnapshot = {
-  date: string;
-  avgScoreNew: number;
-  countNew: number;
+type LastApiCall = {
+  timestamp: string;
+  profile_id: string;
+  min_score: number;
+  limit: number;
+  response_items: number;
 };
+
+// ============================================================================
+// Helpers
+// ============================================================================
 
 function storageKey(profileId: string, suffix: string) {
   return `${STORAGE_PREFIX}_${profileId}_${suffix}`;
@@ -70,158 +84,494 @@ function writeJson<T>(key: string, value: T) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-function average(values: number[]) {
-  if (!values.length) return null;
-  const sum = values.reduce((acc, v) => acc + v, 0);
-  return sum / values.length;
+function normalizeScore(value: unknown): number {
+  if (typeof value !== "number" || Number.isNaN(value)) return 0;
+  const scaled = value >= 0 && value <= 1 ? value * 100 : value;
+  return Math.max(0, Math.min(100, Math.round(scaled)));
 }
 
-function formatPercent(value: number | null) {
-  if (value === null || Number.isNaN(value)) return "—";
-  return `${Math.round(value)}%`;
-}
-
-function formatScore(value: number | null) {
-  if (value === null || Number.isNaN(value)) return "—";
-  return value.toFixed(1).replace(".0", "");
-}
-
-function formatDateLabel(dateStr: string) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("fr-FR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-  });
-}
-
-function daysSince(isoDate: string) {
-  const start = new Date(isoDate).getTime();
-  const now = Date.now();
-  return Math.floor((now - start) / (1000 * 60 * 60 * 24));
-}
-
-function buildKeywordCounts(items: InboxItem[]) {
-  const stopwords = new Set([
-    "avec",
-    "pour",
-    "sans",
-    "dans",
-    "plus",
-    "moins",
-    "avec",
-    "sur",
-    "chez",
-    "vous",
-    "nous",
-    "leur",
-    "par",
-    "les",
-    "des",
-    "une",
-    "un",
-    "the",
-    "and",
-    "est",
-    "pas",
-    "non",
-    "mais",
-    "de",
-    "du",
-    "la",
-    "le",
-    "au",
-  ]);
-  const counts = new Map<string, number>();
-  items.forEach((item) => {
-    item.reasons.forEach((reason) => {
-      reason
-        .toLowerCase()
-        .split(/[^a-zA-Zà-ÿ0-9]+/)
-        .filter((token) => token.length > 2 && !stopwords.has(token))
-        .forEach((token) => {
-          counts.set(token, (counts.get(token) ?? 0) + 1);
-        });
+/**
+ * Strict mapping from API response to UI model.
+ * Uses offer_id (not id), safe nulls for all fields.
+ */
+function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
+  if (!Array.isArray(raw)) {
+    console.warn("[inbox] API items is not an array:", typeof raw);
+    return [];
+  }
+  const results: NormalizedInboxItem[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const rec = item as Record<string, unknown>;
+    // CRITICAL: use offer_id, fallback to id
+    const offerId = (rec.offer_id || rec.id) as string | undefined;
+    if (!offerId) {
+      console.warn("[inbox] Item missing offer_id:", rec);
+      continue;
+    }
+    results.push({
+      offer_id: offerId,
+      title: typeof rec.title === "string" ? rec.title : "Offre",
+      company: typeof rec.company === "string" ? rec.company : null,
+      country: typeof rec.country === "string" ? rec.country : null,
+      city: typeof rec.city === "string" ? rec.city : null,
+      score: normalizeScore(rec.score ?? rec.match_score),
+      reasons: Array.isArray(rec.reasons) ? (rec.reasons as string[]) : [],
+      matched_skills: Array.isArray(rec.matched_skills) ? (rec.matched_skills as string[]) : [],
+      missing_skills: Array.isArray(rec.missing_skills) ? (rec.missing_skills as string[]) : [],
+      rome: rec.rome && typeof rec.rome === "object" ? (rec.rome as { rome_code: string; rome_label: string }) : null,
+      is_vie: typeof rec.is_vie === "boolean" ? rec.is_vie : undefined,
+      skills_source: typeof rec.skills_source === "string" ? rec.skills_source : undefined,
     });
-  });
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([label, count]) => ({ label, count }));
+  }
+  return results;
 }
+
+// ============================================================================
+// Components
+// ============================================================================
+
+function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  actions,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  actions?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+      <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+        <Icon className="w-8 h-8 text-slate-400" />
+      </div>
+      <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
+      <p className="text-sm text-slate-500 max-w-md mb-6">{description}</p>
+      {actions}
+    </div>
+  );
+}
+
+function OfferCard({
+  offer,
+  onShortlist,
+  onDismiss,
+  onApply,
+  isShortlisted,
+  isPending,
+}: {
+  offer: NormalizedInboxItem;
+  onShortlist: () => void;
+  onDismiss: () => void;
+  onApply: () => void;
+  isShortlisted: boolean;
+  isPending: boolean;
+}) {
+  const location = [offer.city, offer.country].filter(Boolean).join(", ");
+
+  return (
+    <div className={`group bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm hover:shadow-lg transition-all flex flex-col h-full ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            {offer.is_vie && (
+              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
+                V.I.E
+              </span>
+            )}
+            <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+              Score · {offer.score}%
+            </span>
+          </div>
+
+          <h3 className="mt-3 text-base font-bold text-slate-900 leading-tight line-clamp-2">
+            {offer.title}
+          </h3>
+
+          <div className="mt-1 text-xs text-slate-500 flex items-center gap-1 flex-wrap">
+            {offer.company && <span className="font-medium text-slate-700">{offer.company}</span>}
+            {offer.company && location && <span>·</span>}
+            {location && (
+              <span className="flex items-center gap-0.5">
+                <MapPin className="w-3 h-3" />
+                {location}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Matched Skills (top 3) */}
+      {offer.matched_skills.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {offer.matched_skills.slice(0, 3).map((skill) => (
+            <span
+              key={skill}
+              className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100"
+            >
+              {skill}
+            </span>
+          ))}
+          {offer.matched_skills.length > 3 && (
+            <span className="text-[10px] text-slate-400">+{offer.matched_skills.length - 3}</span>
+          )}
+        </div>
+      )}
+
+      {/* Reasons */}
+      {offer.reasons.length > 0 && (
+        <div className="mt-3 space-y-1.5">
+          {offer.reasons.slice(0, 2).map((reason, idx) => (
+            <div key={idx} className="flex items-start gap-2 text-xs text-slate-600">
+              <Check className="mt-0.5 w-3 h-3 text-emerald-500 shrink-0" />
+              <span className="line-clamp-1">{reason}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
+        <button
+          onClick={onApply}
+          className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
+        >
+          Générer
+        </button>
+
+        <button
+          onClick={onShortlist}
+          disabled={isShortlisted}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+            isShortlisted
+              ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+              : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+          }`}
+        >
+          {isShortlisted ? "Shortlisté" : "Shortlist"}
+        </button>
+
+        <button
+          onClick={onDismiss}
+          className="ml-auto px-4 py-2 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition"
+        >
+          Écarter
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function FilterBar({
+  threshold,
+  onThresholdChange,
+  searchQuery,
+  onSearchChange,
+  onReset,
+  onShowAll,
+  receivedCount,
+  displayedCount,
+  maskedCount,
+  hasActiveFilters,
+}: {
+  threshold: number;
+  onThresholdChange: (value: number) => void;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onReset: () => void;
+  onShowAll: () => void;
+  receivedCount: number;
+  displayedCount: number;
+  maskedCount: number;
+  hasActiveFilters: boolean;
+}) {
+  return (
+    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-4">
+      <div className="flex flex-wrap items-center gap-4">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Filtrer par ville, pays, titre..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/30 outline-none transition"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => onSearchChange("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Threshold Pills */}
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-slate-400" />
+          <span className="text-xs text-slate-500 font-medium hidden sm:inline">Seuil:</span>
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            {THRESHOLD_OPTIONS.map((opt) => (
+              <button
+                key={opt}
+                onClick={() => onThresholdChange(opt)}
+                className={`px-2.5 py-1 text-xs font-medium rounded-lg transition ${
+                  threshold === opt
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {opt === 0 ? "Tous" : `${opt}%`}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Counters + Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-4">
+          <span className="text-slate-500">
+            Reçues: <strong className="text-slate-900">{receivedCount}</strong>
+          </span>
+          <span className="text-slate-500">
+            Affichées: <strong className="text-emerald-700">{displayedCount}</strong>
+          </span>
+          {maskedCount > 0 && (
+            <span className="text-slate-500">
+              Masquées: <strong className="text-amber-600">{maskedCount}</strong>
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {hasActiveFilters && (
+            <>
+              <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-medium">
+                Filtres actifs
+              </span>
+              <button
+                onClick={onReset}
+                className="text-xs text-rose-600 hover:text-rose-700 font-medium"
+              >
+                Réinitialiser
+              </button>
+              <button
+                onClick={onShowAll}
+                className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+              >
+                Tout afficher
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DebugDrawer({
+  isOpen,
+  onClose,
+  items,
+  displayedCount,
+  threshold,
+  searchQuery,
+  lastApiCall,
+  skillsSource,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  items: NormalizedInboxItem[];
+  displayedCount: number;
+  threshold: number;
+  searchQuery: string;
+  lastApiCall: LastApiCall | null;
+  skillsSource: SkillsSource;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed bottom-4 right-4 w-80 bg-slate-900 text-slate-100 rounded-xl shadow-2xl p-4 text-xs font-mono z-50">
+      <div className="flex items-center justify-between mb-3">
+        <span className="font-semibold text-emerald-400">Debug Inbox</span>
+        <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        <div>
+          <span className="text-slate-400">items.length:</span>{" "}
+          <span className="text-white">{items.length}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">displayed:</span>{" "}
+          <span className="text-white">{displayedCount}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">threshold:</span>{" "}
+          <span className="text-white">{threshold}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">search:</span>{" "}
+          <span className="text-white">{searchQuery || "(empty)"}</span>
+        </div>
+        <div>
+          <span className="text-slate-400">skillsSource:</span>{" "}
+          <span className="text-white">{skillsSource}</span>
+        </div>
+
+        {lastApiCall && (
+          <div className="mt-3 pt-3 border-t border-slate-700">
+            <div className="text-slate-400 mb-1">Last API call:</div>
+            <div>profile_id: {lastApiCall.profile_id.slice(0, 12)}...</div>
+            <div>min_score: {lastApiCall.min_score}</div>
+            <div>limit: {lastApiCall.limit}</div>
+            <div>response_items: {lastApiCall.response_items}</div>
+          </div>
+        )}
+
+        {items.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-slate-700">
+            <div className="text-slate-400 mb-1">First 3 items:</div>
+            {items.slice(0, 3).map((item) => (
+              <div key={item.offer_id} className="text-[10px] truncate">
+                {item.offer_id.slice(0, 8)}... | score={item.score}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
 
 export default function InboxPage() {
-  const { userProfile, profileHash } = useProfileStore();
-  const [items, setItems] = useState<InboxItem[]>([]);
+  const { userProfile, profileHash, setUserProfile } = useProfileStore();
+  const [items, setItems] = useState<NormalizedInboxItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [skillsSource, setSkillsSource] = useState<SkillsSource>("none");
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [threshold, setThreshold] = useState<number>(() => {
-    const stored = readJson<number>(`${STORAGE_PREFIX}_threshold`, DEFAULT_THRESHOLD);
-    return stored || DEFAULT_THRESHOLD;
+    const stored = readJson<number | null>(`${STORAGE_PREFIX}_threshold`, null);
+    return typeof stored === "number" ? stored : DEFAULT_THRESHOLD;
   });
   const [decisions, setDecisions] = useState<Record<string, DecisionRecord>>({});
-  const [applications, setApplications] = useState<Record<string, ApplicationRecord>>({});
-  const [applicationStatusMap, setApplicationStatusMap] = useState<Record<string, string>>({});
-  const [snapshots, setSnapshots] = useState<ScoreSnapshot[]>([]);
-
-  const lineChartRef = useRef<HTMLCanvasElement | null>(null);
-  const doughnutRef = useRef<HTMLCanvasElement | null>(null);
-  const lineChartInstance = useRef<Chart | null>(null);
-  const doughnutInstance = useRef<Chart | null>(null);
+  const [pendingDecisions, setPendingDecisions] = useState<Set<string>>(new Set());
+  const [trackerStatusMap, setTrackerStatusMap] = useState<Record<string, string>>({});
+  const [lastApiCall, setLastApiCall] = useState<LastApiCall | null>(null);
+  const [debugOpen, setDebugOpen] = useState(DEBUG_INBOX);
+  const loadedRef = useRef(false);
 
   const profileId = profileHash ?? "anonymous";
 
+  // Persist threshold
   useEffect(() => {
     writeJson(`${STORAGE_PREFIX}_threshold`, threshold);
   }, [threshold]);
 
+  // Load persisted decisions
   useEffect(() => {
     setDecisions(readJson<Record<string, DecisionRecord>>(storageKey(profileId, "decisions"), {}));
-    setApplications(readJson<Record<string, ApplicationRecord>>(storageKey(profileId, "applications"), {}));
-    setSnapshots(readJson<ScoreSnapshot[]>(storageKey(profileId, "snapshots"), []));
   }, [profileId]);
 
+  // Persist decisions
   useEffect(() => {
     writeJson(storageKey(profileId, "decisions"), decisions);
   }, [decisions, profileId]);
 
-  useEffect(() => {
-    writeJson(storageKey(profileId, "applications"), applications);
-  }, [applications, profileId]);
-
-  useEffect(() => {
-    writeJson(storageKey(profileId, "snapshots"), snapshots);
-  }, [snapshots, profileId]);
-
+  // Load inbox from API - APPROACH B: client filters, API min_score=0
   const load = useCallback(async () => {
     if (!userProfile) return;
     setLoading(true);
     setError(null);
-    try {
-      const data = await fetchInbox(userProfile, profileId, threshold, 60);
-      setItems(data.items);
+    setProfileIncomplete(false);
 
-      const newItems = data.items.filter(
-        (item) => !decisions[item.offer_id] && applications[item.offer_id]?.status !== "APPLIED"
+    try {
+      const { profile: matchingProfile, skillsSource: source, needsSeedHydration } = buildMatchingProfile(
+        userProfile as Record<string, unknown>,
+        profileId
       );
-      const avgNew = average(newItems.map((item) => item.score)) ?? 0;
-      const today = new Date().toISOString().slice(0, 10);
-      setSnapshots((prev) => {
-        const existing = prev.filter((snap) => snap.date !== today);
-        const updated = [{ date: today, avgScoreNew: avgNew, countNew: newItems.length }, ...existing];
-        return updated.slice(0, SNAPSHOT_LIMIT);
+
+      setSkillsSource(source);
+
+      // PROD: Block if no skills
+      if (source === "none" && !import.meta.env.DEV) {
+        setProfileIncomplete(true);
+        setLoading(false);
+        return;
+      }
+
+      // DEV: Hydrate with SEED_PROFILE if needed
+      if (needsSeedHydration && import.meta.env.DEV) {
+        console.warn("[inbox] Hydrating with SEED_PROFILE");
+        await setUserProfile({ ...SEED_PROFILE, id: SEED_PROFILE.id });
+        return;
+      }
+
+      // CRITICAL: Call API with min_score=0, let client filter
+      const apiMinScore = 0;
+      const apiLimit = 100;
+
+      if (DEBUG_INBOX) {
+        console.info("[inbox] Calling API with:", { profile_id: profileId, min_score: apiMinScore, limit: apiLimit });
+      }
+
+      const data = await fetchInbox(matchingProfile, profileId, apiMinScore, apiLimit);
+
+      setLastApiCall({
+        timestamp: new Date().toISOString(),
+        profile_id: profileId,
+        min_score: apiMinScore,
+        limit: apiLimit,
+        response_items: Array.isArray(data.items) ? data.items.length : 0,
       });
+
+      if (DEBUG_INBOX) {
+        console.info("[inbox] API response:", {
+          items_count: Array.isArray(data.items) ? data.items.length : "NOT_ARRAY",
+          total_matched: data.total_matched,
+          total_decided: data.total_decided,
+          first_item: data.items?.[0],
+        });
+      }
+
+      const normalized = normalizeInboxItems(data.items);
+      setItems(normalized);
+
+      if (DEBUG_INBOX) {
+        console.info("[inbox] Normalized items:", normalized.length);
+      }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Erreur inconnue");
+      const msg = e instanceof Error ? e.message : "Erreur inconnue";
+      setError(msg);
+      console.error("[inbox] Load error:", e);
     } finally {
       setLoading(false);
     }
-  }, [userProfile, profileId, threshold, decisions, applications]);
+  }, [userProfile, profileId, setUserProfile]);
 
+  // Initial load
   useEffect(() => {
-    load();
+    if (!loadedRef.current) {
+      loadedRef.current = true;
+      load();
+    }
   }, [load]);
 
+  // Load tracker status
   useEffect(() => {
     const fetchTracker = async () => {
       try {
@@ -230,705 +580,318 @@ export default function InboxPage() {
         data.items.forEach((item) => {
           nextMap[item.offer_id] = item.status;
         });
-        setApplicationStatusMap(nextMap);
+        setTrackerStatusMap(nextMap);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erreur inconnue");
+        console.warn("[inbox] tracker fetch failed:", err);
       }
     };
     fetchTracker();
   }, []);
 
-  const handleDecision = (offerId: string, status: DecisionStatus, score: number) => {
+  // ============================================================================
+  // Filtering Logic - TRUTH FROM API ITEMS
+  // ============================================================================
+
+  // Received = what API returned
+  const receivedCount = items.length;
+
+  // Available = received minus already decided (local)
+  const availableItems = useMemo(
+    () => items.filter((item) => !decisions[item.offer_id]),
+    [items, decisions]
+  );
+
+  // Displayed = available after threshold + search filters
+  const displayedItems = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return availableItems
+      .filter((item) => {
+        // Threshold filter
+        if (item.score < threshold) return false;
+        // Search filter
+        if (!query) return true;
+        const searchable = [item.city, item.country, item.title, item.company]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return searchable.includes(query);
+      })
+      .sort((a, b) => b.score - a.score); // Sort by score desc
+  }, [availableItems, threshold, searchQuery]);
+
+  const displayedCount = displayedItems.length;
+  const maskedCount = receivedCount - displayedCount;
+  const hasActiveFilters = threshold > 0 || searchQuery.trim() !== "";
+
+  // ============================================================================
+  // Handlers
+  // ============================================================================
+
+  const handleDecision = async (offerId: string, status: DecisionStatus, score: number) => {
+    // Optimistic update
+    setPendingDecisions((prev) => new Set(prev).add(offerId));
     setDecisions((prev) => ({
       ...prev,
       [offerId]: { status, score, updated_at: new Date().toISOString() },
     }));
-    postDecision(offerId, profileId, status);
-  };
 
-  const handleApply = (item: InboxItem) => {
-    setApplications((prev) => ({
-      ...prev,
-      [item.offer_id]: {
-        status: "APPLIED",
-        applied_at: new Date().toISOString(),
-        score: item.score,
-        title: item.title,
-        company: item.company,
-        city: item.city,
-        country: item.country,
-        reasons: item.reasons,
-      },
-    }));
-  };
-
-  const handleShortlistTracker = async (offerId: string) => {
-    if (applicationStatusMap[offerId]) {
-      return;
-    }
     try {
-      await upsertApplication({
-        offer_id: offerId,
-        status: "shortlisted",
-        note: null,
-        next_follow_up_date: null,
-      });
-      setApplicationStatusMap((prev) => ({ ...prev, [offerId]: "shortlisted" }));
+      await postDecision(offerId, profileId, status);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      // Rollback on error
+      console.error("[inbox] Decision failed, rolling back:", err);
+      setDecisions((prev) => {
+        const next = { ...prev };
+        delete next[offerId];
+        return next;
+      });
+    } finally {
+      setPendingDecisions((prev) => {
+        const next = new Set(prev);
+        next.delete(offerId);
+        return next;
+      });
     }
   };
 
-  const handleResponded = (offerId: string) => {
-    setApplications((prev) => {
-      const existing = prev[offerId];
-      if (!existing) return prev;
-      return {
-        ...prev,
-        [offerId]: {
-          ...existing,
-          status: "RESPONDED",
-          responded_at: new Date().toISOString(),
-        },
-      };
-    });
+  const handleShortlist = async (offerId: string, score: number) => {
+    await handleDecision(offerId, "SHORTLISTED", score);
+
+    // Also persist to tracker
+    if (!trackerStatusMap[offerId]) {
+      try {
+        await upsertApplication({
+          offer_id: offerId,
+          status: "shortlisted",
+          note: null,
+          next_follow_up_date: null,
+        });
+        setTrackerStatusMap((prev) => ({ ...prev, [offerId]: "shortlisted" }));
+      } catch (err) {
+        console.warn("[inbox] shortlist tracker failed:", err);
+      }
+    }
   };
 
-  const shortlistScores = useMemo(() => {
-    return Object.values(decisions)
-      .filter((decision) => decision.status === "SHORTLISTED")
-      .map((decision) => decision.score);
-  }, [decisions]);
+  const handleApply = (item: NormalizedInboxItem) => {
+    console.log("[inbox] Apply clicked for:", item.offer_id);
+    // TODO: Open generate modal
+  };
 
-  const appliedScores = useMemo(() => {
-    return Object.values(applications)
-      .filter((record) => record.status === "APPLIED")
-      .map((record) => record.score)
-      .filter((score): score is number => typeof score === "number");
-  }, [applications]);
+  const handleResetFilters = () => {
+    setThreshold(DEFAULT_THRESHOLD);
+    setSearchQuery("");
+  };
 
-  const avgShortlist = average(shortlistScores);
-  const avgApplied = average(appliedScores);
+  const handleShowAll = () => {
+    setThreshold(0);
+    setSearchQuery("");
+  };
 
-  const appliedCount = Object.values(applications).filter((record) => record.status === "APPLIED").length;
-  const respondedCount = Object.values(applications).filter((record) => record.status === "RESPONDED").length;
-  const shortlistCount = Object.values(decisions).filter((decision) => decision.status === "SHORTLISTED").length;
+  // ============================================================================
+  // Render States
+  // ============================================================================
 
-  const actionRate = shortlistCount > 0 ? (appliedCount / shortlistCount) * 100 : null;
-  const responseRate = appliedCount > 0 ? (respondedCount / appliedCount) * 100 : null;
-
-  const newItems = useMemo(
-    () => items.filter((item) => !decisions[item.offer_id] && !applications[item.offer_id]),
-    [items, decisions, applications]
-  );
-
-  const avgNew = useMemo(() => average(newItems.map((item) => item.score)), [newItems]);
-
-  const topOffers = useMemo(
-    () => [...newItems].sort((a, b) => b.score - a.score).slice(0, 5),
-    [newItems]
-  );
-
-  const recentForThreshold = newItems.slice(0, 20);
-  const aboveThreshold = recentForThreshold.filter((item) => item.score >= threshold).length;
-  const thresholdRate =
-    recentForThreshold.length > 0 ? (aboveThreshold / recentForThreshold.length) * 100 : null;
-
-  const missingSkills = buildKeywordCounts(newItems);
-
-  const followUps = Object.entries(applications)
-    .filter(([, record]) => record.status === "APPLIED" && record.applied_at)
-    .map(([offerId, record]) => ({ offerId, ...record }))
-    .filter((record) => daysSince(record.applied_at) >= 7)
-    .slice(0, 5);
-
-  useEffect(() => {
-    if (!lineChartRef.current) return;
-    if (lineChartInstance.current) {
-      lineChartInstance.current.destroy();
-    }
-
-    const labels = [...snapshots].reverse().map((snap) => formatDateLabel(snap.date));
-    const dataPoints = [...snapshots].reverse().map((snap) => snap.avgScoreNew);
-
-    lineChartInstance.current = new Chart(lineChartRef.current, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [
-          {
-            data: dataPoints,
-            borderColor: "#0f172a",
-            borderWidth: 1.5,
-            backgroundColor: (context) => {
-              const ctx = context.chart.ctx;
-              const gradient = ctx.createLinearGradient(0, 0, 0, 140);
-              gradient.addColorStop(0, "rgba(15, 23, 42, 0.08)");
-              gradient.addColorStop(1, "rgba(15, 23, 42, 0)");
-              return gradient;
-            },
-            fill: true,
-            tension: 0.4,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            pointHoverBackgroundColor: "#0f172a",
-            pointHoverBorderColor: "#fff",
-            pointHoverBorderWidth: 2,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            enabled: true,
-            intersect: false,
-            mode: "index",
-            backgroundColor: "#1e293b",
-            padding: 8,
-            cornerRadius: 8,
-            displayColors: false,
-            bodyFont: { family: "'Inter', sans-serif", size: 12 },
-            titleFont: { family: "'Inter', sans-serif", size: 12, weight: 500 },
-          },
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: "#94a3b8", font: { size: 10, family: "'Inter', sans-serif" } },
-            border: { display: false },
-          },
-          y: { display: false, min: 0, max: 100 },
-        },
-        interaction: { mode: "nearest", axis: "x", intersect: false },
-      },
-    });
-
-    return () => {
-      lineChartInstance.current?.destroy();
-    };
-  }, [snapshots]);
-
-  useEffect(() => {
-    if (!doughnutRef.current) return;
-    if (doughnutInstance.current) {
-      doughnutInstance.current.destroy();
-    }
-
-    const dataValue = thresholdRate ?? 0;
-
-    doughnutInstance.current = new Chart(doughnutRef.current, {
-      type: "doughnut",
-      data: {
-        labels: ["Au-dessus", "Reste"],
-        datasets: [
-          {
-            data: [dataValue, Math.max(0, 100 - dataValue)],
-            backgroundColor: ["#0ea5e9", "#e0f2fe"],
-            borderWidth: 0,
-            hoverOffset: 0,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: "75%",
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        animation: { animateScale: true, animateRotate: true },
-      },
-    });
-
-    return () => {
-      doughnutInstance.current?.destroy();
-    };
-  }, [thresholdRate]);
-
+  // State A: No profile loaded
   if (!userProfile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gray-50">
-        <p className="text-gray-600">Aucun profil charg&eacute;.</p>
-        <Link to="/analyze" className="text-blue-600 underline">
-          Analyser un CV
-        </Link>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <EmptyState
+          icon={FileText}
+          title="Aucun profil chargé"
+          description="Importez votre CV ou créez un profil pour voir les offres."
+          actions={
+            <div className="flex gap-3">
+              <Link to="/analyze" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
+                Importer CV
+              </Link>
+              <Link to="/profile" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
+                Créer profil
+              </Link>
+            </div>
+          }
+        />
       </div>
     );
   }
 
-  const todayLabel = new Date().toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
-  return (
-    <div className="min-h-screen flex items-center justify-center antialiased lg:p-8 text-slate-800 bg-slate-400 px-4 py-4">
-      <div className="overflow-hidden grid grid-cols-12 lg:p-8 bg-slate-50 w-full max-w-screen-2xl rounded-[2.5rem] pt-6 pr-6 pb-6 pl-6 relative shadow-2xl gap-x-8 gap-y-8">
-        <div className="absolute inset-0 bg-white/40 pointer-events-none"></div>
-
-        <div className="col-span-12 lg:col-span-9 flex flex-col gap-8 z-10">
-          <header className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span className="iconify text-slate-900 w-8 h-8">
-                <Gem className="w-8 h-8" />
-              </span>
-              <span className="text-2xl text-slate-900 font-semibold tracking-tight">Elevia</span>
-            </div>
-
-            <nav className="hidden md:flex items-center bg-white shadow-sm border border-slate-100 rounded-full p-1.5 gap-1">
-              <button className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 rounded-full transition-colors group">
-                <span className="iconify text-lg group-hover:scale-110 transition-transform">
-                  <LayoutDashboard className="w-5 h-5" />
-                </span>
-                <span className="text-sm font-medium">Cockpit</span>
-              </button>
-              <button className="flex items-center gap-2 px-5 py-2.5 text-slate-500 hover:bg-slate-50 rounded-full transition-colors group">
-                <span className="iconify text-lg group-hover:scale-110 transition-transform">
-                  <Building2 className="w-5 h-5" />
-                </span>
-                <span className="text-sm font-medium">Offres</span>
-              </button>
-              <Link
-                to="/applications"
-                className="flex items-center gap-2 px-5 py-2.5 text-slate-500 hover:bg-slate-50 rounded-full transition-colors group"
-              >
-                <span className="iconify text-lg group-hover:scale-110 transition-transform">
-                  <MessageSquare className="w-5 h-5" />
-                </span>
-                <span className="text-sm font-medium">Candidatures</span>
-              </Link>
-            </nav>
-
-            <div className="flex items-center gap-4">
-              <button className="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 rounded-full text-slate-500 hover:text-slate-800 transition">
-                <span className="iconify text-xl">
-                  <MessageSquare className="w-5 h-5" />
-                </span>
-              </button>
-              <button className="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 rounded-full text-slate-500 hover:text-slate-800 transition relative">
-                <span className="iconify text-xl">
-                  <Bell className="w-5 h-5" />
-                </span>
-                <span className="absolute top-3 right-3.5 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
-              </button>
-              <div className="flex gap-3 pl-2 items-center cursor-pointer group">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt="Utilisateur"
-                  className="w-11 h-11 object-cover ring-white ring-2 rounded-full shadow-sm"
-                />
-                <div className="hidden xl:block leading-tight">
-                  <div className="text-sm font-medium text-slate-900 group-hover:text-rose-600 transition-colors">
-                    Akim Guentas
-                  </div>
-                  <div className="text-xs text-slate-400">inbox@elevia.app</div>
-                </div>
-                <span className="iconify text-slate-400 hidden xl:block group-hover:text-slate-600 transition-colors">
-                  <ChevronDown className="w-4 h-4" />
-                </span>
-              </div>
-            </div>
-          </header>
-
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
-              <div className="text-slate-400 text-sm font-medium">{todayLabel}</div>
-              <div className="h-4 w-px bg-slate-300 hidden sm:block"></div>
-              <button className="hidden sm:flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm text-slate-500 hover:text-slate-800 hover:shadow-md transition-all">
-                <span className="iconify">
-                  <Filter className="w-4 h-4" />
-                </span>
-              </button>
-
-              <div className="relative group">
-                <span className="iconify absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-slate-800 transition-colors">
-                  <Search className="w-4 h-4" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Filtrer par ville ou pays"
-                  className="pl-11 pr-4 py-3 bg-white rounded-full text-sm font-medium text-slate-700 placeholder-slate-400 shadow-sm border-none focus:ring-2 focus:ring-rose-500/20 outline-none w-64 transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="flex bg-white p-1.5 rounded-full shadow-sm">
-              <button
-                className={`px-6 py-2 text-sm font-medium rounded-full shadow-sm hover:shadow transition-shadow ${
-                  threshold === 65 ? "bg-rose-50 text-rose-600" : "text-slate-400"
-                }`}
-                onClick={() => setThreshold(65)}
-              >
-                Seuil 65
-              </button>
-              <button
-                className={`px-6 py-2 text-sm font-medium rounded-full hover:bg-slate-50 transition-colors ${
-                  threshold === 75 ? "bg-rose-50 text-rose-600" : "text-slate-400"
-                }`}
-                onClick={() => setThreshold(75)}
-              >
-                Seuil 75
-              </button>
-            </div>
+  // State B: Profile incomplete (PROD only)
+  if (profileIncomplete) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 max-w-md text-center">
+          <AlertCircle className="w-10 h-10 text-amber-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-amber-900 mb-2">Profil incomplet</h3>
+          <p className="text-sm text-amber-700 mb-6">
+            Votre profil ne contient pas de compétences.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Link to="/analyze" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-amber-600 text-white hover:bg-amber-700 transition">
+              Importer CV
+            </Link>
           </div>
-
-          <div className="min-h-[420px] flex flex-col overflow-hidden group bg-gradient-to-br from-slate-500 via-slate-400 to-slate-100 rounded-[2rem] p-8 relative justify-between shadow-inner">
-            <div className="z-10 flex gap-12 mt-4 relative">
-              <div className="">
-                <div className="text-sm font-medium text-slate-100/90 mb-1">Match moyen (Shortlist)</div>
-                <div className="text-5xl text-white font-semibold tracking-tight">
-                  {avgShortlist === null ? "—" : formatScore(avgShortlist)}
-                  {avgShortlist === null ? null : (
-                    <span className="text-2xl text-slate-200 ml-1 font-medium">%</span>
-                  )}
-                </div>
-              </div>
-              <div className="">
-                <div className="text-sm font-medium text-slate-100/90 mb-1">Match moyen (Candidatures)</div>
-                <div className="text-5xl text-white font-semibold tracking-tight">
-                  {avgApplied === null ? "—" : formatScore(avgApplied)}
-                  {avgApplied === null ? null : (
-                    <span className="text-2xl text-slate-200 ml-1 font-medium">%</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap max-w-2xl z-10 mt-auto relative gap-5">
-              <div
-                className="bg-gradient-to-br from-white/90 to-white/40 w-64 rounded-3xl p-5 shadow-xl backdrop-blur-md"
-                style={{
-                  position: "relative",
-                  "--border-gradient":
-                    "linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2))",
-                  "--border-radius-before": "24px",
-                } as CSSProperties}
-              >
-                <div className="flex items-center gap-2 mb-6 text-emerald-800">
-                  <span className="iconify text-xl">
-                    <Check className="w-5 h-5" />
-                  </span>
-                  <span className="text-sm font-medium">Taux d'action</span>
-                </div>
-                <div className="flex items-end justify-between">
-                  <div className="text-3xl text-emerald-900 font-semibold tracking-tight">
-                    {formatPercent(actionRate)}
-                  </div>
-                  <div className="text-emerald-700 text-sm font-medium mb-1.5">
-                    {shortlistCount === 0 ? "—" : `${appliedCount}/${shortlistCount}`}
-                  </div>
-                </div>
-                <div className="mt-3 h-1.5 w-full bg-emerald-900/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-600 rounded-full"
-                    style={{ width: `${actionRate ?? 0}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div
-                className="bg-gradient-to-br from-white/90 to-white/40 w-64 rounded-3xl p-5 shadow-xl backdrop-blur-md"
-                style={{
-                  position: "relative",
-                  "--border-gradient":
-                    "linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2))",
-                  "--border-radius-before": "24px",
-                } as CSSProperties}
-              >
-                <div className="flex items-center gap-2 mb-6 text-sky-800">
-                  <span className="iconify text-xl">
-                    <ChevronRight className="w-5 h-5" />
-                  </span>
-                  <span className="text-sm font-medium">Taux de réponse</span>
-                </div>
-                <div className="flex items-end justify-between">
-                  <div className="text-3xl text-sky-900 font-semibold tracking-tight">
-                    {formatPercent(responseRate)}
-                  </div>
-                  <div className="bg-sky-200 px-2 py-0.5 rounded-md text-sky-800 text-xs font-medium mb-1">
-                    {appliedCount === 0 ? "—" : `${respondedCount}/${appliedCount}`}
-                  </div>
-                </div>
-                <div className="mt-3 h-1.5 w-full bg-sky-900/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-sky-500 rounded-full"
-                    style={{ width: `${responseRate ?? 0}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            <div className="md:col-span-3 bg-white rounded-[2rem] p-6 flex flex-col justify-between shadow-sm border border-slate-100 relative overflow-hidden group">
-              <div className="flex items-center gap-2 mb-4 z-10">
-                <span className="iconify text-slate-900 w-4 h-4">
-                  <Gem className="w-4 h-4" />
-                </span>
-                <span className="font-medium text-slate-900 text-sm">Compétences manquantes</span>
-              </div>
-
-              <div className="flex items-end justify-between gap-1 h-24 mt-2 z-10">
-                {[
-                  "w-full bg-slate-100 rounded-t-md h-[40%] group-hover:bg-rose-100 transition-colors duration-300",
-                  "w-full bg-slate-100 rounded-t-md h-[70%] group-hover:bg-rose-200 transition-colors duration-500",
-                  "w-full bg-slate-100 rounded-t-md h-[50%] group-hover:bg-rose-100 transition-colors duration-300",
-                  "w-full bg-slate-800 rounded-t-md h-[100%] shadow-lg shadow-slate-200 relative group-hover:-translate-y-1 transition-transform duration-300",
-                  "w-full bg-slate-100 rounded-t-md h-[60%] group-hover:bg-rose-100 transition-colors duration-500",
-                ].map((className, index) => {
-                  const item = missingSkills[index === 3 ? 0 : index];
-                  const max = missingSkills[0]?.count ?? 1;
-                  const height = item ? Math.max(25, (item.count / max) * 100) : 20;
-                  const isPrimary = index === 3;
-                  return (
-                    <div
-                      key={`bar-${index}`}
-                      className={className}
-                      style={{ height: `${height}%` }}
-                    >
-                      {isPrimary && item && (
-                        <div className="w-full h-full flex items-start justify-center pt-2">
-                          <span className="text-[10px] text-white font-medium">{item.count}</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-4 z-10">
-                <h3 className="font-medium text-slate-900 leading-tight">
-                  {missingSkills[0]?.label ?? "—"}
-                </h3>
-                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                  Top 3 mots-clés extraits des raisons ({missingSkills.length}/3)
-                </p>
-              </div>
-            </div>
-
-            <div className="md:col-span-5 flex flex-col bg-white border-slate-100 border rounded-[2rem] p-6 shadow-sm justify-between">
-              <div className="flex justify-between items-start mb-6">
-                <h3 className="text-lg font-medium text-slate-900 tracking-tight">
-                  Tendance du match moyen
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-6 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 border border-slate-100">
-                    <span className="iconify text-xl">
-                      <LayoutDashboard className="w-5 h-5" />
-                    </span>
-                  </div>
-                  <div className="">
-                    <div className="text-xs text-slate-400 font-medium">Match moyen (NEW)</div>
-                    <div className="text-xl font-semibold text-slate-900 tracking-tight">
-                      {avgNew === null ? "—" : `${formatScore(avgNew)}%`}
-                    </div>
-                  </div>
-                </div>
-                <div className="h-8 w-px bg-slate-100"></div>
-                <div className="bg-slate-50 rounded-xl px-3 py-2 border border-slate-100">
-                  <div className="text-xs text-slate-400 mb-0.5">Offres analysées</div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-semibold text-slate-900">{items.length}</span>
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-4 flex-1 min-h-0">
-                <div className="flex-1 flex flex-col min-w-0">
-                  <div className="text-xs text-slate-400 font-medium mb-4">Match moyen (7 jours)</div>
-                  <div className="flex-1 w-full relative min-h-[140px]">
-                    <canvas ref={lineChartRef} style={{ width: "100%", height: "100%" }}></canvas>
-                  </div>
-                </div>
-                <div className="bg-sky-50 rounded-2xl p-3 w-28 flex flex-col justify-between relative overflow-hidden shrink-0">
-                  <div className="flex justify-between items-start z-10">
-                    <span className="text-xs text-sky-700 font-medium">Offres ≥ seuil</span>
-                    <span className="iconify text-sky-400 text-xs">
-                      <ChevronRight className="w-3 h-3" />
-                    </span>
-                  </div>
-                  <div className="relative z-10 mt-auto">
-                    <div className="text-lg font-semibold text-sky-900 mb-1 tracking-tight">
-                      {formatPercent(thresholdRate)}
-                    </div>
-                    <div className="text-[10px] text-sky-600/70 font-medium leading-tight">
-                      seuil {threshold}
-                    </div>
-                  </div>
-                  <div className="absolute -bottom-6 -right-6 w-24 h-24 opacity-80 pointer-events-none">
-                    <canvas ref={doughnutRef}></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="md:col-span-4 bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 flex flex-col">
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="text-lg font-medium text-slate-900 tracking-tight">Relances / À faire</h3>
-                <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-50 transition text-slate-400">
-                  <span className="iconify">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </span>
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {followUps.length === 0 && (
-                  <div className="text-sm text-slate-400">Aucune relance en attente.</div>
-                )}
-                {followUps.map((followUp) => (
-                  <div key={followUp.offerId} className="flex items-start gap-3 group cursor-pointer">
-                    <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        followUp.company || "Elevia"
-                      )}&background=E2E8F0&color=475569`}
-                      className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-50 group-hover:ring-rose-100 transition-all"
-                      alt="avatar"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline">
-                        <div className="text-sm font-medium text-slate-900 truncate group-hover:text-rose-600 transition-colors">
-                          {followUp.company || "Entreprise"}
-                        </div>
-                        <div className="w-10 h-5 flex items-center justify-center bg-[#ecfccb] text-[#4d7c0f] text-[10px] font-bold rounded-full">
-                          J+{daysSince(followUp.applied_at)}
-                        </div>
-                      </div>
-                      <div className="text-xs text-slate-400 truncate">{followUp.title}</div>
-                      <button
-                        className="mt-2 text-xs text-rose-500 hover:text-rose-600"
-                        onClick={() => handleResponded(followUp.offerId)}
-                      >
-                        Marquer répondu
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {loading && <div className="text-sm text-slate-400">Chargement…</div>}
-          {error && <div className="text-sm text-rose-500">{error}</div>}
-        </div>
-
-        <div className="col-span-12 lg:col-span-3 z-10 flex flex-col gap-6 border-t lg:border-t-0 lg:border-l border-slate-200/60 lg:pl-8 pt-8 lg:pt-0">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium text-slate-900 tracking-tight">Inbox (Top offers)</h2>
-            <button className="flex items-center gap-1 text-xs font-medium text-slate-500 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-100 hover:bg-slate-50 transition-colors">
-              Tri score
-              <span className="iconify text-slate-400">
-                <ChevronDown className="w-3 h-3" />
-              </span>
-            </button>
-          </div>
-
-          {topOffers.length === 0 && (
-            <div className="text-sm text-slate-400">Aucune offre disponible.</div>
-          )}
-
-          {topOffers.map((offer) => (
-            <div key={offer.offer_id} className="group hover:shadow-lg transition-all bg-white border-slate-100 border rounded-[2rem] p-3 shadow-sm">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl mb-4">
-                <img
-                  src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800&auto=format&fit=crop"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  alt="Offre"
-                />
-                <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur text-slate-400 flex items-center justify-center rounded-full hover:text-rose-500 transition-colors shadow-sm">
-                  <span className="iconify text-lg">
-                    <Heart className="w-4 h-4" />
-                  </span>
-                </button>
-              </div>
-              <div className="px-2 pb-2">
-                <div className="flex justify-between items-start mb-1">
-                  <div className="text-emerald-600 text-sm font-semibold">
-                    {offer.score}% <span className="text-slate-400 font-normal text-xs">match</span>
-                  </div>
-                  <button className="text-slate-400 hover:text-slate-800 transition-colors">
-                    <span className="iconify">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </span>
-                  </button>
-                </div>
-                <h3 className="text-base font-medium text-slate-900 mb-0.5 tracking-tight">
-                  {offer.title}
-                </h3>
-                <div className="text-xs text-slate-400 mb-4">
-                  {[offer.company, offer.city, offer.country].filter(Boolean).join(" · ") || "—"}
-                </div>
-                {offer.rome && (
-                  <div className="text-xs text-slate-500 mb-4">
-                    <span className="font-medium text-slate-600">ROME:</span> {offer.rome.rome_code} —{" "}
-                    {offer.rome.rome_label}
-                  </div>
-                )}
-                {offer.rome_competences && offer.rome_competences.length > 0 && (
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {offer.rome_competences.slice(0, 3).map((competence) => (
-                      <span
-                        key={competence.competence_code}
-                        className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500"
-                      >
-                        {competence.competence_label}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between border-t border-slate-100 pt-3">
-                  <button
-                    className={`flex items-center gap-1.5 ${
-                      applicationStatusMap[offer.offer_id] ? "text-emerald-600" : "text-slate-500"
-                    }`}
-                    onClick={() => handleShortlistTracker(offer.offer_id)}
-                    disabled={Boolean(applicationStatusMap[offer.offer_id])}
-                  >
-                    <span className="text-xs font-medium">
-                      {applicationStatusMap[offer.offer_id] === "shortlisted"
-                        ? "Shortlisted"
-                        : applicationStatusMap[offer.offer_id]
-                          ? applicationStatusMap[offer.offer_id]
-                          : "Shortlist"}
-                    </span>
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 text-slate-500"
-                    onClick={() => handleDecision(offer.offer_id, "DISMISSED", offer.score)}
-                  >
-                    <span className="text-xs font-medium">Dismiss</span>
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 text-slate-500"
-                    onClick={() => handleApply(offer)}
-                  >
-                    <span className="text-xs font-medium">Apply</span>
-                  </button>
-                </div>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {offer.reasons.slice(0, 3).map((reason) => (
-                    <span
-                      key={reason}
-                      className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500"
-                    >
-                      {reason}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
+    );
+  }
+
+  // State C: API error
+  if (error && !loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <EmptyState
+          icon={AlertCircle}
+          title="Erreur de chargement"
+          description={error}
+          actions={
+            <button onClick={load} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-2">
+              <RefreshCw className="w-4 h-4" />
+              Réessayer
+            </button>
+          }
+        />
+      </div>
+    );
+  }
+
+  // Main render
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <header className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <Inbox className="w-7 h-7 text-slate-900" />
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Inbox</h1>
+              {import.meta.env.DEV && skillsSource === "seed" && (
+                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-medium rounded-full border border-emerald-200">
+                  Seed
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              {DEBUG_INBOX && (
+                <button
+                  onClick={() => setDebugOpen(!debugOpen)}
+                  className={`p-2 rounded-lg transition ${debugOpen ? "bg-emerald-100 text-emerald-700" : "text-slate-400 hover:text-slate-600"}`}
+                >
+                  <Bug className="w-4 h-4" />
+                </button>
+              )}
+              <Link to="/applications" className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition">
+                <Sparkles className="w-4 h-4" />
+                Candidatures
+              </Link>
+            </div>
+          </div>
+          <p className="text-sm text-slate-500">
+            Offres correspondant à votre profil.
+          </p>
+        </header>
+
+        {/* Filters */}
+        <div className="mb-6">
+          <FilterBar
+            threshold={threshold}
+            onThresholdChange={setThreshold}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onReset={handleResetFilters}
+            onShowAll={handleShowAll}
+            receivedCount={receivedCount}
+            displayedCount={displayedCount}
+            maskedCount={maskedCount}
+            hasActiveFilters={hasActiveFilters}
+          />
+        </div>
+
+        {/* Loading */}
+        {loading && (
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900" />
+          </div>
+        )}
+
+        {/* Content */}
+        {!loading && (
+          <>
+            {/* State D: No offers from API */}
+            {receivedCount === 0 && (
+              <EmptyState
+                icon={Inbox}
+                title="Aucune offre disponible"
+                description="L'API n'a renvoyé aucune offre. Vérifiez votre connexion ou réessayez."
+                actions={
+                  <button onClick={load} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Actualiser
+                  </button>
+                }
+              />
+            )}
+
+            {/* State E: Offers received but all filtered */}
+            {receivedCount > 0 && displayedCount === 0 && (
+              <EmptyState
+                icon={Filter}
+                title="Tes filtres masquent tout"
+                description={`${maskedCount} offre${maskedCount > 1 ? "s" : ""} reçue${maskedCount > 1 ? "s" : ""} mais masquée${maskedCount > 1 ? "s" : ""} par tes filtres.`}
+                actions={
+                  <div className="flex gap-3">
+                    <button onClick={handleResetFilters} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
+                      Réinitialiser filtres
+                    </button>
+                    <button onClick={handleShowAll} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
+                      Tout afficher
+                    </button>
+                  </div>
+                }
+              />
+            )}
+
+            {/* Offers Grid */}
+            {displayedCount > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedItems.map((offer) => (
+                  <OfferCard
+                    key={offer.offer_id}
+                    offer={offer}
+                    onShortlist={() => handleShortlist(offer.offer_id, offer.score)}
+                    onDismiss={() => handleDecision(offer.offer_id, "DISMISSED", offer.score)}
+                    onApply={() => handleApply(offer)}
+                    isShortlisted={trackerStatusMap[offer.offer_id] === "shortlisted"}
+                    isPending={pendingDecisions.has(offer.offer_id)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {displayedCount > 0 && (
+              <div className="mt-6 flex justify-center">
+                <span className="flex items-center gap-2 text-xs text-slate-400">
+                  <ChevronDown className="w-4 h-4" />
+                  Triées par score décroissant
+                </span>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Debug Drawer */}
+      {DEBUG_INBOX && (
+        <DebugDrawer
+          isOpen={debugOpen}
+          onClose={() => setDebugOpen(false)}
+          items={items}
+          displayedCount={displayedCount}
+          threshold={threshold}
+          searchQuery={searchQuery}
+          lastApiCall={lastApiCall}
+          skillsSource={skillsSource}
+        />
+      )}
     </div>
   );
 }

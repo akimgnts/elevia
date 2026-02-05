@@ -10,6 +10,8 @@ from typing import Dict, List, Set, Optional
 import re
 from dataclasses import dataclass
 
+import os
+import logging
 
 # Mapping ordinal fixe pour les niveaux d'études (spec ligne 130-132)
 EDUCATION_LEVELS: Dict[str, int] = {
@@ -32,10 +34,41 @@ class ExtractedProfile:
     languages: frozenset  # Set immuable de langues normalisées
     education_level: int  # Niveau ordinal (0 si non spécifié)
     preferred_countries: frozenset  # Set immuable de pays canonisés
+    skill_source: str = "skills"
+    matching_skills_count: int = 0
+    capabilities_count: int = 0
 
 
 _SKILL_WS_RE = re.compile(r"\s+")
 _SKILL_PUNCT_RE = re.compile(r"[^\w\s\+#]", flags=re.UNICODE)
+
+logger = logging.getLogger(__name__)
+
+
+def _debug_matching_enabled() -> bool:
+    value = os.getenv("ELEVIA_DEBUG_MATCHING", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _sample_list(values, limit=50):
+    sample = []
+    for item in values:
+        if isinstance(item, str):
+            sample.append(item)
+        elif isinstance(item, dict):
+            if "name" in item:
+                sample.append(str(item.get("name")))
+            elif "label" in item:
+                sample.append(str(item.get("label")))
+            elif "raw_skill" in item:
+                sample.append(str(item.get("raw_skill")))
+            else:
+                sample.append(str(item))
+        else:
+            sample.append(str(item))
+        if len(sample) >= limit:
+            break
+    return sample
 
 
 def normalize_skill_label(skill: str) -> str:
@@ -169,17 +202,44 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
 
     # Skills normalisées
     # Support both formats: "skills": ["str"] and "detected_capabilities": [{name, level}]
-    raw_skills = raw_profile.get("skills", [])
+    raw_skills = raw_profile.get("matching_skills", None)
+    skill_source = "matching_skills"
     detected_caps = raw_profile.get("detected_capabilities", [])
 
-    if detected_caps and isinstance(detected_caps, list):
-        # Extract skill names from detected_capabilities objects
-        raw_skills = [
-            cap.get("name") if isinstance(cap, dict) else cap
-            for cap in detected_caps
-        ]
-    elif isinstance(raw_skills, str):
+    if raw_skills is None:
+        raw_skills = raw_profile.get("skills", [])
+        skill_source = "skills"
+
+    if isinstance(raw_skills, str):
         raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
+
+    # If skills provided as list of dicts, extract common fields
+    if isinstance(raw_skills, list) and raw_skills and isinstance(raw_skills[0], dict):
+        extracted = []
+        for s in raw_skills:
+            if not isinstance(s, dict):
+                continue
+            if s.get("name"):
+                extracted.append(s.get("name"))
+            elif s.get("label"):
+                extracted.append(s.get("label"))
+            elif s.get("raw_skill"):
+                extracted.append(s.get("raw_skill"))
+        raw_skills = extracted
+
+    # Fallback to detected capabilities (prefer tools_detected over capability names)
+    if (not raw_skills) and detected_caps and isinstance(detected_caps, list):
+        skill_source = "detected_capabilities"
+        tools = []
+        names = []
+        for cap in detected_caps:
+            if isinstance(cap, dict):
+                tools.extend(cap.get("tools_detected") or [])
+                if cap.get("name"):
+                    names.append(cap.get("name"))
+            else:
+                names.append(cap)
+        raw_skills = tools or names
 
     skills = frozenset(normalize_skill(s) for s in raw_skills if s and isinstance(s, str))
 
@@ -211,10 +271,27 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
         raw_countries = [c.strip() for c in raw_countries.split(",") if c.strip()]
     preferred_countries = frozenset(canonize_country(c) for c in raw_countries if c)
 
+    capabilities_count = len(detected_caps) if isinstance(detected_caps, list) else 0
+
+    if _debug_matching_enabled():
+        logger.info(
+            "MATCH_INPUT profile_id=%s skill_source=%s raw_count=%s norm_count=%s "
+            "raw_sample=%s norm_sample=%s",
+            profile_id,
+            skill_source,
+            len(raw_skills) if isinstance(raw_skills, list) else (1 if raw_skills else 0),
+            len(skills),
+            _sample_list(raw_skills),
+            _sample_list(list(skills)),
+        )
+
     return ExtractedProfile(
         profile_id=str(profile_id),
         skills=skills,
         languages=languages,
         education_level=education_level,
         preferred_countries=preferred_countries,
+        skill_source=skill_source,
+        matching_skills_count=len(skills),
+        capabilities_count=capabilities_count,
     )

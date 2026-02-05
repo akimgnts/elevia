@@ -139,7 +139,102 @@ def test_scores_and_reasons_bounds(client, profile_demo):
 
 
 # ============================================================================
-# 5. Upsert: second decision updates status
+# 5. matched_skills appear in inbox items
+# ============================================================================
+
+
+@pytest.fixture
+def profile_akim():
+    """Load Akim's profile for matching tests."""
+    fixtures_path = Path(__file__).parent.parent / "fixtures" / "profiles" / "akim_guentas_matching.json"
+    with open(fixtures_path) as f:
+        return json.load(f)
+
+
+def test_inbox_includes_matched_skills(client, profile_akim, monkeypatch):
+    """Sprint 7: Verify matched_skills appear from profile↔offer intersection."""
+    import os
+    monkeypatch.setenv("ELEVIA_INBOX_USE_VIE_FIXTURES", "1")
+
+    resp = client.post("/inbox", json={
+        "profile_id": "akim-test",
+        "profile": profile_akim,
+        "min_score": 50,
+        "limit": 5,
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+
+    # Should have at least 1 match with VIE fixtures
+    assert len(data["items"]) >= 1, "Expected at least 1 matched VIE offer"
+
+    # At least one item should score above fallback (15)
+    assert any(item.get("score", 0) > 15 for item in data["items"]), "Expected score > 15 with Akim profile"
+
+    # At least one item should have matched_skills
+    items_with_skills = [i for i in data["items"] if i.get("matched_skills")]
+    assert len(items_with_skills) >= 1, "Expected at least 1 item with matched_skills"
+
+    # Verify matched_skills are from real intersection
+    for item in items_with_skills:
+        matched = item["matched_skills"]
+        assert isinstance(matched, list)
+        assert len(matched) <= 3, "matched_skills should be capped at 3"
+        # Skills should be strings
+        for skill in matched:
+            assert isinstance(skill, str)
+            assert len(skill) > 0
+
+
+# ============================================================================
+# 7. Profile fixture lookup behavior
+# ============================================================================
+
+
+def test_inbox_profile_lookup_ok(monkeypatch):
+    """Profile fixture should be found when enabled and id matches."""
+    import os
+    monkeypatch.setenv("ELEVIA_INBOX_PROFILE_FIXTURES", "1")
+    monkeypatch.setenv("ELEVIA_PROFILE_FIXTURE_DEFAULT", "")
+    from api.routes import inbox as inbox_routes
+
+    payload = {"skills": ["sql"]}
+    profile, status = inbox_routes._load_profile_fixture("akim_guentas_matching", payload)
+    assert status == "FOUND"
+    assert isinstance(profile.get("skills"), list)
+    assert len(profile["skills"]) >= 10
+
+
+def test_inbox_profile_not_found(monkeypatch):
+    """Unknown profile_id should not silently map when default is disabled."""
+    import os
+    monkeypatch.setenv("ELEVIA_INBOX_PROFILE_FIXTURES", "1")
+    monkeypatch.setenv("ELEVIA_PROFILE_FIXTURE_DEFAULT", "")
+    from api.routes import inbox as inbox_routes
+
+    payload = {"skills": ["sql", "python", "api", "json"]}
+    profile, status = inbox_routes._load_profile_fixture("unknown_profile_id", payload)
+    assert status == "NOT_FOUND"
+    assert profile == payload
+
+
+def test_inbox_profile_default_fallback(monkeypatch):
+    """Low-skill payload should fallback to default fixture when enabled."""
+    import os
+    monkeypatch.setenv("ELEVIA_INBOX_PROFILE_FIXTURES", "1")
+    monkeypatch.setenv("ELEVIA_PROFILE_FIXTURE_DEFAULT", "akim_guentas_matching")
+    monkeypatch.setenv("ELEVIA_PROFILE_FIXTURE_MIN_SKILLS", "3")
+    from api.routes import inbox as inbox_routes
+
+    payload = {"skills": ["sql"]}
+    profile, status = inbox_routes._load_profile_fixture("unknown_profile_id", payload)
+    assert status == "DEFAULT"
+    assert isinstance(profile.get("skills"), list)
+    assert len(profile["skills"]) >= 10
+
+
+# ============================================================================
+# 6. Upsert: second decision updates status
 # ============================================================================
 
 

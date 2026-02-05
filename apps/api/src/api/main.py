@@ -21,6 +21,7 @@ from .routes.offers import router as offers_router
 from .routes.profile import router as profile_router
 from .routes.inbox import router as inbox_router
 from .routes.applications import router as applications_router
+from .routes.debug_match import router as debug_router
 
 
 app = FastAPI(
@@ -58,6 +59,7 @@ app.include_router(offers_router, prefix="/offers")
 app.include_router(profile_router, prefix="/profile")
 app.include_router(inbox_router)
 app.include_router(applications_router)
+app.include_router(debug_router)  # DEV-only debug endpoints
 
 
 @app.get("/health", tags=["health"])

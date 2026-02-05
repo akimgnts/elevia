@@ -221,6 +221,8 @@ export interface InboxItem {
   city: string | null;
   score: number;
   reasons: string[];
+  matched_skills?: string[];
+  missing_skills?: string[];
   rome?: { rome_code: string; rome_label: string } | null;
   rome_competences?: Array<{
     competence_code: string;

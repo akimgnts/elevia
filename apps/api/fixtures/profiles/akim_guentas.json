@@ -1,0 +1,87 @@
+{
+  "id": "akim_guentas_v0",
+  "version": "0.1.0",
+  "meta": {
+    "created_at": "2026-02-03",
+    "source": "manual_normalization",
+    "purpose": "baseline_matching_testing"
+  },
+
+  "identity": {
+    "name": "Akim Guentas",
+    "zone": "france",
+    "mobility": "international_vie"
+  },
+
+  "skills": [
+    "analyse de données",
+    "data analysis",
+    "normalisation de données",
+    "indicateurs décisionnels",
+    "kpi",
+    "reporting",
+    "power bi",
+    "powerbi",
+    "tableau",
+    "excel",
+    "tableur",
+    "python",
+    "sql",
+    "api",
+    "json",
+    "csv",
+    "automatisation",
+    "make",
+    "n8n",
+    "structuration de données",
+    "aide à la décision"
+  ],
+
+  "languages": [
+    "français",
+    "fr",
+    "anglais",
+    "en"
+  ],
+
+  "education": "bac+5",
+
+  "preferred_countries": [],
+
+  "exclusions": {
+    "not_a_match": [
+      "software engineer",
+      "développeur logiciel",
+      "data scientist ml",
+      "machine learning engineer",
+      "deep learning",
+      "marketing opérationnel",
+      "chef de projet généraliste"
+    ],
+    "reason": "profil analyste, pas ingénieur ni scientist ni marketing"
+  },
+
+  "context": {
+    "environment": "corporate_international",
+    "interfaces": ["marketing", "communication", "sav"],
+    "autonomy": "high",
+    "scope": "analyst_not_architect"
+  },
+
+  "signal_strength": {
+    "strong": [
+      "analyse de données appliquée",
+      "normalisation données hétérogènes",
+      "indicateurs décisionnels",
+      "apis publiques",
+      "structuration information"
+    ],
+    "medium": [
+      "reporting bi",
+      "automatisation workflows",
+      "manipulation csv json",
+      "traduction data métier"
+    ],
+    "weak": []
+  }
+}

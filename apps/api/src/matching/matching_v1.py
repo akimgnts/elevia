@@ -12,6 +12,8 @@ Ce moteur:
 - explique chaque décision avec des faits observables
 """
 
+import logging
+import os
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 
@@ -25,6 +27,30 @@ from .extractors import (
 )
 from .idf import compute_idf
 
+logger = logging.getLogger(__name__)
+
+
+def _debug_enabled() -> bool:
+    value = os.getenv("ELEVIA_DEBUG_MATCHING", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _offer_skill_field_label(offer: Dict) -> str:
+    if "skills" in offer:
+        return "skills"
+    if isinstance(offer.get("extracted"), dict) and "skills" in offer["extracted"]:
+        return "extracted.skills"
+    if "required_skills" in offer:
+        return "required_skills"
+    return "missing"
+
+
+def _normalize_skill_list(raw_skills) -> List[str]:
+    if isinstance(raw_skills, str):
+        raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
+    if isinstance(raw_skills, list):
+        return [normalize_skill(s) for s in raw_skills if isinstance(s, str) and s.strip()]
+    return []
 
 # ============================================================================
 # CONSTANTES (VERROUILLÉES - spec lignes 78-83)
@@ -378,6 +404,8 @@ class MatchingEngine:
         # 1. Compétences (priorité max)
         if skills_missing and len(reasons) < 3:
             reasons.append("Compétences indisponibles pour cette offre")
+        if not matched_skills and not skills_missing and len(reasons) < 3:
+            reasons.append("Aucune compétence détectée en commun")
         if matched_skills:
             top_skills = matched_skills[:4]  # Top 2-4
             reasons.append(f"Compétences clés alignées : {', '.join(top_skills)}")
@@ -432,6 +460,31 @@ class MatchingEngine:
         reasons = self._generate_reasons(
             matched_skills, languages_score, education_score, country_score, skills_missing
         )
+
+        if _debug_enabled():
+            raw_offer_skills = offer.get("skills", [])
+            normalized_offer_skills = _normalize_skill_list(raw_offer_skills)
+            offer_skills_len = len(set(normalized_offer_skills))
+            logger.info(
+                "match_debug offer_id=%s total=%s skills=%s lang=%s edu=%s country=%s "
+                "len_offer_skills=%s len_profile_skills=%s intersection=%s "
+                "len_profile_matching_skills=%s len_profile_capabilities=%s "
+                "offer_skill_field=%s profile_skill_field=%s offer_skills_sample=%s",
+                offer_id,
+                final_score,
+                round(skills_score * 100, 1),
+                round(languages_score * 100, 1),
+                round(education_score * 100, 1),
+                round(country_score * 100, 1),
+                offer_skills_len,
+                len(profile.skills),
+                len(matched_skills),
+                getattr(profile, "matching_skills_count", len(profile.skills)),
+                getattr(profile, "capabilities_count", 0),
+                _offer_skill_field_label(offer),
+                getattr(profile, "skill_source", "skills"),
+                normalized_offer_skills[:20],
+            )
 
         return MatchResult(
             offer_id=str(offer_id),
@@ -514,6 +567,30 @@ class MatchingEngine:
 
             # 9. Ajout au résultat
             offer_id = offer.get("id") or offer.get("offer_id") or offer.get("offer_uid", "unknown")
+            if _debug_enabled():
+                raw_offer_skills = offer.get("skills", [])
+                normalized_offer_skills = _normalize_skill_list(raw_offer_skills)
+                offer_skills_len = len(set(normalized_offer_skills))
+                logger.info(
+                    "match_debug offer_id=%s total=%s skills=%s lang=%s edu=%s country=%s "
+                    "len_offer_skills=%s len_profile_skills=%s intersection=%s "
+                    "len_profile_matching_skills=%s len_profile_capabilities=%s "
+                    "offer_skill_field=%s profile_skill_field=%s offer_skills_sample=%s",
+                    offer_id,
+                    final_score,
+                    round(skills_score * 100, 1),
+                    round(languages_score * 100, 1),
+                    round(education_score * 100, 1),
+                    round(country_score * 100, 1),
+                    offer_skills_len,
+                    len(extracted_profile.skills),
+                    len(matched_skills),
+                    getattr(extracted_profile, "matching_skills_count", len(extracted_profile.skills)),
+                    getattr(extracted_profile, "capabilities_count", 0),
+                    _offer_skill_field_label(offer),
+                    getattr(extracted_profile, "skill_source", "skills"),
+                    normalized_offer_skills[:20],
+                )
             results.append(MatchResult(
                 offer_id=str(offer_id),
                 score=final_score,

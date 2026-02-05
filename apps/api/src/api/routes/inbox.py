@@ -2,8 +2,10 @@
 inbox.py - Inbox routes: POST /inbox + POST /offers/{offer_id}/decision
 """
 
+import json
 import logging
-import sqlite3
+import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Set
@@ -20,7 +22,7 @@ from ..schemas.inbox import (
     RomeLink,
 )
 from ..utils.db import get_connection
-from ..utils.offer_skills import get_offer_skills_by_offer_ids
+from ..utils.inbox_catalog import load_catalog_offers
 from ..utils.rome_link import get_offer_rome_links, get_rome_competences_for_rome_codes
 
 # Import matching engine
@@ -29,13 +31,93 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from matching import MatchingEngine
 from matching.extractors import extract_profile
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(tags=["inbox"])
 
-# Same DB_PATH as offers.py
-DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
+PROFILE_FIXTURES_DIR = Path(__file__).parent.parent.parent.parent / "fixtures" / "profiles"
 
+
+def _debug_matching_enabled() -> bool:
+    value = os.getenv("ELEVIA_DEBUG_MATCHING", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _sample_list(values, limit=20):
+    if not isinstance(values, list):
+        return []
+    sample = []
+    for item in values:
+        if isinstance(item, str):
+            sample.append(item)
+        elif isinstance(item, dict):
+            if "name" in item:
+                sample.append(str(item.get("name")))
+            elif "label" in item:
+                sample.append(str(item.get("label")))
+            elif "raw_skill" in item:
+                sample.append(str(item.get("raw_skill")))
+            else:
+                sample.append(str(item))
+        else:
+            sample.append(str(item))
+        if len(sample) >= limit:
+            break
+    return sample
+
+
+def _load_profile_fixture(profile_id: str, payload: Dict) -> tuple[Dict, str]:
+    """
+    Returns (profile, status). Status: FOUND | NOT_FOUND | DISABLED
+    Uses ENV ELEVIA_INBOX_PROFILE_FIXTURES=1 to enable.
+    """
+    enabled = os.getenv("ELEVIA_INBOX_PROFILE_FIXTURES", "").strip().lower() in {"1", "true", "yes", "on"}
+    if not enabled:
+        return payload, "DISABLED"
+
+    forced = os.getenv("ELEVIA_PROFILE_FIXTURE", "").strip()
+    candidates: List[str] = []
+    if forced:
+        candidates.append(forced)
+    if profile_id:
+        candidates.append(profile_id)
+        candidates.append(f"{profile_id}_matching")
+    payload_id = payload.get("id") or payload.get("profile_id")
+    if payload_id:
+        candidates.append(str(payload_id))
+        candidates.append(f"{payload_id}_matching")
+
+    for name in candidates:
+        path = PROFILE_FIXTURES_DIR / f"{name}.json"
+        if path.exists():
+            try:
+                return json.loads(path.read_text(encoding="utf-8")), "FOUND"
+            except Exception:
+                continue
+
+    # Optional default fallback when payload has too few skills (DEV-only usage)
+    min_skills_value = os.getenv("ELEVIA_PROFILE_FIXTURE_MIN_SKILLS", "3").strip()
+    try:
+        min_skills = max(0, int(min_skills_value))
+    except ValueError:
+        min_skills = 3
+    default_name = os.getenv("ELEVIA_PROFILE_FIXTURE_DEFAULT", "akim_guentas_matching").strip()
+    raw_skills = payload.get("matching_skills") or payload.get("skills") or []
+    raw_count = len(raw_skills) if isinstance(raw_skills, list) else (1 if raw_skills else 0)
+    if raw_count <= min_skills and default_name:
+        path = PROFILE_FIXTURES_DIR / f"{default_name}.json"
+        if path.exists():
+            try:
+                return json.loads(path.read_text(encoding="utf-8")), "DEFAULT"
+            except Exception:
+                pass
+
+    return payload, "NOT_FOUND"
+
+
+def _timing_enabled() -> bool:
+    value = os.getenv("ELEVIA_DEBUG_API_TIMING", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
 
 def _load_decided_ids(profile_id: str) -> Set[str]:
     """Load offer IDs already decided by this profile."""
@@ -51,46 +133,48 @@ def _load_decided_ids(profile_id: str) -> Set[str]:
 
 
 def _load_catalog_offers() -> List[Dict]:
-    """Load all offers from fact_offers table."""
-    if not DB_PATH.exists():
-        return []
-    try:
-        conn = sqlite3.connect(str(DB_PATH), timeout=2)
-        conn.row_factory = sqlite3.Row
-        rows = conn.execute(
-            "SELECT id, source, title, description, company, city, country, "
-            "publication_date, contract_duration, start_date FROM fact_offers"
-        ).fetchall()
-        offers = [dict(r) for r in rows]
-
-        offer_ids = [str(o.get("id") or "") for o in offers]
-        skills_map = get_offer_skills_by_offer_ids(conn, offer_ids)
-        for offer in offers:
-            offer_id = str(offer.get("id") or "")
-            if offer_id in skills_map:
-                offer["skills"] = skills_map[offer_id]
-
-        conn.close()
-        return offers
-    except Exception as e:
-        logger.warning(f"[inbox] Failed to load catalog: {e}")
-        return []
+    """Load all offers from catalog loader (shared with scripts)."""
+    return load_catalog_offers()
 
 
 @router.post("/inbox", summary="Get inbox items for a profile")
 async def get_inbox(req: InboxRequest) -> InboxResponse:
     """Score catalog offers against profile, excluding already-decided ones."""
+    t0 = time.perf_counter()
+    profile_payload, lookup_status = _load_profile_fixture(req.profile_id, req.profile)
+    if _debug_matching_enabled():
+        raw_skills = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
+        logger.info(
+            "INBOX_MATCH_INPUT profile_id=%s lookup_status=%s profile_internal_id=%s "
+            "profile_skills_raw_count=%s profile_skills_raw_sample=%s",
+            req.profile_id,
+            lookup_status,
+            profile_payload.get("id") or profile_payload.get("profile_id"),
+            len(raw_skills) if isinstance(raw_skills, list) else (1 if raw_skills else 0),
+            _sample_list(raw_skills),
+        )
     decided_ids = _load_decided_ids(req.profile_id)
+    t_decisions = time.perf_counter()
     catalog = _load_catalog_offers()
+    t_catalog = time.perf_counter()
 
     if not catalog:
+        if _timing_enabled():
+            logger.info(
+                "inbox_timing profile_id=%s decided=%s catalog=%s total=%s",
+                req.profile_id,
+                int((t_decisions - t0) * 1000),
+                int((t_catalog - t_decisions) * 1000),
+                int((t_catalog - t0) * 1000),
+            )
         return InboxResponse(
             profile_id=req.profile_id, items=[], total_matched=0, total_decided=len(decided_ids)
         )
 
     # Build engine + extract profile
     engine = MatchingEngine(offers=catalog)
-    extracted = extract_profile(req.profile)
+    extracted = extract_profile(profile_payload)
+    t_profile = time.perf_counter()
 
     items: List[InboxItem] = []
     source_map: Dict[str, str] = {str(offer.get("id") or ""): offer.get("source") or "" for offer in catalog}
@@ -103,6 +187,14 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
         if result.score < req.min_score:
             continue
 
+        match_debug = result.match_debug or {}
+        skills_debug = match_debug.get("skills") if isinstance(match_debug, dict) else {}
+        matched_skills = []
+        missing_skills = []
+        if isinstance(skills_debug, dict):
+            matched_skills = skills_debug.get("matched") or []
+            missing_skills = skills_debug.get("missing") or []
+
         items.append(
             InboxItem(
                 offer_id=result.offer_id,
@@ -112,8 +204,12 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
                 city=offer.get("city"),
                 score=result.score,
                 reasons=result.reasons[:3],
+                matched_skills=matched_skills[:3],
+                missing_skills=missing_skills[:3],
             )
         )
+
+    t_scoring = time.perf_counter()
 
     # Sort desc by score
     items.sort(key=lambda x: x.score, reverse=True)
@@ -146,6 +242,24 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
             ]
         else:
             item.rome_competences = []
+
+    t_rome = time.perf_counter()
+
+    if _timing_enabled():
+        logger.info(
+            "inbox_timing profile_id=%s decided=%s catalog=%s profile_extract=%s scoring=%s rome=%s total=%s "
+            "catalog_count=%s matched=%s decided_count=%s",
+            req.profile_id,
+            int((t_decisions - t0) * 1000),
+            int((t_catalog - t_decisions) * 1000),
+            int((t_profile - t_catalog) * 1000),
+            int((t_scoring - t_profile) * 1000),
+            int((t_rome - t_scoring) * 1000),
+            int((t_rome - t0) * 1000),
+            len(catalog),
+            total_matched,
+            len(decided_ids),
+        )
 
     return InboxResponse(
         profile_id=req.profile_id,
