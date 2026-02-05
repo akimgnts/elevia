@@ -115,8 +115,8 @@ export default function DashboardPage() {
             />
             <KpiCard
               label="Offres actives"
-              value={`${matchResponse?.received_offers ?? 0}`}
-              delta={matchResponse?.received_offers ? "+12" : undefined}
+              value={`${items.length}`}
+              delta={items.length ? "+12" : undefined}
               accent="lime"
             />
 
