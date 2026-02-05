@@ -60,6 +60,8 @@ type LastApiCall = {
   min_score: number;
   limit: number;
   response_items: number;
+  total_matched: number;
+  total_decided: number;
 };
 
 // ============================================================================
@@ -170,6 +172,7 @@ function OfferCard({
   isPending: boolean;
 }) {
   const location = [offer.city, offer.country].filter(Boolean).join(", ");
+  const showFallback = offer.score === 15 && offer.matched_skills.length === 0;
 
   return (
     <div className={`group bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm hover:shadow-lg transition-all flex flex-col h-full ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
@@ -185,6 +188,11 @@ function OfferCard({
             <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
               Score · {offer.score}%
             </span>
+            {showFallback && (
+              <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                Fallback score (no skill match)
+              </span>
+            )}
           </div>
 
           <h3 className="mt-3 text-base font-bold text-slate-900 leading-tight line-clamp-2">
@@ -205,7 +213,7 @@ function OfferCard({
       </div>
 
       {/* Matched Skills (top 3) */}
-      {offer.matched_skills.length > 0 && (
+      {offer.matched_skills.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-1.5">
           {offer.matched_skills.slice(0, 3).map((skill) => (
             <span
@@ -217,6 +225,26 @@ function OfferCard({
           ))}
           {offer.matched_skills.length > 3 && (
             <span className="text-[10px] text-slate-400">+{offer.matched_skills.length - 3}</span>
+          )}
+        </div>
+      ) : (
+        <div className="mt-4 text-[11px] text-slate-500">
+          Aucune compétence détectée en commun
+        </div>
+      )}
+
+      {offer.missing_skills.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {offer.missing_skills.slice(0, 3).map((skill) => (
+            <span
+              key={skill}
+              className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100"
+            >
+              {skill}
+            </span>
+          ))}
+          {offer.missing_skills.length > 3 && (
+            <span className="text-[10px] text-slate-400">+{offer.missing_skills.length - 3}</span>
           )}
         </div>
       )}
@@ -434,6 +462,8 @@ function DebugDrawer({
             <div>min_score: {lastApiCall.min_score}</div>
             <div>limit: {lastApiCall.limit}</div>
             <div>response_items: {lastApiCall.response_items}</div>
+            <div>total_matched: {lastApiCall.total_matched}</div>
+            <div>total_decided: {lastApiCall.total_decided}</div>
           </div>
         )}
 
@@ -537,6 +567,8 @@ export default function InboxPage() {
         min_score: apiMinScore,
         limit: apiLimit,
         response_items: Array.isArray(data.items) ? data.items.length : 0,
+        total_matched: data.total_matched ?? 0,
+        total_decided: data.total_decided ?? 0,
       });
 
       if (DEBUG_INBOX) {
@@ -788,6 +820,14 @@ export default function InboxPage() {
           <p className="text-sm text-slate-500">
             Offres correspondant à votre profil.
           </p>
+          {import.meta.env.DEV && lastApiCall && (
+            <div className="mt-3 text-[11px] text-slate-500">
+              <span className="mr-3">profile_id: {lastApiCall.profile_id.slice(0, 10)}…</span>
+              <span className="mr-3">total_matched: {lastApiCall.total_matched}</span>
+              <span className="mr-3">total_decided: {lastApiCall.total_decided}</span>
+              <span>first: {items[0]?.offer_id?.slice(0, 10) ?? "—"} / {items[0]?.score ?? "—"}</span>
+            </div>
+          )}
         </header>
 
         {/* Filters */}

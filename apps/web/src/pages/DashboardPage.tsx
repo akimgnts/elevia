@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PageContainer } from "../components/layout/PageContainer";
 import { KpiCard } from "../components/ui/KpiCard";
@@ -31,7 +31,10 @@ export default function DashboardPage() {
         if (import.meta.env.DEV) {
           console.info("[dashboard] profile_id", profileId);
         }
-        const matchingProfile = buildMatchingProfile(userProfile as Record<string, unknown>, profileId);
+        const { profile: matchingProfile } = buildMatchingProfile(
+          userProfile as Record<string, unknown>,
+          profileId
+        );
         const inbox = await fetchInbox(matchingProfile, profileId, 0, 60);
         setItems(inbox.items);
       } catch (err) {

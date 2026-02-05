@@ -62,7 +62,10 @@ export default function ProfilePage() {
 
   const profile = userProfile as ProfileData;
   const aiProfileData = aiProfile as ProfileData;
-  const matchingProfile = buildMatchingProfile(profile, profileHash || "anonymous");
+  const { profile: matchingProfile } = buildMatchingProfile(
+    profile,
+    profileHash || "anonymous"
+  );
 
   // Compute diff
   const aiCapNames = new Set((aiProfileData.detected_capabilities || []).map((c) => c.name));
