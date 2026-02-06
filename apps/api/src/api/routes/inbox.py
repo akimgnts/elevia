@@ -19,11 +19,13 @@ from ..schemas.inbox import (
     InboxRequest,
     InboxResponse,
     RomeCompetence,
+    RomeInferred,
     RomeLink,
 )
 from ..utils.db import get_connection
 from ..utils.inbox_catalog import load_catalog_offers
 from ..utils.rome_link import get_offer_rome_links, get_rome_competences_for_rome_codes
+from ..utils.rome_inferred import infer_rome_for_offers
 
 # Import matching engine
 import sys
@@ -229,6 +231,17 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
         finally:
             conn.close()
 
+    # Build offer lookup for rome_inferred enrichment
+    offer_lookup = {str(o.get("id") or ""): o for o in catalog}
+
+    # Infer ROME for offers without native ROME (Business France VIE)
+    non_ft_offers = [
+        {"id": item.offer_id, "title": item.title, "description": offer_lookup.get(item.offer_id, {}).get("description")}
+        for item in items
+        if source_map.get(item.offer_id) != "france_travail"
+    ]
+    inferred_rome = infer_rome_for_offers(non_ft_offers) if non_ft_offers else {}
+
     for item in items:
         link = rome_links.get(item.offer_id)
         if link and link.get("rome_code") and link.get("rome_label"):
@@ -242,6 +255,13 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
             ]
         else:
             item.rome_competences = []
+
+        # Populate rome_inferred for offers without native ROME
+        inferred = inferred_rome.get(item.offer_id)
+        if inferred:
+            item.rome_inferred = RomeInferred(**inferred)
+        else:
+            item.rome_inferred = None
 
     t_rome = time.perf_counter()
 

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 class InboxRequest(BaseModel):
     profile_id: str
     profile: Dict[str, Any]
-    min_score: int = Field(default=65, ge=0, le=100)
+    min_score: int = Field(default=10, ge=0, le=100)
     limit: int = Field(default=20, ge=1, le=100)
 
 
@@ -24,6 +24,15 @@ class RomeCompetence(BaseModel):
     esco_uri: Optional[str] = None
 
 
+class RomeInferred(BaseModel):
+    """ROME code inferred from title (for offers without native ROME)."""
+    rome_code: str
+    rome_label: str
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    source: str
+    version: str
+
+
 class InboxItem(BaseModel):
     offer_id: str
     title: str
@@ -36,6 +45,7 @@ class InboxItem(BaseModel):
     missing_skills: List[str] = Field(default_factory=list)
     rome: Optional[RomeLink] = None
     rome_competences: List[RomeCompetence] = Field(default_factory=list)
+    rome_inferred: Optional[RomeInferred] = None
 
 
 class InboxResponse(BaseModel):
