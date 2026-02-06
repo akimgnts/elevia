@@ -136,11 +136,14 @@ def _expand_aliases(tokens: Set[str]) -> Set[str]:
 
 # Common stopwords to filter out (French + English)
 STOPWORDS = {
-    # French
+    # French articles/prepositions
     "le", "la", "les", "un", "une", "des", "de", "du", "et", "ou", "à", "au", "aux",
     "en", "pour", "par", "sur", "dans", "avec", "sans", "nous", "vous", "ils",
     "notre", "votre", "leur", "ce", "cette", "ces", "son", "sa", "ses",
     "est", "sont", "être", "avoir", "faire", "très", "plus", "moins",
+    # French job description noise
+    "chez", "tant", "que", "mois", "mission", "vie", "poste", "profil", "candidat",
+    "entreprise", "equipe", "sein", "cadre", "contrat", "cdi", "cdd", "stage",
     # English
     "the", "a", "an", "and", "or", "to", "of", "in", "on", "for", "with",
     "as", "at", "by", "from", "is", "are", "be", "was", "were", "been",
