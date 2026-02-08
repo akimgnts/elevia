@@ -70,6 +70,7 @@ SKILL_ALIASES: Dict[str, List[str]] = {
     "data_visualization": ["logiciel de visualisation des données", "utiliser un logiciel danalyse de données spécifique"],
     "data visualization": ["logiciel de visualisation des données", "utiliser un logiciel danalyse de données spécifique"],
     "data": ["analyse de données", "exploration de données"],
+    "data analysis": ["analyse de données", "exploration de données"],
     "data analyst": ["analyse de données"],
     "analyst": ["analyse de données"],
     "analyse": ["analyse de données"],

@@ -13,6 +13,12 @@ from dataclasses import dataclass
 import os
 import logging
 
+# Import skill aliases for profile expansion (EN→FR translation)
+try:
+    from esco.extract import SKILL_ALIASES
+except ImportError:
+    SKILL_ALIASES = {}
+
 # Mapping ordinal fixe pour les niveaux d'études (spec ligne 130-132)
 EDUCATION_LEVELS: Dict[str, int] = {
     "bac": 1,
@@ -84,6 +90,21 @@ def normalize_skill_label(skill: str) -> str:
 def normalize_skill(skill: str) -> str:
     """Normalise une compétence (lowercase, trim, espace/punct)."""
     return normalize_skill_label(skill)
+
+
+def _expand_profile_skills(skills: Set[str]) -> Set[str]:
+    """
+    Expand profile skills using SKILL_ALIASES.
+
+    Adds French ESCO labels for English skills to enable matching.
+    Example: 'python' → adds 'python (programmation informatique)'
+    """
+    expanded = set(skills)
+    for skill in skills:
+        skill_lower = skill.lower()
+        if skill_lower in SKILL_ALIASES:
+            expanded.update(SKILL_ALIASES[skill_lower])
+    return expanded
 
 
 def normalize_language(lang: str) -> str:
@@ -241,7 +262,10 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
                 names.append(cap)
         raw_skills = tools or names
 
-    skills = frozenset(normalize_skill(s) for s in raw_skills if s and isinstance(s, str))
+    normalized_skills = set(normalize_skill(s) for s in raw_skills if s and isinstance(s, str))
+    # Expand EN→FR aliases for matching with ESCO-labeled offers
+    expanded_skills = _expand_profile_skills(normalized_skills)
+    skills = frozenset(expanded_skills)
 
     # Langues normalisées
     # Support both formats: "languages": ["str"] and "languages": [{code, level}]
