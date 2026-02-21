@@ -22,6 +22,7 @@ def test_cv_parsing_delta_report_subprocess():
     assert "A" in report
     assert "B" in report
     assert "delta" in report
+    assert report["meta"]["run_mode"] == "A"
     assert report["A"]["skills"]
 
 
@@ -63,4 +64,6 @@ def test_cv_parsing_delta_report_with_llm(monkeypatch, tmp_path):
 
     added = set(report["delta"]["added_skills"])
     assert llm_skills.issubset(added)
+    assert report["meta"]["run_mode"] == "A+B"
+    assert report["meta"]["llm"]["cache_hit"] is True
     assert report["delta"]["unchanged_skills_count"] >= 1

@@ -193,22 +193,34 @@ def build_report(
     esco_a = _map_esco(skills_a)
 
     llm_info: Optional[Dict[str, object]] = None
+    llm_error: Optional[str] = None
     if with_llm:
-        llm_skills_raw, cache_hit, cache_key = get_llm_skills(
-            cv_text=cv_text,
-            provider=provider,
-            model=model,
-            max_skills=max_skills,
-            cache_dir=cache_dir,
-            cache_bust=cache_bust,
-        )
-        llm_skills = _clean_llm_skills(llm_skills_raw)
-        llm_info = {
-            "provider": provider,
-            "model": model,
-            "cache_hit": cache_hit,
-            "cache_key": cache_key,
-        }
+        try:
+            llm_skills_raw, cache_hit, cache_key = get_llm_skills(
+                cv_text=cv_text,
+                provider=provider,
+                model=model,
+                max_skills=max_skills,
+                cache_dir=cache_dir,
+                cache_bust=cache_bust,
+            )
+            llm_skills = _clean_llm_skills(llm_skills_raw)
+            llm_info = {
+                "provider": provider,
+                "model": model,
+                "cache_hit": cache_hit,
+                "cache_key": cache_key,
+            }
+        except RuntimeError as exc:
+            llm_error = str(exc)
+            llm_skills = set()
+            llm_info = {
+                "provider": provider,
+                "model": model,
+                "cache_hit": False,
+                "cache_key": None,
+                "error": llm_error,
+            }
     else:
         llm_skills = set()
 
@@ -226,6 +238,10 @@ def build_report(
 
     report = {
         "input": {"mode": "text", "path": input_path, "text_sha256": text_sha256},
+        "meta": {
+            "run_mode": "A+B" if with_llm else "A",
+            "llm": llm_info,
+        },
         "A": {
             "skills": skills_a,
             "counts": {
@@ -270,6 +286,24 @@ def _print_summary(report: Dict[str, object]) -> None:
     print(f"added_esco_count: {len(added_esco)}", file=sys.stderr)
 
 
+def _print_pretty_delta(report: Dict[str, object]) -> None:
+    delta = report.get("delta", {})
+    if not isinstance(delta, dict):
+        return
+    print("added_skills:", file=sys.stderr)
+    for skill in delta.get("added_skills", []):
+        print(f"- {skill}", file=sys.stderr)
+    print("removed_skills:", file=sys.stderr)
+    for skill in delta.get("removed_skills", []):
+        print(f"- {skill}", file=sys.stderr)
+    print("added_esco:", file=sys.stderr)
+    for key in delta.get("added_esco", []):
+        print(f"- {key}", file=sys.stderr)
+    print("removed_esco:", file=sys.stderr)
+    for key in delta.get("removed_esco", []):
+        print(f"- {key}", file=sys.stderr)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="CV parsing delta report (A vs A+B)")
     parser.add_argument("--text", required=True, help="Path to CV text file")
@@ -278,6 +312,7 @@ def main() -> int:
     parser.add_argument("--llm-model", default="gpt-4o-mini", help="LLM model name")
     parser.add_argument("--max-skills", type=int, default=30)
     parser.add_argument("--json", action="store_true", help="Output JSON only")
+    parser.add_argument("--pretty", action="store_true", help="Pretty print delta to stderr")
     args = parser.parse_args()
 
     text_path = Path(args.text)
@@ -297,6 +332,13 @@ def main() -> int:
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if not args.json:
         _print_summary(report)
+        if args.pretty:
+            _print_pretty_delta(report)
+        meta = report.get("meta", {})
+        if isinstance(meta, dict):
+            llm_meta = meta.get("llm")
+            if isinstance(llm_meta, dict) and llm_meta.get("error"):
+                print(f"LLM disabled: {llm_meta.get('error')}", file=sys.stderr)
     return 0
 
 
