@@ -1,0 +1,5 @@
+Profile
+Data engineer with experience in ETL, SQL, and Power BI.
+Built pipelines with Airflow and dbt, deployed FastAPI services, and Dockerized apps.
+Worked on CI/CD, monitoring, and A/B testing with feature flags.
+Tools: Git, Linux, Kubernetes, Postgres, and Azure.
