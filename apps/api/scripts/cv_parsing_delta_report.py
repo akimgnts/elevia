@@ -236,10 +236,12 @@ def build_report(
         "removed_esco": sorted(set(esco_a) - set(esco_b)),
     }
 
+    run_mode = "A+B" if with_llm and not llm_error else "A"
+
     report = {
         "input": {"mode": "text", "path": input_path, "text_sha256": text_sha256},
         "meta": {
-            "run_mode": "A+B" if with_llm else "A",
+            "run_mode": run_mode,
             "llm": llm_info,
         },
         "A": {

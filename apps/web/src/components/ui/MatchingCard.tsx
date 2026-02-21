@@ -1,5 +1,5 @@
 import { Target } from "lucide-react";
-import { Badge } from "./Badge";
+import { Badge } from "./badge";
 import { GlassCard } from "./GlassCard";
 
 export type MatchingCardProps = {

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
-import { Badge, ScoreBadge } from "./Badge";
+import { Badge, ScoreBadge } from "./badge";
 import { GlassCard } from "./GlassCard";
 import { cn } from "../../lib/cn";
 

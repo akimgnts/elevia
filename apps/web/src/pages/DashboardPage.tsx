@@ -5,7 +5,8 @@ import { KpiCard } from "../components/ui/KpiCard";
 import { OfferCard } from "../components/ui/OfferCard";
 import { BaseListingCard } from "../components/ui/BaseListingCard";
 import { GlassCard } from "../components/ui/GlassCard";
-import { Badge } from "../components/ui/Badge";
+import { Badge } from "../components/ui/badge";
+import { Card } from "../components/ui/card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { fetchInbox, type InboxItem } from "../lib/api";
@@ -183,6 +184,25 @@ export default function DashboardPage() {
             </GlassCard>
           </div>
         </div>
+
+        {import.meta.env.DEV && (
+          <section className="mt-10">
+            <p className={typography.overline}>Dev tools</p>
+            <Card className="mt-3 p-5">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">CV Delta A vs A+B</div>
+                  <div className="text-xs text-slate-500">
+                    Analyse comparative du parsing et enrichissement LLM.
+                  </div>
+                </div>
+                <Link to="/dev/cv-delta" className="text-sm font-semibold text-slate-700 underline">
+                  Ouvrir
+                </Link>
+              </div>
+            </Card>
+          </section>
+        )}
       </PageContainer>
     </div>
   );

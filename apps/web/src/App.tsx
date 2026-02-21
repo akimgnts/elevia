@@ -11,6 +11,7 @@ import DemoPage from "./pages/DemoPage";
 import InboxPage from "./pages/InboxPage";
 import AdCoachTestPage from "./pages/AdCoachTestPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
+import DevCvDeltaPage from "./pages/DevCvDeltaPage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
       <Route path="/offres" element={<OffersPage />} />
       <Route path="/inbox" element={<InboxPage />} />
       <Route path="/applications" element={<ApplicationsPage />} />
+      <Route path="/dev/cv-delta" element={<DevCvDeltaPage />} />
       <Route path="/offers/:offerId" element={<OfferDetailPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

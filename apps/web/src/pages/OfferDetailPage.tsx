@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, MapPin, Calendar, Building2 } from "lucide-react";
 import { PageContainer } from "../components/layout/PageContainer";
-import { Badge } from "../components/ui/Badge";
+import { Badge } from "../components/ui/badge";
 import { GlassCard } from "../components/ui/GlassCard";
 import { ErrorState } from "../components/ui/ErrorState";
 import { fetchCatalogOffers, fetchSampleOffers } from "../lib/api";

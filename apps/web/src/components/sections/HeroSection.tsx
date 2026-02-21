@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "../ui/Button";
-import { Badge } from "../ui/Badge";
+import { Badge } from "../ui/badge";
 import { HeroCard } from "../ui/HeroCard";
 import { PageContainer } from "../layout/PageContainer";
 import { SectionWrapper } from "../layout/SectionWrapper";
