@@ -8,22 +8,28 @@
 #   make gate-3           # Pre-merge checks (branch sync, conflicts)
 #   make gates            # Run all gates sequentially
 
-.PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test test-api help
+.PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test test-api help \
+        venv install api web test-cvdelta devtools
 
 # Default target
 help:
-	@echo "Elevia Compass - Agentic Workflow"
+	@echo "Elevia Compass"
 	@echo ""
-	@echo "Available targets:"
-	@echo "  make agents-review  - Run agents review (REVIEW_MATRIX)"
-	@echo "  make gate-1         - Pre-commit checks"
-	@echo "  make gate-2         - PR review checks"
-	@echo "  make gate-3         - Pre-merge checks"
-	@echo "  make gates          - Run all gates"
-	@echo "  make lint           - Run linting"
-	@echo "  make test-fast      - Run fast tests"
-	@echo "  make test           - Run full test suite"
-	@echo "  make test-api       - Alias for make test"
+	@echo "Dev UX:"
+	@echo "  make venv          - Create .venv at repo root"
+	@echo "  make install       - Install Python deps"
+	@echo "  make api           - Start API (port 8000, ELEVIA_DEV_TOOLS=1)"
+	@echo "  make web           - Start Vite (port 3001)"
+	@echo "  make devtools      - Print start-up instructions"
+	@echo "  make test-cvdelta  - Run /dev/cv-delta tests"
+	@echo ""
+	@echo "CI Gates:"
+	@echo "  make gate-1        - Pre-commit (lint + fast tests)"
+	@echo "  make gate-2        - PR review (agents + full tests)"
+	@echo "  make gate-3        - Pre-merge (branch sync)"
+	@echo "  make gates         - All gates"
+	@echo "  make test          - Full test suite"
+	@echo "  make lint          - Lint"
 
 # Agents review (per REVIEW_MATRIX)
 agents-review:
@@ -62,3 +68,47 @@ test:
 
 # Alias
 test-api: test
+
+# ── Dev UX ─────────────────────────────────────────────────────────────────
+
+venv:
+	python3 -m venv .venv
+	@echo "Run: source .venv/bin/activate"
+
+install:
+	.venv/bin/pip install -r apps/api/requirements.txt
+	@if [ -f apps/api/requirements-dev.txt ]; then .venv/bin/pip install -r apps/api/requirements-dev.txt; fi
+	@echo "Done. Activate with: source .venv/bin/activate"
+
+api:
+	@echo "Starting API on http://0.0.0.0:8000 (ELEVIA_DEV_TOOLS=1)..."
+	cd apps/api && ELEVIA_DEV_TOOLS=1 $(PWD)/.venv/bin/uvicorn api.main:app \
+	  --host 0.0.0.0 --port 8000 --reload
+
+web:
+	@echo "Starting Vite on http://0.0.0.0:3001 (proxy -> http://localhost:8000)..."
+	cd apps/web && npm run dev -- --host 0.0.0.0 --port 3001
+
+test-cvdelta:
+	@echo "Running /dev/cv-delta tests..."
+	cd apps/api && ELEVIA_DEV_TOOLS=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+	  $(PWD)/.venv/bin/python3 -m pytest tests/test_dev_cv_delta_endpoint.py tests/test_cv_parsing_delta_report.py \
+	  -v --tb=short
+
+devtools:
+	@echo ""
+	@echo "  Start API (terminal 1):"
+	@echo "    make api"
+	@echo ""
+	@echo "  Start Web (terminal 2):"
+	@echo "    make web"
+	@echo ""
+	@echo "  Open page:"
+	@echo "    http://localhost:3001/dev/cv-delta"
+	@echo "    http://\$$(ipconfig getifaddr en0):3001/dev/cv-delta  (phone/LAN)"
+	@echo ""
+	@echo "  curl proof:"
+	@echo "    curl -i http://localhost:8000/dev/cv-delta                     # expect 405"
+	@echo "    curl -F 'file=@apps/api/fixtures/cv_samples/sample_delta.txt' \\"
+	@echo "         http://localhost:8000/dev/cv-delta                        # expect 200"
+	@echo ""

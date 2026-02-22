@@ -5,7 +5,10 @@ Sprint 7
 Point d'entrée de l'API.
 """
 
+import logging
+import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Charger .env AVANT tout import qui utilise les variables d'environnement
@@ -14,6 +17,8 @@ load_dotenv(env_path)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+logger = logging.getLogger(__name__)
 
 from .routes.matching import router as matching_router
 from .routes.metrics import router as metrics_router
@@ -61,7 +66,15 @@ app.include_router(profile_router, prefix="/profile")
 app.include_router(inbox_router)
 app.include_router(applications_router)
 app.include_router(debug_router)  # DEV-only debug endpoints
-app.include_router(dev_tools_router)  # DEV-only tools (guarded by env)
+app.include_router(dev_tools_router)  # DEV-only tools (guarded by ELEVIA_DEV_TOOLS=1)
+
+# OBS: startup diagnostic (DEV-only, non-invasive)
+_dev_tools_on = os.getenv("ELEVIA_DEV_TOOLS", "").lower() in {"1", "true", "yes"}
+logger.info(
+    "[startup] ELEVIA_DEV_TOOLS=%s → POST /dev/cv-delta %s",
+    os.getenv("ELEVIA_DEV_TOOLS", "unset"),
+    "ENABLED" if _dev_tools_on else "DISABLED (returns 403)",
+)
 
 
 @app.get("/health", tags=["health"])
