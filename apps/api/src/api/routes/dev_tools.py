@@ -33,6 +33,9 @@ def _dev_tools_enabled() -> bool:
     return value in {"1", "true", "yes"}
 
 
+logger.info("DEV_TOOLS_ENABLED=%s", _dev_tools_enabled())
+
+
 def _validate_file(file: UploadFile) -> str:
     filename = (file.filename or "").lower()
     ext = Path(filename).suffix
@@ -172,9 +175,11 @@ async def dev_cv_delta(
     )
 
     logger.info(
-        "DEV_CV_DELTA_RESULT run_mode=%s canonical_count=%s cache_hit=%s",
+        "DEV_CV_DELTA_RESULT run_mode=%s canonical_count=%s cache_hit=%s provider=%s model=%s",
         response["meta"]["run_mode"],
         response["canonical_count"],
         response["meta"]["cache_hit"],
+        response["meta"]["provider"],
+        response["meta"]["model"],
     )
     return response

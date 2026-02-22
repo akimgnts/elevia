@@ -61,8 +61,8 @@ apps/web/
   vite.config.ts               ← proxy /dev → :8000
   src/
     App.tsx                    ← route /dev/cv-delta → DevCvDeltaPage
-    pages/DevCvDeltaPage.tsx   ← UI upload + résultats
-    lib/api/cvDelta.ts         ← runCvDelta(file, withLlm)
+    pages/CvDeltaPage.tsx      ← UI upload + résultats
+    lib/api.ts                 ← runCvDelta(file, withLlm)
 
 docs/
   START_HERE.md               ← point d'entrée unique
