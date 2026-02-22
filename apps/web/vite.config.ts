@@ -13,7 +13,16 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/dev": { target: API_TARGET, changeOrigin: true },
+      "/dev": {
+        target: API_TARGET,
+        changeOrigin: true,
+        bypass: (req) => {
+          if (req.method === "GET") {
+            return "/index.html";
+          }
+          return undefined;
+        },
+      },
       "/v1": { target: API_TARGET, changeOrigin: true },
       "/debug": { target: API_TARGET, changeOrigin: true },
       "/profile": { target: API_TARGET, changeOrigin: true },

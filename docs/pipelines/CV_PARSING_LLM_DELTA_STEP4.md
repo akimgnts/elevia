@@ -61,6 +61,18 @@ curl -X POST http://localhost:8000/dev/cv-delta \
   -F llm_model=gpt-4o-mini
 ```
 
+## PDF Error Codes (API)
+When PDF parsing fails, the API returns 4xx with a structured error:
+```
+{ "error": { "code": "...", "message": "...", "hint": "...", "request_id": "..." } }
+```
+Common codes:
+- PDF_PARSER_UNAVAILABLE: pypdf missing in API environment
+- PDF_PARSE_FAILED: invalid or encrypted PDF
+- PDF_TEXT_EMPTY: no extractable text found
+- FILE_TOO_LARGE: >5MB
+- UNSUPPORTED_FILETYPE: not PDF/TXT
+
 ## Interpretation
 - added_skills should contain relevant skills that were missed by deterministic parsing.
 - removed_skills should be empty or near zero because A+B only adds.
@@ -79,6 +91,8 @@ curl -X POST http://localhost:8000/dev/cv-delta \
 - If pytest says file not found, run pwd, inspect pytest rootdir, and use the correct path.
 - If pytest import hangs, follow docs/infra/PYTEST_IMPORT_HANG_FIX.md and move the repo out of iCloud.
 - If LLM is enabled without OPENAI_API_KEY, the script prints a warning and runs A only.
+- If PDF upload fails, check the error code and request_id in the response and inspect API logs.
+- If `uvicorn api.main:app` fails with `ModuleNotFoundError: api` from `apps/api`, run from repo root (`make api`) or set `PYTHONPATH=apps/api/src`.
 
 ## Notes
 - OPENAI_API_KEY is required only when running with --with-llm.
