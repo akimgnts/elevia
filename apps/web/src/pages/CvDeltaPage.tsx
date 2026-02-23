@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
+import { DevStatusCard } from "../components/DevStatusCard";
 import { PageContainer } from "../components/layout/PageContainer";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/Button";
@@ -155,6 +156,8 @@ export default function CvDeltaPage() {
             Compare le parsing déterministe avec l’enrichissement LLM optionnel.
           </p>
         </header>
+
+        <DevStatusCard />
 
         {errorInfo && (
           <Card className="mb-6 border border-amber-200 bg-amber-50/70 p-5">

@@ -10,13 +10,15 @@
 
 .PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test test-api help \
         venv install api web test-cvdelta devtools \
-        dev-up dev-down dev-status
+        dev-up dev-down dev-status dev smoke
 
 # Default target
 help:
 	@echo "Elevia Compass"
 	@echo ""
 	@echo "Dev Runner (recommended):"
+	@echo "  make dev           - Start API+WEB (alias for dev-up)"
+	@echo "  make smoke         - Quick end-to-end smoke test (API must be up)"
 	@echo "  make dev-up        - Start API+WEB deterministically (kill old, free ports, wait health)"
 	@echo "  make dev-down      - Stop API+WEB cleanly"
 	@echo "  make dev-status    - Show process/port/log status"
@@ -102,6 +104,13 @@ test-cvdelta:
 	  -v --tb=short
 
 # ── Dev Runner ──────────────────────────────────────────────────────────────
+
+# One-command start (alias for dev-up)
+dev: dev-up
+
+# Quick smoke test (requires API running)
+smoke:
+	@bash scripts/smoke_dev.sh
 
 # Start API+WEB deterministically (idempotent: kills old instances, frees ports)
 dev-up:

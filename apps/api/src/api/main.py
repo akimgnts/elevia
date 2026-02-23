@@ -20,6 +20,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 logger = logging.getLogger(__name__)
 
+from .middleware.request_id import RequestIdMiddleware
+from .routes.health import router as health_router
 from .routes.matching import router as matching_router
 from .routes.metrics import router as metrics_router
 from .routes.offers import router as offers_router
@@ -57,8 +59,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Request ID: stamp every request with X-Request-Id header + request.state.request_id
+app.add_middleware(RequestIdMiddleware)
 
 # Routes
+app.include_router(health_router)          # GET /health, GET /health/deps
 app.include_router(matching_router, prefix="/v1")
 app.include_router(metrics_router, prefix="/metrics")
 app.include_router(offers_router, prefix="/offers")
@@ -75,12 +80,6 @@ logger.info(
     os.getenv("ELEVIA_DEV_TOOLS", "unset"),
     "ENABLED" if _dev_tools_on else "DISABLED (returns 403)",
 )
-
-
-@app.get("/health", tags=["health"])
-async def health_check():
-    """Healthcheck endpoint."""
-    return {"status": "ok"}
 
 
 @app.get("/", tags=["root"])
