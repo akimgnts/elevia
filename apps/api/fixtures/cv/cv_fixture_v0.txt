@@ -1,0 +1,30 @@
+Marie Dupont — Data Analyst & BI Engineer
+marie.dupont@email.com | LinkedIn: /marie-dupont
+
+TECHNICAL SKILLS
+- Programming: Python, SQL, R, Bash scripting
+- Data & BI: Power BI, Tableau, Excel (advanced), ETL pipelines, Data analysis
+- Databases: PostgreSQL, MySQL, SQLite, NoSQL
+- Cloud & DevOps: Docker, Git, Linux, APIs, FastAPI
+- ML & Stats: Pandas, Scikit-learn, Machine learning, Statistics, NumPy
+- Methods: Agile, Project management, KPI dashboards, Reporting
+
+EXPERIENCE
+2022–2024 | Data Analyst — Analytics Corp, Paris
+- Built automated ETL pipelines in Python to consolidate data from 5 sources
+- Designed Power BI dashboards (KPI, reporting hebdo) used by 50+ managers
+- Wrote SQL queries and stored procedures for PostgreSQL data warehouse
+- Delivered machine learning model to predict customer churn (Scikit-learn, Pandas)
+
+2021–2022 | Junior BI Developer — DataFirst, Lyon
+- Created Excel reports and Power BI dashboards for sales and finance teams
+- Automated data extraction with Python scripts (Bash, APIs)
+- Maintained Git repositories and Docker containers for data pipeline stack
+
+EDUCATION
+2021 | Master Data Science — Université Paris-Saclay (BAC+5)
+
+LANGUAGES
+French: C2 (native)
+English: B2 (professional)
+Spanish: A2

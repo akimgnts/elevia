@@ -26,6 +26,7 @@ from .routes.matching import router as matching_router
 from .routes.metrics import router as metrics_router
 from .routes.offers import router as offers_router
 from .routes.profile import router as profile_router
+from .routes.profile_baseline import router as profile_baseline_router
 from .routes.inbox import router as inbox_router
 from .routes.applications import router as applications_router
 from .routes.debug_match import router as debug_router
@@ -68,6 +69,7 @@ app.include_router(matching_router, prefix="/v1")
 app.include_router(metrics_router, prefix="/metrics")
 app.include_router(offers_router, prefix="/offers")
 app.include_router(profile_router, prefix="/profile")
+app.include_router(profile_baseline_router)    # POST /profile/parse-baseline (no LLM)
 app.include_router(inbox_router)
 app.include_router(applications_router)
 app.include_router(debug_router)  # DEV-only debug endpoints

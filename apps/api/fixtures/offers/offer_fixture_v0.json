@@ -1,0 +1,26 @@
+[
+  {
+    "id": "smoke_offer_001",
+    "title": "Data Analyst VIE — BI & Reporting",
+    "company": "Elevia Smoke Co.",
+    "city": "Berlin",
+    "country": "Allemagne",
+    "description": "Mission VIE: analyse de données, dashboarding Power BI, reporting KPI hebdo, automatisation ETL Python, requêtes SQL sur entrepôt de données.",
+    "skills": [
+      "python",
+      "sql",
+      "power bi",
+      "etl",
+      "data analysis",
+      "kpi",
+      "reporting",
+      "excel",
+      "git",
+      "docker"
+    ],
+    "languages": ["anglais", "allemand"],
+    "education": "bac+3",
+    "is_vie": true,
+    "source": "business_france"
+  }
+]

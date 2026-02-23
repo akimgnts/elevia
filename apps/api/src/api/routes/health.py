@@ -53,7 +53,10 @@ async def health(request: Request):
 # ── /health/deps ───────────────────────────────────────────────────────────────
 
 def _check_offers_db() -> Dict[str, Any]:
-    """Check SQLite offers DB: existence + row count (if reachable)."""
+    """Check SQLite offers DB: existence and reachability.
+    The live 'offers' table is optional — inbox falls back to fixtures.
+    We check that the DB is reachable and has the 'offer_decisions' table.
+    """
     if not _DB_PATH.exists():
         # Fall back to fixture existence
         if _OFFERS_FIXTURE.exists():
@@ -62,10 +65,23 @@ def _check_offers_db() -> Dict[str, Any]:
 
     try:
         conn = sqlite3.connect(str(_DB_PATH), timeout=1)
-        cur = conn.execute("SELECT COUNT(*) FROM offers LIMIT 1")
-        count = cur.fetchone()[0]
+        # Check DB is reachable; prefer offer_decisions (always exists), offer count optional
+        tables = {
+            row[0]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        }
         conn.close()
-        return {"ok": True, "source": "sqlite", "offers_count": count}
+        has_decisions = "offer_decisions" in tables
+        has_offers = "offers" in tables
+        return {
+            "ok": True,
+            "source": "sqlite",
+            "has_offer_decisions": has_decisions,
+            "has_offers_table": has_offers,
+            "note": "inbox uses fixture catalog (no live offers table required)",
+        }
     except Exception as exc:
         return {"ok": False, "error": str(exc)}
 
