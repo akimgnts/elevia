@@ -34,6 +34,8 @@ class ParseBaselineResponse(BaseModel):
     raw_detected: int
     validated_skills: int
     filtered_out: int
+    validated_items: List[dict] = []
+    skill_groups: List[dict] = []
     profile: dict
     warnings: List[str] = []
 

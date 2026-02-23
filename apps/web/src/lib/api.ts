@@ -342,6 +342,17 @@ export type CvDeltaRequest = {
 // CV File Upload (baseline, no LLM)
 // ============================================================================
 
+export interface SkillGroupItem {
+  group: string;
+  count: number;
+  items: string[];
+}
+
+export interface ValidatedItem {
+  uri: string;
+  label: string;
+}
+
 export interface ParseFileResponse {
   source: string;
   filename: string;
@@ -351,6 +362,8 @@ export interface ParseFileResponse {
   raw_detected: number;
   validated_skills: number;
   filtered_out: number;
+  validated_items: ValidatedItem[];
+  skill_groups: SkillGroupItem[];
   skills_raw: string[];
   skills_canonical: string[];
   profile: { id: string; skills: string[]; skills_source: string };

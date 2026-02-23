@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ingestCv, parseFile, type ParseFileResponse } from "../lib/api";
+import { ingestCv, parseFile, type ParseFileResponse, type SkillGroupItem } from "../lib/api";
 import { useProfileStore } from "../store/profileStore";
 import { Button } from "../components/ui/Button";
 import { GlassCard } from "../components/ui/GlassCard";
@@ -31,6 +31,17 @@ export default function AnalyzePage() {
   const [parseResult, setParseResult] = useState<ParseFileResponse | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [matchingLoading, setMatchingLoading] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [showIgnored, setShowIgnored] = useState(false);
+
+  const toggleGroup = (group: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
+  };
 
   // ── Text tab handlers ────────────────────────────────────────────────────────
 
@@ -195,19 +206,20 @@ export default function AnalyzePage() {
             {/* Results */}
             {parseResult && (
               <div className="mt-6 space-y-4 border-t border-slate-100 pt-5">
-                <div className="flex flex-wrap items-center gap-3">
+                {/* Summary header */}
+                <div className="flex flex-wrap items-start gap-3">
                   <div>
                     <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
                       {parseResult.validated_skills} compétence{parseResult.validated_skills !== 1 ? "s" : ""} validée{parseResult.validated_skills !== 1 ? "s" : ""} pour le matching
                     </span>
                     {parseResult.filtered_out > 0 && (
                       <div className="mt-1 text-xs text-slate-400 pl-1">
-                        {parseResult.filtered_out} élément{parseResult.filtered_out !== 1 ? "s" : ""} ignoré{parseResult.filtered_out !== 1 ? "s" : ""} (non reconnu{parseResult.filtered_out !== 1 ? "s" : ""} par ESCO)
+                        {parseResult.filtered_out} élément{parseResult.filtered_out !== 1 ? "s" : ""} ignoré{parseResult.filtered_out !== 1 ? "s" : ""} (non reconnus par ESCO)
                       </div>
                     )}
                   </div>
-                  <span className="text-xs text-slate-400">
-                    {parseResult.extracted_text_length} caractères · {parseResult.filename}
+                  <span className="text-xs text-slate-400 pt-1">
+                    {parseResult.extracted_text_length} car. · {parseResult.filename}
                   </span>
                 </div>
 
@@ -217,22 +229,73 @@ export default function AnalyzePage() {
                   </div>
                 )}
 
-                {/* Skill pills */}
-                <div className="flex flex-wrap gap-2">
-                  {parseResult.skills_canonical.slice(0, 30).map((skill) => (
-                    <span
-                      key={skill}
-                      className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                {/* Grouped skills */}
+                {parseResult.skill_groups.length > 0 ? (
+                  <div className="space-y-2">
+                    {parseResult.skill_groups.map((group: SkillGroupItem) => {
+                      const isOpen = expandedGroups.has(group.group);
+                      return (
+                        <div key={group.group} className="rounded-xl border border-slate-100 bg-white/80">
+                          <button
+                            onClick={() => toggleGroup(group.group)}
+                            className="flex w-full items-center justify-between px-4 py-2.5 text-left"
+                          >
+                            <span className="text-sm font-semibold text-slate-700">
+                              {group.group}
+                              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-normal text-slate-500">
+                                {group.count}
+                              </span>
+                            </span>
+                            <span className="text-xs text-slate-400">{isOpen ? "▲" : "▼"}</span>
+                          </button>
+                          {isOpen && (
+                            <div className="border-t border-slate-100 px-4 pb-3 pt-2">
+                              <div className="flex flex-wrap gap-1.5">
+                                {group.items.map((skill) => (
+                                  <span
+                                    key={skill}
+                                    className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"
+                                  >
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* Flat fallback if no groups */
+                  <div className="flex flex-wrap gap-2">
+                    {parseResult.skills_canonical.slice(0, 30).map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Ignored count disclosure */}
+                {parseResult.filtered_out > 0 && (
+                  <div>
+                    <button
+                      onClick={() => setShowIgnored((v) => !v)}
+                      className="text-xs text-slate-400 underline underline-offset-2 hover:text-slate-600"
                     >
-                      {skill}
-                    </span>
-                  ))}
-                  {parseResult.skills_canonical.length > 30 && (
-                    <span className="rounded-full bg-slate-200 px-3 py-1 text-xs text-slate-500">
-                      +{parseResult.skills_canonical.length - 30} de plus
-                    </span>
-                  )}
-                </div>
+                      {showIgnored ? "Masquer" : "Voir les éléments ignorés"} ({parseResult.filtered_out})
+                    </button>
+                    {showIgnored && (
+                      <p className="mt-1 text-xs text-slate-400">
+                        {parseResult.filtered_out} token{parseResult.filtered_out !== 1 ? "s" : ""} ont été détectés dans le CV mais ne correspondent à aucun concept ESCO et ont été exclus du matching.
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex justify-end pt-2">
                   <Button onClick={handleRunMatching} disabled={matchingLoading}>

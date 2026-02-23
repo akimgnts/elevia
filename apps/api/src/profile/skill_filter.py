@@ -52,10 +52,11 @@ def strict_filter_skills(raw_skills: List[str]) -> Dict:
 
     Returns:
         {
-            "raw_detected": int,       # count before filtering
-            "validated_skills": int,   # count after ESCO filter
-            "filtered_out": int,       # raw_detected - validated_skills
-            "skills": List[str],       # final skill labels (ESCO preferred, max 40)
+            "raw_detected": int,                     # count before filtering
+            "validated_skills": int,                 # count after ESCO filter
+            "filtered_out": int,                     # raw_detected - validated_skills
+            "skills": List[str],                     # ESCO preferred labels (max 40)
+            "validated_items": List[Dict[str,str]],  # [{uri, label}, ...] (max 40)
         }
     """
     raw_detected = len(raw_skills)
@@ -74,30 +75,30 @@ def strict_filter_skills(raw_skills: List[str]) -> Dict:
 
     # Step 3 — ESCO strict filter (enable_fuzzy=False)
     seen_uris: set[str] = set()
-    validated: List[str] = []
+    validated_items: List[Dict] = []
     for token in after_noise:
         result = map_skill(token, enable_fuzzy=False)
         if result is None:
             continue
-        uri = result.get("esco_id") or result.get("canonical")
+        uri = result.get("esco_id") or result.get("canonical") or ""
         if uri in seen_uris:
             continue  # deduplicate by ESCO URI
         seen_uris.add(uri)
-        # Use preferred label from ESCO
         label = result.get("label") or result.get("canonical") or token
-        validated.append(label)
+        validated_items.append({"uri": uri, "label": label})
 
     # Step 4 — truncate
-    final = validated[:MAX_VALIDATED]
+    final_items = validated_items[:MAX_VALIDATED]
+    final_labels = [item["label"] for item in final_items]
 
-    validated_count = len(final)
+    validated_count = len(final_items)
     filtered_out = raw_detected - validated_count
 
     logger.debug(
         "[skill_filter] raw=%d noise_removed=%d esco_validated=%d truncated_to=%d",
         raw_detected,
         raw_detected - len(after_noise),
-        len(validated),
+        len(validated_items),
         validated_count,
     )
 
@@ -105,5 +106,6 @@ def strict_filter_skills(raw_skills: List[str]) -> Dict:
         "raw_detected": raw_detected,
         "validated_skills": validated_count,
         "filtered_out": filtered_out,
-        "skills": final,
+        "skills": final_labels,
+        "validated_items": final_items,
     }

@@ -58,6 +58,8 @@ class ParseFileResponse(BaseModel):
     raw_detected: int
     validated_skills: int
     filtered_out: int
+    validated_items: List[dict] = []
+    skill_groups: List[dict] = []
     skills_raw: List[str]
     skills_canonical: List[str]
     profile: dict
@@ -165,6 +167,8 @@ async def parse_file(
         raw_detected=result["raw_detected"],
         validated_skills=result["validated_skills"],
         filtered_out=result["filtered_out"],
+        validated_items=result.get("validated_items", []),
+        skill_groups=result.get("skill_groups", []),
         skills_raw=result["skills_raw"],
         skills_canonical=result["skills_canonical"],
         profile=result["profile"],

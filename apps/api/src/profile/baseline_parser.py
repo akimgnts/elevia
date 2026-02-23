@@ -18,6 +18,7 @@ from typing import Dict, List
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from esco.extract import extract_raw_skills_from_profile
+from profile.esco_grouping import group_validated_items
 from profile.skill_filter import strict_filter_skills
 
 logger = logging.getLogger(__name__)
@@ -47,12 +48,17 @@ def run_baseline(cv_text: str, *, profile_id: str = "baseline-profile") -> Dict:
     # Apply strict ESCO filter: normalize → noise removal → ESCO lookup → truncate
     filter_result = strict_filter_skills(skills_raw)
     skills_canonical: List[str] = filter_result["skills"]
+    validated_items = filter_result["validated_items"]
+
+    # Group validated skills by ESCO collection for display
+    skill_groups = group_validated_items(validated_items)
 
     logger.debug(
-        "[baseline_parser] profile_id=%s raw=%d validated=%d",
+        "[baseline_parser] profile_id=%s raw=%d validated=%d groups=%d",
         profile_id,
         filter_result["raw_detected"],
         filter_result["validated_skills"],
+        len(skill_groups),
     )
 
     return {
@@ -63,6 +69,8 @@ def run_baseline(cv_text: str, *, profile_id: str = "baseline-profile") -> Dict:
         "raw_detected": filter_result["raw_detected"],
         "validated_skills": filter_result["validated_skills"],
         "filtered_out": filter_result["filtered_out"],
+        "validated_items": validated_items,
+        "skill_groups": skill_groups,
         "profile": {
             "id": profile_id,
             "skills": skills_canonical,
