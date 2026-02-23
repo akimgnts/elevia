@@ -4,8 +4,8 @@
 # Tests the real user loop (no LLM required):
 #   1. API liveness + request_id
 #   2. Dependency readiness
-#   3. Deterministic baseline CV parse → skills (JSON)
-#   4. CV file upload parse → skills (multipart TXT)
+#   3. Deterministic baseline CV parse → validated_skills bounds (10–60)
+#   4. CV file upload parse → validated_skills bounds (10–60)
 #   5. Inbox matching → scored offers + capture first offer
 #   6. Apply Pack → cv_text + letter_text non-empty
 #
@@ -162,11 +162,15 @@ print(json.dumps({'cv_text': cv_text}))
             echo "  body: $(head -c 300 "$BODY_TMP")"
         else
             canonical_count=$(body_extract "canonical_count")
-            ok "/profile/parse-baseline → canonical_count=${canonical_count:-?} request_id=${rid:-n/a}"
+            validated=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('validated_skills', -1))" 2>/dev/null || echo "-1")
+            raw_det=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('raw_detected', -1))" 2>/dev/null || echo "-1")
+            ok "/profile/parse-baseline → raw=${raw_det} validated=${validated} canonical_count=${canonical_count:-?} request_id=${rid:-n/a}"
 
-            count_int=${canonical_count:-0}
-            if [ "${count_int}" -lt 5 ] 2>/dev/null; then
-                echo "  ⚠️  canonical_count < 5 — fixture may not be matching vocabulary"
+            # Bounds check: validated_skills must be > 10 and < 60
+            if [ "${validated}" -gt 10 ] 2>/dev/null && [ "${validated}" -lt 60 ] 2>/dev/null; then
+                ok "validated_skills=${validated} in bounds (10–60)"
+            else
+                fail "validated_skills=${validated} out of expected bounds (10–60)"
             fi
 
             # Extract skills_canonical array for step 5
@@ -197,10 +201,15 @@ else
     else
         canonical_count=$(body_extract "canonical_count")
         filename=$(body_extract "filename")
-        ok "/profile/parse-file → canonical_count=${canonical_count:-?} filename=${filename:-?} request_id=${rid:-n/a}"
+        validated=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('validated_skills', -1))" 2>/dev/null || echo "-1")
+        raw_det=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('raw_detected', -1))" 2>/dev/null || echo "-1")
+        ok "/profile/parse-file → raw=${raw_det} validated=${validated} filename=${filename:-?} request_id=${rid:-n/a}"
 
-        if [ "${canonical_count:-0}" -lt 5 ] 2>/dev/null; then
-            echo "  ⚠️  canonical_count < 5 — unexpected for fixture"
+        # Bounds check: validated_skills must be > 10 and < 60
+        if [ "${validated}" -gt 10 ] 2>/dev/null && [ "${validated}" -lt 60 ] 2>/dev/null; then
+            ok "validated_skills=${validated} in bounds (10–60)"
+        else
+            fail "validated_skills=${validated} out of expected bounds (10–60)"
         fi
     fi
 fi

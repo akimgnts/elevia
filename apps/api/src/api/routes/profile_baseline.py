@@ -31,6 +31,9 @@ class ParseBaselineResponse(BaseModel):
     skills_raw: List[str]
     skills_canonical: List[str]
     canonical_count: int
+    raw_detected: int
+    validated_skills: int
+    filtered_out: int
     profile: dict
     warnings: List[str] = []
 

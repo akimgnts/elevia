@@ -55,6 +55,9 @@ class ParseFileResponse(BaseModel):
     content_type: str
     extracted_text_length: int
     canonical_count: int
+    raw_detected: int
+    validated_skills: int
+    filtered_out: int
     skills_raw: List[str]
     skills_canonical: List[str]
     profile: dict
@@ -148,8 +151,9 @@ async def parse_file(
         raise HTTPException(status_code=500, detail="Extraction failed") from exc
 
     logger.info(
-        "[parse-file] filename=%s content_type=%s text_len=%d canonical_count=%d request_id=%s",
-        filename, content_type, len(cv_text), result["canonical_count"], request_id,
+        "[parse-file] filename=%s content_type=%s text_len=%d raw=%d validated=%d request_id=%s",
+        filename, content_type, len(cv_text),
+        result["raw_detected"], result["validated_skills"], request_id,
     )
 
     return ParseFileResponse(
@@ -158,6 +162,9 @@ async def parse_file(
         content_type=content_type,
         extracted_text_length=len(cv_text),
         canonical_count=result["canonical_count"],
+        raw_detected=result["raw_detected"],
+        validated_skills=result["validated_skills"],
+        filtered_out=result["filtered_out"],
         skills_raw=result["skills_raw"],
         skills_canonical=result["skills_canonical"],
         profile=result["profile"],

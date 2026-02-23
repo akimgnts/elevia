@@ -18,6 +18,7 @@ from typing import Dict, List
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from esco.extract import extract_raw_skills_from_profile
+from profile.skill_filter import strict_filter_skills
 
 logger = logging.getLogger(__name__)
 
@@ -34,19 +35,24 @@ def run_baseline(cv_text: str, *, profile_id: str = "baseline-profile") -> Dict:
 
     Returns:
         dict with keys:
-          source, skills_raw, skills_canonical, canonical_count, profile
+          source, skills_raw, skills_canonical, canonical_count, profile,
+          raw_detected, validated_skills, filtered_out
 
     The `profile` value is directly usable as POST /inbox `profile` field.
     """
     text = cv_text[:MAX_CV_CHARS]
 
     skills_raw: List[str] = extract_raw_skills_from_profile({"cv_text": text})
-    skills_canonical = skills_raw  # already normalized + sorted
+
+    # Apply strict ESCO filter: normalize → noise removal → ESCO lookup → truncate
+    filter_result = strict_filter_skills(skills_raw)
+    skills_canonical: List[str] = filter_result["skills"]
 
     logger.debug(
-        "[baseline_parser] profile_id=%s canonical_count=%d",
+        "[baseline_parser] profile_id=%s raw=%d validated=%d",
         profile_id,
-        len(skills_canonical),
+        filter_result["raw_detected"],
+        filter_result["validated_skills"],
     )
 
     return {
@@ -54,6 +60,9 @@ def run_baseline(cv_text: str, *, profile_id: str = "baseline-profile") -> Dict:
         "skills_raw": skills_raw,
         "skills_canonical": skills_canonical,
         "canonical_count": len(skills_canonical),
+        "raw_detected": filter_result["raw_detected"],
+        "validated_skills": filter_result["validated_skills"],
+        "filtered_out": filter_result["filtered_out"],
         "profile": {
             "id": profile_id,
             "skills": skills_canonical,

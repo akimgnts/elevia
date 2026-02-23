@@ -348,6 +348,9 @@ export interface ParseFileResponse {
   content_type: string;
   extracted_text_length: number;
   canonical_count: number;
+  raw_detected: number;
+  validated_skills: number;
+  filtered_out: number;
   skills_raw: string[];
   skills_canonical: string[];
   profile: { id: string; skills: string[]; skills_source: string };

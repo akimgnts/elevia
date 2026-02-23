@@ -196,9 +196,16 @@ export default function AnalyzePage() {
             {parseResult && (
               <div className="mt-6 space-y-4 border-t border-slate-100 pt-5">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
-                    {parseResult.canonical_count} compétence{parseResult.canonical_count !== 1 ? "s" : ""} détectée{parseResult.canonical_count !== 1 ? "s" : ""}
-                  </span>
+                  <div>
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
+                      {parseResult.validated_skills} compétence{parseResult.validated_skills !== 1 ? "s" : ""} validée{parseResult.validated_skills !== 1 ? "s" : ""} pour le matching
+                    </span>
+                    {parseResult.filtered_out > 0 && (
+                      <div className="mt-1 text-xs text-slate-400 pl-1">
+                        {parseResult.filtered_out} élément{parseResult.filtered_out !== 1 ? "s" : ""} ignoré{parseResult.filtered_out !== 1 ? "s" : ""} (non reconnu{parseResult.filtered_out !== 1 ? "s" : ""} par ESCO)
+                      </div>
+                    )}
+                  </div>
                   <span className="text-xs text-slate-400">
                     {parseResult.extracted_text_length} caractères · {parseResult.filename}
                   </span>
