@@ -30,6 +30,7 @@ from .routes.profile_baseline import router as profile_baseline_router
 from .routes.profile_file import router as profile_file_router
 from .routes.inbox import router as inbox_router
 from .routes.applications import router as applications_router
+from .routes.apply_pack import router as apply_pack_router
 from .routes.debug_match import router as debug_router
 from .routes.dev_tools import router as dev_tools_router
 
@@ -74,6 +75,7 @@ app.include_router(profile_baseline_router)    # POST /profile/parse-baseline (n
 app.include_router(profile_file_router)        # POST /profile/parse-file (multipart, no LLM)
 app.include_router(inbox_router)
 app.include_router(applications_router)
+app.include_router(apply_pack_router)  # POST /apply-pack (baseline + optional LLM)
 app.include_router(debug_router)  # DEV-only debug endpoints
 app.include_router(dev_tools_router)  # DEV-only tools (guarded by ELEVIA_DEV_TOOLS=1)
 

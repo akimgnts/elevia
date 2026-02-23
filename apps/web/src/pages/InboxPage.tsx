@@ -14,7 +14,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { fetchInbox, postDecision } from "../lib/api";
+import { fetchInbox, postDecision, applyPack, type ApplyPackResponse } from "../lib/api";
 import { buildMatchingProfile, type SkillsSource } from "../lib/profileMatching";
 import { upsertApplication, listApplications } from "../api/applications";
 import { useProfileStore } from "../store/profileStore";
@@ -505,6 +505,13 @@ export default function InboxPage() {
   const [debugOpen, setDebugOpen] = useState(DEBUG_INBOX);
   const loadedRef = useRef(false);
 
+  // Apply Pack modal state
+  const [applyPackOffer, setApplyPackOffer] = useState<NormalizedInboxItem | null>(null);
+  const [applyPackResult, setApplyPackResult] = useState<ApplyPackResponse | null>(null);
+  const [applyPackLoading, setApplyPackLoading] = useState(false);
+  const [applyPackError, setApplyPackError] = useState<string | null>(null);
+  const [applyPackTab, setApplyPackTab] = useState<"cv" | "letter">("cv");
+
   const profileId = profileHash ?? "anonymous";
 
   // Persist threshold
@@ -705,9 +712,40 @@ export default function InboxPage() {
     }
   };
 
-  const handleApply = (item: NormalizedInboxItem) => {
-    console.log("[inbox] Apply clicked for:", item.offer_id);
-    // TODO: Open generate modal
+  const handleApply = async (item: NormalizedInboxItem) => {
+    setApplyPackOffer(item);
+    setApplyPackResult(null);
+    setApplyPackError(null);
+    setApplyPackTab("cv");
+    setApplyPackLoading(true);
+
+    try {
+      const profileSkills: string[] = Array.isArray((userProfile as Record<string, unknown>)?.skills)
+        ? ((userProfile as Record<string, unknown>).skills as string[])
+        : Array.isArray((userProfile as Record<string, unknown>)?.matching_skills)
+        ? ((userProfile as Record<string, unknown>).matching_skills as string[])
+        : [];
+
+      const result = await applyPack({
+        profile: { id: profileId, skills: profileSkills },
+        offer: {
+          id: item.offer_id,
+          title: item.title,
+          company: item.company,
+          country: item.country,
+          city: item.city,
+          skills: [],
+        },
+        matched_core: item.matched_skills,
+        missing_core: item.missing_skills,
+        enrich_llm: 0,
+      });
+      setApplyPackResult(result);
+    } catch (err) {
+      setApplyPackError(err instanceof Error ? err.message : "Erreur lors de la génération");
+    } finally {
+      setApplyPackLoading(false);
+    }
   };
 
   const handleResetFilters = () => {
@@ -718,6 +756,12 @@ export default function InboxPage() {
   const handleShowAll = () => {
     setThreshold(0);
     setSearchQuery("");
+  };
+
+  const handleCloseApplyPack = () => {
+    setApplyPackOffer(null);
+    setApplyPackResult(null);
+    setApplyPackError(null);
   };
 
   // ============================================================================
@@ -932,6 +976,158 @@ export default function InboxPage() {
           skillsSource={skillsSource}
         />
       )}
+
+      {/* Apply Pack Modal */}
+      {applyPackOffer && (
+        <ApplyPackModal
+          offer={applyPackOffer}
+          result={applyPackResult}
+          loading={applyPackLoading}
+          error={applyPackError}
+          tab={applyPackTab}
+          onTabChange={setApplyPackTab}
+          onClose={handleCloseApplyPack}
+        />
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// Apply Pack Modal Component
+// ============================================================================
+
+function ApplyPackModal({
+  offer,
+  result,
+  loading,
+  error,
+  tab,
+  onTabChange,
+  onClose,
+}: {
+  offer: NormalizedInboxItem;
+  result: ApplyPackResponse | null;
+  loading: boolean;
+  error: string | null;
+  tab: "cv" | "letter";
+  onTabChange: (t: "cv" | "letter") => void;
+  onClose: () => void;
+}) {
+  const activeText = result ? (tab === "cv" ? result.cv_text : result.letter_text) : "";
+  const activeFilename = tab === "cv" ? "cv_generated.md" : "lettre_motivation.md";
+
+  const handleCopy = () => {
+    if (activeText) {
+      navigator.clipboard.writeText(activeText).catch(() => {});
+    }
+  };
+
+  const handleDownload = () => {
+    if (!activeText) return;
+    const blob = new Blob([activeText], { type: "text/markdown; charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = activeFilename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="relative flex flex-col w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 px-6 pt-5 pb-4 border-b border-slate-100">
+          <div className="min-w-0">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Apply Pack</div>
+            <h2 className="text-base font-bold text-slate-900 truncate">{offer.title}</h2>
+            {offer.company && (
+              <div className="text-sm text-slate-500 truncate">{offer.company}</div>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        {result && (
+          <div className="flex gap-0 px-6 border-b border-slate-100">
+            {(["cv", "letter"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => onTabChange(t)}
+                className={`px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  tab === t
+                    ? "border-b-2 border-slate-900 text-slate-900"
+                    : "text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                {t === "cv" ? "CV" : "Lettre de motivation"}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
+          {loading && (
+            <div className="flex items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900" />
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
+          {result && (
+            <>
+              {result.warnings.length > 0 && (
+                <div className="mb-3 rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
+                  {result.warnings.join(" · ")}
+                </div>
+              )}
+              <pre className="whitespace-pre-wrap font-mono text-xs text-slate-700 bg-slate-50 rounded-xl p-4 border border-slate-100 leading-relaxed">
+                {activeText}
+              </pre>
+              <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-400">
+                <span className="px-2 py-0.5 bg-slate-100 rounded-full font-mono">{result.mode}</span>
+                {result.meta.matched_core.length > 0 && (
+                  <span>{result.meta.matched_core.length} compétences matchées</span>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer actions */}
+        {result && (
+          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50">
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
+            >
+              Copier
+            </button>
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
+            >
+              Télécharger .md
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

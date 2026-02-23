@@ -373,6 +373,64 @@ export async function parseFile(file: File): Promise<ParseFileResponse> {
   return res.json() as Promise<ParseFileResponse>;
 }
 
+// ============================================================================
+// Apply Pack v0
+// ============================================================================
+
+export interface ApplyPackOfferIn {
+  id: string;
+  title: string;
+  company?: string | null;
+  country?: string | null;
+  city?: string | null;
+  description?: string | null;
+  skills?: string[];
+  url?: string | null;
+}
+
+export interface ApplyPackRequest {
+  profile: { id?: string; skills: string[]; name?: string };
+  offer: ApplyPackOfferIn;
+  matched_core?: string[];
+  missing_core?: string[];
+  enrich_llm?: 0 | 1;
+}
+
+export interface ApplyPackMeta {
+  offer_id: string;
+  offer_title: string;
+  company: string;
+  matched_core: string[];
+  missing_core: string[];
+  generated_at: string;
+}
+
+export interface ApplyPackResponse {
+  mode: "baseline" | "baseline+llm";
+  cv_text: string;
+  letter_text: string;
+  meta: ApplyPackMeta;
+  warnings: string[];
+}
+
+/**
+ * Generate a tailored CV + cover letter for a given offer.
+ * POST /apply-pack
+ * Baseline mode always works (no LLM key required).
+ */
+export async function applyPack(payload: ApplyPackRequest): Promise<ApplyPackResponse> {
+  const res = await fetch(`${API_BASE}/apply-pack`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  return res.json() as Promise<ApplyPackResponse>;
+}
+
 export async function runCvDelta(request: CvDeltaRequest): Promise<CvDeltaResponse> {
   const form = new FormData();
   form.append("file", request.file);

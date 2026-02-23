@@ -6,7 +6,8 @@
 #   2. Dependency readiness
 #   3. Deterministic baseline CV parse → skills (JSON)
 #   4. CV file upload parse → skills (multipart TXT)
-#   5. Inbox matching → scored offers
+#   5. Inbox matching → scored offers + capture first offer
+#   6. Apply Pack → cv_text + letter_text non-empty
 #
 # Usage:
 #   bash scripts/smoke_mvp.sh [API_BASE_URL]
@@ -17,6 +18,7 @@ set -uo pipefail
 
 API_BASE="${1:-${API_BASE_URL:-http://localhost:8000}}"
 CV_FIXTURE="${CV_FIXTURE:-apps/api/fixtures/cv/cv_fixture_v0.txt}"
+EXTRACT_PY="${EXTRACT_PY:-scripts/smoke_mvp_extract.py}"
 
 PASS=0
 FAIL=0
@@ -24,9 +26,10 @@ FAIL=0
 # Temp files for curl output
 HEADERS_TMP=$(mktemp /tmp/smoke_mvp_headers.XXXXXX)
 BODY_TMP=$(mktemp /tmp/smoke_mvp_body.XXXXXX)
+BODY_INBOX_TMP=$(mktemp /tmp/smoke_mvp_inbox.XXXXXX)
 PAYLOAD_TMP=$(mktemp /tmp/smoke_mvp_payload.XXXXXX)
 
-cleanup() { rm -f "$HEADERS_TMP" "$BODY_TMP" "$PAYLOAD_TMP"; }
+cleanup() { rm -f "$HEADERS_TMP" "$BODY_TMP" "$BODY_INBOX_TMP" "$PAYLOAD_TMP"; }
 trap cleanup EXIT
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -47,7 +50,8 @@ curl_get() {
 curl_post_json() {
     local url="$1"
     local payload_file="$2"
-    http_code=$(curl -sS -D "$HEADERS_TMP" -o "$BODY_TMP" \
+    local out_file="${3:-$BODY_TMP}"
+    http_code=$(curl -sS -D "$HEADERS_TMP" -o "$out_file" \
         -X POST \
         -H "Content-Type: application/json" \
         --data-binary "@$payload_file" \
@@ -67,13 +71,15 @@ curl_post_file() {
     echo "$http_code"
 }
 
-body_grep() {
-    grep -o "$1" "$BODY_TMP" 2>/dev/null | head -1
-}
-
 body_extract() {
     # Extract value of a JSON key from body (simple grep, no jq dependency)
     grep -o "\"$1\":[^,}]*" "$BODY_TMP" 2>/dev/null | head -1 | sed 's/.*: *//' | tr -d '"'
+}
+
+py_extract() {
+    # Extract field from a given JSON file using python helper
+    local file="$1" field="$2" default="${3:-}"
+    python3 "$EXTRACT_PY" "$file" "$field" "$default" 2>/dev/null || echo "$default"
 }
 
 # ── Header ────────────────────────────────────────────────────────────────────
@@ -86,9 +92,9 @@ echo "  CV fixture: $CV_FIXTURE"
 echo "════════════════════════════════════════════════════"
 echo ""
 
-# ── [1/5] GET /health ─────────────────────────────────────────────────────────
+# ── [1/6] GET /health ─────────────────────────────────────────────────────────
 
-echo "[1/5] API liveness — GET /health"
+echo "[1/6] API liveness — GET /health"
 http_code=$(curl_get "$API_BASE/health")
 rid=$(get_request_id)
 
@@ -110,9 +116,9 @@ else
 fi
 echo ""
 
-# ── [2/5] GET /health/deps ────────────────────────────────────────────────────
+# ── [2/6] GET /health/deps ────────────────────────────────────────────────────
 
-echo "[2/5] Dependency readiness — GET /health/deps"
+echo "[2/6] Dependency readiness — GET /health/deps"
 http_code=$(curl_get "$API_BASE/health/deps")
 rid=$(get_request_id)
 
@@ -128,9 +134,9 @@ else
 fi
 echo ""
 
-# ── [3/5] POST /profile/parse-baseline ───────────────────────────────────────
+# ── [3/6] POST /profile/parse-baseline ───────────────────────────────────────
 
-echo "[3/5] Baseline parse — POST /profile/parse-baseline"
+echo "[3/6] Baseline parse — POST /profile/parse-baseline"
 
 SKILLS_CANONICAL="[]"
 
@@ -158,7 +164,6 @@ print(json.dumps({'cv_text': cv_text}))
             canonical_count=$(body_extract "canonical_count")
             ok "/profile/parse-baseline → canonical_count=${canonical_count:-?} request_id=${rid:-n/a}"
 
-            # Warn if count is unexpectedly low
             count_int=${canonical_count:-0}
             if [ "${count_int}" -lt 5 ] 2>/dev/null; then
                 echo "  ⚠️  canonical_count < 5 — fixture may not be matching vocabulary"
@@ -166,7 +171,7 @@ print(json.dumps({'cv_text': cv_text}))
 
             # Extract skills_canonical array for step 5
             SKILLS_CANONICAL=$(python3 -c "
-import json, sys
+import json
 body = open('$BODY_TMP', 'r').read()
 d = json.loads(body)
 print(json.dumps(d.get('skills_canonical', [])))
@@ -176,9 +181,9 @@ print(json.dumps(d.get('skills_canonical', [])))
 fi
 echo ""
 
-# ── [4/5] POST /profile/parse-file (multipart TXT) ───────────────────────────
+# ── [4/6] POST /profile/parse-file (multipart TXT) ───────────────────────────
 
-echo "[4/5] File upload parse — POST /profile/parse-file"
+echo "[4/6] File upload parse — POST /profile/parse-file"
 
 if [ ! -f "$CV_FIXTURE" ]; then
     fail "CV fixture not found — skipping parse-file step"
@@ -201,9 +206,15 @@ else
 fi
 echo ""
 
-# ── [5/5] POST /inbox (matching) ─────────────────────────────────────────────
+# ── [5/6] POST /inbox (matching) ─────────────────────────────────────────────
 
-echo "[5/5] Inbox matching — POST /inbox"
+echo "[5/6] Inbox matching — POST /inbox"
+
+FIRST_OFFER_ID=""
+FIRST_OFFER_TITLE=""
+FIRST_OFFER_COMPANY=""
+MATCHED_SKILLS="[]"
+MISSING_SKILLS="[]"
 
 # Build inbox payload
 python3 -c "
@@ -226,7 +237,8 @@ print(json.dumps(payload))
 }
 
 if [ -n "${PAYLOAD_TMP:-}" ] && [ -s "$PAYLOAD_TMP" ]; then
-    http_code=$(curl_post_json "$API_BASE/inbox" "$PAYLOAD_TMP")
+    http_code=$(curl_post_json "$API_BASE/inbox" "$PAYLOAD_TMP" "$BODY_INBOX_TMP")
+    cp "$BODY_INBOX_TMP" "$BODY_TMP"
     rid=$(get_request_id)
 
     if [ "$http_code" != "200" ]; then
@@ -237,19 +249,80 @@ if [ -n "${PAYLOAD_TMP:-}" ] && [ -s "$PAYLOAD_TMP" ]; then
         profile_id_r=$(body_extract "profile_id")
         ok "/inbox → total_matched=${total_matched:-?} profile_id=${profile_id_r:-?} request_id=${rid:-n/a}"
 
-        # Print top result if any
-        if command -v python3 > /dev/null 2>&1; then
+        # Capture first offer for apply-pack step
+        FIRST_OFFER_ID=$(py_extract "$BODY_INBOX_TMP" "items.0.offer_id" "smoke-offer-1")
+        FIRST_OFFER_TITLE=$(py_extract "$BODY_INBOX_TMP" "items.0.title" "Offre V.I.E")
+        FIRST_OFFER_COMPANY=$(py_extract "$BODY_INBOX_TMP" "items.0.company" "")
+        MATCHED_SKILLS=$(py_extract "$BODY_INBOX_TMP" "items.0.matched_skills" "[]")
+        MISSING_SKILLS=$(py_extract "$BODY_INBOX_TMP" "items.0.missing_skills" "[]")
+
+        echo "  first offer: id=${FIRST_OFFER_ID:0:16}... score=$(py_extract "$BODY_INBOX_TMP" "items.0.score" "?")"
+    fi
+fi
+echo ""
+
+# ── [6/6] POST /apply-pack ────────────────────────────────────────────────────
+
+echo "[6/6] Apply Pack — POST /apply-pack"
+
+if [ -z "$FIRST_OFFER_ID" ]; then
+    fail "/apply-pack — no offer from inbox to use"
+else
+    python3 -c "
+import json
+profile_skills = $SKILLS_CANONICAL
+matched = $MATCHED_SKILLS if isinstance($MATCHED_SKILLS, list) else []
+missing = $MISSING_SKILLS if isinstance($MISSING_SKILLS, list) else []
+payload = {
+    'profile': {
+        'id': 'smoke-mvp',
+        'skills': profile_skills,
+    },
+    'offer': {
+        'id': '$FIRST_OFFER_ID',
+        'title': '$FIRST_OFFER_TITLE',
+        'company': '$FIRST_OFFER_COMPANY',
+        'skills': [],
+    },
+    'matched_core': matched,
+    'missing_core': missing,
+    'enrich_llm': 0,
+}
+print(json.dumps(payload))
+" > "$PAYLOAD_TMP" 2>/dev/null || {
+        fail "Failed to build apply-pack payload"
+        PAYLOAD_TMP=""
+    }
+
+    if [ -n "${PAYLOAD_TMP:-}" ] && [ -s "$PAYLOAD_TMP" ]; then
+        http_code=$(curl_post_json "$API_BASE/apply-pack" "$PAYLOAD_TMP")
+        rid=$(get_request_id)
+
+        if [ "$http_code" != "200" ]; then
+            fail "/apply-pack → HTTP $http_code"
+            echo "  body: $(head -c 400 "$BODY_TMP")"
+        else
+            mode=$(body_extract "mode")
+            ok "/apply-pack → mode=${mode:-?} request_id=${rid:-n/a}"
+
+            # Verify cv_text and letter_text are non-empty
             python3 -c "
 import json
 body = open('$BODY_TMP', 'r').read()
 d = json.loads(body)
-items = d.get('items', [])
-if items:
-    top = items[0]
-    print(f'  top offer: score={top.get(\"score\")} title=\"{top.get(\"title\", \"\")[:60]}\"')
-else:
-    print('  no offers scored >= 0 (catalog may be empty)')
-" 2>/dev/null || true
+cv = d.get('cv_text', '')
+lt = d.get('letter_text', '')
+mode = d.get('mode', '?')
+if not cv:
+    print('  ❌ cv_text is empty')
+    exit(1)
+if not lt:
+    print('  ❌ letter_text is empty')
+    exit(1)
+print(f'  cv_len={len(cv)} letter_len={len(lt)} mode={mode}')
+if d.get('warnings'):
+    print(f'  warnings: {d[\"warnings\"]}')
+" 2>/dev/null || fail "apply-pack: cv_text or letter_text missing"
         fi
     fi
 fi
