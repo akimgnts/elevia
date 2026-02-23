@@ -223,16 +223,16 @@ export default function AnalyzePage() {
                   </span>
                 </div>
 
-                {parseResult.warnings.length > 0 && (
+                {(parseResult.warnings?.length ?? 0) > 0 && (
                   <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
-                    {parseResult.warnings.join(" · ")}
+                    {(parseResult.warnings ?? []).join(" · ")}
                   </div>
                 )}
 
                 {/* Grouped skills */}
-                {parseResult.skill_groups.length > 0 ? (
+                {(parseResult.skill_groups?.length ?? 0) > 0 ? (
                   <div className="space-y-2">
-                    {parseResult.skill_groups.map((group: SkillGroupItem) => {
+                    {(parseResult.skill_groups ?? []).map((group: SkillGroupItem) => {
                       const isOpen = expandedGroups.has(group.group);
                       return (
                         <div key={group.group} className="rounded-xl border border-slate-100 bg-white/80">
@@ -269,7 +269,7 @@ export default function AnalyzePage() {
                 ) : (
                   /* Flat fallback if no groups */
                   <div className="flex flex-wrap gap-2">
-                    {parseResult.skills_canonical.slice(0, 30).map((skill) => (
+                    {(parseResult.skills_canonical ?? []).slice(0, 30).map((skill) => (
                       <span
                         key={skill}
                         className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
