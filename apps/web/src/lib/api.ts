@@ -338,6 +338,41 @@ export type CvDeltaRequest = {
   model?: string;
 };
 
+// ============================================================================
+// CV File Upload (baseline, no LLM)
+// ============================================================================
+
+export interface ParseFileResponse {
+  source: string;
+  filename: string;
+  content_type: string;
+  extracted_text_length: number;
+  canonical_count: number;
+  skills_raw: string[];
+  skills_canonical: string[];
+  profile: { id: string; skills: string[]; skills_source: string };
+  warnings: string[];
+}
+
+/**
+ * Upload a CV file (PDF or TXT) and run deterministic baseline skill extraction.
+ * POST /profile/parse-file (multipart/form-data)
+ * No LLM required. Same file → same output.
+ */
+export async function parseFile(file: File): Promise<ParseFileResponse> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${API_BASE}/profile/parse-file`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  return res.json() as Promise<ParseFileResponse>;
+}
+
 export async function runCvDelta(request: CvDeltaRequest): Promise<CvDeltaResponse> {
   const form = new FormData();
   form.append("file", request.file);

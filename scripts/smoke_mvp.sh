@@ -4,8 +4,9 @@
 # Tests the real user loop (no LLM required):
 #   1. API liveness + request_id
 #   2. Dependency readiness
-#   3. Deterministic baseline CV parse → skills
-#   4. Inbox matching → scored offers
+#   3. Deterministic baseline CV parse → skills (JSON)
+#   4. CV file upload parse → skills (multipart TXT)
+#   5. Inbox matching → scored offers
 #
 # Usage:
 #   bash scripts/smoke_mvp.sh [API_BASE_URL]
@@ -55,6 +56,17 @@ curl_post_json() {
     echo "$http_code"
 }
 
+curl_post_file() {
+    local url="$1"
+    local filepath="$2"
+    http_code=$(curl -sS -D "$HEADERS_TMP" -o "$BODY_TMP" \
+        -X POST \
+        -F "file=@$filepath" \
+        -w "%{http_code}" \
+        "$url" 2>/dev/null || echo "000")
+    echo "$http_code"
+}
+
 body_grep() {
     grep -o "$1" "$BODY_TMP" 2>/dev/null | head -1
 }
@@ -74,9 +86,9 @@ echo "  CV fixture: $CV_FIXTURE"
 echo "════════════════════════════════════════════════════"
 echo ""
 
-# ── [1/4] GET /health ─────────────────────────────────────────────────────────
+# ── [1/5] GET /health ─────────────────────────────────────────────────────────
 
-echo "[1/4] API liveness — GET /health"
+echo "[1/5] API liveness — GET /health"
 http_code=$(curl_get "$API_BASE/health")
 rid=$(get_request_id)
 
@@ -90,7 +102,7 @@ if [ "$http_code" = "000" ]; then
     exit 1
 elif [ "$http_code" != "200" ]; then
     fail "/health → HTTP $http_code (expected 200)"
-    echo "  body: $(cat "$BODY_TMP" | head -c 200)"
+    echo "  body: $(head -c 200 "$BODY_TMP")"
 else
     status=$(body_extract "status")
     version=$(body_extract "version")
@@ -98,34 +110,34 @@ else
 fi
 echo ""
 
-# ── [2/4] GET /health/deps ────────────────────────────────────────────────────
+# ── [2/5] GET /health/deps ────────────────────────────────────────────────────
 
-echo "[2/4] Dependency readiness — GET /health/deps"
+echo "[2/5] Dependency readiness — GET /health/deps"
 http_code=$(curl_get "$API_BASE/health/deps")
 rid=$(get_request_id)
 
 if [ "$http_code" != "200" ]; then
     fail "/health/deps → HTTP $http_code"
-    echo "  body: $(cat "$BODY_TMP" | head -c 300)"
+    echo "  body: $(head -c 300 "$BODY_TMP")"
 else
     dep_status=$(body_extract "status")
     ok "/health/deps → status=$dep_status request_id=${rid:-n/a}"
     if [ "$dep_status" = "degraded" ]; then
-        echo "  ⚠️  Some deps degraded (non-fatal for smoke): $(cat "$BODY_TMP" | head -c 200)"
+        echo "  ⚠️  Some deps degraded (non-fatal for smoke): $(head -c 200 "$BODY_TMP")"
     fi
 fi
 echo ""
 
-# ── [3/4] POST /profile/parse-baseline ───────────────────────────────────────
+# ── [3/5] POST /profile/parse-baseline ───────────────────────────────────────
 
-echo "[3/4] Baseline parse — POST /profile/parse-baseline"
+echo "[3/5] Baseline parse — POST /profile/parse-baseline"
+
+SKILLS_CANONICAL="[]"
 
 if [ ! -f "$CV_FIXTURE" ]; then
     fail "CV fixture not found: $CV_FIXTURE"
     echo ""
-    SKILLS_CANONICAL="[]"
 else
-    CV_TEXT=$(cat "$CV_FIXTURE")
     # Build JSON payload via python3 (handles escaping safely)
     python3 -c "
 import json, sys
@@ -133,7 +145,6 @@ cv_text = open('$CV_FIXTURE', 'r', encoding='utf-8').read()
 print(json.dumps({'cv_text': cv_text}))
 " > "$PAYLOAD_TMP" 2>/dev/null || {
         fail "Failed to build parse-baseline payload"
-        SKILLS_CANONICAL="[]"
     }
 
     if [ -f "$PAYLOAD_TMP" ] && [ -s "$PAYLOAD_TMP" ]; then
@@ -142,8 +153,7 @@ print(json.dumps({'cv_text': cv_text}))
 
         if [ "$http_code" != "200" ]; then
             fail "/profile/parse-baseline → HTTP $http_code"
-            echo "  body: $(cat "$BODY_TMP" | head -c 300)"
-            SKILLS_CANONICAL="[]"
+            echo "  body: $(head -c 300 "$BODY_TMP")"
         else
             canonical_count=$(body_extract "canonical_count")
             ok "/profile/parse-baseline → canonical_count=${canonical_count:-?} request_id=${rid:-n/a}"
@@ -154,7 +164,7 @@ print(json.dumps({'cv_text': cv_text}))
                 echo "  ⚠️  canonical_count < 5 — fixture may not be matching vocabulary"
             fi
 
-            # Extract skills_canonical array for step 4
+            # Extract skills_canonical array for step 5
             SKILLS_CANONICAL=$(python3 -c "
 import json, sys
 body = open('$BODY_TMP', 'r').read()
@@ -166,9 +176,34 @@ print(json.dumps(d.get('skills_canonical', [])))
 fi
 echo ""
 
-# ── [4/4] POST /inbox (matching) ─────────────────────────────────────────────
+# ── [4/5] POST /profile/parse-file (multipart TXT) ───────────────────────────
 
-echo "[4/4] Inbox matching — POST /inbox"
+echo "[4/5] File upload parse — POST /profile/parse-file"
+
+if [ ! -f "$CV_FIXTURE" ]; then
+    fail "CV fixture not found — skipping parse-file step"
+else
+    http_code=$(curl_post_file "$API_BASE/profile/parse-file" "$CV_FIXTURE")
+    rid=$(get_request_id)
+
+    if [ "$http_code" != "200" ]; then
+        fail "/profile/parse-file → HTTP $http_code"
+        echo "  body: $(head -c 300 "$BODY_TMP")"
+    else
+        canonical_count=$(body_extract "canonical_count")
+        filename=$(body_extract "filename")
+        ok "/profile/parse-file → canonical_count=${canonical_count:-?} filename=${filename:-?} request_id=${rid:-n/a}"
+
+        if [ "${canonical_count:-0}" -lt 5 ] 2>/dev/null; then
+            echo "  ⚠️  canonical_count < 5 — unexpected for fixture"
+        fi
+    fi
+fi
+echo ""
+
+# ── [5/5] POST /inbox (matching) ─────────────────────────────────────────────
+
+echo "[5/5] Inbox matching — POST /inbox"
 
 # Build inbox payload
 python3 -c "
@@ -196,7 +231,7 @@ if [ -n "${PAYLOAD_TMP:-}" ] && [ -s "$PAYLOAD_TMP" ]; then
 
     if [ "$http_code" != "200" ]; then
         fail "/inbox → HTTP $http_code"
-        echo "  body: $(cat "$BODY_TMP" | head -c 400)"
+        echo "  body: $(head -c 400 "$BODY_TMP")"
     else
         total_matched=$(body_extract "total_matched")
         profile_id_r=$(body_extract "profile_id")
