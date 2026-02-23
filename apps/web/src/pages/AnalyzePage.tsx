@@ -9,6 +9,39 @@ import { DevStatusCard } from "../components/DevStatusCard";
 
 const PLACEHOLDER_CV = `Jean Dupont\nData Analyst - 3 ans d'expérience\n\nFORMATION\nMaster Data Science, École Polytechnique (2020)\n\nEXPÉRIENCE\n- Analyste BI chez Acme Corp (2020-2023)\n  Python, SQL, Power BI, Tableau\n- Stage Data Engineer chez StartupXYZ (2019)\n  ETL, dbt, Airflow\n\nCOMPÉTENCES\n- Python, SQL, R\n- Power BI, Tableau, Looker\n- Excel avancé, VBA\n- Jira, Confluence\n\nLANGUES\n- Français (natif)\n- Anglais (C1)\n- Espagnol (B2)`;
 
+// Groups shown first when deriving key skills
+const KEY_SKILL_PRIORITY = ["Numérique", "Aptitudes & Compétences"];
+const MAX_KEY_SKILLS = 12;
+
+/** Deterministic: pick up to MAX_KEY_SKILLS labels, priority groups first. */
+function deriveKeySkills(groups: SkillGroupItem[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  const addFromGroup = (g: SkillGroupItem) => {
+    for (const skill of [...g.items].sort()) {
+      if (!seen.has(skill) && result.length < MAX_KEY_SKILLS) {
+        seen.add(skill);
+        result.push(skill);
+      }
+    }
+  };
+
+  // Priority pass
+  for (const name of KEY_SKILL_PRIORITY) {
+    const g = groups.find((g) => g.group === name);
+    if (g) addFromGroup(g);
+  }
+
+  // Remaining groups (stable: sorted by group name)
+  const others = groups
+    .filter((g) => !KEY_SKILL_PRIORITY.includes(g.group))
+    .sort((a, b) => a.group.localeCompare(b.group, "fr"));
+  for (const g of others) addFromGroup(g);
+
+  return result;
+}
+
 type Tab = "file" | "text";
 
 export default function AnalyzePage() {
@@ -31,8 +64,11 @@ export default function AnalyzePage() {
   const [parseResult, setParseResult] = useState<ParseFileResponse | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [matchingLoading, setMatchingLoading] = useState(false);
+
+  // ── Results UI state ─────────────────────────────────────────────────────────
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-  const [showIgnored, setShowIgnored] = useState(false);
+  const [showFullList, setShowFullList] = useState(false);
+  const [fullListSearch, setFullListSearch] = useState("");
 
   const toggleGroup = (group: string) => {
     setExpandedGroups((prev) => {
@@ -69,6 +105,8 @@ export default function AnalyzePage() {
     setSelectedFile(file);
     setParseResult(null);
     setParseError(null);
+    setShowFullList(false);
+    setFullListSearch("");
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -83,6 +121,8 @@ export default function AnalyzePage() {
     setParsing(true);
     setParseError(null);
     setParseResult(null);
+    setShowFullList(false);
+    setExpandedGroups(new Set());
     try {
       const result = await parseFile(selectedFile);
       setParseResult(result);
@@ -103,6 +143,23 @@ export default function AnalyzePage() {
       setMatchingLoading(false);
     }
   };
+
+  // ── Derived display data ──────────────────────────────────────────────────────
+
+  const skillGroups: SkillGroupItem[] = parseResult?.skill_groups ?? [];
+  const allLabels: string[] = parseResult?.skills_canonical ?? [];
+  const validatedCount = parseResult?.validated_skills ?? 0;
+  const filteredOut = parseResult?.filtered_out ?? 0;
+  const rawDetected = parseResult?.raw_detected ?? 0;
+
+  const keySkills = deriveKeySkills(skillGroups);
+
+  const autreGroup = skillGroups.find((g) => g.group === "Autres");
+
+  const filteredFullList = allLabels.filter((s) =>
+    fullListSearch.trim() === "" ||
+    s.toLowerCase().includes(fullListSearch.trim().toLowerCase())
+  );
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
@@ -203,102 +260,144 @@ export default function AnalyzePage() {
               </div>
             )}
 
-            {/* Results */}
+            {/* ── Results ─────────────────────────────────────────────────────── */}
             {parseResult && (
-              <div className="mt-6 space-y-4 border-t border-slate-100 pt-5">
-                {/* Summary header */}
-                <div className="flex flex-wrap items-start gap-3">
-                  <div>
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
-                      {parseResult.validated_skills} compétence{parseResult.validated_skills !== 1 ? "s" : ""} validée{parseResult.validated_skills !== 1 ? "s" : ""} pour le matching
+              <div className="mt-6 space-y-5 border-t border-slate-100 pt-5">
+
+                {/* (C) Health counters */}
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+                  <span className="font-semibold text-emerald-700">
+                    Validées&nbsp;
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold">
+                      {validatedCount}
                     </span>
-                    {parseResult.filtered_out > 0 && (
-                      <div className="mt-1 text-xs text-slate-400 pl-1">
-                        {parseResult.filtered_out} élément{parseResult.filtered_out !== 1 ? "s" : ""} ignoré{parseResult.filtered_out !== 1 ? "s" : ""} (non reconnus par ESCO)
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-xs text-slate-400 pt-1">
+                  </span>
+                  <span className="text-slate-500">
+                    Ignorées&nbsp;
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                      {filteredOut}
+                    </span>
+                  </span>
+                  <span className="text-slate-400">
+                    Brut détecté&nbsp;
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                      {rawDetected}
+                    </span>
+                  </span>
+                  {autreGroup && autreGroup.count > 0 && (
+                    <span className="text-slate-400">
+                      Autres&nbsp;
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                        {autreGroup.count}
+                      </span>
+                    </span>
+                  )}
+                  <span className="ml-auto text-xs text-slate-400">
                     {parseResult.extracted_text_length} car. · {parseResult.filename}
                   </span>
                 </div>
 
+                {/* Warnings */}
                 {(parseResult.warnings?.length ?? 0) > 0 && (
                   <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
                     {(parseResult.warnings ?? []).join(" · ")}
                   </div>
                 )}
 
-                {/* Grouped skills */}
-                {(parseResult.skill_groups?.length ?? 0) > 0 ? (
-                  <div className="space-y-2">
-                    {(parseResult.skill_groups ?? []).map((group: SkillGroupItem) => {
-                      const isOpen = expandedGroups.has(group.group);
-                      return (
-                        <div key={group.group} className="rounded-xl border border-slate-100 bg-white/80">
-                          <button
-                            onClick={() => toggleGroup(group.group)}
-                            className="flex w-full items-center justify-between px-4 py-2.5 text-left"
-                          >
-                            <span className="text-sm font-semibold text-slate-700">
-                              {group.group}
-                              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-normal text-slate-500">
-                                {group.count}
-                              </span>
-                            </span>
-                            <span className="text-xs text-slate-400">{isOpen ? "▲" : "▼"}</span>
-                          </button>
-                          {isOpen && (
-                            <div className="border-t border-slate-100 px-4 pb-3 pt-2">
-                              <div className="flex flex-wrap gap-1.5">
-                                {group.items.map((skill) => (
-                                  <span
-                                    key={skill}
-                                    className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"
-                                  >
-                                    {skill}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                {/* Zero-state: no ESCO skills found */}
+                {validatedCount === 0 ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
+                    <p className="font-semibold text-slate-700">Aucune compétence ESCO reconnue</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Le fichier a peut-être un contenu difficile à extraire.
+                      Essayez de coller le texte dans l'onglet "Coller le texte".
+                    </p>
                   </div>
                 ) : (
-                  /* Flat fallback if no groups */
-                  <div className="flex flex-wrap gap-2">
-                    {(parseResult.skills_canonical ?? []).slice(0, 30).map((skill) => (
-                      <span
-                        key={skill}
-                        className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                  <>
+                    {/* (A) Key skills */}
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-sm font-semibold text-slate-700">
+                          Compétences clés&nbsp;
+                          <span className="font-normal text-slate-400">
+                            {keySkills.length}&nbsp;/&nbsp;{validatedCount}
+                          </span>
+                        </span>
+                        {/* (B) Voir tout */}
+                        <button
+                          onClick={() => { setShowFullList(true); setFullListSearch(""); }}
+                          className="text-xs font-medium text-cyan-600 hover:text-cyan-800 hover:underline"
+                        >
+                          Voir toutes les compétences ({validatedCount})
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {keySkills.map((skill) => (
+                          <span
+                            key={skill}
+                            className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-800 ring-1 ring-cyan-200"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
 
-                {/* Ignored count disclosure */}
-                {parseResult.filtered_out > 0 && (
-                  <div>
-                    <button
-                      onClick={() => setShowIgnored((v) => !v)}
-                      className="text-xs text-slate-400 underline underline-offset-2 hover:text-slate-600"
-                    >
-                      {showIgnored ? "Masquer" : "Voir les éléments ignorés"} ({parseResult.filtered_out})
-                    </button>
-                    {showIgnored && (
-                      <p className="mt-1 text-xs text-slate-400">
-                        {parseResult.filtered_out} token{parseResult.filtered_out !== 1 ? "s" : ""} ont été détectés dans le CV mais ne correspondent à aucun concept ESCO et ont été exclus du matching.
-                      </p>
+                    {/* (D) Grouped skills — collapsible */}
+                    {skillGroups.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                          Détail par groupe
+                        </p>
+                        <div className="space-y-1.5">
+                          {skillGroups.map((group) => {
+                            const isOpen = expandedGroups.has(group.group);
+                            return (
+                              <div
+                                key={group.group}
+                                className="rounded-xl border border-slate-100 bg-white/80"
+                              >
+                                <button
+                                  onClick={() => toggleGroup(group.group)}
+                                  className="flex w-full items-center justify-between px-4 py-2.5 text-left"
+                                >
+                                  <span className="text-sm font-semibold text-slate-700">
+                                    {group.group}
+                                    <span className="ml-1.5 font-normal text-slate-400">
+                                      — {group.count}
+                                    </span>
+                                  </span>
+                                  <span className="text-xs text-slate-400">
+                                    {isOpen ? "▲" : "▼"}
+                                  </span>
+                                </button>
+                                {isOpen && (
+                                  <div className="border-t border-slate-100 px-4 pb-3 pt-2">
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {group.items.map((skill) => (
+                                        <span
+                                          key={skill}
+                                          className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"
+                                        >
+                                          {skill}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     )}
-                  </div>
+                  </>
                 )}
 
-                <div className="flex justify-end pt-2">
-                  <Button onClick={handleRunMatching} disabled={matchingLoading}>
+                {/* CTA */}
+                <div className="flex justify-end pt-1">
+                  <Button onClick={handleRunMatching} disabled={matchingLoading || validatedCount === 0}>
                     {matchingLoading ? "Chargement..." : "Lancer le matching →"}
                   </Button>
                 </div>
@@ -334,6 +433,66 @@ export default function AnalyzePage() {
           </GlassCard>
         )}
       </PageContainer>
+
+      {/* ── Full-list modal (B) ────────────────────────────────────────────────── */}
+      {showFullList && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowFullList(false); }}
+        >
+          <div className="flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-xl">
+            {/* Modal header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <span className="font-semibold text-slate-800">
+                Toutes les compétences ({allLabels.length})
+              </span>
+              <button
+                onClick={() => setShowFullList(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="border-b border-slate-100 px-5 py-3">
+              <input
+                type="search"
+                value={fullListSearch}
+                onChange={(e) => setFullListSearch(e.target.value)}
+                placeholder="Rechercher..."
+                autoFocus
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+              />
+            </div>
+
+            {/* Skill list */}
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              {filteredFullList.length === 0 ? (
+                <p className="text-center text-sm text-slate-400">Aucun résultat</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {filteredFullList.map((skill) => (
+                    <span
+                      key={skill}
+                      className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer count */}
+            <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">
+              {filteredFullList.length} compétence{filteredFullList.length !== 1 ? "s" : ""} affichée{filteredFullList.length !== 1 ? "s" : ""}
+              {fullListSearch && ` sur ${allLabels.length}`}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
