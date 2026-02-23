@@ -9,13 +9,19 @@
 #   make gates            # Run all gates sequentially
 
 .PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test test-api help \
-        venv install api web test-cvdelta devtools
+        venv install api web test-cvdelta devtools \
+        dev-up dev-down dev-status
 
 # Default target
 help:
 	@echo "Elevia Compass"
 	@echo ""
-	@echo "Dev UX:"
+	@echo "Dev Runner (recommended):"
+	@echo "  make dev-up        - Start API+WEB deterministically (kill old, free ports, wait health)"
+	@echo "  make dev-down      - Stop API+WEB cleanly"
+	@echo "  make dev-status    - Show process/port/log status"
+	@echo ""
+	@echo "Dev UX (manual):"
 	@echo "  make venv          - Create .venv at repo root"
 	@echo "  make install       - Install Python deps"
 	@echo "  make api           - Start API (port 8000, ELEVIA_DEV_TOOLS=1)"
@@ -94,6 +100,20 @@ test-cvdelta:
 	cd apps/api && ELEVIA_DEV_TOOLS=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
 	  $(PWD)/.venv/bin/python3 -m pytest tests/test_dev_cv_delta_endpoint.py tests/test_cv_parsing_delta_report.py \
 	  -v --tb=short
+
+# ── Dev Runner ──────────────────────────────────────────────────────────────
+
+# Start API+WEB deterministically (idempotent: kills old instances, frees ports)
+dev-up:
+	@bash scripts/dev/up.sh
+
+# Stop API+WEB cleanly (PID files + port sweep)
+dev-down:
+	@bash scripts/dev/down.sh
+
+# Show status: ports, PIDs, health, log tails
+dev-status:
+	@bash scripts/dev/status.sh
 
 devtools:
 	@echo ""
