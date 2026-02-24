@@ -12,6 +12,8 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, Request
 
+from esco.loader import esco_index_stats
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["health"])
@@ -87,13 +89,26 @@ def _check_offers_db() -> Dict[str, Any]:
 
 
 def _check_esco() -> Dict[str, Any]:
-    """Check ESCO resource directory exists and has CSV files."""
-    if not _ESCO_DIR.exists():
-        return {"ok": False, "error": f"ESCO dir not found: {_ESCO_DIR}"}
-    csv_files = list(_ESCO_DIR.glob("*.csv"))
-    if not csv_files:
-        return {"ok": False, "error": "ESCO dir empty (no CSV files)"}
-    return {"ok": True, "csv_count": len(csv_files)}
+    """Check ESCO resource directory and index readiness."""
+    stats = esco_index_stats()
+    skills_index_size = int(stats.get("skills_index_size", 0) or 0)
+    collections_loaded = int(stats.get("collections_loaded", 0) or 0)
+
+    if skills_index_size <= 0:
+        return {
+            "status": "fail",
+            "skills_index_size": skills_index_size,
+            "collections_loaded": collections_loaded,
+            "reason": stats.get("error") or "ESCO index empty",
+            "data_path": stats.get("data_path"),
+        }
+
+    return {
+        "status": "ok",
+        "skills_index_size": skills_index_size,
+        "collections_loaded": collections_loaded,
+        "data_path": stats.get("data_path"),
+    }
 
 
 def _check_weights() -> Dict[str, Any]:
@@ -115,7 +130,7 @@ async def health_deps(request: Request):
         "weights": _check_weights(),
     }
 
-    all_ok = all(v.get("ok", False) for v in deps.values())
+    all_ok = all(v.get("status") == "ok" or v.get("ok") for v in deps.values())
 
     return {
         "status": "ok" if all_ok else "degraded",

@@ -32,7 +32,7 @@ from esco.loader import get_esco_store
 logger = logging.getLogger(__name__)
 
 # Path to ESCO data files
-_DATA_DIR = Path(__file__).parent.parent.parent / "data" / "esco" / "v1_2_1" / "fr"
+_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "esco" / "v1_2_1" / "fr"
 
 # Ordered collection definitions (priority: first match wins)
 _COLLECTION_DEFS = [
@@ -78,6 +78,10 @@ def _get_collection_index() -> List[tuple[str, Set[str]]]:
         return _collection_index
 
     index: List[tuple[str, Set[str]]] = []
+    if not _DATA_DIR.exists():
+        logger.warning("[esco_grouping] data dir not found: %s", _DATA_DIR)
+        _collection_index = [(name, set()) for name, _ in _COLLECTION_DEFS]
+        return _collection_index
     for group_name, fname in _COLLECTION_DEFS:
         filepath = _DATA_DIR / fname
         if not filepath.exists():
@@ -140,12 +144,26 @@ def group_validated_items(
         ]
         Groups with zero items are omitted.
     """
+    if not validated_items:
+        return []
+
     groups: Dict[str, List[str]] = {}
-    for item in validated_items:
-        uri = item.get("uri", "")
-        label = item.get("label", "")
-        group = _assign_group(uri)
-        groups.setdefault(group, []).append(label)
+    try:
+        for item in validated_items:
+            uri = item.get("uri", "")
+            label = item.get("label", "") or uri
+            group = _assign_group(uri)
+            groups.setdefault(group, []).append(label)
+    except Exception as exc:
+        logger.error("[esco_grouping] grouping failed: %s", exc)
+        labels = sorted(
+            [item.get("label") or item.get("uri") or "" for item in validated_items if item]
+        )
+        return [{
+            "group": _GROUP_OTHER,
+            "count": len(labels),
+            "items": labels,
+        }]
 
     # Sort within each group for determinism
     for g in groups:

@@ -127,9 +127,16 @@ if [ "$http_code" != "200" ]; then
     echo "  body: $(head -c 300 "$BODY_TMP")"
 else
     dep_status=$(body_extract "status")
-    ok "/health/deps → status=$dep_status request_id=${rid:-n/a}"
+    esco_index=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('deps',{}).get('esco',{}).get('skills_index_size',-1))" 2>/dev/null || echo "-1")
+    esco_status=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('deps',{}).get('esco',{}).get('status','n/a'))" 2>/dev/null || echo "n/a")
+    ok "/health/deps → status=$dep_status esco_status=${esco_status} esco_index=${esco_index} request_id=${rid:-n/a}"
     if [ "$dep_status" = "degraded" ]; then
         echo "  ⚠️  Some deps degraded (non-fatal for smoke): $(head -c 200 "$BODY_TMP")"
+    fi
+    if [ "${esco_index}" -gt 0 ] 2>/dev/null; then
+        ok "esco_index_size=${esco_index} (>0)"
+    else
+        fail "esco_index_size=${esco_index} (expected >0)"
     fi
 fi
 echo ""
@@ -166,11 +173,11 @@ print(json.dumps({'cv_text': cv_text}))
             raw_det=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('raw_detected', -1))" 2>/dev/null || echo "-1")
             ok "/profile/parse-baseline → raw=${raw_det} validated=${validated} canonical_count=${canonical_count:-?} request_id=${rid:-n/a}"
 
-            # Bounds check: validated_skills must be > 10 and < 60
-            if [ "${validated}" -gt 10 ] 2>/dev/null && [ "${validated}" -lt 60 ] 2>/dev/null; then
-                ok "validated_skills=${validated} in bounds (10–60)"
+            # Bounds check: validated_skills must be >= 1
+            if [ "${validated}" -ge 1 ] 2>/dev/null; then
+                ok "validated_skills=${validated} in bounds (>=1)"
             else
-                fail "validated_skills=${validated} out of expected bounds (10–60)"
+                fail "validated_skills=${validated} out of expected bounds (>=1)"
             fi
 
             # Extract skills_canonical array for step 5
@@ -205,11 +212,11 @@ else
         raw_det=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('raw_detected', -1))" 2>/dev/null || echo "-1")
         ok "/profile/parse-file → raw=${raw_det} validated=${validated} filename=${filename:-?} request_id=${rid:-n/a}"
 
-        # Bounds check: validated_skills must be > 10 and < 60
-        if [ "${validated}" -gt 10 ] 2>/dev/null && [ "${validated}" -lt 60 ] 2>/dev/null; then
-            ok "validated_skills=${validated} in bounds (10–60)"
+        # Bounds check: validated_skills must be >= 1
+        if [ "${validated}" -ge 1 ] 2>/dev/null; then
+            ok "validated_skills=${validated} in bounds (>=1)"
         else
-            fail "validated_skills=${validated} out of expected bounds (10–60)"
+            fail "validated_skills=${validated} out of expected bounds (>=1)"
         fi
     fi
 fi

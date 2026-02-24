@@ -370,6 +370,20 @@ export interface ParseFileResponse {
   warnings: string[];
 }
 
+export interface ParseBaselineResponse {
+  source: string;
+  skills_raw: string[];
+  skills_canonical: string[];
+  canonical_count: number;
+  raw_detected: number;
+  validated_skills: number;
+  filtered_out: number;
+  validated_items: ValidatedItem[];
+  skill_groups: SkillGroupItem[];
+  profile: { id: string; skills: string[]; skills_source: string };
+  warnings: string[];
+}
+
 /**
  * Upload a CV file (PDF or TXT) and run deterministic baseline skill extraction.
  * POST /profile/parse-file (multipart/form-data)

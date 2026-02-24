@@ -18,7 +18,16 @@ ESCO_VERSION = "v1.2.1-fr"
 ESCO_LOCALE = "fr"
 
 # Default data path (relative to this file)
-_DEFAULT_DATA_PATH = Path(__file__).parent.parent.parent / "data" / "esco" / "v1_2_1" / "fr"
+_DEFAULT_DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "esco" / "v1_2_1" / "fr"
+
+# ESCO collection CSVs used for grouping (health stats only)
+_COLLECTION_FILES = [
+    "digital_skills_collection_fr.csv",
+    "green_skills_collection_fr.csv",
+    "language_skills_collection_fr.csv",
+    "transversal_skills_collection_fr.csv",
+    "research_skills_collection_fr.csv",
+]
 
 
 @dataclass
@@ -243,6 +252,7 @@ def get_esco_store(data_path: Optional[Path] = None, force_reload: bool = False)
 
     if data_path is None:
         data_path = _DEFAULT_DATA_PATH
+    data_path = Path(data_path).resolve()
 
     store = EscoStore()
 
@@ -253,6 +263,45 @@ def get_esco_store(data_path: Optional[Path] = None, force_reload: bool = False)
 
     _store = store
     return _store
+
+
+def esco_index_stats(data_path: Optional[Path] = None) -> Dict[str, object]:
+    """
+    Return ESCO index stats for observability and health checks.
+
+    Returns:
+        {
+            "skills_index_size": int,
+            "collections_loaded": int,
+            "data_path": str,
+            "error": Optional[str]
+        }
+    """
+    if data_path is None:
+        data_path = _DEFAULT_DATA_PATH
+    data_path = Path(data_path).resolve()
+
+    stats: Dict[str, object] = {
+        "skills_index_size": 0,
+        "collections_loaded": 0,
+        "data_path": str(data_path),
+        "error": None,
+    }
+
+    try:
+        store = get_esco_store(data_path=data_path)
+        stats["skills_index_size"] = int(len(store.preferred_to_uri))
+    except Exception as exc:
+        stats["error"] = str(exc)
+        return stats
+
+    collections_loaded = 0
+    for fname in _COLLECTION_FILES:
+        path = data_path / fname
+        if path.exists() and path.stat().st_size > 0:
+            collections_loaded += 1
+    stats["collections_loaded"] = int(collections_loaded)
+    return stats
 
 
 def validate_columns(data_path: Optional[Path] = None) -> Dict[str, List[str]]:

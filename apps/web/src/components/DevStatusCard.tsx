@@ -22,7 +22,7 @@ interface HealthResponse {
 
 interface DepsResponse {
   status: string;
-  deps?: Record<string, { ok: boolean; [key: string]: unknown }>;
+  deps?: Record<string, { ok?: boolean; status?: string; [key: string]: unknown }>;
   request_id?: string;
 }
 
@@ -188,7 +188,10 @@ export function DevStatusCard() {
             {deps.data?.deps && (
               <span style={{ color: "#475569", marginLeft: 8 }}>
                 {Object.entries(deps.data.deps)
-                  .map(([k, v]) => `${k}:${v.ok ? "✓" : "✗"}`)
+                  .map(([k, v]) => {
+                    const ok = v.ok ?? v.status === "ok";
+                    return `${k}:${ok ? "✓" : "✗"}`;
+                  })
                   .join("  ")}
               </span>
             )}

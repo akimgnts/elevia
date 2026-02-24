@@ -148,9 +148,10 @@ export default function AnalyzePage() {
 
   const skillGroups: SkillGroupItem[] = parseResult?.skill_groups ?? [];
   const allLabels: string[] = parseResult?.skills_canonical ?? [];
-  const validatedCount = parseResult?.validated_skills ?? 0;
-  const filteredOut = parseResult?.filtered_out ?? 0;
+  const validatedItems = parseResult?.validated_items ?? [];
   const rawDetected = parseResult?.raw_detected ?? 0;
+  const validatedCount = parseResult?.validated_skills ?? validatedItems.length;
+  const filteredOut = parseResult?.filtered_out ?? Math.max(0, rawDetected - validatedCount);
 
   const keySkills = deriveKeySkills(skillGroups);
 
@@ -311,6 +312,9 @@ export default function AnalyzePage() {
                     <p className="mt-1 text-sm text-slate-500">
                       Le fichier a peut-être un contenu difficile à extraire.
                       Essayez de coller le texte dans l'onglet "Coller le texte".
+                    </p>
+                    <p className="mt-2 text-xs text-slate-400">
+                      Brut détecté: {rawDetected} · Ignorées: {filteredOut}
                     </p>
                   </div>
                 ) : (
