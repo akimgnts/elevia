@@ -14,11 +14,27 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { fetchInbox, postDecision, applyPack, type ApplyPackResponse } from "../lib/api";
+import {
+  fetchInbox,
+  fetchOfferSemantic,
+  fetchOfferContext,
+  fetchProfileContext,
+  fetchContextFit,
+  postDecision,
+  applyPack,
+  type ApplyPackResponse,
+  type ExplainBlock,
+  type SkillExplainItem,
+  type OfferSemanticResponse,
+  type OfferContext,
+  type ProfileContext,
+  type ContextFit,
+} from "../lib/api";
 import { buildMatchingProfile, type SkillsSource } from "../lib/profileMatching";
 import { upsertApplication, listApplications } from "../api/applications";
 import { useProfileStore } from "../store/profileStore";
 import { SEED_PROFILE } from "../fixtures/seedProfile";
+import { OfferDetailModal, type OfferDetail } from "../components/OfferDetailModal";
 
 // ============================================================================
 // Constants
@@ -41,17 +57,40 @@ type DecisionRecord = {
 
 type NormalizedInboxItem = {
   offer_id: string;
+  id?: string;
   title: string;
   company: string | null;
   country: string | null;
   city: string | null;
   score: number;
+  score_pct?: number;
+  score_raw?: number;
   reasons: string[];
   matched_skills: string[];
   missing_skills: string[];
+  matched_skills_display: string[];
+  missing_skills_display: string[];
+  unmapped_tokens: string[];
+  offer_uri_count?: number;
+  profile_uri_count?: number;
+  intersection_count?: number;
+  scoring_unit?: string;
+  description?: string | null;
+  display_description?: string | null;
+  description_snippet?: string;
+  skills_display?: string[];
+  strategy_summary?: {
+    mission_summary?: string;
+    distance?: string;
+    action_guidance?: string;
+  } | null;
+  skills_uri_count?: number;
+  skills_uri_collapsed_dupes?: number;
+  skills_unmapped_count?: number;
   rome: { rome_code: string; rome_label: string } | null;
   is_vie?: boolean;
   skills_source?: string;
+  explain: ExplainBlock | null;
 };
 
 type LastApiCall = {
@@ -92,6 +131,32 @@ function normalizeScore(value: unknown): number {
   return Math.max(0, Math.min(100, Math.round(scaled)));
 }
 
+function cleanDescriptionSnippet(value?: string | null, maxLen = 180): string {
+  if (!value) return "";
+  const stripped = value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  if (stripped.length <= maxLen) return stripped;
+  return `${stripped.slice(0, maxLen).trim()}…`;
+}
+
+function formatRoleType(role?: OfferContext["role_type"]) {
+  switch (role) {
+    case "BI_REPORTING":
+      return "BI/Reporting";
+    case "DATA_ANALYSIS":
+      return "Data Analysis";
+    case "DATA_ENGINEERING":
+      return "Data Engineering";
+    case "PRODUCT_ANALYTICS":
+      return "Product Analytics";
+    case "OPS_ANALYTICS":
+      return "Ops Analytics";
+    case "MIXED":
+      return "Mixte";
+    default:
+      return null;
+  }
+}
+
 /**
  * Strict mapping from API response to UI model.
  * Uses offer_id (not id), safe nulls for all fields.
@@ -111,19 +176,79 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       console.warn("[inbox] Item missing offer_id:", rec);
       continue;
     }
+    const matchedDisplay = Array.isArray(rec.matched_skills_display)
+      ? (rec.matched_skills_display as string[])
+      : Array.isArray(rec.matched_skills)
+        ? (rec.matched_skills as string[])
+        : [];
+    const missingDisplay = Array.isArray(rec.missing_skills_display)
+      ? (rec.missing_skills_display as string[])
+      : Array.isArray(rec.missing_skills)
+        ? (rec.missing_skills as string[])
+        : [];
+
     results.push({
       offer_id: offerId,
+      id: typeof rec.id === "string" ? rec.id : undefined,
       title: typeof rec.title === "string" ? rec.title : "Offre",
       company: typeof rec.company === "string" ? rec.company : null,
       country: typeof rec.country === "string" ? rec.country : null,
       city: typeof rec.city === "string" ? rec.city : null,
-      score: normalizeScore(rec.score ?? rec.match_score),
+      score: normalizeScore(
+        typeof rec.score_pct === "number"
+          ? rec.score_pct
+          : typeof rec.score === "number"
+            ? rec.score
+            : rec.match_score
+      ),
+      score_pct: typeof rec.score_pct === "number" ? rec.score_pct : undefined,
+      score_raw: typeof rec.score_raw === "number" ? rec.score_raw : undefined,
       reasons: Array.isArray(rec.reasons) ? (rec.reasons as string[]) : [],
       matched_skills: Array.isArray(rec.matched_skills) ? (rec.matched_skills as string[]) : [],
       missing_skills: Array.isArray(rec.missing_skills) ? (rec.missing_skills as string[]) : [],
+      matched_skills_display: matchedDisplay,
+      missing_skills_display: missingDisplay,
+      unmapped_tokens: Array.isArray(rec.unmapped_tokens) ? (rec.unmapped_tokens as string[]) : [],
+      offer_uri_count:
+        typeof rec.offer_uri_count === "number"
+          ? rec.offer_uri_count
+          : typeof rec.skills_uri_count === "number"
+            ? rec.skills_uri_count
+            : undefined,
+      profile_uri_count: typeof rec.profile_uri_count === "number" ? rec.profile_uri_count : undefined,
+      intersection_count:
+        typeof rec.intersection_count === "number" ? rec.intersection_count : matchedDisplay.length,
+      scoring_unit: typeof rec.scoring_unit === "string" ? rec.scoring_unit : undefined,
+      description: typeof rec.description === "string" ? rec.description : null,
+      display_description: typeof rec.display_description === "string" ? rec.display_description : null,
+      description_snippet:
+        typeof rec.description_snippet === "string" && rec.description_snippet.trim()
+          ? rec.description_snippet
+          : cleanDescriptionSnippet(
+              typeof rec.display_description === "string"
+                ? rec.display_description
+                : typeof rec.description === "string"
+                  ? rec.description
+                  : null
+            ),
+      skills_display: Array.isArray(rec.skills_display) ? (rec.skills_display as string[]) : undefined,
+      strategy_summary:
+        rec.strategy_summary && typeof rec.strategy_summary === "object"
+          ? (rec.strategy_summary as {
+              mission_summary?: string;
+              distance?: string;
+              action_guidance?: string;
+            })
+          : null,
+      skills_uri_count: typeof rec.skills_uri_count === "number" ? rec.skills_uri_count : undefined,
+      skills_uri_collapsed_dupes:
+        typeof rec.skills_uri_collapsed_dupes === "number" ? rec.skills_uri_collapsed_dupes : undefined,
+      skills_unmapped_count:
+        typeof rec.skills_unmapped_count === "number" ? rec.skills_unmapped_count : undefined,
       rome: rec.rome && typeof rec.rome === "object" ? (rec.rome as { rome_code: string; rome_label: string }) : null,
       is_vie: typeof rec.is_vie === "boolean" ? rec.is_vie : undefined,
       skills_source: typeof rec.skills_source === "string" ? rec.skills_source : undefined,
+      explain: rec.explain && typeof rec.explain === "object" ? (rec.explain as ExplainBlock) : null,
     });
   }
   return results;
@@ -156,26 +281,213 @@ function EmptyState({
   );
 }
 
+// ── WhyThisScore panel ─────────────────────────────────────────────────────────
+
+function SkillPill({ item }: { item: SkillExplainItem }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-slate-100 text-slate-700">
+      {item.label}
+      {item.weighted && (
+        <span className="rounded px-1 bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold text-[9px]">
+          pondérée
+        </span>
+      )}
+    </span>
+  );
+}
+
+function WhyThisScore({ explain, score, matchedCount, missingCount }: {
+  explain: ExplainBlock | null;
+  score: number;
+  matchedCount: number;
+  missingCount: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [showAllMatched, setShowAllMatched] = useState(false);
+  const [showAllMissing, setShowAllMissing] = useState(false);
+
+  if (!explain) {
+    return (
+      <div className="mt-3 text-[11px] text-slate-400">
+        Explication non disponible.
+      </div>
+    );
+  }
+
+  const { breakdown, matched_display, missing_display, matched_full, missing_full } = explain;
+
+  const matchedList = showAllMatched ? matched_full : matched_display;
+  const missingList = showAllMissing ? missing_full : missing_display;
+
+  return (
+    <div className="mt-3 border-t border-slate-100 pt-3">
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center justify-between text-left text-[11px] font-semibold text-slate-500 hover:text-slate-700 transition"
+      >
+        <span>Pourquoi ce score ?</span>
+        <ChevronDown className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} />
+      </button>
+
+      {expanded && (
+        <div className="mt-3 space-y-3 text-[11px]">
+
+          {/* A: Résumé */}
+          <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-slate-600">
+            <span>Score <strong className="text-slate-900">{score}</strong></span>
+            <span>Matchées <strong className="text-emerald-700">{matchedCount}</strong></span>
+            <span>Manquantes <strong className="text-rose-600">{missingCount}</strong></span>
+          </div>
+          {score === 100 && missingCount === 0 && (
+            <div className="text-[10px] text-emerald-700">
+              100% = toutes les compétences ESCO alignées + critères langue/formation/pays OK.
+            </div>
+          )}
+          {score === 100 && missingCount > 0 && (
+            <div className="text-[10px] text-slate-500">
+              Score arrondi (total {breakdown.total.toFixed(1)} / 100).
+            </div>
+          )}
+
+          {/* B: Ce qui fait monter le score */}
+          {matchedList.length > 0 && (
+            <div>
+              <div className="mb-1.5 font-semibold text-emerald-700">Ce qui fait monter le score</div>
+              <div className="flex flex-wrap gap-1">
+                {matchedList.map((s) => (
+                  <SkillPill key={s.label} item={s} />
+                ))}
+              </div>
+              {!showAllMatched && matched_full.length > matched_display.length && (
+                <button
+                  onClick={() => setShowAllMatched(true)}
+                  className="mt-1 text-[10px] text-cyan-600 hover:underline"
+                >
+                  Voir tout ({matched_full.length})
+                </button>
+              )}
+              {showAllMatched && matched_full.length > matched_display.length && (
+                <button
+                  onClick={() => setShowAllMatched(false)}
+                  className="mt-1 text-[10px] text-slate-400 hover:underline"
+                >
+                  Réduire
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* C: Ce qui manque vraiment */}
+          {missingList.length > 0 && (
+            <div>
+              <div className="mb-1.5 font-semibold text-rose-600">Ce qui manque vraiment</div>
+              <div className="flex flex-wrap gap-1">
+                {missingList.map((s) => (
+                  <span
+                    key={s.label}
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-rose-50 text-rose-700"
+                  >
+                    {s.label}
+                    {s.weighted && (
+                      <span className="rounded px-1 bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold text-[9px]">
+                        pondérée
+                      </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+              {!showAllMissing && missing_full.length > missing_display.length && (
+                <button
+                  onClick={() => setShowAllMissing(true)}
+                  className="mt-1 text-[10px] text-cyan-600 hover:underline"
+                >
+                  Voir tout ({missing_full.length})
+                </button>
+              )}
+              {showAllMissing && missing_full.length > missing_display.length && (
+                <button
+                  onClick={() => setShowAllMissing(false)}
+                  className="mt-1 text-[10px] text-slate-400 hover:underline"
+                >
+                  Réduire
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* D: Transparence — breakdown */}
+          <div className="rounded-lg bg-slate-50 px-3 py-2 space-y-1">
+            <div className="font-semibold text-slate-500 mb-1">Détail du score</div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Compétences ({breakdown.skills_weight}%)</span>
+              <span className="font-medium text-slate-800">{breakdown.skills_score.toFixed(1)} pts</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">
+                Langues ({breakdown.language_weight}%)
+                {breakdown.language_match && <span className="ml-1 text-emerald-600">✓</span>}
+              </span>
+              <span className="font-medium text-slate-800">{breakdown.language_score.toFixed(1)} pts</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">
+                Formation ({breakdown.education_weight}%)
+                {breakdown.education_match && <span className="ml-1 text-emerald-600">✓</span>}
+              </span>
+              <span className="font-medium text-slate-800">{breakdown.education_score.toFixed(1)} pts</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">
+                Pays ({breakdown.country_weight}%)
+                {breakdown.country_match && <span className="ml-1 text-emerald-600">✓</span>}
+              </span>
+              <span className="font-medium text-slate-800">{breakdown.country_score.toFixed(1)} pts</span>
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
+  );
+}
+
 function OfferCard({
   offer,
   onShortlist,
   onDismiss,
   onApply,
+  onOpen,
   isShortlisted,
   isPending,
+  roleTypeLabel,
 }: {
   offer: NormalizedInboxItem;
   onShortlist: () => void;
   onDismiss: () => void;
   onApply: () => void;
+  onOpen: () => void;
   isShortlisted: boolean;
   isPending: boolean;
+  roleTypeLabel?: string | null;
 }) {
   const location = [offer.city, offer.country].filter(Boolean).join(", ");
-  const showFallback = offer.score === 15 && offer.matched_skills.length === 0;
+  const matchedDisplay = offer.matched_skills_display;
+  const missingDisplay = offer.missing_skills_display;
+  const unmapped = offer.unmapped_tokens;
+  const showFallback = offer.score === 15 && matchedDisplay.length === 0;
+  const uriSummary =
+    typeof offer.intersection_count === "number" && typeof offer.offer_uri_count === "number"
+      ? `${offer.intersection_count} compétences reconnues sur ${offer.offer_uri_count}`
+      : null;
 
   return (
-    <div className={`group bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm hover:shadow-lg transition-all flex flex-col h-full ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
+    <div
+      className={`group bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm hover:shadow-lg transition-all flex flex-col h-full ${isPending ? "opacity-50 pointer-events-none" : ""}`}
+      onClick={onOpen}
+      onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}
+      role="button"
+      tabIndex={0}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -183,6 +495,11 @@ function OfferCard({
             {offer.is_vie && (
               <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
                 V.I.E
+              </span>
+            )}
+            {roleTypeLabel && (
+              <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                {roleTypeLabel}
               </span>
             )}
             <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
@@ -199,23 +516,29 @@ function OfferCard({
             {offer.title}
           </h3>
 
-          <div className="mt-1 text-xs text-slate-500 flex items-center gap-1 flex-wrap">
-            {offer.company && <span className="font-medium text-slate-700">{offer.company}</span>}
-            {offer.company && location && <span>·</span>}
-            {location && (
-              <span className="flex items-center gap-0.5">
-                <MapPin className="w-3 h-3" />
-                {location}
-              </span>
-            )}
-          </div>
-        </div>
+      <div className="mt-1 text-xs text-slate-500 flex items-center gap-1 flex-wrap">
+        {offer.company && <span className="font-medium text-slate-700">{offer.company}</span>}
+        {offer.company && location && <span>·</span>}
+        {location && (
+          <span className="flex items-center gap-0.5">
+            <MapPin className="w-3 h-3" />
+            {location}
+          </span>
+        )}
       </div>
 
+      {offer.description_snippet && (
+        <p className="mt-3 text-xs text-slate-500 leading-relaxed line-clamp-3">
+          {offer.description_snippet}
+        </p>
+      )}
+    </div>
+  </div>
+
       {/* Matched Skills (top 3) */}
-      {offer.matched_skills.length > 0 ? (
+      {matchedDisplay.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {offer.matched_skills.slice(0, 3).map((skill) => (
+          {matchedDisplay.slice(0, 3).map((skill) => (
             <span
               key={skill}
               className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100"
@@ -223,8 +546,8 @@ function OfferCard({
               {skill}
             </span>
           ))}
-          {offer.matched_skills.length > 3 && (
-            <span className="text-[10px] text-slate-400">+{offer.matched_skills.length - 3}</span>
+          {matchedDisplay.length > 3 && (
+            <span className="text-[10px] text-slate-400">+{matchedDisplay.length - 3}</span>
           )}
         </div>
       ) : (
@@ -233,9 +556,9 @@ function OfferCard({
         </div>
       )}
 
-      {offer.missing_skills.length > 0 && (
+      {missingDisplay.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {offer.missing_skills.slice(0, 3).map((skill) => (
+          {missingDisplay.slice(0, 3).map((skill) => (
             <span
               key={skill}
               className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100"
@@ -243,9 +566,39 @@ function OfferCard({
               {skill}
             </span>
           ))}
-          {offer.missing_skills.length > 3 && (
-            <span className="text-[10px] text-slate-400">+{offer.missing_skills.length - 3}</span>
+          {missingDisplay.length > 3 && (
+            <span className="text-[10px] text-slate-400">+{missingDisplay.length - 3}</span>
           )}
+        </div>
+      )}
+
+      {DEBUG_INBOX && unmapped.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {unmapped.slice(0, 3).map((skill) => (
+            <span
+              key={skill}
+              className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200"
+            >
+              {skill}
+            </span>
+          ))}
+          {unmapped.length > 3 && (
+            <span className="text-[10px] text-slate-400">+{unmapped.length - 3}</span>
+          )}
+          <span className="text-[10px] text-slate-400">Non mappées ESCO</span>
+        </div>
+      )}
+
+      {uriSummary && (
+        <div className="mt-2 text-[11px] text-slate-500">
+          {uriSummary}
+        </div>
+      )}
+
+      {DEBUG_INBOX && (
+        <div className="mt-2 text-[10px] text-slate-400">
+          Compétences (URIs): {offer.skills_uri_count ?? "—"} | Doublons collapse:{" "}
+          {offer.skills_uri_collapsed_dupes ?? "—"} | Non mappées: {offer.skills_unmapped_count ?? "—"}
         </div>
       )}
 
@@ -261,17 +614,25 @@ function OfferCard({
         </div>
       )}
 
+      {/* Why this score — collapsible */}
+      <WhyThisScore
+        explain={offer.explain}
+        score={offer.score}
+        matchedCount={matchedDisplay.length}
+        missingCount={missingDisplay.length}
+      />
+
       {/* Actions */}
       <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
         <button
-          onClick={onApply}
+          onClick={(e) => { e.stopPropagation(); onApply(); }}
           className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
         >
           Générer
         </button>
 
         <button
-          onClick={onShortlist}
+          onClick={(e) => { e.stopPropagation(); onShortlist(); }}
           disabled={isShortlisted}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
             isShortlisted
@@ -283,7 +644,7 @@ function OfferCard({
         </button>
 
         <button
-          onClick={onDismiss}
+          onClick={(e) => { e.stopPropagation(); onDismiss(); }}
           className="ml-auto px-4 py-2 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition"
         >
           Écarter
@@ -511,8 +872,160 @@ export default function InboxPage() {
   const [applyPackLoading, setApplyPackLoading] = useState(false);
   const [applyPackError, setApplyPackError] = useState<string | null>(null);
   const [applyPackTab, setApplyPackTab] = useState<"cv" | "letter">("cv");
+  const [selectedOffer, setSelectedOffer] = useState<OfferDetail | null>(null);
+  const [semanticByOfferId, setSemanticByOfferId] = useState<Record<string, OfferSemanticResponse>>({});
+  const [semanticLoadingIds, setSemanticLoadingIds] = useState<Set<string>>(new Set());
+  const [offerContextById, setOfferContextById] = useState<Record<string, OfferContext>>({});
+  const [profileContext, setProfileContext] = useState<ProfileContext | null>(null);
+  const [profileContextLoading, setProfileContextLoading] = useState(false);
+  const [contextFitByOfferId, setContextFitByOfferId] = useState<Record<string, ContextFit>>({});
+  const [contextLoadingIds, setContextLoadingIds] = useState<Set<string>>(new Set());
+  const [contextFitLoadingIds, setContextFitLoadingIds] = useState<Set<string>>(new Set());
+  const [contextErrorByOfferId, setContextErrorByOfferId] = useState<Record<string, string>>({});
 
   const profileId = profileHash ?? "anonymous";
+  const selectedOfferId = selectedOffer?.offer_id || selectedOffer?.id;
+  const selectedSemantic = selectedOfferId ? semanticByOfferId[selectedOfferId] : undefined;
+  const selectedOfferContext = selectedOfferId ? offerContextById[selectedOfferId] : undefined;
+  const selectedContextFit = selectedOfferId ? contextFitByOfferId[selectedOfferId] : undefined;
+  const contextLoading =
+    profileContextLoading ||
+    (selectedOfferId ? contextLoadingIds.has(selectedOfferId) || contextFitLoadingIds.has(selectedOfferId) : false);
+  const contextError = selectedOfferId ? contextErrorByOfferId[selectedOfferId] : null;
+
+  useEffect(() => {
+    if (!selectedOffer) return;
+    const offerId = selectedOffer.offer_id || selectedOffer.id;
+    if (!offerId) return;
+    if (semanticByOfferId[offerId] || semanticLoadingIds.has(offerId)) return;
+
+    setSemanticLoadingIds((prev) => new Set(prev).add(offerId));
+    fetchOfferSemantic(offerId, profileId)
+      .then((data) => {
+        setSemanticByOfferId((prev) => ({ ...prev, [offerId]: data }));
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn("[inbox] semantic fetch failed:", err);
+        }
+        setSemanticByOfferId((prev) => ({
+          ...prev,
+          [offerId]: {
+            offer_id: offerId,
+            semantic_score: null,
+            semantic_model_version: null,
+            relevant_passages: [],
+            ai_available: false,
+            ai_error: "embeddings_unavailable",
+          },
+        }));
+      })
+      .finally(() => {
+        setSemanticLoadingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(offerId);
+          return next;
+        });
+      });
+  }, [selectedOffer, profileId, semanticByOfferId, semanticLoadingIds]);
+
+  useEffect(() => {
+    if (!userProfile || !profileId) return;
+    setProfileContextLoading(true);
+    fetchProfileContext(profileId, userProfile)
+      .then((data) => {
+        setProfileContext(data);
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn("[inbox] profile context fetch failed:", err);
+        }
+        setProfileContext(null);
+      })
+      .finally(() => {
+        setProfileContextLoading(false);
+      });
+  }, [userProfile, profileId]);
+
+  useEffect(() => {
+    if (!selectedOffer) return;
+    const offerId = selectedOffer.offer_id || selectedOffer.id;
+    if (!offerId) return;
+    if (offerContextById[offerId] || contextLoadingIds.has(offerId)) return;
+
+    const description =
+      selectedOffer.description ||
+      selectedOffer.display_description ||
+      selectedOffer.description_snippet ||
+      "";
+
+    setContextLoadingIds((prev) => new Set(prev).add(offerId));
+    fetchOfferContext(offerId, description)
+      .then((data) => {
+        setOfferContextById((prev) => ({ ...prev, [offerId]: data }));
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn("[inbox] offer context fetch failed:", err);
+        }
+        setContextErrorByOfferId((prev) => ({
+          ...prev,
+          [offerId]: "context_offer_failed",
+        }));
+      })
+      .finally(() => {
+        setContextLoadingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(offerId);
+          return next;
+        });
+      });
+  }, [selectedOffer, offerContextById, contextLoadingIds]);
+
+  useEffect(() => {
+    if (!selectedOfferId || !profileContext) return;
+    const offerContext = offerContextById[selectedOfferId];
+    if (!offerContext) return;
+    if (contextFitByOfferId[selectedOfferId] || contextFitLoadingIds.has(selectedOfferId)) return;
+
+    const matched =
+      selectedOffer?.matched_skills_display?.length
+        ? selectedOffer.matched_skills_display
+        : selectedOffer?.matched_skills || [];
+    const missing =
+      selectedOffer?.missing_skills_display?.length
+        ? selectedOffer.missing_skills_display
+        : selectedOffer?.missing_skills || [];
+
+    setContextFitLoadingIds((prev) => new Set(prev).add(selectedOfferId));
+    fetchContextFit(profileContext, offerContext, matched, missing)
+      .then((data) => {
+        setContextFitByOfferId((prev) => ({ ...prev, [selectedOfferId]: data }));
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn("[inbox] context fit fetch failed:", err);
+        }
+        setContextErrorByOfferId((prev) => ({
+          ...prev,
+          [selectedOfferId]: "context_fit_failed",
+        }));
+      })
+      .finally(() => {
+        setContextFitLoadingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(selectedOfferId);
+          return next;
+        });
+      });
+  }, [
+    selectedOfferId,
+    selectedOffer,
+    profileContext,
+    offerContextById,
+    contextFitByOfferId,
+    contextFitLoadingIds,
+  ]);
 
   // Persist threshold
   useEffect(() => {
@@ -736,8 +1249,8 @@ export default function InboxPage() {
           city: item.city,
           skills: [],
         },
-        matched_core: item.matched_skills,
-        missing_core: item.missing_skills,
+        matched_core: item.matched_skills_display,
+        missing_core: item.missing_skills_display,
         enrich_llm: 0,
       });
       setApplyPackResult(result);
@@ -944,8 +1457,10 @@ export default function InboxPage() {
                     onShortlist={() => handleShortlist(offer.offer_id, offer.score)}
                     onDismiss={() => handleDecision(offer.offer_id, "DISMISSED", offer.score)}
                     onApply={() => handleApply(offer)}
+                    onOpen={() => setSelectedOffer(offer)}
                     isShortlisted={trackerStatusMap[offer.offer_id] === "shortlisted"}
                     isPending={pendingDecisions.has(offer.offer_id)}
+                    roleTypeLabel={formatRoleType(offerContextById[offer.offer_id]?.role_type)}
                   />
                 ))}
               </div>
@@ -987,6 +1502,19 @@ export default function InboxPage() {
           tab={applyPackTab}
           onTabChange={setApplyPackTab}
           onClose={handleCloseApplyPack}
+        />
+      )}
+
+      {selectedOffer && (
+        <OfferDetailModal
+          offer={selectedSemantic ? { ...selectedOffer, ...selectedSemantic } : selectedOffer}
+          showDebug={DEBUG_INBOX}
+          offerContext={selectedOfferContext}
+          profileContext={profileContext}
+          contextFit={selectedContextFit}
+          contextLoading={contextLoading}
+          contextError={contextError}
+          onClose={() => setSelectedOffer(null)}
         />
       )}
     </div>

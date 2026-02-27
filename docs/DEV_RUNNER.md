@@ -31,6 +31,24 @@ make dev-status    # check what's running
 make dev-down      # stop cleanly
 ```
 
+## Tests
+
+```bash
+# Install dev deps (first time only)
+pip install -r apps/api/requirements-dev.txt
+
+# Run full API test suite
+cd apps/api && python -m pytest -q
+
+# Run context layer tests only (fast, no DB)
+cd apps/api && python -m pytest tests/test_context_fit_specificity.py tests/test_context_endpoints.py tests/test_context_profile_fallback.py -q
+
+# Run context smoke (deterministic, no API required)
+python apps/api/scripts/context_smoke.py
+# With CV text override:
+python apps/api/scripts/context_smoke.py --cv-text "Expert SQL, Python, Power BI."
+```
+
 ## Logs
 
 ```bash
@@ -47,6 +65,26 @@ To enable:
 
 ```bash
 DEV_RELOAD=1 make dev-up
+```
+
+## Enable IA (A+IA)
+
+1) Create or edit `apps/api/.env`:
+
+```bash
+OPENAI_API_KEY=sk-...
+```
+
+2) Restart the API:
+
+```bash
+make dev-down && make dev-up
+```
+
+3) Verify:
+
+```bash
+curl http://localhost:8000/health/deps | jq '.deps.llm'
 ```
 
 ## Troubleshooting

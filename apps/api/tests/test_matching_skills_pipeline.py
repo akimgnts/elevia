@@ -28,7 +28,8 @@ def test_matching_with_explicit_skills_intersection():
     result = engine.score_offer(extracted, offer)
 
     assert result.score > 15
-    assert result.match_debug["skills"]["matched"] == ["sql"]
+    matched = result.match_debug["skills"]["matched"]
+    assert [m.lower() for m in matched] == ["sql"]
 
 
 def test_profile_skills_empty_fallback_reason():

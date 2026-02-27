@@ -56,8 +56,8 @@ export default function DashboardPage() {
   const topMatches = items.slice(0, 3).map((offer) => {
     const location = offer.country || offer.city || "Localisation à préciser";
     const preview =
-      offer.matched_skills && offer.matched_skills.length > 0
-        ? `Compétences alignées: ${offer.matched_skills.slice(0, 3).join(", ")}`
+      offer.matched_skills_display && offer.matched_skills_display.length > 0
+        ? `Compétences alignées: ${offer.matched_skills_display.slice(0, 3).join(", ")}`
         : "Aucune compétence détectée en commun.";
     return {
       id: offer.offer_id,

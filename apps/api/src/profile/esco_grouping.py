@@ -20,14 +20,17 @@ Grouping is:
 from __future__ import annotations
 
 import csv
+import importlib
 import logging
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from esco.loader import get_esco_store
+try:
+    from ..esco.loader import get_esco_store
+except ImportError:
+    get_esco_store = importlib.import_module("esco.loader").get_esco_store
 
 logger = logging.getLogger(__name__)
 

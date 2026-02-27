@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-test_francetravail_api.py
-==========================
+ft_check_francetravail_api.py
+=============================
 Script de test complet pour toutes les APIs France Travail.
 
 Tests:
@@ -12,14 +12,15 @@ Tests:
 - API Anotéa v1
 
 Usage:
-    python test_francetravail_api.py
+    python scripts/ft_check_francetravail_api.py
 """
 
 import sys
 from pathlib import Path
 
-# Add fetchers to path
-sys.path.insert(0, str(Path(__file__).parent / "fetchers"))
+# Add repo root to path (for fetchers/*)
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from client_ft import FranceTravailClient
 

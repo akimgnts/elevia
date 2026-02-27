@@ -20,15 +20,15 @@ def get_llm_api_key() -> Optional[str]:
       2. LLM_API_KEY     (legacy — triggers a deprecation warning)
     """
     key = os.getenv("OPENAI_API_KEY")
-    if key:
-        return key
+    if key and key.strip():
+        return key.strip()
 
     key = os.getenv("LLM_API_KEY")
-    if key:
+    if key and key.strip():
         logger.warning(
             "[env] LLM_API_KEY is deprecated — set OPENAI_API_KEY instead. "
             "Support for LLM_API_KEY will be removed in a future release."
         )
-        return key
+        return key.strip()
 
     return None

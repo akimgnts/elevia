@@ -213,22 +213,75 @@ export async function postCorrectionMetric(event: CorrectionEvent): Promise<void
 // Inbox
 // ============================================================================
 
+// ── Explain block types ───────────────────────────────────────────────────────
+
+export interface SkillExplainItem {
+  label: string;
+  weighted: boolean; // true if skill appears in ROME competences for this offer
+}
+
+export interface ExplainBreakdown {
+  skills_score: number;
+  skills_weight: number;   // 70
+  language_score: number;
+  language_weight: number; // 15
+  language_match: boolean;
+  education_score: number;
+  education_weight: number; // 10
+  education_match: boolean;
+  country_score: number;
+  country_weight: number;  // 5
+  country_match: boolean;
+  total: number;
+}
+
+export interface ExplainBlock {
+  matched_display: SkillExplainItem[];  // top 6 for card
+  missing_display: SkillExplainItem[];  // top 6 for card
+  matched_full: SkillExplainItem[];     // all matched, max 30
+  missing_full: SkillExplainItem[];     // all missing, max 30
+  breakdown: ExplainBreakdown;
+}
+
 export interface InboxItem {
   offer_id: string;
+  id?: string;
   title: string;
   company: string | null;
   country: string | null;
   city: string | null;
   score: number;
+  score_pct?: number;
+  score_raw?: number;
   reasons: string[];
   matched_skills?: string[];
   missing_skills?: string[];
+  matched_skills_display?: string[];
+  missing_skills_display?: string[];
+  unmapped_tokens?: string[];
+  offer_uri_count?: number;
+  profile_uri_count?: number;
+  intersection_count?: number;
+  scoring_unit?: string;
+  description?: string | null;
+  display_description?: string | null;
+  description_snippet?: string | null;
+  skills_display?: string[];
+  strategy_summary?: {
+    mission_summary?: string;
+    distance?: string;
+    action_guidance?: string;
+  } | null;
+  skills_uri_count?: number;
+  skills_uri_collapsed_dupes?: number;
+  skills_unmapped_count?: number;
   rome?: { rome_code: string; rome_label: string } | null;
   rome_competences?: Array<{
     competence_code: string;
     competence_label: string;
     esco_uri?: string | null;
   }> | null;
+  explain?: ExplainBlock | null;
 }
 
 export interface InboxResponse {
@@ -238,17 +291,94 @@ export interface InboxResponse {
   total_decided: number;
 }
 
+export interface OfferSemanticResponse {
+  offer_id: string;
+  semantic_score: number | null;
+  semantic_model_version: string | null;
+  relevant_passages: string[];
+  ai_available: boolean;
+  ai_error: string | null;
+}
+
+// ── Context layer ───────────────────────────────────────────────────────────
+
+export interface EvidenceSpan {
+  field: string;
+  span: string;
+}
+
+export interface OfferContext {
+  offer_id: string;
+  mission_summary: string | null;
+  role_type: "BI_REPORTING" | "DATA_ANALYSIS" | "DATA_ENGINEERING" | "PRODUCT_ANALYTICS" | "OPS_ANALYTICS" | "MIXED" | "UNKNOWN";
+  primary_role_type: "BI_REPORTING" | "DATA_ANALYSIS" | "DATA_ENGINEERING" | "PRODUCT_ANALYTICS" | "OPS_ANALYTICS" | "MIXED" | "UNKNOWN";
+  role_type_reason?: string | null;
+  primary_outcomes: string[];
+  responsibilities: string[];
+  tools_stack_signals: string[];
+  work_style_signals: {
+    autonomy_level: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN";
+    stakeholder_exposure: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN";
+    cadence: "ADHOC" | "WEEKLY" | "DAILY" | "UNKNOWN";
+  };
+  environment_signals: {
+    org_type: "LARGE_CORP" | "SME" | "STARTUP" | "PUBLIC" | "UNKNOWN";
+    domain: string | null;
+    data_maturity: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN";
+  };
+  constraints: string[];
+  needs_clarification: string[];
+  confidence: number;
+  evidence_spans: EvidenceSpan[];
+}
+
+export interface ProfileContext {
+  profile_id: string;
+  trajectory_summary: string | null;
+  dominant_strengths: string[];
+  profile_tools_signals: string[];
+  experience_signals: {
+    analysis_vs_execution: "ANALYSIS" | "EXECUTION" | "MIXED" | "UNKNOWN";
+    autonomy_signal: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN";
+    stakeholder_signal: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN";
+  };
+  preferred_work_signals: {
+    cadence_preference: "ADHOC" | "WEEKLY" | "DAILY" | "UNKNOWN";
+    environment_preference: "LARGE_CORP" | "SME" | "STARTUP" | "PUBLIC" | "UNKNOWN";
+  };
+  nonlinear_notes: string[];
+  gaps_or_unknowns: string[];
+  confidence: number;
+  evidence_spans: EvidenceSpan[];
+}
+
+export interface ContextFit {
+  profile_id: string;
+  offer_id: string;
+  fit_summary: string | null;
+  why_it_fits: string[];
+  likely_frictions: string[];
+  clarifying_questions: string[];
+  recommended_angle: {
+    cv_focus: string[];
+    cover_letter_hooks: string[];
+  };
+  confidence: number;
+  evidence_spans: EvidenceSpan[];
+}
+
 export async function fetchInbox(
   profile: unknown,
   profileId: string,
   minScore = 65,
-  limit = 20
+  limit = 20,
+  explain = true,
 ): Promise<InboxResponse> {
   const url = `${API_BASE}/inbox`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ profile_id: profileId, profile, min_score: minScore, limit }),
+    body: JSON.stringify({ profile_id: profileId, profile, min_score: minScore, limit, explain }),
   });
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
@@ -271,6 +401,81 @@ export async function postDecision(
   if (!res.ok) {
     console.warn(`[inbox] decision failed: ${res.status}`);
   }
+}
+
+export async function fetchOfferSemantic(
+  offerId: string,
+  profileId: string
+): Promise<OfferSemanticResponse> {
+  const url = `${API_BASE}/offers/${encodeURIComponent(offerId)}/semantic`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile_id: profileId }),
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+export async function fetchOfferContext(
+  offerId: string,
+  description: string
+): Promise<OfferContext> {
+  const url = `${API_BASE}/context/offer`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ offer_id: offerId, description }),
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+export async function fetchProfileContext(
+  profileId: string,
+  profile?: unknown
+): Promise<ProfileContext> {
+  const url = `${API_BASE}/context/profile`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile_id: profileId, profile: profile ?? null }),
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+export async function fetchContextFit(
+  profileContext: ProfileContext,
+  offerContext: OfferContext,
+  matchedSkills: string[],
+  missingSkills: string[]
+): Promise<ContextFit> {
+  const url = `${API_BASE}/context/fit`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      profile_context: profileContext,
+      offer_context: offerContext,
+      matched_skills: matchedSkills,
+      missing_skills: missingSkills,
+    }),
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json();
 }
 
 /**
@@ -355,6 +560,10 @@ export interface ValidatedItem {
 
 export interface ParseFileResponse {
   source: string;
+  mode: "baseline" | "llm";
+  ai_available: boolean;
+  ai_added_count: number;
+  ai_error?: string | null;
   filename: string;
   content_type: string;
   extracted_text_length: number;
@@ -363,10 +572,19 @@ export interface ParseFileResponse {
   validated_skills: number;
   filtered_out: number;
   validated_items: ValidatedItem[];
+  validated_labels?: string[];
+  raw_tokens?: string[];
+  filtered_tokens?: string[];
+  alias_hits_count?: number;
+  alias_hits?: { alias: string; label: string }[];
   skill_groups: SkillGroupItem[];
+  skills_uri_count?: number;
+  skills_uri_collapsed_dupes?: number;
+  skills_unmapped_count?: number;
+  skills_dupes?: Array<{ label: string; surfaces: string[] }>;
   skills_raw: string[];
   skills_canonical: string[];
-  profile: { id: string; skills: string[]; skills_source: string };
+  profile: { id: string; skills: string[]; skills_source: string; skills_uri?: string[] };
   warnings: string[];
 }
 
@@ -379,8 +597,17 @@ export interface ParseBaselineResponse {
   validated_skills: number;
   filtered_out: number;
   validated_items: ValidatedItem[];
+  validated_labels?: string[];
+  raw_tokens?: string[];
+  filtered_tokens?: string[];
+  alias_hits_count?: number;
+  alias_hits?: { alias: string; label: string }[];
   skill_groups: SkillGroupItem[];
-  profile: { id: string; skills: string[]; skills_source: string };
+  skills_uri_count?: number;
+  skills_uri_collapsed_dupes?: number;
+  skills_unmapped_count?: number;
+  skills_dupes?: Array<{ label: string; surfaces: string[] }>;
+  profile: { id: string; skills: string[]; skills_source: string; skills_uri?: string[] };
   warnings: string[];
 }
 
@@ -393,6 +620,24 @@ export async function parseFile(file: File): Promise<ParseFileResponse> {
   const form = new FormData();
   form.append("file", file);
   const res = await fetch(`${API_BASE}/profile/parse-file`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  return res.json() as Promise<ParseFileResponse>;
+}
+
+/**
+ * Upload a CV file and attempt LLM enrichment (best-effort).
+ * POST /profile/parse-file?enrich_llm=1
+ */
+export async function parseFileEnriched(file: File): Promise<ParseFileResponse> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${API_BASE}/profile/parse-file?enrich_llm=1`, {
     method: "POST",
     body: form,
   });
@@ -459,6 +704,43 @@ export async function applyPack(payload: ApplyPackRequest): Promise<ApplyPackRes
     throw new Error(`API ${res.status}: ${text}`);
   }
   return res.json() as Promise<ApplyPackResponse>;
+}
+
+// ============================================================================
+// Profile Key Skills (display-only ranking for AnalyzePage)
+// ============================================================================
+
+export interface KeySkillItem {
+  label: string;
+  reason: "weighted" | "idf" | "standard";
+  idf: number | null;
+  weighted: boolean;
+}
+
+export interface KeySkillsResponse {
+  key_skills: KeySkillItem[];       // max 12 — shown first
+  all_skills_ranked: KeySkillItem[]; // all, max 40 — for modal
+}
+
+/**
+ * Rank validated ESCO skills by signal importance (IDF / ROME weights).
+ * POST /profile/key-skills
+ * Deterministic. No scoring change.
+ */
+export async function fetchKeySkills(
+  validated_items: ValidatedItem[],
+  rome_code?: string | null,
+): Promise<KeySkillsResponse> {
+  const res = await fetch(`${API_BASE}/profile/key-skills`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ validated_items, rome_code: rome_code ?? null }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  return res.json() as Promise<KeySkillsResponse>;
 }
 
 export async function runCvDelta(request: CvDeltaRequest): Promise<CvDeltaResponse> {

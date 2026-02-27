@@ -9,7 +9,7 @@
 #   make gates            # Run all gates sequentially
 
 .PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test test-api help \
-        venv install api web test-cvdelta devtools \
+        venv install api web test-cvdelta devtools env-check \
         dev-up dev-down dev-status dev smoke smoke-mvp smoke-all
 
 # Default target
@@ -32,6 +32,7 @@ help:
 	@echo "  make web           - Start Vite (port 3001)"
 	@echo "  make devtools      - Print start-up instructions"
 	@echo "  make test-cvdelta  - Run /dev/cv-delta tests"
+	@echo "  make env-check     - Check OPENAI_API_KEY presence (no value)"
 	@echo ""
 	@echo "CI Gates:"
 	@echo "  make gate-1        - Pre-commit (lint + fast tests)"
@@ -150,3 +151,39 @@ devtools:
 	@echo "    curl -F 'file=@apps/api/fixtures/cv_samples/sample_delta.txt' \\"
 	@echo "         http://localhost:8000/dev/cv-delta                        # expect 200"
 	@echo ""
+
+env-check:
+	@python3 - <<'PY'
+	from pathlib import Path
+	import os
+
+	def has_value(value: str | None) -> bool:
+	    return bool(value and value.strip())
+
+	def read_dotenv(path: Path) -> dict[str, str]:
+	    if not path.exists():
+	        return {}
+	    data: dict[str, str] = {}
+	    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+	        line = line.strip()
+	        if not line or line.startswith("#") or "=" not in line:
+	            continue
+	        key, value = line.split("=", 1)
+	        data[key.strip()] = value.strip()
+	    return data
+
+	env_key = os.getenv("OPENAI_API_KEY")
+	env_legacy = os.getenv("LLM_API_KEY")
+	dotenv = read_dotenv(Path("apps/api/.env"))
+
+	if has_value(env_key):
+	    print("OPENAI_API_KEY: set (environment)")
+	elif has_value(env_legacy):
+	    print("OPENAI_API_KEY: missing (LLM_API_KEY set, deprecated)")
+	elif has_value(dotenv.get("OPENAI_API_KEY")):
+	    print("OPENAI_API_KEY: set (apps/api/.env)")
+	elif has_value(dotenv.get("LLM_API_KEY")):
+	    print("OPENAI_API_KEY: missing (apps/api/.env has LLM_API_KEY, deprecated)")
+	else:
+	    print("OPENAI_API_KEY: missing")
+	PY

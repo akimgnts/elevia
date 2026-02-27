@@ -49,10 +49,12 @@ def test_parse_file_txt_schema(client):
     resp = _post_txt(client, TECH_CV)
     assert resp.status_code == 200
     body = resp.json()
-    required = {"source", "filename", "content_type", "extracted_text_length",
-                "canonical_count", "skills_raw", "skills_canonical", "profile", "warnings"}
+    required = {"source", "mode", "ai_available", "ai_added_count", "filename", "content_type", "extracted_text_length",
+                "canonical_count", "skills_raw", "skills_canonical", "profile", "warnings",
+                "raw_tokens", "filtered_tokens", "validated_labels"}
     assert required.issubset(body.keys()), f"Missing keys: {required - body.keys()}"
     assert body["source"] == "baseline"
+    assert body["mode"] in {"baseline", "llm"}
     assert isinstance(body["canonical_count"], int)
     assert isinstance(body["skills_raw"], list)
     assert isinstance(body["skills_canonical"], list)
@@ -135,3 +137,13 @@ def test_parse_file_txt_content_type_in_response(client):
     assert resp.status_code == 200
     ct = resp.json()["content_type"]
     assert "text" in ct or ct == "application/octet-stream"
+
+
+def test_parse_file_debug_arrays_capped(client):
+    """Debug arrays must be present and capped."""
+    resp = _post_txt(client, TECH_CV)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert len(body.get("raw_tokens", [])) <= 200
+    assert len(body.get("filtered_tokens", [])) <= 200
+    assert len(body.get("validated_labels", [])) <= 200

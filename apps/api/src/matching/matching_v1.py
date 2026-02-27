@@ -14,6 +14,7 @@ Ce moteur:
 
 import logging
 import os
+import importlib
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 
@@ -29,13 +30,149 @@ from .idf import compute_idf
 
 logger = logging.getLogger(__name__)
 
+# Optional ESCO helpers for URI-based scoring
+try:
+    from ..esco.mapper import map_skill
+    from ..esco.uri_collapse import collapse_to_uris
+    from ..esco.extract import SKILL_ALIASES as _OFFER_SKILL_ALIASES
+except ImportError:
+    try:
+        _esco_mapper = importlib.import_module("esco.mapper")
+        _esco_collapse = importlib.import_module("esco.uri_collapse")
+        _esco_extract = importlib.import_module("esco.extract")
+        map_skill = _esco_mapper.map_skill
+        collapse_to_uris = _esco_collapse.collapse_to_uris
+        _OFFER_SKILL_ALIASES = _esco_extract.SKILL_ALIASES
+    except ImportError:
+        map_skill = None
+        collapse_to_uris = None
+        _OFFER_SKILL_ALIASES = {}
+
 
 def _debug_enabled() -> bool:
     value = os.getenv("ELEVIA_DEBUG_MATCHING", "").strip().lower()
     return value in {"1", "true", "yes", "on"}
 
 
+def _use_uri_scoring() -> bool:
+    value = os.getenv("ELEVIA_SCORE_USE_URIS", "1").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _dedupe_preserve_order(values: List[str]) -> List[str]:
+    seen = set()
+    result: List[str] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
+def normalize_skill_uri(uri: str) -> str:
+    """Normalize ESCO URI without altering structure (no punctuation stripping)."""
+    if not uri:
+        return ""
+    return uri.strip()
+
+
+def _normalize_uri_list(raw_skills) -> List[str]:
+    if isinstance(raw_skills, str):
+        raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
+    if isinstance(raw_skills, list):
+        normalized = [normalize_skill_uri(s) for s in raw_skills if isinstance(s, str) and s.strip()]
+        return _dedupe_preserve_order([s for s in normalized if s])
+    return []
+
+
+def _build_offer_label_map(offer: Dict) -> Dict[str, str]:
+    mapping: Dict[str, str] = {}
+    display = offer.get("skills_display")
+    if isinstance(display, list):
+        for item in display:
+            if not isinstance(item, dict):
+                continue
+            uri = item.get("uri")
+            label = item.get("label") or uri
+            if uri and uri not in mapping:
+                mapping[str(uri)] = str(label)
+    return mapping
+
+
+def _map_offer_skills_to_uris(raw_skills: List[str]) -> Dict[str, object]:
+    """
+    Map explicit offer skills to ESCO URIs (strict), preserving order.
+    Used as fallback when skills_uri is missing.
+    """
+    if not raw_skills or not map_skill or not collapse_to_uris:
+        return {
+            "uris": [],
+            "label_map": {},
+            "collapsed_dupes": 0,
+            "unmapped_count": 0,
+        }
+
+    mapped_items: List[Dict[str, str]] = []
+    unmapped: List[str] = []
+    for skill in raw_skills:
+        if not skill:
+            continue
+        s = str(skill)
+        mapped_any = False
+        if s.startswith("http://data.europa.eu/esco/"):
+            mapped_items.append({
+                "surface": s,
+                "esco_uri": s,
+                "esco_label": s,
+                "source": "explicit",
+            })
+            mapped_any = True
+        else:
+            result = map_skill(s, enable_fuzzy=False)
+            if result:
+                mapped_items.append({
+                    "surface": s,
+                    "esco_uri": result.get("esco_id", ""),
+                    "esco_label": result.get("label") or result.get("canonical") or s,
+                    "source": "explicit",
+                })
+                mapped_any = True
+
+        # Alias expansion to improve ESCO coverage for explicit skills
+        alias_key = s.lower()
+        if alias_key in _OFFER_SKILL_ALIASES:
+            for alias in _OFFER_SKILL_ALIASES[alias_key]:
+                alias_result = map_skill(alias, enable_fuzzy=False)
+                if alias_result:
+                    mapped_items.append({
+                        "surface": alias,
+                        "esco_uri": alias_result.get("esco_id", ""),
+                        "esco_label": alias_result.get("label") or alias_result.get("canonical") or alias,
+                        "source": "alias",
+                    })
+                    mapped_any = True
+
+        if not mapped_any:
+            unmapped.append(s)
+
+    collapsed = collapse_to_uris(mapped_items)
+    display = collapsed.get("display") or []
+    label_map = {
+        item.get("uri"): item.get("label")
+        for item in display
+        if isinstance(item, dict) and item.get("uri")
+    }
+    return {
+        "uris": collapsed.get("uris") or [],
+        "label_map": {str(k): str(v) for k, v in label_map.items()},
+        "collapsed_dupes": int(collapsed.get("collapsed_dupes", 0) or 0),
+        "unmapped_count": len(_dedupe_preserve_order(unmapped)),
+    }
+
 def _offer_skill_field_label(offer: Dict) -> str:
+    if "skills_uri" in offer:
+        return "skills_uri"
     if "skills" in offer:
         return "skills"
     if isinstance(offer.get("extracted"), dict) and "skills" in offer["extracted"]:
@@ -121,7 +258,8 @@ class MatchingEngine:
             offers: Corpus d'offres pour calcul IDF
             context_coeffs: Coefficients contextuels optionnels (clamp ±20%)
         """
-        self.idf_table = compute_idf(offers)
+        skill_field = "skills_uri" if _use_uri_scoring() else "skills"
+        self.idf_table = compute_idf(offers, skill_field=skill_field)
         self.context_coeffs = context_coeffs or {}
 
     def _hard_filter(self, offer: Dict) -> Tuple[bool, Optional[str]]:
@@ -197,6 +335,50 @@ class MatchingEngine:
         Returns:
             (score, matched_skills, missing_skills, skills_missing)
         """
+        if _use_uri_scoring():
+            raw_uris = offer.get("skills_uri")
+            label_map = _build_offer_label_map(offer)
+            collapsed_dupes = int(offer.get("skills_uri_collapsed_dupes", 0) or 0)
+            unmapped_count = int(offer.get("skills_unmapped_count", 0) or 0)
+
+            if raw_uris is None:
+                raw_skills = offer.get("skills", [])
+                if isinstance(raw_skills, str):
+                    raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
+                mapped = _map_offer_skills_to_uris(raw_skills if isinstance(raw_skills, list) else [])
+                raw_uris = mapped.get("uris") or []
+                label_map = label_map or (mapped.get("label_map") or {})
+                collapsed_dupes = int(mapped.get("collapsed_dupes", 0) or 0)
+                unmapped_count = int(mapped.get("unmapped_count", 0) or 0)
+                # Cache for downstream if needed
+                offer["skills_uri"] = raw_uris
+                offer["skills_display"] = offer.get("skills_display") or [
+                    {"uri": uri, "label": label_map.get(uri, uri), "source": "explicit"}
+                    for uri in raw_uris
+                ]
+                offer["skills_uri_collapsed_dupes"] = collapsed_dupes
+                offer["skills_unmapped_count"] = unmapped_count
+
+            offer_skills = _normalize_uri_list(raw_uris)
+            offer_skills_set = set(offer_skills)
+
+            # Spec ligne 113: "Si l'offre n'a aucune skill → skills_score = 0"
+            if not offer_skills:
+                return 0.0, [], [], True
+
+            profile_skills_set = getattr(profile, "skills_uri", frozenset()) or frozenset()
+            matched_uris = [uri for uri in offer_skills if uri in profile_skills_set]
+            missing_uris = [uri for uri in offer_skills if uri not in profile_skills_set]
+
+            matched_labels = [label_map.get(uri, uri) for uri in matched_uris]
+            missing_labels = [label_map.get(uri, uri) for uri in missing_uris]
+
+            if not matched_uris:
+                return 0.0, [], missing_labels, False
+
+            score = len(matched_uris) / len(offer_skills)
+            return score, matched_labels, missing_labels, False
+
         raw_skills = offer.get("skills", [])
         if isinstance(raw_skills, str):
             raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
@@ -340,13 +522,32 @@ class MatchingEngine:
             offer_country = offer.get("country") or offer.get("pays") or ""
             country_match = canonize_country(offer_country) in profile.preferred_countries
 
+        skills_debug: Dict[str, Any] = {
+            "matched": matched_skills,
+            "missing": missing_skills,
+            "weight": int(WEIGHT_SKILLS * 100),
+            "score": round(skills_score * WEIGHT_SKILLS * 100, 1),
+        }
+        if _use_uri_scoring():
+            offer_uri_list = offer.get("skills_uri") or []
+            skills_debug.update({
+                "scoring_unit": "uri",
+                "intersection_count": len(matched_skills),
+                "offer_skill_uri_count": int(offer.get("skills_uri_count", len(offer_uri_list))),
+                "offer_skill_collapsed_dupes": int(offer.get("skills_uri_collapsed_dupes", 0) or 0),
+                "offer_unmapped_count": int(offer.get("skills_unmapped_count", 0) or 0),
+                "profile_skill_uri_count": int(getattr(profile, "skills_uri_count", 0) or 0),
+                "profile_skill_collapsed_dupes": int(getattr(profile, "skills_uri_collapsed_dupes", 0) or 0),
+                "profile_unmapped_count": int(getattr(profile, "skills_unmapped_count", 0) or 0),
+            })
+        else:
+            skills_debug.update({
+                "scoring_unit": "string",
+                "intersection_count": len(matched_skills),
+            })
+
         return {
-            "skills": {
-                "matched": matched_skills,
-                "missing": missing_skills,
-                "weight": int(WEIGHT_SKILLS * 100),
-                "score": round(skills_score * WEIGHT_SKILLS * 100, 1),
-            },
+            "skills": skills_debug,
             "language": {
                 "match": language_match,
                 "weight": int(WEIGHT_LANGUAGES * 100),
@@ -462,9 +663,16 @@ class MatchingEngine:
         )
 
         if _debug_enabled():
-            raw_offer_skills = offer.get("skills", [])
-            normalized_offer_skills = _normalize_skill_list(raw_offer_skills)
-            offer_skills_len = len(set(normalized_offer_skills))
+            if _use_uri_scoring():
+                raw_offer_skills = offer.get("skills_uri") or offer.get("skills", [])
+                normalized_offer_skills = _normalize_uri_list(raw_offer_skills)
+                offer_skills_len = len(normalized_offer_skills)
+                profile_skills_len = len(getattr(profile, "skills_uri", []))
+            else:
+                raw_offer_skills = offer.get("skills", [])
+                normalized_offer_skills = _normalize_skill_list(raw_offer_skills)
+                offer_skills_len = len(set(normalized_offer_skills))
+                profile_skills_len = len(profile.skills)
             logger.info(
                 "match_debug offer_id=%s total=%s skills=%s lang=%s edu=%s country=%s "
                 "len_offer_skills=%s len_profile_skills=%s intersection=%s "
@@ -477,7 +685,7 @@ class MatchingEngine:
                 round(education_score * 100, 1),
                 round(country_score * 100, 1),
                 offer_skills_len,
-                len(profile.skills),
+                profile_skills_len,
                 len(matched_skills),
                 getattr(profile, "matching_skills_count", len(profile.skills)),
                 getattr(profile, "capabilities_count", 0),
@@ -568,9 +776,16 @@ class MatchingEngine:
             # 9. Ajout au résultat
             offer_id = offer.get("id") or offer.get("offer_id") or offer.get("offer_uid", "unknown")
             if _debug_enabled():
-                raw_offer_skills = offer.get("skills", [])
-                normalized_offer_skills = _normalize_skill_list(raw_offer_skills)
-                offer_skills_len = len(set(normalized_offer_skills))
+                if _use_uri_scoring():
+                    raw_offer_skills = offer.get("skills_uri") or offer.get("skills", [])
+                    normalized_offer_skills = _normalize_uri_list(raw_offer_skills)
+                    offer_skills_len = len(normalized_offer_skills)
+                    profile_skills_len = len(getattr(extracted_profile, "skills_uri", []))
+                else:
+                    raw_offer_skills = offer.get("skills", [])
+                    normalized_offer_skills = _normalize_skill_list(raw_offer_skills)
+                    offer_skills_len = len(set(normalized_offer_skills))
+                    profile_skills_len = len(extracted_profile.skills)
                 logger.info(
                     "match_debug offer_id=%s total=%s skills=%s lang=%s edu=%s country=%s "
                     "len_offer_skills=%s len_profile_skills=%s intersection=%s "
@@ -583,7 +798,7 @@ class MatchingEngine:
                     round(education_score * 100, 1),
                     round(country_score * 100, 1),
                     offer_skills_len,
-                    len(extracted_profile.skills),
+                    profile_skills_len,
                     len(matched_skills),
                     getattr(extracted_profile, "matching_skills_count", len(extracted_profile.skills)),
                     getattr(extracted_profile, "capabilities_count", 0),

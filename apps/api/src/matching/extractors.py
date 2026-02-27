@@ -10,14 +10,27 @@ from typing import Dict, List, Set, Optional
 import re
 from dataclasses import dataclass
 
+import importlib
 import os
 import logging
 
 # Import skill aliases for profile expansion (EN→FR translation)
 try:
-    from esco.extract import SKILL_ALIASES
+    from ..esco.extract import SKILL_ALIASES
+    from ..esco.mapper import map_skill
+    from ..esco.uri_collapse import collapse_to_uris
 except ImportError:
-    SKILL_ALIASES = {}
+    try:
+        _esco_extract = importlib.import_module("esco.extract")
+        _esco_mapper = importlib.import_module("esco.mapper")
+        _esco_collapse = importlib.import_module("esco.uri_collapse")
+        SKILL_ALIASES = _esco_extract.SKILL_ALIASES
+        map_skill = _esco_mapper.map_skill
+        collapse_to_uris = _esco_collapse.collapse_to_uris
+    except ImportError:
+        SKILL_ALIASES = {}
+        map_skill = None
+        collapse_to_uris = None
 
 # Mapping ordinal fixe pour les niveaux d'études (spec ligne 130-132)
 EDUCATION_LEVELS: Dict[str, int] = {
@@ -37,12 +50,16 @@ class ExtractedProfile:
     """
     profile_id: str
     skills: frozenset  # Set immuable de skills normalisées
+    skills_uri: frozenset  # Set immuable de skills ESCO URIs (scoring)
     languages: frozenset  # Set immuable de langues normalisées
     education_level: int  # Niveau ordinal (0 si non spécifié)
     preferred_countries: frozenset  # Set immuable de pays canonisés
     skill_source: str = "skills"
     matching_skills_count: int = 0
     capabilities_count: int = 0
+    skills_uri_count: int = 0
+    skills_uri_collapsed_dupes: int = 0
+    skills_unmapped_count: int = 0
 
 
 _SKILL_WS_RE = re.compile(r"\s+")
@@ -92,18 +109,37 @@ def normalize_skill(skill: str) -> str:
     return normalize_skill_label(skill)
 
 
-def _expand_profile_skills(skills: Set[str]) -> Set[str]:
+def _dedupe_preserve_order(values: List[str]) -> List[str]:
+    seen = set()
+    result: List[str] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
+def _expand_profile_skills(skills: List[str]) -> List[str]:
     """
-    Expand profile skills using SKILL_ALIASES.
+    Expand profile skills using SKILL_ALIASES, preserving order.
 
     Adds French ESCO labels for English skills to enable matching.
     Example: 'python' → adds 'python (programmation informatique)'
     """
-    expanded = set(skills)
+    expanded: List[str] = []
+    seen: set[str] = set()
     for skill in skills:
+        if skill not in seen:
+            seen.add(skill)
+            expanded.append(skill)
         skill_lower = skill.lower()
         if skill_lower in SKILL_ALIASES:
-            expanded.update(SKILL_ALIASES[skill_lower])
+            for alias in SKILL_ALIASES[skill_lower]:
+                alias_norm = normalize_skill(alias)
+                if alias_norm and alias_norm not in seen:
+                    seen.add(alias_norm)
+                    expanded.append(alias_norm)
     return expanded
 
 
@@ -262,10 +298,51 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
                 names.append(cap)
         raw_skills = tools or names
 
-    normalized_skills = set(normalize_skill(s) for s in raw_skills if s and isinstance(s, str))
+    normalized_list = _dedupe_preserve_order([
+        normalize_skill(s)
+        for s in raw_skills
+        if s and isinstance(s, str)
+    ])
     # Expand EN→FR aliases for matching with ESCO-labeled offers
-    expanded_skills = _expand_profile_skills(normalized_skills)
-    skills = frozenset(expanded_skills)
+    expanded_list = _expand_profile_skills(normalized_list)
+    skills = frozenset(expanded_list)
+
+    # ESCO URI collapse for scoring (deterministic, strict)
+    raw_skills_uri = raw_profile.get("skills_uri")
+    skills_uri_list: List[str] = []
+    skills_uri_collapsed_dupes = int(raw_profile.get("skills_uri_collapsed_dupes", 0) or 0)
+    skills_unmapped_count = int(raw_profile.get("skills_unmapped_count", 0) or 0)
+
+    if isinstance(raw_skills_uri, list) and raw_skills_uri:
+        skills_uri_list = _dedupe_preserve_order([
+            str(s).strip()
+            for s in raw_skills_uri
+            if isinstance(s, str) and str(s).strip()
+        ])
+    elif map_skill and collapse_to_uris:
+        mapped_items: List[Dict[str, str]] = []
+        unmapped: List[str] = []
+        normalized_set = set(normalized_list)
+        for skill in expanded_list:
+            if not skill:
+                continue
+            result = map_skill(skill, enable_fuzzy=False)
+            if result:
+                mapped_items.append({
+                    "surface": skill,
+                    "esco_uri": result.get("esco_id", ""),
+                    "esco_label": result.get("label") or result.get("canonical") or skill,
+                    "source": "alias" if skill not in normalized_set else "direct",
+                })
+            else:
+                if skill in normalized_set:
+                    unmapped.append(skill)
+        collapsed = collapse_to_uris(mapped_items)
+        skills_uri_list = collapsed.get("uris") or []
+        skills_uri_collapsed_dupes = int(collapsed.get("collapsed_dupes", 0) or 0)
+        skills_unmapped_count = len(_dedupe_preserve_order(unmapped))
+
+    skills_uri = frozenset(skills_uri_list)
 
     # Langues normalisées
     # Support both formats: "languages": ["str"] and "languages": [{code, level}]
@@ -299,12 +376,13 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
 
     if _debug_matching_enabled():
         logger.info(
-            "MATCH_INPUT profile_id=%s skill_source=%s raw_count=%s norm_count=%s "
+            "MATCH_INPUT profile_id=%s skill_source=%s raw_count=%s norm_count=%s uri_count=%s "
             "raw_sample=%s norm_sample=%s",
             profile_id,
             skill_source,
             len(raw_skills) if isinstance(raw_skills, list) else (1 if raw_skills else 0),
             len(skills),
+            len(skills_uri),
             _sample_list(raw_skills),
             _sample_list(list(skills)),
         )
@@ -312,10 +390,14 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
     return ExtractedProfile(
         profile_id=str(profile_id),
         skills=skills,
+        skills_uri=skills_uri,
         languages=languages,
         education_level=education_level,
         preferred_countries=preferred_countries,
         skill_source=skill_source,
         matching_skills_count=len(skills),
         capabilities_count=capabilities_count,
+        skills_uri_count=len(skills_uri),
+        skills_uri_collapsed_dupes=skills_uri_collapsed_dupes,
+        skills_unmapped_count=skills_unmapped_count,
     )

@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from profile.baseline_parser import run_baseline  # shared extractor
+from semantic.profile_cache import cache_profile_text, compute_profile_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["profile"])
@@ -35,7 +36,16 @@ class ParseBaselineResponse(BaseModel):
     validated_skills: int
     filtered_out: int
     validated_items: List[dict] = []
+    validated_labels: List[str] = []
+    raw_tokens: List[str] = []
+    filtered_tokens: List[str] = []
+    alias_hits_count: int = 0
+    alias_hits: List[dict] = []
     skill_groups: List[dict] = []
+    skills_uri_count: int = 0
+    skills_uri_collapsed_dupes: int = 0
+    skills_unmapped_count: int = 0
+    skills_dupes: List[dict] = []
     profile: dict
     warnings: List[str] = []
 
@@ -62,5 +72,9 @@ async def parse_baseline(req: ParseBaselineRequest, request: Request) -> ParseBa
         result["canonical_count"],
         getattr(request.state, "request_id", "n/a"),
     )
+
+    profile = result.get("profile") or {}
+    profile_hash = compute_profile_hash(profile)
+    cache_profile_text(profile_hash, req.cv_text)
 
     return ParseBaselineResponse(**result)

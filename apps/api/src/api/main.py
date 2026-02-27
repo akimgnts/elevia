@@ -33,6 +33,8 @@ from .routes.applications import router as applications_router
 from .routes.apply_pack import router as apply_pack_router
 from .routes.debug_match import router as debug_router
 from .routes.dev_tools import router as dev_tools_router
+from .routes.profile_key_skills import router as profile_key_skills_router
+from .routes.context import router as context_router
 
 
 app = FastAPI(
@@ -78,6 +80,8 @@ app.include_router(applications_router)
 app.include_router(apply_pack_router)  # POST /apply-pack (baseline + optional LLM)
 app.include_router(debug_router)  # DEV-only debug endpoints
 app.include_router(dev_tools_router)  # DEV-only tools (guarded by ELEVIA_DEV_TOOLS=1)
+app.include_router(profile_key_skills_router)  # POST /profile/key-skills (display-only ranking)
+app.include_router(context_router)  # POST /context/*
 
 # OBS: startup diagnostic (DEV-only, non-invasive)
 _dev_tools_on = os.getenv("ELEVIA_DEV_TOOLS", "").lower() in {"1", "true", "yes"}

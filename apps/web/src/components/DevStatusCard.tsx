@@ -111,6 +111,9 @@ export function DevStatusCard() {
   const healthOk = health.data?.status === "ok";
   const depsOk = deps.data?.status === "ok";
   const anyBad = !health.loading && !deps.loading && (!healthOk || !depsOk);
+  const llm = deps.data?.deps?.llm as { status?: string } | undefined;
+  const llmStatus =
+    llm?.status === "ok" ? "OK" : llm?.status === "missing" ? "MISSING" : "n/a";
 
   return (
     <div
@@ -197,6 +200,12 @@ export function DevStatusCard() {
             )}
           </>
         )}
+      </div>
+
+      {/* LLM status */}
+      <div>
+        <span style={{ color: "#475569" }}>LLM:</span>
+        <span style={{ color: "#e2e8f0", marginLeft: 6 }}>{llmStatus}</span>
       </div>
 
       {/* Last Request ID */}

@@ -27,6 +27,7 @@ export default defineConfig({
       "/debug": { target: API_TARGET, changeOrigin: true },
       "/profile": { target: API_TARGET, changeOrigin: true },
       "/offers": { target: API_TARGET, changeOrigin: true },
+      "/context": { target: API_TARGET, changeOrigin: true },
       "/inbox": { target: API_TARGET, changeOrigin: true },
       "/metrics": { target: API_TARGET, changeOrigin: true },
       "/apply-pack": { target: API_TARGET, changeOrigin: true },

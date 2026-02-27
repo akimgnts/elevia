@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """
-Test complet de toutes les APIs France Travail
-Basé sur CORRECTIONS_APPLIED.md et ARCHITECTURE_TECHNIQUE.md
+Test complet de toutes les APIs France Travail.
+
+Usage:
+    python scripts/ft_check_all_apis.py
 """
 
 import sys
 import os
 from pathlib import Path
 
-# Ajouter le répertoire courant au path pour importer client_ft
-sys.path.insert(0, str(Path(__file__).parent))
+# Ajouter la racine du repo pour importer fetchers/*
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from fetchers.client_ft import FranceTravailClient
 

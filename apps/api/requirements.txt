@@ -29,3 +29,6 @@ python-multipart>=0.0.9
 
 # LLM providers
 openai>=1.0.0
+
+# Embeddings (optional, behind ELEVIA_EMBEDDINGS_LOCAL)
+sentence-transformers>=2.5.1

@@ -20,6 +20,30 @@ def _debug_enabled() -> bool:
     return value in {"1", "true", "yes", "on"}
 
 
+def _use_uri_scoring() -> bool:
+    value = os.getenv("ELEVIA_SCORE_USE_URIS", "1").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _dedupe_preserve_order(values: List[str]) -> List[str]:
+    seen = set()
+    result: List[str] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
+def _normalize_uri_list(raw_skills) -> List[str]:
+    if isinstance(raw_skills, str):
+        raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
+    if isinstance(raw_skills, list):
+        normalized = [str(s).strip() for s in raw_skills if isinstance(s, str) and str(s).strip()]
+        return _dedupe_preserve_order(normalized)
+    return []
+
 @dataclass
 class MatchTraceResult:
     """Résultat de trace pour une offre."""
@@ -65,26 +89,26 @@ def trace_single_match(
     offer_id = offer.get("id") or offer.get("offer_id") or "unknown"
 
     # Profile skills
-    profile_skills_norm = list(profile.skills)
+    if _use_uri_scoring():
+        profile_skills_norm = list(getattr(profile, "skills_uri", []))
+        raw_skills = offer.get("skills_uri") or offer.get("skills", [])
+        offer_skills_norm = _normalize_uri_list(raw_skills)
+        offer_skills_set = set(offer_skills_norm)
+    else:
+        profile_skills_norm = list(profile.skills)
+        raw_skills = offer.get("skills", [])
+        if isinstance(raw_skills, str):
+            raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
+        offer_skills_norm = [normalize_skill(s) for s in raw_skills if s]
+        offer_skills_set = set(offer_skills_norm)
 
-    # Offer skills raw + normalized
-    raw_skills = offer.get("skills", [])
-    if isinstance(raw_skills, str):
-        raw_skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
-    offer_skills_norm = [normalize_skill(s) for s in raw_skills if s]
-    offer_skills_set = set(offer_skills_norm)
-
-    # Intersection
-    matched_set = profile.skills & offer_skills_set
-    matched_skills = sorted(list(matched_set))
-    missing_skills = [s for s in offer_skills_norm if s not in matched_set]
-
-    # Scores (recalculate to trace)
-    skills_score = len(matched_skills) / len(offer_skills_set) if offer_skills_set else 0.0
-
-    # Use engine to get full result
+    # Use engine to get full result (authoritative)
     result = engine.score_offer(profile, offer)
     breakdown = result.breakdown
+    skills_debug = result.match_debug.get("skills", {}) if result.match_debug else {}
+    matched_skills = skills_debug.get("matched", [])
+    missing_skills = skills_debug.get("missing", [])
+    skills_score = len(matched_skills) / len(offer_skills_set) if offer_skills_set else 0.0
 
     return MatchTraceResult(
         offer_id=str(offer_id),

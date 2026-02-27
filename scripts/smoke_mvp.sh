@@ -7,7 +7,8 @@
 #   3. Deterministic baseline CV parse → validated_skills bounds (10–60)
 #   4. CV file upload parse → validated_skills bounds (10–60)
 #   5. Inbox matching → scored offers + capture first offer
-#   6. Apply Pack → cv_text + letter_text non-empty
+#   6. Key skills ranking → key_skills count <= 12
+#   7. Apply Pack → cv_text + letter_text non-empty
 #
 # Usage:
 #   bash scripts/smoke_mvp.sh [API_BASE_URL]
@@ -222,6 +223,29 @@ else
 fi
 echo ""
 
+# ── [4b/6] OPTIONAL: POST /profile/parse-file?enrich_llm=1 ───────────────────
+
+if [ -n "${OPENAI_API_KEY:-}" ]; then
+    echo "[4b/6] File upload parse (LLM enrich) — POST /profile/parse-file?enrich_llm=1"
+    if [ ! -f "$CV_FIXTURE" ]; then
+        fail "CV fixture not found: $CV_FIXTURE"
+    else
+        http_code=$(curl_post_file "$API_BASE/profile/parse-file?enrich_llm=1" "$CV_FIXTURE")
+        rid=$(get_request_id)
+        if [ "$http_code" != "200" ]; then
+            fail "/profile/parse-file?enrich_llm=1 → HTTP $http_code"
+            echo "  body: $(head -c 300 "$BODY_TMP")"
+        else
+            mode=$(python3 -c "import json; d=json.loads(open('$BODY_TMP').read()); print(d.get('mode','n/a'))" 2>/dev/null || echo "n/a")
+            ok "/profile/parse-file?enrich_llm=1 → mode=$mode request_id=${rid:-n/a}"
+        fi
+    fi
+    echo ""
+else
+    echo "[4b/6] Optional LLM enrich skipped (OPENAI_API_KEY not set)"
+    echo ""
+fi
+
 # ── [5/6] POST /inbox (matching) ─────────────────────────────────────────────
 
 echo "[5/6] Inbox matching — POST /inbox"
@@ -245,6 +269,7 @@ payload = {
     },
     'min_score': 0,
     'limit': 5,
+    'explain': True,
 }
 print(json.dumps(payload))
 " > "$PAYLOAD_TMP" 2>/dev/null || {
@@ -273,13 +298,88 @@ if [ -n "${PAYLOAD_TMP:-}" ] && [ -s "$PAYLOAD_TMP" ]; then
         MISSING_SKILLS=$(py_extract "$BODY_INBOX_TMP" "items.0.missing_skills" "[]")
 
         echo "  first offer: id=${FIRST_OFFER_ID:0:16}... score=$(py_extract "$BODY_INBOX_TMP" "items.0.score" "?")"
+
+        # Assert explain block on first item (if items present)
+        python3 -c "
+import json, sys
+body = open('$BODY_INBOX_TMP', 'r').read()
+d = json.loads(body)
+items = d.get('items', [])
+if not items:
+    print('  ⚠️  no items to check explain block')
+    sys.exit(0)
+item = items[0]
+ex = item.get('explain')
+if ex is None:
+    print('  ❌ explain block is null (expected object when explain=true)')
+    sys.exit(1)
+required_keys = {'matched_display', 'missing_display', 'matched_full', 'missing_full', 'breakdown'}
+missing = required_keys - set(ex.keys())
+if missing:
+    print(f'  ❌ explain block missing keys: {missing}')
+    sys.exit(1)
+bd = ex.get('breakdown', {})
+bd_keys = {'skills_score', 'skills_weight', 'language_score', 'language_weight',
+           'education_score', 'education_weight', 'country_score', 'country_weight', 'total'}
+missing_bd = bd_keys - set(bd.keys())
+if missing_bd:
+    print(f'  ❌ breakdown missing keys: {missing_bd}')
+    sys.exit(1)
+print(f'  explain block ok — matched={len(ex[\"matched_display\"])} missing={len(ex[\"missing_display\"])} total={bd.get(\"total\")}')
+" 2>/dev/null && ok "explain block shape valid (matched/missing/breakdown)" || fail "explain block missing or malformed"
     fi
 fi
 echo ""
 
-# ── [6/6] POST /apply-pack ────────────────────────────────────────────────────
+# ── [6/7] POST /profile/key-skills ───────────────────────────────────────────
 
-echo "[6/6] Apply Pack — POST /apply-pack"
+echo "[6/7] Key skills ranking — POST /profile/key-skills"
+
+if [ "$SKILLS_CANONICAL" = "[]" ] || [ -z "$SKILLS_CANONICAL" ]; then
+    fail "/profile/key-skills — no validated_items from parse step"
+else
+    # Build validated_items from skills_canonical (use label=skill, uri=mock)
+    python3 -c "
+import json
+skills = $SKILLS_CANONICAL
+items = [{'uri': 'http://data.europa.eu/esco/smoke/' + str(i), 'label': s} for i, s in enumerate(skills[:20])]
+payload = {'validated_items': items}
+print(json.dumps(payload))
+" > "$PAYLOAD_TMP" 2>/dev/null || {
+        fail "Failed to build key-skills payload"
+        PAYLOAD_TMP=""
+    }
+
+    if [ -n "${PAYLOAD_TMP:-}" ] && [ -s "$PAYLOAD_TMP" ]; then
+        http_code=$(curl_post_json "$API_BASE/profile/key-skills" "$PAYLOAD_TMP")
+        rid=$(get_request_id)
+
+        if [ "$http_code" != "200" ]; then
+            fail "/profile/key-skills → HTTP $http_code"
+            echo "  body: $(head -c 300 "$BODY_TMP")"
+        else
+            key_count=$(python3 -c "
+import json
+body = open('$BODY_TMP', 'r').read()
+d = json.loads(body)
+print(len(d.get('key_skills', [])))
+" 2>/dev/null || echo "-1")
+            ok "/profile/key-skills → key_skills_count=${key_count} request_id=${rid:-n/a}"
+
+            # key_skills must be <= 12
+            if [ "${key_count}" -le 12 ] 2>/dev/null && [ "${key_count}" -ge 0 ] 2>/dev/null; then
+                ok "key_skills_count=${key_count} <= 12"
+            else
+                fail "key_skills_count=${key_count} exceeds max 12"
+            fi
+        fi
+    fi
+fi
+echo ""
+
+# ── [7/7] POST /apply-pack ────────────────────────────────────────────────────
+
+echo "[7/7] Apply Pack — POST /apply-pack"
 
 if [ -z "$FIRST_OFFER_ID" ]; then
     fail "/apply-pack — no offer from inbox to use"

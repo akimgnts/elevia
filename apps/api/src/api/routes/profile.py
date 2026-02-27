@@ -40,6 +40,7 @@ from profile import (
     ExtractionError,
     ProviderNotConfiguredError,
 )
+from semantic.profile_cache import cache_profile_text, compute_profile_hash
 
 
 logger = logging.getLogger(__name__)
@@ -134,6 +135,9 @@ async def ingest_cv(request: CvIngestRequest) -> CvExtractionResponse:
 
         # Validation Pydantic (barrière anti-hallucination)
         validated = CvExtractionResponse.model_validate(raw_data)
+
+        profile_hash = compute_profile_hash(validated.model_dump())
+        cache_profile_text(profile_hash, request.cv_text)
 
         duration_ms = int((time.time() - start_time) * 1000)
         obs_log("cv_ingested", run_id=run_id, status="success", duration_ms=duration_ms,

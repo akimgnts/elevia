@@ -15,13 +15,16 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile, Query
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from api.utils.pdf_text import PdfTextError, extract_text_from_pdf
-from profile.baseline_parser import run_baseline
+from api.utils.env import get_llm_api_key
+from profile.baseline_parser import run_baseline, run_baseline_from_tokens
+from profile.llm_skill_suggester import suggest_skills_from_cv
+from semantic.profile_cache import cache_profile_text, compute_profile_hash
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["profile"])
@@ -51,6 +54,10 @@ def _is_txt(content_type: str, filename: str) -> bool:
 
 class ParseFileResponse(BaseModel):
     source: str
+    mode: str = "baseline"
+    ai_available: bool = False
+    ai_added_count: int = 0
+    ai_error: Optional[str] = None
     filename: str
     content_type: str
     extracted_text_length: int
@@ -59,7 +66,16 @@ class ParseFileResponse(BaseModel):
     validated_skills: int
     filtered_out: int
     validated_items: List[dict] = []
+    validated_labels: List[str] = []
+    raw_tokens: List[str] = []
+    filtered_tokens: List[str] = []
+    alias_hits_count: int = 0
+    alias_hits: List[dict] = []
     skill_groups: List[dict] = []
+    skills_uri_count: int = 0
+    skills_uri_collapsed_dupes: int = 0
+    skills_unmapped_count: int = 0
+    skills_dupes: List[dict] = []
     skills_raw: List[str]
     skills_canonical: List[str]
     profile: dict
@@ -72,6 +88,7 @@ class ParseFileResponse(BaseModel):
 async def parse_file(
     request: Request,
     file: UploadFile = File(...),
+    enrich_llm: int = Query(0, ge=0, le=1, description="1 = attempt LLM skill enrichment"),
 ) -> ParseFileResponse:
     """
     Upload a CV (PDF or TXT) and run deterministic baseline skill extraction.
@@ -152,14 +169,57 @@ async def parse_file(
         logger.error("[parse-file] baseline error: %s request_id=%s", exc, request_id)
         raise HTTPException(status_code=500, detail="Extraction failed") from exc
 
+    mode = "baseline"
+    ai_available = False
+    ai_added_count = 0
+    ai_error: Optional[str] = None
+
+    # ── Optional LLM enrichment ───────────────────────────────────────────────
+    if enrich_llm == 1:
+        if not get_llm_api_key():
+            ai_available = False
+            ai_error = "missing_openai_api_key"
+        else:
+            ai_available = True
+            llm = suggest_skills_from_cv(cv_text)
+            llm_warning = llm.get("warning")
+            if llm_warning:
+                warnings.append(str(llm_warning))
+
+            llm_error = llm.get("error")
+            if llm_error:
+                ai_error = "llm_failed"
+            else:
+                llm_skills = llm.get("skills") or []
+                if isinstance(llm_skills, list):
+                    base_tokens = result.get("skills_raw", [])
+                    base_set = set(base_tokens)
+                    new_tokens = [t for t in llm_skills if isinstance(t, str) and t not in base_set]
+                    ai_added_count = len(new_tokens)
+                    combined = base_tokens + new_tokens
+                    result = run_baseline_from_tokens(
+                        combined,
+                        profile_id=f"file-{filename}",
+                        source="llm",
+                    )
+                    mode = "llm"
+
     logger.info(
         "[parse-file] filename=%s content_type=%s text_len=%d raw=%d validated=%d request_id=%s",
         filename, content_type, len(cv_text),
         result["raw_detected"], result["validated_skills"], request_id,
     )
 
+    profile = result.get("profile") or {}
+    profile_hash = compute_profile_hash(profile)
+    cache_profile_text(profile_hash, cv_text)
+
     return ParseFileResponse(
         source=result["source"],
+        mode=mode,
+        ai_available=ai_available,
+        ai_added_count=ai_added_count,
+        ai_error=ai_error,
         filename=filename,
         content_type=content_type,
         extracted_text_length=len(cv_text),
@@ -168,7 +228,16 @@ async def parse_file(
         validated_skills=result["validated_skills"],
         filtered_out=result["filtered_out"],
         validated_items=result.get("validated_items", []),
+        validated_labels=result.get("validated_labels", []),
+        raw_tokens=result.get("raw_tokens", []),
+        filtered_tokens=result.get("filtered_tokens", []),
+        alias_hits_count=result.get("alias_hits_count", 0),
+        alias_hits=result.get("alias_hits", []),
         skill_groups=result.get("skill_groups", []),
+        skills_uri_count=result.get("skills_uri_count", 0),
+        skills_uri_collapsed_dupes=result.get("skills_uri_collapsed_dupes", 0),
+        skills_unmapped_count=result.get("skills_unmapped_count", 0),
+        skills_dupes=result.get("skills_dupes", []),
         skills_raw=result["skills_raw"],
         skills_canonical=result["skills_canonical"],
         profile=result["profile"],

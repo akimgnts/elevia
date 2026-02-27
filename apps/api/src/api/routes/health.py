@@ -4,15 +4,26 @@ health.py — Health and dependency check endpoints.
 GET /health        → quick liveness probe
 GET /health/deps   → dependency readiness probe
 """
+import importlib
 import logging
 import sqlite3
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
 from fastapi import APIRouter, Request
 
-from esco.loader import esco_index_stats
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from api.utils.env import get_llm_api_key
+
+try:
+    from ...esco.loader import esco_index_stats
+    from ...profile.esco_aliases import alias_stats as _alias_stats
+except ImportError:
+    esco_index_stats = importlib.import_module("esco.loader").esco_index_stats
+    _alias_stats = importlib.import_module("profile.esco_aliases").alias_stats
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +130,35 @@ def _check_weights() -> Dict[str, Any]:
     return {"ok": False, "error": "offers fixture missing — IDF source unavailable"}
 
 
+def _check_aliases() -> Dict[str, Any]:
+    """Check ESCO alias table: existence and count."""
+    try:
+        stats = _alias_stats()
+        return stats
+    except Exception as exc:
+        return {"status": "error", "alias_count": 0, "error": str(exc)}
+
+
+def _check_llm() -> Dict[str, Any]:
+    """Check whether LLM key is configured (optional dependency)."""
+    key_present = bool(get_llm_api_key())
+    return {
+        "status": "ok" if key_present else "missing",
+        "provider": "openai",
+        "key_present": key_present,
+    }
+
+
+def _check_uri_collapse() -> Dict[str, Any]:
+    """Signal URI-collapse readiness (deterministic, local-only)."""
+    return {
+        "status": "ok",
+        "mode": "uri",
+        "version": "v0",
+        "notes": "collapse before scoring",
+    }
+
+
 @router.get("/health/deps")
 async def health_deps(request: Request):
     """Readiness probe — checks data dependencies."""
@@ -127,10 +167,18 @@ async def health_deps(request: Request):
     deps = {
         "offers_db": _check_offers_db(),
         "esco": _check_esco(),
+        "esco_aliases": _check_aliases(),
+        "alias": _check_aliases(),
         "weights": _check_weights(),
+        "llm": _check_llm(),
     }
+    deps["esco"]["uri_collapse"] = _check_uri_collapse()
 
-    all_ok = all(v.get("status") == "ok" or v.get("ok") for v in deps.values())
+    all_ok = all(
+        v.get("status") == "ok" or v.get("ok")
+        for k, v in deps.items()
+        if k != "llm"
+    )
 
     return {
         "status": "ok" if all_ok else "degraded",
