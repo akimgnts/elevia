@@ -847,6 +847,27 @@ export interface ForOfferResponse {
   duration_ms: number;
 }
 
+export interface CoverLetterBlock {
+  label: "hook" | "match" | "value" | "closing";
+  text: string;
+}
+
+export interface CoverLetterDocument {
+  blocks: CoverLetterBlock[];
+  meta: {
+    offer_id: string;
+    template_version: string;
+    context_used: boolean;
+  };
+}
+
+export interface ForOfferLetterResponse {
+  ok: boolean;
+  document: CoverLetterDocument;
+  preview_text: string;
+  duration_ms: number;
+}
+
 /**
  * Generate an inbox-contextualised CV for a given offer.
  * POST /documents/cv/for-offer
@@ -876,4 +897,31 @@ export async function generateCvForOffer(
   }
 
   return res.json() as Promise<ForOfferResponse>;
+}
+
+/**
+ * Generate a deterministic cover letter for a given offer.
+ * POST /documents/letter/for-offer
+ */
+export async function generateLetterForOffer(
+  offerId: string,
+  profile: Record<string, unknown>,
+  context?: InboxContextPayload,
+): Promise<ForOfferLetterResponse> {
+  const url = `${API_BASE}/documents/letter/for-offer`;
+  const body: Record<string, unknown> = { offer_id: offerId, profile, lang: "fr" };
+  if (context) body.context = context;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`Lettre génération échouée (${res.status}): ${txt}`);
+  }
+
+  return res.json() as Promise<ForOfferLetterResponse>;
 }

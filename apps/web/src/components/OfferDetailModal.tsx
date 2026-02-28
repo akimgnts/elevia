@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, FileText, Loader2, X } from "lucide-react";
-import type { ContextFit, ExplainBlock, ForOfferResponse, InboxContextPayload, OfferContext, ProfileContext } from "../lib/api";
-import { generateCvForOffer } from "../lib/api";
+import type {
+  ContextFit,
+  ExplainBlock,
+  ForOfferResponse,
+  ForOfferLetterResponse,
+  InboxContextPayload,
+  OfferContext,
+  ProfileContext,
+} from "../lib/api";
+import { generateCvForOffer, generateLetterForOffer } from "../lib/api";
+import { LetterPreviewModal } from "./LetterPreviewModal";
 import { CvPreviewModal } from "./CvPreviewModal";
 import { cleanOfferTitle } from "../lib/titleUtils";
 import { formatRelativeDate } from "../lib/dateUtils";
@@ -268,6 +277,11 @@ export function OfferDetailModal({
   const [cvPreview, setCvPreview] = useState<ForOfferResponse | null>(null);
   const [cvError, setCvError] = useState<string | null>(null);
 
+  // Letter generation state
+  const [letterLoading, setLetterLoading] = useState(false);
+  const [letterPreview, setLetterPreview] = useState<ForOfferLetterResponse | null>(null);
+  const [letterError, setLetterError] = useState<string | null>(null);
+
   async function handleGenerateCv() {
     const offerId = offer.offer_id || offer.id;
     if (!offerId) return;
@@ -287,6 +301,28 @@ export function OfferDetailModal({
       setCvError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setCvLoading(false);
+    }
+  }
+
+  async function handleGenerateLetter() {
+    const offerId = offer.offer_id || offer.id;
+    if (!offerId) return;
+    setLetterLoading(true);
+    setLetterError(null);
+    try {
+      const ctx: InboxContextPayload | undefined =
+        offer.matched_skills_display?.length || offer.matched_skills?.length
+          ? {
+              matched_skills: offer.matched_skills_display ?? offer.matched_skills ?? [],
+              missing_skills: offer.missing_skills_display ?? offer.missing_skills ?? [],
+            }
+          : undefined;
+      const result = await generateLetterForOffer(offerId, profile ?? {}, ctx);
+      setLetterPreview(result);
+    } catch (err) {
+      setLetterError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setLetterLoading(false);
     }
   }
 
@@ -411,6 +447,20 @@ export function OfferDetailModal({
               )}
               {cvLoading ? "Génération…" : "Générer CV"}
             </button>
+            {/* Generate Letter CTA */}
+            <button
+              onClick={handleGenerateLetter}
+              disabled={letterLoading}
+              className="flex items-center gap-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-xs font-medium text-white transition-colors"
+              title="Générer une lettre ciblée pour cette offre"
+            >
+              {letterLoading ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <FileText className="h-3 w-3" />
+              )}
+              {letterLoading ? "Génération…" : "Générer lettre"}
+            </button>
             <button
               onClick={onClose}
               className="rounded-lg border border-neutral-700 p-2 text-neutral-300 hover:text-white hover:border-neutral-500"
@@ -425,6 +475,11 @@ export function OfferDetailModal({
         {cvError && (
           <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 px-4 py-2 text-xs text-rose-300">
             Génération échouée : {cvError}
+          </div>
+        )}
+        {letterError && (
+          <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 px-4 py-2 text-xs text-rose-300">
+            Génération lettre échouée : {letterError}
           </div>
         )}
 
@@ -833,6 +888,14 @@ export function OfferDetailModal({
         offerCompany={offer.company}
         preview={cvPreview}
         onClose={() => setCvPreview(null)}
+      />
+    )}
+    {letterPreview && (
+      <LetterPreviewModal
+        offerTitle={offer.title}
+        offerCompany={offer.company}
+        preview={letterPreview}
+        onClose={() => setLetterPreview(null)}
       />
     )}
     </>

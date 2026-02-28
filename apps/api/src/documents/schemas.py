@@ -14,6 +14,7 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
 
 PROMPT_VERSION = "cv_v1"
+LETTER_TEMPLATE_VERSION = "letter_v0"
 
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
@@ -103,4 +104,37 @@ class ForOfferResponse(BaseModel):
     document: CvDocumentPayload           # Enriched payload (matched skills first)
     preview_text: str = ""                # Markdown render, ready to download
     context_used: bool = False            # True when inbox context drove ordering
+    duration_ms: int = 0
+
+
+# ── Cover letter (deterministic, no LLM) ─────────────────────────────────────
+
+class CoverLetterBlock(BaseModel):
+    label: Literal["hook", "match", "value", "closing"]
+    text: str = Field(..., max_length=600)
+
+
+class CoverLetterMeta(BaseModel):
+    offer_id: str
+    template_version: str = LETTER_TEMPLATE_VERSION
+    context_used: bool = False
+
+
+class CoverLetterPayload(BaseModel):
+    blocks: List[CoverLetterBlock] = Field(..., min_length=1, max_length=4)
+    meta: CoverLetterMeta
+
+
+class ForOfferLetterRequest(BaseModel):
+    offer_id: str = Field(..., min_length=1)
+    profile: Optional[dict] = None
+    profile_id: Optional[str] = None
+    lang: Literal["fr", "en"] = "fr"
+    context: Optional[InboxContext] = None
+
+
+class ForOfferLetterResponse(BaseModel):
+    ok: bool = True
+    document: CoverLetterPayload
+    preview_text: str = ""
     duration_ms: int = 0

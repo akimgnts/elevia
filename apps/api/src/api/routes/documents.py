@@ -29,10 +29,18 @@ from fastapi import APIRouter, HTTPException
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from documents.schemas import CvRequest, CvDocumentResponse, ForOfferRequest, ForOfferResponse
+from documents.schemas import (
+    CvRequest,
+    CvDocumentResponse,
+    ForOfferRequest,
+    ForOfferResponse,
+    ForOfferLetterRequest,
+    ForOfferLetterResponse,
+)
 from documents.cv_generator import generate_cv, enrich_payload, get_offer
 from documents.context_builder import build_matched_skills
 from documents.preview_renderer import render_preview_markdown
+from documents.cover_letter_generator import generate_cover_letter
 from documents.llm_client import is_llm_available
 
 logger = logging.getLogger(__name__)
@@ -157,6 +165,69 @@ async def create_cv_for_offer(req: ForOfferRequest) -> ForOfferResponse:
         document=enriched,
         preview_text=preview,
         context_used=context_used,
+        duration_ms=duration_ms,
+    )
+
+
+@router.post("/documents/letter/for-offer", response_model=ForOfferLetterResponse)
+async def create_letter_for_offer(req: ForOfferLetterRequest) -> ForOfferLetterResponse:
+    """
+    Generate a deterministic cover letter for a specific offer.
+
+    - Uses InboxContext matched skills if provided
+    - No LLM calls
+    - Returns preview_text (markdown) + structured blocks
+    """
+    t0 = time.time()
+    profile = req.profile or {}
+
+    logger.info(
+        '{"event":"DOC_LETTER_FOR_OFFER_REQUEST","offer_id":"%s","has_context":%s,"lang":"%s"}',
+        req.offer_id,
+        "true" if req.context and req.context.matched_skills else "false",
+        req.lang,
+    )
+
+    offer = get_offer(req.offer_id)
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+
+    ctx = req.context
+    matched_core, _ = build_matched_skills(
+        offer=offer,
+        profile=profile,
+        matched_skills=ctx.matched_skills if ctx else None,
+        missing_skills=ctx.missing_skills if ctx else None,
+    )
+    context_used = bool(ctx and ctx.matched_skills)
+
+    try:
+        payload, preview = generate_cover_letter(
+            offer_id=req.offer_id,
+            offer_title=offer.get("title"),
+            offer_company=offer.get("company"),
+            matched_skills=matched_core,
+            context_used=context_used,
+        )
+    except Exception as exc:
+        logger.error(
+            '{"event":"DOC_LETTER_FOR_OFFER_FAIL","error_class":"%s","safe_message":"letter generation failed"}',
+            type(exc).__name__,
+        )
+        raise HTTPException(status_code=500, detail="Letter generation failed — see logs")
+
+    duration_ms = int((time.time() - t0) * 1000)
+    logger.info(
+        '{"event":"DOC_LETTER_FOR_OFFER_OK","offer_id":"%s","duration_ms":%d,"context_used":%s}',
+        req.offer_id,
+        duration_ms,
+        "true" if context_used else "false",
+    )
+
+    return ForOfferLetterResponse(
+        ok=True,
+        document=payload,
+        preview_text=preview,
         duration_ms=duration_ms,
     )
 
