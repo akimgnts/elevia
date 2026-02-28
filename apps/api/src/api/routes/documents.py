@@ -29,8 +29,10 @@ from fastapi import APIRouter, HTTPException
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from documents.schemas import CvRequest, CvDocumentResponse
-from documents.cv_generator import generate_cv
+from documents.schemas import CvRequest, CvDocumentResponse, ForOfferRequest, ForOfferResponse
+from documents.cv_generator import generate_cv, enrich_payload, get_offer
+from documents.context_builder import build_matched_skills
+from documents.preview_renderer import render_preview_markdown
 from documents.llm_client import is_llm_available
 
 logger = logging.getLogger(__name__)
@@ -73,6 +75,88 @@ async def create_cv(req: CvRequest) -> CvDocumentResponse:
     return CvDocumentResponse(
         ok=True,
         document=payload,
+        duration_ms=duration_ms,
+    )
+
+
+@router.post("/documents/cv/for-offer", response_model=ForOfferResponse)
+async def create_cv_for_offer(req: ForOfferRequest) -> ForOfferResponse:
+    """
+    Generate an inbox-contextualised CV for a specific offer.
+
+    Differences vs POST /documents/cv:
+      - Accepts InboxContext (matched_skills / missing_skills from inbox)
+      - Reorders keywords_injected + experience_block.tools:
+          matched skills first (alpha), then rest (alpha) — deterministic
+      - Returns preview_text (markdown) ready to display or download
+      - context_used=True when inbox context drove the ordering
+
+    Logs: DOC_FOR_OFFER_REQUEST, DOC_FOR_OFFER_OK, DOC_FOR_OFFER_FAIL
+    No scoring core changes. No LLM beyond generate_cv().
+    """
+    t0 = time.time()
+    profile = req.profile or {}
+
+    logger.info(
+        '{"event":"DOC_FOR_OFFER_REQUEST","offer_id":"%s","has_context":%s,"lang":"%s"}',
+        req.offer_id,
+        "true" if req.context and req.context.matched_skills else "false",
+        req.lang,
+    )
+
+    # Step 1: Build CV (cache-aware, LLM or fallback)
+    cv_req = CvRequest(
+        offer_id=req.offer_id,
+        profile=profile,
+        profile_id=req.profile_id,
+        lang=req.lang,
+    )
+    try:
+        payload = generate_cv(cv_req)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        logger.error(
+            '{"event":"DOC_FOR_OFFER_FAIL","error_class":"%s","safe_message":"cv generation failed"}',
+            type(exc).__name__,
+        )
+        raise HTTPException(status_code=500, detail="CV generation failed — see logs")
+
+    # Step 2: Build matched/missing context (from inbox or recomputed)
+    offer = get_offer(req.offer_id) or {}
+    ctx = req.context
+    matched_core, _ = build_matched_skills(
+        offer=offer,
+        profile=profile,
+        matched_skills=ctx.matched_skills if ctx else None,
+        missing_skills=ctx.missing_skills if ctx else None,
+    )
+    context_used = bool(ctx and ctx.matched_skills)
+
+    # Step 3: Enrich payload ordering (deterministic, no LLM)
+    enriched = enrich_payload(payload, matched_core)
+
+    # Step 4: Render markdown preview
+    preview = render_preview_markdown(
+        enriched,
+        offer_title=offer.get("title") or req.offer_id,
+        offer_company=offer.get("company") or "",
+        offer_country=offer.get("country") or "",
+    )
+
+    duration_ms = int((time.time() - t0) * 1000)
+    logger.info(
+        '{"event":"DOC_FOR_OFFER_OK","offer_id":"%s","duration_ms":%d,"context_used":%s}',
+        req.offer_id,
+        duration_ms,
+        "true" if context_used else "false",
+    )
+
+    return ForOfferResponse(
+        ok=True,
+        document=enriched,
+        preview_text=preview,
+        context_used=context_used,
         duration_ms=duration_ms,
     )
 

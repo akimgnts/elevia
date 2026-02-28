@@ -435,3 +435,49 @@ def generate_cv(req: CvRequest) -> CvDocumentPayload:
         verdict_fields_present=bool(payload.summary and payload.ats_notes),
     )
     return payload
+
+
+# ── Enrichment (deterministic reordering, no LLM) ────────────────────────────
+
+def enrich_payload(
+    payload: CvDocumentPayload,
+    matched_core_skills: List[str],
+) -> CvDocumentPayload:
+    """
+    Reorder CV payload to surface matched_core_skills first.
+
+    keywords_injected: matched first (alpha), then rest (alpha).
+    experience_blocks.tools: matched first (alpha), then rest (alpha).
+
+    Contract:
+      - Deterministic: same inputs → same output, no set iteration
+      - No mutation: returns model_copy
+      - No LLM. No scoring core.
+    """
+    if not matched_core_skills:
+        return payload
+
+    matched_norm = {s.lower().strip() for s in matched_core_skills if s and s.strip()}
+
+    def _reorder(items: List[str]) -> List[str]:
+        """Matched items first (alpha), rest after (alpha). Stable."""
+        first = sorted(i for i in items if i.lower().strip() in matched_norm)
+        rest = sorted(i for i in items if i.lower().strip() not in matched_norm)
+        return first + rest
+
+    new_keywords = _reorder(payload.keywords_injected)
+
+    new_blocks: List[ExperienceBlock] = []
+    for block in payload.experience_blocks:
+        new_blocks.append(block.model_copy(update={"tools": _reorder(block.tools)}))
+
+    return payload.model_copy(
+        update={
+            "keywords_injected": new_keywords,
+            "experience_blocks": new_blocks,
+        }
+    )
+
+
+# Public alias — lets routes load an offer without duplicating DB code
+get_offer = _load_offer

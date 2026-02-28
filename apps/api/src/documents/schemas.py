@@ -73,3 +73,34 @@ class CvDocumentResponse(BaseModel):
     ok: bool = True
     document: CvDocumentPayload
     duration_ms: int = 0
+
+
+# ── For-offer endpoint (inbox-contextualised) ─────────────────────────────────
+
+class InboxContext(BaseModel):
+    """
+    Optional context forwarded from the inbox match result.
+    Used to enrich CV ordering (matched skills first) without recomputing.
+    """
+    matched_skills: List[str] = Field(default_factory=list)
+    missing_skills: List[str] = Field(default_factory=list)
+    offer_cluster: Optional[str] = None
+    profile_cluster: Optional[str] = None
+
+
+class ForOfferRequest(BaseModel):
+    """POST /documents/cv/for-offer input."""
+    offer_id: str = Field(..., min_length=1)
+    profile: Optional[dict] = None
+    profile_id: Optional[str] = None
+    lang: Literal["fr", "en"] = "fr"
+    context: Optional[InboxContext] = None  # Inbox match context for enrichment
+
+
+class ForOfferResponse(BaseModel):
+    """POST /documents/cv/for-offer response."""
+    ok: bool = True
+    document: CvDocumentPayload           # Enriched payload (matched skills first)
+    preview_text: str = ""                # Markdown render, ready to download
+    context_used: bool = False            # True when inbox context drove ordering
+    duration_ms: int = 0
