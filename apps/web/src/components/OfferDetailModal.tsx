@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import type { ContextFit, ExplainBlock, OfferContext, ProfileContext } from "../lib/api";
+import { cleanOfferTitle } from "../lib/titleUtils";
+import { formatRelativeDate } from "../lib/dateUtils";
 
 export type StrategySummary = {
   mission_summary?: string;
@@ -12,9 +14,13 @@ export type OfferDetail = {
   offer_id?: string;
   id?: string;
   title: string;
+  publication_date?: string | null;
   company?: string | null;
   country?: string | null;
   score?: number | null;
+  offer_cluster?: string | null;
+  signal_score?: number | null;
+  coherence?: "ok" | "suspicious" | null;
   description?: string | null;
   display_description?: string | null;
   description_snippet?: string | null;
@@ -75,6 +81,99 @@ function distanceBadgeClass(distance?: string) {
   if (value.includes("inter")) return "bg-amber-500/20 text-amber-300";
   if (value.includes("élev") || value.includes("ele")) return "bg-rose-500/20 text-rose-300";
   return "bg-neutral-700 text-neutral-200";
+}
+
+function formatClusterLabel(cluster?: string | null) {
+  switch (cluster) {
+    case "DATA_IT":
+      return "Data/IT";
+    case "FINANCE_LEGAL":
+      return "Finance/Juridique";
+    case "SUPPLY_OPS":
+      return "Supply/Ops";
+    case "MARKETING_SALES":
+      return "Marketing/Vente";
+    case "ENGINEERING_INDUSTRY":
+      return "Ingénierie/Industrie";
+    case "ADMIN_HR":
+      return "Admin/RH";
+    case "OTHER":
+      return "Autre";
+    default:
+      return null;
+  }
+}
+
+function mapRoleTypeToCluster(role?: OfferContext["role_type"] | OfferContext["primary_role_type"]) {
+  if (!role) return null;
+  switch (role) {
+    case "BI_REPORTING":
+    case "DATA_ANALYSIS":
+    case "DATA_ENGINEERING":
+    case "PRODUCT_ANALYTICS":
+    case "OPS_ANALYTICS":
+    case "MIXED":
+      return "DATA_IT";
+    default:
+      return null;
+  }
+}
+
+function getVerdict(score?: number | null): "BON" | "MOYEN" | "STRETCH" {
+  if (score === null || score === undefined) return "STRETCH";
+  if (score >= 75) return "BON";
+  if (score >= 60) return "MOYEN";
+  return "STRETCH";
+}
+
+function verdictBadgeClass(verdict: "BON" | "MOYEN" | "STRETCH") {
+  switch (verdict) {
+    case "BON":
+      return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+    case "MOYEN":
+      return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+    default:
+      return "bg-rose-500/20 text-rose-300 border border-rose-500/30";
+  }
+}
+
+function derivePositionElevia({
+  score,
+  matchedCore,
+  missingCore,
+  clusterMismatch,
+  isRecent,
+}: {
+  score?: number | null;
+  matchedCore: number;
+  missingCore: number;
+  clusterMismatch: boolean;
+  isRecent: boolean;
+}) {
+  const scoreDefined = score !== null && score !== undefined;
+  const verdict = getVerdict(score);
+  let signal = "Signal à confirmer";
+  if (matchedCore >= 1) {
+    signal = "Compétences cœur présentes";
+  } else if (isRecent) {
+    signal = "Opportunité récente dans ton périmètre";
+  }
+
+  let risk = "Risque modéré";
+  if (missingCore >= 3) {
+    risk = "Manque compétences clés";
+  } else if (clusterMismatch) {
+    risk = "Domaine différent";
+  }
+
+  let action = "À faire : clarifier les attentes avant d'avancer";
+  if (isRecent && (verdict === "BON" || verdict === "MOYEN")) {
+    action = "À faire : postuler maintenant";
+  } else if (verdict === "STRETCH" && scoreDefined) {
+    action = "À faire : postuler seulement si tu acceptes un pivot";
+  }
+
+  return { verdict, signal, risk, action };
 }
 
 function SkillGroup({
@@ -183,6 +282,30 @@ export function OfferDetailModal({
   const unmapped = offer.unmapped_tokens ?? [];
   const explain = offer.explain ?? null;
   const summary = offer.strategy_summary || undefined;
+  const titleInfo = useMemo(() => cleanOfferTitle(offer.title), [offer.title]);
+  const profileDominantCluster =
+    profileContext && typeof (profileContext as { dominant_cluster?: string }).dominant_cluster === "string"
+      ? (profileContext as { dominant_cluster?: string }).dominant_cluster
+      : null;
+  const offerCluster = mapRoleTypeToCluster(offerContext?.primary_role_type);
+  const roleClusterMismatch = Boolean(profileDominantCluster && offerCluster && profileDominantCluster !== offerCluster);
+  const matchedCoreCount = explain?.matched_full?.filter((item) => item.weighted).length ?? 0;
+  const missingCoreCount = explain?.missing_full?.filter((item) => item.weighted).length ?? 0;
+  const relativeDate = offer.publication_date
+    ? formatRelativeDate(offer.publication_date)
+    : null;
+  const isRecent = relativeDate?.freshness === "new";
+  const clusterLabel = formatClusterLabel(offer.offer_cluster);
+  const signalLabel =
+    typeof offer.signal_score === "number" ? `Signal ${offer.signal_score.toFixed(1)}` : null;
+  const isSuspicious = offer.coherence === "suspicious";
+  const positionElevia = derivePositionElevia({
+    score: offer.score ?? undefined,
+    matchedCore: matchedCoreCount,
+    missingCore: missingCoreCount,
+    clusterMismatch: roleClusterMismatch,
+    isRecent,
+  });
 
   const descriptionPreview = useMemo(() => {
     if (!description) return "";
@@ -208,7 +331,10 @@ export function OfferDetailModal({
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-xl font-semibold text-white">{offer.title}</h2>
+            <h2 className="text-xl font-semibold text-white">{titleInfo.display}</h2>
+            {titleInfo.changes.length > 0 && titleInfo.original && (
+              <p className="mt-1 text-xs text-neutral-500">Titre original : {titleInfo.original}</p>
+            )}
             {offer.company && (
               <p className="mt-1 text-sm text-neutral-400">{offer.company}</p>
             )}
@@ -218,9 +344,24 @@ export function OfferDetailModal({
                   {offer.country}
                 </span>
               )}
+              {clusterLabel && (
+                <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-900">
+                  {clusterLabel}
+                </span>
+              )}
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${scoreBadgeClass(offer.score)}`}>
                 Score {offer.score ?? "—"}
               </span>
+              {signalLabel && (
+                <span className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-300">
+                  {signalLabel}
+                </span>
+              )}
+              {isSuspicious && (
+                <span className="rounded-full bg-rose-500/20 px-3 py-1 text-xs text-rose-300">
+                  Incohérent
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -231,6 +372,22 @@ export function OfferDetailModal({
             <X className="h-4 w-4" />
           </button>
         </div>
+
+        {/* Position Elevia */}
+        <section className="mt-6">
+          <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300 space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-neutral-100">Position Elevia</h3>
+              <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${verdictBadgeClass(positionElevia.verdict)}`}>
+                {positionElevia.verdict}
+              </span>
+            </div>
+            <p className="text-[11px] text-neutral-300">
+              Signal fort : {positionElevia.signal} · Risque : {positionElevia.risk}
+            </p>
+            <p className="text-[11px] text-neutral-400">{positionElevia.action}</p>
+          </div>
+        </section>
 
         {/* Description — always visible */}
         <section className="mt-6">

@@ -8,9 +8,9 @@ import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from ..schemas.inbox import (
     DecisionRequest,
@@ -18,6 +18,7 @@ from ..schemas.inbox import (
     ExplainBlock,
     ExplainBreakdown,
     InboxItem,
+    InboxMeta,
     InboxRequest,
     InboxResponse,
     OfferSemanticRequest,
@@ -32,6 +33,13 @@ from ..utils.inbox_catalog import load_catalog_offers
 from ..utils.rome_link import get_offer_rome_links, get_rome_competences_for_rome_codes
 from ..utils.rome_inferred import infer_rome_for_offers
 from semantic.semantic_service import compute_semantic_for_offer
+from offer.offer_cluster import detect_offer_cluster
+from offer.generic_skill_stats import (
+    get_offer_count,
+    load_generic_skill_table,
+    signal_score,
+)
+from profile.profile_cluster import detect_profile_cluster
 
 # Import matching engine
 import sys
@@ -44,6 +52,9 @@ logger = logging.getLogger("uvicorn.error")
 router = APIRouter(tags=["inbox"])
 
 PROFILE_FIXTURES_DIR = Path(__file__).parent.parent.parent.parent / "fixtures" / "profiles"
+MIN_RESULTS = 10
+SUSPICIOUS_SCORE_THRESHOLD = 95
+SIGNAL_MIN_K = 1.0
 
 
 def _debug_matching_enabled() -> bool:
@@ -72,6 +83,22 @@ def _sample_list(values, limit=20):
         if len(sample) >= limit:
             break
     return sample
+
+
+def _extract_skill_labels(raw_skills) -> List[str]:
+    if not raw_skills:
+        return []
+    if isinstance(raw_skills, list):
+        labels = []
+        for item in raw_skills:
+            if isinstance(item, str):
+                labels.append(item)
+            elif isinstance(item, dict) and item.get("label"):
+                labels.append(str(item.get("label")))
+        return labels
+    if isinstance(raw_skills, str):
+        return [s.strip() for s in raw_skills.split(",") if s.strip()]
+    return []
 
 
 def _load_profile_fixture(profile_id: str, payload: Dict) -> tuple[Dict, str]:
@@ -204,7 +231,10 @@ def _load_catalog_offers() -> List[Dict]:
 
 
 @router.post("/inbox", summary="Get inbox items for a profile")
-async def get_inbox(req: InboxRequest) -> InboxResponse:
+async def get_inbox(
+    req: InboxRequest,
+    domain_mode: str = Query(default="in_domain", pattern="^(in_domain|all)$"),
+) -> InboxResponse:
     """Score catalog offers against profile, excluding already-decided ones."""
     t0 = time.perf_counter()
     profile_payload, lookup_status = _load_profile_fixture(req.profile_id, req.profile)
@@ -241,6 +271,10 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
     engine = MatchingEngine(offers=catalog)
     extracted = extract_profile(profile_payload)
     t_profile = time.perf_counter()
+    profile_cluster = detect_profile_cluster(list(getattr(extracted, "skills", []))).get("dominant_cluster")
+
+    freq_table = load_generic_skill_table()
+    offer_count = get_offer_count()
 
     items: List[InboxItem] = []
     _explain_debug: Dict[str, tuple] = {}  # offer_id → (match_debug, matched, missing)
@@ -280,6 +314,20 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
         if profile_uri_count is None:
             profile_uri_count = getattr(extracted, "skills_uri_count", None)
 
+        matched_skills_all = matched_skills if isinstance(matched_skills, list) else []
+        offer_skill_labels = _extract_skill_labels(offer.get("skills_display") or offer.get("skills") or [])
+        offer_cluster, _, _ = detect_offer_cluster(
+            offer.get("title"),
+            offer.get("description") or offer.get("display_description"),
+            offer_skill_labels,
+        )
+        signal = signal_score(matched_skills_all, freq_table, offer_count)
+        coherence = (
+            "suspicious"
+            if result.score >= SUSPICIOUS_SCORE_THRESHOLD and signal < SIGNAL_MIN_K
+            else "ok"
+        )
+
         score_raw = None
         if isinstance(match_debug, dict) and isinstance(match_debug.get("total"), (int, float)):
             score_raw = float(match_debug["total"]) / 100.0
@@ -305,6 +353,9 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
                 matched_skills_display=matched_display,
                 missing_skills_display=missing_display,
                 unmapped_tokens=offer.get("skills_unmapped") or [],
+                offer_cluster=offer_cluster,
+                signal_score=signal,
+                coherence=coherence,
                 offer_uri_count=offer_uri_count
                 if offer_uri_count is not None
                 else (
@@ -327,10 +378,58 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
 
     t_scoring = time.perf_counter()
 
-    # Sort desc by score
-    items.sort(key=lambda x: x.score, reverse=True)
+    # Post-layer gating + ordering (no scoring changes)
+    coverage_before = len(items)
+    out_of_domain_count = sum(1 for item in items if item.offer_cluster != profile_cluster)
+    gating_mode = "IN_DOMAIN" if domain_mode == "in_domain" else "OUT_OF_DOMAIN"
+    if domain_mode == "in_domain":
+        items = [item for item in items if item.offer_cluster == profile_cluster]
+
+    coverage_after = len(items)
+    suggest_out_of_domain = (
+        domain_mode == "in_domain"
+        and coverage_after < MIN_RESULTS
+        and out_of_domain_count > 0
+    )
+
+    def _sort_key(item: InboxItem) -> Tuple[int, float, int, str]:
+        signal = float(item.signal_score or 0.0)
+        coherence_rank = 1 if item.coherence != "suspicious" else 0
+        return (-item.score, -signal, -coherence_rank, item.offer_id)
+
+    items.sort(key=_sort_key)
     total_matched = len(items)
+
+    cluster_distribution_top20: Dict[str, int] = {}
+    for item in items[:20]:
+        key = item.offer_cluster or "UNKNOWN"
+        cluster_distribution_top20[key] = cluster_distribution_top20.get(key, 0) + 1
+
+    suspicious_items = [item for item in items if item.coherence == "suspicious"]
+    suspicious_count = len(suspicious_items)
+    suspicious_sample_ids = [item.offer_id for item in suspicious_items[:5]]
+
     items = items[: req.limit]
+
+    top_clusters = sorted(cluster_distribution_top20.items(), key=lambda x: (-x[1], x[0]))[:3]
+    logger.info("MATCH_POST_LAYER_APPLIED %s", json.dumps({
+        "event": "MATCH_POST_LAYER_APPLIED",
+        "profile_id": req.profile_id,
+        "profile_cluster": profile_cluster,
+        "domain_mode": domain_mode,
+        "before_count": coverage_before,
+        "after_count": coverage_after,
+        "top_clusters_after": {k: v for k, v in top_clusters},
+        "suspicious_count": suspicious_count,
+    }))
+    if suspicious_count > 0:
+        logger.info("SUSPICIOUS_HIGH_SCORE %s", json.dumps({
+            "event": "SUSPICIOUS_HIGH_SCORE",
+            "count": suspicious_count,
+            "sample_offer_ids": suspicious_sample_ids,
+            "profile_cluster": profile_cluster,
+            "domain_mode": domain_mode,
+        }))
 
     ft_ids = [item.offer_id for item in items if source_map.get(item.offer_id) == "france_travail"]
     rome_links: Dict[str, Dict[str, str]] = {}
@@ -400,11 +499,22 @@ async def get_inbox(req: InboxRequest) -> InboxResponse:
             len(decided_ids),
         )
 
+    meta = InboxMeta(
+        profile_cluster=profile_cluster,
+        gating_mode=gating_mode,
+        coverage_before=coverage_before,
+        coverage_after=coverage_after,
+        suggest_out_of_domain=suggest_out_of_domain,
+        out_of_domain_count=out_of_domain_count,
+        cluster_distribution_top20=cluster_distribution_top20,
+    )
+
     return InboxResponse(
         profile_id=req.profile_id,
         items=items,
         total_matched=total_matched,
         total_decided=len(decided_ids),
+        meta=meta,
     )
 
 

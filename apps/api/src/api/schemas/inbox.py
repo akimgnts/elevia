@@ -98,10 +98,23 @@ class InboxItem(BaseModel):
     skills_uri_count: Optional[int] = None
     skills_uri_collapsed_dupes: Optional[int] = None
     skills_unmapped_count: Optional[int] = None
+    offer_cluster: Optional[str] = None
+    signal_score: Optional[float] = None
+    coherence: Optional[str] = Field(default=None, pattern="^(ok|suspicious)$")
     rome: Optional[RomeLink] = None
     rome_competences: List[RomeCompetence] = Field(default_factory=list)
     rome_inferred: Optional[RomeInferred] = None
     explain: Optional[ExplainBlock] = None  # populated when request.explain=True
+
+
+class InboxMeta(BaseModel):
+    profile_cluster: Optional[str] = None
+    gating_mode: Optional[str] = Field(default=None, pattern="^(IN_DOMAIN|OUT_OF_DOMAIN)$")
+    coverage_before: Optional[int] = None
+    coverage_after: Optional[int] = None
+    suggest_out_of_domain: Optional[bool] = None
+    out_of_domain_count: Optional[int] = None
+    cluster_distribution_top20: Optional[Dict[str, int]] = None
 
 
 class InboxResponse(BaseModel):
@@ -109,6 +122,7 @@ class InboxResponse(BaseModel):
     items: List[InboxItem]
     total_matched: int
     total_decided: int
+    meta: Optional[InboxMeta] = None
 
 
 class DecisionRequest(BaseModel):

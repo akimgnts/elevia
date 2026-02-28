@@ -275,6 +275,9 @@ export interface InboxItem {
   skills_uri_count?: number;
   skills_uri_collapsed_dupes?: number;
   skills_unmapped_count?: number;
+  offer_cluster?: string;
+  signal_score?: number;
+  coherence?: "ok" | "suspicious";
   rome?: { rome_code: string; rome_label: string } | null;
   rome_competences?: Array<{
     competence_code: string;
@@ -284,11 +287,22 @@ export interface InboxItem {
   explain?: ExplainBlock | null;
 }
 
+export interface InboxMeta {
+  profile_cluster?: string;
+  gating_mode?: "IN_DOMAIN" | "OUT_OF_DOMAIN";
+  coverage_before?: number;
+  coverage_after?: number;
+  suggest_out_of_domain?: boolean;
+  out_of_domain_count?: number;
+  cluster_distribution_top20?: Record<string, number>;
+}
+
 export interface InboxResponse {
   profile_id: string;
   items: InboxItem[];
   total_matched: number;
   total_decided: number;
+  meta?: InboxMeta;
 }
 
 export interface OfferSemanticResponse {
@@ -373,8 +387,9 @@ export async function fetchInbox(
   minScore = 65,
   limit = 20,
   explain = true,
+  domainMode: "in_domain" | "all" = "in_domain",
 ): Promise<InboxResponse> {
-  const url = `${API_BASE}/inbox`;
+  const url = `${API_BASE}/inbox?domain_mode=${encodeURIComponent(domainMode)}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -586,6 +601,7 @@ export interface ParseFileResponse {
   skills_canonical: string[];
   profile: { id: string; skills: string[]; skills_source: string; skills_uri?: string[] };
   warnings: string[];
+  profile_cluster?: ProfileCluster;
 }
 
 export interface ParseBaselineResponse {
@@ -609,6 +625,23 @@ export interface ParseBaselineResponse {
   skills_dupes?: Array<{ label: string; surfaces: string[] }>;
   profile: { id: string; skills: string[]; skills_source: string; skills_uri?: string[] };
   warnings: string[];
+  profile_cluster?: ProfileCluster;
+}
+
+export interface ProfileCluster {
+  dominant_cluster:
+    | "DATA_IT"
+    | "FINANCE_LEGAL"
+    | "SUPPLY_OPS"
+    | "MARKETING_SALES"
+    | "ENGINEERING_INDUSTRY"
+    | "ADMIN_HR"
+    | "OTHER";
+  dominance_percent: number;
+  distribution_percent: Record<string, number>;
+  skills_count: number;
+  confidence: number;
+  note: "TRANSVERSAL" | "LOW_SIGNAL" | null;
 }
 
 /**

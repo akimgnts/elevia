@@ -8,7 +8,6 @@ import {
   FileText,
   Filter,
   Inbox,
-  MapPin,
   RefreshCw,
   Search,
   Sparkles,
@@ -29,12 +28,15 @@ import {
   type OfferContext,
   type ProfileContext,
   type ContextFit,
+  type InboxMeta,
 } from "../lib/api";
 import { buildMatchingProfile, type SkillsSource } from "../lib/profileMatching";
 import { upsertApplication, listApplications } from "../api/applications";
 import { useProfileStore } from "../store/profileStore";
 import { SEED_PROFILE } from "../fixtures/seedProfile";
 import { OfferDetailModal, type OfferDetail } from "../components/OfferDetailModal";
+import { formatRelativeDate } from "../lib/dateUtils";
+import { cleanOfferTitle, truncateOfferTitle } from "../lib/titleUtils";
 
 // ============================================================================
 // Constants
@@ -58,10 +60,12 @@ type DecisionRecord = {
 type NormalizedInboxItem = {
   offer_id: string;
   id?: string;
+  source?: string;
   title: string;
   company: string | null;
   country: string | null;
   city: string | null;
+  publication_date?: string | null;
   score: number;
   score_pct?: number;
   score_raw?: number;
@@ -91,6 +95,9 @@ type NormalizedInboxItem = {
   is_vie?: boolean;
   skills_source?: string;
   explain: ExplainBlock | null;
+  offer_cluster?: string;
+  signal_score?: number;
+  coherence?: "ok" | "suspicious";
 };
 
 type LastApiCall = {
@@ -157,6 +164,27 @@ function formatRoleType(role?: OfferContext["role_type"]) {
   }
 }
 
+function formatCluster(cluster?: string | null) {
+  switch (cluster) {
+    case "DATA_IT":
+      return "Data/IT";
+    case "FINANCE_LEGAL":
+      return "Finance/Juridique";
+    case "SUPPLY_OPS":
+      return "Supply/Ops";
+    case "MARKETING_SALES":
+      return "Marketing/Vente";
+    case "ENGINEERING_INDUSTRY":
+      return "Ingénierie/Industrie";
+    case "ADMIN_HR":
+      return "Admin/RH";
+    case "OTHER":
+      return "Autre";
+    default:
+      return null;
+  }
+}
+
 /**
  * Strict mapping from API response to UI model.
  * Uses offer_id (not id), safe nulls for all fields.
@@ -190,10 +218,12 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
     results.push({
       offer_id: offerId,
       id: typeof rec.id === "string" ? rec.id : undefined,
+      source: typeof rec.source === "string" ? rec.source : undefined,
       title: typeof rec.title === "string" ? rec.title : "Offre",
       company: typeof rec.company === "string" ? rec.company : null,
       country: typeof rec.country === "string" ? rec.country : null,
       city: typeof rec.city === "string" ? rec.city : null,
+      publication_date: typeof rec.publication_date === "string" ? rec.publication_date : null,
       score: normalizeScore(
         typeof rec.score_pct === "number"
           ? rec.score_pct
@@ -249,6 +279,9 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       is_vie: typeof rec.is_vie === "boolean" ? rec.is_vie : undefined,
       skills_source: typeof rec.skills_source === "string" ? rec.skills_source : undefined,
       explain: rec.explain && typeof rec.explain === "object" ? (rec.explain as ExplainBlock) : null,
+      offer_cluster: typeof rec.offer_cluster === "string" ? rec.offer_cluster : undefined,
+      signal_score: typeof rec.signal_score === "number" ? rec.signal_score : undefined,
+      coherence: rec.coherence === "ok" || rec.coherence === "suspicious" ? rec.coherence : undefined,
     });
   }
   return results;
@@ -470,11 +503,33 @@ function OfferCard({
   isPending: boolean;
   roleTypeLabel?: string | null;
 }) {
-  const location = [offer.city, offer.country].filter(Boolean).join(", ");
   const matchedDisplay = offer.matched_skills_display;
   const missingDisplay = offer.missing_skills_display;
   const unmapped = offer.unmapped_tokens;
   const showFallback = offer.score === 15 && matchedDisplay.length === 0;
+  const scoreBadgeClass =
+    offer.score >= 75
+      ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+      : offer.score >= 60
+        ? "bg-amber-50 text-amber-700 border-amber-200"
+        : "bg-slate-100 text-slate-600 border-slate-200";
+  const scoreLabel = `Score ${offer.score}%`;
+  const relativeDate = offer.publication_date
+    ? formatRelativeDate(offer.publication_date)
+    : null;
+  const showVie = offer.source === "business_france" || offer.is_vie;
+  const clusterLabel = formatCluster(offer.offer_cluster);
+  const signalLabel =
+    typeof offer.signal_score === "number" ? `Signal ${offer.signal_score.toFixed(1)}` : null;
+  const isSuspicious = offer.coherence === "suspicious";
+  const titleInfo = useMemo(() => cleanOfferTitle(offer.title), [offer.title]);
+  const displayTitle = truncateOfferTitle(titleInfo.display, 90);
+  const freshnessBadge =
+    relativeDate?.freshness === "new"
+      ? "Nouveau"
+      : relativeDate?.freshness === "recent"
+        ? "Récent"
+        : null;
   const uriSummary =
     typeof offer.intersection_count === "number" && typeof offer.offer_uri_count === "number"
       ? `${offer.intersection_count} compétences reconnues sur ${offer.offer_uri_count}`
@@ -490,39 +545,75 @@ function OfferCard({
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            {offer.is_vie && (
-              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
-                V.I.E
-              </span>
-            )}
-            {roleTypeLabel && (
-              <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                {roleTypeLabel}
-              </span>
-            )}
-            <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-              Score · {offer.score}%
-            </span>
-            {showFallback && (
-              <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                Fallback score (no skill match)
-              </span>
-            )}
-          </div>
+        <h3 className="min-w-0 flex-1 text-base font-bold text-slate-900 leading-tight line-clamp-2">
+          {displayTitle}
+        </h3>
+        <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${scoreBadgeClass}`}>
+          {scoreLabel}
+        </span>
+      </div>
 
-          <h3 className="mt-3 text-base font-bold text-slate-900 leading-tight line-clamp-2">
-            {offer.title}
-          </h3>
-
-      <div className="mt-1 text-xs text-slate-500 flex items-center gap-1 flex-wrap">
-        {offer.company && <span className="font-medium text-slate-700">{offer.company}</span>}
-        {offer.company && location && <span>·</span>}
-        {location && (
-          <span className="flex items-center gap-0.5">
-            <MapPin className="w-3 h-3" />
-            {location}
+      {/* Badges */}
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+        {offer.country && (
+          <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+            {offer.country}
+          </span>
+        )}
+        {offer.city && (
+          <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
+            {offer.city}
+          </span>
+        )}
+        {showVie && (
+          <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
+            VIE
+          </span>
+        )}
+        {offer.company && (
+          <span className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-600">
+            {offer.company}
+          </span>
+        )}
+        {clusterLabel && (
+          <span className="px-2.5 py-1 rounded-full bg-slate-900 text-white border border-slate-800">
+            {clusterLabel}
+          </span>
+        )}
+        {signalLabel && (
+          <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
+            {signalLabel}
+          </span>
+        )}
+        {isSuspicious && (
+          <span className="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+            Incohérent
+          </span>
+        )}
+        {relativeDate && (
+          <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-500 border border-slate-100">
+            {relativeDate.label}
+          </span>
+        )}
+        {freshnessBadge && (
+          <span
+            className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
+              relativeDate?.freshness === "new"
+                ? "bg-rose-50 text-rose-700 border-rose-200"
+                : "bg-amber-50 text-amber-700 border-amber-200"
+            }`}
+          >
+            {freshnessBadge}
+          </span>
+        )}
+        {showFallback && (
+          <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            Fallback score
+          </span>
+        )}
+        {roleTypeLabel && (
+          <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+            {roleTypeLabel}
           </span>
         )}
       </div>
@@ -532,8 +623,6 @@ function OfferCard({
           {offer.description_snippet}
         </p>
       )}
-    </div>
-  </div>
 
       {/* Matched Skills (top 3) */}
       {matchedDisplay.length > 0 ? (
@@ -661,6 +750,11 @@ function FilterBar({
   onSearchChange,
   onReset,
   onShowAll,
+  domainMode,
+  onDomainModeChange,
+  suggestOutOfDomain,
+  sortMode,
+  onSortChange,
   receivedCount,
   displayedCount,
   maskedCount,
@@ -672,6 +766,11 @@ function FilterBar({
   onSearchChange: (value: string) => void;
   onReset: () => void;
   onShowAll: () => void;
+  domainMode: "in_domain" | "all";
+  onDomainModeChange: (value: "in_domain" | "all") => void;
+  suggestOutOfDomain: boolean;
+  sortMode: "score" | "recent" | "oldest";
+  onSortChange: (value: "score" | "recent" | "oldest") => void;
   receivedCount: number;
   displayedCount: number;
   maskedCount: number;
@@ -698,6 +797,33 @@ function FilterBar({
               <X className="w-4 h-4" />
             </button>
           )}
+        </div>
+
+        {/* Domain mode */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Domaine</span>
+          <select
+            value={domainMode}
+            onChange={(e) => onDomainModeChange(e.target.value as "in_domain" | "all")}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
+          >
+            <option value="in_domain">Dans mon domaine</option>
+            <option value="all">Voir hors domaine</option>
+          </select>
+        </div>
+
+        {/* Sort */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Trier par</span>
+          <select
+            value={sortMode}
+            onChange={(e) => onSortChange(e.target.value as "score" | "recent" | "oldest")}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
+          >
+            <option value="score">Score (desc)</option>
+            <option value="recent">Plus récent</option>
+            <option value="oldest">Plus ancien</option>
+          </select>
         </div>
 
         {/* Threshold Pills */}
@@ -734,6 +860,11 @@ function FilterBar({
           {maskedCount > 0 && (
             <span className="text-slate-500">
               Masquées: <strong className="text-amber-600">{maskedCount}</strong>
+            </span>
+          )}
+          {suggestOutOfDomain && (
+            <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-medium">
+              Résultats limités — activer Hors domaine
             </span>
           )}
         </div>
@@ -854,11 +985,14 @@ export default function InboxPage() {
   const [error, setError] = useState<string | null>(null);
   const [skillsSource, setSkillsSource] = useState<SkillsSource>("none");
   const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [domainMode, setDomainMode] = useState<"in_domain" | "all">("in_domain");
+  const [inboxMeta, setInboxMeta] = useState<InboxMeta | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [threshold, setThreshold] = useState<number>(() => {
     const stored = readJson<number | null>(`${STORAGE_PREFIX}_threshold`, null);
     return typeof stored === "number" ? stored : DEFAULT_THRESHOLD;
   });
+  const [sortMode, setSortMode] = useState<"score" | "recent" | "oldest">("score");
   const [decisions, setDecisions] = useState<Record<string, DecisionRecord>>({});
   const [pendingDecisions, setPendingDecisions] = useState<Set<string>>(new Set());
   const [trackerStatusMap, setTrackerStatusMap] = useState<Record<string, string>>({});
@@ -1079,7 +1213,7 @@ export default function InboxPage() {
         console.info("[inbox] Calling API with:", { profile_id: profileId, min_score: apiMinScore, limit: apiLimit });
       }
 
-      const data = await fetchInbox(matchingProfile, profileId, apiMinScore, apiLimit);
+      const data = await fetchInbox(matchingProfile, profileId, apiMinScore, apiLimit, true, domainMode);
 
       setLastApiCall({
         timestamp: new Date().toISOString(),
@@ -1102,6 +1236,7 @@ export default function InboxPage() {
 
       const normalized = normalizeInboxItems(data.items);
       setItems(normalized);
+      setInboxMeta(data.meta ?? null);
 
       if (DEBUG_INBOX) {
         console.info("[inbox] Normalized items:", normalized.length);
@@ -1113,7 +1248,7 @@ export default function InboxPage() {
     } finally {
       setLoading(false);
     }
-  }, [userProfile, profileId, setUserProfile]);
+  }, [userProfile, profileId, setUserProfile, domainMode]);
 
   // Initial load
   useEffect(() => {
@@ -1122,6 +1257,12 @@ export default function InboxPage() {
       load();
     }
   }, [load]);
+
+  useEffect(() => {
+    if (loadedRef.current) {
+      load();
+    }
+  }, [domainMode, load]);
 
   // Load tracker status
   useEffect(() => {
@@ -1156,6 +1297,12 @@ export default function InboxPage() {
   // Displayed = available after threshold + search filters
   const displayedItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
+    const getDateValue = (value?: string | null) => {
+      if (!value) return 0;
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return 0;
+      return parsed.getTime();
+    };
     return availableItems
       .filter((item) => {
         // Threshold filter
@@ -1168,8 +1315,26 @@ export default function InboxPage() {
           .toLowerCase();
         return searchable.includes(query);
       })
-      .sort((a, b) => b.score - a.score); // Sort by score desc
-  }, [availableItems, threshold, searchQuery]);
+      .sort((a, b) => {
+        if (sortMode === "recent") {
+          return getDateValue(b.publication_date) - getDateValue(a.publication_date);
+        }
+        if (sortMode === "oldest") {
+          return getDateValue(a.publication_date) - getDateValue(b.publication_date);
+        }
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+        const signalA = typeof a.signal_score === "number" ? a.signal_score : 0;
+        const signalB = typeof b.signal_score === "number" ? b.signal_score : 0;
+        if (signalB !== signalA) {
+          return signalB - signalA;
+        }
+        const cohA = a.coherence === "suspicious" ? 0 : 1;
+        const cohB = b.coherence === "suspicious" ? 0 : 1;
+        return cohB - cohA;
+      });
+  }, [availableItems, threshold, searchQuery, sortMode]);
 
   const displayedCount = displayedItems.length;
   const maskedCount = receivedCount - displayedCount;
@@ -1396,6 +1561,11 @@ export default function InboxPage() {
             onSearchChange={setSearchQuery}
             onReset={handleResetFilters}
             onShowAll={handleShowAll}
+            domainMode={domainMode}
+            onDomainModeChange={setDomainMode}
+            suggestOutOfDomain={Boolean(inboxMeta?.suggest_out_of_domain && domainMode === "in_domain")}
+            sortMode={sortMode}
+            onSortChange={setSortMode}
             receivedCount={receivedCount}
             displayedCount={displayedCount}
             maskedCount={maskedCount}
