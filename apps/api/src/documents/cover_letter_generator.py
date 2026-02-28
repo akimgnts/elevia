@@ -11,6 +11,7 @@ from .schemas import CoverLetterBlock, CoverLetterMeta, CoverLetterPayload, LETT
 
 _MAX_PREVIEW_CHARS = 1200
 _MAX_SKILLS = 3
+_MAX_BLOCK_TEXT = 600
 
 
 def _safe_company(company: str | None) -> str:
@@ -94,11 +95,14 @@ def generate_cover_letter(
 
     closing = "Je serais ravi·e d'échanger sur cette opportunité. Bien cordialement,"
 
+    def _block(label: str, text: str) -> CoverLetterBlock:
+        return CoverLetterBlock(label=label, text=text[:_MAX_BLOCK_TEXT])
+
     blocks = [
-        CoverLetterBlock(label="hook", text=hook),
-        CoverLetterBlock(label="match", text=match),
-        CoverLetterBlock(label="value", text=value),
-        CoverLetterBlock(label="closing", text=closing),
+        _block("hook", hook),
+        _block("match", match),
+        _block("value", value),
+        _block("closing", closing),
     ]
 
     payload = CoverLetterPayload(
