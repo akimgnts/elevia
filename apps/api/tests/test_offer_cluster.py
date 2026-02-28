@@ -22,7 +22,26 @@ def test_offer_cluster_cases():
 
     for title, description, skills, expected in cases:
         cluster, confidence, scores = detect_offer_cluster(title, description, skills)
-        assert cluster == expected
+        assert cluster == expected, f"{title!r}: expected {expected!r}, got {cluster!r}"
         assert 0.0 <= confidence <= 1.0
         assert isinstance(scores, dict)
         assert expected in scores
+
+
+def test_offer_cluster_tiebreak_deterministic():
+    """Same inputs → same cluster (tie-break stable, no set iteration)."""
+    r1 = detect_offer_cluster("Poste généraliste", "", [])
+    r2 = detect_offer_cluster("Poste généraliste", "", [])
+    assert r1[0] == r2[0]
+    assert r1[0] == "OTHER"
+
+
+def test_offer_cluster_confidence_range():
+    """Confidence is always in [0, 1]."""
+    for title, skills in [
+        ("Data Analyst", ["python", "sql"]),
+        ("Inconnu", []),
+        ("Ingénieur", ["mécanique"]),
+    ]:
+        _, confidence, _ = detect_offer_cluster(title, "", skills)
+        assert 0.0 <= confidence <= 1.0

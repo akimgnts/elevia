@@ -99,6 +99,7 @@ class InboxItem(BaseModel):
     skills_uri_collapsed_dupes: Optional[int] = None
     skills_unmapped_count: Optional[int] = None
     offer_cluster: Optional[str] = None
+    domain_bucket: Optional[str] = Field(default=None, pattern="^(strict|neighbor|out)$")
     signal_score: Optional[float] = None
     coherence: Optional[str] = Field(default=None, pattern="^(ok|suspicious)$")
     rome: Optional[RomeLink] = None
@@ -109,12 +110,18 @@ class InboxItem(BaseModel):
 
 class InboxMeta(BaseModel):
     profile_cluster: Optional[str] = None
-    gating_mode: Optional[str] = Field(default=None, pattern="^(IN_DOMAIN|OUT_OF_DOMAIN)$")
+    gating_mode: Optional[str] = Field(
+        default=None,
+        pattern="^(IN_DOMAIN|STRICT_PLUS_NEIGHBORS|OUT_OF_DOMAIN)$",
+    )
     coverage_before: Optional[int] = None
     coverage_after: Optional[int] = None
     suggest_out_of_domain: Optional[bool] = None
     out_of_domain_count: Optional[int] = None
     cluster_distribution_top20: Optional[Dict[str, int]] = None
+    strict_count: Optional[int] = None
+    neighbor_count: Optional[int] = None
+    out_count: Optional[int] = None
 
 
 class InboxResponse(BaseModel):

@@ -276,6 +276,7 @@ export interface InboxItem {
   skills_uri_collapsed_dupes?: number;
   skills_unmapped_count?: number;
   offer_cluster?: string;
+  domain_bucket?: "strict" | "neighbor" | "out";
   signal_score?: number;
   coherence?: "ok" | "suspicious";
   rome?: { rome_code: string; rome_label: string } | null;
@@ -289,12 +290,15 @@ export interface InboxItem {
 
 export interface InboxMeta {
   profile_cluster?: string;
-  gating_mode?: "IN_DOMAIN" | "OUT_OF_DOMAIN";
+  gating_mode?: "IN_DOMAIN" | "STRICT_PLUS_NEIGHBORS" | "OUT_OF_DOMAIN";
   coverage_before?: number;
   coverage_after?: number;
   suggest_out_of_domain?: boolean;
   out_of_domain_count?: number;
   cluster_distribution_top20?: Record<string, number>;
+  strict_count?: number;
+  neighbor_count?: number;
+  out_count?: number;
 }
 
 export interface InboxResponse {

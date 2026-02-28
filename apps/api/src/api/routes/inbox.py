@@ -53,8 +53,20 @@ router = APIRouter(tags=["inbox"])
 
 PROFILE_FIXTURES_DIR = Path(__file__).parent.parent.parent.parent / "fixtures" / "profiles"
 MIN_RESULTS = 10
+MIN_STRICT = 5   # below this, auto-widen to neighbors
 SUSPICIOUS_SCORE_THRESHOLD = 95
 SIGNAL_MIN_K = 1.0
+
+# Fixed adjacency matrix (cluster → neighbor clusters)
+_ADJACENCY: Dict[str, List[str]] = {
+    "DATA_IT": ["ENGINEERING_INDUSTRY"],
+    "ENGINEERING_INDUSTRY": ["DATA_IT", "SUPPLY_OPS"],
+    "MARKETING_SALES": ["SUPPLY_OPS"],
+    "SUPPLY_OPS": ["ENGINEERING_INDUSTRY", "MARKETING_SALES"],
+    "FINANCE_LEGAL": ["ADMIN_HR"],
+    "ADMIN_HR": ["FINANCE_LEGAL"],
+    "OTHER": [],
+}
 
 
 def _debug_matching_enabled() -> bool:
@@ -233,7 +245,7 @@ def _load_catalog_offers() -> List[Dict]:
 @router.post("/inbox", summary="Get inbox items for a profile")
 async def get_inbox(
     req: InboxRequest,
-    domain_mode: str = Query(default="in_domain", pattern="^(in_domain|all)$"),
+    domain_mode: str = Query(default="in_domain", pattern="^(strict|in_domain|all)$"),
 ) -> InboxResponse:
     """Score catalog offers against profile, excluding already-decided ones."""
     t0 = time.perf_counter()
@@ -378,26 +390,62 @@ async def get_inbox(
 
     t_scoring = time.perf_counter()
 
-    # Post-layer gating + ordering (no scoring changes)
+    # ── Post-layer: cluster ladder (no scoring changes) ───────────────────────
     coverage_before = len(items)
-    out_of_domain_count = sum(1 for item in items if item.offer_cluster != profile_cluster)
-    gating_mode = "IN_DOMAIN" if domain_mode == "in_domain" else "OUT_OF_DOMAIN"
-    if domain_mode == "in_domain":
-        items = [item for item in items if item.offer_cluster == profile_cluster]
+    is_strict_mode = domain_mode in ("strict", "in_domain")
+    neighbors_of_profile: List[str] = _ADJACENCY.get(profile_cluster or "", [])
+    neighbor_set = set(neighbors_of_profile)
+
+    # Assign domain_bucket to every item
+    for item in items:
+        oc = item.offer_cluster or "OTHER"
+        if oc != "OTHER" and oc == profile_cluster:
+            item.domain_bucket = "strict"
+        elif oc in neighbor_set:
+            item.domain_bucket = "neighbor"
+        else:
+            item.domain_bucket = "out"
+
+    strict_items = [i for i in items if i.domain_bucket == "strict"]
+    neighbor_items = [i for i in items if i.domain_bucket == "neighbor"]
+    out_items = [i for i in items if i.domain_bucket == "out"]
+    strict_count = len(strict_items)
+    neighbor_count = len(neighbor_items)
+    out_count = len(out_items)
+
+    # Update coherence using domain_bucket (incoherent = suspicious score outside strict)
+    for item in items:
+        item.coherence = (
+            "suspicious"
+            if item.score >= SUSPICIOUS_SCORE_THRESHOLD
+            and item.domain_bucket != "strict"
+            and (item.signal_score or 0.0) < SIGNAL_MIN_K
+            else "ok"
+        )
+
+    def _bucket_sort(bucket: List[InboxItem]) -> List[InboxItem]:
+        return sorted(bucket, key=lambda i: (-i.score, -(i.signal_score or 0.0), i.offer_id))
+
+    # Apply ladder
+    if not is_strict_mode:
+        gating_mode = "OUT_OF_DOMAIN"
+        items = _bucket_sort(strict_items) + _bucket_sort(neighbor_items) + _bucket_sort(out_items)
+    elif strict_count >= MIN_STRICT:
+        gating_mode = "IN_DOMAIN"
+        items = _bucket_sort(strict_items)
+    else:
+        # Auto-widen to neighbors
+        gating_mode = "STRICT_PLUS_NEIGHBORS"
+        items = _bucket_sort(strict_items) + _bucket_sort(neighbor_items)
 
     coverage_after = len(items)
     suggest_out_of_domain = (
-        domain_mode == "in_domain"
+        is_strict_mode
         and coverage_after < MIN_RESULTS
-        and out_of_domain_count > 0
+        and out_count > 0
     )
+    out_of_domain_count = out_count
 
-    def _sort_key(item: InboxItem) -> Tuple[int, float, int, str]:
-        signal = float(item.signal_score or 0.0)
-        coherence_rank = 1 if item.coherence != "suspicious" else 0
-        return (-item.score, -signal, -coherence_rank, item.offer_id)
-
-    items.sort(key=_sort_key)
     total_matched = len(items)
 
     cluster_distribution_top20: Dict[str, int] = {}
@@ -411,16 +459,21 @@ async def get_inbox(
 
     items = items[: req.limit]
 
+    # OBS: INBOX_DOMAIN_LAYER_APPLIED
+    top_generic_skills = sorted(
+        freq_table.items(), key=lambda x: (-x[1], x[0])
+    )[:5] if freq_table else []
     top_clusters = sorted(cluster_distribution_top20.items(), key=lambda x: (-x[1], x[0]))[:3]
-    logger.info("MATCH_POST_LAYER_APPLIED %s", json.dumps({
-        "event": "MATCH_POST_LAYER_APPLIED",
+    logger.info("INBOX_DOMAIN_LAYER_APPLIED %s", json.dumps({
+        "event": "INBOX_DOMAIN_LAYER_APPLIED",
         "profile_id": req.profile_id,
         "profile_cluster": profile_cluster,
-        "domain_mode": domain_mode,
-        "before_count": coverage_before,
-        "after_count": coverage_after,
-        "top_clusters_after": {k: v for k, v in top_clusters},
-        "suspicious_count": suspicious_count,
+        "domain_mode": gating_mode,
+        "strict_count": strict_count,
+        "neighbor_count": neighbor_count,
+        "out_count": out_count,
+        "top_generic_skills": [s for s, _ in top_generic_skills],
+        "total_offers_db": offer_count,
     }))
     if suspicious_count > 0:
         logger.info("SUSPICIOUS_HIGH_SCORE %s", json.dumps({
@@ -428,7 +481,7 @@ async def get_inbox(
             "count": suspicious_count,
             "sample_offer_ids": suspicious_sample_ids,
             "profile_cluster": profile_cluster,
-            "domain_mode": domain_mode,
+            "domain_mode": gating_mode,
         }))
 
     ft_ids = [item.offer_id for item in items if source_map.get(item.offer_id) == "france_travail"]
@@ -507,6 +560,9 @@ async def get_inbox(
         suggest_out_of_domain=suggest_out_of_domain,
         out_of_domain_count=out_of_domain_count,
         cluster_distribution_top20=cluster_distribution_top20,
+        strict_count=strict_count,
+        neighbor_count=neighbor_count,
+        out_count=out_count,
     )
 
     return InboxResponse(

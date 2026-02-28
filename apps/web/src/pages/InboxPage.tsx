@@ -96,6 +96,7 @@ type NormalizedInboxItem = {
   skills_source?: string;
   explain: ExplainBlock | null;
   offer_cluster?: string;
+  domain_bucket?: "strict" | "neighbor" | "out";
   signal_score?: number;
   coherence?: "ok" | "suspicious";
 };
@@ -280,6 +281,10 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       skills_source: typeof rec.skills_source === "string" ? rec.skills_source : undefined,
       explain: rec.explain && typeof rec.explain === "object" ? (rec.explain as ExplainBlock) : null,
       offer_cluster: typeof rec.offer_cluster === "string" ? rec.offer_cluster : undefined,
+      domain_bucket:
+        rec.domain_bucket === "strict" || rec.domain_bucket === "neighbor" || rec.domain_bucket === "out"
+          ? (rec.domain_bucket as "strict" | "neighbor" | "out")
+          : undefined,
       signal_score: typeof rec.signal_score === "number" ? rec.signal_score : undefined,
       coherence: rec.coherence === "ok" || rec.coherence === "suspicious" ? rec.coherence : undefined,
     });
@@ -578,6 +583,16 @@ function OfferCard({
         {clusterLabel && (
           <span className="px-2.5 py-1 rounded-full bg-slate-900 text-white border border-slate-800">
             {clusterLabel}
+          </span>
+        )}
+        {offer.domain_bucket === "neighbor" && (
+          <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            Voisin
+          </span>
+        )}
+        {offer.domain_bucket === "out" && (
+          <span className="px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200">
+            Hors domaine
           </span>
         )}
         {signalLabel && (
