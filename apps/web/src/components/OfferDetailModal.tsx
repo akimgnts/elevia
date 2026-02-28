@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, X } from "lucide-react";
-import type { ContextFit, ExplainBlock, OfferContext, ProfileContext } from "../lib/api";
+import { ChevronDown, ChevronRight, FileText, Loader2, X } from "lucide-react";
+import type { ContextFit, ExplainBlock, ForOfferResponse, InboxContextPayload, OfferContext, ProfileContext } from "../lib/api";
+import { generateCvForOffer } from "../lib/api";
+import { CvPreviewModal } from "./CvPreviewModal";
 import { cleanOfferTitle } from "../lib/titleUtils";
 import { formatRelativeDate } from "../lib/dateUtils";
 
@@ -246,6 +248,7 @@ export function OfferDetailModal({
   contextFit,
   contextLoading = false,
   contextError = null,
+  profile,
 }: {
   offer: OfferDetail;
   onClose: () => void;
@@ -255,9 +258,37 @@ export function OfferDetailModal({
   contextFit?: ContextFit | null;
   contextLoading?: boolean;
   contextError?: string | null;
+  profile?: Record<string, unknown> | null;
 }) {
   const [visible, setVisible] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+
+  // CV generation state
+  const [cvLoading, setCvLoading] = useState(false);
+  const [cvPreview, setCvPreview] = useState<ForOfferResponse | null>(null);
+  const [cvError, setCvError] = useState<string | null>(null);
+
+  async function handleGenerateCv() {
+    const offerId = offer.offer_id || offer.id;
+    if (!offerId) return;
+    setCvLoading(true);
+    setCvError(null);
+    try {
+      const ctx: InboxContextPayload | undefined =
+        offer.matched_skills_display?.length || offer.matched_skills?.length
+          ? {
+              matched_skills: offer.matched_skills_display ?? offer.matched_skills ?? [],
+              missing_skills: offer.missing_skills_display ?? offer.missing_skills ?? [],
+            }
+          : undefined;
+      const result = await generateCvForOffer(offerId, profile ?? {}, ctx);
+      setCvPreview(result);
+    } catch (err) {
+      setCvError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setCvLoading(false);
+    }
+  }
 
   useEffect(() => {
     setVisible(true);
@@ -314,6 +345,7 @@ export function OfferDetailModal({
   }, [description, showFullDescription]);
 
   return (
+    <>
     <div
       className={`fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-200 ${
         visible ? "opacity-100" : "opacity-0"
@@ -364,14 +396,37 @@ export function OfferDetailModal({
               )}
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg border border-neutral-700 p-2 text-neutral-300 hover:text-white hover:border-neutral-500"
-            aria-label="Fermer"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Generate CV CTA */}
+            <button
+              onClick={handleGenerateCv}
+              disabled={cvLoading}
+              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-xs font-medium text-white transition-colors"
+              title="Générer un CV ciblé pour cette offre"
+            >
+              {cvLoading ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <FileText className="h-3 w-3" />
+              )}
+              {cvLoading ? "Génération…" : "Générer CV"}
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-lg border border-neutral-700 p-2 text-neutral-300 hover:text-white hover:border-neutral-500"
+              aria-label="Fermer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
+
+        {/* CV error notice */}
+        {cvError && (
+          <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 px-4 py-2 text-xs text-rose-300">
+            Génération échouée : {cvError}
+          </div>
+        )}
 
         {/* Position Elevia */}
         <section className="mt-6">
@@ -770,5 +825,16 @@ export function OfferDetailModal({
         )}
       </div>
     </div>
+
+    {/* CV Preview Modal — rendered on top of offer modal (z-[60]) */}
+    {cvPreview && (
+      <CvPreviewModal
+        offerTitle={offer.title}
+        offerCompany={offer.company}
+        preview={cvPreview}
+        onClose={() => setCvPreview(null)}
+      />
+    )}
+    </>
   );
 }

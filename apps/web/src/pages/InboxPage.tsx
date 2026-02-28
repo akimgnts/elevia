@@ -1685,6 +1685,7 @@ export default function InboxPage() {
           contextLoading={contextLoading}
           contextError={contextError}
           onClose={() => setSelectedOffer(null)}
+          profile={userProfile as Record<string, unknown> ?? undefined}
         />
       )}
     </div>

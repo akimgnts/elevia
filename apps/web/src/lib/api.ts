@@ -798,3 +798,82 @@ export async function runCvDelta(request: CvDeltaRequest): Promise<CvDeltaRespon
   const data = (await res.json()) as CvDeltaResponse;
   return data;
 }
+
+// ============================================================================
+// CV Generator — for-offer endpoint
+// ============================================================================
+
+export interface InboxContextPayload {
+  matched_skills?: string[];
+  missing_skills?: string[];
+  offer_cluster?: string;
+  profile_cluster?: string;
+}
+
+export interface CvAtsNotes {
+  matched_keywords: string[];
+  missing_keywords: string[];
+  ats_score_estimate: number;
+}
+
+export interface CvExperienceBlock {
+  title: string;
+  company: string;
+  bullets: string[];
+  tools: string[];
+  autonomy: "CONTRIB" | "COPILOT" | "LEAD";
+  impact: string | null;
+}
+
+export interface CvDocument {
+  summary: string;
+  keywords_injected: string[];
+  experience_blocks: CvExperienceBlock[];
+  ats_notes: CvAtsNotes;
+  meta: {
+    offer_id: string;
+    profile_fingerprint: string;
+    prompt_version: string;
+    cache_hit: boolean;
+    fallback_used: boolean;
+  };
+}
+
+export interface ForOfferResponse {
+  ok: boolean;
+  document: CvDocument;
+  preview_text: string;
+  context_used: boolean;
+  duration_ms: number;
+}
+
+/**
+ * Generate an inbox-contextualised CV for a given offer.
+ * POST /documents/cv/for-offer
+ *
+ * @param offerId   - Offer identifier (from InboxItem.offer_id)
+ * @param profile   - Profile payload (from profileStore.userProfile)
+ * @param context   - Optional inbox match context (matched/missing skills)
+ */
+export async function generateCvForOffer(
+  offerId: string,
+  profile: Record<string, unknown>,
+  context?: InboxContextPayload,
+): Promise<ForOfferResponse> {
+  const url = `${API_BASE}/documents/cv/for-offer`;
+  const body: Record<string, unknown> = { offer_id: offerId, profile, lang: "fr" };
+  if (context) body.context = context;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`CV génération échouée (${res.status}): ${txt}`);
+  }
+
+  return res.json() as Promise<ForOfferResponse>;
+}
