@@ -439,7 +439,12 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo, tmp_path):
             "SELECT id, source, title, description, company, city, country, publication_date, contract_duration, start_date FROM fact_offers"
         ).fetchall()
         conn.close()
-        return [dict(r) for r in rows]
+        offers = [dict(r) for r in rows]
+        # BF offers require is_vie=True (set via payload_json in production)
+        for offer in offers:
+            if offer.get("source") == "business_france":
+                offer["is_vie"] = True
+        return offers
 
     monkeypatch.setattr(inbox_routes, "_load_catalog_offers", _catalog_stub)
     monkeypatch.setattr(inbox_routes, "_load_decided_ids", lambda _: set())
@@ -449,7 +454,7 @@ def test_inbox_includes_rome_link(monkeypatch, client, profile_demo, tmp_path):
         lambda: sqlite3.connect(db_path, check_same_thread=False),
     )
 
-    resp = client.post("/inbox", json={
+    resp = client.post("/inbox?domain_mode=all", json={
         "profile_id": "rome-test",
         "profile": profile_demo,
         "min_score": 0,

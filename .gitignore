@@ -39,3 +39,12 @@ apps/api/data/sample_*.json
 # Claude tooling
 .claude/
 .run/
+
+# Scraping artifacts (raw data dumps — never commit)
+data/*.csv
+data/*.json
+raw_offers_*.json
+
+# Report artifacts (local QA exports)
+report_elevia.*
+README_EXPORT_PDF.md
