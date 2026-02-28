@@ -35,9 +35,11 @@ Resilience (Sprint 20 + 20.1):
     - Exit code 1 ONLY if total_offers == 0 or DB write fails
 """
 
+import argparse
 import json
 import os
 import sqlite3
+import subprocess
 import sys
 import time
 import traceback
@@ -90,8 +92,16 @@ FT_TOKEN_URL = "https://entreprise.francetravail.fr/connexion/oauth2/access_toke
 FT_API_BASE = "https://api.francetravail.io/partenaire"
 FT_SCOPES = "api_offresdemploiv2 o2dsoffre"
 
-# Business France config
-BF_USE_SAMPLE = os.environ.get("BF_USE_SAMPLE", "1") == "1"  # Default to sample mode
+# Business France config — Option A
+# BF_USE_SAMPLE default is "0" (LIVE). Set to "1" for explicit SAMPLE mode.
+# STOP: default was "1" (silent sample) — fixed to "0" (explicit LIVE required)
+_BF_USE_SAMPLE_ENV = os.environ.get("BF_USE_SAMPLE", "0")
+BF_USE_SAMPLE = _BF_USE_SAMPLE_ENV == "1"
+# BF_SOURCE: "LIVE" | "SAMPLE" | "CACHE" — explicit, never ambiguous
+BF_SOURCE = os.environ.get("BF_SOURCE", "SAMPLE" if BF_USE_SAMPLE else "LIVE").upper()
+if BF_SOURCE not in ("LIVE", "SAMPLE", "CACHE"):
+    BF_SOURCE = "LIVE"
+
 SAMPLE_FILE = DATA_DIR / "sample_vie_offers.json"
 BF_CACHE_FILE = RAW_BF_DIR / "bf_cache.jsonl"  # Single cache file for atomic ops
 
@@ -417,116 +427,216 @@ def load_bf_from_cache(logger: StructuredLogger) -> tuple[list, Optional[Path], 
     return [], None, None
 
 
-def ingest_business_france(logger: StructuredLogger) -> int:
+def ingest_business_france(logger: StructuredLogger, bf_source: str) -> int:
     """
-    Ingest Business France offers with hardened fallback.
+    Option A — launcher pattern for Business France.
 
-    Sprint 20.1 behavior:
-    1. Try to scrape fresh data (live API or sample file)
-    2. Validate scraped data before writing to cache (anti-poisoning)
-    3. If valid, atomically write to cache, then persist to DB
-    4. If invalid/failed, fall back to validated cache with staleness tracking
-    5. Log with bf_source and cache_age_hours for observability
+    One True Path:
+      1. scrape_business_france_azure.py  →  raw JSONL (LIVE only)
+      2. ingest_business_france.py --path <raw> →  normalize + UPSERT DB
 
-    Returns number of offers ingested.
+    bf_source: "LIVE" | "SAMPLE" | "CACHE"
+      - LIVE   : scrape fresh data from Civiweb Azure API
+      - SAMPLE : reuse latest existing raw JSONL (explicit, never silent)
+      - CACHE  : fallback to latest existing raw JSONL after scrape failure
+
+    normalization_source_of_truth = ingest_business_france.py (NEVER here)
+    id_strategy = BF-<native_id> (NEVER hash())
     """
     start_time = time.time()
-    now = datetime.now(timezone.utc)
-    timestamp = now.isoformat()
-    run_id = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    SCRIPTS_DIR = Path(__file__).parent
 
-    # Step 1: Try live scraping
-    offers, scrape_error = scrape_bf_live(logger)
+    # ── OBS: BF_INGEST_START ─────────────────────────────────────────────────
+    logger.log("BF_INGEST_START", "started", extra={
+        "bf_source": bf_source,
+        "db_path": str(DB_PATH),
+        "raw_dir": str(RAW_BF_DIR),
+        "catalog_source": "RAW",
+    })
 
-    if offers:
-        # Step 2: Validate before writing cache (anti-poisoning)
-        if validate_offers_minimal(offers):
-            # Atomic write to cache
-            RAW_BF_DIR.mkdir(parents=True, exist_ok=True)
-            cache_written = atomic_write_jsonl(BF_CACHE_FILE, offers, run_id, timestamp)
+    raw_file_path: Optional[Path] = None
 
-            if not cache_written:
-                logger.log("write_bf_cache", "warning",
-                           error="Atomic cache write failed, continuing with DB persist")
+    # ── Step 1: Scrape (LIVE) or reuse existing raw JSONL (SAMPLE / CACHE) ──
+    if bf_source == "LIVE":
+        scraper = SCRIPTS_DIR / "scrape_business_france_azure.py"
+        logger.log("BF_SCRAPE_START", "started", extra={
+            "bf_source": "LIVE",
+            "catalog_source": "RAW",
+        })
+        env = {**os.environ}
+        env.setdefault("BF_AZURE_SKIP_DETAILS", "1")
 
-            # Persist to DB
-            count = persist_bf_offers(offers, timestamp)
-            duration_ms = int((time.time() - start_time) * 1000)
-
-            logger.log("scrape_business_france", "success",
-                       duration_ms=duration_ms,
-                       offers_processed=count,
-                       extra={
-                           "bf_source": "live",
-                           "cache_written": cache_written,
-                       })
-            return count
-        else:
-            # Live data is invalid - don't poison the cache
-            scrape_error = "Live data failed validation (empty or missing IDs)"
-            logger.log("scrape_business_france", "error",
-                       error=scrape_error,
-                       extra={"bf_source": "live", "validation_failed": True})
-
-    # Step 3: Live failed or invalid, try fallback to cached raw
-    if scrape_error:
-        logger.log("scrape_business_france", "error",
-                   error=scrape_error,
-                   extra={"attempting_fallback": True})
-
-    cached_offers, cached_file, age_hours = load_bf_from_cache(logger)
-
-    if cached_offers and cached_file:
-        # Check staleness
-        staleness = get_staleness_level(age_hours)
-        age_hours_rounded = round(age_hours, 1) if age_hours else None
-
-        if staleness == "critical":
-            # Send Slack alert for critically stale cache
-            send_slack_alert(
-                run_id,
-                "bf_cache_staleness",
-                f"BF cache is critically stale ({age_hours_rounded}h > {CACHE_CRITICAL_HOURS}h)"
+        try:
+            result = subprocess.run(
+                [sys.executable, str(scraper)],
+                env=env,
+                timeout=300,
             )
-            logger.log("bf_cache_staleness", "critical",
-                       extra={"cache_age_hours": age_hours_rounded, "threshold": CACHE_CRITICAL_HOURS})
+        except subprocess.TimeoutExpired:
+            logger.log("BF_SCRAPE_SUMMARY", "error",
+                       error="Scraper timeout (300s) — falling back to CACHE",
+                       extra={"bf_source": "LIVE"})
+            bf_source = "CACHE"
+            result = None
 
-        elif staleness == "warning":
-            logger.log("bf_cache_staleness", "warning",
-                       extra={"cache_age_hours": age_hours_rounded, "threshold": CACHE_WARNING_HOURS})
+        if result is not None and result.returncode == 0:
+            raw_files = sorted(
+                RAW_BF_DIR.glob("bf_azure_*.jsonl"),
+                key=lambda f: f.stat().st_mtime, reverse=True,
+            ) if RAW_BF_DIR.exists() else []
+            if raw_files:
+                raw_file_path = raw_files[0]
+                logger.log("BF_SCRAPE_SUMMARY", "success", extra={
+                    "bf_source": "LIVE",
+                    "raw_file": raw_file_path.name,
+                    "catalog_source": "RAW",
+                })
+            else:
+                logger.log("BF_SCRAPE_SUMMARY", "error",
+                           error="Scraper exited 0 but no raw file found — CACHE fallback",
+                           extra={"bf_source": "LIVE"})
+                bf_source = "CACHE"
+        elif result is not None:
+            logger.log("BF_SCRAPE_SUMMARY", "error",
+                       error=f"Scraper exited {result.returncode} — CACHE fallback",
+                       extra={"bf_source": "LIVE"})
+            bf_source = "CACHE"
 
-        # Persist cached offers to DB
-        count = persist_bf_offers(cached_offers, timestamp)
-        duration_ms = int((time.time() - start_time) * 1000)
+    # SAMPLE / CACHE: use latest existing raw JSONL (no new API calls)
+    if raw_file_path is None and RAW_BF_DIR.exists():
+        raw_files = sorted(
+            RAW_BF_DIR.glob("bf_azure_*.jsonl"),
+            key=lambda f: f.stat().st_mtime, reverse=True,
+        )
+        if raw_files:
+            raw_file_path = raw_files[0]
+            log_status = "success" if bf_source == "SAMPLE" else "fallback"
+            logger.log("BF_SCRAPE_SUMMARY", log_status, extra={
+                "bf_source": bf_source,
+                "raw_file": raw_file_path.name,
+                "catalog_source": "RAW",
+            })
 
-        logger.log("scrape_business_france", "fallback",
-                   duration_ms=duration_ms,
-                   offers_processed=count,
-                   extra={
-                       "bf_source": "cache",
-                       "raw_file": str(cached_file.name),
-                       "cache_age_hours": age_hours_rounded,
-                       "staleness": staleness,
-                       "original_error": scrape_error,
-                   })
-        return count
+    # ── RELIABILITY STOP: no raw file ────────────────────────────────────────
+    if raw_file_path is None or not raw_file_path.exists():
+        logger.log("BF_INGEST_SUMMARY", "error",
+                   duration_ms=int((time.time() - start_time) * 1000),
+                   offers_processed=0,
+                   error="STOP: no raw file available (scrape failed, no cache)",
+                   extra={"bf_source": bf_source, "catalog_source": "RAW"})
+        return 0
 
-    # Step 4: Both live and cache failed
+    # ── RELIABILITY STOP: raw file empty ─────────────────────────────────────
+    if raw_file_path.stat().st_size == 0:
+        logger.log("BF_INGEST_SUMMARY", "error",
+                   duration_ms=int((time.time() - start_time) * 1000),
+                   offers_processed=0,
+                   error=f"STOP: raw file is empty — {raw_file_path.name}",
+                   extra={"bf_source": bf_source})
+        return 0
+
+    # ── Step 2: Delegate normalization + UPSERT to ingest_business_france.py ─
+    ingestor = SCRIPTS_DIR / "ingest_business_france.py"
+    count_before = _get_bf_count()
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(ingestor), "--path", str(raw_file_path)],
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        logger.log("BF_INGEST_SUMMARY", "error",
+                   error="Ingestor timeout (120s)",
+                   extra={"bf_source": bf_source})
+        return 0
+
+    if result.returncode != 0:
+        logger.log("BF_INGEST_SUMMARY", "error",
+                   duration_ms=int((time.time() - start_time) * 1000),
+                   offers_processed=0,
+                   error=f"STOP: ingestor exited {result.returncode}",
+                   extra={"bf_source": bf_source, "raw_file": raw_file_path.name})
+        return 0
+
+    count_after = _get_bf_count()
+    skills_count = _get_bf_skills_count()
+
+    # ── RELIABILITY STOP: zero upserts ───────────────────────────────────────
+    if count_after == 0:
+        logger.log("BF_INGEST_SUMMARY", "error",
+                   duration_ms=int((time.time() - start_time) * 1000),
+                   offers_processed=0,
+                   error="STOP: zero rows in fact_offers after ingest",
+                   extra={"bf_source": bf_source})
+        return 0
+
     duration_ms = int((time.time() - start_time) * 1000)
-    logger.log("scrape_business_france", "error",
+
+    # ── OBS: BF_INGEST_SUMMARY + BF_DB_EVIDENCE ──────────────────────────────
+    logger.log("BF_INGEST_SUMMARY", "success",
                duration_ms=duration_ms,
-               offers_processed=0,
-               error="Both live scrape and cache fallback failed",
+               offers_processed=count_after,
                extra={
-                   "bf_source": "none",
-                   "scrape_error": scrape_error,
-                   "cache_available": False,
+                   "bf_source": bf_source,
+                   "db_path": str(DB_PATH),
+                   "upserts_this_run": count_after - count_before,
+                   "total_bf_rows": count_after,
+                   "skills_rows": skills_count,
+                   "raw_file": raw_file_path.name,
+                   "catalog_source": "DB",
                })
-    return 0
+    logger.log("BF_DB_EVIDENCE", "success", extra={
+        "catalog_source": "DB",
+        "bf_source": bf_source,
+        "fact_offers_bf": count_after,
+        "fact_offer_skills": skills_count,
+    })
+
+    return count_after
+
+
+def _get_bf_count() -> int:
+    """Return current count of business_france rows in fact_offers."""
+    if not DB_PATH.exists():
+        return 0
+    try:
+        conn = sqlite3.connect(str(DB_PATH), timeout=5)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM fact_offers WHERE source='business_france'")
+        count = cursor.fetchone()[0]
+        conn.close()
+        return count
+    except Exception:
+        return 0
+
+
+def _get_bf_skills_count() -> int:
+    """Return count of skills linked to BF offers in fact_offer_skills."""
+    if not DB_PATH.exists():
+        return 0
+    try:
+        conn = sqlite3.connect(str(DB_PATH), timeout=5)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM fact_offer_skills WHERE offer_id LIKE 'BF-%'")
+        count = cursor.fetchone()[0]
+        conn.close()
+        return count
+    except Exception:
+        return 0
 
 
 def persist_bf_offers(offers: list, timestamp: str) -> int:
-    """Persist Business France offers to SQLite."""
+    """
+    DEPRECATED — Option A: normalization is exclusively in ingest_business_france.py.
+
+    This function is dead code in the Option A path. It is kept for backward
+    compatibility only. It must NOT be called by ingest_business_france().
+    If called directly, it raises RuntimeError to prevent silent parallel normalization.
+    """
+    raise RuntimeError(
+        "persist_bf_offers() is disabled (Option A). "
+        "Use ingest_business_france() → subprocess ingest_business_france.py instead."
+    )
     ensure_db_exists()
 
     conn = sqlite3.connect(str(DB_PATH), timeout=10)
@@ -733,20 +843,33 @@ def run_sanity_checks(logger: StructuredLogger) -> bool:
 
 def run_ingestion() -> int:
     """
-    Main ingestion orchestrator.
+    Main ingestion orchestrator — Option A launcher for BF.
 
-    Sprint 20 behavior:
-    - Pipeline continues even if one source fails
-    - Exit code 0 as long as total_offers > 0 after sanity check
-    - Exit code 1 ONLY if:
-      - total_offers == 0 (catalog would be empty)
-      - DB write fails
-      - Unexpected uncaught exception
+    BF path: scrape_business_france_azure.py → ingest_business_france.py (subprocess)
+    normalization_source_of_truth = ingest_business_france.py
+    id_strategy = BF-<native_id>, never hash()
 
-    Returns exit code: 0 = success/partial, 1 = failure
+    CLI flags:
+      --bf-only   Run Business France only (skip France Travail)
+
+    Env vars (explicit, no silent defaults):
+      BF_USE_SAMPLE=0  (default LIVE)  |  BF_USE_SAMPLE=1 → SAMPLE (logged)
+      BF_SOURCE=LIVE | SAMPLE | CACHE
+
+    Returns exit code: 0 = success, 1 = failure
     """
+    parser = argparse.ArgumentParser(description="Elevia ingestion pipeline (Option A)")
+    parser.add_argument("--bf-only", action="store_true",
+                        help="Run Business France ingestion only (skip France Travail)")
+    args, _unknown = parser.parse_known_args()
+
     run_id = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     logger = StructuredLogger("ingestion_pipeline", run_id)
+
+    # Determine BF source — explicit, never silent
+    bf_source = BF_SOURCE
+    if BF_USE_SAMPLE:
+        bf_source = "SAMPLE"
 
     total_start = time.time()
     ft_count = 0
@@ -755,19 +878,25 @@ def run_ingestion() -> int:
     bf_error = None
 
     try:
-        logger.log("pipeline", "started")
+        logger.log("pipeline", "started", extra={
+            "db_path": str(DB_PATH),
+            "raw_dir": str(RAW_BF_DIR),
+            "bf_source": bf_source,
+            "bf_only": args.bf_only,
+        })
 
-        # Step 1: France Travail (error = non-blocking)
-        try:
-            ft_count = ingest_france_travail(logger)
-        except Exception as e:
-            ft_error = str(e)
-            logger.log("scrape_france_travail", "error", error=f"{e}\n{traceback.format_exc()}")
-            # Continue to Business France
+        # Step 1: France Travail (skipped in --bf-only mode)
+        if not args.bf_only:
+            try:
+                ft_count = ingest_france_travail(logger)
+            except Exception as e:
+                ft_error = str(e)
+                logger.log("scrape_france_travail", "error", error=f"{e}\n{traceback.format_exc()}")
+                # Continue to Business France
 
-        # Step 2: Business France with fallback (error = non-blocking if cache available)
+        # Step 2: Business France — Option A launcher (always explicit bf_source)
         try:
-            bf_count = ingest_business_france(logger)
+            bf_count = ingest_business_france(logger, bf_source)
         except Exception as e:
             bf_error = str(e)
             logger.log("ingest_business_france", "error", error=f"{e}\n{traceback.format_exc()}")
@@ -836,3 +965,12 @@ def run_ingestion() -> int:
 
 if __name__ == "__main__":
     sys.exit(run_ingestion())
+
+# ==============================================================================
+# OPTION A CONTRACT
+# ==============================================================================
+# one_true_path: scrape_business_france_azure.py → ingest_business_france.py
+# run_ingestion_role: launcher_only (no BF normalization here)
+# id_strategy: BF-<native_id> (in ingest_business_france.py, NEVER hash() here)
+# normalization_source_of_truth: ingest_business_france.py
+# bf_source: LIVE | SAMPLE | CACHE — always explicit, never silent
