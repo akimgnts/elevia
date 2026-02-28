@@ -434,6 +434,13 @@ def run_ingestion(raw_path: Optional[Path] = None) -> int:
                 # Extract and clean fields
                 offer = extract_offer_fields(payload)
 
+                # PATCH 1 — VIE detection: inject is_vie as JSON boolean
+                # Civiweb Azure API returns missionType="VIE" but not is_vie boolean.
+                # _attach_payload_fields() requires isinstance(payload.get("is_vie"), bool)
+                # — SQL integer 1 fails this check, so we must use Python bool here.
+                _mission_type = str(payload.get("missionType") or "").upper()
+                payload["is_vie"] = (_mission_type == "VIE")
+
                 # Store raw payload for debugging
                 offer["payload_json"] = json.dumps(payload, ensure_ascii=False)
 

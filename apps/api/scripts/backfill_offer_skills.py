@@ -128,6 +128,10 @@ def backfill_offer_skills(conn: sqlite3.Connection) -> Dict[str, int]:
     timestamp = _utc_now()
 
     for offer_id, source, title, description, payload_json in rows:
+        # BF offers use ESCO normalization — handled by backfill_bf_skills_esco.py
+        if source == "business_france":
+            continue
+
         payload: Dict[str, Any] = {}
         if payload_json:
             try:
