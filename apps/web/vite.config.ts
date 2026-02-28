@@ -33,6 +33,7 @@ export default defineConfig({
       "/apply-pack": { target: API_TARGET, changeOrigin: true },
       "/applications": { target: API_TARGET, changeOrigin: true },
       "/health": { target: API_TARGET, changeOrigin: true },
+      "/documents": { target: API_TARGET, changeOrigin: true },
     },
   },
 });

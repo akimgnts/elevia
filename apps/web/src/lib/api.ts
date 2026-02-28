@@ -940,6 +940,7 @@ export async function generateCvForOffer(
 
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
+    console.warn(`[documents] cv/for-offer status=${res.status} offer_id=${offerId}`);
     throw new Error(`CV génération échouée (${res.status}): ${txt}`);
   }
 
@@ -967,6 +968,7 @@ export async function generateLetterForOffer(
 
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
+    console.warn(`[documents] letter/for-offer status=${res.status} offer_id=${offerId}`);
     throw new Error(`Lettre génération échouée (${res.status}): ${txt}`);
   }
 

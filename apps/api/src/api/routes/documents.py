@@ -42,8 +42,15 @@ from documents.context_builder import build_matched_skills
 from documents.preview_renderer import render_preview_markdown
 from documents.cover_letter_generator import generate_cover_letter
 from documents.llm_client import is_llm_available
+from api.utils.env import get_llm_api_key
 
 logger = logging.getLogger(__name__)
+
+# Safe startup signal — boolean only, key value never logged
+logger.info(
+    '{"event":"STARTUP","component":"documents","OPENAI_API_KEY_present":%s}',
+    "true" if get_llm_api_key() else "false",
+)
 
 router = APIRouter(tags=["documents"])
 
@@ -105,11 +112,13 @@ async def create_cv_for_offer(req: ForOfferRequest) -> ForOfferResponse:
     t0 = time.time()
     profile = req.profile or {}
 
+    _llm_enabled = is_llm_available()
     logger.info(
-        '{"event":"DOC_FOR_OFFER_REQUEST","offer_id":"%s","has_context":%s,"lang":"%s"}',
+        '{"event":"DOCUMENTS_REQUEST","kind":"cv","offer_id":"%s","has_context":%s,"lang":"%s","llm_enabled":%s}',
         req.offer_id,
         "true" if req.context and req.context.matched_skills else "false",
         req.lang,
+        "true" if _llm_enabled else "false",
     )
 
     # Step 1: Build CV (cache-aware, LLM or fallback)
@@ -182,7 +191,7 @@ async def create_letter_for_offer(req: ForOfferLetterRequest) -> ForOfferLetterR
     profile = req.profile or {}
 
     logger.info(
-        '{"event":"DOC_LETTER_FOR_OFFER_REQUEST","offer_id":"%s","has_context":%s,"lang":"%s"}',
+        '{"event":"DOCUMENTS_REQUEST","kind":"letter","offer_id":"%s","has_context":%s,"lang":"%s","llm_enabled":false}',
         req.offer_id,
         "true" if req.context and req.context.matched_skills else "false",
         req.lang,
