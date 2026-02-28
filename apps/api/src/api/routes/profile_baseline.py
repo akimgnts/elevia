@@ -6,6 +6,7 @@ POST /profile/parse-baseline
   - Delegates to profile.baseline_parser.run_baseline (shared with parse-file).
   - Returns a profile dict compatible with POST /inbox.
 """
+import json
 import logging
 import sys
 from pathlib import Path
@@ -17,6 +18,7 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from profile.baseline_parser import run_baseline  # shared extractor
+from profile.profile_cluster import detect_profile_cluster
 from semantic.profile_cache import cache_profile_text, compute_profile_hash
 
 logger = logging.getLogger(__name__)
@@ -48,6 +50,7 @@ class ParseBaselineResponse(BaseModel):
     skills_dupes: List[dict] = []
     profile: dict
     warnings: List[str] = []
+    profile_cluster: Optional[dict] = None
 
 
 @router.post("/profile/parse-baseline", response_model=ParseBaselineResponse)
@@ -77,4 +80,29 @@ async def parse_baseline(req: ParseBaselineRequest, request: Request) -> ParseBa
     profile_hash = compute_profile_hash(profile)
     cache_profile_text(profile_hash, req.cv_text)
 
+    # ── Profile cluster (deterministic, no LLM) ───────────────────────────────
+    skills_for_cluster: List[str] = []
+    validated_items = result.get("validated_items") or []
+    if validated_items:
+        skills_for_cluster = [
+            str(item.get("label") or item.get("uri") or "")
+            for item in validated_items
+            if isinstance(item, dict)
+        ]
+        skills_for_cluster = [s for s in skills_for_cluster if s]
+    if not skills_for_cluster:
+        skills_for_cluster = result.get("skills_canonical") or []
+    if not skills_for_cluster:
+        skills_for_cluster = result.get("skills_raw") or []
+
+    profile_cluster = detect_profile_cluster(skills_for_cluster)
+    logger.info(json.dumps({
+        "event": "PROFILE_CLUSTER_DETECTED",
+        "dominant_cluster": profile_cluster.get("dominant_cluster"),
+        "dominance_percent": profile_cluster.get("dominance_percent"),
+        "skills_count": profile_cluster.get("skills_count"),
+        "request_id": getattr(request.state, "request_id", "n/a"),
+    }))
+
+    result["profile_cluster"] = profile_cluster
     return ParseBaselineResponse(**result)

@@ -9,6 +9,7 @@ POST /profile/parse-file
 """
 from __future__ import annotations
 
+import json
 import logging
 import re
 import sys
@@ -23,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from api.utils.pdf_text import PdfTextError, extract_text_from_pdf
 from api.utils.env import get_llm_api_key
 from profile.baseline_parser import run_baseline, run_baseline_from_tokens
+from profile.profile_cluster import detect_profile_cluster
 from profile.llm_skill_suggester import suggest_skills_from_cv
 from semantic.profile_cache import cache_profile_text, compute_profile_hash
 
@@ -80,6 +82,7 @@ class ParseFileResponse(BaseModel):
     skills_canonical: List[str]
     profile: dict
     warnings: List[str] = []
+    profile_cluster: Optional[dict] = None
 
 
 # ── Route ──────────────────────────────────────────────────────────────────────
@@ -214,6 +217,30 @@ async def parse_file(
     profile_hash = compute_profile_hash(profile)
     cache_profile_text(profile_hash, cv_text)
 
+    # ── Profile cluster (deterministic, no LLM) ───────────────────────────────
+    skills_for_cluster: List[str] = []
+    validated_items = result.get("validated_items") or []
+    if validated_items:
+        skills_for_cluster = [
+            str(item.get("label") or item.get("uri") or "")
+            for item in validated_items
+            if isinstance(item, dict)
+        ]
+        skills_for_cluster = [s for s in skills_for_cluster if s]
+    if not skills_for_cluster:
+        skills_for_cluster = result.get("skills_canonical") or []
+    if not skills_for_cluster:
+        skills_for_cluster = result.get("skills_raw") or []
+
+    profile_cluster = detect_profile_cluster(skills_for_cluster)
+    logger.info(json.dumps({
+        "event": "PROFILE_CLUSTER_DETECTED",
+        "dominant_cluster": profile_cluster.get("dominant_cluster"),
+        "dominance_percent": profile_cluster.get("dominance_percent"),
+        "skills_count": profile_cluster.get("skills_count"),
+        "request_id": request_id,
+    }))
+
     return ParseFileResponse(
         source=result["source"],
         mode=mode,
@@ -242,4 +269,5 @@ async def parse_file(
         skills_canonical=result["skills_canonical"],
         profile=result["profile"],
         warnings=result.get("warnings", []) + warnings,
+        profile_cluster=profile_cluster,
     )

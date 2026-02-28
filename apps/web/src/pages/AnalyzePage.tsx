@@ -255,6 +255,13 @@ export default function AnalyzePage() {
   const skillsUnmappedCount = parseResult?.skills_unmapped_count ?? filteredOut;
   const skillsDupes = parseResult?.skills_dupes ?? [];
 
+  const profileCluster = parseResult?.profile_cluster ?? null;
+  const clusterDistribution = profileCluster?.distribution_percent ?? {};
+  const topClusterDist = Object.entries(clusterDistribution)
+    .filter(([, value]) => value > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+
   const filterTokens = (items: string[], query: string) => {
     const q = query.trim().toLowerCase();
     if (!q) return items;
@@ -446,6 +453,40 @@ export default function AnalyzePage() {
                 {(parseResult.warnings?.length ?? 0) > 0 && (
                   <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
                     {(parseResult.warnings ?? []).join(" · ")}
+                  </div>
+                )}
+
+                {/* Profile cluster */}
+                {profileCluster && (
+                  <div className="rounded-xl border border-slate-200 bg-white/70 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="text-sm font-semibold text-slate-700">Domaine détecté</div>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                        {profileCluster.dominant_cluster}
+                      </span>
+                    </div>
+                    <div className="mt-2 text-sm text-slate-600">
+                      Dominance: <span className="font-semibold">{profileCluster.dominance_percent}%</span>
+                    </div>
+                    {topClusterDist.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
+                        {topClusterDist.map(([cluster, value]) => (
+                          <span key={cluster} className="rounded bg-slate-100 px-2 py-1">
+                            {cluster}: {value}%
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {profileCluster.note === "LOW_SIGNAL" && (
+                      <div className="mt-2 text-xs font-medium text-amber-700">
+                        Signal insuffisant (parsing à renforcer)
+                      </div>
+                    )}
+                    {profileCluster.note === "TRANSVERSAL" && (
+                      <div className="mt-2 text-xs font-medium text-slate-600">
+                        Profil transversal
+                      </div>
+                    )}
                   </div>
                 )}
 
