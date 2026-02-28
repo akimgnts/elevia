@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, FileText, Loader2, X } from "lucide-react";
 import type {
   ContextFit,
+  DescriptionStructured,
   ExplainBlock,
   ForOfferResponse,
   ForOfferLetterResponse,
@@ -9,7 +10,7 @@ import type {
   OfferContext,
   ProfileContext,
 } from "../lib/api";
-import { generateCvForOffer, generateLetterForOffer } from "../lib/api";
+import { fetchOfferDetail, generateCvForOffer, generateLetterForOffer } from "../lib/api";
 import { LetterPreviewModal } from "./LetterPreviewModal";
 import { CvPreviewModal } from "./CvPreviewModal";
 import { cleanOfferTitle } from "../lib/titleUtils";
@@ -50,6 +51,7 @@ export type OfferDetail = {
   ai_available?: boolean;
   ai_error?: string | null;
   explain?: ExplainBlock | null;
+  description_structured?: DescriptionStructured | null;
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -272,6 +274,12 @@ export function OfferDetailModal({
   const [visible, setVisible] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
+  // Structured description state
+  const [structured, setStructured] = useState<DescriptionStructured | null>(
+    offer.description_structured ?? null
+  );
+  const [structuredLoading, setStructuredLoading] = useState(false);
+
   // CV generation state
   const [cvLoading, setCvLoading] = useState(false);
   const [cvPreview, setCvPreview] = useState<ForOfferResponse | null>(null);
@@ -332,6 +340,25 @@ export function OfferDetailModal({
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = original; };
   }, []);
+
+  // Fetch structured description on mount if not already provided
+  useEffect(() => {
+    if (structured) return; // already have it
+    const offerId = offer.offer_id || offer.id;
+    if (!offerId) return;
+    setStructuredLoading(true);
+    fetchOfferDetail(offerId)
+      .then((detail) => {
+        if (detail.description_structured) {
+          setStructured(detail.description_structured);
+        }
+      })
+      .catch(() => {
+        // Silently fail — fallback to raw description below
+      })
+      .finally(() => setStructuredLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offer.offer_id, offer.id]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -499,19 +526,115 @@ export function OfferDetailModal({
           </div>
         </section>
 
-        {/* Description — always visible */}
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold text-neutral-200">Description</h3>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-300">
-            {descriptionPreview || "Description indisponible."}
-          </p>
-          {description.length > 600 && (
-            <button
-              className="mt-2 text-xs font-semibold text-neutral-400 hover:text-neutral-200"
-              onClick={() => setShowFullDescription((prev) => !prev)}
-            >
-              {showFullDescription ? "Réduire la description" : "Voir description complète"}
-            </button>
+        {/* Description — structured sections (with raw fallback) */}
+        <section className="mt-6 space-y-4">
+          {structuredLoading && !structured && (
+            <div className="flex items-center gap-2 text-xs text-neutral-500">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Chargement de la description…
+            </div>
+          )}
+
+          {structured ? (
+            <>
+              {/* Résumé */}
+              {structured.summary && (
+                <div>
+                  <h3 className="text-sm font-semibold text-neutral-200">Résumé</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-300">{structured.summary}</p>
+                </div>
+              )}
+
+              {/* Missions */}
+              {structured.missions.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-neutral-200">Missions</h3>
+                  <ul className="mt-2 space-y-1">
+                    {structured.missions.map((m, i) => (
+                      <li key={`mission-${i}`} className="flex gap-2 text-sm text-neutral-300">
+                        <span className="mt-0.5 shrink-0 text-neutral-500">•</span>
+                        <span>{m}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Profil */}
+              {structured.profile.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-neutral-200">Profil recherché</h3>
+                  <ul className="mt-2 space-y-1">
+                    {structured.profile.map((p, i) => (
+                      <li key={`profile-${i}`} className="flex gap-2 text-sm text-neutral-300">
+                        <span className="mt-0.5 shrink-0 text-neutral-500">•</span>
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Compétences — chips */}
+              {structured.competences.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-neutral-200">Compétences demandées</h3>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {structured.competences.map((c) => (
+                      <span
+                        key={`comp-${c}`}
+                        className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-200"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Contexte */}
+              {structured.context && (
+                <div>
+                  <h3 className="text-sm font-semibold text-neutral-200">Contexte</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-300">{structured.context}</p>
+                </div>
+              )}
+
+              {/* Voir original — debug only */}
+              {showDebug && (
+                <DebugSection title="Description originale">
+                  <p className="text-xs text-neutral-400 whitespace-pre-wrap leading-relaxed">
+                    {descriptionPreview || "Description indisponible."}
+                  </p>
+                  {description.length > 600 && (
+                    <button
+                      className="mt-2 text-xs font-semibold text-neutral-400 hover:text-neutral-200"
+                      onClick={() => setShowFullDescription((prev) => !prev)}
+                    >
+                      {showFullDescription ? "Réduire" : "Voir complète"}
+                    </button>
+                  )}
+                </DebugSection>
+              )}
+            </>
+          ) : (
+            /* Fallback: raw description */
+            !structuredLoading && (
+              <div>
+                <h3 className="text-sm font-semibold text-neutral-200">Description</h3>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-300">
+                  {descriptionPreview || "Description indisponible."}
+                </p>
+                {description.length > 600 && (
+                  <button
+                    className="mt-2 text-xs font-semibold text-neutral-400 hover:text-neutral-200"
+                    onClick={() => setShowFullDescription((prev) => !prev)}
+                  >
+                    {showFullDescription ? "Réduire la description" : "Voir description complète"}
+                  </button>
+                )}
+              </div>
+            )
           )}
         </section>
 

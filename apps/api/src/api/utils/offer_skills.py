@@ -24,6 +24,27 @@ def ensure_offer_skills_table(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def get_esco_skills_for_offer(
+    conn: sqlite3.Connection,
+    offer_id: str,
+    limit: int = 12,
+) -> List[str]:
+    """Return ESCO skill labels for a single offer, sorted alphabetically."""
+    try:
+        rows = conn.execute(
+            """
+            SELECT skill FROM fact_offer_skills
+            WHERE offer_id = ? AND source = 'esco'
+            ORDER BY skill ASC
+            LIMIT ?
+            """,
+            (str(offer_id), limit),
+        ).fetchall()
+    except sqlite3.OperationalError:
+        return []
+    return [row[0] for row in rows]
+
+
 def get_offer_skills_by_offer_ids(
     conn: sqlite3.Connection,
     offer_ids: Iterable[str],

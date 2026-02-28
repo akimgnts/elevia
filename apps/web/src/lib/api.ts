@@ -872,6 +872,49 @@ export interface ForOfferLetterResponse {
   duration_ms: number;
 }
 
+// ============================================================================
+// Offer Detail (structured description)
+// ============================================================================
+
+export interface DescriptionStructured {
+  summary: string;
+  missions: string[];
+  profile: string[];
+  competences: string[];
+  context: string;
+  has_headings: boolean;
+  source: "structured" | "fallback";
+}
+
+export interface OfferDetailResponse {
+  id: string;
+  source: string;
+  title: string;
+  description: string;
+  display_description: string;
+  publication_date: string | null;
+  company: string | null;
+  city: string | null;
+  country: string | null;
+  contract_duration: number | null;
+  start_date: string | null;
+  description_structured: DescriptionStructured | null;
+}
+
+/**
+ * Fetch single offer with structured description sections.
+ * GET /offers/{offer_id}/detail
+ */
+export async function fetchOfferDetail(offerId: string): Promise<OfferDetailResponse> {
+  const url = `${API_BASE}/offers/${encodeURIComponent(offerId)}/detail`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json() as Promise<OfferDetailResponse>;
+}
+
 /**
  * Generate an inbox-contextualised CV for a given offer.
  * POST /documents/cv/for-offer

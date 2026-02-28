@@ -148,6 +148,8 @@ async def get_sample_offers(
 # ============================================================================
 
 from ..utils.text_cleaning import clean_text, make_display_text
+from ..utils.offer_skills import get_esco_skills_for_offer
+from offer.offer_description_structurer import structure_offer_description
 
 # Path to SQLite database
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
@@ -442,3 +444,110 @@ async def get_catalog_offers(
             "X-Sample-Version": version_hash,
         },
     )
+
+
+# ============================================================================
+# OFFER DETAIL ENDPOINT
+# ============================================================================
+
+@router.get(
+    "/{offer_id}/detail",
+    summary="Get structured offer detail",
+    description="""
+Return a single offer with deterministic structured description sections.
+
+**Structured sections (description_structured):**
+- `summary`: Short intro ≤ 600 chars
+- `missions`: Up to 8 bullet points
+- `profile`: Up to 6 profile requirements
+- `competences`: Up to 12 skills (ESCO preferred)
+- `context`: Company/team context ≤ 300 chars
+- `has_headings`: Whether heading-based parsing was used
+- `source`: "structured" | "fallback"
+
+Returns 404 if offer not found in the database.
+""",
+)
+async def get_offer_detail(offer_id: str) -> JSONResponse:
+    """
+    Fetch one offer by ID and return it with structured description sections.
+
+    Deterministic: same input → same output.
+    No LLM calls. ESCO skills preferred for competences section.
+    """
+    start_time = time.time()
+
+    if not DB_PATH.exists():
+        obs_log("offer_detail_fetch", status="error", error_code="DB_MISSING",
+                extra={"offer_id": offer_id})
+        return JSONResponse(status_code=404, content={"error": "NOT_FOUND", "offer_id": offer_id})
+
+    try:
+        conn = sqlite3.connect(str(DB_PATH), timeout=2)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id, source, title, description, company, city, country,
+                   publication_date, contract_duration, start_date
+            FROM fact_offers
+            WHERE id = ?
+        """, (offer_id,))
+        row = cursor.fetchone()
+
+        if row is None:
+            conn.close()
+            return JSONResponse(status_code=404, content={"error": "NOT_FOUND", "offer_id": offer_id})
+
+        raw = {
+            "id": row["id"],
+            "source": row["source"],
+            "title": row["title"],
+            "description": row["description"],
+            "company": row["company"],
+            "city": row["city"],
+            "country": row["country"],
+            "publication_date": row["publication_date"],
+            "contract_duration": row["contract_duration"],
+            "start_date": row["start_date"],
+        }
+
+        # Fetch ESCO skills for this offer
+        esco_skills = get_esco_skills_for_offer(conn, offer_id, limit=12)
+        conn.close()
+
+    except sqlite3.OperationalError as e:
+        logger.warning(f"[offer_detail] SQLite error for offer_id={offer_id}: {e}")
+        return JSONResponse(status_code=503, content={"error": "DB_ERROR"})
+
+    # Normalize offer fields
+    normalized = _normalize_offer(raw)
+
+    # Structure description
+    description_structured = structure_offer_description(
+        raw.get("description") or "",
+        esco_skills=esco_skills,
+        lang_hint="fr",
+    )
+
+    duration_ms = int((time.time() - start_time) * 1000)
+    obs_log(
+        "OFFER_DESCRIPTION_STRUCTURED",
+        status="ok",
+        duration_ms=duration_ms,
+        extra={
+            "offer_id": offer_id,
+            "source": description_structured["source"],
+            "has_headings": description_structured["has_headings"],
+            "missions_count": len(description_structured.get("missions", [])),
+            "profile_count": len(description_structured.get("profile", [])),
+            "competences_count": len(description_structured.get("competences", [])),
+            "used_esco_skills": len(esco_skills) > 0,
+            "esco_skills_count": len(esco_skills),
+        },
+    )
+
+    return JSONResponse(content={
+        **normalized,
+        "description_structured": description_structured,
+    })
