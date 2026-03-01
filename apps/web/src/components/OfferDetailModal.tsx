@@ -3,14 +3,18 @@ import { ChevronDown, ChevronRight, FileText, Loader2, X } from "lucide-react";
 import type {
   ContextFit,
   DescriptionStructured,
+  DescriptionStructuredV1,
   ExplainBlock,
+  ExplainPayloadV1Full,
+  CvHtmlResponse,
   ForOfferResponse,
   ForOfferLetterResponse,
   InboxContextPayload,
   OfferContext,
   ProfileContext,
 } from "../lib/api";
-import { fetchOfferDetail, generateCvForOffer, generateLetterForOffer } from "../lib/api";
+import { fetchOfferDetail, generateCvForOffer, generateCvHtmlForOffer, generateLetterForOffer } from "../lib/api";
+import { CvHtmlPreviewModal } from "./CvHtmlPreviewModal";
 import { LetterPreviewModal } from "./LetterPreviewModal";
 import { CvPreviewModal } from "./CvPreviewModal";
 import { cleanOfferTitle } from "../lib/titleUtils";
@@ -52,6 +56,8 @@ export type OfferDetail = {
   ai_error?: string | null;
   explain?: ExplainBlock | null;
   description_structured?: DescriptionStructured | null;
+  description_structured_v1?: DescriptionStructuredV1 | null;
+  explain_v1_full?: ExplainPayloadV1Full | null;
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -274,16 +280,27 @@ export function OfferDetailModal({
   const [visible, setVisible] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
-  // Structured description state
+  // Structured description state (v0)
   const [structured, setStructured] = useState<DescriptionStructured | null>(
     offer.description_structured ?? null
   );
   const [structuredLoading, setStructuredLoading] = useState(false);
 
+  // Compass v1 data state
+  const [structuredV1, setStructuredV1] = useState<DescriptionStructuredV1 | null>(
+    offer.description_structured_v1 ?? null
+  );
+  const [explainV1Full, setExplainV1Full] = useState<ExplainPayloadV1Full | null>(
+    offer.explain_v1_full ?? null
+  );
+
   // CV generation state
   const [cvLoading, setCvLoading] = useState(false);
   const [cvPreview, setCvPreview] = useState<ForOfferResponse | null>(null);
   const [cvError, setCvError] = useState<string | null>(null);
+  const [cvHtmlLoading, setCvHtmlLoading] = useState(false);
+  const [cvHtmlPreview, setCvHtmlPreview] = useState<CvHtmlResponse | null>(null);
+  const [cvHtmlError, setCvHtmlError] = useState<string | null>(null);
 
   // Letter generation state
   const [letterLoading, setLetterLoading] = useState(false);
@@ -309,6 +326,28 @@ export function OfferDetailModal({
       setCvError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setCvLoading(false);
+    }
+  }
+
+  async function handleGenerateCvHtml() {
+    const offerId = offer.offer_id || offer.id;
+    if (!offerId) return;
+    setCvHtmlLoading(true);
+    setCvHtmlError(null);
+    try {
+      const ctx: InboxContextPayload | undefined =
+        offer.matched_skills_display?.length || offer.matched_skills?.length
+          ? {
+              matched_skills: offer.matched_skills_display ?? offer.matched_skills ?? [],
+              missing_skills: offer.missing_skills_display ?? offer.missing_skills ?? [],
+            }
+          : undefined;
+      const result = await generateCvHtmlForOffer(offerId, profile ?? {}, ctx);
+      setCvHtmlPreview(result);
+    } catch (err) {
+      setCvHtmlError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setCvHtmlLoading(false);
     }
   }
 
@@ -351,6 +390,12 @@ export function OfferDetailModal({
       .then((detail) => {
         if (detail.description_structured) {
           setStructured(detail.description_structured);
+        }
+        if (detail.description_structured_v1) {
+          setStructuredV1(detail.description_structured_v1);
+        }
+        if (detail.explain_v1_full) {
+          setExplainV1Full(detail.explain_v1_full);
         }
       })
       .catch(() => {
@@ -474,6 +519,19 @@ export function OfferDetailModal({
               )}
               {cvLoading ? "Génération…" : "Générer CV"}
             </button>
+            <button
+              onClick={handleGenerateCvHtml}
+              disabled={cvHtmlLoading}
+              className="flex items-center gap-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-xs font-medium text-white transition-colors"
+              title="Voir le CV en HTML"
+            >
+              {cvHtmlLoading ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <FileText className="h-3 w-3" />
+              )}
+              {cvHtmlLoading ? "Génération…" : "Voir CV (HTML)"}
+            </button>
             {/* Generate Letter CTA */}
             <button
               onClick={handleGenerateLetter}
@@ -502,6 +560,11 @@ export function OfferDetailModal({
         {cvError && (
           <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 px-4 py-2 text-xs text-rose-300">
             Génération échouée : {cvError}
+          </div>
+        )}
+        {cvHtmlError && (
+          <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 px-4 py-2 text-xs text-rose-300">
+            Génération CV HTML échouée : {cvHtmlError}
           </div>
         )}
         {letterError && (
@@ -795,6 +858,179 @@ export function OfferDetailModal({
           </section>
         )}
 
+        {/* ── PREUVE DU MATCH (Compass signal layer) ───────────────────────────── */}
+        {explainV1Full && (
+          <section className="mt-6 space-y-3">
+            <h3 className="text-sm font-semibold text-neutral-200">Preuve du match</h3>
+            <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300 space-y-3">
+
+              {/* Confidence + signals row */}
+              <div className="flex flex-wrap gap-2">
+                <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                  explainV1Full.confidence === "HIGH"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : explainV1Full.confidence === "MED"
+                      ? "bg-amber-500/20 text-amber-300"
+                      : "bg-rose-500/20 text-rose-300"
+                }`}>
+                  Confiance {explainV1Full.confidence}
+                </span>
+                <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                  explainV1Full.rare_signal_level === "HIGH"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : explainV1Full.rare_signal_level === "MED"
+                      ? "bg-amber-500/20 text-amber-300"
+                      : "bg-rose-500/20 text-rose-300"
+                }`}>
+                  Signal rare {explainV1Full.rare_signal_level}
+                </span>
+                {explainV1Full.sector_signal_level && (
+                  <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                    explainV1Full.sector_signal_level === "HIGH"
+                      ? "bg-emerald-500/20 text-emerald-300"
+                      : explainV1Full.sector_signal_level === "MED"
+                        ? "bg-amber-500/20 text-amber-300"
+                        : "bg-rose-500/20 text-rose-300"
+                  }`}>
+                    Secteur {explainV1Full.sector_signal_level}
+                    {explainV1Full.sector_signal_note && ` · ${explainV1Full.sector_signal_note}`}
+                  </span>
+                )}
+              </div>
+
+              {/* Incoherence reasons */}
+              {explainV1Full.incoherence_reasons.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {explainV1Full.incoherence_reasons.map((reason) => (
+                    <span key={reason} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-[10px] text-neutral-400">
+                      {reason.replace("TOOL_UNSPECIFIED:", "Outil non précisé : ").replace(/_/g, " ").toLowerCase()}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Missing skills from offer */}
+              {explainV1Full.missing_offer_skills.length > 0 && (
+                <div>
+                  <div className="mb-1.5 text-[10px] uppercase tracking-wide text-neutral-500">
+                    Compétences de l'offre ({explainV1Full.missing_offer_skills.length})
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {explainV1Full.missing_offer_skills.map((s, i) => (
+                      <span key={`ms-${i}`} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-[10px] text-neutral-300">
+                        {s.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tool notes */}
+              {explainV1Full.tool_notes.length > 0 && (
+                <div>
+                  <div className="mb-1.5 text-[10px] uppercase tracking-wide text-neutral-500">Outils détectés</div>
+                  <div className="space-y-1">
+                    {explainV1Full.tool_notes.map((note) => (
+                      <div key={note.tool_key} className="flex items-center gap-2 text-[10px]">
+                        <span className="font-semibold text-neutral-200 uppercase">{note.tool_key}</span>
+                        <span className={`rounded-full px-2 py-0.5 ${
+                          note.status === "SPECIFIED"
+                            ? "bg-emerald-500/20 text-emerald-300"
+                            : note.status === "UNSPECIFIED"
+                              ? "bg-amber-500/20 text-amber-300"
+                              : "bg-neutral-700 text-neutral-400"
+                        }`}>
+                          {note.status === "SPECIFIED" && note.sense
+                            ? `précisé · ${note.sense}`
+                            : note.status === "UNSPECIFIED"
+                              ? "outil non précisé"
+                              : note.status.toLowerCase()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── DESCRIPTION STRUCTURÉE v1 (Compass text structurer) ──────────────── */}
+        {structuredV1 && (structuredV1.missions.length > 0 || structuredV1.requirements.length > 0 || structuredV1.tools_stack.length > 0) && (
+          <section className="mt-6 space-y-3">
+            <h3 className="text-sm font-semibold text-neutral-200">Description structurée</h3>
+            <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 space-y-4">
+
+              {structuredV1.missions.length > 0 && (
+                <div>
+                  <div className="mb-2 text-[10px] uppercase tracking-wide text-neutral-500">Missions</div>
+                  <ul className="space-y-1">
+                    {structuredV1.missions.map((m, i) => (
+                      <li key={`sv1m-${i}`} className="flex gap-2 text-xs text-neutral-300">
+                        <span className="mt-0.5 shrink-0 text-neutral-600">•</span>
+                        <span>{m}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {structuredV1.requirements.length > 0 && (
+                <div>
+                  <div className="mb-2 text-[10px] uppercase tracking-wide text-neutral-500">Profil recherché</div>
+                  <ul className="space-y-1">
+                    {structuredV1.requirements.map((r, i) => (
+                      <li key={`sv1r-${i}`} className="flex gap-2 text-xs text-neutral-300">
+                        <span className="mt-0.5 shrink-0 text-neutral-600">•</span>
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {structuredV1.tools_stack.length > 0 && (
+                <div>
+                  <div className="mb-2 text-[10px] uppercase tracking-wide text-neutral-500">Stack technique</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {structuredV1.tools_stack.map((t) => (
+                      <span key={`sv1t-${t}`} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-xs text-neutral-200">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {structuredV1.context.length > 0 && (
+                <div>
+                  <div className="mb-2 text-[10px] uppercase tracking-wide text-neutral-500">Contexte</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {structuredV1.context.map((tag) => (
+                      <span key={`sv1c-${tag}`} className="rounded-full bg-blue-500/20 px-2.5 py-0.5 text-[10px] text-blue-300">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {structuredV1.red_flags.length > 0 && (
+                <div>
+                  <div className="mb-2 text-[10px] uppercase tracking-wide text-neutral-500">Points d'attention</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {structuredV1.red_flags.map((flag) => (
+                      <span key={`sv1f-${flag}`} className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] text-amber-300">
+                        {flag.replace(/_/g, " ")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* ── DEV SECTIONS — collapsible, hidden in user mode ──────────────────── */}
         {showDebug && (
           <div className="mt-8 space-y-3">
@@ -1011,6 +1247,14 @@ export function OfferDetailModal({
         offerCompany={offer.company}
         preview={cvPreview}
         onClose={() => setCvPreview(null)}
+      />
+    )}
+    {cvHtmlPreview && (
+      <CvHtmlPreviewModal
+        offerTitle={offer.title}
+        offerCompany={offer.company}
+        preview={cvHtmlPreview}
+        onClose={() => setCvHtmlPreview(null)}
       />
     )}
     {letterPreview && (

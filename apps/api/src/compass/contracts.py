@@ -11,6 +11,20 @@ from typing import Any, Dict, List, Literal, Optional
 from pydantic import BaseModel
 
 
+class OfferDescriptionStructuredV1(BaseModel):
+    """
+    Structured offer description produced by compass text_structurer v1.
+
+    Deterministic. No ML/LLM. Same input → same output.
+    """
+    missions: List[str]           # up to 8 bullet points
+    requirements: List[str]       # up to 6 profile requirements
+    tools_stack: List[str]        # up to 12 detected tools/technologies
+    context: List[str]            # context tags (remote, hybride, vie, etc.)
+    red_flags: List[str]          # heuristic red flag keys
+    extracted_sections: Optional[Dict[str, str]] = None  # debug only (ELEVIA_DEBUG_STRUCTURER=1)
+
+
 class SkillRef(BaseModel):
     """Reference to a skill (ESCO URI + display label)."""
     uri: Optional[str] = None

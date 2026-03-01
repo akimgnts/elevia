@@ -29,6 +29,7 @@ import {
   type ProfileContext,
   type ContextFit,
   type InboxMeta,
+  type CompassExplainCompact,
 } from "../lib/api";
 import { buildMatchingProfile, type SkillsSource } from "../lib/profileMatching";
 import { upsertApplication, listApplications } from "../api/applications";
@@ -95,6 +96,7 @@ type NormalizedInboxItem = {
   is_vie?: boolean;
   skills_source?: string;
   explain: ExplainBlock | null;
+  explain_v1?: CompassExplainCompact | null;
   offer_cluster?: string;
   domain_bucket?: "strict" | "neighbor" | "out";
   signal_score?: number;
@@ -280,6 +282,7 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       is_vie: typeof rec.is_vie === "boolean" ? rec.is_vie : undefined,
       skills_source: typeof rec.skills_source === "string" ? rec.skills_source : undefined,
       explain: rec.explain && typeof rec.explain === "object" ? (rec.explain as ExplainBlock) : null,
+      explain_v1: rec.explain_v1 && typeof rec.explain_v1 === "object" ? (rec.explain_v1 as CompassExplainCompact) : null,
       offer_cluster: typeof rec.offer_cluster === "string" ? rec.offer_cluster : undefined,
       domain_bucket:
         rec.domain_bucket === "strict" || rec.domain_bucket === "neighbor" || rec.domain_bucket === "out"
@@ -630,6 +633,44 @@ function OfferCard({
           <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
             {roleTypeLabel}
           </span>
+        )}
+        {/* Compass signal badges */}
+        {offer.explain_v1 && (
+          <>
+            <span className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
+              offer.explain_v1.confidence === "HIGH"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : offer.explain_v1.confidence === "MED"
+                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                  : "bg-rose-50 text-rose-700 border-rose-200"
+            }`}>
+              Confiance {offer.explain_v1.confidence}
+            </span>
+            {offer.explain_v1.rare_signal_level !== "HIGH" && (
+              <span className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
+                offer.explain_v1.rare_signal_level === "MED"
+                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                  : "bg-rose-50 text-rose-700 border-rose-200"
+              }`}>
+                Signal {offer.explain_v1.rare_signal_level}
+              </span>
+            )}
+            {offer.explain_v1.sector_signal_level && offer.explain_v1.sector_signal_level !== "HIGH" && (
+              <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-violet-50 text-violet-700 border border-violet-200">
+                Secteur {offer.explain_v1.sector_signal_level}
+              </span>
+            )}
+            {offer.explain_v1.incoherence_reasons.slice(0, 2).map((reason) => (
+              <span key={reason} className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                {reason.replace("TOOL_UNSPECIFIED:", "Outil non précisé: ").replace("_", " ").toLowerCase()}
+              </span>
+            ))}
+            {offer.score >= 95 && offer.explain_v1.confidence !== "HIGH" && (
+              <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-300">
+                Score élevé, confiance limitée
+              </span>
+            )}
+          </>
         )}
       </div>
 

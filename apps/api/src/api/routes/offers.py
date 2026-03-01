@@ -150,6 +150,9 @@ async def get_sample_offers(
 from ..utils.text_cleaning import clean_text, make_display_text
 from ..utils.offer_skills import get_esco_skills_for_offer
 from offer.offer_description_structurer import structure_offer_description
+from compass.signal_layer import build_explain_payload_v1, get_signal_cfg
+from compass.contracts import SkillRef
+from compass.text_structurer import structure_offer_text_v1
 
 # Path to SQLite database
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
@@ -522,12 +525,35 @@ async def get_offer_detail(offer_id: str) -> JSONResponse:
 
     # Normalize offer fields
     normalized = _normalize_offer(raw)
+    raw_description = raw.get("description") or ""
 
-    # Structure description
+    # Legacy structured description (v0)
     description_structured = structure_offer_description(
-        raw.get("description") or "",
+        raw_description,
         esco_skills=esco_skills,
         lang_hint="fr",
+    )
+
+    # Compass text structurer v1 (deterministic, no LLM)
+    description_structured_v1 = structure_offer_text_v1(
+        raw_description,
+        esco_labels=esco_skills,
+    )
+
+    # Compass explain_v1_full (Part A — standalone view, no profile match)
+    offer_skills_refs = [SkillRef(uri=None, label=s) for s in esco_skills]
+    _cfg = get_signal_cfg()
+    explain_v1_full = build_explain_payload_v1(
+        score_core=0.0,
+        matched_skills=[],
+        offer_skills=offer_skills_refs,
+        offer_text=raw_description,
+        domain_bucket="out",
+        idf_map={},
+        cfg=_cfg,
+        # No cluster_idf_table in standalone view (no catalog available here)
+        offer_cluster=None,
+        cluster_idf_table=None,
     )
 
     duration_ms = int((time.time() - start_time) * 1000)
@@ -544,10 +570,14 @@ async def get_offer_detail(offer_id: str) -> JSONResponse:
             "competences_count": len(description_structured.get("competences", [])),
             "used_esco_skills": len(esco_skills) > 0,
             "esco_skills_count": len(esco_skills),
+            "structurer_v1_tools": len(description_structured_v1.tools_stack),
+            "explain_v1_tool_notes": len(explain_v1_full.tool_notes),
         },
     )
 
     return JSONResponse(content={
         **normalized,
         "description_structured": description_structured,
+        "description_structured_v1": description_structured_v1.model_dump(),
+        "explain_v1_full": explain_v1_full.model_dump(),
     })

@@ -4,7 +4,9 @@
  */
 
 const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "";
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "/api";
 
 export interface OfferNormalized {
   id: string;
@@ -286,6 +288,7 @@ export interface InboxItem {
     esco_uri?: string | null;
   }> | null;
   explain?: ExplainBlock | null;
+  explain_v1?: CompassExplainCompact | null;
 }
 
 export interface InboxMeta {
@@ -851,6 +854,21 @@ export interface ForOfferResponse {
   duration_ms: number;
 }
 
+export interface CvHtmlMeta {
+  offer_id: string;
+  prompt_version: string;
+  cache_hit: boolean;
+  fallback_used: boolean;
+  template_version: string;
+}
+
+export interface CvHtmlResponse {
+  ok: boolean;
+  html: string;
+  meta: CvHtmlMeta;
+  duration_ms: number;
+}
+
 export interface CoverLetterBlock {
   label: "hook" | "match" | "value" | "closing";
   text: string;
@@ -886,6 +904,60 @@ export interface DescriptionStructured {
   source: "structured" | "fallback";
 }
 
+// ── Compass signal layer types ────────────────────────────────────────────────
+
+export interface ToolNote {
+  tool_key: string;
+  status: "UNSPECIFIED" | "SPECIFIED" | "UNKNOWN";
+  sense: string | null;
+  hits: string[];
+}
+
+export interface SkillRefItem {
+  uri: string | null;
+  label: string;
+}
+
+export interface CompassExplainCompact {
+  score_core: number;
+  confidence: "LOW" | "MED" | "HIGH";
+  cluster_level: "STRICT" | "NEIGHBOR" | "OUT";
+  rare_signal_level: "LOW" | "MED" | "HIGH";
+  incoherence_reasons: string[];
+  matched_count: number;
+  missing_count: number;
+  sector_signal: number | null;
+  sector_signal_level: "LOW" | "MED" | "HIGH" | null;
+  sector_signal_note: string | null;
+}
+
+export interface ExplainPayloadV1Full {
+  score_core: number;
+  confidence: "LOW" | "MED" | "HIGH";
+  incoherence_reasons: string[];
+  matched_skills: SkillRefItem[];
+  missing_offer_skills: SkillRefItem[];
+  coverage_ratio: number;
+  rare_signal: number;
+  rare_signal_level: "LOW" | "MED" | "HIGH";
+  generic_ratio: number;
+  cluster_level: "STRICT" | "NEIGHBOR" | "OUT";
+  tool_notes: ToolNote[];
+  sector_signal: number | null;
+  sector_signal_level: "LOW" | "MED" | "HIGH" | null;
+  sector_signal_note: string | null;
+  debug_trace: unknown | null;
+}
+
+export interface DescriptionStructuredV1 {
+  missions: string[];
+  requirements: string[];
+  tools_stack: string[];
+  context: string[];
+  red_flags: string[];
+  extracted_sections: Record<string, string> | null;
+}
+
 export interface OfferDetailResponse {
   id: string;
   source: string;
@@ -899,6 +971,8 @@ export interface OfferDetailResponse {
   contract_duration: number | null;
   start_date: string | null;
   description_structured: DescriptionStructured | null;
+  description_structured_v1?: DescriptionStructuredV1 | null;
+  explain_v1_full?: ExplainPayloadV1Full | null;
 }
 
 /**
@@ -939,12 +1013,48 @@ export async function generateCvForOffer(
   });
 
   if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    console.warn(`[documents] cv/for-offer status=${res.status} offer_id=${offerId}`);
-    throw new Error(`CV génération échouée (${res.status}): ${txt}`);
+    console.warn(JSON.stringify({
+      event: "DOCUMENTS_REQUEST_FAIL",
+      endpoint: "/documents/cv/for-offer",
+      status: res.status,
+      offer_id: offerId,
+    }));
+    throw new Error("Génération du CV échouée. Réessayez.");
   }
 
   return res.json() as Promise<ForOfferResponse>;
+}
+
+/**
+ * Generate a rendered HTML CV for a given offer.
+ * POST /documents/cv/html/for-offer
+ */
+export async function generateCvHtmlForOffer(
+  offerId: string,
+  profile: Record<string, unknown>,
+  context?: InboxContextPayload,
+): Promise<CvHtmlResponse> {
+  const url = `${API_BASE}/documents/cv/html/for-offer`;
+  const body: Record<string, unknown> = { offer_id: offerId, profile, lang: "fr" };
+  if (context) body.context = context;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    console.warn(JSON.stringify({
+      event: "DOCUMENTS_CV_HTML_FAILED",
+      endpoint: "/documents/cv/html/for-offer",
+      status: res.status,
+      offer_id: offerId,
+    }));
+    throw new Error("Génération du CV HTML échouée. Réessayez.");
+  }
+
+  return res.json() as Promise<CvHtmlResponse>;
 }
 
 /**
@@ -967,9 +1077,13 @@ export async function generateLetterForOffer(
   });
 
   if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    console.warn(`[documents] letter/for-offer status=${res.status} offer_id=${offerId}`);
-    throw new Error(`Lettre génération échouée (${res.status}): ${txt}`);
+    console.warn(JSON.stringify({
+      event: "DOCUMENTS_REQUEST_FAIL",
+      endpoint: "/documents/letter/for-offer",
+      status: res.status,
+      offer_id: offerId,
+    }));
+    throw new Error("Génération de la lettre échouée. Réessayez.");
   }
 
   return res.json() as Promise<ForOfferLetterResponse>;
