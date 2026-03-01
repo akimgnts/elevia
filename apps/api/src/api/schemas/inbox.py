@@ -71,6 +71,22 @@ class ExplainBlock(BaseModel):
     breakdown: ExplainBreakdown
 
 
+# ── Compass signal compact (display-only, always computed) ────────────────────
+
+class CompassExplainCompact(BaseModel):
+    """
+    Compact Compass signal payload for inbox list view.
+    Display-only — does NOT affect scoring or ranking.
+    """
+    score_core: float
+    confidence: str  # LOW | MED | HIGH
+    cluster_level: str  # STRICT | NEIGHBOR | OUT
+    rare_signal_level: str  # LOW | MED | HIGH
+    incoherence_reasons: List[str] = Field(default_factory=list)  # top 2
+    matched_count: int = 0
+    missing_count: int = 0
+
+
 # ── Main item/response ────────────────────────────────────────────────────────
 
 class InboxItem(BaseModel):
@@ -106,6 +122,7 @@ class InboxItem(BaseModel):
     rome_competences: List[RomeCompetence] = Field(default_factory=list)
     rome_inferred: Optional[RomeInferred] = None
     explain: Optional[ExplainBlock] = None  # populated when request.explain=True
+    explain_v1: Optional[CompassExplainCompact] = None  # compass signal (always computed)
 
 
 class InboxMeta(BaseModel):

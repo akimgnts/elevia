@@ -1,0 +1,1 @@
+# verticals — per-vertical configuration

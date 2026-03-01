@@ -1,0 +1,13 @@
+{
+  "vertical": "elevia",
+  "signal_layer": {
+    "enabled": true,
+    "generic_cap_ratio": 0.15,
+    "rare_signal_thresholds": {
+      "low": 0.30,
+      "med": 0.55
+    },
+    "max_tool_hits": 5,
+    "max_list_items_ui": 8
+  }
+}

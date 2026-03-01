@@ -1,0 +1,93 @@
+{
+  "version": "v1",
+  "description": "Registry of tools with multiple senses. Used to detect ambiguous tool mentions and classify their usage context.",
+  "tools": [
+    {
+      "tool_key": "sap",
+      "aliases": ["sap", "s/4hana", "sap hana", "sap bw", "s4hana"],
+      "min_context_hits": 1,
+      "penalty_if_unspecified": 0.6,
+      "senses": [
+        {
+          "sense": "finance",
+          "disambiguators": [
+            "fi", "co", "comptabil", "controle de gestion", "reporting financier",
+            "consolidation", "tresorerie", "cloture", "bilan", "fi-co"
+          ]
+        },
+        {
+          "sense": "supply",
+          "disambiguators": [
+            "mm", "sd", "supply chain", "logist", "stocks", "procurement",
+            "achats", "approvisionnement", "warehouse", "wm", "ewm"
+          ]
+        },
+        {
+          "sense": "data",
+          "disambiguators": [
+            "bw", "hana", "data warehouse", "bi", "etl", "datasphere",
+            "analytics", "reporting", "bods", "bo"
+          ]
+        }
+      ]
+    },
+    {
+      "tool_key": "salesforce",
+      "aliases": ["salesforce", "sfmc", "marketing cloud", "sales cloud", "service cloud", "sf"],
+      "min_context_hits": 1,
+      "penalty_if_unspecified": 0.6,
+      "senses": [
+        {
+          "sense": "crm",
+          "disambiguators": [
+            "lead", "opportunit", "pipeline", "crm", "account",
+            "prospection", "commercial", "vente", "salescloud"
+          ]
+        },
+        {
+          "sense": "dev",
+          "disambiguators": [
+            "apex", "lwc", "integration", "api", "deployment",
+            "developpeur", "visualforce", "soql", "platform"
+          ]
+        },
+        {
+          "sense": "marketing",
+          "disambiguators": [
+            "campaign", "journey", "email", "sfmc", "marketing cloud",
+            "automation", "segmentation", "nurturing"
+          ]
+        }
+      ]
+    },
+    {
+      "tool_key": "oracle",
+      "aliases": ["oracle", "oracle erp", "oracle ebs", "oracle fusion"],
+      "min_context_hits": 1,
+      "penalty_if_unspecified": 0.5,
+      "senses": [
+        {
+          "sense": "finance",
+          "disambiguators": [
+            "comptabil", "finance", "general ledger", "accounts payable",
+            "accounts receivable", "tresorerie", "consolidation"
+          ]
+        },
+        {
+          "sense": "supply",
+          "disambiguators": [
+            "supply chain", "logist", "inventory", "procurement",
+            "purchasing", "warehouse", "scm"
+          ]
+        },
+        {
+          "sense": "data",
+          "disambiguators": [
+            "database", "dba", "sql", "plsql", "analytics", "bi",
+            "data warehouse", "obiee", "oci"
+          ]
+        }
+      ]
+    }
+  ]
+}

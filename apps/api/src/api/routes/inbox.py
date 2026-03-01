@@ -13,6 +13,7 @@ from typing import Dict, List, Set, Tuple
 from fastapi import APIRouter, HTTPException, Query
 
 from ..schemas.inbox import (
+    CompassExplainCompact,
     DecisionRequest,
     DecisionResponse,
     ExplainBlock,
@@ -46,6 +47,8 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from matching import MatchingEngine
 from matching.extractors import extract_profile
+from compass.contracts import SkillRef
+from compass.signal_layer import build_explain_payload_v1, build_explain_compact, get_signal_cfg
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -384,9 +387,8 @@ async def get_inbox(
                 # explain is populated after ROME enrichment below
             )
         )
-        # Stash full debug for explain enrichment after ROME is resolved
-        if req.explain:
-            _explain_debug[result.offer_id] = (match_debug, matched_skills, missing_skills)
+        # Always stash debug: used for ExplainBlock (when req.explain=True) + compass signal
+        _explain_debug[result.offer_id] = (match_debug, matched_skills, missing_skills)
 
     t_scoring = time.perf_counter()
 
@@ -533,6 +535,51 @@ async def get_inbox(
         if req.explain and item.offer_id in _explain_debug:
             debug, _matched, _missing = _explain_debug[item.offer_id]
             item.explain = _build_explain(debug, item.rome_competences)
+
+        # Compass signal (always computed, compact — no scoring impact)
+        _c_stash = _explain_debug.get(item.offer_id)
+        if _c_stash is not None:
+            _match_debug_c = _c_stash[0]
+            _offer_c = offer_lookup.get(item.offer_id, {})
+            _offer_uris: List[str] = _offer_c.get("skills_uri") or []
+
+            # Build URI→label from skills_display
+            _label_map: Dict[str, str] = {}
+            for _sd in (_offer_c.get("skills_display") or []):
+                if isinstance(_sd, dict) and _sd.get("uri"):
+                    _label_map[str(_sd["uri"])] = str(_sd.get("label") or _sd["uri"])
+
+            if _offer_uris:
+                # URI scoring: matched = profile_uris ∩ offer_uris
+                _prof_uris: Set[str] = set(extracted.skills_uri)
+                _off_uri_set: Set[str] = set(_offer_uris)
+                _match_uri_set: Set[str] = _prof_uris & _off_uri_set
+                _compass_offer_skills = [
+                    SkillRef(uri=u, label=_label_map.get(u, u)) for u in _offer_uris
+                ]
+                _compass_matched_skills = [
+                    SkillRef(uri=u, label=_label_map.get(u, u)) for u in _match_uri_set
+                ]
+            else:
+                # Label scoring fallback
+                _s_dbg = _match_debug_c.get("skills", {}) if isinstance(_match_debug_c, dict) else {}
+                _m_lbls: List[str] = (_s_dbg.get("matched") or []) if isinstance(_s_dbg, dict) else []
+                _miss_lbls: List[str] = (_s_dbg.get("missing") or []) if isinstance(_s_dbg, dict) else []
+                _compass_offer_skills = [SkillRef(uri=None, label=l) for l in _m_lbls + _miss_lbls]
+                _compass_matched_skills = [SkillRef(uri=None, label=l) for l in _m_lbls]
+
+            _cfg = get_signal_cfg()
+            _compass_full = build_explain_payload_v1(
+                score_core=item.score_raw or (item.score / 100.0),
+                matched_skills=_compass_matched_skills,
+                offer_skills=_compass_offer_skills,
+                offer_text=_offer_c.get("description") or "",
+                domain_bucket=item.domain_bucket or "out",
+                idf_map=engine.idf_table,
+                cfg=_cfg,
+            )
+            _compact = build_explain_compact(_compass_full, len(_offer_uris))
+            item.explain_v1 = CompassExplainCompact(**_compact.model_dump())
 
     t_rome = time.perf_counter()
 
