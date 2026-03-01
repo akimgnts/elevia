@@ -80,3 +80,96 @@ class ExplainPayloadV1Compact(BaseModel):
     sector_signal: Optional[float] = None
     sector_signal_level: Optional[Literal["LOW", "MED", "HIGH"]] = None
     sector_signal_note: Optional[str] = None
+
+
+# ── COMPASS D+ — Profile Structurer v1 contracts ──────────────────────────────
+
+class ExperienceV1(BaseModel):
+    """
+    One professional experience block extracted from CV.
+
+    autonomy_level heuristic (rule-based, no ML):
+      HIGH  — lead / pilotage / responsable / owner / directeur
+      MED   — contribution / équipe / collaborat* / chef de projet
+      LOW   — support / assistant / stagiaire / apprenti
+
+    impact_signals: regex-matched evidence of quantified impact.
+    """
+    company: Optional[str] = None
+    title: Optional[str] = None
+    start_date: Optional[str] = None    # "MM/YYYY" or "YYYY" or None
+    end_date: Optional[str] = None      # "MM/YYYY" | "YYYY" | "présent" | None
+    duration_months: Optional[int] = None
+    bullets: List[str] = []
+    tools: List[str] = []
+    skills: List[str] = []
+    autonomy_level: Literal["LOW", "MED", "HIGH"] = "MED"
+    impact_signals: List[str] = []      # matched evidence strings, capped at 5
+
+
+class EducationV1(BaseModel):
+    """
+    One education block extracted from CV.
+
+    cluster_hint: rule-based mapping of field → cluster key.
+    """
+    institution: Optional[str] = None
+    degree: Optional[str] = None
+    field: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    location: Optional[str] = None
+    cluster_hint: Optional[str] = None  # DATA_IT | FINANCE | SUPPLY_OPS | MARKETING_SALES | None
+
+
+class CertificationV1(BaseModel):
+    """One certification found in CV, with optional registry match."""
+    name: str
+    bundle_skills: List[str] = []       # from certifications_registry.json
+    cluster_hint: Optional[str] = None  # from registry, or None if unmapped
+    mapped: bool = False                # True if found in registry
+
+
+class CVQualityCoverage(BaseModel):
+    """Coverage sub-object for CVQualityV1."""
+    experiences_found: int
+    education_found: int
+    certifications_found: int
+    tools_found: int
+    date_coverage_ratio: float          # fraction of experiences with ≥1 date
+
+
+class CVQualityV1(BaseModel):
+    """
+    Heuristic CV quality assessment.
+
+    quality_level:
+      LOW  — no experience, no dates, wall of text (>800 chars no structure),
+             tools_found < 2, or experiences_found == 0
+      MED  — partial structure, incomplete dates
+      HIGH — sections detected, ≥1 experience with dates, ≥3 tools, ≥1 impact signal
+
+    NOT a judgment of the candidate — only of CV exploitability for matching.
+    Does NOT influence score_core.
+    """
+    quality_level: Literal["LOW", "MED", "HIGH"]
+    reasons: List[str]
+    coverage: CVQualityCoverage
+
+
+class ProfileStructuredV1(BaseModel):
+    """
+    Full structured view of a candidate CV.
+
+    Deterministic. No ML/LLM. Same input → same output.
+    score_core is NEVER touched by this layer.
+    """
+    experiences: List[ExperienceV1] = []
+    education: List[EducationV1] = []
+    certifications: List[CertificationV1] = []
+    extracted_tools: List[str] = []         # aggregated across all experiences, capped at 50
+    extracted_companies: List[str] = []
+    extracted_titles: List[str] = []
+    inferred_cluster_hints: List[str] = []  # deduplicated hints from education + certs
+    cv_quality: CVQualityV1
+    extracted_sections: Optional[Dict[str, str]] = None  # debug only (ELEVIA_DEBUG_PROFILE_STRUCT=1)

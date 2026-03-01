@@ -1,0 +1,314 @@
+{
+  "_meta": {
+    "version": "v1",
+    "description": "Maps certification names (lowercase, accent-stripped) to bundle_skills and cluster_hint.",
+    "cluster_hints": ["DATA_IT", "FINANCE", "SUPPLY_OPS", "MARKETING_SALES", "PROJECT_MGT", "HR", "SECURITY"]
+  },
+  "certifications": {
+    "pmp": {
+      "canonical": "PMP",
+      "bundle_skills": ["gestion de projet", "planification", "budget", "gestion des risques"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "prince2": {
+      "canonical": "PRINCE2",
+      "bundle_skills": ["gestion de projet", "planification", "gouvernance", "contrôle"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "prince 2": {
+      "canonical": "PRINCE2",
+      "bundle_skills": ["gestion de projet", "planification", "gouvernance", "contrôle"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "pmi": {
+      "canonical": "PMI",
+      "bundle_skills": ["gestion de projet", "cadre de référence"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "safe": {
+      "canonical": "SAFe",
+      "bundle_skills": ["agile à l'échelle", "lean", "scrum", "kanban"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "safe certified": {
+      "canonical": "SAFe Certified",
+      "bundle_skills": ["agile à l'échelle", "lean", "scrum", "kanban"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "scrum master": {
+      "canonical": "Scrum Master",
+      "bundle_skills": ["scrum", "agile", "gestion de sprint", "facilitation"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "csm": {
+      "canonical": "CSM",
+      "bundle_skills": ["scrum", "agile", "gestion de sprint"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "psm": {
+      "canonical": "PSM",
+      "bundle_skills": ["scrum", "agile", "gestion de sprint"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "product owner": {
+      "canonical": "Product Owner",
+      "bundle_skills": ["product management", "backlog", "user stories", "agile"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "cppo": {
+      "canonical": "CPPO",
+      "bundle_skills": ["product management", "backlog", "user stories"],
+      "cluster_hint": "PROJECT_MGT"
+    },
+    "aws certified": {
+      "canonical": "AWS Certified",
+      "bundle_skills": ["cloud computing", "AWS", "infrastructure cloud", "S3", "EC2"],
+      "cluster_hint": "DATA_IT"
+    },
+    "aws solutions architect": {
+      "canonical": "AWS Solutions Architect",
+      "bundle_skills": ["cloud computing", "AWS", "architecture cloud", "EC2", "S3", "RDS"],
+      "cluster_hint": "DATA_IT"
+    },
+    "aws developer": {
+      "canonical": "AWS Developer",
+      "bundle_skills": ["cloud computing", "AWS", "Lambda", "API Gateway", "DynamoDB"],
+      "cluster_hint": "DATA_IT"
+    },
+    "azure": {
+      "canonical": "Microsoft Azure",
+      "bundle_skills": ["cloud computing", "Azure", "infrastructure cloud"],
+      "cluster_hint": "DATA_IT"
+    },
+    "azure certified": {
+      "canonical": "Azure Certified",
+      "bundle_skills": ["cloud computing", "Azure", "infrastructure cloud"],
+      "cluster_hint": "DATA_IT"
+    },
+    "az-900": {
+      "canonical": "AZ-900",
+      "bundle_skills": ["cloud computing", "Azure", "fondamentaux cloud"],
+      "cluster_hint": "DATA_IT"
+    },
+    "az-104": {
+      "canonical": "AZ-104",
+      "bundle_skills": ["cloud computing", "Azure", "administration cloud"],
+      "cluster_hint": "DATA_IT"
+    },
+    "gcp": {
+      "canonical": "GCP Certified",
+      "bundle_skills": ["cloud computing", "Google Cloud", "infrastructure cloud"],
+      "cluster_hint": "DATA_IT"
+    },
+    "google cloud": {
+      "canonical": "Google Cloud Certified",
+      "bundle_skills": ["cloud computing", "Google Cloud", "BigQuery", "infrastructure"],
+      "cluster_hint": "DATA_IT"
+    },
+    "cka": {
+      "canonical": "CKA",
+      "bundle_skills": ["Kubernetes", "orchestration de conteneurs", "administration cluster"],
+      "cluster_hint": "DATA_IT"
+    },
+    "ckad": {
+      "canonical": "CKAD",
+      "bundle_skills": ["Kubernetes", "développement cloud-native", "conteneurs"],
+      "cluster_hint": "DATA_IT"
+    },
+    "cfa": {
+      "canonical": "CFA",
+      "bundle_skills": ["analyse financière", "gestion de portefeuille", "marchés financiers", "évaluation"],
+      "cluster_hint": "FINANCE"
+    },
+    "cfa level 1": {
+      "canonical": "CFA Level 1",
+      "bundle_skills": ["analyse financière", "marchés financiers"],
+      "cluster_hint": "FINANCE"
+    },
+    "cfa level 2": {
+      "canonical": "CFA Level 2",
+      "bundle_skills": ["analyse financière", "évaluation d'actifs", "marchés financiers"],
+      "cluster_hint": "FINANCE"
+    },
+    "cfa level 3": {
+      "canonical": "CFA Level 3",
+      "bundle_skills": ["gestion de portefeuille", "stratégie d'investissement", "marchés financiers"],
+      "cluster_hint": "FINANCE"
+    },
+    "caia": {
+      "canonical": "CAIA",
+      "bundle_skills": ["actifs alternatifs", "private equity", "hedge funds", "gestion de portefeuille"],
+      "cluster_hint": "FINANCE"
+    },
+    "frm": {
+      "canonical": "FRM",
+      "bundle_skills": ["gestion des risques", "risque de marché", "risque de crédit", "modélisation"],
+      "cluster_hint": "FINANCE"
+    },
+    "acca": {
+      "canonical": "ACCA",
+      "bundle_skills": ["comptabilité", "audit", "IFRS", "reporting financier"],
+      "cluster_hint": "FINANCE"
+    },
+    "dscg": {
+      "canonical": "DSCG",
+      "bundle_skills": ["comptabilité", "audit", "gestion fiscale", "contrôle de gestion"],
+      "cluster_hint": "FINANCE"
+    },
+    "dcg": {
+      "canonical": "DCG",
+      "bundle_skills": ["comptabilité", "droit des affaires", "gestion fiscale"],
+      "cluster_hint": "FINANCE"
+    },
+    "cissp": {
+      "canonical": "CISSP",
+      "bundle_skills": ["cybersécurité", "architecture sécurité", "gestion des risques SI", "gouvernance SI"],
+      "cluster_hint": "SECURITY"
+    },
+    "ceh": {
+      "canonical": "CEH",
+      "bundle_skills": ["ethical hacking", "tests de pénétration", "cybersécurité", "vulnérabilités"],
+      "cluster_hint": "SECURITY"
+    },
+    "cism": {
+      "canonical": "CISM",
+      "bundle_skills": ["gestion de la sécurité SI", "gouvernance", "gestion des risques", "conformité"],
+      "cluster_hint": "SECURITY"
+    },
+    "oscp": {
+      "canonical": "OSCP",
+      "bundle_skills": ["tests de pénétration", "exploitation", "cybersécurité offensive"],
+      "cluster_hint": "SECURITY"
+    },
+    "comptia security+": {
+      "canonical": "CompTIA Security+",
+      "bundle_skills": ["cybersécurité", "gestion des risques", "cryptographie", "réseau"],
+      "cluster_hint": "SECURITY"
+    },
+    "apics cpim": {
+      "canonical": "APICS CPIM",
+      "bundle_skills": ["gestion de production", "planification", "supply chain", "MRP"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "cpim": {
+      "canonical": "CPIM",
+      "bundle_skills": ["gestion de production", "planification", "supply chain", "MRP"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "apics cscp": {
+      "canonical": "APICS CSCP",
+      "bundle_skills": ["supply chain", "approvisionnement", "logistique", "S&OP"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "cscp": {
+      "canonical": "CSCP",
+      "bundle_skills": ["supply chain", "approvisionnement", "logistique"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "lean six sigma": {
+      "canonical": "Lean Six Sigma",
+      "bundle_skills": ["amélioration continue", "lean", "six sigma", "résolution de problèmes"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "green belt": {
+      "canonical": "Green Belt",
+      "bundle_skills": ["lean six sigma", "amélioration continue", "résolution de problèmes"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "black belt": {
+      "canonical": "Black Belt",
+      "bundle_skills": ["lean six sigma", "amélioration continue", "management de projet", "statistiques"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "six sigma green belt": {
+      "canonical": "Six Sigma Green Belt",
+      "bundle_skills": ["lean six sigma", "amélioration continue", "résolution de problèmes"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "six sigma black belt": {
+      "canonical": "Six Sigma Black Belt",
+      "bundle_skills": ["lean six sigma", "amélioration continue", "statistiques avancées"],
+      "cluster_hint": "SUPPLY_OPS"
+    },
+    "google analytics": {
+      "canonical": "Google Analytics",
+      "bundle_skills": ["web analytics", "marketing digital", "mesure de performance", "SEO"],
+      "cluster_hint": "MARKETING_SALES"
+    },
+    "google ads": {
+      "canonical": "Google Ads",
+      "bundle_skills": ["publicité en ligne", "SEA", "marketing digital", "gestion de campagnes"],
+      "cluster_hint": "MARKETING_SALES"
+    },
+    "hubspot": {
+      "canonical": "HubSpot Certified",
+      "bundle_skills": ["CRM", "inbound marketing", "automatisation marketing", "lead nurturing"],
+      "cluster_hint": "MARKETING_SALES"
+    },
+    "salesforce certified": {
+      "canonical": "Salesforce Certified",
+      "bundle_skills": ["CRM", "Salesforce", "gestion commerciale", "automatisation"],
+      "cluster_hint": "MARKETING_SALES"
+    },
+    "rncp": {
+      "canonical": "RNCP",
+      "bundle_skills": [],
+      "cluster_hint": null
+    },
+    "itil": {
+      "canonical": "ITIL",
+      "bundle_skills": ["gestion des services IT", "ITSM", "ITIL", "gouvernance IT"],
+      "cluster_hint": "DATA_IT"
+    },
+    "itil v4": {
+      "canonical": "ITIL v4",
+      "bundle_skills": ["gestion des services IT", "ITSM", "ITIL", "gouvernance IT"],
+      "cluster_hint": "DATA_IT"
+    },
+    "togaf": {
+      "canonical": "TOGAF",
+      "bundle_skills": ["architecture d'entreprise", "gouvernance IT", "architecture SI"],
+      "cluster_hint": "DATA_IT"
+    },
+    "data science": {
+      "canonical": "Data Science Certification",
+      "bundle_skills": ["machine learning", "Python", "statistiques", "analyse de données"],
+      "cluster_hint": "DATA_IT"
+    },
+    "tensorflow": {
+      "canonical": "TensorFlow Developer",
+      "bundle_skills": ["deep learning", "TensorFlow", "machine learning", "Python"],
+      "cluster_hint": "DATA_IT"
+    },
+    "machine learning": {
+      "canonical": "Machine Learning Certification",
+      "bundle_skills": ["machine learning", "Python", "modélisation", "statistiques"],
+      "cluster_hint": "DATA_IT"
+    },
+    "microsoft certified": {
+      "canonical": "Microsoft Certified",
+      "bundle_skills": ["Microsoft", "infrastructure IT"],
+      "cluster_hint": "DATA_IT"
+    },
+    "dp-900": {
+      "canonical": "DP-900",
+      "bundle_skills": ["données cloud", "Azure", "bases de données"],
+      "cluster_hint": "DATA_IT"
+    },
+    "ai-900": {
+      "canonical": "AI-900",
+      "bundle_skills": ["intelligence artificielle", "Azure AI", "machine learning"],
+      "cluster_hint": "DATA_IT"
+    },
+    "hrbp": {
+      "canonical": "HRBP",
+      "bundle_skills": ["business partner RH", "gestion des talents", "développement RH"],
+      "cluster_hint": "HR"
+    },
+    "gpec": {
+      "canonical": "GPEC",
+      "bundle_skills": ["gestion prévisionnelle des emplois", "compétences", "ressources humaines"],
+      "cluster_hint": "HR"
+    }
+  }
+}

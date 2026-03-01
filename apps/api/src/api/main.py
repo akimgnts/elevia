@@ -36,6 +36,8 @@ from .routes.dev_tools import router as dev_tools_router
 from .routes.profile_key_skills import router as profile_key_skills_router
 from .routes.context import router as context_router
 from .routes.documents import router as documents_router
+from .routes.profile_structured import router as profile_structured_router
+from documents.llm_client import is_llm_available
 
 
 app = FastAPI(
@@ -84,6 +86,7 @@ app.include_router(dev_tools_router)  # DEV-only tools (guarded by ELEVIA_DEV_TO
 app.include_router(profile_key_skills_router)  # POST /profile/key-skills (display-only ranking)
 app.include_router(context_router)  # POST /context/*
 app.include_router(documents_router)  # POST /documents/cv (CV Generator v1)
+app.include_router(profile_structured_router)  # GET|POST /profile/structured (COMPASS D+)
 
 # OBS: startup diagnostic (DEV-only, non-invasive)
 _dev_tools_on = os.getenv("ELEVIA_DEV_TOOLS", "").lower() in {"1", "true", "yes"}
@@ -91,6 +94,10 @@ logger.info(
     "[startup] ELEVIA_DEV_TOOLS=%s → POST /dev/cv-delta %s",
     os.getenv("ELEVIA_DEV_TOOLS", "unset"),
     "ENABLED" if _dev_tools_on else "DISABLED (returns 403)",
+)
+logger.info(
+    "[startup] OPENAI_API_KEY_present=%s",
+    "true" if is_llm_available() else "false",
 )
 
 
