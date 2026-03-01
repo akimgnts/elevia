@@ -43,6 +43,10 @@ class ExplainPayloadV1(BaseModel):
     generic_ratio: float               # fraction of matched weight that is generic
     cluster_level: Literal["STRICT", "NEIGHBOR", "OUT"]
     tool_notes: List[ToolNote]
+    # Sector signal (optional — requires cluster_idf_table at call site)
+    sector_signal: Optional[float] = None
+    sector_signal_level: Optional[Literal["LOW", "MED", "HIGH"]] = None
+    sector_signal_note: Optional[str] = None
     debug_trace: Optional[Dict[str, Any]] = None  # only when ELEVIA_DEBUG_SIGNAL=1
 
 
@@ -58,3 +62,7 @@ class ExplainPayloadV1Compact(BaseModel):
     incoherence_reasons: List[str]      # top 2
     matched_count: int
     missing_count: int
+    # Sector signal (optional — matches ExplainPayloadV1)
+    sector_signal: Optional[float] = None
+    sector_signal_level: Optional[Literal["LOW", "MED", "HIGH"]] = None
+    sector_signal_note: Optional[str] = None

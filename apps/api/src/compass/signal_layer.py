@@ -25,6 +25,7 @@ from .contracts import (
     ToolNote,
 )
 from .context_engine import compute_cluster_level
+from .cluster_signal import compute_sector_signal
 
 _EPS = 1e-9
 _REGISTRY_DIR = Path(__file__).parent / "registry"
@@ -240,6 +241,7 @@ def compute_confidence(
     generic_ratio: float,
     tool_notes: List[ToolNote],
     cfg: Dict,
+    sector_signal_level: Optional[str] = None,
 ) -> Tuple[str, List[str]]:
     """
     Compute confidence level and incoherence reasons.
@@ -249,11 +251,16 @@ def compute_confidence(
       TOOL_UNSPECIFIED:<key> — any tool with UNSPECIFIED status
       LOW_RARE_SIGNAL        — rare_signal_level == "LOW"
       CLUSTER_OUT            — cluster_level == "OUT"
+      LOW_SECTOR_SIGNAL      — sector LOW + score_core >= 0.90 + baseline HIGH
 
     Confidence baseline:
       base = min(rare_signal_conf, cluster_conf)
       if any reasons → cap at "MED"
       if rare_signal_level == "LOW" → force "LOW"
+
+    Sector nudge (never upgrades, only caps HIGH to MED):
+      sector LOW + baseline HIGH + score_core >= 0.90 → MED + LOW_SECTOR_SIGNAL
+      sector signal never overrides LOW confidence
     """
     generic_cap = float(cfg.get("generic_cap_ratio", 0.15))
 
@@ -268,8 +275,6 @@ def compute_confidence(
     if cluster_level == "OUT":
         reasons.append("CLUSTER_OUT")
 
-    reasons = sorted(set(reasons))
-
     # Map to numeric confidence values
     signal_val = {"LOW": 0, "MED": 1, "HIGH": 2}.get(rare_signal_level, 1)
     cluster_val = {"STRICT": 2, "NEIGHBOR": 1, "OUT": 0}.get(cluster_level, 1)
@@ -282,6 +287,13 @@ def compute_confidence(
     if rare_signal_level == "LOW":
         confidence = "LOW"
 
+    # Sector nudge: caps HIGH to MED only for very high scores with low sector fit
+    # Never upgrades confidence. Never overrides LOW.
+    if sector_signal_level == "LOW" and confidence == "HIGH" and score_core >= 0.90:
+        reasons.append("LOW_SECTOR_SIGNAL")
+        confidence = "MED"
+
+    reasons = sorted(set(reasons))
     return confidence, reasons
 
 
@@ -297,12 +309,17 @@ def build_explain_payload_v1(
     cfg: Dict,
     generic_set: Optional[Set[str]] = None,
     tool_registry: Optional[Dict] = None,
+    offer_cluster: Optional[str] = None,
+    cluster_idf_table: Optional[Dict[str, Dict[str, float]]] = None,
 ) -> ExplainPayloadV1:
     """
     Build the full ExplainPayloadV1 from already-available scoring outputs.
 
     Does NOT recompute score_core — reads it as given.
     Ordering: by (-idf, label) — deterministic, no randomness.
+
+    Optional sector signal: requires offer_cluster + cluster_idf_table.
+    Controlled by cfg["sector_signal_enabled"].
     """
     generic_set = generic_set if generic_set is not None else load_generic_set()
     tool_registry = tool_registry if tool_registry is not None else load_tool_registry()
@@ -344,7 +361,19 @@ def build_explain_payload_v1(
         max_hits=int(cfg.get("max_tool_hits", 5)),
     )
 
-    # Confidence
+    # Sector signal (optional — requires cluster_idf_table + offer_cluster)
+    sector_result: Dict = {"sector_signal": None, "sector_signal_level": None, "sector_signal_note": None}
+    if cfg.get("sector_signal_enabled", False) and cluster_idf_table is not None and offer_cluster:
+        thresholds = cfg.get("rare_signal_thresholds", {})
+        sector_result = compute_sector_signal(
+            matched_skill_keys=matched_keys,
+            offer_skill_keys=offer_keys,
+            offer_cluster=offer_cluster,
+            cluster_idf_table=cluster_idf_table,
+            thresholds=thresholds,
+        )
+
+    # Confidence (sector_signal_level passed for optional nudge)
     confidence, incoherence_reasons = compute_confidence(
         score_core=score_core,
         rare_signal_level=rare_signal_level,
@@ -352,6 +381,7 @@ def build_explain_payload_v1(
         generic_ratio=generic_ratio,
         tool_notes=tool_notes,
         cfg=cfg,
+        sector_signal_level=sector_result.get("sector_signal_level"),
     )
 
     # Stable ordering: (-idf_value, label)
@@ -374,6 +404,7 @@ def build_explain_payload_v1(
             "generic_ratio": generic_ratio,
             "rare_signal": rare_signal,
             "tool_notes": [t.model_dump() for t in tool_notes],
+            "sector_signal": sector_result.get("sector_signal"),
         }
 
     return ExplainPayloadV1(
@@ -388,6 +419,9 @@ def build_explain_payload_v1(
         generic_ratio=generic_ratio,
         cluster_level=cluster_level,
         tool_notes=tool_notes,
+        sector_signal=sector_result.get("sector_signal"),
+        sector_signal_level=sector_result.get("sector_signal_level"),
+        sector_signal_note=sector_result.get("sector_signal_note"),
         debug_trace=debug_trace,
     )
 
@@ -402,4 +436,7 @@ def build_explain_compact(payload: ExplainPayloadV1, full_offer_skill_count: int
         incoherence_reasons=payload.incoherence_reasons[:2],
         matched_count=len(payload.matched_skills),
         missing_count=len(payload.missing_offer_skills),
+        sector_signal=payload.sector_signal,
+        sector_signal_level=payload.sector_signal_level,
+        sector_signal_note=payload.sector_signal_note,
     )

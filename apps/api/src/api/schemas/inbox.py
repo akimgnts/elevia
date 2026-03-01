@@ -85,6 +85,10 @@ class CompassExplainCompact(BaseModel):
     incoherence_reasons: List[str] = Field(default_factory=list)  # top 2
     matched_count: int = 0
     missing_count: int = 0
+    # Sector signal (optional — populated when sector_signal_enabled=true)
+    sector_signal: Optional[float] = None
+    sector_signal_level: Optional[str] = None  # LOW | MED | HIGH
+    sector_signal_note: Optional[str] = None
 
 
 # ── Main item/response ────────────────────────────────────────────────────────

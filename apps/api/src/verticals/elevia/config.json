@@ -8,6 +8,8 @@
       "med": 0.55
     },
     "max_tool_hits": 5,
-    "max_list_items_ui": 8
+    "max_list_items_ui": 8,
+    "sector_signal_enabled": true,
+    "rerank_use_sector_signal": true
   }
 }

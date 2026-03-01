@@ -49,6 +49,7 @@ from matching import MatchingEngine
 from matching.extractors import extract_profile
 from compass.contracts import SkillRef
 from compass.signal_layer import build_explain_payload_v1, build_explain_compact, get_signal_cfg
+from compass.cluster_signal import compute_cluster_skill_stats, compute_cluster_idf
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -59,6 +60,38 @@ MIN_RESULTS = 10
 MIN_STRICT = 5   # below this, auto-widen to neighbors
 SUSPICIOUS_SCORE_THRESHOLD = 95
 SIGNAL_MIN_K = 1.0
+
+# Module-level cache for cluster IDF tables (built once, reused per request)
+_cluster_idf_cache: Optional[Dict[str, Dict[str, float]]] = None
+
+
+def _build_or_get_cluster_idf(catalog: List[Dict]) -> Dict[str, Dict[str, float]]:
+    """
+    Build and cache cluster-level IDF tables from the catalog.
+
+    Detects cluster for each offer, then computes per-cluster skill frequency.
+    Result is cached at module level (engine lifetime). Thread-safe for read-only use.
+    """
+    global _cluster_idf_cache
+    if _cluster_idf_cache is not None:
+        return _cluster_idf_cache
+
+    # Detect cluster for every catalog offer (same logic as inbox scoring loop)
+    offer_clusters: Dict[str, str] = {}
+    for cat_offer in catalog:
+        oid = str(cat_offer.get("id") or "")
+        skill_labels = _extract_skill_labels(cat_offer.get("skills_display") or cat_offer.get("skills") or [])
+        cluster, _, _ = detect_offer_cluster(
+            cat_offer.get("title"),
+            cat_offer.get("description") or cat_offer.get("display_description"),
+            skill_labels,
+        )
+        offer_clusters[oid] = cluster or "OTHER"
+
+    stats = compute_cluster_skill_stats(catalog, offer_clusters, skill_field="skills_uri")
+    _cluster_idf_cache = compute_cluster_idf(stats)
+    return _cluster_idf_cache
+
 
 # Fixed adjacency matrix (cluster → neighbor clusters)
 _ADJACENCY: Dict[str, List[str]] = {
@@ -290,6 +323,14 @@ async def get_inbox(
 
     freq_table = load_generic_skill_table()
     offer_count = get_offer_count()
+
+    # Compass config + cluster IDF (cached, built once per catalog load)
+    _inbox_cfg = get_signal_cfg()
+    _sector_enabled = _inbox_cfg.get("sector_signal_enabled", False)
+    _rerank_enabled = _inbox_cfg.get("rerank_use_sector_signal", False)
+    _cluster_idf: Optional[Dict[str, Dict[str, float]]] = (
+        _build_or_get_cluster_idf(catalog) if _sector_enabled else None
+    )
 
     items: List[InboxItem] = []
     _explain_debug: Dict[str, tuple] = {}  # offer_id → (match_debug, matched, missing)
@@ -568,7 +609,6 @@ async def get_inbox(
                 _compass_offer_skills = [SkillRef(uri=None, label=l) for l in _m_lbls + _miss_lbls]
                 _compass_matched_skills = [SkillRef(uri=None, label=l) for l in _m_lbls]
 
-            _cfg = get_signal_cfg()
             _compass_full = build_explain_payload_v1(
                 score_core=item.score_raw or (item.score / 100.0),
                 matched_skills=_compass_matched_skills,
@@ -576,10 +616,31 @@ async def get_inbox(
                 offer_text=_offer_c.get("description") or "",
                 domain_bucket=item.domain_bucket or "out",
                 idf_map=engine.idf_table,
-                cfg=_cfg,
+                cfg=_inbox_cfg,
+                offer_cluster=item.offer_cluster,
+                cluster_idf_table=_cluster_idf,
             )
             _compact = build_explain_compact(_compass_full, len(_offer_uris))
             item.explain_v1 = CompassExplainCompact(**_compact.model_dump())
+
+    # Optional sector-aware rerank (no score change — secondary sort only)
+    if _rerank_enabled and items:
+        _conf_rank = {"HIGH": 2, "MED": 1, "LOW": 0}
+        _sig_rank = {"HIGH": 2, "MED": 1, "LOW": 0}
+        _bucket_rank = {"strict": 2, "neighbor": 1, "out": 0}
+
+        def _rerank_key(item: InboxItem) -> tuple:
+            ev1 = item.explain_v1
+            return (
+                -_bucket_rank.get(item.domain_bucket or "out", 0),
+                -item.score,
+                -_conf_rank.get(ev1.confidence if ev1 else "LOW", 0),
+                -_sig_rank.get(ev1.rare_signal_level if ev1 else "LOW", 0),
+                -(ev1.sector_signal if ev1 and ev1.sector_signal is not None else 0.0),
+                item.offer_id,  # stable tie-break
+            )
+
+        items = sorted(items, key=_rerank_key)
 
     t_rome = time.perf_counter()
 
