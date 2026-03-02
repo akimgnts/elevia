@@ -197,6 +197,23 @@ class ClusterDomainSkill(BaseModel):
     validation_score: float = 0.0
 
 
+class EscoResolvedSkill(BaseModel):
+    """
+    A cluster library token resolved to an ESCO URI via the mapping table.
+
+    Provenance:
+      library_token_to_esco — ACTIVE library token mapped to ESCO (manually or via alias)
+      llm_token_to_esco     — token injected by Compass E LLM, then mapped to ESCO
+
+    Display/observability only — NEVER injected into score_core.
+    """
+    token_normalized: str
+    esco_uri: str
+    esco_label: Optional[str] = None
+    provenance: Literal["library_token_to_esco", "llm_token_to_esco"]
+    mapping_source: str  # "manual" | "alias_lookup" | "llm_suggestion"
+
+
 class CVEnrichmentResult(BaseModel):
     """
     Result of CV enrichment pass through the cluster library.
@@ -205,6 +222,7 @@ class CVEnrichmentResult(BaseModel):
     domain_skills_pending: newly recorded PENDING tokens from this CV
     llm_triggered: True if LLM was called (ESCO count < threshold)
     llm_suggestions: validated tokens suggested by LLM
+    resolved_to_esco: domain tokens resolved to ESCO URIs (display-only, no score_core impact)
     score_core is NEVER present here.
     """
     cluster: Optional[str] = None
@@ -214,6 +232,7 @@ class CVEnrichmentResult(BaseModel):
     llm_triggered: bool = False
     llm_suggestions: List[Dict[str, str]] = []
     rejected_tokens: List[Dict[str, str]] = []  # [{token, token_norm, reason_code}] — debug/obs
+    resolved_to_esco: List[EscoResolvedSkill] = []  # DOMAIN→ESCO mappings (display-only)
 
 
 class MarketRadarReport(BaseModel):

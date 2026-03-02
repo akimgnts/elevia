@@ -71,6 +71,7 @@ class CVPipelineResult:
     domain_skills_pending_count: int = 0
     compass_e_enabled: bool = False
     llm_fired: bool = False
+    resolved_to_esco: List[Dict[str, Any]] = field(default_factory=list)  # display-only
     warnings: List[str] = field(default_factory=list)
 
 
@@ -174,6 +175,7 @@ def run_cv_pipeline(
     domain_skills_active: List[str] = []
     domain_skills_pending_count = 0
     llm_fired = False
+    resolved_to_esco: List[Dict[str, Any]] = []
 
     if use_compass_e:
         try:
@@ -189,6 +191,7 @@ def run_cv_pipeline(
             domain_skills_active = enrichment.domain_skills_active
             domain_skills_pending_count = len(enrichment.domain_skills_pending)
             llm_fired = enrichment.llm_triggered
+            resolved_to_esco = [r.model_dump() for r in enrichment.resolved_to_esco]
 
             if mode == "baseline+llm_legacy":
                 mode = "baseline+llm_legacy+compass_e"
@@ -223,5 +226,6 @@ def run_cv_pipeline(
         domain_skills_pending_count=domain_skills_pending_count,
         compass_e_enabled=use_compass_e,
         llm_fired=llm_fired,
+        resolved_to_esco=resolved_to_esco,
         warnings=warnings,
     )

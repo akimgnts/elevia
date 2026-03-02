@@ -93,6 +93,8 @@ class ParseFileResponse(BaseModel):
     profile: dict
     warnings: List[str] = []
     profile_cluster: Optional[dict] = None
+    resolved_to_esco: List[dict] = []        # domain tokens → ESCO URI (display-only)
+    skill_provenance: dict = {}              # {baseline_esco, library_token_to_esco, llm_token_to_esco}
 
 
 # ── Route ──────────────────────────────────────────────────────────────────────
@@ -270,6 +272,7 @@ async def parse_file(
     domain_skills_active: List[str] = []
     domain_skills_pending_count = 0
     llm_fired = False
+    resolved_to_esco: List[dict] = []
 
     if compass_e_on:
         try:
@@ -285,8 +288,27 @@ async def parse_file(
             domain_skills_active = enrichment.domain_skills_active
             domain_skills_pending_count = len(enrichment.domain_skills_pending)
             llm_fired = enrichment.llm_triggered
+            resolved_to_esco = [r.model_dump() for r in enrichment.resolved_to_esco]
         except Exception as exc:
             logger.warning("[parse-file] compass_e enrichment failed (non-fatal): %s", type(exc).__name__)
+
+    # Provenance summary (baseline_esco always present from validated_items)
+    baseline_esco_labels = [
+        str(item.get("label") or item.get("uri") or "")
+        for item in result.get("validated_items", [])
+        if isinstance(item, dict) and (item.get("label") or item.get("uri"))
+    ]
+    skill_provenance = {
+        "baseline_esco": baseline_esco_labels,
+        "library_token_to_esco": [
+            r["token_normalized"] for r in resolved_to_esco
+            if r.get("provenance") == "library_token_to_esco"
+        ],
+        "llm_token_to_esco": [
+            r["token_normalized"] for r in resolved_to_esco
+            if r.get("provenance") == "llm_token_to_esco"
+        ],
+    }
 
     # Build pipeline_used tag
     if compass_e_on and llm_fired:
@@ -338,4 +360,6 @@ async def parse_file(
         profile=result["profile"],
         warnings=result.get("warnings", []) + warnings,
         profile_cluster=profile_cluster,
+        resolved_to_esco=resolved_to_esco,
+        skill_provenance=skill_provenance,
     )

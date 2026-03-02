@@ -20,7 +20,7 @@ import unicodedata
 from typing import Dict, List, Optional, Set
 
 from .cluster_library import ClusterLibraryStore, classify_token, normalize_token, get_library
-from .contracts import CVEnrichmentResult
+from .contracts import CVEnrichmentResult, EscoResolvedSkill
 
 logger = logging.getLogger(__name__)
 
@@ -215,6 +215,23 @@ def enrich_cv(
     # Refresh active after any LLM recording
     active_skills = lib.get_active_skills(cluster)
 
+    # 5. Resolve ACTIVE library tokens to ESCO URIs (display-only, never score_core)
+    esco_resolved: List[EscoResolvedSkill] = []
+    if active_skills and cluster:
+        llm_token_norms = {s["token"] for s in llm_suggestions}
+        esco_map = lib.resolve_tokens_to_esco(cluster, active_skills)
+        for tok, m in esco_map.items():
+            prov = "llm_token_to_esco" if tok in llm_token_norms else "library_token_to_esco"
+            esco_resolved.append(
+                EscoResolvedSkill(
+                    token_normalized=tok,
+                    esco_uri=m["esco_uri"],
+                    esco_label=m.get("esco_label"),
+                    provenance=prov,
+                    mapping_source=m["mapping_source"],
+                )
+            )
+
     return CVEnrichmentResult(
         cluster=cluster,
         domain_skills_active=active_skills,
@@ -223,4 +240,5 @@ def enrich_cv(
         llm_triggered=llm_triggered,
         llm_suggestions=llm_suggestions,
         rejected_tokens=rejected[:50],
+        resolved_to_esco=esco_resolved,
     )

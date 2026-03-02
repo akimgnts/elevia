@@ -309,6 +309,22 @@ CREATE TABLE IF NOT EXISTS cluster_library_meta (
 )
 """
 
+_SQL_CREATE_ESCO_MAP = """
+CREATE TABLE IF NOT EXISTS cluster_token_esco_map (
+    id                TEXT PRIMARY KEY,
+    cluster           TEXT NOT NULL,
+    token_normalized  TEXT NOT NULL,
+    esco_uri          TEXT NOT NULL,
+    esco_label        TEXT,
+    status            TEXT DEFAULT 'ACTIVE',
+    mapping_source    TEXT NOT NULL DEFAULT 'manual',
+    occurrences_mapped INTEGER DEFAULT 0,
+    first_mapped_at   TEXT NOT NULL,
+    last_mapped_at    TEXT NOT NULL,
+    UNIQUE(cluster, token_normalized)
+)
+"""
+
 _META_KEYS = ("llm_calls_total", "llm_calls_avoided", "new_skills_via_offers")
 
 
@@ -379,6 +395,7 @@ class ClusterLibraryStore:
             conn = self._conn()
             conn.execute(_SQL_CREATE_SKILLS)
             conn.execute(_SQL_CREATE_META)
+            conn.execute(_SQL_CREATE_ESCO_MAP)
             for key in _META_KEYS:
                 conn.execute(
                     "INSERT OR IGNORE INTO cluster_library_meta (key, value_int) VALUES (?, 0)",
@@ -652,6 +669,109 @@ class ClusterLibraryStore:
                 pending_skills=[r["token_normalized"] for r in pending_rows],
                 rejected_tokens=[],   # validated at record time — not stored
             )
+
+    # ── DOMAIN→ESCO mapping (cluster-aware, display-only, no score_core impact) ──
+
+    def add_esco_mapping(
+        self,
+        cluster: str,
+        token: str,
+        esco_uri: str,
+        esco_label: Optional[str] = None,
+        mapping_source: str = "manual",
+    ) -> None:
+        """
+        Register (or update) a domain-token → ESCO-URI mapping.
+
+        mapping_source: "manual" | "alias_lookup" | "llm_suggestion"
+        Score invariance: this mapping is NEVER read by the scoring engine.
+        """
+        norm = _nfkd_lower(token)
+        tid = _make_id(cluster, norm)
+        now = _utcnow()
+        with self._lock:
+            conn = self._conn()
+            conn.execute(
+                """INSERT INTO cluster_token_esco_map
+                   (id, cluster, token_normalized, esco_uri, esco_label,
+                    status, mapping_source, first_mapped_at, last_mapped_at)
+                   VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, ?, ?)
+                   ON CONFLICT(cluster, token_normalized) DO UPDATE SET
+                     esco_uri=excluded.esco_uri,
+                     esco_label=excluded.esco_label,
+                     mapping_source=excluded.mapping_source,
+                     last_mapped_at=excluded.last_mapped_at""",
+                (tid, cluster, norm, esco_uri, esco_label, mapping_source, now, now),
+            )
+            conn.commit()
+
+    def get_esco_mapping(self, cluster: str, token: str) -> Optional[Dict[str, str]]:
+        """
+        Return the ACTIVE ESCO mapping for (cluster, token), or None.
+        Returns {"esco_uri", "esco_label", "mapping_source"}.
+        """
+        norm = _nfkd_lower(token)
+        with self._lock:
+            conn = self._conn()
+            row = conn.execute(
+                "SELECT esco_uri, esco_label, mapping_source "
+                "FROM cluster_token_esco_map "
+                "WHERE cluster=? AND token_normalized=? AND status='ACTIVE'",
+                (cluster, norm),
+            ).fetchone()
+            if row:
+                return {
+                    "esco_uri": row["esco_uri"],
+                    "esco_label": row["esco_label"] or None,
+                    "mapping_source": row["mapping_source"],
+                }
+            return None
+
+    def resolve_tokens_to_esco(
+        self,
+        cluster: str,
+        tokens: List[str],
+    ) -> Dict[str, Dict[str, str]]:
+        """
+        Batch-resolve a list of token_normalized values to their ESCO mappings.
+
+        Returns {token_norm: {"esco_uri", "esco_label", "mapping_source"}}
+        for tokens that have an ACTIVE mapping.  Increments occurrences_mapped.
+        Score invariance: callers MUST NOT feed returned URIs into score_core.
+        """
+        if not tokens:
+            return {}
+        # Normalize inputs (active_skills are already normalized, but be safe)
+        norms = [_nfkd_lower(t) for t in tokens]
+        placeholders = ",".join("?" * len(norms))
+        with self._lock:
+            conn = self._conn()
+            rows = conn.execute(
+                f"SELECT token_normalized, esco_uri, esco_label, mapping_source "
+                f"FROM cluster_token_esco_map "
+                f"WHERE cluster=? AND status='ACTIVE' "
+                f"AND token_normalized IN ({placeholders})",
+                [cluster, *norms],
+            ).fetchall()
+            result: Dict[str, Dict[str, str]] = {
+                r["token_normalized"]: {
+                    "esco_uri": r["esco_uri"],
+                    "esco_label": r["esco_label"] or None,
+                    "mapping_source": r["mapping_source"],
+                }
+                for r in rows
+            }
+            if result:
+                now = _utcnow()
+                for tok_norm in result:
+                    conn.execute(
+                        "UPDATE cluster_token_esco_map "
+                        "SET occurrences_mapped=occurrences_mapped+1, last_mapped_at=? "
+                        "WHERE cluster=? AND token_normalized=?",
+                        (now, cluster, tok_norm),
+                    )
+                conn.commit()
+            return result
 
     def save_reports(self) -> None:
         """Write metrics + radar to JSON files in data/reports/."""
