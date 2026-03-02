@@ -34,12 +34,15 @@ from documents.schemas import (
     CvDocumentResponse,
     ForOfferRequest,
     ForOfferResponse,
+    CvHtmlResponse,
+    CvHtmlMeta,
     ForOfferLetterRequest,
     ForOfferLetterResponse,
 )
 from documents.cv_generator import generate_cv, enrich_payload, get_offer
 from documents.context_builder import build_matched_skills
 from documents.preview_renderer import render_preview_markdown
+from documents.html_renderer import render_cv_html
 from documents.cover_letter_generator import generate_cover_letter
 from documents.llm_client import is_llm_available
 from api.utils.env import get_llm_api_key
@@ -86,6 +89,14 @@ async def create_cv(req: CvRequest) -> CvDocumentResponse:
         raise HTTPException(status_code=500, detail="CV generation failed — see logs")
 
     duration_ms = int((time.time() - t0) * 1000)
+
+    logger.info(
+        '{"event":"DOCUMENTS_REQUEST","kind":"cv","offer_id":"%s","cache_hit":%s,"llm_enabled":%s,"duration_ms":%d}',
+        req.offer_id,
+        "true" if payload.meta.cache_hit else "false",
+        "true" if is_llm_available() else "false",
+        duration_ms,
+    )
 
     return CvDocumentResponse(
         ok=True,
@@ -168,12 +179,93 @@ async def create_cv_for_offer(req: ForOfferRequest) -> ForOfferResponse:
         duration_ms,
         "true" if context_used else "false",
     )
+    logger.info(
+        '{"event":"DOCUMENTS_REQUEST","kind":"cv","offer_id":"%s","cache_hit":%s,"llm_enabled":%s,"duration_ms":%d}',
+        req.offer_id,
+        "true" if enriched.meta.cache_hit else "false",
+        "true" if is_llm_available() else "false",
+        duration_ms,
+    )
 
     return ForOfferResponse(
         ok=True,
         document=enriched,
         preview_text=preview,
         context_used=context_used,
+        duration_ms=duration_ms,
+    )
+
+
+@router.post("/documents/cv/html/for-offer", response_model=CvHtmlResponse)
+async def create_cv_html_for_offer(req: ForOfferRequest) -> CvHtmlResponse:
+    """
+    Render a deterministic HTML CV for a given offer using the versioned template.
+    Input is identical to /documents/cv/for-offer.
+    """
+    t0 = time.time()
+    profile = req.profile or {}
+
+    offer = get_offer(req.offer_id)
+    if not offer:
+        raise HTTPException(status_code=404, detail=f"Offer not found: {req.offer_id}")
+
+    cv_req = CvRequest(
+        offer_id=req.offer_id,
+        profile=profile,
+        profile_id=req.profile_id,
+        lang=req.lang,
+    )
+    try:
+        payload = generate_cv(cv_req)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        logger.error(
+            '{"event":"DOCUMENTS_CV_HTML_FAIL","error_class":"%s","safe_message":"cv generation failed"}',
+            type(exc).__name__,
+        )
+        raise HTTPException(status_code=500, detail="CV HTML generation failed — see logs")
+
+    ctx = req.context
+    matched_core, _ = build_matched_skills(
+        offer=offer,
+        profile=profile,
+        matched_skills=ctx.matched_skills if ctx else None,
+        missing_skills=ctx.missing_skills if ctx else None,
+    )
+    enriched = enrich_payload(payload, matched_core)
+
+    html_output = render_cv_html(enriched, template_version="cv_v1", profile=profile, offer=offer)
+    duration_ms = int((time.time() - t0) * 1000)
+
+    logger.info(
+        '{"event":"DOCUMENTS_CV_HTML_REQUEST","offer_id":"%s","cache_hit":%s,'
+        '"template_version":"%s","duration_ms":%d,"llm_used":%s}',
+        req.offer_id,
+        "true" if enriched.meta.cache_hit else "false",
+        "cv_v1",
+        duration_ms,
+        "true" if (is_llm_available() and not enriched.meta.fallback_used) else "false",
+    )
+    logger.info(
+        '{"event":"DOCUMENTS_CV_HTML_RENDERED","offer_id":"%s","html_size":%d,"blocks_count":%d}',
+        req.offer_id,
+        len(html_output),
+        len(enriched.experience_blocks),
+    )
+
+    meta = CvHtmlMeta(
+        offer_id=req.offer_id,
+        prompt_version=enriched.meta.prompt_version,
+        cache_hit=enriched.meta.cache_hit,
+        fallback_used=enriched.meta.fallback_used,
+        template_version="cv_v1",
+    )
+
+    return CvHtmlResponse(
+        ok=True,
+        html=html_output,
+        meta=meta,
         duration_ms=duration_ms,
     )
 
@@ -231,6 +323,11 @@ async def create_letter_for_offer(req: ForOfferLetterRequest) -> ForOfferLetterR
         req.offer_id,
         duration_ms,
         "true" if context_used else "false",
+    )
+    logger.info(
+        '{"event":"DOCUMENTS_REQUEST","kind":"letter","offer_id":"%s","cache_hit":false,"llm_enabled":false,"duration_ms":%d}',
+        req.offer_id,
+        duration_ms,
     )
 
     return ForOfferLetterResponse(

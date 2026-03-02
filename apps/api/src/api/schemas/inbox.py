@@ -95,10 +95,13 @@ class CompassExplainCompact(BaseModel):
 
 class InboxItem(BaseModel):
     offer_id: str
+    source: Optional[str] = None
     title: str
     company: Optional[str] = None
     country: Optional[str] = None
     city: Optional[str] = None
+    publication_date: Optional[str] = None
+    is_vie: Optional[bool] = None
     score: int = Field(..., ge=0, le=100)
     score_pct: Optional[int] = Field(default=None, ge=0, le=100)
     score_raw: Optional[float] = None
@@ -150,6 +153,10 @@ class InboxResponse(BaseModel):
     items: List[InboxItem]
     total_matched: int
     total_decided: int
+    total_estimate: Optional[int] = None
+    applied_filters: Optional[Dict[str, Any]] = None
+    page: Optional[int] = None
+    page_size: Optional[int] = None
     meta: Optional[InboxMeta] = None
 
 

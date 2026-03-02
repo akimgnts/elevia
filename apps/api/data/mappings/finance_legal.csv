@@ -1,0 +1,30 @@
+cluster,token,esco_uri,esco_label,status,mapping_source
+# FINANCE_LEGAL — seed initial v1
+# URIs validées contre catalog (965 offres VIE actives)
+# Format: cluster,token,esco_uri,esco_label,status,mapping_source
+#
+# Règle de mapping: token = terme métier non-ESCO fréquent dans les CVs finance/juridique
+# URI = compétence ESCO la plus proche sémantiquement, présente dans les offres VIE
+
+# ── Analyse & valorisation financière ────────────────────────────────────────
+FINANCE_LEGAL,opcvm,http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1,analyse financière,ACTIVE,manual
+FINANCE_LEGAL,sicav,http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1,analyse financière,ACTIVE,manual
+FINANCE_LEGAL,lbo,http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1,analyse financière,ACTIVE,manual
+FINANCE_LEGAL,dcf,http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1,analyse financière,ACTIVE,manual
+FINANCE_LEGAL,m&a,http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1,analyse financière,ACTIVE,manual
+FINANCE_LEGAL,due_diligence,http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1,analyse financière,ACTIVE,manual
+FINANCE_LEGAL,valorisation,http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1,analyse financière,ACTIVE,manual
+
+# ── Comptabilité & normes ─────────────────────────────────────────────────────
+FINANCE_LEGAL,ifrs,http://data.europa.eu/esco/skill/4a855abe-ac5b-4e95-ac10-3c1adceeee28,normes internationales d'information financière,ACTIVE,manual
+FINANCE_LEGAL,audit,http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b,comptabilité,ACTIVE,manual
+FINANCE_LEGAL,consolidation,http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b,comptabilité,ACTIVE,manual
+FINANCE_LEGAL,liasse_fiscale,http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b,comptabilité,ACTIVE,manual
+FINANCE_LEGAL,bilan,http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b,comptabilité,ACTIVE,manual
+
+# ── Outils & ERP ─────────────────────────────────────────────────────────────
+FINANCE_LEGAL,erp,http://data.europa.eu/esco/skill/f0393af3-bcd9-41af-a36e-0cfb83b60081,gérer le système normalisé de planification des ressources d'une entreprise,ACTIVE,manual
+FINANCE_LEGAL,sap,http://data.europa.eu/esco/skill/f0393af3-bcd9-41af-a36e-0cfb83b60081,gérer le système normalisé de planification des ressources d'une entreprise,ACTIVE,manual
+FINANCE_LEGAL,bloomberg,http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180,exploration de données,ACTIVE,manual
+FINANCE_LEGAL,factset,http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3,utiliser un logiciel d'analyse de données spécifique,ACTIVE,manual
+FINANCE_LEGAL,excel,http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be,utiliser un logiciel de tableur,ACTIVE,manual

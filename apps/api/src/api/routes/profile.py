@@ -8,6 +8,7 @@ Endpoint POST /profile/ingest_cv pour extraire un profil structuré depuis un CV
 
 import json
 import logging
+import os
 import time
 import uuid
 from datetime import datetime, timezone
@@ -41,6 +42,9 @@ from profile import (
     ProviderNotConfiguredError,
 )
 from semantic.profile_cache import cache_profile_text, compute_profile_hash
+from compass.profile_structurer import structure_profile_text_v1
+from api.utils.profile_summary_builder import build_profile_summary
+from api.utils.profile_summary_store import store_profile_summary
 
 
 logger = logging.getLogger(__name__)
@@ -138,6 +142,20 @@ async def ingest_cv(request: CvIngestRequest) -> CvExtractionResponse:
 
         profile_hash = compute_profile_hash(validated.model_dump())
         cache_profile_text(profile_hash, request.cv_text)
+
+        # ── Profile summary cache (deterministic) ────────────────────────────
+        try:
+            structured = structure_profile_text_v1(request.cv_text, debug=False)
+            summary = build_profile_summary(structured)
+            store_profile_summary(profile_hash, summary.model_dump())
+            if os.getenv("ELEVIA_DEBUG_PROFILE_SUMMARY", "").strip().lower() in {"1", "true", "yes", "on"}:
+                logger.info(
+                    "PROFILE_SUMMARY_STORED profile_id=%s last_updated=%s",
+                    profile_hash,
+                    summary.last_updated,
+                )
+        except Exception as exc:
+            logger.warning("[profile/ingest_cv] profile summary failed: %s", type(exc).__name__)
 
         duration_ms = int((time.time() - start_time) * 1000)
         obs_log("cv_ingested", run_id=run_id, status="success", duration_ms=duration_ms,

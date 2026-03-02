@@ -13,6 +13,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      "/api": {
+        target: API_TARGET,
+        changeOrigin: true,
+        ws: false,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
       "/dev": {
         target: API_TARGET,
         changeOrigin: true,

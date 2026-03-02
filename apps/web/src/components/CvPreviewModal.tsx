@@ -19,9 +19,12 @@ export function CvPreviewModal({
   onClose: () => void;
 }) {
   const { document: doc, preview_text, context_used } = preview;
+  const sanitizedPreview = preview_text.includes("## ATS")
+    ? preview_text.split("## ATS")[0].trimEnd()
+    : preview_text;
 
   function handleDownload() {
-    const blob = new Blob([preview_text], { type: "text/markdown;charset=utf-8" });
+    const blob = new Blob([sanitizedPreview], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     const slug = offerTitle
@@ -55,10 +58,6 @@ export function CvPreviewModal({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {/* ATS badge */}
-            <span className="rounded-full bg-neutral-800 px-2.5 py-1 text-xs font-medium text-neutral-300">
-              ATS {doc.ats_notes.ats_score_estimate}%
-            </span>
             {/* Context-used badge */}
             {context_used && (
               <span className="rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2.5 py-1 text-xs text-emerald-300">
@@ -108,21 +107,9 @@ export function CvPreviewModal({
         {/* Markdown preview */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <pre className="whitespace-pre-wrap text-xs text-neutral-300 font-mono leading-relaxed">
-            {preview_text}
+            {sanitizedPreview}
           </pre>
         </div>
-
-        {/* Missing keywords footer */}
-        {doc.ats_notes.missing_keywords.length > 0 && (
-          <div className="px-5 py-3 border-t border-neutral-800 bg-neutral-950/60">
-            <p className="text-xs text-neutral-500">
-              À renforcer :{" "}
-              <span className="text-amber-400">
-                {doc.ats_notes.missing_keywords.join(", ")}
-              </span>
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

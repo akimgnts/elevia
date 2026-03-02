@@ -248,10 +248,14 @@ export interface ExplainBlock {
 export interface InboxItem {
   offer_id: string;
   id?: string;
+  source?: string;
   title: string;
+  title_clean?: string | null;
   company: string | null;
   country: string | null;
   city: string | null;
+  publication_date?: string | null;
+  is_vie?: boolean;
   score: number;
   score_pct?: number;
   score_raw?: number;
@@ -309,7 +313,30 @@ export interface InboxResponse {
   items: InboxItem[];
   total_matched: number;
   total_decided: number;
+  total_estimate?: number | null;
+  applied_filters?: Record<string, unknown> | null;
+  page?: number | null;
+  page_size?: number | null;
   meta?: InboxMeta;
+}
+
+export interface ProfileSummaryExperience {
+  title: string | null;
+  company: string | null;
+  dates: string | null;
+  impact_one_liner: string | null;
+}
+
+export interface ProfileSummaryV1 {
+  cv_quality_level: "LOW" | "MED" | "HIGH";
+  cv_quality_reasons: string[];
+  top_skills: SkillRefItem[];
+  tools: string[];
+  certifications: string[];
+  education: string[];
+  experiences: ProfileSummaryExperience[];
+  cluster_hints: string[];
+  last_updated: string;
 }
 
 export interface OfferSemanticResponse {
@@ -388,6 +415,24 @@ export interface ContextFit {
   evidence_spans: EvidenceSpan[];
 }
 
+export interface InboxFilters {
+  q_company?: string;
+  country?: string;
+  city?: string;
+  contract_type?: string;
+  published_from?: string;
+  published_to?: string;
+  domain_bucket?: "strict" | "neighbor" | "out";
+  min_score?: number;
+  confidence?: "LOW" | "MED" | "HIGH";
+  rare_level?: "LOW" | "MED" | "HIGH";
+  sector_level?: "LOW" | "MED" | "HIGH";
+  has_tool_unspecified?: boolean;
+  page?: number;
+  page_size?: number;
+  sort?: "published_desc" | "score_desc" | "confidence_desc";
+}
+
 export async function fetchInbox(
   profile: unknown,
   profileId: string,
@@ -395,8 +440,29 @@ export async function fetchInbox(
   limit = 20,
   explain = true,
   domainMode: "in_domain" | "all" = "in_domain",
+  filters?: InboxFilters,
 ): Promise<InboxResponse> {
-  const url = `${API_BASE}/inbox?domain_mode=${encodeURIComponent(domainMode)}`;
+  const params = new URLSearchParams();
+  params.set("domain_mode", domainMode);
+  if (filters?.q_company) params.set("q_company", filters.q_company);
+  if (filters?.country) params.set("country", filters.country);
+  if (filters?.city) params.set("city", filters.city);
+  if (filters?.contract_type) params.set("contract_type", filters.contract_type);
+  if (filters?.published_from) params.set("published_from", filters.published_from);
+  if (filters?.published_to) params.set("published_to", filters.published_to);
+  if (filters?.domain_bucket) params.set("domain_bucket", filters.domain_bucket);
+  if (typeof filters?.min_score === "number") params.set("min_score", String(filters.min_score));
+  if (filters?.confidence) params.set("confidence", filters.confidence);
+  if (filters?.rare_level) params.set("rare_level", filters.rare_level);
+  if (filters?.sector_level) params.set("sector_level", filters.sector_level);
+  if (typeof filters?.has_tool_unspecified === "boolean") {
+    params.set("has_tool_unspecified", String(filters.has_tool_unspecified));
+  }
+  if (typeof filters?.page === "number") params.set("page", String(filters.page));
+  if (typeof filters?.page_size === "number") params.set("page_size", String(filters.page_size));
+  if (filters?.sort) params.set("sort", filters.sort);
+
+  const url = `${API_BASE}/inbox?${params.toString()}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -472,6 +538,21 @@ export async function fetchProfileContext(
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
     throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+export async function fetchProfileSummary(profileId: string): Promise<ProfileSummaryV1> {
+  const url = `${API_BASE}/profile/summary?profile_id=${encodeURIComponent(profileId)}`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    const err = new Error(`API ${res.status}: ${txt}`);
+    (err as Error & { status?: number }).status = res.status;
+    throw err;
   }
   return res.json();
 }

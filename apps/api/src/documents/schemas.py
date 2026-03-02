@@ -107,6 +107,23 @@ class ForOfferResponse(BaseModel):
     duration_ms: int = 0
 
 
+# ── HTML CV (rendered) ───────────────────────────────────────────────────────
+
+class CvHtmlMeta(BaseModel):
+    offer_id: str
+    prompt_version: str
+    cache_hit: bool = False
+    fallback_used: bool = False
+    template_version: str = "cv_v1"
+
+
+class CvHtmlResponse(BaseModel):
+    ok: bool = True
+    html: str
+    meta: CvHtmlMeta
+    duration_ms: int = 0
+
+
 # ── Cover letter (deterministic, no LLM) ─────────────────────────────────────
 
 class CoverLetterBlock(BaseModel):

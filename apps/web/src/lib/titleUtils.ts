@@ -8,6 +8,8 @@ const PREFIX_RE = /^(?:\s*(?:V\.?\s?I\.?\s?E\.?|VIE|Volontariat\s+International)
 const SUFFIX_GENDER_RE = /\s*(?:\((?:H\/F|F\/H|M\/F)\)|(?:H\/F|F\/H|M\/F))\s*$/i;
 const SUFFIX_REF_BRACKET_RE = /\s*\[\s*ref[:\s#-]*[^\]]+\]\s*$/i;
 const SUFFIX_REF_RE = /\s*ref[:\s#-]*[^\s]+\s*$/i;
+const ACRONYM_TOKENS = new Set(["SQL", "SAP", "AWS", "BI", "CRM", "VIE", "API", "UX", "UI", "ETL", "CDI", "CDD"]);
+const LOWERCASE_TOKENS = new Set(["de", "du", "des", "la", "le", "les", "et", "en", "d", "l", "au", "aux", "pour", "sur", "chez"]);
 
 function normalizeWhitespace(input: string) {
   return input.replace(/\s+/g, " ").trim();
@@ -65,6 +67,32 @@ function toSentenceCase(input: string) {
   return sentence;
 }
 
+function toSmartTitleCase(input: string) {
+  const tokens = input.split(" ");
+  return tokens
+    .map((token, index) => {
+      if (!token || token === "—") return token;
+      const core = token.replace(/^[^A-Za-zÀ-ÖØ-öø-ÿ0-9]+|[^A-Za-zÀ-ÖØ-öø-ÿ0-9]+$/g, "");
+      if (!core) return token;
+      const upperCore = core.toUpperCase();
+      if (ACRONYM_TOKENS.has(upperCore)) {
+        return token.replace(core, upperCore);
+      }
+      const hasLower = /[a-zà-öø-ÿ]/.test(core);
+      const hasUpper = /[A-ZÀ-ÖØ-öø-ÿ]/.test(core);
+      if (hasLower && hasUpper) {
+        return token;
+      }
+      const lowerCore = core.toLowerCase();
+      if (index > 0 && LOWERCASE_TOKENS.has(lowerCore)) {
+        return token.replace(core, lowerCore);
+      }
+      const titleCore = lowerCore.charAt(0).toUpperCase() + lowerCore.slice(1);
+      return token.replace(core, titleCore);
+    })
+    .join(" ");
+}
+
 export function truncateOfferTitle(value: string, maxLen = 90) {
   if (!value) return value;
   if (value.length <= maxLen) return value;
@@ -97,6 +125,10 @@ export function cleanOfferTitle(raw: string): CleanTitleResult {
     if (sentence !== value) changes.push("sentence_case");
     value = sentence;
   }
+
+  const smartCased = toSmartTitleCase(value);
+  if (smartCased !== value) changes.push("smart_title_case");
+  value = smartCased;
 
   if (!value) {
     value = normalizedOriginal || original;

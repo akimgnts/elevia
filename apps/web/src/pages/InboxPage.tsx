@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertCircle,
   Bug,
-  Check,
   ChevronDown,
   FileText,
   Filter,
@@ -19,24 +18,22 @@ import {
   fetchOfferContext,
   fetchProfileContext,
   fetchContextFit,
-  postDecision,
+  fetchProfileSummary,
   applyPack,
   type ApplyPackResponse,
   type ExplainBlock,
-  type SkillExplainItem,
   type OfferSemanticResponse,
   type OfferContext,
   type ProfileContext,
   type ContextFit,
-  type InboxMeta,
   type CompassExplainCompact,
+  type ProfileSummaryV1,
+  type InboxFilters,
 } from "../lib/api";
 import { buildMatchingProfile, type SkillsSource } from "../lib/profileMatching";
-import { upsertApplication, listApplications } from "../api/applications";
 import { useProfileStore } from "../store/profileStore";
 import { SEED_PROFILE } from "../fixtures/seedProfile";
 import { OfferDetailModal, type OfferDetail } from "../components/OfferDetailModal";
-import { formatRelativeDate } from "../lib/dateUtils";
 import { cleanOfferTitle, truncateOfferTitle } from "../lib/titleUtils";
 
 // ============================================================================
@@ -44,8 +41,36 @@ import { cleanOfferTitle, truncateOfferTitle } from "../lib/titleUtils";
 // ============================================================================
 
 const STORAGE_PREFIX = "elevia_inbox";
-const DEFAULT_THRESHOLD = import.meta.env.DEV ? 0 : 65;
-const THRESHOLD_OPTIONS = [0, 40, 50, 65, 75, 85];
+const DEFAULT_THRESHOLD = 0;
+const THRESHOLD_OPTIONS = [0, 55, 65, 75, 85];
+
+type FiltersState = {
+  q_company: string;
+  country: string;
+  city: string;
+  contract_type: string;
+  published_from: string;
+  published_to: string;
+  domain_bucket: "" | "strict" | "neighbor" | "out";
+  confidence: "" | "LOW" | "MED" | "HIGH";
+  rare_level: "" | "LOW" | "MED" | "HIGH";
+  sector_level: "" | "LOW" | "MED" | "HIGH";
+  has_tool_unspecified: boolean | null;
+};
+
+const DEFAULT_FILTERS: FiltersState = {
+  q_company: "",
+  country: "",
+  city: "",
+  contract_type: "",
+  published_from: "",
+  published_to: "",
+  domain_bucket: "",
+  confidence: "",
+  rare_level: "",
+  sector_level: "",
+  has_tool_unspecified: null,
+};
 
 // Debug mode: localStorage.setItem("elevia_debug_inbox", "1")
 const DEBUG_INBOX = import.meta.env.DEV && localStorage.getItem("elevia_debug_inbox") === "1";
@@ -63,6 +88,7 @@ type NormalizedInboxItem = {
   id?: string;
   source?: string;
   title: string;
+  title_clean?: string | null;
   company: string | null;
   country: string | null;
   city: string | null;
@@ -108,6 +134,9 @@ type LastApiCall = {
   profile_id: string;
   min_score: number;
   limit: number;
+  page?: number;
+  page_size?: number;
+  total_estimate?: number | null;
   response_items: number;
   total_matched: number;
   total_decided: number;
@@ -148,44 +177,49 @@ function cleanDescriptionSnippet(value?: string | null, maxLen = 180): string {
   return `${stripped.slice(0, maxLen).trim()}…`;
 }
 
-function formatRoleType(role?: OfferContext["role_type"]) {
-  switch (role) {
-    case "BI_REPORTING":
-      return "BI/Reporting";
-    case "DATA_ANALYSIS":
-      return "Data Analysis";
-    case "DATA_ENGINEERING":
-      return "Data Engineering";
-    case "PRODUCT_ANALYTICS":
-      return "Product Analytics";
-    case "OPS_ANALYTICS":
-      return "Ops Analytics";
-    case "MIXED":
-      return "Mixte";
-    default:
-      return null;
-  }
+function mapConfidenceCopy(confidence?: "LOW" | "MED" | "HIGH") {
+  if (confidence === "HIGH") return "Alignement solide";
+  if (confidence === "MED") return "Alignement probable";
+  if (confidence === "LOW") return "Match fragile";
+  return "Alignement probable";
 }
 
-function formatCluster(cluster?: string | null) {
-  switch (cluster) {
-    case "DATA_IT":
-      return "Data/IT";
-    case "FINANCE_LEGAL":
-      return "Finance/Juridique";
-    case "SUPPLY_OPS":
-      return "Supply/Ops";
-    case "MARKETING_SALES":
-      return "Marketing/Vente";
-    case "ENGINEERING_INDUSTRY":
-      return "Ingénierie/Industrie";
-    case "ADMIN_HR":
-      return "Admin/RH";
-    case "OTHER":
-      return "Autre";
-    default:
-      return null;
-  }
+function confidenceToneClass(confidence?: "LOW" | "MED" | "HIGH") {
+  if (confidence === "HIGH") return "text-emerald-700";
+  if (confidence === "MED") return "text-amber-700";
+  if (confidence === "LOW") return "text-rose-700";
+  return "text-slate-600";
+}
+
+function formatLocation(city?: string | null, country?: string | null) {
+  if (city && country) return `${city}, ${country}`;
+  if (city) return city;
+  if (country) return country;
+  return null;
+}
+
+function bucketLabel(bucket?: "strict" | "neighbor" | "out" | "") {
+  if (bucket === "strict") return "Bucket: Strict";
+  if (bucket === "neighbor") return "Bucket: Voisin";
+  if (bucket === "out") return "Bucket: Hors domaine";
+  return null;
+}
+
+function levelLabel(level?: "LOW" | "MED" | "HIGH") {
+  if (level === "HIGH") return "Haut";
+  if (level === "MED") return "Moyen";
+  if (level === "LOW") return "Bas";
+  return null;
+}
+
+function normalizeFiltersState(filters: FiltersState): FiltersState {
+  return {
+    ...filters,
+    q_company: filters.q_company.trim(),
+    country: filters.country.trim(),
+    city: filters.city.trim(),
+    contract_type: filters.contract_type.trim(),
+  };
 }
 
 /**
@@ -223,6 +257,7 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       id: typeof rec.id === "string" ? rec.id : undefined,
       source: typeof rec.source === "string" ? rec.source : undefined,
       title: typeof rec.title === "string" ? rec.title : "Offre",
+      title_clean: typeof rec.title_clean === "string" ? rec.title_clean : null,
       company: typeof rec.company === "string" ? rec.company : null,
       country: typeof rec.country === "string" ? rec.country : null,
       city: typeof rec.city === "string" ? rec.city : null,
@@ -322,631 +357,480 @@ function EmptyState({
   );
 }
 
-// ── WhyThisScore panel ─────────────────────────────────────────────────────────
-
-function SkillPill({ item }: { item: SkillExplainItem }) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-slate-100 text-slate-700">
-      {item.label}
-      {item.weighted && (
-        <span className="rounded px-1 bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold text-[9px]">
-          pondérée
-        </span>
-      )}
-    </span>
-  );
-}
-
-function WhyThisScore({ explain, score, matchedCount, missingCount }: {
-  explain: ExplainBlock | null;
-  score: number;
-  matchedCount: number;
-  missingCount: number;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const [showAllMatched, setShowAllMatched] = useState(false);
-  const [showAllMissing, setShowAllMissing] = useState(false);
-
-  if (!explain) {
-    return (
-      <div className="mt-3 text-[11px] text-slate-400">
-        Explication non disponible.
-      </div>
-    );
-  }
-
-  const { breakdown, matched_display, missing_display, matched_full, missing_full } = explain;
-
-  const matchedList = showAllMatched ? matched_full : matched_display;
-  const missingList = showAllMissing ? missing_full : missing_display;
-
-  return (
-    <div className="mt-3 border-t border-slate-100 pt-3">
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center justify-between text-left text-[11px] font-semibold text-slate-500 hover:text-slate-700 transition"
-      >
-        <span>Pourquoi ce score ?</span>
-        <ChevronDown className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} />
-      </button>
-
-      {expanded && (
-        <div className="mt-3 space-y-3 text-[11px]">
-
-          {/* A: Résumé */}
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-slate-600">
-            <span>Score <strong className="text-slate-900">{score}</strong></span>
-            <span>Matchées <strong className="text-emerald-700">{matchedCount}</strong></span>
-            <span>Manquantes <strong className="text-rose-600">{missingCount}</strong></span>
-          </div>
-          {score === 100 && missingCount === 0 && (
-            <div className="text-[10px] text-emerald-700">
-              100% = toutes les compétences ESCO alignées + critères langue/formation/pays OK.
-            </div>
-          )}
-          {score === 100 && missingCount > 0 && (
-            <div className="text-[10px] text-slate-500">
-              Score arrondi (total {breakdown.total.toFixed(1)} / 100).
-            </div>
-          )}
-
-          {/* B: Ce qui fait monter le score */}
-          {matchedList.length > 0 && (
-            <div>
-              <div className="mb-1.5 font-semibold text-emerald-700">Ce qui fait monter le score</div>
-              <div className="flex flex-wrap gap-1">
-                {matchedList.map((s) => (
-                  <SkillPill key={s.label} item={s} />
-                ))}
-              </div>
-              {!showAllMatched && matched_full.length > matched_display.length && (
-                <button
-                  onClick={() => setShowAllMatched(true)}
-                  className="mt-1 text-[10px] text-cyan-600 hover:underline"
-                >
-                  Voir tout ({matched_full.length})
-                </button>
-              )}
-              {showAllMatched && matched_full.length > matched_display.length && (
-                <button
-                  onClick={() => setShowAllMatched(false)}
-                  className="mt-1 text-[10px] text-slate-400 hover:underline"
-                >
-                  Réduire
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* C: Ce qui manque vraiment */}
-          {missingList.length > 0 && (
-            <div>
-              <div className="mb-1.5 font-semibold text-rose-600">Ce qui manque vraiment</div>
-              <div className="flex flex-wrap gap-1">
-                {missingList.map((s) => (
-                  <span
-                    key={s.label}
-                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-rose-50 text-rose-700"
-                  >
-                    {s.label}
-                    {s.weighted && (
-                      <span className="rounded px-1 bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold text-[9px]">
-                        pondérée
-                      </span>
-                    )}
-                  </span>
-                ))}
-              </div>
-              {!showAllMissing && missing_full.length > missing_display.length && (
-                <button
-                  onClick={() => setShowAllMissing(true)}
-                  className="mt-1 text-[10px] text-cyan-600 hover:underline"
-                >
-                  Voir tout ({missing_full.length})
-                </button>
-              )}
-              {showAllMissing && missing_full.length > missing_display.length && (
-                <button
-                  onClick={() => setShowAllMissing(false)}
-                  className="mt-1 text-[10px] text-slate-400 hover:underline"
-                >
-                  Réduire
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* D: Transparence — breakdown */}
-          <div className="rounded-lg bg-slate-50 px-3 py-2 space-y-1">
-            <div className="font-semibold text-slate-500 mb-1">Détail du score</div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">Compétences ({breakdown.skills_weight}%)</span>
-              <span className="font-medium text-slate-800">{breakdown.skills_score.toFixed(1)} pts</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">
-                Langues ({breakdown.language_weight}%)
-                {breakdown.language_match && <span className="ml-1 text-emerald-600">✓</span>}
-              </span>
-              <span className="font-medium text-slate-800">{breakdown.language_score.toFixed(1)} pts</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">
-                Formation ({breakdown.education_weight}%)
-                {breakdown.education_match && <span className="ml-1 text-emerald-600">✓</span>}
-              </span>
-              <span className="font-medium text-slate-800">{breakdown.education_score.toFixed(1)} pts</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">
-                Pays ({breakdown.country_weight}%)
-                {breakdown.country_match && <span className="ml-1 text-emerald-600">✓</span>}
-              </span>
-              <span className="font-medium text-slate-800">{breakdown.country_score.toFixed(1)} pts</span>
-            </div>
-          </div>
-
-        </div>
-      )}
-    </div>
-  );
-}
-
 function OfferCard({
   offer,
-  onShortlist,
-  onDismiss,
   onApply,
   onOpen,
-  isShortlisted,
   isPending,
-  roleTypeLabel,
 }: {
   offer: NormalizedInboxItem;
-  onShortlist: () => void;
-  onDismiss: () => void;
   onApply: () => void;
   onOpen: () => void;
-  isShortlisted: boolean;
   isPending: boolean;
-  roleTypeLabel?: string | null;
 }) {
-  const matchedDisplay = offer.matched_skills_display;
-  const missingDisplay = offer.missing_skills_display;
-  const unmapped = offer.unmapped_tokens;
-  const showFallback = offer.score === 15 && matchedDisplay.length === 0;
-  const scoreBadgeClass =
-    offer.score >= 75
-      ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-      : offer.score >= 60
-        ? "bg-amber-50 text-amber-700 border-amber-200"
-        : "bg-slate-100 text-slate-600 border-slate-200";
-  const scoreLabel = `Score ${offer.score}%`;
-  const relativeDate = offer.publication_date
-    ? formatRelativeDate(offer.publication_date)
-    : null;
-  const showVie = offer.source === "business_france" || offer.is_vie;
-  const clusterLabel = formatCluster(offer.offer_cluster);
-  const signalLabel =
-    typeof offer.signal_score === "number" ? `Signal ${offer.signal_score.toFixed(1)}` : null;
-  const isSuspicious = offer.coherence === "suspicious";
-  const titleInfo = useMemo(() => cleanOfferTitle(offer.title), [offer.title]);
+  const relativeTitle = offer.title_clean || offer.title;
+  const titleInfo = useMemo(() => cleanOfferTitle(relativeTitle), [relativeTitle]);
   const displayTitle = truncateOfferTitle(titleInfo.display, 90);
-  const freshnessBadge =
-    relativeDate?.freshness === "new"
-      ? "Nouveau"
-      : relativeDate?.freshness === "recent"
-        ? "Récent"
-        : null;
-  const uriSummary =
-    typeof offer.intersection_count === "number" && typeof offer.offer_uri_count === "number"
-      ? `${offer.intersection_count} compétences reconnues sur ${offer.offer_uri_count}`
-      : null;
+  const showVie = offer.source === "business_france" || offer.is_vie;
+  const confidence = offer.explain_v1?.confidence;
+  const confidenceCopy = mapConfidenceCopy(confidence);
+  const missingCount =
+    typeof offer.explain_v1?.missing_count === "number"
+      ? offer.explain_v1.missing_count
+      : offer.missing_skills_display?.length || offer.missing_skills?.length || 0;
+  const warningNeeded = offer.score >= 95 && confidence && confidence !== "HIGH";
+  const decisionText =
+    offer.domain_bucket === "out"
+      ? "Hors domaine — à considérer si pivot"
+      : `${confidenceCopy}${
+          missingCount > 0 ? ` • ${missingCount} compétence${missingCount > 1 ? "s" : ""} clé${missingCount > 1 ? "s" : ""} à renforcer` : ""
+        }`;
+  const decisionTone = offer.domain_bucket === "out" ? "text-slate-600" : confidenceToneClass(confidence);
+  const locationLabel = formatLocation(offer.city, offer.country);
+  const titleLineParts = [displayTitle];
+  if (showVie) titleLineParts.push("VIE");
+  if (offer.city) titleLineParts.push(offer.city);
+  const titleLine = titleLineParts.join(" — ");
+  const subtitleParts = [offer.company, locationLabel].filter(Boolean) as string[];
+  const subtitle = subtitleParts.join(" • ");
+  const attenuationClass =
+    offer.score >= 70 ? "" : offer.score >= 55 ? "opacity-90" : "opacity-70 grayscale";
+  const weakMatch = offer.score < 55;
 
   return (
     <div
-      className={`group bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm hover:shadow-lg transition-all flex flex-col h-full ${isPending ? "opacity-50 pointer-events-none" : ""}`}
+      className={`group bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow-lg transition-all flex flex-col h-full ${
+        isPending ? "opacity-50 pointer-events-none" : ""
+      } ${attenuationClass}`}
       onClick={onOpen}
       onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}
       role="button"
       tabIndex={0}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="min-w-0 flex-1 text-base font-bold text-slate-900 leading-tight line-clamp-2">
-          {displayTitle}
-        </h3>
-        <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${scoreBadgeClass}`}>
-          {scoreLabel}
-        </span>
-      </div>
-
-      {/* Badges */}
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-        {offer.country && (
-          <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-            {offer.country}
-          </span>
-        )}
-        {offer.city && (
-          <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
-            {offer.city}
-          </span>
-        )}
-        {showVie && (
-          <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
-            VIE
-          </span>
-        )}
-        {offer.company && (
-          <span className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-600">
-            {offer.company}
-          </span>
-        )}
-        {clusterLabel && (
-          <span className="px-2.5 py-1 rounded-full bg-slate-900 text-white border border-slate-800">
-            {clusterLabel}
-          </span>
-        )}
-        {offer.domain_bucket === "neighbor" && (
-          <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-            Voisin
-          </span>
-        )}
-        {offer.domain_bucket === "out" && (
-          <span className="px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200">
-            Hors domaine
-          </span>
-        )}
-        {signalLabel && (
-          <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100">
-            {signalLabel}
-          </span>
-        )}
-        {isSuspicious && (
-          <span className="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-            Incohérent
-          </span>
-        )}
-        {relativeDate && (
-          <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-500 border border-slate-100">
-            {relativeDate.label}
-          </span>
-        )}
-        {freshnessBadge && (
-          <span
-            className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
-              relativeDate?.freshness === "new"
-                ? "bg-rose-50 text-rose-700 border-rose-200"
-                : "bg-amber-50 text-amber-700 border-amber-200"
-            }`}
-          >
-            {freshnessBadge}
-          </span>
-        )}
-        {showFallback && (
-          <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-            Fallback score
-          </span>
-        )}
-        {roleTypeLabel && (
-          <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-            {roleTypeLabel}
-          </span>
-        )}
-        {/* Compass signal badges */}
-        {offer.explain_v1 && (
-          <>
-            <span className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
-              offer.explain_v1.confidence === "HIGH"
-                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                : offer.explain_v1.confidence === "MED"
-                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                  : "bg-rose-50 text-rose-700 border-rose-200"
-            }`}>
-              Confiance {offer.explain_v1.confidence}
-            </span>
-            {offer.explain_v1.rare_signal_level !== "HIGH" && (
-              <span className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
-                offer.explain_v1.rare_signal_level === "MED"
-                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                  : "bg-rose-50 text-rose-700 border-rose-200"
-              }`}>
-                Signal {offer.explain_v1.rare_signal_level}
-              </span>
-            )}
-            {offer.explain_v1.sector_signal_level && offer.explain_v1.sector_signal_level !== "HIGH" && (
-              <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-violet-50 text-violet-700 border border-violet-200">
-                Secteur {offer.explain_v1.sector_signal_level}
-              </span>
-            )}
-            {offer.explain_v1.incoherence_reasons.slice(0, 2).map((reason) => (
-              <span key={reason} className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                {reason.replace("TOOL_UNSPECIFIED:", "Outil non précisé: ").replace("_", " ").toLowerCase()}
-              </span>
-            ))}
-            {offer.score >= 95 && offer.explain_v1.confidence !== "HIGH" && (
-              <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-300">
-                Score élevé, confiance limitée
-              </span>
-            )}
-          </>
-        )}
-      </div>
-
-      {offer.description_snippet && (
-        <p className="mt-3 text-xs text-slate-500 leading-relaxed line-clamp-3">
-          {offer.description_snippet}
-        </p>
-      )}
-
-      {/* Matched Skills (top 3) */}
-      {matchedDisplay.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          {matchedDisplay.slice(0, 3).map((skill) => (
-            <span
-              key={skill}
-              className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100"
-            >
-              {skill}
-            </span>
-          ))}
-          {matchedDisplay.length > 3 && (
-            <span className="text-[10px] text-slate-400">+{matchedDisplay.length - 3}</span>
-          )}
-        </div>
-      ) : (
-        <div className="mt-4 text-[11px] text-slate-500">
-          Aucune compétence détectée en commun
-        </div>
-      )}
-
-      {missingDisplay.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {missingDisplay.slice(0, 3).map((skill) => (
-            <span
-              key={skill}
-              className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100"
-            >
-              {skill}
-            </span>
-          ))}
-          {missingDisplay.length > 3 && (
-            <span className="text-[10px] text-slate-400">+{missingDisplay.length - 3}</span>
-          )}
-        </div>
-      )}
-
-      {DEBUG_INBOX && unmapped.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {unmapped.slice(0, 3).map((skill) => (
-            <span
-              key={skill}
-              className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200"
-            >
-              {skill}
-            </span>
-          ))}
-          {unmapped.length > 3 && (
-            <span className="text-[10px] text-slate-400">+{unmapped.length - 3}</span>
-          )}
-          <span className="text-[10px] text-slate-400">Non mappées ESCO</span>
-        </div>
-      )}
-
-      {uriSummary && (
-        <div className="mt-2 text-[11px] text-slate-500">
-          {uriSummary}
-        </div>
-      )}
-
-      {DEBUG_INBOX && (
-        <div className="mt-2 text-[10px] text-slate-400">
-          Compétences (URIs): {offer.skills_uri_count ?? "—"} | Doublons collapse:{" "}
-          {offer.skills_uri_collapsed_dupes ?? "—"} | Non mappées: {offer.skills_unmapped_count ?? "—"}
-        </div>
-      )}
-
-      {/* Reasons */}
-      {offer.reasons.length > 0 && (
-        <div className="mt-3 space-y-1.5">
-          {offer.reasons.slice(0, 2).map((reason, idx) => (
-            <div key={idx} className="flex items-start gap-2 text-xs text-slate-600">
-              <Check className="mt-0.5 w-3 h-3 text-emerald-500 shrink-0" />
-              <span className="line-clamp-1">{reason}</span>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-semibold text-slate-900 leading-snug line-clamp-2">
+            {titleLine}
+          </h3>
+          {subtitle && (
+            <div className="mt-1 text-xs text-slate-500 line-clamp-1">
+              {subtitle}
             </div>
-          ))}
+          )}
         </div>
-      )}
+        <div className="shrink-0 text-right">
+          <div className="text-4xl font-bold text-slate-900 leading-none">{offer.score}%</div>
+          {weakMatch && (
+            <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Match faible
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* Why this score — collapsible */}
-      <WhyThisScore
-        explain={offer.explain}
-        score={offer.score}
-        matchedCount={matchedDisplay.length}
-        missingCount={missingDisplay.length}
-      />
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+        <span className={`line-clamp-1 ${decisionTone}`}>
+          {decisionText}
+        </span>
+        {warningNeeded && (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            Score élevé, vérification conseillée
+          </span>
+        )}
+      </div>
 
-      {/* Actions */}
-      <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-auto pt-5 flex flex-wrap items-center gap-2">
         <button
-          onClick={(e) => { e.stopPropagation(); onApply(); }}
+          onClick={(e) => { e.stopPropagation(); onOpen(); }}
           className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
         >
+          Voir détails
+        </button>
+
+        <button
+          onClick={(e) => { e.stopPropagation(); onApply(); }}
+          className="px-3 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
+        >
           Générer
-        </button>
-
-        <button
-          onClick={(e) => { e.stopPropagation(); onShortlist(); }}
-          disabled={isShortlisted}
-          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
-            isShortlisted
-              ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
-              : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-          }`}
-        >
-          {isShortlisted ? "Shortlisté" : "Shortlist"}
-        </button>
-
-        <button
-          onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-          className="ml-auto px-4 py-2 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition"
-        >
-          Écarter
         </button>
       </div>
     </div>
   );
 }
 
-function FilterBar({
+function FiltersDrawer({
+  isOpen,
+  draft,
+  onDraftChange,
   threshold,
   onThresholdChange,
-  searchQuery,
-  onSearchChange,
-  onReset,
-  onShowAll,
-  domainMode,
-  onDomainModeChange,
-  suggestOutOfDomain,
-  sortMode,
-  onSortChange,
-  receivedCount,
-  displayedCount,
-  maskedCount,
-  hasActiveFilters,
+  filtersDirty,
+  onApply,
+  onCancel,
 }: {
+  isOpen: boolean;
+  draft: FiltersState;
+  onDraftChange: (next: FiltersState) => void;
   threshold: number;
   onThresholdChange: (value: number) => void;
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  onReset: () => void;
-  onShowAll: () => void;
-  domainMode: "in_domain" | "all";
-  onDomainModeChange: (value: "in_domain" | "all") => void;
-  suggestOutOfDomain: boolean;
-  sortMode: "score" | "recent" | "oldest";
-  onSortChange: (value: "score" | "recent" | "oldest") => void;
-  receivedCount: number;
-  displayedCount: number;
-  maskedCount: number;
-  hasActiveFilters: boolean;
+  filtersDirty: boolean;
+  onApply: () => void;
+  onCancel: () => void;
+}) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  if (!isOpen) return null;
+
+  const update = (patch: Partial<FiltersState>) => {
+    onDraftChange({ ...draft, ...patch });
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-40 flex items-stretch justify-end bg-slate-900/40 backdrop-blur-sm"
+      onClick={onCancel}
+    >
+      <div
+        className="w-full max-w-md bg-white shadow-2xl p-5 flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-slate-500" />
+            <h3 className="text-sm font-semibold text-slate-900">Filtres</h3>
+          </div>
+          <button
+            onClick={onCancel}
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Pays</label>
+              <input
+                type="text"
+                value={draft.country}
+                onChange={(e) => update({ country: e.target.value })}
+                placeholder="Ex: France"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Ville</label>
+              <input
+                type="text"
+                value={draft.city}
+                onChange={(e) => update({ city: e.target.value })}
+                placeholder="Ex: Lyon"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Contrat</label>
+              <select
+                value={draft.contract_type}
+                onChange={(e) => update({ contract_type: e.target.value })}
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+              >
+                <option value="">Tous</option>
+                <option value="VIE">VIE</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Bucket</label>
+              <select
+                value={draft.domain_bucket}
+                onChange={(e) => update({ domain_bucket: e.target.value as FiltersState["domain_bucket"] })}
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+              >
+                <option value="">Tous</option>
+                <option value="strict">Strict</option>
+                <option value="neighbor">Voisin</option>
+                <option value="out">Hors domaine</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Publié après</label>
+              <input
+                type="date"
+                value={draft.published_from}
+                onChange={(e) => update({ published_from: e.target.value })}
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Publié avant</label>
+              <input
+                type="date"
+                value={draft.published_to}
+                onChange={(e) => update({ published_to: e.target.value })}
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Seuil score</label>
+            <div className="mt-2 flex bg-slate-100 p-1 rounded-xl flex-wrap">
+              {THRESHOLD_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => onThresholdChange(opt)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-lg transition ${
+                    threshold === opt
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  {opt === 0 ? "Tous" : `${opt}%`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Outil ambigu</label>
+            <select
+              value={draft.has_tool_unspecified === null ? "" : draft.has_tool_unspecified ? "yes" : "no"}
+              onChange={(e) =>
+                update({
+                  has_tool_unspecified: e.target.value === "" ? null : e.target.value === "yes",
+                })
+              }
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+            >
+              <option value="">Indifférent</option>
+              <option value="yes">Oui</option>
+              <option value="no">Non</option>
+            </select>
+          </div>
+
+          <button
+            onClick={() => setShowAdvanced((prev) => !prev)}
+            className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-700 transition"
+          >
+            <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+            Avancé
+          </button>
+
+          {showAdvanced && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Confiance</label>
+                  <select
+                    value={draft.confidence}
+                    onChange={(e) => update({ confidence: e.target.value as FiltersState["confidence"] })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+                  >
+                    <option value="">Toutes</option>
+                    <option value="HIGH">Haute</option>
+                    <option value="MED">Moyenne</option>
+                    <option value="LOW">Basse</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Signal rare</label>
+                  <select
+                    value={draft.rare_level}
+                    onChange={(e) => update({ rare_level: e.target.value as FiltersState["rare_level"] })}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+                  >
+                    <option value="">Tous</option>
+                    <option value="HIGH">Haut</option>
+                    <option value="MED">Moyen</option>
+                    <option value="LOW">Bas</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Signal secteur</label>
+                <select
+                  value={draft.sector_level}
+                  onChange={(e) => update({ sector_level: e.target.value as FiltersState["sector_level"] })}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+                >
+                  <option value="">Tous</option>
+                  <option value="HIGH">Haut</option>
+                  <option value="MED">Moyen</option>
+                  <option value="LOW">Bas</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 flex items-center gap-2">
+          <button
+            onClick={onApply}
+            disabled={!filtersDirty}
+            className={`flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition ${
+              filtersDirty
+                ? "bg-slate-900 text-white hover:bg-slate-800"
+                : "bg-slate-100 text-slate-400 cursor-not-allowed"
+            }`}
+          >
+            Appliquer
+          </button>
+          <button
+            onClick={onCancel}
+            className="px-3 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfileSummarySidebar({
+  summary,
+  loading,
+  missing,
+  error,
+}: {
+  summary: ProfileSummaryV1 | null;
+  loading: boolean;
+  missing: boolean;
+  error: string | null;
 }) {
   return (
     <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-4">
-      <div className="flex flex-wrap items-center gap-4">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Filtrer par ville, pays, titre..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/30 outline-none transition"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-wide text-slate-400 font-semibold">Ton profil</div>
+          <div className="text-sm font-semibold text-slate-900">Profil comparé</div>
         </div>
+        <Link to="/profile" className="text-xs font-medium text-emerald-600 hover:text-emerald-700">
+          Voir analyse
+        </Link>
+      </div>
 
-        {/* Domain mode */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Domaine</span>
-          <select
-            value={domainMode}
-            onChange={(e) => onDomainModeChange(e.target.value as "in_domain" | "all")}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-          >
-            <option value="in_domain">Dans mon domaine</option>
-            <option value="all">Voir hors domaine</option>
-          </select>
+      {loading && (
+        <div className="space-y-3 animate-pulse">
+          <div className="h-4 bg-slate-100 rounded" />
+          <div className="h-3 bg-slate-100 rounded" />
+          <div className="h-3 bg-slate-100 rounded w-4/5" />
         </div>
+      )}
 
-        {/* Sort */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Trier par</span>
-          <select
-            value={sortMode}
-            onChange={(e) => onSortChange(e.target.value as "score" | "recent" | "oldest")}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-          >
-            <option value="score">Score (desc)</option>
-            <option value="recent">Plus récent</option>
-            <option value="oldest">Plus ancien</option>
-          </select>
-        </div>
-
-        {/* Threshold Pills */}
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-xs text-slate-500 font-medium hidden sm:inline">Seuil:</span>
-          <div className="flex bg-slate-100 p-1 rounded-xl">
-            {THRESHOLD_OPTIONS.map((opt) => (
-              <button
-                key={opt}
-                onClick={() => onThresholdChange(opt)}
-                className={`px-2.5 py-1 text-xs font-medium rounded-lg transition ${
-                  threshold === opt
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                {opt === 0 ? "Tous" : `${opt}%`}
-              </button>
-            ))}
+      {!loading && missing && (
+        <div className="text-sm text-slate-600">
+          Aucun profil résumé disponible.
+          <div className="mt-3">
+            <Link to="/analyze" className="inline-flex px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
+              Importer un CV
+            </Link>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Counters + Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-4">
-          <span className="text-slate-500">
-            Reçues: <strong className="text-slate-900">{receivedCount}</strong>
-          </span>
-          <span className="text-slate-500">
-            Affichées: <strong className="text-emerald-700">{displayedCount}</strong>
-          </span>
-          {maskedCount > 0 && (
-            <span className="text-slate-500">
-              Masquées: <strong className="text-amber-600">{maskedCount}</strong>
-            </span>
-          )}
-          {suggestOutOfDomain && (
-            <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-medium">
-              Résultats limités — activer Hors domaine
-            </span>
-          )}
+      {!loading && !missing && error && (
+        <div className="text-sm text-rose-600">
+          Résumé indisponible.
         </div>
+      )}
 
-        <div className="flex items-center gap-2">
-          {hasActiveFilters && (
-            <>
-              <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-medium">
-                Filtres actifs
+      {!loading && !missing && !error && summary && (
+        <div className="space-y-4 text-sm text-slate-700">
+          <div>
+            <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Qualité CV</div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                summary.cv_quality_level === "HIGH"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : summary.cv_quality_level === "MED"
+                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : "bg-rose-50 text-rose-700 border-rose-200"
+              }`}>
+                {summary.cv_quality_level}
               </span>
-              <button
-                onClick={onReset}
-                className="text-xs text-rose-600 hover:text-rose-700 font-medium"
-              >
-                Réinitialiser
-              </button>
-              <button
-                onClick={onShowAll}
-                className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
-              >
-                Tout afficher
-              </button>
-            </>
+            </div>
+            {summary.cv_quality_reasons.length > 0 && (
+              <div className="mt-2 text-xs text-slate-500">
+                {summary.cv_quality_reasons[0].replace(/_/g, " ").toLowerCase()}
+              </div>
+            )}
+          </div>
+
+          {summary.top_skills.length > 0 && (
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Skills clés</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {summary.top_skills.slice(0, 5).map((skill) => (
+                  <span key={skill.label} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                    {skill.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {summary.tools.length > 0 && (
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Outils</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {summary.tools.slice(0, 5).map((tool) => (
+                  <span key={tool} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {tool}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {summary.education.length > 0 && (
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Formation</div>
+              <div className="mt-2 text-xs text-slate-600">
+                {summary.education[0]}
+              </div>
+            </div>
+          )}
+
+          {summary.experiences.length > 0 && (
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Expériences</div>
+              <div className="mt-2 space-y-3 text-xs text-slate-600">
+                {summary.experiences.slice(0, 2).map((exp, idx) => (
+                  <div key={`${exp.title}-${idx}`} className="space-y-1">
+                    <div className="font-semibold text-slate-700">
+                      {exp.title || "Expérience"} {exp.company ? `· ${exp.company}` : ""}
+                    </div>
+                    {exp.dates && <div className="text-[11px] text-slate-500">{exp.dates}</div>}
+                    {exp.impact_one_liner && (
+                      <div className="text-[11px] text-slate-500">“{exp.impact_one_liner}”</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {summary.cluster_hints.length > 0 && (
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Cluster</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {summary.cluster_hints.slice(0, 2).map((hint) => (
+                  <span key={hint} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                    {hint}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -957,7 +841,6 @@ function DebugDrawer({
   items,
   displayedCount,
   threshold,
-  searchQuery,
   lastApiCall,
   skillsSource,
 }: {
@@ -966,7 +849,6 @@ function DebugDrawer({
   items: NormalizedInboxItem[];
   displayedCount: number;
   threshold: number;
-  searchQuery: string;
   lastApiCall: LastApiCall | null;
   skillsSource: SkillsSource;
 }) {
@@ -995,10 +877,6 @@ function DebugDrawer({
           <span className="text-white">{threshold}</span>
         </div>
         <div>
-          <span className="text-slate-400">search:</span>{" "}
-          <span className="text-white">{searchQuery || "(empty)"}</span>
-        </div>
-        <div>
           <span className="text-slate-400">skillsSource:</span>{" "}
           <span className="text-white">{skillsSource}</span>
         </div>
@@ -1009,6 +887,9 @@ function DebugDrawer({
             <div>profile_id: {lastApiCall.profile_id.slice(0, 12)}...</div>
             <div>min_score: {lastApiCall.min_score}</div>
             <div>limit: {lastApiCall.limit}</div>
+            {typeof lastApiCall.page === "number" && <div>page: {lastApiCall.page}</div>}
+            {typeof lastApiCall.page_size === "number" && <div>page_size: {lastApiCall.page_size}</div>}
+            {typeof lastApiCall.total_estimate === "number" && <div>total_estimate: {lastApiCall.total_estimate}</div>}
             <div>response_items: {lastApiCall.response_items}</div>
             <div>total_matched: {lastApiCall.total_matched}</div>
             <div>total_decided: {lastApiCall.total_decided}</div>
@@ -1041,20 +922,23 @@ export default function InboxPage() {
   const [error, setError] = useState<string | null>(null);
   const [skillsSource, setSkillsSource] = useState<SkillsSource>("none");
   const [profileIncomplete, setProfileIncomplete] = useState(false);
-  const [domainMode, setDomainMode] = useState<"in_domain" | "all">("in_domain");
-  const [inboxMeta, setInboxMeta] = useState<InboxMeta | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filtersDraft, setFiltersDraft] = useState<FiltersState>(DEFAULT_FILTERS);
+  const [filtersApplied, setFiltersApplied] = useState<FiltersState>(DEFAULT_FILTERS);
   const [threshold, setThreshold] = useState<number>(() => {
     const stored = readJson<number | null>(`${STORAGE_PREFIX}_threshold`, null);
     return typeof stored === "number" ? stored : DEFAULT_THRESHOLD;
   });
-  const [sortMode, setSortMode] = useState<"score" | "recent" | "oldest">("score");
+  const [thresholdDraft, setThresholdDraft] = useState<number>(() => {
+    const stored = readJson<number | null>(`${STORAGE_PREFIX}_threshold`, null);
+    return typeof stored === "number" ? stored : DEFAULT_THRESHOLD;
+  });
+  const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
+  const [sortMode] = useState<"published_desc" | "score_desc" | "confidence_desc">("published_desc");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(24);
   const [decisions, setDecisions] = useState<Record<string, DecisionRecord>>({});
-  const [pendingDecisions, setPendingDecisions] = useState<Set<string>>(new Set());
-  const [trackerStatusMap, setTrackerStatusMap] = useState<Record<string, string>>({});
   const [lastApiCall, setLastApiCall] = useState<LastApiCall | null>(null);
   const [debugOpen, setDebugOpen] = useState(DEBUG_INBOX);
-  const loadedRef = useRef(false);
 
   // Apply Pack modal state
   const [applyPackOffer, setApplyPackOffer] = useState<NormalizedInboxItem | null>(null);
@@ -1068,6 +952,10 @@ export default function InboxPage() {
   const [offerContextById, setOfferContextById] = useState<Record<string, OfferContext>>({});
   const [profileContext, setProfileContext] = useState<ProfileContext | null>(null);
   const [profileContextLoading, setProfileContextLoading] = useState(false);
+  const [profileSummary, setProfileSummary] = useState<ProfileSummaryV1 | null>(null);
+  const [profileSummaryLoading, setProfileSummaryLoading] = useState(false);
+  const [profileSummaryMissing, setProfileSummaryMissing] = useState(false);
+  const [profileSummaryError, setProfileSummaryError] = useState<string | null>(null);
   const [contextFitByOfferId, setContextFitByOfferId] = useState<Record<string, ContextFit>>({});
   const [contextLoadingIds, setContextLoadingIds] = useState<Set<string>>(new Set());
   const [contextFitLoadingIds, setContextFitLoadingIds] = useState<Set<string>>(new Set());
@@ -1136,6 +1024,30 @@ export default function InboxPage() {
         setProfileContextLoading(false);
       });
   }, [userProfile, profileId]);
+
+  useEffect(() => {
+    if (!profileId) return;
+    setProfileSummaryLoading(true);
+    setProfileSummaryMissing(false);
+    setProfileSummaryError(null);
+    fetchProfileSummary(profileId)
+      .then((data) => {
+        setProfileSummary(data);
+      })
+      .catch((err: unknown) => {
+        const status = (err as { status?: number }).status;
+        if (status === 404) {
+          setProfileSummary(null);
+          setProfileSummaryMissing(true);
+          return;
+        }
+        setProfileSummary(null);
+        setProfileSummaryError(err instanceof Error ? err.message : "summary_failed");
+      })
+      .finally(() => {
+        setProfileSummaryLoading(false);
+      });
+  }, [profileId]);
 
   useEffect(() => {
     if (!selectedOffer) return;
@@ -1261,21 +1173,45 @@ export default function InboxPage() {
         return;
       }
 
-      // CRITICAL: Call API with min_score=0, let client filter
       const apiMinScore = 0;
-      const apiLimit = 100;
+      const apiLimit = pageSize;
+      const apiFilters: InboxFilters = {
+        q_company: filtersApplied.q_company || undefined,
+        country: filtersApplied.country || undefined,
+        city: filtersApplied.city || undefined,
+        contract_type: filtersApplied.contract_type || undefined,
+        published_from: filtersApplied.published_from || undefined,
+        published_to: filtersApplied.published_to || undefined,
+        domain_bucket: filtersApplied.domain_bucket || undefined,
+        min_score: threshold,
+        confidence: filtersApplied.confidence || undefined,
+        rare_level: filtersApplied.rare_level || undefined,
+        sector_level: filtersApplied.sector_level || undefined,
+        has_tool_unspecified: filtersApplied.has_tool_unspecified ?? undefined,
+        page,
+        page_size: pageSize,
+        sort: sortMode,
+      };
 
       if (DEBUG_INBOX) {
-        console.info("[inbox] Calling API with:", { profile_id: profileId, min_score: apiMinScore, limit: apiLimit });
+        console.info("[inbox] Calling API with:", {
+          profile_id: profileId,
+          min_score: apiMinScore,
+          limit: apiLimit,
+          filters: apiFilters,
+        });
       }
 
-      const data = await fetchInbox(matchingProfile, profileId, apiMinScore, apiLimit, true, domainMode);
+      const data = await fetchInbox(matchingProfile, profileId, apiMinScore, apiLimit, true, "all", apiFilters);
 
       setLastApiCall({
         timestamp: new Date().toISOString(),
         profile_id: profileId,
         min_score: apiMinScore,
         limit: apiLimit,
+        page,
+        page_size: pageSize,
+        total_estimate: data.total_estimate ?? null,
         response_items: Array.isArray(data.items) ? data.items.length : 0,
         total_matched: data.total_matched ?? 0,
         total_decided: data.total_decided ?? 0,
@@ -1292,7 +1228,6 @@ export default function InboxPage() {
 
       const normalized = normalizeInboxItems(data.items);
       setItems(normalized);
-      setInboxMeta(data.meta ?? null);
 
       if (DEBUG_INBOX) {
         console.info("[inbox] Normalized items:", normalized.length);
@@ -1304,38 +1239,25 @@ export default function InboxPage() {
     } finally {
       setLoading(false);
     }
-  }, [userProfile, profileId, setUserProfile, domainMode]);
+  }, [
+    userProfile,
+    profileId,
+    setUserProfile,
+    filtersApplied,
+    threshold,
+    sortMode,
+    page,
+    pageSize,
+  ]);
 
   // Initial load
   useEffect(() => {
-    if (!loadedRef.current) {
-      loadedRef.current = true;
-      load();
-    }
+    load();
   }, [load]);
 
   useEffect(() => {
-    if (loadedRef.current) {
-      load();
-    }
-  }, [domainMode, load]);
-
-  // Load tracker status
-  useEffect(() => {
-    const fetchTracker = async () => {
-      try {
-        const data = await listApplications();
-        const nextMap: Record<string, string> = {};
-        data.items.forEach((item) => {
-          nextMap[item.offer_id] = item.status;
-        });
-        setTrackerStatusMap(nextMap);
-      } catch (err) {
-        console.warn("[inbox] tracker fetch failed:", err);
-      }
-    };
-    fetchTracker();
-  }, []);
+    setPage(1);
+  }, [threshold, sortMode]);
 
   // ============================================================================
   // Filtering Logic - TRUTH FROM API ITEMS
@@ -1350,101 +1272,65 @@ export default function InboxPage() {
     [items, decisions]
   );
 
-  // Displayed = available after threshold + search filters
-  const displayedItems = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    const getDateValue = (value?: string | null) => {
-      if (!value) return 0;
-      const parsed = new Date(value);
-      if (Number.isNaN(parsed.getTime())) return 0;
-      return parsed.getTime();
-    };
-    return availableItems
-      .filter((item) => {
-        // Threshold filter
-        if (item.score < threshold) return false;
-        // Search filter
-        if (!query) return true;
-        const searchable = [item.city, item.country, item.title, item.company]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        return searchable.includes(query);
-      })
-      .sort((a, b) => {
-        if (sortMode === "recent") {
-          return getDateValue(b.publication_date) - getDateValue(a.publication_date);
-        }
-        if (sortMode === "oldest") {
-          return getDateValue(a.publication_date) - getDateValue(b.publication_date);
-        }
-        if (b.score !== a.score) {
-          return b.score - a.score;
-        }
-        const signalA = typeof a.signal_score === "number" ? a.signal_score : 0;
-        const signalB = typeof b.signal_score === "number" ? b.signal_score : 0;
-        if (signalB !== signalA) {
-          return signalB - signalA;
-        }
-        const cohA = a.coherence === "suspicious" ? 0 : 1;
-        const cohB = b.coherence === "suspicious" ? 0 : 1;
-        return cohB - cohA;
-      });
-  }, [availableItems, threshold, searchQuery, sortMode]);
+  // Displayed = available after server-side filters
+  const displayedItems = useMemo(() => availableItems, [availableItems]);
 
   const displayedCount = displayedItems.length;
   const maskedCount = receivedCount - displayedCount;
-  const hasActiveFilters = threshold > 0 || searchQuery.trim() !== "";
+  const hasActiveFilters = useMemo(() => {
+    if (threshold > 0) return true;
+    const values = Object.values(filtersApplied);
+    for (const value of values) {
+      if (typeof value === "string" && value.trim()) return true;
+      if (typeof value === "boolean") return true;
+    }
+    return false;
+  }, [filtersApplied, threshold]);
+
+  const activeFilterChips = useMemo(() => {
+    const chips: { key: string; label: string }[] = [];
+    if (filtersApplied.q_company) chips.push({ key: "q_company", label: `Entreprise: ${filtersApplied.q_company}` });
+    if (filtersApplied.country) chips.push({ key: "country", label: filtersApplied.country });
+    if (filtersApplied.city) chips.push({ key: "city", label: filtersApplied.city });
+    if (filtersApplied.contract_type) chips.push({ key: "contract_type", label: filtersApplied.contract_type });
+    if (filtersApplied.published_from || filtersApplied.published_to) {
+      const from = filtersApplied.published_from ? filtersApplied.published_from : "…";
+      const to = filtersApplied.published_to ? filtersApplied.published_to : "…";
+      chips.push({ key: "published_range", label: `Publié: ${from} -> ${to}` });
+    }
+    const bucket = bucketLabel(filtersApplied.domain_bucket);
+    if (bucket) chips.push({ key: "bucket", label: bucket });
+    if (threshold > 0) chips.push({ key: "threshold", label: `Score ≥ ${threshold}` });
+    if (filtersApplied.has_tool_unspecified !== null) {
+      chips.push({
+        key: "tool_unspecified",
+        label: `Outil ambigu: ${filtersApplied.has_tool_unspecified ? "oui" : "non"}`,
+      });
+    }
+    if (filtersApplied.confidence) {
+      chips.push({
+        key: "confidence",
+        label: `Confiance: ${levelLabel(filtersApplied.confidence)}`,
+      });
+    }
+    if (filtersApplied.rare_level) {
+      chips.push({
+        key: "rare_level",
+        label: `Rare: ${levelLabel(filtersApplied.rare_level)}`,
+      });
+    }
+    if (filtersApplied.sector_level) {
+      chips.push({
+        key: "sector_level",
+        label: `Secteur: ${levelLabel(filtersApplied.sector_level)}`,
+      });
+    }
+    return chips;
+  }, [filtersApplied, threshold]);
 
   // ============================================================================
   // Handlers
   // ============================================================================
-
-  const handleDecision = async (offerId: string, status: DecisionStatus, score: number) => {
-    // Optimistic update
-    setPendingDecisions((prev) => new Set(prev).add(offerId));
-    setDecisions((prev) => ({
-      ...prev,
-      [offerId]: { status, score, updated_at: new Date().toISOString() },
-    }));
-
-    try {
-      await postDecision(offerId, profileId, status);
-    } catch (err) {
-      // Rollback on error
-      console.error("[inbox] Decision failed, rolling back:", err);
-      setDecisions((prev) => {
-        const next = { ...prev };
-        delete next[offerId];
-        return next;
-      });
-    } finally {
-      setPendingDecisions((prev) => {
-        const next = new Set(prev);
-        next.delete(offerId);
-        return next;
-      });
-    }
-  };
-
-  const handleShortlist = async (offerId: string, score: number) => {
-    await handleDecision(offerId, "SHORTLISTED", score);
-
-    // Also persist to tracker
-    if (!trackerStatusMap[offerId]) {
-      try {
-        await upsertApplication({
-          offer_id: offerId,
-          status: "shortlisted",
-          note: null,
-          next_follow_up_date: null,
-        });
-        setTrackerStatusMap((prev) => ({ ...prev, [offerId]: "shortlisted" }));
-      } catch (err) {
-        console.warn("[inbox] shortlist tracker failed:", err);
-      }
-    }
-  };
 
   const handleApply = async (item: NormalizedInboxItem) => {
     setApplyPackOffer(item);
@@ -1482,14 +1368,55 @@ export default function InboxPage() {
     }
   };
 
+  const filtersDirty = useMemo(
+    () => JSON.stringify(filtersDraft) !== JSON.stringify(filtersApplied) || thresholdDraft !== threshold,
+    [filtersDraft, filtersApplied, thresholdDraft, threshold]
+  );
+
+  const handleApplyFilters = () => {
+    const normalized = normalizeFiltersState(filtersDraft);
+    setFiltersApplied(normalized);
+    setFiltersDraft(normalized);
+    setThreshold(thresholdDraft);
+    setFiltersDrawerOpen(false);
+    setPage(1);
+  };
+
+  const handleCancelFilters = () => {
+    setFiltersDraft(filtersApplied);
+    setThresholdDraft(threshold);
+    setFiltersDrawerOpen(false);
+  };
+
   const handleResetFilters = () => {
     setThreshold(DEFAULT_THRESHOLD);
-    setSearchQuery("");
+    setThresholdDraft(DEFAULT_THRESHOLD);
+    setFiltersDraft(DEFAULT_FILTERS);
+    setFiltersApplied(DEFAULT_FILTERS);
+    setPage(1);
   };
 
   const handleShowAll = () => {
     setThreshold(0);
-    setSearchQuery("");
+    setThresholdDraft(0);
+    setFiltersDraft(DEFAULT_FILTERS);
+    setFiltersApplied(DEFAULT_FILTERS);
+    setPage(1);
+  };
+
+  const handleOpenFilters = () => {
+    setFiltersDrawerOpen(true);
+  };
+
+  const handleSearchSubmit = () => {
+    const normalized = normalizeFiltersState(filtersDraft);
+    if (normalized.q_company !== filtersApplied.q_company) {
+      setFiltersDraft(normalized);
+      setFiltersApplied(normalized);
+      setThreshold(thresholdDraft);
+      setFiltersDrawerOpen(false);
+      setPage(1);
+    }
   };
 
   const handleCloseApplyPack = () => {
@@ -1598,7 +1525,7 @@ export default function InboxPage() {
           <p className="text-sm text-slate-500">
             Offres correspondant à votre profil.
           </p>
-          {import.meta.env.DEV && lastApiCall && (
+          {DEBUG_INBOX && lastApiCall && (
             <div className="mt-3 text-[11px] text-slate-500">
               <span className="mr-3">profile_id: {lastApiCall.profile_id.slice(0, 10)}…</span>
               <span className="mr-3">total_matched: {lastApiCall.total_matched}</span>
@@ -1608,100 +1535,156 @@ export default function InboxPage() {
           )}
         </header>
 
-        {/* Filters */}
-        <div className="mb-6">
-          <FilterBar
-            threshold={threshold}
-            onThresholdChange={setThreshold}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onReset={handleResetFilters}
-            onShowAll={handleShowAll}
-            domainMode={domainMode}
-            onDomainModeChange={setDomainMode}
-            suggestOutOfDomain={Boolean(inboxMeta?.suggest_out_of_domain && domainMode === "in_domain")}
-            sortMode={sortMode}
-            onSortChange={setSortMode}
-            receivedCount={receivedCount}
-            displayedCount={displayedCount}
-            maskedCount={maskedCount}
-            hasActiveFilters={hasActiveFilters}
-          />
-        </div>
-
-        {/* Loading */}
-        {loading && (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900" />
-          </div>
-        )}
-
-        {/* Content */}
-        {!loading && (
-          <>
-            {/* State D: No offers from API */}
-            {receivedCount === 0 && (
-              <EmptyState
-                icon={Inbox}
-                title="Aucune offre disponible"
-                description="L'API n'a renvoyé aucune offre. Vérifiez votre connexion ou réessayez."
-                actions={
-                  <button onClick={load} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4" />
-                    Actualiser
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
+          {/* Main content */}
+          <main>
+            <div className="sticky top-0 z-20 bg-slate-50/90 backdrop-blur border-y border-slate-100 py-3 mb-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 min-w-[220px]">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    value={filtersDraft.q_company}
+                    onChange={(e) => setFiltersDraft({ ...filtersDraft, q_company: e.target.value })}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit(); }}
+                    onBlur={handleSearchSubmit}
+                    placeholder="Entreprise…"
+                    className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+                  />
+                </div>
+                <button
+                  onClick={handleOpenFilters}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
+                >
+                  <Filter className="w-4 h-4" />
+                  Filtres
+                </button>
+                {hasActiveFilters && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="px-3 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
+                  >
+                    Reset
                   </button>
-                }
-              />
+                )}
+                <div className="ml-auto text-xs text-slate-500">
+                  Affichées: <strong className="text-slate-900">{displayedCount}</strong>
+                </div>
+              </div>
+              {activeFilterChips.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {activeFilterChips.map((chip) => (
+                    <span
+                      key={chip.key}
+                      className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200"
+                    >
+                      {chip.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {loading && (
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900" />
+              </div>
             )}
 
-            {/* State E: Offers received but all filtered */}
-            {receivedCount > 0 && displayedCount === 0 && (
-              <EmptyState
-                icon={Filter}
-                title="Tes filtres masquent tout"
-                description={`${maskedCount} offre${maskedCount > 1 ? "s" : ""} reçue${maskedCount > 1 ? "s" : ""} mais masquée${maskedCount > 1 ? "s" : ""} par tes filtres.`}
-                actions={
-                  <div className="flex gap-3">
-                    <button onClick={handleResetFilters} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
-                      Réinitialiser filtres
+            {!loading && (
+              <>
+                {/* State D: No offers from API */}
+                {receivedCount === 0 && (
+                  <EmptyState
+                    icon={Inbox}
+                    title="Aucune offre disponible"
+                    description="L'API n'a renvoyé aucune offre. Vérifiez votre connexion ou réessayez."
+                    actions={
+                      <button onClick={load} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4" />
+                        Actualiser
+                      </button>
+                    }
+                  />
+                )}
+
+                {/* State E: Offers received but all filtered */}
+                {receivedCount > 0 && displayedCount === 0 && (
+                  <EmptyState
+                    icon={Filter}
+                    title="Tes filtres masquent tout"
+                    description={`${maskedCount} offre${maskedCount > 1 ? "s" : ""} reçue${maskedCount > 1 ? "s" : ""} mais masquée${maskedCount > 1 ? "s" : ""} par tes filtres.`}
+                    actions={
+                      <div className="flex gap-3">
+                        <button onClick={handleResetFilters} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
+                          Réinitialiser filtres
+                        </button>
+                        <button onClick={handleShowAll} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
+                          Tout afficher
+                        </button>
+                      </div>
+                    }
+                  />
+                )}
+
+                {/* Offers Grid */}
+                {displayedCount > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {displayedItems.map((offer) => (
+                      <OfferCard
+                        key={offer.offer_id}
+                        offer={offer}
+                        onApply={() => handleApply(offer)}
+                        onOpen={() => setSelectedOffer(offer)}
+                        isPending={false}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {displayedCount > 0 && (
+                  <div className="mt-6 flex items-center justify-between">
+                    <button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page <= 1}
+                      className={`px-3 py-2 rounded-xl text-sm font-semibold border ${
+                        page <= 1
+                          ? "border-slate-200 text-slate-300 cursor-not-allowed"
+                          : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      Précédent
                     </button>
-                    <button onClick={handleShowAll} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
-                      Tout afficher
+                    <div className="text-xs text-slate-500">
+                      Page <strong className="text-slate-900">{page}</strong>
+                    </div>
+                    <button
+                      onClick={() => setPage((p) => p + 1)}
+                      disabled={displayedCount < pageSize}
+                      className={`px-3 py-2 rounded-xl text-sm font-semibold border ${
+                        displayedCount < pageSize
+                          ? "border-slate-200 text-slate-300 cursor-not-allowed"
+                          : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      Suivant
                     </button>
                   </div>
-                }
-              />
+                )}
+              </>
             )}
+          </main>
 
-            {/* Offers Grid */}
-            {displayedCount > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayedItems.map((offer) => (
-                  <OfferCard
-                    key={offer.offer_id}
-                    offer={offer}
-                    onShortlist={() => handleShortlist(offer.offer_id, offer.score)}
-                    onDismiss={() => handleDecision(offer.offer_id, "DISMISSED", offer.score)}
-                    onApply={() => handleApply(offer)}
-                    onOpen={() => setSelectedOffer(offer)}
-                    isShortlisted={trackerStatusMap[offer.offer_id] === "shortlisted"}
-                    isPending={pendingDecisions.has(offer.offer_id)}
-                    roleTypeLabel={formatRoleType(offerContextById[offer.offer_id]?.role_type)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {displayedCount > 0 && (
-              <div className="mt-6 flex justify-center">
-                <span className="flex items-center gap-2 text-xs text-slate-400">
-                  <ChevronDown className="w-4 h-4" />
-                  Triées par score décroissant
-                </span>
-              </div>
-            )}
-          </>
-        )}
+          {/* Profile summary */}
+          <aside className="lg:sticky top-6 self-start">
+            <ProfileSummarySidebar
+              summary={profileSummary}
+              loading={profileSummaryLoading}
+              missing={profileSummaryMissing}
+              error={profileSummaryError}
+            />
+          </aside>
+        </div>
       </div>
 
       {/* Debug Drawer */}
@@ -1712,11 +1695,21 @@ export default function InboxPage() {
           items={items}
           displayedCount={displayedCount}
           threshold={threshold}
-          searchQuery={searchQuery}
           lastApiCall={lastApiCall}
           skillsSource={skillsSource}
         />
       )}
+
+      <FiltersDrawer
+        isOpen={filtersDrawerOpen}
+        draft={filtersDraft}
+        onDraftChange={setFiltersDraft}
+        threshold={thresholdDraft}
+        onThresholdChange={setThresholdDraft}
+        filtersDirty={filtersDirty}
+        onApply={handleApplyFilters}
+        onCancel={handleCancelFilters}
+      />
 
       {/* Apply Pack Modal */}
       {applyPackOffer && (
