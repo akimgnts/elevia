@@ -37,6 +37,8 @@ from .routes.profile_key_skills import router as profile_key_skills_router
 from .routes.context import router as context_router
 from .routes.documents import router as documents_router
 from .routes.profile_structured import router as profile_structured_router
+from .routes.profile_summary import router as profile_summary_router
+from .routes.cluster_library_api import router as cluster_library_router
 from documents.llm_client import is_llm_available
 
 
@@ -87,6 +89,8 @@ app.include_router(profile_key_skills_router)  # POST /profile/key-skills (displ
 app.include_router(context_router)  # POST /context/*
 app.include_router(documents_router)  # POST /documents/cv (CV Generator v1)
 app.include_router(profile_structured_router)  # GET|POST /profile/structured (COMPASS D+)
+app.include_router(profile_summary_router)  # GET /profile/summary (compact profile panel)
+app.include_router(cluster_library_router)  # GET /cluster/library/* + POST /cluster/library/enrich/cv
 
 # OBS: startup diagnostic (DEV-only, non-invasive)
 _dev_tools_on = os.getenv("ELEVIA_DEV_TOOLS", "").lower() in {"1", "true", "yes"}

@@ -173,3 +173,64 @@ class ProfileStructuredV1(BaseModel):
     inferred_cluster_hints: List[str] = []  # deduplicated hints from education + certs
     cv_quality: CVQualityV1
     extracted_sections: Optional[Dict[str, str]] = None  # debug only (ELEVIA_DEBUG_PROFILE_STRUCT=1)
+
+
+# ── COMPASS E — Cluster-Aware Enrichment + Market Radar contracts ─────────────
+
+class ClusterDomainSkill(BaseModel):
+    """
+    One non-ESCO skill token tracked in the cluster library.
+
+    status lifecycle: PENDING → ACTIVE (via activation rules) | REJECTED (validation fail)
+    source: CV | OFFER | BOTH | LLM
+    score_core is NEVER touched by this layer.
+    """
+    id: str                                    # md5(cluster|token_normalized)[:16]
+    cluster: str
+    token_normalized: str
+    occurrences_cv: int = 0
+    occurrences_offers: int = 0
+    first_seen_at: str                         # ISO-8601 UTC
+    last_seen_at: str
+    status: Literal["PENDING", "ACTIVE", "REJECTED"] = "PENDING"
+    source: Literal["CV", "OFFER", "BOTH", "LLM"] = "CV"
+    validation_score: float = 0.0
+
+
+class CVEnrichmentResult(BaseModel):
+    """
+    Result of CV enrichment pass through the cluster library.
+
+    domain_skills_active: ACTIVE library tokens for this cluster (display/context only)
+    domain_skills_pending: newly recorded PENDING tokens from this CV
+    llm_triggered: True if LLM was called (ESCO count < threshold)
+    llm_suggestions: validated tokens suggested by LLM
+    score_core is NEVER present here.
+    """
+    cluster: Optional[str] = None
+    domain_skills_active: List[str] = []
+    domain_skills_pending: List[str] = []
+    new_tokens_added: List[str] = []
+    llm_triggered: bool = False
+    llm_suggestions: List[Dict[str, str]] = []
+
+
+class MarketRadarReport(BaseModel):
+    """Market radar: emerging non-ESCO skills detected from offer ingestion."""
+    generated_at: str
+    top_emerging_per_cluster: Dict[str, List[str]] = {}
+    new_active_skills: List[str] = []
+    pending_skills: List[str] = []
+    rejected_tokens: List[str] = []
+
+
+class ClusterLibraryMetrics(BaseModel):
+    """Operational metrics for the cluster domain skill library."""
+    generated_at: str
+    total_clusters: int
+    active_per_cluster: Dict[str, int] = {}
+    pending_per_cluster: Dict[str, int] = {}
+    llm_calls_total: int = 0
+    llm_calls_avoided: int = 0
+    new_skills_via_offers: int = 0
+    drift_index_per_cluster: Dict[str, float] = {}   # pending / (active + 1)
