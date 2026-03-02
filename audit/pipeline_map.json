@@ -1,0 +1,222 @@
+{
+  "_meta": {
+    "generated_at": "2026-03-02",
+    "purpose": "Exhaustive inventory of all FastAPI routes and processing scripts, tagged CANONICAL vs PARALLEL/LEGACY",
+    "canonical_definition": "Route uses run_baseline() → detect_profile_cluster() → [enrich_cv() if COMPASS_E] chain",
+    "parallel_definition": "Route has its own LLM or enrichment path not going through canonical_pipeline.py"
+  },
+
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/profile/parse-file",
+      "file": "apps/api/src/api/routes/profile_file.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": true,
+      "compass_e_wired": true,
+      "flags": ["ELEVIA_ENABLE_COMPASS_E", "enrich_llm (deprecated)"],
+      "functions_called": [
+        "profile.baseline_parser.run_baseline",
+        "profile.baseline_parser.run_baseline_from_tokens",
+        "profile.profile_cluster.detect_profile_cluster",
+        "compass.profile_structurer.structure_profile_text_v1",
+        "api.utils.profile_summary_builder.build_profile_summary",
+        "api.utils.profile_summary_store.store_profile_summary",
+        "compass.cv_enricher.enrich_cv (conditional: ELEVIA_ENABLE_COMPASS_E=1)",
+        "profile.llm_skill_suggester.suggest_skills_from_cv (deprecated: enrich_llm=1)"
+      ],
+      "score_invariant": true,
+      "notes": "enrich_llm=1 path is deprecated but kept for backwards compat; logs WARNING"
+    },
+    {
+      "method": "POST",
+      "path": "/profile/parse-baseline",
+      "file": "apps/api/src/api/routes/profile_baseline.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": true,
+      "compass_e_wired": true,
+      "flags": ["ELEVIA_ENABLE_COMPASS_E"],
+      "functions_called": [
+        "profile.baseline_parser.run_baseline",
+        "profile.profile_cluster.detect_profile_cluster",
+        "compass.profile_structurer.structure_profile_text_v1",
+        "api.utils.profile_summary_builder.build_profile_summary",
+        "api.utils.profile_summary_store.store_profile_summary",
+        "compass.cv_enricher.enrich_cv (conditional: ELEVIA_ENABLE_COMPASS_E=1)"
+      ],
+      "score_invariant": true,
+      "notes": "No enrich_llm deprecated path — cleaner than parse-file"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/match",
+      "file": "apps/api/src/api/routes/matching.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": [],
+      "functions_called": [
+        "matching.matching_v1.run_matching"
+      ],
+      "score_invariant": true,
+      "notes": "Pure ESCO scoring. Compass E never touches this route."
+    },
+    {
+      "method": "POST",
+      "path": "/inbox",
+      "file": "apps/api/src/api/routes/inbox.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": [],
+      "functions_called": [
+        "matching.matching_v1.run_matching (via inbox orchestration)"
+      ],
+      "score_invariant": true,
+      "notes": "Calls matching pipeline on stored profile. domain_skills_active not injected."
+    },
+    {
+      "method": "POST",
+      "path": "/cluster/library/enrich/cv",
+      "file": "apps/api/src/api/routes/cluster_library_api.py",
+      "tag": "PARALLEL/ADMIN",
+      "pipeline_used_field": false,
+      "compass_e_wired": true,
+      "flags": ["llm_enabled query param (default: false)"],
+      "functions_called": [
+        "compass.cv_enricher.enrich_cv"
+      ],
+      "score_invariant": true,
+      "notes": "Admin-only enrichment endpoint. NOT called by UI or matching hot path. Used for batch Compass E library building."
+    },
+    {
+      "method": "GET",
+      "path": "/cluster/library/metrics",
+      "file": "apps/api/src/api/routes/cluster_library_api.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": [],
+      "functions_called": ["compass.offer_enricher.generate_library_metrics"],
+      "score_invariant": true,
+      "notes": "Read-only analytics endpoint"
+    },
+    {
+      "method": "GET",
+      "path": "/cluster/library/radar",
+      "file": "apps/api/src/api/routes/cluster_library_api.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": [],
+      "functions_called": ["compass.offer_enricher.generate_market_radar"],
+      "score_invariant": true,
+      "notes": "Read-only analytics endpoint"
+    },
+    {
+      "method": "GET",
+      "path": "/cluster/library/skills",
+      "file": "apps/api/src/api/routes/cluster_library_api.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": ["cluster query param", "status query param"],
+      "functions_called": ["compass.cluster_library.get_active_skills"],
+      "score_invariant": true,
+      "notes": "Read-only skills query endpoint"
+    },
+    {
+      "method": "POST",
+      "path": "/profile/structured",
+      "file": "apps/api/src/api/routes/profile_structured.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": ["ELEVIA_DEBUG_PROFILE_STRUCT"],
+      "functions_called": ["compass.profile_structurer.structure_profile_text_v1"],
+      "score_invariant": true,
+      "notes": "COMPASS D+ structured CV endpoint. Display only."
+    },
+    {
+      "method": "GET",
+      "path": "/profile/summary",
+      "file": "apps/api/src/api/routes/profile_summary.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": [],
+      "functions_called": ["api.utils.profile_summary_store.get_profile_summary"],
+      "score_invariant": true,
+      "notes": "Reads cached profile summary panel. Populated by parse routes."
+    },
+    {
+      "method": "POST",
+      "path": "/apply-pack",
+      "file": "apps/api/src/api/routes/apply_pack.py",
+      "tag": "PARALLEL/LEGACY",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": ["enrich_llm (optional)"],
+      "functions_called": [
+        "profile.baseline_parser.run_baseline",
+        "profile.llm_skill_suggester.suggest_skills_from_cv (optional)"
+      ],
+      "score_invariant": true,
+      "notes": "DEPRECATED path still uses suggest_skills_from_cv directly. Candidate for migration to canonical pipeline."
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "file": "apps/api/src/api/routes/health.py",
+      "tag": "INFRA",
+      "score_invariant": true,
+      "notes": "Health check, no pipeline involvement"
+    },
+    {
+      "method": "POST",
+      "path": "/context/fit",
+      "file": "apps/api/src/api/routes/context.py",
+      "tag": "CANONICAL",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": [],
+      "functions_called": ["api.utils.context_store (read)"],
+      "score_invariant": true,
+      "notes": "Context retrieval, no enrichment"
+    },
+    {
+      "method": "POST",
+      "path": "/documents/cv",
+      "file": "apps/api/src/api/routes/documents.py",
+      "tag": "PARALLEL/LLM",
+      "pipeline_used_field": false,
+      "compass_e_wired": false,
+      "flags": [],
+      "functions_called": ["documents.llm_client (LLM for CV generation)"],
+      "score_invariant": true,
+      "notes": "CV Generator v1 — uses LLM for document generation, not for skill scoring"
+    }
+  ],
+
+  "scripts": [
+    {
+      "path": "apps/api/scripts/context_smoke.py",
+      "tag": "DEV/SMOKE",
+      "notes": "Context endpoint smoke test script"
+    },
+    {
+      "path": "scripts/smoke_mvp.sh",
+      "tag": "DEV/SMOKE",
+      "notes": "MVP smoke test shell script"
+    }
+  ],
+
+  "summary": {
+    "total_routes": 13,
+    "CANONICAL": 9,
+    "PARALLEL_LEGACY": 2,
+    "PARALLEL_ADMIN": 1,
+    "INFRA": 1,
+    "score_invariant_violations": 0
+  }
+}

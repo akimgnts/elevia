@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 import sys
 from pathlib import Path
@@ -27,6 +28,10 @@ from profile.baseline_parser import run_baseline, run_baseline_from_tokens
 from profile.profile_cluster import detect_profile_cluster
 from profile.llm_skill_suggester import suggest_skills_from_cv
 from semantic.profile_cache import cache_profile_text, compute_profile_hash
+from compass.profile_structurer import structure_profile_text_v1
+from compass.canonical_pipeline import is_compass_e_enabled, is_trace_enabled
+from api.utils.profile_summary_builder import build_profile_summary
+from api.utils.profile_summary_store import store_profile_summary
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["profile"])
@@ -57,6 +62,11 @@ def _is_txt(content_type: str, filename: str) -> bool:
 class ParseFileResponse(BaseModel):
     source: str
     mode: str = "baseline"
+    pipeline_used: str = "baseline"
+    compass_e_enabled: bool = False
+    domain_skills_active: List[str] = []
+    domain_skills_pending_count: int = 0
+    llm_fired: bool = False
     ai_available: bool = False
     ai_added_count: int = 0
     ai_error: Optional[str] = None
@@ -217,6 +227,20 @@ async def parse_file(
     profile_hash = compute_profile_hash(profile)
     cache_profile_text(profile_hash, cv_text)
 
+    # ── Profile summary cache (deterministic) ────────────────────────────────
+    try:
+        structured = structure_profile_text_v1(cv_text, debug=False)
+        summary = build_profile_summary(structured, extra_skills=profile.get("skills"))
+        store_profile_summary(profile_hash, summary.model_dump())
+        if os.getenv("ELEVIA_DEBUG_PROFILE_SUMMARY", "").strip().lower() in {"1", "true", "yes", "on"}:
+            logger.info(
+                "PROFILE_SUMMARY_STORED profile_id=%s last_updated=%s",
+                profile_hash,
+                summary.last_updated,
+            )
+    except Exception as exc:
+        logger.warning("[parse-file] profile summary failed: %s", type(exc).__name__)
+
     # ── Profile cluster (deterministic, no LLM) ───────────────────────────────
     skills_for_cluster: List[str] = []
     validated_items = result.get("validated_items") or []
@@ -241,9 +265,53 @@ async def parse_file(
         "request_id": request_id,
     }))
 
+    # ── Compass E enrichment (canonical layer) ────────────────────────────────
+    compass_e_on = is_compass_e_enabled()
+    domain_skills_active: List[str] = []
+    domain_skills_pending_count = 0
+    llm_fired = False
+
+    if compass_e_on:
+        try:
+            from compass.cv_enricher import enrich_cv
+            esco_labels = result.get("validated_labels") or []
+            cluster_key = (profile_cluster.get("dominant_cluster") or "").upper() or None
+            enrichment = enrich_cv(
+                cv_text=cv_text,
+                cluster=cluster_key,
+                esco_skills=esco_labels,
+                llm_enabled=True,
+            )
+            domain_skills_active = enrichment.domain_skills_active
+            domain_skills_pending_count = len(enrichment.domain_skills_pending)
+            llm_fired = enrichment.llm_triggered
+        except Exception as exc:
+            logger.warning("[parse-file] compass_e enrichment failed (non-fatal): %s", type(exc).__name__)
+
+    # Build pipeline_used tag
+    if compass_e_on and llm_fired:
+        pipeline_tag = "baseline+compass_e+llm" if mode == "baseline" else f"{mode}+compass_e+llm"
+    elif compass_e_on:
+        pipeline_tag = "baseline+compass_e" if mode == "baseline" else f"{mode}+compass_e"
+    elif mode == "llm":
+        pipeline_tag = "baseline+llm_legacy"
+    else:
+        pipeline_tag = "baseline"
+
+    if is_trace_enabled():
+        logger.info(
+            "[PIPELINE_WIRING] parse-file pipeline_used=%s compass_e=%s domain_active=%d request_id=%s",
+            pipeline_tag, compass_e_on, len(domain_skills_active), request_id,
+        )
+
     return ParseFileResponse(
         source=result["source"],
         mode=mode,
+        pipeline_used=pipeline_tag,
+        compass_e_enabled=compass_e_on,
+        domain_skills_active=domain_skills_active,
+        domain_skills_pending_count=domain_skills_pending_count,
+        llm_fired=llm_fired,
         ai_available=ai_available,
         ai_added_count=ai_added_count,
         ai_error=ai_error,
