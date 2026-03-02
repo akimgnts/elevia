@@ -35,6 +35,7 @@ import { useProfileStore } from "../store/profileStore";
 import { SEED_PROFILE } from "../fixtures/seedProfile";
 import { OfferDetailModal, type OfferDetail } from "../components/OfferDetailModal";
 import { cleanOfferTitle, truncateOfferTitle } from "../lib/titleUtils";
+import { InboxCardV2 } from "../components/inbox/InboxCardV2";
 
 // ============================================================================
 // Constants
@@ -175,20 +176,6 @@ function cleanDescriptionSnippet(value?: string | null, maxLen = 180): string {
   const stripped = value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
   if (stripped.length <= maxLen) return stripped;
   return `${stripped.slice(0, maxLen).trim()}…`;
-}
-
-function mapConfidenceCopy(confidence?: "LOW" | "MED" | "HIGH") {
-  if (confidence === "HIGH") return "Alignement solide";
-  if (confidence === "MED") return "Alignement probable";
-  if (confidence === "LOW") return "Match fragile";
-  return "Alignement probable";
-}
-
-function confidenceToneClass(confidence?: "LOW" | "MED" | "HIGH") {
-  if (confidence === "HIGH") return "text-emerald-700";
-  if (confidence === "MED") return "text-amber-700";
-  if (confidence === "LOW") return "text-rose-700";
-  return "text-slate-600";
 }
 
 function formatLocation(city?: string | null, country?: string | null) {
@@ -357,11 +344,11 @@ function EmptyState({
   );
 }
 
+/** Adapts a NormalizedInboxItem to InboxCardV2 props and renders the card. */
 function OfferCard({
   offer,
   onApply,
   onOpen,
-  isPending,
 }: {
   offer: NormalizedInboxItem;
   onApply: () => void;
@@ -369,92 +356,40 @@ function OfferCard({
   isPending: boolean;
 }) {
   const relativeTitle = offer.title_clean || offer.title;
-  const titleInfo = useMemo(() => cleanOfferTitle(relativeTitle), [relativeTitle]);
+  const titleInfo = cleanOfferTitle(relativeTitle);
   const displayTitle = truncateOfferTitle(titleInfo.display, 90);
-  const showVie = offer.source === "business_france" || offer.is_vie;
-  const confidence = offer.explain_v1?.confidence;
-  const confidenceCopy = mapConfidenceCopy(confidence);
-  const missingCount =
-    typeof offer.explain_v1?.missing_count === "number"
-      ? offer.explain_v1.missing_count
-      : offer.missing_skills_display?.length || offer.missing_skills?.length || 0;
-  const warningNeeded = offer.score >= 95 && confidence && confidence !== "HIGH";
-  const decisionText =
-    offer.domain_bucket === "out"
-      ? "Hors domaine — à considérer si pivot"
-      : `${confidenceCopy}${
-          missingCount > 0 ? ` • ${missingCount} compétence${missingCount > 1 ? "s" : ""} clé${missingCount > 1 ? "s" : ""} à renforcer` : ""
-        }`;
-  const decisionTone = offer.domain_bucket === "out" ? "text-slate-600" : confidenceToneClass(confidence);
-  const locationLabel = formatLocation(offer.city, offer.country);
-  const titleLineParts = [displayTitle];
-  if (showVie) titleLineParts.push("VIE");
-  if (offer.city) titleLineParts.push(offer.city);
-  const titleLine = titleLineParts.join(" — ");
-  const subtitleParts = [offer.company, locationLabel].filter(Boolean) as string[];
-  const subtitle = subtitleParts.join(" • ");
-  const attenuationClass =
-    offer.score >= 70 ? "" : offer.score >= 55 ? "opacity-90" : "opacity-70 grayscale";
-  const weakMatch = offer.score < 55;
+
+  const location = formatLocation(offer.city, offer.country) ?? undefined;
+
+  const topMatchedSkills = (offer.matched_skills_display?.length
+    ? offer.matched_skills_display
+    : offer.matched_skills ?? []
+  ).slice(0, 3);
+
+  const missingCriticalSkills = (offer.missing_skills_display?.length
+    ? offer.missing_skills_display
+    : offer.missing_skills ?? []
+  ).slice(0, 1);
+
+  const rareSignal =
+    offer.explain_v1?.rare_signal_level === "HIGH"
+      ? { label: offer.explain_v1.sector_signal_note ?? "Signal de rareté élevé" }
+      : null;
 
   return (
-    <div
-      className={`group bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow-lg transition-all flex flex-col h-full ${
-        isPending ? "opacity-50 pointer-events-none" : ""
-      } ${attenuationClass}`}
-      onClick={onOpen}
-      onKeyDown={(e) => { if (e.key === "Enter") onOpen(); }}
-      role="button"
-      tabIndex={0}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-semibold text-slate-900 leading-snug line-clamp-2">
-            {titleLine}
-          </h3>
-          {subtitle && (
-            <div className="mt-1 text-xs text-slate-500 line-clamp-1">
-              {subtitle}
-            </div>
-          )}
-        </div>
-        <div className="shrink-0 text-right">
-          <div className="text-4xl font-bold text-slate-900 leading-none">{offer.score}%</div>
-          {weakMatch && (
-            <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              Match faible
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-        <span className={`line-clamp-1 ${decisionTone}`}>
-          {decisionText}
-        </span>
-        {warningNeeded && (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-            Score élevé, vérification conseillée
-          </span>
-        )}
-      </div>
-
-      <div className="mt-auto pt-5 flex flex-wrap items-center gap-2">
-        <button
-          onClick={(e) => { e.stopPropagation(); onOpen(); }}
-          className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
-        >
-          Voir détails
-        </button>
-
-        <button
-          onClick={(e) => { e.stopPropagation(); onApply(); }}
-          className="px-3 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
-        >
-          Générer
-        </button>
-      </div>
-    </div>
+    <InboxCardV2
+      offerId={offer.offer_id}
+      company={offer.company ?? ""}
+      title={displayTitle}
+      location={location}
+      score={offer.score}
+      cluster={{ label: offer.offer_cluster ?? "" }}
+      topMatchedSkills={topMatchedSkills}
+      missingCriticalSkills={missingCriticalSkills}
+      rareSignal={rareSignal}
+      onOpenDetails={() => onOpen()}
+      onGenerateLetter={() => onApply()}
+    />
   );
 }
 
