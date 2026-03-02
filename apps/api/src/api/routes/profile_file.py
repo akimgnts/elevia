@@ -93,8 +93,11 @@ class ParseFileResponse(BaseModel):
     profile: dict
     warnings: List[str] = []
     profile_cluster: Optional[dict] = None
-    resolved_to_esco: List[dict] = []        # domain tokens → ESCO URI (display-only)
+    resolved_to_esco: List[dict] = []        # domain tokens → ESCO URI (injected into profile)
     skill_provenance: dict = {}              # {baseline_esco, library_token_to_esco, llm_token_to_esco}
+    baseline_esco_count: int = 0            # skills_uri_count from ESCO baseline only
+    injected_esco_from_domain: int = 0      # URIs added via DOMAIN→ESCO mapping
+    total_esco_count: int = 0               # baseline + injected
 
 
 # ── Route ──────────────────────────────────────────────────────────────────────
@@ -292,6 +295,25 @@ async def parse_file(
         except Exception as exc:
             logger.warning("[parse-file] compass_e enrichment failed (non-fatal): %s", type(exc).__name__)
 
+    # Inject resolved ESCO URIs into profile.skills_uri (matching impact, no formula change)
+    # extract_profile() reads profile["skills_uri"] — adding URIs here increases coverage.
+    baseline_esco_count = result.get("skills_uri_count", 0)
+    injected_esco_from_domain = 0
+    if resolved_to_esco and profile:
+        existing_uris: set = set(profile.get("skills_uri") or [])
+        for r in resolved_to_esco:
+            uri = r["esco_uri"]
+            if uri not in existing_uris:
+                existing_uris.add(uri)
+                profile.setdefault("skills_uri", []).append(uri)
+                injected_esco_from_domain += 1
+                label = r.get("esco_label")
+                if label:
+                    skills_list = profile.setdefault("skills", [])
+                    if label not in skills_list:
+                        skills_list.append(label)
+    total_esco_count = baseline_esco_count + injected_esco_from_domain
+
     # Provenance summary (baseline_esco always present from validated_items)
     baseline_esco_labels = [
         str(item.get("label") or item.get("uri") or "")
@@ -362,4 +384,7 @@ async def parse_file(
         profile_cluster=profile_cluster,
         resolved_to_esco=resolved_to_esco,
         skill_provenance=skill_provenance,
+        baseline_esco_count=baseline_esco_count,
+        injected_esco_from_domain=injected_esco_from_domain,
+        total_esco_count=total_esco_count,
     )
