@@ -213,6 +213,7 @@ class CVEnrichmentResult(BaseModel):
     new_tokens_added: List[str] = []
     llm_triggered: bool = False
     llm_suggestions: List[Dict[str, str]] = []
+    rejected_tokens: List[Dict[str, str]] = []  # [{token, token_norm, reason_code}] — debug/obs
 
 
 class MarketRadarReport(BaseModel):

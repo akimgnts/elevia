@@ -24,7 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from compass.cluster_library import ClusterLibraryStore, reset_library
+from compass.cluster_library import ClusterLibraryStore, classify_token, reset_library
 from compass.cv_enricher import enrich_cv, extract_candidate_tokens, should_trigger_llm
 from compass.llm_enricher import validate_llm_suggestions
 from compass.offer_enricher import enrich_offer, generate_market_radar
@@ -348,4 +348,93 @@ def test_scoring_invariance_enrichment():
         # validation_score is distinct from score_core
         assert "validation_score" in skill_dict, (
             "ClusterDomainSkill should have validation_score (not score_core)"
+        )
+
+
+# ── Test 10 — Unresolved tools go to DOMAIN_PENDING, not REJECT ───────────────
+
+def test_unresolved_tools_go_to_pending_not_reject():
+    """
+    Known domain tools (spec allowlist) must be classified as DOMAIN_PENDING,
+    never REJECT, even when submitted in lowercase without surrounding context.
+    """
+    spec_tools = [
+        "tableau", "dashboards", "forecasting", "adobe", "photoshop",
+        "premiere", "opc", "opcvm", "analytics", "api", "crm", "kpi",
+    ]
+    for token in spec_tools:
+        decision, reason_code = classify_token(token)
+        assert decision == "DOMAIN_PENDING", (
+            f"Expected DOMAIN_PENDING for tool {token!r}, got {decision!r} ({reason_code})"
+        )
+
+
+# ── Test 11 — Hard noise is rejected ──────────────────────────────────────────
+
+def test_hard_noise_rejected():
+    """
+    Personal identifiers, email addresses, URLs, city names and email-service
+    names must all be rejected with a specific REJECT_* reason code.
+    """
+    hard_noise = [
+        "akim",            # personal first name (short alpha, ≥2 vowels)
+        "akinguentas13",   # username handle (alpha+digits)
+        "gmail",           # email service name
+        "com",             # TLD alone
+        "paris",           # FR city
+        "havre",           # FR city (Le Havre)
+        "@foo",            # starts with @
+        "foo@gmail.com",   # full email address
+        "https://x.y",     # URL
+    ]
+    for token in hard_noise:
+        decision, reason_code = classify_token(token)
+        assert decision == "REJECT", (
+            f"Expected REJECT for noise token {token!r}, got {decision!r} ({reason_code})"
+        )
+        assert reason_code.startswith("REJECT_"), (
+            f"Expected a REJECT_* reason code for {token!r}, got {reason_code!r}"
+        )
+
+
+# ── Test 12 — Generic English words are REJECT_GENERIC ───────────────────────
+
+def test_generic_english_rejected():
+    """
+    Generic English words that appear in CV text but carry no domain-skill
+    information must be classified as REJECT with reason_code REJECT_GENERIC.
+    """
+    generic_words = [
+        "across", "after", "advanced", "aligned",
+        "ensure", "worked", "make", "making",
+    ]
+    for token in generic_words:
+        decision, reason_code = classify_token(token)
+        assert decision == "REJECT", (
+            f"Expected REJECT for generic word {token!r}, got {decision!r} ({reason_code})"
+        )
+        assert reason_code == "REJECT_GENERIC", (
+            f"Expected REJECT_GENERIC for {token!r}, got {reason_code!r}"
+        )
+
+
+# ── Test 13 — Surrounding punctuation is stripped before classification ────────
+
+def test_punctuation_normalization():
+    """
+    Tokens with surrounding punctuation (as extracted from raw CV text) must be
+    normalised before classification. The base form should be DOMAIN_PENDING,
+    not rejected.
+    """
+    punctuated = [
+        "opcvm,",
+        "tableau.",
+        "dashboards)",
+        "forecasting;",
+    ]
+    for token in punctuated:
+        decision, reason_code = classify_token(token)
+        assert decision == "DOMAIN_PENDING", (
+            f"Expected DOMAIN_PENDING after stripping punct from {token!r}, "
+            f"got {decision!r} ({reason_code})"
         )

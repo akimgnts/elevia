@@ -19,7 +19,7 @@ import re
 import unicodedata
 from typing import Dict, List, Optional, Set
 
-from .cluster_library import ClusterLibraryStore, get_library
+from .cluster_library import ClusterLibraryStore, classify_token, normalize_token, get_library
 from .contracts import CVEnrichmentResult
 
 logger = logging.getLogger(__name__)
@@ -158,11 +158,20 @@ def enrich_cv(
     # 1. Extract candidate tokens
     candidates = extract_candidate_tokens(cv_text, esco_skills)
 
-    # 2. Record each candidate in library
+    # 2. Pre-classify then record each candidate in library
     new_tokens: List[str] = []
     pending: List[str] = []
+    rejected: List[Dict[str, str]] = []
 
     for token in candidates:
+        decision, reason_code = classify_token(token)
+        if decision != "DOMAIN_PENDING":
+            rejected.append({
+                "token": token,
+                "token_norm": normalize_token(token),
+                "reason_code": reason_code,
+            })
+            continue
         status = lib.record_cv_token(cluster, token)
         if status in ("PENDING", "ACTIVE"):
             norm = _nfkd_lower(token)
@@ -213,4 +222,5 @@ def enrich_cv(
         new_tokens_added=new_tokens[:20],
         llm_triggered=llm_triggered,
         llm_suggestions=llm_suggestions,
+        rejected_tokens=rejected[:50],
     )

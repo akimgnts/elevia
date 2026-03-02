@@ -30,7 +30,7 @@ import unicodedata
 from collections import OrderedDict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 from .contracts import (
     ClusterDomainSkill,
@@ -98,6 +98,192 @@ _SOFT_SKILL_PATTERNS: List[re.Pattern] = [
 
 _NUMBER_ONLY = re.compile(r"^\d+([.,]\d+)?$")
 
+# ── Tool / skill allowlist — forces DOMAIN_PENDING (display-only, not scored) ─
+
+_TOOL_ALLOWLIST: Set[str] = {
+    # Spec-mandated list
+    "tableau", "dashboards", "dashboard", "forecasting", "forecast",
+    "adobe", "photoshop", "premiere", "crm", "kpi", "kpis",
+    "api", "apis", "analytics", "opc", "opcvm", "power bi", "powerbi",
+    # Finance/asset management
+    "ucits", "etf", "etfs", "dcf", "irr", "npv",
+    # Common acronyms (safe to record as domain-pending)
+    "erp", "bi", "etl", "edi", "sap",
+    # Tools that would trip the short-name heuristic (≤4 chars, ≥2 vowels)
+    "api", "apis",
+}
+
+# ── Generic English words — too vague to be domain skills ─────────────────────
+
+_GENERIC_ENGLISH: Set[str] = {
+    # Prepositions / temporal (not in FR stopwords)
+    "after", "before", "during", "across", "along", "among", "around",
+    "against", "between", "beyond", "through", "within", "without",
+    "towards", "until", "since", "prior", "per",
+    # Generic CV verbs / adjectives
+    "make", "making", "made", "build", "building", "built",
+    "ensure", "ensuring", "worked", "working", "focus", "focused",
+    "provide", "support", "handle", "own",
+    # Generic adjectives
+    "advanced", "aligned", "certain", "effective", "effectively",
+    "general", "large", "likely", "long", "multiple", "new", "next",
+    "other", "right", "same", "several", "specific", "unique", "various",
+    # Generic nouns
+    "aspect", "aspects", "issue", "issues", "key", "part", "parts",
+    "place", "year", "years", "month",
+    # Generic adverbs / pronouns
+    "also", "often", "just", "rather", "especially", "including",
+    "following", "given", "related", "relevant", "current",
+    # Generic tech words (too vague alone)
+    "system", "systems", "tool", "process", "processes",
+    "report", "reports", "using", "used",
+}
+
+# ── Email / domain noise ───────────────────────────────────────────────────────
+
+_EMAIL_NOISE: Set[str] = {
+    "gmail", "yahoo", "hotmail", "outlook", "orange", "wanadoo", "free",
+    "laposte", "sfr",
+    # TLDs standing alone as tokens
+    "com", "fr", "net", "org", "eu", "io", "co", "uk", "de",
+}
+
+# ── URL and handle patterns ────────────────────────────────────────────────────
+
+_URL_RE = re.compile(r"https?://|www\.", re.IGNORECASE)
+_HANDLE_DIGITS_RE = re.compile(r"^[a-z]+\d{2,}[a-z]*$|^[a-z]*\d{2,}[a-z]+$", re.IGNORECASE)
+
+# ── Minimal FR location names (common in CV headers) ─────────────────────────
+
+_LOCATION_NAMES_FR: Set[str] = {
+    "paris", "lyon", "marseille", "bordeaux", "lille", "havre", "nantes",
+    "toulouse", "rennes", "strasbourg", "nice", "grenoble", "montpellier",
+    "rouen", "toulon", "brest", "reims", "limoges", "amiens",
+}
+
+# ── Short alpha name heuristic helpers ────────────────────────────────────────
+
+_SHORT_ALPHA_NAME = re.compile(r"^[a-z]{3,4}$")
+_VOWELS = frozenset("aeiou")
+
+
+def _vowel_count(s: str) -> int:
+    return sum(1 for c in s if c in _VOWELS)
+
+
+# ── Reason codes ──────────────────────────────────────────────────────────────
+
+_DOMAIN_PENDING = "DOMAIN_PENDING"
+_REJECT = "REJECT"
+RC_ALLOWLIST = "ALLOWLIST"
+RC_TOO_SHORT = "REJECT_TOO_SHORT"
+RC_WORD_COUNT = "REJECT_WORD_COUNT"
+RC_NUMBER = "REJECT_NUMBER"
+RC_STOPWORD = "REJECT_STOPWORD"
+RC_GENERIC = "REJECT_GENERIC"
+RC_SOFT_SKILL = "REJECT_SOFT_SKILL"
+RC_EMAIL = "REJECT_EMAIL"
+RC_URL = "REJECT_URL"
+RC_HANDLE = "REJECT_NAME_HANDLE"
+
+
+# ── classify_token — single entry point for token validation ──────────────────
+
+def classify_token(token: str, cluster: Optional[str] = None) -> Tuple[str, str]:
+    """
+    Classify a candidate token.  Pure function — no DB access, no side effects.
+
+    Returns (decision, reason_code) where:
+      decision   = "DOMAIN_PENDING"  → valid, should go to cluster library
+                 = "REJECT"          → noise token
+      reason_code = "ALLOWLIST"            (guaranteed DOMAIN_PENDING)
+                  | "REJECT_TOO_SHORT"
+                  | "REJECT_WORD_COUNT"
+                  | "REJECT_NUMBER"
+                  | "REJECT_STOPWORD"
+                  | "REJECT_GENERIC"
+                  | "REJECT_SOFT_SKILL"
+                  | "REJECT_EMAIL"
+                  | "REJECT_URL"
+                  | "REJECT_NAME_HANDLE"
+
+    Rule order:
+      1. Normalize (strip surrounding punct, NFKD lower)
+      2. Allowlist guard  ← checked BEFORE any rejection
+      3. URL / email / handle patterns
+      4. Length / word-count / number
+      5. Location names
+      6. Short alpha name heuristic  (≤4 chars, all-alpha, ≥2 vowels → likely a name)
+      7. Stopwords
+      8. Generic English words
+      9. Soft-skill patterns
+    """
+    if not token or not token.strip():
+        return _REJECT, RC_TOO_SHORT
+
+    # 1. Normalize
+    norm = _nfkd_lower(token)
+    if not norm:
+        return _REJECT, RC_TOO_SHORT
+
+    # 2. Allowlist → force DOMAIN_PENDING regardless of other rules
+    if norm in _TOOL_ALLOWLIST:
+        return _DOMAIN_PENDING, RC_ALLOWLIST
+
+    # 3a. URL
+    if _URL_RE.search(token):
+        return _REJECT, RC_URL
+
+    # 3b. Email (@ sign)
+    if "@" in token:
+        return _REJECT, RC_EMAIL
+
+    # 3c. Email noise words (gmail, com, etc.)
+    if norm in _EMAIL_NOISE:
+        return _REJECT, RC_EMAIL
+
+    # 3d. Handle with digits (e.g. akinguentas13)
+    if _HANDLE_DIGITS_RE.match(norm):
+        return _REJECT, RC_HANDLE
+
+    # 4a. Length
+    if len(norm) < 2 or len(norm) > 50:
+        return _REJECT, RC_TOO_SHORT
+
+    # 4b. Word count
+    words = norm.split()
+    if not (1 <= len(words) <= 4):
+        return _REJECT, RC_WORD_COUNT
+
+    # 4c. Number-only
+    if _NUMBER_ONLY.match(norm):
+        return _REJECT, RC_NUMBER
+
+    # 5. Known FR locations
+    if norm in _LOCATION_NAMES_FR:
+        return _REJECT, RC_HANDLE
+
+    # 6. Stopwords
+    if norm in _STOPWORDS:
+        return _REJECT, RC_STOPWORD
+    if len(words) == 1 and words[0] in _STOPWORDS:
+        return _REJECT, RC_STOPWORD
+
+    # 7. Generic English words  ← before name heuristic so "make/after/ensure" get right code
+    if norm in _GENERIC_ENGLISH:
+        return _REJECT, RC_GENERIC
+
+    # 8. Short alpha name heuristic: ≤4 all-alpha chars with ≥2 vowels → likely a name
+    if _SHORT_ALPHA_NAME.match(norm) and _vowel_count(norm) >= 2:
+        return _REJECT, RC_HANDLE
+
+    # 9. Soft-skill patterns (case-insensitive, checked on original token)
+    for pat in _SOFT_SKILL_PATTERNS:
+        if pat.search(token):
+            return _REJECT, RC_SOFT_SKILL
+
+    return _DOMAIN_PENDING, "VALID"
+
 # ── Schema ────────────────────────────────────────────────────────────────────
 
 _SQL_CREATE_SKILLS = """
@@ -126,11 +312,22 @@ CREATE TABLE IF NOT EXISTS cluster_library_meta (
 _META_KEYS = ("llm_calls_total", "llm_calls_avoided", "new_skills_via_offers")
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Normalisation helpers ─────────────────────────────────────────────────────
+
+# Surrounding punctuation to strip (never internal – preserves C#, S&OP, etc.)
+_STRIP_SURROUND = re.compile(r"^[\s,.;:()\[\]{}<>/\\|\-_]+|[\s,.;:()\[\]{}<>/\\|\-_]+$")
+
 
 def _nfkd_lower(s: str) -> str:
+    """Strip surrounding punct, NFKD-decompose, remove combining chars, lowercase."""
+    s = _STRIP_SURROUND.sub("", s.strip())
     nfkd = unicodedata.normalize("NFKD", s)
     return "".join(c for c in nfkd if not unicodedata.combining(c)).lower().strip()
+
+
+def normalize_token(token: str) -> str:
+    """Public normalisation for display / reporting (same as DB key function)."""
+    return _nfkd_lower(token)
 
 
 def _make_id(cluster: str, token_norm: str) -> str:
@@ -196,37 +393,10 @@ class ClusterLibraryStore:
         Deterministic token validation. No DB access. No side effects.
 
         Returns True iff token is a valid non-ESCO skill candidate.
+        Delegates to module-level classify_token() — kept for backwards compat.
         """
-        if not token or not token.strip():
-            return False
-        token = token.strip()
-
-        # Length
-        if len(token) < 2 or len(token) > 50:
-            return False
-
-        # Word count
-        words = token.split()
-        if not (1 <= len(words) <= 4):
-            return False
-
-        # Number-only
-        if _NUMBER_ONLY.match(token):
-            return False
-
-        # Stopword (NFKD-normalized)
-        norm = _nfkd_lower(token)
-        if norm in _STOPWORDS:
-            return False
-        if len(words) == 1 and words[0].lower() in _STOPWORDS:
-            return False
-
-        # Soft-skill pattern
-        for pat in _SOFT_SKILL_PATTERNS:
-            if pat.search(token):
-                return False
-
-        return True
+        decision, _ = classify_token(token, cluster)
+        return decision == _DOMAIN_PENDING
 
     # ── Record operations ─────────────────────────────────────────────────────
 
