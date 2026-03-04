@@ -387,21 +387,25 @@ class ClusterLibraryStore:
             c.execute("PRAGMA journal_mode=WAL")
             c.execute("PRAGMA busy_timeout=3000")
             c.row_factory = sqlite3.Row
+            self._ensure_schema(c)
             self._local.conn = c
         return c
+
+    def _ensure_schema(self, conn: sqlite3.Connection) -> None:
+        conn.execute(_SQL_CREATE_SKILLS)
+        conn.execute(_SQL_CREATE_META)
+        conn.execute(_SQL_CREATE_ESCO_MAP)
+        for key in _META_KEYS:
+            conn.execute(
+                "INSERT OR IGNORE INTO cluster_library_meta (key, value_int) VALUES (?, 0)",
+                (key,),
+            )
+        conn.commit()
 
     def _init_db(self) -> None:
         with self._lock:
             conn = self._conn()
-            conn.execute(_SQL_CREATE_SKILLS)
-            conn.execute(_SQL_CREATE_META)
-            conn.execute(_SQL_CREATE_ESCO_MAP)
-            for key in _META_KEYS:
-                conn.execute(
-                    "INSERT OR IGNORE INTO cluster_library_meta (key, value_int) VALUES (?, 0)",
-                    (key,),
-                )
-            conn.commit()
+            self._ensure_schema(conn)
 
     # ── Pure validation (no DB) ───────────────────────────────────────────────
 

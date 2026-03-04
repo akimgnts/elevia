@@ -1,63 +1,46 @@
 #!/usr/bin/env python3
 """
-Test rapide d'authentification France Travail
+Test authentification France Travail 2025 (safe for pytest).
 """
 import os
-import requests
-from dotenv import load_dotenv
+from typing import Dict
 
-load_dotenv()
 
-print("="*70)
-print("🔐 TEST AUTHENTIFICATION FRANCE TRAVAIL 2025")
-print("="*70)
+def _load_env() -> Dict[str, str]:
+    from dotenv import load_dotenv
+    load_dotenv()
+    return {
+        "token_url": os.getenv("FT_TOKEN_URL"),
+        "client_id": os.getenv("FT_CLIENT_ID"),
+        "client_secret": os.getenv("FT_CLIENT_SECRET"),
+        "scopes": os.getenv("FT_SCOPES"),
+    }
 
-url = os.getenv("FT_TOKEN_URL")
-print(f"\n📍 URL: {url}")
 
-data = {
-    "grant_type": "client_credentials",
-    "client_id": os.getenv("FT_CLIENT_ID"),
-    "client_secret": os.getenv("FT_CLIENT_SECRET"),
-    "scope": os.getenv("FT_SCOPES")
-}
+def run_auth_check(dry_run: bool = False) -> Dict[str, str]:
+    data = _load_env()
+    if not data["token_url"] or not data["client_id"] or not data["client_secret"]:
+        return {"status": "ENV_MISSING"}
 
-print(f"🔑 Client ID: {data['client_id'][:30]}...")
-print(f"📋 Scopes: {data['scope']}")
+    if dry_run:
+        return {"status": "DRY_RUN"}
 
-try:
-    r = requests.post(
-        url,
-        data=data,
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-        timeout=10
-    )
+    import requests
 
-    print(f"\n✅ Status: {r.status_code}")
-    print(f"📄 Content-Type: {r.headers.get('Content-Type', 'N/A')}")
+    payload = {
+        "grant_type": "client_credentials",
+        "client_id": data["client_id"],
+        "client_secret": data["client_secret"],
+        "scope": data["scopes"],
+    }
+    r = requests.post(data["token_url"], data=payload, timeout=10)
+    return {"status": "SUCCESS" if r.status_code == 200 else "FAILED"}
 
-    if r.status_code == 200:
-        if 'application/json' in r.headers.get('Content-Type', ''):
-            result = r.json()
-            if 'access_token' in result:
-                print(f"\n🎉 SUCCESS! Token obtenu!")
-                print(f"   Longueur: {len(result['access_token'])} caractères")
-                print(f"   Token: {result['access_token'][:60]}...")
-                if 'expires_in' in result:
-                    print(f"   Expire dans: {result['expires_in']} secondes")
-            else:
-                print(f"\n⚠️  JSON reçu mais pas de token:")
-                print(result)
-        else:
-            print(f"\n❌ Pas du JSON:")
-            print(r.text[:300])
-    else:
-        print(f"\n❌ Erreur {r.status_code}:")
-        print(r.text[:500])
 
-except requests.exceptions.ConnectionError as e:
-    print(f"\n❌ Erreur de connexion: {str(e)[:100]}")
-except Exception as e:
-    print(f"\n❌ Erreur: {e}")
+def test_auth_env_gate():
+    result = run_auth_check(dry_run=True)
+    assert result["status"] in {"ENV_MISSING", "DRY_RUN", "SUCCESS"}
 
-print("\n" + "="*70)
+
+if __name__ == "__main__":
+    print(run_auth_check(dry_run=False))

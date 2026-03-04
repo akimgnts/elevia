@@ -54,7 +54,7 @@ def test_parse_file_enrich_with_mock_llm(client, monkeypatch):
             "model": "mock",
         }
 
-    monkeypatch.setattr("api.routes.profile_file.suggest_skills_from_cv", _fake_suggest)
+    monkeypatch.setattr("profile.llm_skill_suggester.suggest_skills_from_cv", _fake_suggest)
 
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
     resp = _post_txt(client, TECH_CV, enrich=True)
@@ -71,7 +71,7 @@ def test_parse_file_enrich_llm_failure_fallback(client, monkeypatch):
         return {"skills": [], "error": "boom", "warning": "fail", "model": "mock"}
 
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
-    monkeypatch.setattr("api.routes.profile_file.suggest_skills_from_cv", _fake_suggest_fail)
+    monkeypatch.setattr("profile.llm_skill_suggester.suggest_skills_from_cv", _fake_suggest_fail)
 
     resp = _post_txt(client, TECH_CV, enrich=True)
     assert resp.status_code == 200

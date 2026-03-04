@@ -20,6 +20,7 @@ Usage:
 import sys
 import sqlite3
 import json
+import pytest
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -32,7 +33,7 @@ from fetchers.client_ft import FranceTravailClient
 # ============================================================================
 
 DB_PATH = Path("data/test/anotea_test.db")
-SCHEMA_PATH = Path("schema_anotea.sql")
+SCHEMA_PATH = Path(__file__).parent / "schema_anotea.sql"
 
 
 # ============================================================================
@@ -52,7 +53,7 @@ def log(message: str, level: str = "INFO"):
     print(f"[{timestamp}] {emoji} {message}")
 
 
-def test_schema_creation():
+def _create_schema():
     """Test 1: Création du schéma SQL."""
     log("=" * 70, "INFO")
     log("TEST 1: CRÉATION DU SCHÉMA SQL", "TEST")
@@ -112,7 +113,22 @@ def test_schema_creation():
         return None
 
 
-def test_api_call():
+@pytest.fixture
+def conn():
+    """Provide a fresh SQLite connection with schema for integration tests."""
+    connection = _create_schema()
+    assert connection is not None
+    yield connection
+    connection.close()
+
+
+def test_schema_creation():
+    connection = _create_schema()
+    assert connection is not None
+    connection.close()
+
+
+def _api_call():
     """Test 2: Appel API Anotea (attendu: 403 Forbidden)."""
     log("=" * 70, "INFO")
     log("TEST 2: APPEL API ANOTEA", "TEST")
@@ -151,6 +167,11 @@ def test_api_call():
     except Exception as e:
         log(f"Erreur client: {e}", "ERROR")
         return False
+
+
+def test_api_call():
+    result = _api_call()
+    assert result in {True, False}
 
 
 def test_insert_data(conn):

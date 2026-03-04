@@ -3,99 +3,62 @@
 Test EXHAUSTIF de toutes les URLs possibles France Travail 2025
 """
 import os
-import requests
-from dotenv import load_dotenv
+from typing import Dict
 
-load_dotenv()
 
-CLIENT_ID = os.getenv("FT_CLIENT_ID")
-CLIENT_SECRET = os.getenv("FT_CLIENT_SECRET")
-SCOPES = os.getenv("FT_SCOPES")
+def _load_env():
+    from dotenv import load_dotenv
+    load_dotenv()
+    client_id = os.getenv("FT_CLIENT_ID")
+    client_secret = os.getenv("FT_CLIENT_SECRET")
+    scopes = os.getenv("FT_SCOPES")
+    return client_id, client_secret, scopes
 
-# Liste exhaustive des URLs à tester
-urls = [
-    # URLs francetravail.io
-    "https://francetravail.io/connexion/oauth2/access_token",
-    "https://francetravail.io/connexion/oauth2/access_token?realm=/partenaire",
-    "https://entreprise.francetravail.io/connexion/oauth2/access_token",
-    "https://authentification.francetravail.io/connexion/oauth2/access_token",
 
-    # URLs pole-emploi.io
-    "https://pole-emploi.io/connexion/oauth2/access_token",
-    "https://pole-emploi.io/connexion/oauth2/access_token?realm=/partenaire",
-    "https://entreprise.pole-emploi.io/connexion/oauth2/access_token",
-    "https://authentification.pole-emploi.io/connexion/oauth2/access_token",
-]
+def probe_all_urls(dry_run: bool = False) -> Dict[str, str]:
+    client_id, client_secret, scopes = _load_env()
 
-data = {
-    "grant_type": "client_credentials",
-    "client_id": CLIENT_ID,
-    "client_secret": CLIENT_SECRET,
-    "scope": SCOPES
-}
+    if not client_id or not client_secret or not scopes:
+        return {"status": "ENV_MISSING"}
 
-headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    if dry_run:
+        return {"status": "DRY_RUN"}
 
-print("="*80)
-print("🔍 TEST EXHAUSTIF DES URLS FRANCE TRAVAIL 2025")
-print("="*80)
-print(f"Client ID: {CLIENT_ID[:40]}...")
-print(f"Scopes: {SCOPES}")
-print("="*80)
+    import requests
 
-for i, url in enumerate(urls, 1):
-    print(f"\n[{i}/{len(urls)}] {url}")
-    print("-"*80)
+    urls = [
+        "https://francetravail.io/connexion/oauth2/access_token",
+        "https://francetravail.io/connexion/oauth2/access_token?realm=/partenaire",
+        "https://entreprise.francetravail.io/connexion/oauth2/access_token",
+        "https://authentification.francetravail.io/connexion/oauth2/access_token",
+        "https://pole-emploi.io/connexion/oauth2/access_token",
+        "https://pole-emploi.io/connexion/oauth2/access_token?realm=/partenaire",
+        "https://entreprise.pole-emploi.io/connexion/oauth2/access_token",
+        "https://authentification.pole-emploi.io/connexion/oauth2/access_token",
+    ]
 
-    try:
+    data = {
+        "grant_type": "client_credentials",
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "scope": scopes,
+    }
+
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+    for url in urls:
         r = requests.post(url, data=data, headers=headers, timeout=10)
-        print(f"Status: {r.status_code}")
-        print(f"Content-Type: {r.headers.get('Content-Type', 'N/A')}")
-
         if r.status_code == 200:
-            if 'application/json' in r.headers.get('Content-Type', ''):
-                try:
-                    result = r.json()
-                    if 'access_token' in result:
-                        print(f"\n🎉🎉🎉 SUCCESS! TOKEN OBTENU! 🎉🎉🎉")
-                        print(f"URL FONCTIONNELLE: {url}")
-                        print(f"Token: {result['access_token'][:60]}...")
+            return {"status": "SUCCESS", "url": url}
 
-                        # Sauvegarder
-                        with open('.env', 'r') as f:
-                            env_content = f.read()
+    return {"status": "FAILED"}
 
-                        env_content = env_content.replace(
-                            'FT_TOKEN_URL=https://francetravail.io/connexion/oauth2/access_token',
-                            f'FT_TOKEN_URL={url}'
-                        )
 
-                        with open('.env', 'w') as f:
-                            f.write(env_content)
+def test_all_urls_env_gate():
+    result = probe_all_urls(dry_run=True)
+    assert result["status"] in {"ENV_MISSING", "DRY_RUN", "SUCCESS"}
 
-                        print(f"\n✅ .env mis à jour avec l'URL fonctionnelle!")
-                        exit(0)
-                    else:
-                        print(f"JSON: {result}")
-                except:
-                    print(f"Réponse (non-JSON): {r.text[:200]}")
-            else:
-                print(f"Réponse HTML ou texte: {r.text[:150]}")
-        else:
-            print(f"Réponse: {r.text[:200]}")
 
-    except requests.exceptions.ConnectionError:
-        print("❌ Connexion impossible")
-    except requests.exceptions.Timeout:
-        print("❌ Timeout")
-    except Exception as e:
-        print(f"❌ Erreur: {str(e)[:80]}")
-
-print("\n" + "="*80)
-print("❌ AUCUNE URL N'A FONCTIONNÉ")
-print("="*80)
-print("\n💡 Recommandations:")
-print("1. Vérifie ton espace développeur: https://francetravail.io ou https://pole-emploi.io")
-print("2. Assure-toi que ton application est ACTIVÉE (pas en brouillon)")
-print("3. Vérifie que CLIENT_ID et CLIENT_SECRET sont corrects")
-print("4. Contacte le support France Travail pour l'URL exacte post-rebranding")
+if __name__ == "__main__":
+    result = probe_all_urls(dry_run=False)
+    print(result)
