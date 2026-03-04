@@ -50,7 +50,7 @@ class ExtractedProfile:
     """
     profile_id: str
     skills: frozenset  # Set immuable de skills normalisées
-    skills_uri: frozenset  # Set immuable de skills ESCO URIs (scoring)
+    skills_uri: frozenset  # Set immuable de skills URIs (ESCO + DOMAIN) pour scoring
     languages: frozenset  # Set immuable de langues normalisées
     education_level: int  # Niveau ordinal (0 si non spécifié)
     preferred_countries: frozenset  # Set immuable de pays canonisés
@@ -341,6 +341,16 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
         skills_uri_list = collapsed.get("uris") or []
         skills_uri_collapsed_dupes = int(collapsed.get("collapsed_dupes", 0) or 0)
         skills_unmapped_count = len(_dedupe_preserve_order(unmapped))
+
+    raw_domain_uris = raw_profile.get("domain_uris")
+    if isinstance(raw_domain_uris, list) and raw_domain_uris:
+        domain_uri_list = _dedupe_preserve_order([
+            str(s).strip()
+            for s in raw_domain_uris
+            if isinstance(s, str) and str(s).strip()
+        ])
+        if domain_uri_list:
+            skills_uri_list = _dedupe_preserve_order(skills_uri_list + domain_uri_list)
 
     skills_uri = frozenset(skills_uri_list)
 

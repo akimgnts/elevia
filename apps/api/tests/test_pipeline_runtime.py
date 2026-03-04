@@ -3,9 +3,9 @@ test_pipeline_runtime.py — Factual verification of Compass E pipeline wiring.
 
 7 tests + 1 E2E:
   1. test_compass_e_on_sets_pipeline_tag
-       ELEVIA_ENABLE_COMPASS_E=1 → pipeline_used contains "compass_e"
+       ELEVIA_ENABLE_COMPASS_E=1 → pipeline_variant == "canonical_compass_with_compass_e"
   2. test_compass_e_off_uses_baseline
-       ELEVIA_ENABLE_COMPASS_E=0 → pipeline_used == "baseline"
+       ELEVIA_ENABLE_COMPASS_E=0 → pipeline_variant == "canonical_compass_baseline"
   3. test_llm_fires_for_sparse_cv
        Sparse ESCO → llm_triggered=True (mocked, no real OpenAI call)
   4. test_llm_does_not_fire_for_rich_cv
@@ -76,7 +76,7 @@ def _post_txt(client, text: str, filename: str = "cv.txt"):
 def test_compass_e_on_sets_pipeline_tag(client):
     """
     POST /profile/parse-file with ELEVIA_ENABLE_COMPASS_E=1 must return a
-    response whose pipeline_used field contains 'compass_e'.
+    response whose pipeline_variant field contains 'compass_e'.
     """
     with patch.dict("os.environ", {"ELEVIA_ENABLE_COMPASS_E": "1"}):
         resp = _post_txt(client, _FINANCE_CV)
@@ -84,8 +84,11 @@ def test_compass_e_on_sets_pipeline_tag(client):
     assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text[:200]}"
     body = resp.json()
 
-    assert "compass_e" in body["pipeline_used"], (
-        f"Expected pipeline_used to contain 'compass_e', got {body['pipeline_used']!r}"
+    assert body["pipeline_used"] == "canonical_compass", (
+        f"Expected pipeline_used='canonical_compass', got {body['pipeline_used']!r}"
+    )
+    assert body.get("pipeline_variant") == "canonical_compass_with_compass_e", (
+        f"Expected pipeline_variant='canonical_compass_with_compass_e', got {body.get('pipeline_variant')!r}"
     )
     assert body["compass_e_enabled"] is True, (
         f"Expected compass_e_enabled=True in response, got {body['compass_e_enabled']}"
@@ -93,6 +96,7 @@ def test_compass_e_on_sets_pipeline_tag(client):
     # Observability report
     print(
         f"\n[TEST1] pipeline_used={body['pipeline_used']} "
+        f"pipeline_variant={body.get('pipeline_variant')} "
         f"llm_fired={body.get('llm_fired')} "
         f"esco_count={body.get('canonical_count')} "
         f"domain_active={len(body.get('domain_skills_active', []))} "
@@ -105,7 +109,7 @@ def test_compass_e_on_sets_pipeline_tag(client):
 def test_compass_e_off_uses_baseline(client):
     """
     POST /profile/parse-file with ELEVIA_ENABLE_COMPASS_E=0 (default) must
-    return pipeline_used == "baseline" exactly.
+    return pipeline_variant == "baseline" exactly.
     """
     with patch.dict("os.environ", {"ELEVIA_ENABLE_COMPASS_E": "0"}):
         resp = _post_txt(client, _FINANCE_CV)
@@ -113,13 +117,20 @@ def test_compass_e_off_uses_baseline(client):
     assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text[:200]}"
     body = resp.json()
 
-    assert body["pipeline_used"] == "baseline", (
-        f"Expected pipeline_used='baseline' when COMPASS_E=0, got {body['pipeline_used']!r}"
+    assert body["pipeline_used"] == "canonical_compass", (
+        f"Expected pipeline_used='canonical_compass' when COMPASS_E=0, got {body['pipeline_used']!r}"
+    )
+    assert body.get("pipeline_variant") == "canonical_compass_baseline", (
+        f"Expected pipeline_variant='canonical_compass_baseline' when COMPASS_E=0, got {body.get('pipeline_variant')!r}"
     )
     assert body["compass_e_enabled"] is False, (
         f"Expected compass_e_enabled=False, got {body['compass_e_enabled']}"
     )
-    print(f"\n[TEST2] pipeline_used={body['pipeline_used']} compass_e_enabled={body['compass_e_enabled']}")
+    print(
+        f"\n[TEST2] pipeline_used={body['pipeline_used']} "
+        f"pipeline_variant={body.get('pipeline_variant')} "
+        f"compass_e_enabled={body['compass_e_enabled']}"
+    )
 
 
 # ── Test 3 — LLM fires for sparse CV ──────────────────────────────────────────

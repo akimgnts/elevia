@@ -1,0 +1,17 @@
+{
+  "cluster": "DATA_IT",
+  "ignored_tokens": [
+    "machine", "learning", "power", "bi", "airflow", "dbt", "etl",
+    "tensorflow", "pytorch", "databricks", "snowflake", "redshift",
+    "kafka", "elasticsearch", "docker", "kubernetes"
+  ],
+  "noise_tokens": [],
+  "validated_esco_labels": [
+    "Python (programming language)",
+    "SQL",
+    "Data analysis",
+    "Tableau Software",
+    "Microsoft Excel"
+  ],
+  "profile_text_excerpt": "Data Analyst avec 3 ans d'expérience en machine learning et data engineering. Utilisation quotidienne de Python, SQL, Power BI. Compétences en ETL, Airflow, dbt. Expérience avec TensorFlow pour les modèles prédictifs."
+}

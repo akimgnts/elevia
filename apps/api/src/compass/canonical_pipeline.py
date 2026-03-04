@@ -17,7 +17,7 @@ PIPELINE_USED tags:
   "baseline+compass_e+llm" — ESCO + Compass E + Compass E LLM trigger
 
 FLAGS:
-  ELEVIA_ENABLE_COMPASS_E=1     → enable Compass E layer (off by default)
+  ELEVIA_ENABLE_COMPASS_E=1     → enable Compass E layer (auto-on in local/dev if unset)
   ELEVIA_TRACE_PIPELINE_WIRING=1 → log detailed pipeline trace
   enrich_llm (query param)       → DEPRECATED: logs warning, still works for compat
 
@@ -38,8 +38,22 @@ logger = logging.getLogger(__name__)
 # ── Environment flags ─────────────────────────────────────────────────────────
 
 def is_compass_e_enabled() -> bool:
-    """True when ELEVIA_ENABLE_COMPASS_E=1 (off by default)."""
-    return os.getenv("ELEVIA_ENABLE_COMPASS_E", "0").strip().lower() in {"1", "true", "yes", "on"}
+    """True when ELEVIA_ENABLE_COMPASS_E=1 or when running in local/dev (if unset)."""
+    raw = os.getenv("ELEVIA_ENABLE_COMPASS_E")
+    if raw is not None and raw.strip() != "":
+        return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+    env = os.getenv("ENV", "").strip().lower()
+    debug = os.getenv("DEBUG", "").strip().lower()
+    dev_tools = os.getenv("ELEVIA_DEV_TOOLS", "").strip().lower()
+    elevia_dev = os.getenv("ELEVIA_DEV", "").strip().lower()
+    is_dev = (
+        env in {"dev", "local"} or
+        debug in {"1", "true", "yes", "on"} or
+        dev_tools in {"1", "true", "yes", "on"} or
+        elevia_dev in {"1", "true", "yes", "on"}
+    )
+    return is_dev
 
 
 def is_trace_enabled() -> bool:
@@ -72,7 +86,11 @@ class CVPipelineResult:
     compass_e_enabled: bool = False
     llm_fired: bool = False
     resolved_to_esco: List[Dict[str, Any]] = field(default_factory=list)  # display-only
+    rejected_tokens: List[Dict[str, Any]] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
+    legacy_llm_available: bool = False
+    legacy_llm_added_count: int = 0
+    legacy_llm_error: Optional[str] = None
 
 
 # ── Canonical pipeline ────────────────────────────────────────────────────────
@@ -103,6 +121,9 @@ def run_cv_pipeline(
     warnings: List[str] = []
     trace = is_trace_enabled()
     use_compass_e = compass_e_override if compass_e_override is not None else is_compass_e_enabled()
+    legacy_llm_available = False
+    legacy_llm_added_count = 0
+    legacy_llm_error: Optional[str] = None
 
     if trace:
         logger.info(
@@ -131,21 +152,30 @@ def run_cv_pipeline(
             from api.utils.env import get_llm_api_key  # local import
             from profile.llm_skill_suggester import suggest_skills_from_cv  # local import
             if get_llm_api_key():
+                legacy_llm_available = True
                 llm = suggest_skills_from_cv(cv_text)
-                llm_skills = (llm.get("skills") or []) if not llm.get("error") else []
+                if llm.get("error"):
+                    legacy_llm_error = "llm_failed"
+                    llm_skills = []
+                else:
+                    llm_skills = (llm.get("skills") or [])
                 if isinstance(llm_skills, list) and llm_skills:
                     base_tokens = baseline_result.get("skills_raw", [])
                     base_set = set(base_tokens)
                     new_tokens = [t for t in llm_skills if isinstance(t, str) and t not in base_set]
                     if new_tokens:
+                        legacy_llm_added_count = len(new_tokens)
                         combined = base_tokens + new_tokens
                         baseline_result = run_baseline_from_tokens(
                             combined, profile_id=profile_id, source="llm"
                         )
                         mode = "baseline+llm_legacy"
+            else:
+                legacy_llm_error = "missing_openai_api_key"
         except Exception as exc:
             logger.warning("[PIPELINE_WIRING] legacy LLM enrichment failed: %s", type(exc).__name__)
             warnings.append(f"legacy_llm_failed: {type(exc).__name__}")
+            legacy_llm_error = "llm_failed"
 
     # ── 3. Profile cluster ─────────────────────────────────────────────────────
     from profile.profile_cluster import detect_profile_cluster  # local import
@@ -176,6 +206,7 @@ def run_cv_pipeline(
     domain_skills_pending_count = 0
     llm_fired = False
     resolved_to_esco: List[Dict[str, Any]] = []
+    rejected_tokens: List[Dict[str, Any]] = []
 
     if use_compass_e:
         try:
@@ -192,6 +223,7 @@ def run_cv_pipeline(
             domain_skills_pending_count = len(enrichment.domain_skills_pending)
             llm_fired = enrichment.llm_triggered
             resolved_to_esco = [r.model_dump() for r in enrichment.resolved_to_esco]
+            rejected_tokens = enrichment.rejected_tokens[:50]
 
             if mode == "baseline+llm_legacy":
                 mode = "baseline+llm_legacy+compass_e"
@@ -227,5 +259,9 @@ def run_cv_pipeline(
         compass_e_enabled=use_compass_e,
         llm_fired=llm_fired,
         resolved_to_esco=resolved_to_esco,
+        rejected_tokens=rejected_tokens,
         warnings=warnings,
+        legacy_llm_available=legacy_llm_available,
+        legacy_llm_added_count=legacy_llm_added_count,
+        legacy_llm_error=legacy_llm_error,
     )

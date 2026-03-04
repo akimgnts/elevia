@@ -1,0 +1,26 @@
+{
+  "cv": "sample_delta.txt",
+  "pipeline_used": "baseline+compass_e",
+  "pipeline_variant": "canonical_compass_with_compass_e",
+  "compass_e_enabled": true,
+  "dominant_cluster": "DATA_IT",
+  "domain_skills_active_count": 599,
+  "resolved_to_esco_count": 0,
+  "baseline_esco_count": 5,
+  "injected_esco_from_domain": 10,
+  "total_esco_count": 15,
+  "domain_uris": [
+    "compass:skill:DATA_IT:etl",
+    "compass:skill:DATA_IT:bi",
+    "compass:skill:DATA_IT:git",
+    "compass:skill:DATA_IT:linux",
+    "compass:skill:DATA_IT:kubernetes",
+    "compass:skill:DATA_IT:azure",
+    "compass:skill:DATA_IT:power",
+    "compass:skill:DATA_IT:ci",
+    "compass:skill:DATA_IT:cd",
+    "compass:skill:DATA_IT:tools"
+  ],
+  "domain_uri_count": 10,
+  "profile_skills_uri_count": 15
+}

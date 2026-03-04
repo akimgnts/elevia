@@ -18,11 +18,10 @@ from pydantic import BaseModel, Field
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from profile.baseline_parser import run_baseline  # shared extractor
-from profile.profile_cluster import detect_profile_cluster
 from semantic.profile_cache import cache_profile_text, compute_profile_hash
 from compass.profile_structurer import structure_profile_text_v1
-from compass.canonical_pipeline import is_compass_e_enabled, is_trace_enabled
+from compass.canonical_pipeline import run_cv_pipeline, is_trace_enabled
+from compass.domain_uris import build_domain_uris_for_text
 from api.utils.profile_summary_builder import build_profile_summary
 from api.utils.profile_summary_store import store_profile_summary
 
@@ -56,7 +55,8 @@ class ParseBaselineResponse(BaseModel):
     profile: dict
     warnings: List[str] = []
     profile_cluster: Optional[dict] = None
-    pipeline_used: str = "baseline"
+    pipeline_used: str = "canonical_compass"
+    pipeline_variant: str = "canonical_compass_baseline"
     compass_e_enabled: bool = False
     domain_skills_active: List[str] = []
     domain_skills_pending_count: int = 0
@@ -75,10 +75,12 @@ async def parse_baseline(req: ParseBaselineRequest, request: Request) -> ParseBa
         raise HTTPException(status_code=422, detail="cv_text is empty")
 
     try:
-        result = run_baseline(req.cv_text)
+        pipeline = run_cv_pipeline(req.cv_text, profile_id="baseline")
     except Exception as exc:
-        logger.error("[parse-baseline] extraction error: %s", exc)
+        logger.error("[parse-baseline] canonical pipeline error: %s", exc)
         raise HTTPException(status_code=500, detail="Extraction failed") from exc
+
+    result = pipeline.baseline_result
 
     logger.info(
         "[parse-baseline] canonical_count=%d request_id=%s",
@@ -104,22 +106,8 @@ async def parse_baseline(req: ParseBaselineRequest, request: Request) -> ParseBa
     except Exception as exc:
         logger.warning("[parse-baseline] profile summary failed: %s", type(exc).__name__)
 
-    # ── Profile cluster (deterministic, no LLM) ───────────────────────────────
-    skills_for_cluster: List[str] = []
-    validated_items = result.get("validated_items") or []
-    if validated_items:
-        skills_for_cluster = [
-            str(item.get("label") or item.get("uri") or "")
-            for item in validated_items
-            if isinstance(item, dict)
-        ]
-        skills_for_cluster = [s for s in skills_for_cluster if s]
-    if not skills_for_cluster:
-        skills_for_cluster = result.get("skills_canonical") or []
-    if not skills_for_cluster:
-        skills_for_cluster = result.get("skills_raw") or []
-
-    profile_cluster = detect_profile_cluster(skills_for_cluster)
+    # ── Profile cluster (computed in canonical pipeline) ──────────────────────
+    profile_cluster = pipeline.profile_cluster or {}
     logger.info(json.dumps({
         "event": "PROFILE_CLUSTER_DETECTED",
         "dominant_cluster": profile_cluster.get("dominant_cluster"),
@@ -128,33 +116,18 @@ async def parse_baseline(req: ParseBaselineRequest, request: Request) -> ParseBa
         "request_id": getattr(request.state, "request_id", "n/a"),
     }))
 
-    result["profile_cluster"] = profile_cluster
+    cluster_key = (profile_cluster.get("dominant_cluster") or "").upper() or None
+    esco_labels = result.get("validated_labels") or []
 
-    # ── Compass E enrichment (canonical layer) ────────────────────────────────
-    compass_e_on = is_compass_e_enabled()
-    domain_skills_active: List[str] = []
-    domain_skills_pending_count = 0
-    llm_fired = False
-
-    if compass_e_on:
-        try:
-            from compass.cv_enricher import enrich_cv
-            esco_labels = result.get("validated_labels") or []
-            cluster_key = (profile_cluster.get("dominant_cluster") or "").upper() or None
-            enrichment = enrich_cv(
-                cv_text=req.cv_text,
-                cluster=cluster_key,
-                esco_skills=esco_labels,
-                llm_enabled=True,
-            )
-            domain_skills_active = enrichment.domain_skills_active
-            domain_skills_pending_count = len(enrichment.domain_skills_pending)
-            llm_fired = enrichment.llm_triggered
-        except Exception as exc:
-            logger.warning("[parse-baseline] compass_e enrichment failed (non-fatal): %s", type(exc).__name__)
-
-    pipeline_tag = "baseline+compass_e+llm" if (compass_e_on and llm_fired) \
-        else ("baseline+compass_e" if compass_e_on else "baseline")
+    # ── Compass E enrichment (from canonical pipeline) ────────────────────────
+    compass_e_on = pipeline.compass_e_enabled
+    domain_skills_active: List[str] = pipeline.domain_skills_active
+    domain_skills_pending_count = pipeline.domain_skills_pending_count
+    llm_fired = pipeline.llm_fired
+    if pipeline.compass_e_enabled:
+        pipeline_tag = "canonical_compass_with_compass_e"
+    else:
+        pipeline_tag = "canonical_compass_baseline"
 
     if is_trace_enabled():
         logger.info(
@@ -163,11 +136,36 @@ async def parse_baseline(req: ParseBaselineRequest, request: Request) -> ParseBa
             getattr(request.state, "request_id", "n/a"),
         )
 
+    # Inject DOMAIN URIs (active library tokens present in CV) into profile.skills_uri
+    domain_tokens: List[str] = []
+    domain_uris: List[str] = []
+    if cluster_key:
+        try:
+            domain_tokens, domain_uris = build_domain_uris_for_text(
+                req.cv_text,
+                esco_labels,
+                cluster_key,
+            )
+        except Exception as exc:
+            logger.warning("[parse-baseline] domain uri build failed: %s", type(exc).__name__)
+    if domain_uris and profile:
+        existing_uris: set = set(profile.get("skills_uri") or [])
+        for uri in domain_uris:
+            if uri not in existing_uris:
+                existing_uris.add(uri)
+                profile.setdefault("skills_uri", []).append(uri)
+        profile["domain_uris"] = domain_uris
+        profile["domain_uri_count"] = len(domain_uris)
+        profile["domain_tokens"] = domain_tokens
+
     return ParseBaselineResponse(
-        **result,
-        pipeline_used=pipeline_tag,
+        **{k: v for k, v in result.items() if k not in ("warnings",)},
+        pipeline_used="canonical_compass",
+        pipeline_variant=pipeline_tag,
         compass_e_enabled=compass_e_on,
         domain_skills_active=domain_skills_active,
         domain_skills_pending_count=domain_skills_pending_count,
         llm_fired=llm_fired,
+        warnings=result.get("warnings", []) + pipeline.warnings,
+        profile_cluster=profile_cluster,
     )

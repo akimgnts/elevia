@@ -1,0 +1,48 @@
+[
+  {
+    "offer_id": "BF-237359",
+    "offer_title": "Data Analyst Operations (H/F)",
+    "score_pre": 82,
+    "score_post": 42,
+    "delta": -40,
+    "offer_uri_count_pre": 4,
+    "offer_uri_count_post": 34,
+    "profile_uri_count_pre": 17,
+    "profile_uri_count_post": 55,
+    "shared_uris_pre": 3,
+    "shared_uris_post": 6,
+    "domain_shared": [
+      "compass:skill:DATA_IT:analyst",
+      "compass:skill:DATA_IT:analytics",
+      "compass:skill:DATA_IT:data analyst"
+    ],
+    "esco_shared": [
+      "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180",
+      "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+      "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378"
+    ],
+    "skills_score_formula_pre": "3/4 = 0.75",
+    "skills_score_formula_post": "6/34 = 0.176",
+    "root_cause_delta": "Denominator grew 8.5x (4→34 offer URIs) vs numerator 2x (3→6 shared). Score diluted by 27 unmatched domain URIs in offer."
+  },
+  {
+    "offer_id": "BF-237189",
+    "offer_title": "Ingénieur station d'épuration (H/F)",
+    "score_pre": 65,
+    "score_post": 35,
+    "delta": -30,
+    "offer_uri_count_pre": 2,
+    "offer_uri_count_post": 15,
+    "profile_uri_count_pre": 17,
+    "profile_uri_count_post": 55,
+    "shared_uris_pre": 1,
+    "shared_uris_post": 1,
+    "domain_shared": [],
+    "esco_shared": [
+      "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378"
+    ],
+    "skills_score_formula_pre": "1/2 = 0.500",
+    "skills_score_formula_post": "1/15 = 0.067",
+    "root_cause_delta": "No domain URI overlap (semantic mismatch: offer is wastewater engineering). Denominator grew 7.5x (2→15), numerator unchanged. Pure dilution with no compensating match."
+  }
+]

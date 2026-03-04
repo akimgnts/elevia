@@ -1,0 +1,977 @@
+{
+  "generated_at": "2026-03-03T01:12:04.010954Z",
+  "items": [
+    {
+      "kind": "route",
+      "path": "/applications",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/applications.py",
+      "tags": [
+        "applications"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_API_TIMING"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/applications/{offer_id}",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/applications.py",
+      "tags": [
+        "applications"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_API_TIMING"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/applications",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/applications.py",
+      "tags": [
+        "applications"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_API_TIMING"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/applications/{offer_id}",
+      "method": "PATCH",
+      "file": "apps/api/src/api/routes/applications.py",
+      "tags": [
+        "applications"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_API_TIMING"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/applications/{offer_id}",
+      "method": "DELETE",
+      "file": "apps/api/src/api/routes/applications.py",
+      "tags": [
+        "applications"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_API_TIMING"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/apply-pack",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/apply_pack.py",
+      "tags": [
+        "apply-pack"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/cluster/library/metrics",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/cluster_library_api.py",
+      "tags": [
+        "cluster-library"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_CLUSTER"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/cluster/library/radar",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/cluster_library_api.py",
+      "tags": [
+        "cluster-library"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_CLUSTER"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/cluster/library/skills",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/cluster_library_api.py",
+      "tags": [
+        "cluster-library"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_CLUSTER"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/cluster/library/enrich/cv",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/cluster_library_api.py",
+      "tags": [
+        "cluster-library"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_CLUSTER"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/offer",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/context.py",
+      "tags": [
+        "context"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/profile",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/context.py",
+      "tags": [
+        "context"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/fit",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/context.py",
+      "tags": [
+        "context"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/debug/match",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/debug_match.py",
+      "tags": [
+        "debug"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ENV",
+        "DEBUG",
+        "ELEVIA_DEV",
+        "ELEVIA_DEBUG_MATCHING"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/debug/status",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/debug_match.py",
+      "tags": [
+        "debug"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ENV",
+        "DEBUG",
+        "ELEVIA_DEV",
+        "ELEVIA_DEBUG_MATCHING"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/dev/cv-delta",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/dev_tools.py",
+      "tags": [
+        "dev"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEV_TOOLS",
+        "OPENAI_API_KEY"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/dev/metrics",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/dev_tools.py",
+      "tags": [
+        "dev"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEV_TOOLS",
+        "OPENAI_API_KEY"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/documents/cv",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/documents.py",
+      "tags": [
+        "documents"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/documents/cv/for-offer",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/documents.py",
+      "tags": [
+        "documents"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/documents/cv/html/for-offer",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/documents.py",
+      "tags": [
+        "documents"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/documents/letter/for-offer",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/documents.py",
+      "tags": [
+        "documents"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/documents/cv/status",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/documents.py",
+      "tags": [
+        "documents"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/health",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/health.py",
+      "tags": [
+        "health"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/health/deps",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/health.py",
+      "tags": [
+        "health"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/inbox",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/inbox.py",
+      "tags": [
+        "inbox"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": "api.routes.inbox.get_inbox",
+      "call_chain": [
+        "api.utils.inbox_catalog.load_catalog_offers",
+        "compass.domain_uris.build_domain_uris_for_text (offer side)",
+        "matching.extractors.extract_profile",
+        "matching.matching_v1.MatchingEngine",
+        "compass.signal_layer.build_explain_payload_v1"
+      ],
+      "outputs": [
+        "InboxResponse (items + explain_v1)"
+      ],
+      "flags": [
+        "ELEVIA_DEBUG_MATCHING",
+        "ELEVIA_INBOX_PROFILE_FIXTURES",
+        "ELEVIA_PROFILE_FIXTURE",
+        "ELEVIA_PROFILE_FIXTURE_MIN_SKILLS",
+        "ELEVIA_PROFILE_FIXTURE_DEFAULT",
+        "ELEVIA_DEBUG_API_TIMING",
+        "ELEVIA_DEBUG_INBOX_FILTERS"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/offers/{offer_id}/decision",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/inbox.py",
+      "tags": [
+        "inbox"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_MATCHING",
+        "ELEVIA_INBOX_PROFILE_FIXTURES",
+        "ELEVIA_PROFILE_FIXTURE",
+        "ELEVIA_PROFILE_FIXTURE_MIN_SKILLS",
+        "ELEVIA_PROFILE_FIXTURE_DEFAULT",
+        "ELEVIA_DEBUG_API_TIMING",
+        "ELEVIA_DEBUG_INBOX_FILTERS"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/offers/{offer_id}/semantic",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/inbox.py",
+      "tags": [
+        "inbox"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_MATCHING",
+        "ELEVIA_INBOX_PROFILE_FIXTURES",
+        "ELEVIA_PROFILE_FIXTURE",
+        "ELEVIA_PROFILE_FIXTURE_MIN_SKILLS",
+        "ELEVIA_PROFILE_FIXTURE_DEFAULT",
+        "ELEVIA_DEBUG_API_TIMING",
+        "ELEVIA_DEBUG_INBOX_FILTERS"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/match",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/matching.py",
+      "tags": [
+        "matching"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/correction",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/metrics.py",
+      "tags": [
+        "metrics"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/sample",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/offers.py",
+      "tags": [
+        "offers"
+      ],
+      "tag": "LEGACY",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/catalog",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/offers.py",
+      "tags": [
+        "offers"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/{offer_id}/detail",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/offers.py",
+      "tags": [
+        "offers"
+      ],
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/ingest_cv",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/profile.py",
+      "tags": [
+        "profile"
+      ],
+      "tag": "LEGACY",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": [
+        "ELEVIA_DEBUG_PROFILE_SUMMARY"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/profile/parse-baseline",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/profile_baseline.py",
+      "tags": [
+        "profile"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": "api.routes.profile_baseline.parse_baseline",
+      "call_chain": [
+        "profile.baseline_parser.run_baseline",
+        "compass.profile_structurer.structure_profile_text_v1",
+        "api.utils.profile_summary_builder.build_profile_summary",
+        "compass.cv_enricher.enrich_cv (Compass E, gated)",
+        "compass.domain_uris.build_domain_uris_for_text"
+      ],
+      "outputs": [
+        "profile",
+        "skills_uri",
+        "domain_uris",
+        "pipeline_used"
+      ],
+      "flags": [
+        "ELEVIA_DEBUG_PROFILE_SUMMARY"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/profile/parse-file",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/profile_file.py",
+      "tags": [
+        "profile"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": "api.routes.profile_file.parse_file",
+      "call_chain": [
+        "api.utils.pdf_text.extract_text_from_pdf",
+        "profile.baseline_parser.run_baseline",
+        "profile.llm_skill_suggester.suggest_skills_from_cv (legacy, optional)",
+        "compass.profile_structurer.structure_profile_text_v1",
+        "api.utils.profile_summary_builder.build_profile_summary",
+        "compass.cv_enricher.enrich_cv (Compass E, gated by ELEVIA_ENABLE_COMPASS_E)",
+        "compass.domain_uris.build_domain_uris_for_text"
+      ],
+      "outputs": [
+        "profile",
+        "skills_uri",
+        "domain_uris",
+        "pipeline_used"
+      ],
+      "flags": [
+        "ELEVIA_DEBUG_PROFILE_SUMMARY"
+      ]
+    },
+    {
+      "kind": "route",
+      "path": "/profile/key-skills",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/profile_key_skills.py",
+      "tags": [
+        "profile"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/profile/structured",
+      "method": "POST",
+      "file": "apps/api/src/api/routes/profile_structured.py",
+      "tags": [
+        "profile"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": "api.routes.profile_structured.post_profile_structured",
+      "call_chain": [
+        "compass.profile_structurer.structure_profile_text_v1"
+      ],
+      "outputs": [
+        "ProfileStructuredV1"
+      ],
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/profile/structured",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/profile_structured.py",
+      "tags": [
+        "profile"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": "api.routes.profile_structured.post_profile_structured",
+      "call_chain": [
+        "compass.profile_structurer.structure_profile_text_v1"
+      ],
+      "outputs": [
+        "ProfileStructuredV1"
+      ],
+      "flags": []
+    },
+    {
+      "kind": "route",
+      "path": "/profile/summary",
+      "method": "GET",
+      "file": "apps/api/src/api/routes/profile_summary.py",
+      "tags": [
+        "profile"
+      ],
+      "tag": "CANONICAL",
+      "entrypoint": "api.routes.profile_summary.get_profile_summary_route",
+      "call_chain": [
+        "api.utils.profile_summary_store.get_profile_summary"
+      ],
+      "outputs": [
+        "ProfileSummaryV1"
+      ],
+      "flags": [
+        "ELEVIA_DEBUG_PROFILE_SUMMARY"
+      ]
+    },
+    {
+      "kind": "script",
+      "path": "scripts/add_esco_mapping.py",
+      "file": "scripts/add_esco_mapping.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/audit_profile_parse.py",
+      "file": "scripts/audit_profile_parse.py",
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/audit_repo_pipeline.py",
+      "file": "scripts/audit_repo_pipeline.py",
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/ft_check_all_apis.py",
+      "file": "scripts/ft_check_all_apis.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/ft_check_francetravail_api.py",
+      "file": "scripts/ft_check_francetravail_api.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/import_esco_mappings.py",
+      "file": "scripts/import_esco_mappings.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/smoke_mvp_extract.py",
+      "file": "scripts/smoke_mvp_extract.py",
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/smoke_test_mappings.py",
+      "file": "scripts/smoke_test_mappings.py",
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/trace_matching_uris.py",
+      "file": "scripts/trace_matching_uris.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "scripts/validate_domain_esco_impact.py",
+      "file": "scripts/validate_domain_esco_impact.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/backfill_bf_skills_esco.py",
+      "file": "apps/api/scripts/backfill_bf_skills_esco.py",
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/backfill_offer_skills.py",
+      "file": "apps/api/scripts/backfill_offer_skills.py",
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/backtest_esco.py",
+      "file": "apps/api/scripts/backtest_esco.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/bf_cache.py",
+      "file": "apps/api/scripts/bf_cache.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/compute_diff.py",
+      "file": "apps/api/scripts/compute_diff.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/context_smoke.py",
+      "file": "apps/api/scripts/context_smoke.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/cv_parsing_delta_report.py",
+      "file": "apps/api/scripts/cv_parsing_delta_report.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/enrich_offers_with_rome.py",
+      "file": "apps/api/scripts/enrich_offers_with_rome.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/ingest_business_france.py",
+      "file": "apps/api/scripts/ingest_business_france.py",
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/ingest_pipeline.py",
+      "file": "apps/api/scripts/ingest_pipeline.py",
+      "tag": "CANONICAL",
+      "entrypoint": "apps/api/scripts/ingest_pipeline.py",
+      "call_chain": [
+        "esco.extract.extract_raw_skills_from_offer",
+        "matching.extractors.normalize_skill_label",
+        "api.utils.offer_skills.ensure_offer_skills_table"
+      ],
+      "outputs": [
+        "offers.db (fact_offers + fact_offer_skills)"
+      ],
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/ingest_rome.py",
+      "file": "apps/api/scripts/ingest_rome.py",
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/market_pulse.py",
+      "file": "apps/api/scripts/market_pulse.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/normalize_offers.py",
+      "file": "apps/api/scripts/normalize_offers.py",
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/run_ingestion.py",
+      "file": "apps/api/scripts/run_ingestion.py",
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/scrape_business_france.py",
+      "file": "apps/api/scripts/scrape_business_france.py",
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/scrape_business_france_azure.py",
+      "file": "apps/api/scripts/scrape_business_france_azure.py",
+      "tag": "CANONICAL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/smoke_inbox_http.py",
+      "file": "apps/api/scripts/smoke_inbox_http.py",
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/smoke_runtime_matching.py",
+      "file": "apps/api/scripts/smoke_runtime_matching.py",
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/test_profile_matching.py",
+      "file": "apps/api/scripts/test_profile_matching.py",
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/test_vie_fixture_catalog.py",
+      "file": "apps/api/scripts/test_vie_fixture_catalog.py",
+      "tag": "PARALLEL",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    },
+    {
+      "kind": "script",
+      "path": "apps/api/scripts/validate_metrics_log.py",
+      "file": "apps/api/scripts/validate_metrics_log.py",
+      "tag": "UNUSED",
+      "entrypoint": null,
+      "call_chain": null,
+      "outputs": null,
+      "flags": []
+    }
+  ]
+}

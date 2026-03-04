@@ -7,6 +7,7 @@ Point d'entrée de l'API.
 
 import logging
 import os
+import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -16,7 +17,11 @@ env_path = Path(__file__).parent.parent.parent / ".env"
 load_dotenv(env_path)
 
 from fastapi import FastAPI
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.requests import Request
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +44,8 @@ from .routes.documents import router as documents_router
 from .routes.profile_structured import router as profile_structured_router
 from .routes.profile_summary import router as profile_summary_router
 from .routes.cluster_library_api import router as cluster_library_router
+from .routes.analyze_recovery import router as analyze_recovery_router
+from .routes.analyze_ai_quality import router as analyze_ai_quality_router
 from documents.llm_client import is_llm_available
 
 
@@ -91,6 +98,35 @@ app.include_router(documents_router)  # POST /documents/cv (CV Generator v1)
 app.include_router(profile_structured_router)  # GET|POST /profile/structured (COMPASS D+)
 app.include_router(profile_summary_router)  # GET /profile/summary (compact profile panel)
 app.include_router(cluster_library_router)  # GET /cluster/library/* + POST /cluster/library/enrich/cv
+app.include_router(analyze_recovery_router)  # POST /analyze/recover-skills (DEV-only)
+app.include_router(analyze_ai_quality_router)  # POST /analyze/audit-ai-quality (DEV-only)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Return a stable error shape for /analyze/recover-skills invalid payloads."""
+    if request.url.path != "/analyze/recover-skills":
+        return await request_validation_exception_handler(request, exc)
+    request_id = getattr(request.state, "request_id", uuid.uuid4().hex[:8])
+    return JSONResponse(
+        status_code=400,
+        content={
+            "recovered_skills": [],
+            "ai_available": False,
+            "ai_error": "INVALID_REQUEST",
+            "error_code": "INVALID_REQUEST",
+            "error_message": "Invalid request payload",
+            "cluster": "",
+            "ignored_token_count": 0,
+            "noise_token_count": 0,
+            "error": {
+                "code": "INVALID_REQUEST",
+                "message": "Invalid request payload",
+                "request_id": request_id,
+            },
+            "request_id": request_id,
+        },
+    )
 
 # OBS: startup diagnostic (DEV-only, non-invasive)
 _dev_tools_on = os.getenv("ELEVIA_DEV_TOOLS", "").lower() in {"1", "true", "yes"}

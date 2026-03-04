@@ -5,10 +5,14 @@ import {
   parseFile,
   parseFileEnriched,
   fetchKeySkills,
+  fetchRecoverSkills,
+  fetchAuditAiQuality,
   type ParseFileResponse,
   type SkillGroupItem,
   type KeySkillItem,
   type KeySkillsResponse,
+  type RecoveredSkillItem,
+  type AuditAIQualityResponse,
 } from "../lib/api";
 import { useProfileStore } from "../store/profileStore";
 import { Button } from "../components/ui/Button";
@@ -96,7 +100,9 @@ export default function AnalyzePage() {
   const [parseResult, setParseResult] = useState<ParseFileResponse | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [matchingLoading, setMatchingLoading] = useState(false);
-  const [analysisMode, setAnalysisMode] = useState<"baseline" | "llm">("baseline");
+  const [analysisMode, setAnalysisMode] = useState<"baseline" | "enriched">("baseline");
+  const [legacyLlmEnabled, setLegacyLlmEnabled] = useState(false);
+  const isDev = import.meta.env.DEV;
 
   // ── Key skills state (from API) ───────────────────────────────────────────
   const [keySkillsResult, setKeySkillsResult] = useState<KeySkillsResponse | null>(null);
@@ -106,6 +112,17 @@ export default function AnalyzePage() {
   const [showFullList, setShowFullList] = useState(false);
   const [fullListSearch, setFullListSearch] = useState("");
   const [debugOpen, setDebugOpen] = useState(false);
+  const [recoveredSkills, setRecoveredSkills] = useState<RecoveredSkillItem[]>([]);
+  const [recoveringSkills, setRecoveringSkills] = useState(false);
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  const [recoveryMeta, setRecoveryMeta] = useState<{
+    ai_available: boolean;
+    ai_error: string | null;
+    request_id: string | null;
+  } | null>(null);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditError, setAuditError] = useState<string | null>(null);
+  const [auditResult, setAuditResult] = useState<AuditAIQualityResponse | null>(null);
   const [validatedSearch, setValidatedSearch] = useState("");
   const [filteredSearch, setFilteredSearch] = useState("");
   const [rawSearch, setRawSearch] = useState("");
@@ -146,6 +163,12 @@ export default function AnalyzePage() {
     setParseResult(null);
     setParseError(null);
     setKeySkillsResult(null);
+    setRecoveredSkills([]);
+    setRecoveringSkills(false);
+    setRecoveryError(null);
+    setAuditLoading(false);
+    setAuditError(null);
+    setAuditResult(null);
     setShowFullList(false);
     setFullListSearch("");
     setDebugOpen(false);
@@ -167,6 +190,12 @@ export default function AnalyzePage() {
     setParseError(null);
     setParseResult(null);
     setKeySkillsResult(null);
+    setRecoveredSkills([]);
+    setRecoveringSkills(false);
+    setRecoveryError(null);
+    setAuditLoading(false);
+    setAuditError(null);
+    setAuditResult(null);
     setShowFullList(false);
     setExpandedGroups(new Set());
     setDebugOpen(false);
@@ -174,11 +203,21 @@ export default function AnalyzePage() {
     setFilteredSearch("");
     setRawSearch("");
     try {
-      const result =
-        analysisMode === "llm"
-          ? await parseFileEnriched(selectedFile)
-          : await parseFile(selectedFile);
+      const useLegacyLlm = isDev && legacyLlmEnabled;
+      const result = useLegacyLlm
+        ? await parseFileEnriched(selectedFile)
+        : await parseFile(selectedFile);
       setParseResult(result);
+
+      // Bridge domain signals to InboxPage (profile-level, not per-offer)
+      if ((result.injected_esco_from_domain ?? 0) > 0 || (result.domain_skills_active?.length ?? 0) > 0) {
+        localStorage.setItem("elevia_domain_signals", JSON.stringify({
+          domain_skills_active: result.domain_skills_active ?? [],
+          resolved_to_esco: result.resolved_to_esco ?? [],
+          injected_esco_from_domain: result.injected_esco_from_domain ?? 0,
+          total_esco_count: result.total_esco_count ?? 0,
+        }));
+      }
 
       // Fetch key skills ranking (graceful: never block on failure)
       if (result.validated_items?.length > 0) {
@@ -208,6 +247,93 @@ export default function AnalyzePage() {
     }
   };
 
+  // ── AI skill recovery (DEV-only) ─────────────────────────────────────────────
+  const handleRecover = async () => {
+    const cluster = profileCluster?.dominant_cluster;
+    if (!cluster) return;
+    setRecoveringSkills(true);
+    setRecoveryError(null);
+    setRecoveredSkills([]);
+    setRecoveryMeta(null);
+    try {
+      const validatedSet = new Set(validatedLabels.map((l) => l.toLowerCase()));
+      const ignored = filteredTokens ?? [];
+      const ignoredSet = new Set(ignored.map((t) => t.toLowerCase()));
+      const noise = (rawTokens ?? []).filter(
+        (t) => !validatedSet.has(t.toLowerCase()) && !ignoredSet.has(t.toLowerCase()),
+      );
+      const resp = await fetchRecoverSkills({
+        cluster,
+        ignored_tokens: ignored,
+        noise_tokens: noise,
+        validated_esco_labels: validatedLabels,
+      });
+      const errorCode = resp.error_code || resp.ai_error || resp.error || null;
+      let resolvedCode = errorCode ?? (resp.ai_available === false ? "AI_DISABLED" : null);
+      if (!resolvedCode && resp.error_message) {
+        resolvedCode = "UNKNOWN_ERROR";
+      }
+      setRecoveryMeta({
+        ai_available: resp.ai_available,
+        ai_error: resolvedCode,
+        request_id: resp.request_id ?? null,
+      });
+      if (resp.recovered_skills.length > 0) {
+        setRecoveredSkills(resp.recovered_skills);
+      } else if (resolvedCode === "OPENAI_KEY_MISSING") {
+        setRecoveryError("Clé IA non configurée (OPENAI_API_KEY manquante côté API).");
+      } else if (resolvedCode === "DEV_TOOLS_DISABLED") {
+        setRecoveryError("DEV tools désactivés (ELEVIA_DEV_TOOLS=1 requis).");
+      } else if (resolvedCode === "MODEL_MISSING") {
+        setRecoveryError("Modèle IA non configuré (OPENAI_MODEL manquant côté API).");
+      } else if (resolvedCode === "LLM_CALL_FAILED") {
+        setRecoveryError("IA indisponible : échec d'appel LLM (voir logs).");
+      } else if (resolvedCode === "CLUSTER_MISSING") {
+        setRecoveryError("Cluster manquant pour la récupération IA.");
+      } else if (resolvedCode === "INVALID_REQUEST") {
+        setRecoveryError("Requête invalide pour la récupération IA.");
+      } else if (resolvedCode === "NETWORK_ERROR") {
+        setRecoveryError("Erreur réseau : impossible de joindre l'API.");
+      } else if (resolvedCode === "AI_DISABLED") {
+        setRecoveryError("IA désactivée ou non disponible (pas de clé/config).");
+      } else if (resolvedCode === "UNKNOWN_ERROR") {
+        setRecoveryError(`IA indisponible : ${resp.error_message || "UNKNOWN_ERROR"}`);
+      } else if (resp.error_message) {
+        setRecoveryError(`IA indisponible : ${resp.error_message}`);
+      } else {
+        setRecoveryError("Aucune compétence supplémentaire détectée.");
+      }
+    } catch (err) {
+      setRecoveryError("Erreur réseau : impossible de joindre l'API.");
+    } finally {
+      setRecoveringSkills(false);
+    }
+  };
+
+  const handleAuditQuality = async () => {
+    const cluster = profileCluster?.dominant_cluster;
+    if (!cluster) return;
+    setAuditLoading(true);
+    setAuditError(null);
+    setAuditResult(null);
+    try {
+      const resp = await fetchAuditAiQuality({
+        cluster,
+        validated_esco_labels: validatedLabels,
+        recovered_skills: recoveredSkills.map((s) => s.label),
+      });
+      if (resp.error_code) {
+        setAuditError(resp.error_message || resp.error_code);
+      } else {
+        setAuditResult(resp);
+      }
+    } catch (err) {
+      setAuditError(err instanceof Error ? err.message : "Audit IA indisponible");
+    } finally {
+      setAuditLoading(false);
+    }
+  };
+
   // ── Derived display data ──────────────────────────────────────────────────────
 
   const skillGroups: SkillGroupItem[] = parseResult?.skill_groups ?? [];
@@ -216,8 +342,8 @@ export default function AnalyzePage() {
   const rawDetected = parseResult?.raw_detected ?? 0;
   const validatedCount = parseResult?.validated_skills ?? validatedItems.length;
   const filteredOut = parseResult?.filtered_out ?? Math.max(0, rawDetected - validatedCount);
-  const llmRequested = analysisMode === "llm";
-  const llmEffective = parseResult?.mode === "llm";
+  const legacyLlmRequested = isDev && legacyLlmEnabled;
+  const llmEffective = parseResult?.pipeline_variant === "legacy_llm_enrichment";
   const aiAvailable = parseResult?.ai_available ?? false;
   const aiError = parseResult?.ai_error ?? null;
   const aiAdded = parseResult?.ai_added_count ?? 0;
@@ -248,15 +374,31 @@ export default function AnalyzePage() {
   const validatedLabels = validatedItems.map((item) => item.label);
   const rawTokens = parseResult?.raw_tokens ?? null;
   const filteredTokens = parseResult?.filtered_tokens ?? null;
+  const pipelineUsed = parseResult?.pipeline_used ?? null;
+  const pipelineVariant = parseResult?.pipeline_variant ?? null;
+  const compassEEnabled = parseResult?.compass_e_enabled ?? false;
+  const baselineEscoCount = parseResult?.baseline_esco_count ?? 0;
+  const totalEscoCount = parseResult?.total_esco_count ?? 0;
   const aliasHitsCount = parseResult?.alias_hits_count ?? 0;
   const aliasHits = parseResult?.alias_hits ?? [];
   const skillsUriCount = parseResult?.skills_uri_count ?? validatedItems.length;
   const skillsUriCollapsed = parseResult?.skills_uri_collapsed_dupes ?? 0;
   const skillsUnmappedCount = parseResult?.skills_unmapped_count ?? filteredOut;
   const skillsDupes = parseResult?.skills_dupes ?? [];
+  const allWarnings = parseResult?.warnings ?? [];
+  const visibleWarnings = legacyLlmRequested
+    ? allWarnings
+    : allWarnings.filter((w) => !w.includes("DEPRECATED: enrich_llm=1"));
 
   const profileCluster = parseResult?.profile_cluster ?? null;
   const clusterDistribution = profileCluster?.distribution_percent ?? {};
+
+  // Domain signal derived data
+  const domainSkillsActive = parseResult?.domain_skills_active ?? [];
+  const domainSkillsPendingCount = parseResult?.domain_skills_pending_count ?? 0;
+  const resolvedToEsco = parseResult?.resolved_to_esco ?? [];
+  const rejectedTokens = parseResult?.rejected_tokens ?? [];
+  const injectedEscoFromDomain = parseResult?.injected_esco_from_domain ?? 0;
   const topClusterDist = Object.entries(clusterDistribution)
     .filter(([, value]) => value > 0)
     .sort((a, b) => b[1] - a[1])
@@ -383,9 +525,9 @@ export default function AnalyzePage() {
                   A (déterministe)
                 </button>
                 <button
-                  onClick={() => setAnalysisMode("llm")}
+                  onClick={() => setAnalysisMode("enriched")}
                   className={`rounded-full px-3 py-1 transition ${
-                    analysisMode === "llm"
+                    analysisMode === "enriched"
                       ? "bg-white text-slate-900 shadow"
                       : "text-slate-500 hover:text-slate-700"
                   }`}
@@ -394,6 +536,21 @@ export default function AnalyzePage() {
                 </button>
               </div>
             </div>
+
+            {isDev && (
+              <div className="mt-2 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                <span className="font-semibold">DEV</span>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={legacyLlmEnabled}
+                    onChange={(e) => setLegacyLlmEnabled(e.target.checked)}
+                  />
+                  Legacy LLM (deprecated)
+                </label>
+              </div>
+            )}
 
             {/* Parse button */}
             <div className="mt-4 flex justify-end">
@@ -450,9 +607,9 @@ export default function AnalyzePage() {
                 </div>
 
                 {/* Warnings */}
-                {(parseResult.warnings?.length ?? 0) > 0 && (
+                {visibleWarnings.length > 0 && (
                   <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
-                    {(parseResult.warnings ?? []).join(" · ")}
+                    {visibleWarnings.join(" · ")}
                   </div>
                 )}
 
@@ -491,13 +648,13 @@ export default function AnalyzePage() {
                 )}
 
                 {/* LLM fallback */}
-                {llmRequested && parseResult && !aiAvailable && (
+                {legacyLlmRequested && parseResult && !aiAvailable && (
                   <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
                     IA indisponible: clé OPENAI_API_KEY manquante (apps/api/.env). Résultat déterministe.
                   </div>
                 )}
 
-                {llmRequested && parseResult && aiAvailable && aiError === "llm_failed" && (
+                {legacyLlmRequested && parseResult && aiAvailable && aiError === "llm_failed" && (
                   <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
                     IA indisponible (erreur appel). Résultat déterministe.
                   </div>
@@ -563,6 +720,18 @@ export default function AnalyzePage() {
                             </span>
                           ))
                         )}
+                        {recoveredSkills.map((s) => (
+                          <span
+                            key={s.label}
+                            title={`${s.kind} · confiance ${Math.round(s.confidence * 100)}% · ${s.evidence}`}
+                            className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-800 ring-1 ring-violet-200"
+                          >
+                            {s.label}
+                            <span className="ml-0.5 rounded bg-violet-100 px-1 py-0.5 text-[9px] font-bold text-violet-600">
+                              IA
+                            </span>
+                          </span>
+                        ))}
                       </div>
 
                       {/* Badge legend (only shown when API ranking available) */}
@@ -579,7 +748,62 @@ export default function AnalyzePage() {
                           </span>
                         </div>
                       )}
+
+                      {recoveredSkills.length > 0 && (
+                        <div className="mt-2 text-[10px] text-slate-400">
+                          IA&nbsp;: affichage uniquement — non injectées dans le matching
+                        </div>
+                      )}
                     </div>
+
+                    {/* AI recovery trigger (DEV-only) */}
+                    {isDev && profileCluster?.dominant_cluster && (filteredTokens?.length ?? 0) > 0 && (
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={handleRecover}
+                          disabled={recoveringSkills}
+                          className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-100 disabled:opacity-50"
+                        >
+                          {recoveringSkills ? "Récupération IA..." : "Récupérer des compétences (IA)"}
+                        </button>
+                        {recoveredSkills.length > 0 && !recoveringSkills && (
+                          <span className="text-xs text-violet-600">
+                            {recoveredSkills.length} compétence{recoveredSkills.length > 1 ? "s" : ""} récupérée{recoveredSkills.length > 1 ? "s" : ""}
+                          </span>
+                        )}
+                        {recoveryError && (
+                          <span className="text-xs text-rose-500">{recoveryError}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* AI quality audit (DEV-only) */}
+                    {isDev && profileCluster?.dominant_cluster && (
+                      <div className="mt-2">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={handleAuditQuality}
+                            disabled={auditLoading}
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                          >
+                            {auditLoading ? "Audit IA..." : "Audit qualité IA"}
+                          </button>
+                          {auditError && (
+                            <span className="text-xs text-rose-500">{auditError}</span>
+                          )}
+                        </div>
+                        {auditResult && (
+                          <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-600">
+                            <div>ESCO count: <span className="font-semibold">{auditResult.validated_esco_count}</span></div>
+                            <div>IA count: <span className="font-semibold">{auditResult.ai_recovered_count}</span></div>
+                            <div>IA overlap: <span className="font-semibold">{auditResult.ai_overlap_with_offers}</span></div>
+                            <div>IA unique: <span className="font-semibold">{auditResult.ai_unique_vs_esco}</span></div>
+                            <div>Coherence: <span className="font-semibold">{Math.round(auditResult.cluster_coherence_score * 100)}%</span></div>
+                            <div>Noise ratio: <span className="font-semibold">{Math.round(auditResult.noise_ratio_estimate * 100)}%</span></div>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* C) Grouped skills — collapsible */}
                     {skillGroups.length > 0 && (
@@ -668,6 +892,92 @@ export default function AnalyzePage() {
                                 ) : null}
                               </div>
                             ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Domain signal panels (Compass E) */}
+                      {isDev && pipelineUsed && (
+                        <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-[11px] text-blue-700">
+                          Pipeline: <span className="font-semibold">{pipelineUsed}</span>
+                          {pipelineVariant && (
+                            <span className="ml-2 text-blue-800">({pipelineVariant})</span>
+                          )}
+                          <span className="ml-2 text-slate-600">
+                            compass_e={String(compassEEnabled)}
+                          </span>
+                          <span className="ml-2 text-slate-600">
+                            esco={baselineEscoCount}/{totalEscoCount}
+                          </span>
+                          <span className="ml-2 text-slate-600">
+                            ai_available={String(recoveryMeta?.ai_available ?? false)}
+                          </span>
+                          <span className="ml-2 text-slate-600">
+                            ai_error={recoveryMeta?.ai_error ?? "none"}
+                          </span>
+                          {injectedEscoFromDomain > 0 && (
+                            <span className="ml-3 font-semibold text-blue-800">
+                              ↗ +{injectedEscoFromDomain} URI injectée{injectedEscoFromDomain > 1 ? "s" : ""} via mapping métier
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {domainSkillsActive.length > 0 && (
+                        <div className="rounded-xl border border-blue-100 bg-white p-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-wide text-blue-600 mb-2">
+                            DOMAIN_ACTIVE ({domainSkillsActive.length})
+                            {domainSkillsPendingCount > 0 && (
+                              <span className="ml-2 text-slate-400 font-normal">{domainSkillsPendingCount} pending</span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {domainSkillsActive.map((skill) => (
+                              <span key={skill} className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-800 ring-1 ring-blue-200">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {resolvedToEsco.length > 0 && (
+                        <div className="rounded-xl border border-emerald-100 bg-white p-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600 mb-2">
+                            RESOLVED_TO_ESCO ({resolvedToEsco.length})
+                          </div>
+                          <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
+                            {resolvedToEsco.map((r, idx) => (
+                              <div key={`${r.token_normalized}-${idx}`} className="text-[10px] text-slate-600">
+                                <span className="font-semibold text-slate-700">{r.token_normalized}</span>
+                                <span className="text-slate-400"> → </span>
+                                <span className="text-emerald-700">{r.esco_label ?? r.esco_uri}</span>
+                                {r.provenance && (
+                                  <span className="ml-1 text-[9px] text-slate-400">({r.provenance})</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {rejectedTokens.length > 0 && (
+                        <div className="rounded-xl border border-rose-100 bg-white p-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-wide text-rose-500 mb-2">
+                            REJECTED ({rejectedTokens.length})
+                          </div>
+                          <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
+                            {rejectedTokens.slice(0, 20).map((r, idx) => (
+                              <div key={`${r.token_norm}-${idx}`} className="text-[10px] text-slate-600">
+                                <span className="font-semibold text-slate-700">{r.token}</span>
+                                <span className="ml-1 rounded bg-rose-50 px-1 text-[9px] text-rose-600 ring-1 ring-rose-200">
+                                  {r.reason_code}
+                                </span>
+                              </div>
+                            ))}
+                            {rejectedTokens.length > 20 && (
+                              <div className="text-[10px] text-slate-400">+{rejectedTokens.length - 20} autres</div>
+                            )}
                           </div>
                         </div>
                       )}

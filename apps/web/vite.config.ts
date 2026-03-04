@@ -40,6 +40,7 @@ export default defineConfig({
       "/applications": { target: API_TARGET, changeOrigin: true },
       "/health": { target: API_TARGET, changeOrigin: true },
       "/documents": { target: API_TARGET, changeOrigin: true },
+      "/analyze": { target: API_TARGET, changeOrigin: true },
     },
   },
 });

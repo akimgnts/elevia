@@ -60,9 +60,8 @@ cv_text (raw string or uploaded file)
 └──────┬──────────┘
        │
        ▼
-   pipeline_used:
-   "baseline+compass_e"      (no LLM triggered)
-   "baseline+compass_e+llm"  (LLM triggered)
+   pipeline_variant:
+   "canonical_compass_with_compass_e"  (Compass E active)
     │
     ▼
  Response (domain_skills_active — DISPLAY ONLY, never in score)
@@ -109,22 +108,26 @@ profile (from /profile/parse-*)  +  offers (from France Travail / static)
 
 | Flag | Default | Effect |
 |------|---------|--------|
-| `ELEVIA_ENABLE_COMPASS_E` | `0` | Enable Compass E enrichment layer in parse routes |
+| `ELEVIA_ENABLE_COMPASS_E` | `auto` | Enable Compass E enrichment layer (auto-on in local/dev if unset) |
 | `ELEVIA_TRACE_PIPELINE_WIRING` | `0` | Log detailed pipeline wiring trace (INFO level) |
 | `ELEVIA_DEBUG_PROFILE_SUMMARY` | `0` | Log profile_summary stored events |
 | `ELEVIA_DEBUG_PROFILE_STRUCT` | `0` | Include `extracted_sections` in /profile/structured response |
-| `enrich_llm=1` (query param) | `0` | DEPRECATED: triggers `suggest_skills_from_cv()`. Logs warning, still works for compat |
+| `enrich_llm=1` (query param) | `0` | **DEV-only** legacy LLM path. Returns 400 if `ELEVIA_DEV_TOOLS` is not set |
 
 ---
 
-## pipeline_used Tags
+## Pipeline Tags (API Response)
 
 ```
-"baseline"               → ESCO only (COMPASS_E=0, enrich_llm=0)
-"baseline+llm_legacy"    → ESCO + old suggest_skills_from_cv (enrich_llm=1, COMPASS_E=0)
-"baseline+compass_e"     → ESCO + Compass E library (COMPASS_E=1, no LLM triggered)
-"baseline+compass_e+llm" → ESCO + Compass E + LLM trigger (COMPASS_E=1, LLM triggered)
+pipeline_used     = "canonical_compass"
+pipeline_variant  = "canonical_compass_baseline" | "canonical_compass_with_compass_e" | "legacy_llm_enrichment"
 ```
+
+### Local/Dev Default for Compass E
+
+If `ELEVIA_ENABLE_COMPASS_E` is **unset**, Compass E defaults to **ON** when running
+in local/dev (`ENV=dev|local`, `DEBUG=1`, or `ELEVIA_DEV_TOOLS=1`). In production,
+the default remains **OFF** unless explicitly enabled.
 
 ---
 
@@ -137,7 +140,7 @@ profile (from /profile/parse-*)  +  offers (from France Travail / static)
 class CVPipelineResult:
     baseline_result: Dict[str, Any]      # raw run_baseline() output (ESCO fields)
     profile_cluster: Dict[str, Any]      # detect_profile_cluster() output
-    pipeline_used: str                   # tag string above
+    pipeline_used: str                   # internal tag (baseline+compass_e...)
     domain_skills_active: List[str]      # Compass E active skills (DISPLAY ONLY)
     domain_skills_pending_count: int     # new tokens recorded (count only)
     compass_e_enabled: bool              # was ELEVIA_ENABLE_COMPASS_E set?
@@ -197,12 +200,12 @@ ELEVIA_ENABLE_COMPASS_E=1 uvicorn api.main:app ...
 
 **Disabling Compass E (rollback):**
 ```bash
-# Remove or unset ELEVIA_ENABLE_COMPASS_E (defaults to 0)
+# Set ELEVIA_ENABLE_COMPASS_E=0 (overrides local/dev auto-on)
 # Score output is identical — no data loss
 ```
 
 **Full rollback to pre-COMPASS state:**
-- `pipeline_used` fields added to parse responses are backwards-compatible (new optional fields)
+- `pipeline_used` / `pipeline_variant` fields added to parse responses are backwards-compatible (new optional fields)
 - No schema migrations required for scoring path
 - `cluster_library.db` can be deleted without affecting scoring
 
@@ -211,7 +214,7 @@ ELEVIA_ENABLE_COMPASS_E=1 uvicorn api.main:app ...
 ## Deprecation Notes
 
 `enrich_llm=1` query parameter on `POST /profile/parse-file` is **deprecated**.
-- It still works (for backwards compat with older clients)
+- DEV-only: returns 400 unless `ELEVIA_DEV_TOOLS=1`
 - Logs a `WARNING` in the pipeline trace: `"enrich_llm_legacy=True is DEPRECATED"`
 - Will be removed in a future sprint
 - Canonical replacement: `ELEVIA_ENABLE_COMPASS_E=1` server-side flag

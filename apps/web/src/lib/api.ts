@@ -664,9 +664,13 @@ export interface ValidatedItem {
 export interface ParseFileResponse {
   source: string;
   mode: "baseline" | "llm";
+  pipeline_used?: string;
+  pipeline_variant?: string;
+  compass_e_enabled?: boolean;
   ai_available: boolean;
   ai_added_count: number;
   ai_error?: string | null;
+  llm_fired?: boolean;
   filename: string;
   content_type: string;
   extracted_text_length: number;
@@ -690,6 +694,24 @@ export interface ParseFileResponse {
   profile: { id: string; skills: string[]; skills_source: string; skills_uri?: string[] };
   warnings: string[];
   profile_cluster?: ProfileCluster;
+  /** DOMAIN→ESCO enrichment fields (Compass E) */
+  domain_skills_active?: string[];
+  domain_skills_pending_count?: number;
+  resolved_to_esco?: Array<{
+    token_normalized: string;
+    esco_uri: string;
+    esco_label?: string;
+    provenance?: string;
+  }>;
+  skill_provenance?: {
+    baseline_esco: string[];
+    library_token_to_esco: string[];
+    llm_token_to_esco: string[];
+  };
+  baseline_esco_count?: number;
+  injected_esco_from_domain?: number;
+  total_esco_count?: number;
+  rejected_tokens?: Array<{ token: string; token_norm: string; reason_code: string }>;
 }
 
 export interface ParseBaselineResponse {
@@ -714,6 +736,8 @@ export interface ParseBaselineResponse {
   profile: { id: string; skills: string[]; skills_source: string; skills_uri?: string[] };
   warnings: string[];
   profile_cluster?: ProfileCluster;
+  pipeline_used?: string;
+  pipeline_variant?: string;
 }
 
 export interface ProfileCluster {
@@ -752,7 +776,7 @@ export async function parseFile(file: File): Promise<ParseFileResponse> {
 }
 
 /**
- * Upload a CV file and attempt LLM enrichment (best-effort).
+ * Upload a CV file and attempt legacy LLM enrichment (DEV-only).
  * POST /profile/parse-file?enrich_llm=1
  */
 export async function parseFileEnriched(file: File): Promise<ParseFileResponse> {
@@ -1136,6 +1160,187 @@ export async function generateCvHtmlForOffer(
   }
 
   return res.json() as Promise<CvHtmlResponse>;
+}
+
+// ============================================================================
+// Analyze Page — Cluster-Aware AI Skill Recovery (DEV-only)
+// ============================================================================
+
+export interface RecoverSkillsRequest {
+  cluster: string;
+  ignored_tokens: string[];
+  noise_tokens?: string[];
+  validated_esco_labels?: string[];
+  profile_text_excerpt?: string;
+}
+
+export interface RecoveredSkillItem {
+  label: string;
+  kind: string;       // tool | language | method | framework | certification | domain
+  confidence: number; // 0.0–1.0
+  source: string;     // ignored_token | noise_token | recombined | cv_excerpt
+  evidence: string;
+  why_cluster_fit: string;
+}
+
+export interface RecoverSkillsResponse {
+  recovered_skills: RecoveredSkillItem[];
+  ai_available: boolean;
+  ai_error?: string | null;
+  error_code?: string | null;
+  error_message?: string | null;
+  cluster: string;
+  ignored_token_count: number;
+  noise_token_count: number;
+  error: string | null;
+  request_id: string;
+}
+
+/**
+ * Recover skills missed by deterministic parsing (DEV-only AI endpoint).
+ * POST /analyze/recover-skills
+ * Requires ELEVIA_DEV_TOOLS=1 + OPENAI_API_KEY on the backend.
+ * Results are display-only — never injected into matching.
+ */
+export async function fetchRecoverSkills(
+  payload: RecoverSkillsRequest,
+): Promise<RecoverSkillsResponse> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/analyze/recover-skills`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    return {
+      recovered_skills: [],
+      ai_available: false,
+      ai_error: "NETWORK_ERROR",
+      error_code: "NETWORK_ERROR",
+      error_message: "Network error",
+      cluster: payload.cluster,
+      ignored_token_count: payload.ignored_tokens.length,
+      noise_token_count: payload.noise_tokens?.length ?? 0,
+      error: "NETWORK_ERROR",
+      request_id: "",
+    };
+  }
+  if (!res.ok) {
+    const fallbackCode = res.status === 422 ? "INVALID_REQUEST" : "UNKNOWN_ERROR";
+    const fallback: RecoverSkillsResponse = {
+      recovered_skills: [],
+      ai_available: false,
+      ai_error: fallbackCode,
+      error_code: fallbackCode,
+      error_message: `HTTP ${res.status}`,
+      cluster: payload.cluster,
+      ignored_token_count: payload.ignored_tokens.length,
+      noise_token_count: payload.noise_tokens?.length ?? 0,
+      error: fallbackCode,
+      request_id: "",
+    };
+    try {
+      const data = await res.json();
+      const errorObj = data?.error;
+      const code = errorObj?.code || data?.error_code || fallbackCode;
+      const message = errorObj?.message || data?.error_message || `HTTP ${res.status}`;
+      return {
+        ...fallback,
+        ai_error: code,
+        error_code: code,
+        error_message: message,
+        error: code,
+        request_id: errorObj?.request_id || data?.request_id || "",
+      };
+    } catch {
+      return fallback;
+    }
+  }
+  return res.json() as Promise<RecoverSkillsResponse>;
+}
+
+// ============================================================================
+// Analyze Page — AI Quality Audit (DEV-only)
+// ============================================================================
+
+export interface AuditAIQualityRequest {
+  cluster: string;
+  validated_esco_labels: string[];
+  recovered_skills: string[];
+}
+
+export interface AuditAIQualityResponse {
+  validated_esco_count: number;
+  ai_recovered_count: number;
+  ai_overlap_with_offers: number;
+  ai_unique_vs_esco: number;
+  cluster_coherence_score: number;
+  noise_ratio_estimate: number;
+  offers_considered: number;
+  request_id: string;
+  error_code?: string | null;
+  error_message?: string | null;
+}
+
+export async function fetchAuditAiQuality(
+  payload: AuditAIQualityRequest,
+): Promise<AuditAIQualityResponse> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/analyze/audit-ai-quality`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    return {
+      validated_esco_count: 0,
+      ai_recovered_count: 0,
+      ai_overlap_with_offers: 0,
+      ai_unique_vs_esco: 0,
+      cluster_coherence_score: 0,
+      noise_ratio_estimate: 0,
+      offers_considered: 0,
+      request_id: "",
+      error_code: "NETWORK_ERROR",
+      error_message: "Network error",
+    };
+  }
+
+  if (!res.ok) {
+    const fallbackCode = res.status === 422 ? "INVALID_REQUEST" : "UNKNOWN_ERROR";
+    try {
+      const data = await res.json();
+      return {
+        validated_esco_count: 0,
+        ai_recovered_count: 0,
+        ai_overlap_with_offers: 0,
+        ai_unique_vs_esco: 0,
+        cluster_coherence_score: 0,
+        noise_ratio_estimate: 0,
+        offers_considered: 0,
+        request_id: data?.request_id || "",
+        error_code: data?.error_code || fallbackCode,
+        error_message: data?.error_message || `HTTP ${res.status}`,
+      };
+    } catch {
+      return {
+        validated_esco_count: 0,
+        ai_recovered_count: 0,
+        ai_overlap_with_offers: 0,
+        ai_unique_vs_esco: 0,
+        cluster_coherence_score: 0,
+        noise_ratio_estimate: 0,
+        offers_considered: 0,
+        request_id: "",
+        error_code: fallbackCode,
+        error_message: `HTTP ${res.status}`,
+      };
+    }
+  }
+
+  return res.json() as Promise<AuditAIQualityResponse>;
 }
 
 /**

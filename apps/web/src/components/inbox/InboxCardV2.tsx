@@ -175,7 +175,10 @@ export function InboxCardV2({
     <article
       className="group bg-white ring-1 ring-slate-200 rounded-2xl p-5 shadow-card
                  hover:shadow-md hover:ring-slate-300 transition-all flex flex-col h-full
-                 focus-within:ring-2 focus-within:ring-slate-400"
+                 focus-within:ring-2 focus-within:ring-slate-400 cursor-pointer"
+      onClick={() => onOpenDetails(offerId)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onOpenDetails(offerId); }}
+      tabIndex={0}
     >
       {/* ── Block A: Identity + Score ───────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
@@ -260,7 +263,7 @@ export function InboxCardV2({
       <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => onGenerateLetter(offerId)}
+          onClick={(e) => { e.stopPropagation(); onGenerateLetter(offerId); }}
           className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-sm font-semibold
                      bg-slate-900 text-white hover:bg-slate-700 transition
                      focus:outline-none focus:ring-2 focus:ring-slate-500"

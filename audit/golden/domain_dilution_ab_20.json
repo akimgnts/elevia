@@ -1,0 +1,362 @@
+{
+  "generated_at": "2026-03-03T22:18:28.726965+00:00",
+  "topk_new": 5,
+  "topk_old_simulation": 50,
+  "cluster": "DATA_IT",
+  "profile": "cv_fixture_v0.txt (Marie Dupont — Data Analyst)",
+  "profile_esco_uri_count": 17,
+  "comparison": {
+    "A": "ESCO-only (no domain URIs)",
+    "B": "Top-K=5 (new filter)",
+    "C": "No-filter K=50 (old behavior)"
+  },
+  "summary": {
+    "offers_checked": 20,
+    "topk_improved_vs_nofilter": 20,
+    "topk_regressed_vs_nofilter": 0,
+    "neutral": 0,
+    "avg_delta_topk_vs_nofilter": 12.45
+  },
+  "results": [
+    {
+      "offer_id": "BF-237359",
+      "score_esco_only": 82,
+      "score_topk5": 53,
+      "score_nofilter": 36,
+      "delta_topk_vs_nofilter": 17,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 29,
+      "esco_uri_count": 4,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:creating",
+        "compass:skill:DATA_IT:growth",
+        "compass:skill:DATA_IT:optimisation",
+        "compass:skill:DATA_IT:recruitment",
+        "compass:skill:DATA_IT:ad"
+      ]
+    },
+    {
+      "offer_id": "BF-237189",
+      "score_esco_only": 65,
+      "score_topk5": 40,
+      "score_nofilter": 35,
+      "delta_topk_vs_nofilter": 5,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 13,
+      "esco_uri_count": 2,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:construction",
+        "compass:skill:DATA_IT:organisation",
+        "compass:skill:DATA_IT:techniques",
+        "compass:skill:DATA_IT:planning",
+        "compass:skill:DATA_IT:solutions"
+      ]
+    },
+    {
+      "offer_id": "BF-235428",
+      "score_esco_only": 47,
+      "score_topk5": 38,
+      "score_nofilter": 34,
+      "delta_topk_vs_nofilter": 4,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 16,
+      "esco_uri_count": 4,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:construction",
+        "compass:skill:DATA_IT:solution",
+        "compass:skill:DATA_IT:depuis",
+        "compass:skill:DATA_IT:maitrise",
+        "compass:skill:DATA_IT:ne"
+      ]
+    },
+    {
+      "offer_id": "BF-235427",
+      "score_esco_only": 65,
+      "score_topk5": 46,
+      "score_nofilter": 33,
+      "delta_topk_vs_nofilter": 13,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 4,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:equity",
+        "compass:skill:DATA_IT:interface",
+        "compass:skill:DATA_IT:private",
+        "compass:skill:DATA_IT:senior",
+        "compass:skill:DATA_IT:tracking"
+      ]
+    },
+    {
+      "offer_id": "BF-233040",
+      "score_esco_only": 55,
+      "score_topk5": 47,
+      "score_nofilter": 35,
+      "delta_topk_vs_nofilter": 12,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 11,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:acheteur",
+        "compass:skill:DATA_IT:fort",
+        "compass:skill:DATA_IT:presentation",
+        "compass:skill:DATA_IT:achats",
+        "compass:skill:DATA_IT:conditions"
+      ]
+    },
+    {
+      "offer_id": "BF-237357",
+      "score_esco_only": 63,
+      "score_topk5": 55,
+      "score_nofilter": 38,
+      "delta_topk_vs_nofilter": 17,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 15,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:machine",
+        "compass:skill:DATA_IT:fort",
+        "compass:skill:DATA_IT:leader",
+        "compass:skill:DATA_IT:principales",
+        "compass:skill:DATA_IT:applications"
+      ]
+    },
+    {
+      "offer_id": "BF-237356",
+      "score_esco_only": 58,
+      "score_topk5": 49,
+      "score_nofilter": 35,
+      "delta_topk_vs_nofilter": 14,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 47,
+      "esco_uri_count": 10,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:automatisation",
+        "compass:skill:DATA_IT:optimisation",
+        "compass:skill:DATA_IT:principales",
+        "compass:skill:DATA_IT:depuis",
+        "compass:skill:DATA_IT:maintenir"
+      ]
+    },
+    {
+      "offer_id": "BF-237355",
+      "score_esco_only": 53,
+      "score_topk5": 45,
+      "score_nofilter": 34,
+      "delta_topk_vs_nofilter": 11,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 9,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:artificial",
+        "compass:skill:DATA_IT:central",
+        "compass:skill:DATA_IT:flexible",
+        "compass:skill:DATA_IT:functional",
+        "compass:skill:DATA_IT:growth"
+      ]
+    },
+    {
+      "offer_id": "BF-237353",
+      "score_esco_only": 100,
+      "score_topk5": 50,
+      "score_nofilter": 35,
+      "delta_topk_vs_nofilter": 15,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 27,
+      "esco_uri_count": 2,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:please",
+        "compass:skill:DATA_IT:proactively",
+        "compass:skill:DATA_IT:interest",
+        "compass:skill:DATA_IT:requirements",
+        "compass:skill:DATA_IT:scientist"
+      ]
+    },
+    {
+      "offer_id": "BF-237348",
+      "score_esco_only": 62,
+      "score_topk5": 53,
+      "score_nofilter": 37,
+      "delta_topk_vs_nofilter": 16,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 13,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:application",
+        "compass:skill:DATA_IT:insights",
+        "compass:skill:DATA_IT:interface",
+        "compass:skill:DATA_IT:interpersonal",
+        "compass:skill:DATA_IT:learn"
+      ]
+    },
+    {
+      "offer_id": "BF-237324",
+      "score_esco_only": 72,
+      "score_topk5": 51,
+      "score_nofilter": 36,
+      "delta_topk_vs_nofilter": 15,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 32,
+      "esco_uri_count": 5,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:animation",
+        "compass:skill:DATA_IT:banque",
+        "compass:skill:DATA_IT:centre",
+        "compass:skill:DATA_IT:former",
+        "compass:skill:DATA_IT:fort"
+      ]
+    },
+    {
+      "offer_id": "BF-237271",
+      "score_esco_only": 61,
+      "score_topk5": 50,
+      "score_nofilter": 35,
+      "delta_topk_vs_nofilter": 15,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 9,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:collaborating",
+        "compass:skill:DATA_IT:day",
+        "compass:skill:DATA_IT:deliver",
+        "compass:skill:DATA_IT:insights",
+        "compass:skill:DATA_IT:leader"
+      ]
+    },
+    {
+      "offer_id": "BF-237212",
+      "score_esco_only": 42,
+      "score_topk5": 36,
+      "score_nofilter": 32,
+      "delta_topk_vs_nofilter": 4,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 23,
+      "esco_uri_count": 6,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:banque",
+        "compass:skill:DATA_IT:grand",
+        "compass:skill:DATA_IT:alors",
+        "compass:skill:DATA_IT:soutenir",
+        "compass:skill:DATA_IT:analyste"
+      ]
+    },
+    {
+      "offer_id": "BF-237157",
+      "score_esco_only": 58,
+      "score_topk5": 49,
+      "score_nofilter": 36,
+      "delta_topk_vs_nofilter": 13,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 39,
+      "esco_uri_count": 10,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:both",
+        "compass:skill:DATA_IT:products",
+        "compass:skill:DATA_IT:sw",
+        "compass:skill:DATA_IT:applications",
+        "compass:skill:DATA_IT:communicate"
+      ]
+    },
+    {
+      "offer_id": "BF-232891",
+      "score_esco_only": 58,
+      "score_topk5": 44,
+      "score_nofilter": 34,
+      "delta_topk_vs_nofilter": 10,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 34,
+      "esco_uri_count": 5,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:fort",
+        "compass:skill:DATA_IT:principales",
+        "compass:skill:DATA_IT:applications",
+        "compass:skill:DATA_IT:comprendre",
+        "compass:skill:DATA_IT:gitlab"
+      ]
+    },
+    {
+      "offer_id": "BF-236714",
+      "score_esco_only": 57,
+      "score_topk5": 49,
+      "score_nofilter": 36,
+      "delta_topk_vs_nofilter": 13,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 13,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:creating",
+        "compass:skill:DATA_IT:data analysis",
+        "compass:skill:DATA_IT:organizational",
+        "compass:skill:DATA_IT:social",
+        "compass:skill:DATA_IT:tracking"
+      ]
+    },
+    {
+      "offer_id": "BF-235365",
+      "score_esco_only": 72,
+      "score_topk5": 51,
+      "score_nofilter": 34,
+      "delta_topk_vs_nofilter": 17,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 5,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:both",
+        "compass:skill:DATA_IT:central",
+        "compass:skill:DATA_IT:designing",
+        "compass:skill:DATA_IT:engineers",
+        "compass:skill:DATA_IT:growth"
+      ]
+    },
+    {
+      "offer_id": "BF-232892",
+      "score_esco_only": 58,
+      "score_topk5": 44,
+      "score_nofilter": 34,
+      "delta_topk_vs_nofilter": 10,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 33,
+      "esco_uri_count": 5,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:fort",
+        "compass:skill:DATA_IT:principales",
+        "compass:skill:DATA_IT:applications",
+        "compass:skill:DATA_IT:comprendre",
+        "compass:skill:DATA_IT:gitlab"
+      ]
+    },
+    {
+      "offer_id": "BF-237305",
+      "score_esco_only": 53,
+      "score_topk5": 45,
+      "score_nofilter": 34,
+      "delta_topk_vs_nofilter": 11,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 9,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:application",
+        "compass:skill:DATA_IT:data analysis",
+        "compass:skill:DATA_IT:detail",
+        "compass:skill:DATA_IT:equity",
+        "compass:skill:DATA_IT:execution"
+      ]
+    },
+    {
+      "offer_id": "BF-237294",
+      "score_esco_only": 72,
+      "score_topk5": 51,
+      "score_nofilter": 34,
+      "delta_topk_vs_nofilter": 17,
+      "domain_uri_count_topk": 5,
+      "domain_uri_count_nofilter": 50,
+      "esco_uri_count": 5,
+      "domain_uris_topk": [
+        "compass:skill:DATA_IT:data analysis",
+        "compass:skill:DATA_IT:learn",
+        "compass:skill:DATA_IT:opportunity",
+        "compass:skill:DATA_IT:presentation",
+        "compass:skill:DATA_IT:update"
+      ]
+    }
+  ]
+}

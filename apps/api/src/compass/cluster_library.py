@@ -543,6 +543,21 @@ class ClusterLibraryStore:
             self._cache_dirty.discard(cluster)
             return list(tokens)
 
+    def get_active_skills_with_rarity(self, cluster: str) -> Dict[str, int]:
+        """Return {token_norm: occurrences_offers} for ACTIVE tokens in cluster.
+
+        Lower occurrences_offers = rarer = more cluster-specific.
+        Used by the Top-K rarity filter in offer_canonicalization.
+        """
+        with self._lock:
+            conn = self._conn()
+            rows = conn.execute(
+                "SELECT token_normalized, occurrences_offers FROM cluster_domain_skills "
+                "WHERE cluster=? AND status='ACTIVE' ORDER BY token_normalized",
+                (cluster,),
+            ).fetchall()
+            return {r["token_normalized"]: r["occurrences_offers"] for r in rows}
+
     def get_all_skills(
         self,
         status: Optional[str] = None,

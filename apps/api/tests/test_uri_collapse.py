@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from esco.uri_collapse import collapse_to_uris
 from matching.extractors import extract_profile
-from api.utils.inbox_catalog import _normalize_offer_skills_via_esco
+from compass.offer_canonicalization import _normalize_offer_skills_via_esco
 
 
 def test_collapse_to_uris_dedupes_and_prefers_label():

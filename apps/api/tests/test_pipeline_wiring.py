@@ -137,7 +137,7 @@ def test_score_invariance_compass_e_on_off():
 def test_no_parallel_pipeline_routing():
     """
     profile_baseline.py and profile_file.py must import from
-    compass.canonical_pipeline (is_compass_e_enabled / is_trace_enabled).
+    compass.canonical_pipeline (run_cv_pipeline / is_trace_enabled).
 
     This ensures they use the single canonical flag rather than
     defining their own env-var checks.
@@ -149,10 +149,10 @@ def test_no_parallel_pipeline_routing():
         source = route_file.read_text(encoding="utf-8")
         assert "from compass.canonical_pipeline import" in source, (
             f"{route_file.name} must import from compass.canonical_pipeline "
-            f"(is_compass_e_enabled / is_trace_enabled)"
+            f"(run_cv_pipeline / is_trace_enabled)"
         )
-        assert "is_compass_e_enabled" in source, (
-            f"{route_file.name} must use is_compass_e_enabled() from canonical_pipeline"
+        assert "run_cv_pipeline" in source, (
+            f"{route_file.name} must use run_cv_pipeline() from canonical_pipeline"
         )
 
     # Also assert matching_v1.py is NOT imported by any enrichment module

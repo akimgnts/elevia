@@ -76,6 +76,24 @@ const DEFAULT_FILTERS: FiltersState = {
 // Debug mode: localStorage.setItem("elevia_debug_inbox", "1")
 const DEBUG_INBOX = import.meta.env.DEV && localStorage.getItem("elevia_debug_inbox") === "1";
 
+// ── Domain signals (from AnalyzePage parse result, stored in localStorage) ──
+type DomainSignals = {
+  domain_skills_active: string[];
+  resolved_to_esco: Array<{ token_normalized: string; esco_uri: string; esco_label?: string; provenance?: string }>;
+  injected_esco_from_domain: number;
+  total_esco_count: number;
+};
+
+function readDomainSignals(): DomainSignals | null {
+  try {
+    const raw = localStorage.getItem("elevia_domain_signals");
+    if (!raw) return null;
+    return JSON.parse(raw) as DomainSignals;
+  } catch {
+    return null;
+  }
+}
+
 type DecisionStatus = "SHORTLISTED" | "DISMISSED";
 
 type DecisionRecord = {
@@ -349,11 +367,13 @@ function OfferCard({
   offer,
   onApply,
   onOpen,
+  domainSignals,
 }: {
   offer: NormalizedInboxItem;
   onApply: () => void;
   onOpen: () => void;
   isPending: boolean;
+  domainSignals: DomainSignals | null;
 }) {
   const relativeTitle = offer.title_clean || offer.title;
   const titleInfo = cleanOfferTitle(relativeTitle);
@@ -387,6 +407,8 @@ function OfferCard({
       topMatchedSkills={topMatchedSkills}
       missingCriticalSkills={missingCriticalSkills}
       rareSignal={rareSignal}
+      injectedEscoFromDomain={domainSignals?.injected_esco_from_domain}
+      resolvedToEsco={domainSignals?.resolved_to_esco}
       onOpenDetails={() => onOpen()}
       onGenerateLetter={() => onApply()}
     />
@@ -633,11 +655,13 @@ function ProfileSummarySidebar({
   loading,
   missing,
   error,
+  domainSignals,
 }: {
   summary: ProfileSummaryV1 | null;
   loading: boolean;
   missing: boolean;
   error: string | null;
+  domainSignals: DomainSignals | null;
 }) {
   return (
     <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-4">
@@ -762,6 +786,30 @@ function ProfileSummarySidebar({
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Domain skills (from Compass E mapping — shown if available) */}
+      {domainSignals && domainSignals.domain_skills_active.length > 0 && (
+        <div className="border-t border-slate-100 pt-4 space-y-2">
+          <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Compétences métier</div>
+          <div className="flex flex-wrap gap-1.5">
+            {domainSignals.domain_skills_active.slice(0, 3).map((skill) => (
+              <span key={skill} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                {skill}
+              </span>
+            ))}
+          </div>
+          {domainSignals.injected_esco_from_domain > 0 && (
+            <div className="text-[10px] text-blue-600 font-medium">
+              ↗ +{domainSignals.injected_esco_from_domain} compétence{domainSignals.injected_esco_from_domain > 1 ? "s" : ""} via mapping ESCO
+              {domainSignals.resolved_to_esco[0] && (
+                <span className="text-blue-400 font-normal">
+                  {" "}· ex. {domainSignals.resolved_to_esco[0].token_normalized}
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -895,6 +943,9 @@ export default function InboxPage() {
   const [contextLoadingIds, setContextLoadingIds] = useState<Set<string>>(new Set());
   const [contextFitLoadingIds, setContextFitLoadingIds] = useState<Set<string>>(new Set());
   const [contextErrorByOfferId, setContextErrorByOfferId] = useState<Record<string, string>>({});
+
+  // Domain signals: read once from localStorage (written by AnalyzePage after parse)
+  const [domainSignals] = useState<DomainSignals | null>(() => readDomainSignals());
 
   const profileId = profileHash ?? "anonymous";
   const selectedOfferId = selectedOffer?.offer_id || selectedOffer?.id;
@@ -1572,6 +1623,7 @@ export default function InboxPage() {
                         onApply={() => handleApply(offer)}
                         onOpen={() => setSelectedOffer(offer)}
                         isPending={false}
+                        domainSignals={domainSignals}
                       />
                     ))}
                   </div>
@@ -1617,6 +1669,7 @@ export default function InboxPage() {
               loading={profileSummaryLoading}
               missing={profileSummaryMissing}
               error={profileSummaryError}
+              domainSignals={domainSignals}
             />
           </aside>
         </div>

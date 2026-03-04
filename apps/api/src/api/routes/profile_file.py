@@ -23,13 +23,10 @@ from pydantic import BaseModel
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from api.utils.pdf_text import PdfTextError, extract_text_from_pdf
-from api.utils.env import get_llm_api_key
-from profile.baseline_parser import run_baseline, run_baseline_from_tokens
-from profile.profile_cluster import detect_profile_cluster
-from profile.llm_skill_suggester import suggest_skills_from_cv
 from semantic.profile_cache import cache_profile_text, compute_profile_hash
 from compass.profile_structurer import structure_profile_text_v1
-from compass.canonical_pipeline import is_compass_e_enabled, is_trace_enabled
+from compass.canonical_pipeline import run_cv_pipeline, is_trace_enabled
+from compass.domain_uris import build_domain_uris_for_text
 from api.utils.profile_summary_builder import build_profile_summary
 from api.utils.profile_summary_store import store_profile_summary
 
@@ -57,12 +54,19 @@ def _is_txt(content_type: str, filename: str) -> bool:
     return content_type.startswith("text/") or filename.lower().endswith(".txt")
 
 
+def _dev_tools_enabled() -> bool:
+    elevia_dev_tools = os.getenv("ELEVIA_DEV_TOOLS", "").strip().lower()
+    elevia_dev = os.getenv("ELEVIA_DEV", "").strip().lower()
+    return elevia_dev_tools in {"1", "true", "yes", "on"} or elevia_dev in {"1", "true", "yes", "on"}
+
+
 # ── Response schema ────────────────────────────────────────────────────────────
 
 class ParseFileResponse(BaseModel):
     source: str
     mode: str = "baseline"
-    pipeline_used: str = "baseline"
+    pipeline_used: str = "canonical_compass"
+    pipeline_variant: str = "canonical_compass_baseline"
     compass_e_enabled: bool = False
     domain_skills_active: List[str] = []
     domain_skills_pending_count: int = 0
@@ -98,6 +102,7 @@ class ParseFileResponse(BaseModel):
     baseline_esco_count: int = 0            # skills_uri_count from ESCO baseline only
     injected_esco_from_domain: int = 0      # URIs added via DOMAIN→ESCO mapping
     total_esco_count: int = 0               # baseline + injected
+    rejected_tokens: List[dict] = []        # [{token, token_norm, reason_code}] — debug/obs
 
 
 # ── Route ──────────────────────────────────────────────────────────────────────
@@ -180,47 +185,38 @@ async def parse_file(
             },
         )
 
-    # ── Baseline parse ─────────────────────────────────────────────────────────
+    if enrich_llm == 1 and not _dev_tools_enabled():
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "legacy_llm_disabled",
+                "message": "Legacy LLM enrichment is DEV-only. Use ELEVIA_DEV_TOOLS=1.",
+                "request_id": request_id,
+            },
+        )
+
+    # ── Canonical pipeline ────────────────────────────────────────────────────
     try:
-        result = run_baseline(cv_text, profile_id=f"file-{filename}")
+        pipeline = run_cv_pipeline(
+            cv_text,
+            profile_id=f"file-{filename}",
+            enrich_llm_legacy=(enrich_llm == 1),
+        )
     except Exception as exc:
-        logger.error("[parse-file] baseline error: %s request_id=%s", exc, request_id)
+        logger.error("[parse-file] canonical pipeline error: %s request_id=%s", exc, request_id)
         raise HTTPException(status_code=500, detail="Extraction failed") from exc
 
-    mode = "baseline"
-    ai_available = False
-    ai_added_count = 0
-    ai_error: Optional[str] = None
-
-    # ── Optional LLM enrichment ───────────────────────────────────────────────
+    result = pipeline.baseline_result
     if enrich_llm == 1:
-        if not get_llm_api_key():
-            ai_available = False
-            ai_error = "missing_openai_api_key"
-        else:
-            ai_available = True
-            llm = suggest_skills_from_cv(cv_text)
-            llm_warning = llm.get("warning")
-            if llm_warning:
-                warnings.append(str(llm_warning))
-
-            llm_error = llm.get("error")
-            if llm_error:
-                ai_error = "llm_failed"
-            else:
-                llm_skills = llm.get("skills") or []
-                if isinstance(llm_skills, list):
-                    base_tokens = result.get("skills_raw", [])
-                    base_set = set(base_tokens)
-                    new_tokens = [t for t in llm_skills if isinstance(t, str) and t not in base_set]
-                    ai_added_count = len(new_tokens)
-                    combined = base_tokens + new_tokens
-                    result = run_baseline_from_tokens(
-                        combined,
-                        profile_id=f"file-{filename}",
-                        source="llm",
-                    )
-                    mode = "llm"
+        pipeline_variant = "legacy_llm_enrichment"
+    elif pipeline.compass_e_enabled:
+        pipeline_variant = "canonical_compass_with_compass_e"
+    else:
+        pipeline_variant = "canonical_compass_baseline"
+    mode = "llm" if (pipeline_variant == "legacy_llm_enrichment" and pipeline.legacy_llm_available and pipeline.legacy_llm_error is None) else "baseline"
+    ai_available = pipeline.legacy_llm_available if enrich_llm == 1 else False
+    ai_added_count = pipeline.legacy_llm_added_count if enrich_llm == 1 else 0
+    ai_error: Optional[str] = pipeline.legacy_llm_error if enrich_llm == 1 else None
 
     logger.info(
         "[parse-file] filename=%s content_type=%s text_len=%d raw=%d validated=%d request_id=%s",
@@ -246,22 +242,8 @@ async def parse_file(
     except Exception as exc:
         logger.warning("[parse-file] profile summary failed: %s", type(exc).__name__)
 
-    # ── Profile cluster (deterministic, no LLM) ───────────────────────────────
-    skills_for_cluster: List[str] = []
-    validated_items = result.get("validated_items") or []
-    if validated_items:
-        skills_for_cluster = [
-            str(item.get("label") or item.get("uri") or "")
-            for item in validated_items
-            if isinstance(item, dict)
-        ]
-        skills_for_cluster = [s for s in skills_for_cluster if s]
-    if not skills_for_cluster:
-        skills_for_cluster = result.get("skills_canonical") or []
-    if not skills_for_cluster:
-        skills_for_cluster = result.get("skills_raw") or []
-
-    profile_cluster = detect_profile_cluster(skills_for_cluster)
+    # ── Profile cluster (computed in canonical pipeline) ──────────────────────
+    profile_cluster = pipeline.profile_cluster or {}
     logger.info(json.dumps({
         "event": "PROFILE_CLUSTER_DETECTED",
         "dominant_cluster": profile_cluster.get("dominant_cluster"),
@@ -269,31 +251,16 @@ async def parse_file(
         "skills_count": profile_cluster.get("skills_count"),
         "request_id": request_id,
     }))
+    cluster_key = (profile_cluster.get("dominant_cluster") or "").upper() or None
+    esco_labels = result.get("validated_labels") or []
 
-    # ── Compass E enrichment (canonical layer) ────────────────────────────────
-    compass_e_on = is_compass_e_enabled()
-    domain_skills_active: List[str] = []
-    domain_skills_pending_count = 0
-    llm_fired = False
-    resolved_to_esco: List[dict] = []
-
-    if compass_e_on:
-        try:
-            from compass.cv_enricher import enrich_cv
-            esco_labels = result.get("validated_labels") or []
-            cluster_key = (profile_cluster.get("dominant_cluster") or "").upper() or None
-            enrichment = enrich_cv(
-                cv_text=cv_text,
-                cluster=cluster_key,
-                esco_skills=esco_labels,
-                llm_enabled=True,
-            )
-            domain_skills_active = enrichment.domain_skills_active
-            domain_skills_pending_count = len(enrichment.domain_skills_pending)
-            llm_fired = enrichment.llm_triggered
-            resolved_to_esco = [r.model_dump() for r in enrichment.resolved_to_esco]
-        except Exception as exc:
-            logger.warning("[parse-file] compass_e enrichment failed (non-fatal): %s", type(exc).__name__)
+    # ── Compass E enrichment (from canonical pipeline) ────────────────────────
+    compass_e_on = pipeline.compass_e_enabled
+    domain_skills_active: List[str] = pipeline.domain_skills_active
+    domain_skills_pending_count = pipeline.domain_skills_pending_count
+    llm_fired = pipeline.llm_fired
+    resolved_to_esco: List[dict] = pipeline.resolved_to_esco
+    rejected_tokens_list: List[dict] = pipeline.rejected_tokens[:50] if pipeline.rejected_tokens else []
 
     # Inject resolved ESCO URIs into profile.skills_uri (matching impact, no formula change)
     # extract_profile() reads profile["skills_uri"] — adding URIs here increases coverage.
@@ -314,6 +281,28 @@ async def parse_file(
                         skills_list.append(label)
     total_esco_count = baseline_esco_count + injected_esco_from_domain
 
+    # Inject DOMAIN URIs (active library tokens present in CV) into skills_uri
+    domain_uris: List[str] = []
+    domain_tokens: List[str] = []
+    if cluster_key:
+        try:
+            domain_tokens, domain_uris = build_domain_uris_for_text(
+                cv_text,
+                esco_labels,
+                cluster_key,
+            )
+        except Exception as exc:
+            logger.warning("[parse-file] domain uri build failed: %s", type(exc).__name__)
+    if domain_uris and profile:
+        existing_uris: set = set(profile.get("skills_uri") or [])
+        for uri in domain_uris:
+            if uri not in existing_uris:
+                existing_uris.add(uri)
+                profile.setdefault("skills_uri", []).append(uri)
+        profile["domain_uris"] = domain_uris
+        profile["domain_uri_count"] = len(domain_uris)
+        profile["domain_tokens"] = domain_tokens
+
     # Provenance summary (baseline_esco always present from validated_items)
     baseline_esco_labels = [
         str(item.get("label") or item.get("uri") or "")
@@ -333,25 +322,17 @@ async def parse_file(
     }
 
     # Build pipeline_used tag
-    if compass_e_on and llm_fired:
-        pipeline_tag = "baseline+compass_e+llm" if mode == "baseline" else f"{mode}+compass_e+llm"
-    elif compass_e_on:
-        pipeline_tag = "baseline+compass_e" if mode == "baseline" else f"{mode}+compass_e"
-    elif mode == "llm":
-        pipeline_tag = "baseline+llm_legacy"
-    else:
-        pipeline_tag = "baseline"
-
     if is_trace_enabled():
         logger.info(
             "[PIPELINE_WIRING] parse-file pipeline_used=%s compass_e=%s domain_active=%d request_id=%s",
-            pipeline_tag, compass_e_on, len(domain_skills_active), request_id,
+            pipeline_variant, compass_e_on, len(domain_skills_active), request_id,
         )
 
     return ParseFileResponse(
         source=result["source"],
         mode=mode,
-        pipeline_used=pipeline_tag,
+        pipeline_used="canonical_compass",
+        pipeline_variant=pipeline_variant,
         compass_e_enabled=compass_e_on,
         domain_skills_active=domain_skills_active,
         domain_skills_pending_count=domain_skills_pending_count,
@@ -380,11 +361,12 @@ async def parse_file(
         skills_raw=result["skills_raw"],
         skills_canonical=result["skills_canonical"],
         profile=result["profile"],
-        warnings=result.get("warnings", []) + warnings,
+        warnings=result.get("warnings", []) + warnings + pipeline.warnings,
         profile_cluster=profile_cluster,
         resolved_to_esco=resolved_to_esco,
         skill_provenance=skill_provenance,
         baseline_esco_count=baseline_esco_count,
         injected_esco_from_domain=injected_esco_from_domain,
         total_esco_count=total_esco_count,
+        rejected_tokens=rejected_tokens_list,
     )

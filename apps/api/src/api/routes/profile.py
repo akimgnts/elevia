@@ -51,6 +51,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["profile"])
 
 
+def _dev_tools_enabled() -> bool:
+    elevia_dev_tools = os.getenv("ELEVIA_DEV_TOOLS", "").strip().lower()
+    elevia_dev = os.getenv("ELEVIA_DEV", "").strip().lower()
+    return elevia_dev_tools in {"1", "true", "yes", "on"} or elevia_dev in {"1", "true", "yes", "on"}
+
+
 @router.post(
     "/ingest_cv",
     response_model=CvExtractionResponse,
@@ -121,6 +127,15 @@ async def ingest_cv(request: CvIngestRequest) -> CvExtractionResponse:
     Le LLM propose, Pydantic garde la vérité.
     Toute capacité hors du référentiel V0.1 est rejetée.
     """
+    if not _dev_tools_enabled():
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "legacy_endpoint_disabled",
+                "message": "Legacy LLM ingestion endpoint is disabled in production.",
+                "hint": "Set ELEVIA_DEV_TOOLS=1 to enable /profile/ingest_cv in dev.",
+            },
+        )
     run_id = str(uuid.uuid4())[:8]
     start_time = time.time()
 

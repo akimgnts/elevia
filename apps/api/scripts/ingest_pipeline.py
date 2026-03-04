@@ -26,8 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from api.utils.offer_skills import ensure_offer_skills_table
-from esco.extract import extract_raw_skills_from_offer
-from matching.extractors import normalize_skill_label
+from compass.offer_canonicalization import normalize_offers_to_uris
 
 try:
     import requests
@@ -261,9 +260,17 @@ def upsert_offers(offers: list, source: str, timestamp: str) -> int:
             ))
             count += 1
 
-            skills_from_payload = (
-                _extract_ft_skills(offer) if source == "france_travail" else _extract_bf_skills(offer)
+            skill_candidates = (
+                _extract_ft_skill_candidates(offer) if source == "france_travail"
+                else _extract_bf_skill_candidates(offer)
             )
+            offer_stub = {
+                "id": offer_id,
+                "title": title,
+                "description": description or "",
+                "skills": skill_candidates,
+            }
+            skills_from_payload = _normalize_offer_skills_for_ingest(offer_stub)
             if skills_from_payload:
                 source_label = "france_travail" if source == "france_travail" else "manual"
                 _insert_offer_skills(cursor, offer_id, skills_from_payload, source=source_label, timestamp=timestamp)
@@ -280,9 +287,9 @@ def upsert_offers(offers: list, source: str, timestamp: str) -> int:
         conn.close()
 
 
-def _extract_ft_skills(offer: dict) -> list[str]:
-    """Extract and normalize FT skills from payload."""
-    skills = []
+def _extract_ft_skill_candidates(offer: dict) -> list[str]:
+    """Extract raw FT skills from payload (no normalization)."""
+    skills: list[str] = []
     competences = offer.get("competences", [])
     if isinstance(competences, list):
         for comp in competences:
@@ -292,24 +299,22 @@ def _extract_ft_skills(offer: dict) -> list[str]:
                     skills.append(str(label))
             elif isinstance(comp, str):
                 skills.append(comp)
-
-    if not skills:
-        payload = {
-            "title": offer.get("intitule") or offer.get("appellationlibelle"),
-            "description": offer.get("description"),
-            "skills": competences,
-        }
-        skills = extract_raw_skills_from_offer(payload)
-
-    normalized = [normalize_skill_label(s) for s in skills if s]
-    return sorted({s for s in normalized if s})
+    return skills
 
 
-def _extract_bf_skills(offer: dict) -> list[str]:
-    """Extract and normalize BF skills from payload."""
-    skills = extract_raw_skills_from_offer(offer)
-    normalized = [normalize_skill_label(s) for s in skills if s]
-    return sorted({s for s in normalized if s})
+def _extract_bf_skill_candidates(offer: dict) -> list[str]:
+    """Extract raw BF skills from payload (no normalization)."""
+    skills = offer.get("skills") or offer.get("competences") or []
+    if isinstance(skills, list):
+        return [str(s) for s in skills if s]
+    return []
+
+
+def _normalize_offer_skills_for_ingest(offer_stub: dict) -> list[str]:
+    """Canonical ESCO normalization (includes domain URIs for consistency)."""
+    normalize_offers_to_uris([offer_stub], include_domain_uris=True)
+    skills = offer_stub.get("skills") or []
+    return [str(s) for s in skills if s]
 
 
 def _insert_offer_skills(

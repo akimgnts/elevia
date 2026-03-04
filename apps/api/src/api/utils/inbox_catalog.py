@@ -4,7 +4,6 @@ Inbox catalog loader (shared by runtime route and smoke scripts).
 Sprint 7 - ESCO extraction + normalization for offers.
 """
 
-import importlib
 import json
 import os
 import sqlite3
@@ -15,29 +14,13 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from .offer_skills import get_offer_skills_by_offer_ids
-
-# ESCO extraction and mapping (referential-based normalization)
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-try:
-    from ...esco.extract import extract_raw_skills_from_offer, SKILL_ALIASES as _OFFER_SKILL_ALIASES
-    from ...esco.mapper import map_skill
-    from ...esco.uri_collapse import collapse_to_uris
-except ImportError:
-    _esco_extract = importlib.import_module("esco.extract")
-    _esco_mapper = importlib.import_module("esco.mapper")
-    _esco_collapse = importlib.import_module("esco.uri_collapse")
-    extract_raw_skills_from_offer = _esco_extract.extract_raw_skills_from_offer
-    _OFFER_SKILL_ALIASES = _esco_extract.SKILL_ALIASES
-    map_skill = _esco_mapper.map_skill
-    collapse_to_uris = _esco_collapse.collapse_to_uris
+from compass.offer_canonicalization import normalize_offers_to_uris
 
 logger = logging.getLogger(__name__)
 
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
 VIE_FIXTURES_PATH = Path(__file__).parent.parent.parent.parent / "fixtures" / "offers" / "vie_catalog.json"
 VIE_FIXTURES_ENV = "ELEVIA_INBOX_USE_VIE_FIXTURES"
-MAX_DEBUG_TOKENS = 200
 MAX_DESCRIPTION_SNIPPET = 280
 
 _BR_RE = re.compile(r"(?i)<br\\s*/?>")
@@ -124,157 +107,6 @@ def _extract_education_from_payload(payload: Dict) -> str | None:
     return None
 
 
-def _dedupe_preserve_order(values: List[str]) -> List[str]:
-    seen = set()
-    result: List[str] = []
-    for value in values:
-        if value in seen:
-            continue
-        seen.add(value)
-        result.append(value)
-    return result
-
-
-def _normalize_offer_skills_via_esco(offer: Dict) -> Dict[str, object]:
-    """
-    Normalize offer skills via ESCO referential.
-
-    Strategy: Preserve original skills and augment with ESCO-extracted terms.
-    This ensures:
-    - Explicit skills from fixtures/payload are kept as-is
-    - ESCO extraction adds coverage from title/description
-    - Both English (profile) and French (ESCO) terms are available for matching
-
-    Returns:
-        dict with:
-          - skills: list of skill labels (original + ESCO) for UI
-          - skills_source: classification of where skills came from
-          - skills_uri: list of ESCO URIs for scoring (unique, deterministic)
-          - skills_display: list of {uri, label, source} for UI/debug
-          - skills_unmapped: list of tokens not mapped to ESCO (debug-only)
-          - skills_uri_count / skills_uri_collapsed_dupes / skills_unmapped_count
-    """
-    # Collect all skill sources
-    all_skills: List[str] = []
-    sources_used = set()
-    mapped_items: List[Dict[str, str]] = []
-    unmapped_tokens: List[str] = []
-
-    # 1. Keep existing skills (from fixtures or payload) - they're usually good quality
-    existing_skills = offer.get("skills", [])
-    if isinstance(existing_skills, list) and existing_skills:
-        for s in existing_skills:
-            if not s:
-                continue
-            raw = str(s)
-            all_skills.append(raw.lower())
-            mapped_any = False
-            result = map_skill(raw, enable_fuzzy=False)
-            if result:
-                mapped_items.append({
-                    "surface": raw,
-                    "esco_uri": result.get("esco_id", ""),
-                    "esco_label": result.get("label") or result.get("canonical") or raw,
-                    "source": "explicit",
-                })
-                mapped_any = True
-
-            # Alias expansion for explicit skills (improve mapping coverage)
-            alias_key = raw.lower()
-            if alias_key in _OFFER_SKILL_ALIASES:
-                for alias in _OFFER_SKILL_ALIASES[alias_key]:
-                    alias_result = map_skill(alias, enable_fuzzy=False)
-                    if alias_result:
-                        mapped_items.append({
-                            "surface": alias,
-                            "esco_uri": alias_result.get("esco_id", ""),
-                            "esco_label": alias_result.get("label") or alias_result.get("canonical") or alias,
-                            "source": "alias",
-                        })
-                        mapped_any = True
-
-            if not mapped_any:
-                unmapped_tokens.append(raw)
-        sources_used.add("explicit")
-
-    # 2. Extract raw skills from offer text (title, description, etc.)
-    raw_skills = extract_raw_skills_from_offer(offer)
-
-    if raw_skills:
-        try:
-            for token in raw_skills:
-                if not token:
-                    continue
-                raw = str(token)
-                result = map_skill(raw, enable_fuzzy=False)
-                if result:
-                    mapped_items.append({
-                        "surface": raw,
-                        "esco_uri": result.get("esco_id", ""),
-                        "esco_label": result.get("label") or result.get("canonical") or raw,
-                        "source": "referential",
-                    })
-                    if result.get("label"):
-                        all_skills.append(str(result["label"]).lower())
-                    if result.get("raw_skill"):
-                        all_skills.append(str(result["raw_skill"]).lower())
-                    sources_used.add("referential")
-                else:
-                    unmapped_tokens.append(raw)
-                    all_skills.append(raw.lower())
-                    sources_used.add("extracted")
-        except Exception as e:
-            logger.warning("[esco] Failed to map skills for offer %s: %s", offer.get("id"), e)
-            # Fallback: add raw skills as-is
-            all_skills.extend(str(s).lower() for s in raw_skills)
-            unmapped_tokens.extend(str(s) for s in raw_skills)
-            sources_used.add("extracted")
-
-    # Deduplicate while preserving order
-    deduped = _dedupe_preserve_order([s for s in all_skills if s])
-
-    # Determine source classification
-    if not deduped:
-        source = "none"
-    elif "explicit" in sources_used and "referential" in sources_used:
-        source = "explicit|referential"
-    elif "explicit" in sources_used:
-        source = "explicit"
-    elif "referential" in sources_used:
-        source = "referential"
-    else:
-        source = "extracted"
-
-    logger.debug(
-        "[esco] offer=%s existing=%d extracted=%d final=%d source=%s",
-        offer.get("id", "?"),
-        len(existing_skills) if isinstance(existing_skills, list) else 0,
-        len(raw_skills),
-        len(deduped),
-        source,
-    )
-
-    collapse = collapse_to_uris(mapped_items)
-    skills_uri = collapse.get("uris") or []
-    skills_display = collapse.get("display") or []
-    unmapped_deduped_full = _dedupe_preserve_order([s for s in unmapped_tokens if s])
-    skills_unmapped_count = len(unmapped_deduped_full)
-    unmapped_deduped = unmapped_deduped_full
-    if len(unmapped_deduped) > MAX_DEBUG_TOKENS:
-        unmapped_deduped = unmapped_deduped[:MAX_DEBUG_TOKENS]
-
-    return {
-        "skills": deduped,
-        "skills_source": source,
-        "skills_uri": skills_uri,
-        "skills_display": skills_display,
-        "skills_uri_count": len(skills_uri),
-        "skills_uri_collapsed_dupes": int(collapse.get("collapsed_dupes", 0) or 0),
-        "skills_unmapped": unmapped_deduped,
-        "skills_unmapped_count": skills_unmapped_count,
-    }
-
-
 def _attach_payload_fields(offer: Dict) -> None:
     payload_raw = offer.get("payload_json")
     if not payload_raw or not isinstance(payload_raw, str):
@@ -307,28 +139,7 @@ def _apply_esco_normalization(offers: List[Dict]) -> List[Dict]:
         offer["description"] = description_clean or (description_raw if isinstance(description_raw, str) else None)
         offer["description_snippet"] = _description_snippet(description_clean)
 
-        normalized = _normalize_offer_skills_via_esco(offer)
-        normalized_skills = normalized.get("skills") or []
-        skills_source = normalized.get("skills_source") or "none"
-        if normalized_skills:
-            offer["skills"] = normalized_skills
-            offer["skills_source"] = skills_source
-            offer["skills_uri"] = normalized.get("skills_uri") or []
-            offer["skills_display"] = normalized.get("skills_display") or []
-            offer["skills_uri_count"] = normalized.get("skills_uri_count") or 0
-            offer["skills_uri_collapsed_dupes"] = normalized.get("skills_uri_collapsed_dupes") or 0
-            offer["skills_unmapped"] = normalized.get("skills_unmapped") or []
-            offer["skills_unmapped_count"] = normalized.get("skills_unmapped_count") or 0
-        else:
-            # Keep existing skills if ESCO extraction yields nothing
-            offer["skills_source"] = "none" if not offer.get("skills") else "payload"
-            offer.setdefault("skills_uri", [])
-            offer.setdefault("skills_display", [])
-            offer.setdefault("skills_uri_count", 0)
-            offer.setdefault("skills_uri_collapsed_dupes", 0)
-            offer.setdefault("skills_unmapped", [])
-            offer.setdefault("skills_unmapped_count", 0)
-
+    normalize_offers_to_uris(offers)
     return offers
 
 
