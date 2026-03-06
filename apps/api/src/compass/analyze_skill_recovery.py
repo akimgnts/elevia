@@ -80,6 +80,10 @@ _CLUSTER_COHERENCE: Dict[str, re.Pattern] = {
     ),
 }
 
+# Bump this whenever _RECOVERY_PROMPT changes — it is embedded into PIPELINE_VERSION
+# in analyze_recovery_cache.py, which invalidates the SQLite cache automatically.
+LLM_PROMPT_VERSION = "v1"
+
 # LLM prompt — strict, cluster-aware, recombines multi-word skills
 _RECOVERY_PROMPT = """\
 Tu es un expert en extraction de compétences pour le cluster {cluster}.
@@ -256,6 +260,13 @@ def _filter_recovered(
     return out
 
 
+def _stable_sort_recovered(items: List[RecoveredSkillItem]) -> List[RecoveredSkillItem]:
+    return sorted(
+        items,
+        key=lambda s: (_nfkd_lower(s.label), s.kind, s.source),
+    )
+
+
 # ── LLM call ──────────────────────────────────────────────────────────────────
 
 def _resolve_model() -> Optional[str]:
@@ -401,10 +412,10 @@ def recover_skills_cluster_aware(
 
     esco_labels_lower: Set[str] = {_nfkd_lower(lbl) for lbl in validated_esco_labels if lbl}
 
-    result.recovered_skills = _filter_recovered(
+    result.recovered_skills = _stable_sort_recovered(_filter_recovered(
         items=raw_items,
         cluster=cluster,
         esco_labels_lower=esco_labels_lower,
-    )
+    ))
 
     return result

@@ -24,9 +24,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from api.utils.pdf_text import PdfTextError, extract_text_from_pdf
 from semantic.profile_cache import cache_profile_text, compute_profile_hash
+from semantic.text_utils import hash_text
+from api.utils.analyze_recovery_cache import PIPELINE_VERSION
 from compass.profile_structurer import structure_profile_text_v1
 from compass.canonical_pipeline import run_cv_pipeline, is_trace_enabled
 from compass.domain_uris import build_domain_uris_for_text
+from compass.promotion.apply_promotion import apply_profile_esco_promotion
 from api.utils.profile_summary_builder import build_profile_summary
 from api.utils.profile_summary_store import store_profile_summary
 
@@ -77,6 +80,9 @@ class ParseFileResponse(BaseModel):
     filename: str
     content_type: str
     extracted_text_length: int
+    extracted_text_hash: Optional[str] = None
+    profile_fingerprint: Optional[str] = None
+    recovery_pipeline_version: Optional[str] = None
     canonical_count: int
     raw_detected: int
     validated_skills: int
@@ -103,6 +109,8 @@ class ParseFileResponse(BaseModel):
     injected_esco_from_domain: int = 0      # URIs added via DOMAIN→ESCO mapping
     total_esco_count: int = 0               # baseline + injected
     rejected_tokens: List[dict] = []        # [{token, token_norm, reason_code}] — debug/obs
+    tight_candidates: List[str] = []       # phrase-level extraction (1–5 grams, pre-policy)
+    tight_metrics: dict = {}               # raw_count, candidate_count, noise_ratio, tech_density
 
 
 # ── Route ──────────────────────────────────────────────────────────────────────
@@ -227,6 +235,7 @@ async def parse_file(
     profile = result.get("profile") or {}
     profile_hash = compute_profile_hash(profile)
     cache_profile_text(profile_hash, cv_text)
+    extracted_text_hash = hash_text(cv_text)
 
     # ── Profile summary cache (deterministic) ────────────────────────────────
     try:
@@ -253,6 +262,17 @@ async def parse_file(
     }))
     cluster_key = (profile_cluster.get("dominant_cluster") or "").upper() or None
     esco_labels = result.get("validated_labels") or []
+
+    # ── Tight extraction (phrase-level, case-insensitive, pre-policy) ─────────
+    tight_candidates: List[str] = []
+    tight_metrics: dict = {}
+    try:
+        from compass.extraction.tight_skill_extractor import extract_tight_skills
+        _tight = extract_tight_skills(cv_text, cluster=cluster_key)
+        tight_candidates = _tight.skill_candidates
+        tight_metrics = _tight.metrics
+    except Exception as exc:
+        logger.warning("[parse-file] tight extraction failed: %s", type(exc).__name__)
 
     # ── Compass E enrichment (from canonical pipeline) ────────────────────────
     compass_e_on = pipeline.compass_e_enabled
@@ -303,6 +323,16 @@ async def parse_file(
         profile["domain_uri_count"] = len(domain_uris)
         profile["domain_tokens"] = domain_tokens
 
+    # Sprint 6 Step 2: ESCO promotion mapping (flag-gated)
+    if profile:
+        apply_profile_esco_promotion(
+            profile,
+            base_skills_uri=profile.get("skills_uri") or [],
+            tight_candidates=tight_candidates,
+            filtered_tokens=result.get("filtered_tokens") or [],
+            cluster=cluster_key,
+        )
+
     # Provenance summary (baseline_esco always present from validated_items)
     baseline_esco_labels = [
         str(item.get("label") or item.get("uri") or "")
@@ -328,6 +358,16 @@ async def parse_file(
             pipeline_variant, compass_e_on, len(domain_skills_active), request_id,
         )
 
+    profile_fingerprint: Optional[str] = None
+    if extracted_text_hash and cluster_key:
+        try:
+            import hashlib
+            profile_fingerprint = hashlib.sha256(
+                f"{extracted_text_hash}|{cluster_key}|{PIPELINE_VERSION}".encode("utf-8")
+            ).hexdigest()
+        except Exception:
+            profile_fingerprint = None
+
     return ParseFileResponse(
         source=result["source"],
         mode=mode,
@@ -343,6 +383,9 @@ async def parse_file(
         filename=filename,
         content_type=content_type,
         extracted_text_length=len(cv_text),
+        extracted_text_hash=extracted_text_hash,
+        profile_fingerprint=profile_fingerprint,
+        recovery_pipeline_version=PIPELINE_VERSION,
         canonical_count=result["canonical_count"],
         raw_detected=result["raw_detected"],
         validated_skills=result["validated_skills"],
@@ -369,4 +412,6 @@ async def parse_file(
         injected_esco_from_domain=injected_esco_from_domain,
         total_esco_count=total_esco_count,
         rejected_tokens=rejected_tokens_list,
+        tight_candidates=tight_candidates,
+        tight_metrics=tight_metrics,
     )

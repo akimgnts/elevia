@@ -20,6 +20,7 @@ import {
   fetchContextFit,
   fetchProfileSummary,
   applyPack,
+  postDecision,
   type ApplyPackResponse,
   type ExplainBlock,
   type OfferSemanticResponse,
@@ -365,13 +366,15 @@ function EmptyState({
 /** Adapts a NormalizedInboxItem to InboxCardV2 props and renders the card. */
 function OfferCard({
   offer,
-  onApply,
   onOpen,
+  onShortlist,
+  onPass,
   domainSignals,
 }: {
   offer: NormalizedInboxItem;
-  onApply: () => void;
   onOpen: () => void;
+  onShortlist: () => void;
+  onPass: () => void;
   isPending: boolean;
   domainSignals: DomainSignals | null;
 }) {
@@ -381,15 +384,16 @@ function OfferCard({
 
   const location = formatLocation(offer.city, offer.country) ?? undefined;
 
-  const topMatchedSkills = (offer.matched_skills_display?.length
+  const matchedAll = offer.matched_skills_display?.length
     ? offer.matched_skills_display
-    : offer.matched_skills ?? []
-  ).slice(0, 3);
-
-  const missingCriticalSkills = (offer.missing_skills_display?.length
+    : offer.matched_skills ?? [];
+  const missingAll = offer.missing_skills_display?.length
     ? offer.missing_skills_display
-    : offer.missing_skills ?? []
-  ).slice(0, 1);
+    : offer.missing_skills ?? [];
+
+  const topMatchedSkills = matchedAll.slice(0, 3);
+  const missingCriticalSkills = missingAll.slice(0, 1);
+  const missingPrimary = missingAll[0];
 
   const rareSignal =
     offer.explain_v1?.rare_signal_level === "HIGH"
@@ -403,14 +407,20 @@ function OfferCard({
       title={displayTitle}
       location={location}
       score={offer.score}
+      domainBucket={offer.domain_bucket}
       cluster={{ label: offer.offer_cluster ?? "" }}
       topMatchedSkills={topMatchedSkills}
+      matchedCount={matchedAll.length}
+      missingCount={missingAll.length}
+      missingPrimary={missingPrimary}
+      explainV1={offer.explain_v1 ?? null}
       missingCriticalSkills={missingCriticalSkills}
       rareSignal={rareSignal}
       injectedEscoFromDomain={domainSignals?.injected_esco_from_domain}
       resolvedToEsco={domainSignals?.resolved_to_esco}
       onOpenDetails={() => onOpen()}
-      onGenerateLetter={() => onApply()}
+      onShortlist={() => onShortlist()}
+      onPass={() => onPass()}
     />
   );
 }
@@ -1354,6 +1364,26 @@ export default function InboxPage() {
     }
   };
 
+  const handleDecision = useCallback(
+    async (item: NormalizedInboxItem, status: DecisionStatus) => {
+      try {
+        await postDecision(item.offer_id, profileId, status);
+      } catch (err) {
+        console.warn("[inbox] decision API failed:", err);
+      } finally {
+        setDecisions((prev) => ({
+          ...prev,
+          [item.offer_id]: {
+            status,
+            score: item.score,
+            updated_at: new Date().toISOString(),
+          },
+        }));
+      }
+    },
+    [profileId]
+  );
+
   const filtersDirty = useMemo(
     () => JSON.stringify(filtersDraft) !== JSON.stringify(filtersApplied) || thresholdDraft !== threshold,
     [filtersDraft, filtersApplied, thresholdDraft, threshold]
@@ -1620,8 +1650,9 @@ export default function InboxPage() {
                       <OfferCard
                         key={offer.offer_id}
                         offer={offer}
-                        onApply={() => handleApply(offer)}
                         onOpen={() => setSelectedOffer(offer)}
+                        onShortlist={() => handleDecision(offer, "SHORTLISTED")}
+                        onPass={() => handleDecision(offer, "DISMISSED")}
                         isPending={false}
                         domainSignals={domainSignals}
                       />

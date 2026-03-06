@@ -19,39 +19,20 @@ import { Button } from "../components/ui/Button";
 import { GlassCard } from "../components/ui/GlassCard";
 import { PageContainer } from "../components/layout/PageContainer";
 import { DevStatusCard } from "../components/DevStatusCard";
+import { ProfileCard } from "../components/analyze/ProfileCard";
+import { MarketPositionCard } from "../components/analyze/MarketPositionCard";
+import { ActionsCard } from "../components/analyze/ActionsCard";
+import { DevPanel } from "../components/analyze/DevPanel";
+import {
+  buildUriLabelMap,
+  labelFromUri,
+  mapLabelsToUris,
+  normalizeProfileSkills,
+} from "../lib/skills/normalizeSkills";
 
 const PLACEHOLDER_CV = `Jean Dupont\nData Analyst - 3 ans d'expérience\n\nFORMATION\nMaster Data Science, École Polytechnique (2020)\n\nEXPÉRIENCE\n- Analyste BI chez Acme Corp (2020-2023)\n  Python, SQL, Power BI, Tableau\n- Stage Data Engineer chez StartupXYZ (2019)\n  ETL, dbt, Airflow\n\nCOMPÉTENCES\n- Python, SQL, R\n- Power BI, Tableau, Looker\n- Excel avancé, VBA\n- Jira, Confluence\n\nLANGUES\n- Français (natif)\n- Anglais (C1)\n- Espagnol (B2)`;
 
-// Groups shown first when deriving key skills (fallback when API unavailable)
-const KEY_SKILL_PRIORITY = ["Numérique", "Aptitudes & Compétences"];
-const MAX_KEY_SKILLS = 12;
-
-/** Deterministic fallback: pick up to MAX_KEY_SKILLS labels, priority groups first. */
-function deriveKeySkills(groups: SkillGroupItem[]): string[] {
-  const seen = new Set<string>();
-  const result: string[] = [];
-
-  const addFromGroup = (g: SkillGroupItem) => {
-    for (const skill of [...g.items].sort()) {
-      if (!seen.has(skill) && result.length < MAX_KEY_SKILLS) {
-        seen.add(skill);
-        result.push(skill);
-      }
-    }
-  };
-
-  for (const name of KEY_SKILL_PRIORITY) {
-    const g = groups.find((g) => g.group === name);
-    if (g) addFromGroup(g);
-  }
-
-  const others = groups
-    .filter((g) => !KEY_SKILL_PRIORITY.includes(g.group))
-    .sort((a, b) => a.group.localeCompare(b.group, "fr"));
-  for (const g of others) addFromGroup(g);
-
-  return result;
-}
+// (legacy deriveKeySkills removed — Analyze now displays URI-unified skills only)
 
 // ── Reason badge ──────────────────────────────────────────────────────────────
 
@@ -103,6 +84,11 @@ export default function AnalyzePage() {
   const [analysisMode, setAnalysisMode] = useState<"baseline" | "enriched">("baseline");
   const [legacyLlmEnabled, setLegacyLlmEnabled] = useState(false);
   const isDev = import.meta.env.DEV;
+  const devMode =
+    isDev &&
+    typeof window !== "undefined" &&
+    (new URLSearchParams(window.location.search).get("dev") === "1" ||
+      localStorage.getItem("devMode") === "1");
 
   // ── Key skills state (from API) ───────────────────────────────────────────
   const [keySkillsResult, setKeySkillsResult] = useState<KeySkillsResponse | null>(null);
@@ -119,6 +105,13 @@ export default function AnalyzePage() {
     ai_available: boolean;
     ai_error: string | null;
     request_id: string | null;
+    raw_count?: number | null;
+    candidate_count?: number | null;
+    dropped_count?: number | null;
+    noise_ratio?: number | null;
+    tech_density?: number | null;
+    cache_hit?: boolean | null;
+    ai_fired?: boolean | null;
   } | null>(null);
   const [auditLoading, setAuditLoading] = useState(false);
   const [auditError, setAuditError] = useState<string | null>(null);
@@ -126,6 +119,7 @@ export default function AnalyzePage() {
   const [validatedSearch, setValidatedSearch] = useState("");
   const [filteredSearch, setFilteredSearch] = useState("");
   const [rawSearch, setRawSearch] = useState("");
+
 
   const toggleGroup = (group: string) => {
     setExpandedGroups((prev) => {
@@ -229,6 +223,7 @@ export default function AnalyzePage() {
           setKeySkillsResult(null);
         }
       }
+
     } catch (err) {
       setParseError(err instanceof Error ? err.message : "Erreur lors de l'analyse");
     } finally {
@@ -248,7 +243,7 @@ export default function AnalyzePage() {
   };
 
   // ── AI skill recovery (DEV-only) ─────────────────────────────────────────────
-  const handleRecover = async () => {
+  const handleRecover = async (force = false) => {
     const cluster = profileCluster?.dominant_cluster;
     if (!cluster) return;
     setRecoveringSkills(true);
@@ -262,11 +257,16 @@ export default function AnalyzePage() {
       const noise = (rawTokens ?? []).filter(
         (t) => !validatedSet.has(t.toLowerCase()) && !ignoredSet.has(t.toLowerCase()),
       );
+      const profileFingerprint = parseResult?.profile_fingerprint ?? null;
+      const extractedTextHash = parseResult?.extracted_text_hash ?? null;
       const resp = await fetchRecoverSkills({
         cluster,
         ignored_tokens: ignored,
         noise_tokens: noise,
         validated_esco_labels: validatedLabels,
+        profile_fingerprint: profileFingerprint,
+        extracted_text_hash: extractedTextHash,
+        force,
       });
       const errorCode = resp.error_code || resp.ai_error || resp.error || null;
       let resolvedCode = errorCode ?? (resp.ai_available === false ? "AI_DISABLED" : null);
@@ -277,9 +277,19 @@ export default function AnalyzePage() {
         ai_available: resp.ai_available,
         ai_error: resolvedCode,
         request_id: resp.request_id ?? null,
+        raw_count: resp.raw_count ?? null,
+        candidate_count: resp.candidate_count ?? null,
+        dropped_count: resp.dropped_count ?? null,
+        noise_ratio: resp.noise_ratio ?? null,
+        tech_density: resp.tech_density ?? null,
+        cache_hit: resp.cache_hit ?? false,
+        ai_fired: resp.ai_fired ?? null,
       });
       if (resp.recovered_skills.length > 0) {
         setRecoveredSkills(resp.recovered_skills);
+        if (resp.cache_hit) {
+          setRecoveryError("Résultat récupéré (cache).");
+        }
       } else if (resolvedCode === "OPENAI_KEY_MISSING") {
         setRecoveryError("Clé IA non configurée (OPENAI_API_KEY manquante côté API).");
       } else if (resolvedCode === "DEV_TOOLS_DISABLED") {
@@ -291,7 +301,7 @@ export default function AnalyzePage() {
       } else if (resolvedCode === "CLUSTER_MISSING") {
         setRecoveryError("Cluster manquant pour la récupération IA.");
       } else if (resolvedCode === "INVALID_REQUEST") {
-        setRecoveryError("Requête invalide pour la récupération IA.");
+        setRecoveryError("Requête invalide (fingerprint manquant).");
       } else if (resolvedCode === "NETWORK_ERROR") {
         setRecoveryError("Erreur réseau : impossible de joindre l'API.");
       } else if (resolvedCode === "AI_DISABLED") {
@@ -350,8 +360,13 @@ export default function AnalyzePage() {
 
   // Key skills: API-ranked (with badges) or fallback (no badges)
   const apiKeySkills: KeySkillItem[] = keySkillsResult?.key_skills ?? [];
-  const fallbackKeySkills: string[] = deriveKeySkills(skillGroups);
-  const hasApiRanking = apiKeySkills.length > 0;
+  const labelMap = buildUriLabelMap(validatedItems, parseResult?.resolved_to_esco);
+  const normalizedProfile = normalizeProfileSkills(parseResult?.profile ?? null, labelMap);
+  const keySkillUris = mapLabelsToUris(apiKeySkills.map((s) => s.label), labelMap);
+  const topSkillUris = (keySkillUris.length > 0 ? keySkillUris : normalizedProfile.uris).slice(0, 4);
+  const topSkills = topSkillUris.map((uri) => labelMap[uri] ?? labelFromUri(uri));
+  const languageGroup = skillGroups.find((g) => g.group.toLowerCase().includes("lang"));
+  const languages = languageGroup?.items ?? [];
 
   const autreGroup = skillGroups.find((g) => g.group === "Autres");
   const autreRatio = validatedCount > 0 ? (autreGroup?.count ?? 0) / validatedCount : 0;
@@ -398,7 +413,25 @@ export default function AnalyzePage() {
   const domainSkillsPendingCount = parseResult?.domain_skills_pending_count ?? 0;
   const resolvedToEsco = parseResult?.resolved_to_esco ?? [];
   const rejectedTokens = parseResult?.rejected_tokens ?? [];
+
+  const profileSkillsUri = (parseResult?.profile?.skills_uri ?? []) as string[];
+  const profileSkillsUriPromoted =
+    (parseResult?.profile as { skills_uri_promoted?: string[] } | undefined)?.skills_uri_promoted ?? [];
+  const skillsUriEffective = normalizedProfile.uris;
+
+  const marketMatched = topSkills;
+  const marketMissing: string[] = [];
+  const marketNote = "Données marché indisponibles — affichage basé sur le profil.";
+
+  const actionItems: string[] = [];
+  if (marketMissing[0]) {
+    actionItems.push(`Ajouter « ${marketMissing[0]} » au CV`);
+  }
+  if (profileCluster?.dominant_cluster) {
+    actionItems.push(`Générer un CV optimisé pour ${profileCluster.dominant_cluster}`);
+  }
   const injectedEscoFromDomain = parseResult?.injected_esco_from_domain ?? 0;
+  const recoveryCached = recoveryMeta?.cache_hit ?? false;
   const topClusterDist = Object.entries(clusterDistribution)
     .filter(([, value]) => value > 0)
     .sort((a, b) => b[1] - a[1])
@@ -568,590 +601,49 @@ export default function AnalyzePage() {
 
             {/* ── Results ─────────────────────────────────────────────────────── */}
             {parseResult && (
-              <div className="mt-6 space-y-5 border-t border-slate-100 pt-5">
-
-                {/* A) Health counters */}
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-                  <span className="font-semibold text-emerald-700">
-                    Validées&nbsp;
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold">
-                      {validatedCount}
-                    </span>
-                  </span>
-                  <span className="text-slate-500">
-                    Ignorées&nbsp;
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                      {filteredOut}
-                    </span>
-                  </span>
-                  <span className="text-slate-400">
-                    Brut détecté&nbsp;
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
-                      {rawDetected}
-                    </span>
-                  </span>
-                  {autreGroup && autreGroup.count > 0 && (
-                    <span className={autreRatio > 0.4 ? "text-amber-600 font-medium" : "text-slate-400"}>
-                      Autres&nbsp;
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
-                        {autreGroup.count}
-                      </span>
-                      {autreRatio > 0.4 && (
-                        <span className="ml-1 text-xs">⚠ signal faible</span>
-                      )}
-                    </span>
-                  )}
-                  <span className="ml-auto text-xs text-slate-400">
-                    {parseResult.extracted_text_length} car. · {parseResult.filename}
-                  </span>
+              <div className="mt-6 space-y-6 border-t border-slate-100 pt-6">
+                <div className="grid gap-4 lg:grid-cols-3">
+                  <ProfileCard
+                    cluster={profileCluster?.dominant_cluster ?? null}
+                    topSkills={topSkills}
+                    languages={languages}
+                    footer={
+                      <div className="text-xs text-slate-400">
+                        {parseResult.extracted_text_length} car. · {parseResult.filename}
+                      </div>
+                    }
+                  />
+                  <MarketPositionCard
+                    matchedSkills={marketMatched}
+                    missingSkills={marketMissing}
+                    loading={false}
+                    note={marketNote}
+                  />
+                  <ActionsCard actions={actionItems} />
                 </div>
 
-                {/* Warnings */}
-                {visibleWarnings.length > 0 && (
-                  <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
-                    {visibleWarnings.join(" · ")}
-                  </div>
-                )}
-
-                {/* Profile cluster */}
-                {profileCluster && (
-                  <div className="rounded-xl border border-slate-200 bg-white/70 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-slate-700">Domaine détecté</div>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                        {profileCluster.dominant_cluster}
-                      </span>
-                    </div>
-                    <div className="mt-2 text-sm text-slate-600">
-                      Dominance: <span className="font-semibold">{profileCluster.dominance_percent}%</span>
-                    </div>
-                    {topClusterDist.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
-                        {topClusterDist.map(([cluster, value]) => (
-                          <span key={cluster} className="rounded bg-slate-100 px-2 py-1">
-                            {cluster}: {value}%
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {profileCluster.note === "LOW_SIGNAL" && (
-                      <div className="mt-2 text-xs font-medium text-amber-700">
-                        Signal insuffisant (parsing à renforcer)
-                      </div>
-                    )}
-                    {profileCluster.note === "TRANSVERSAL" && (
-                      <div className="mt-2 text-xs font-medium text-slate-600">
-                        Profil transversal
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* LLM fallback */}
-                {legacyLlmRequested && parseResult && !aiAvailable && (
-                  <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
-                    IA indisponible: clé OPENAI_API_KEY manquante (apps/api/.env). Résultat déterministe.
-                  </div>
-                )}
-
-                {legacyLlmRequested && parseResult && aiAvailable && aiError === "llm_failed" && (
-                  <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
-                    IA indisponible (erreur appel). Résultat déterministe.
-                  </div>
-                )}
-
-                {/* LLM delta */}
-                {llmEffective && (
-                  <div className="text-xs font-medium text-slate-500">
-                    IA a ajouté: +{aiAdded} compétence{aiAdded !== 1 ? "s" : ""} candidate{aiAdded !== 1 ? "s" : ""}
-                  </div>
-                )}
-
-                {/* Zero-state: no ESCO skills found */}
-                {validatedCount === 0 ? (
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
-                    <p className="font-semibold text-slate-700">Aucune compétence ESCO reconnue</p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      Le fichier a peut-être un contenu difficile à extraire.
-                      Essayez de coller le texte dans l'onglet "Coller le texte".
-                    </p>
-                    <p className="mt-2 text-xs text-slate-400">
-                      Brut détecté: {rawDetected} · Ignorées: {filteredOut}
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    {/* B) Key skills — with reason badges when API available */}
-                    <div>
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="text-sm font-semibold text-slate-700">
-                          Compétences clés&nbsp;
-                          <span className="font-normal text-slate-400">
-                            {hasApiRanking ? apiKeySkills.length : fallbackKeySkills.length}
-                            &nbsp;/&nbsp;{validatedCount}
-                          </span>
-                        </span>
-                        <button
-                          onClick={() => { setShowFullList(true); setFullListSearch(""); }}
-                          className="text-xs font-medium text-cyan-600 hover:text-cyan-800 hover:underline"
-                        >
-                          Voir toutes les compétences ({validatedCount})
-                        </button>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5">
-                        {hasApiRanking ? (
-                          apiKeySkills.map((skill) => (
-                            <span
-                              key={skill.label}
-                              className="inline-flex items-center rounded-full bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-800 ring-1 ring-cyan-200"
-                            >
-                              {skill.label}
-                              <ReasonBadge reason={skill.reason} />
-                            </span>
-                          ))
-                        ) : (
-                          fallbackKeySkills.map((skill) => (
-                            <span
-                              key={skill}
-                              className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-800 ring-1 ring-cyan-200"
-                            >
-                              {skill}
-                            </span>
-                          ))
-                        )}
-                        {recoveredSkills.map((s) => (
-                          <span
-                            key={s.label}
-                            title={`${s.kind} · confiance ${Math.round(s.confidence * 100)}% · ${s.evidence}`}
-                            className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-800 ring-1 ring-violet-200"
-                          >
-                            {s.label}
-                            <span className="ml-0.5 rounded bg-violet-100 px-1 py-0.5 text-[9px] font-bold text-violet-600">
-                              IA
-                            </span>
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Badge legend (only shown when API ranking available) */}
-                      {hasApiRanking && (
-                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
-                          <span>Signal :</span>
-                          <span className="inline-flex items-center gap-1">
-                            <span className="rounded px-1 py-0.5 bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold">pondérée</span>
-                            requise dans ce domaine
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <span className="rounded px-1 py-0.5 bg-violet-50 text-violet-700 ring-1 ring-violet-200 font-semibold">rare</span>
-                            peu commune (IDF élevé)
-                          </span>
-                        </div>
-                      )}
-
-                      {recoveredSkills.length > 0 && (
-                        <div className="mt-2 text-[10px] text-slate-400">
-                          IA&nbsp;: affichage uniquement — non injectées dans le matching
-                        </div>
-                      )}
-                    </div>
-
-                    {/* AI recovery trigger (DEV-only) */}
-                    {isDev && profileCluster?.dominant_cluster && (filteredTokens?.length ?? 0) > 0 && (
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={handleRecover}
-                          disabled={recoveringSkills}
-                          className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-100 disabled:opacity-50"
-                        >
-                          {recoveringSkills ? "Récupération IA..." : "Récupérer des compétences (IA)"}
-                        </button>
-                        {recoveredSkills.length > 0 && !recoveringSkills && (
-                          <span className="text-xs text-violet-600">
-                            {recoveredSkills.length} compétence{recoveredSkills.length > 1 ? "s" : ""} récupérée{recoveredSkills.length > 1 ? "s" : ""}
-                          </span>
-                        )}
-                        {recoveryError && (
-                          <span className="text-xs text-rose-500">{recoveryError}</span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* AI quality audit (DEV-only) */}
-                    {isDev && profileCluster?.dominant_cluster && (
-                      <div className="mt-2">
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={handleAuditQuality}
-                            disabled={auditLoading}
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-                          >
-                            {auditLoading ? "Audit IA..." : "Audit qualité IA"}
-                          </button>
-                          {auditError && (
-                            <span className="text-xs text-rose-500">{auditError}</span>
-                          )}
-                        </div>
-                        {auditResult && (
-                          <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-600">
-                            <div>ESCO count: <span className="font-semibold">{auditResult.validated_esco_count}</span></div>
-                            <div>IA count: <span className="font-semibold">{auditResult.ai_recovered_count}</span></div>
-                            <div>IA overlap: <span className="font-semibold">{auditResult.ai_overlap_with_offers}</span></div>
-                            <div>IA unique: <span className="font-semibold">{auditResult.ai_unique_vs_esco}</span></div>
-                            <div>Coherence: <span className="font-semibold">{Math.round(auditResult.cluster_coherence_score * 100)}%</span></div>
-                            <div>Noise ratio: <span className="font-semibold">{Math.round(auditResult.noise_ratio_estimate * 100)}%</span></div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* C) Grouped skills — collapsible */}
-                    {skillGroups.length > 0 && (
-                      <div>
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                          Détail par groupe
-                        </p>
-                        <div className="space-y-1.5">
-                          {skillGroups.map((group) => {
-                            const isOpen = expandedGroups.has(group.group);
-                            return (
-                              <div
-                                key={group.group}
-                                className="rounded-xl border border-slate-100 bg-white/80"
-                              >
-                                <button
-                                  onClick={() => toggleGroup(group.group)}
-                                  className="flex w-full items-center justify-between px-4 py-2.5 text-left"
-                                >
-                                  <span className="text-sm font-semibold text-slate-700">
-                                    {group.group}
-                                    <span className="ml-1.5 font-normal text-slate-400">
-                                      — {group.count}
-                                    </span>
-                                  </span>
-                                  <span className="text-xs text-slate-400">
-                                    {isOpen ? "▲" : "▼"}
-                                  </span>
-                                </button>
-                                {isOpen && (
-                                  <div className="border-t border-slate-100 px-4 pb-3 pt-2">
-                                    <div className="flex flex-wrap gap-1.5">
-                                      {group.items.map((skill) => (
-                                        <span
-                                          key={skill}
-                                          className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"
-                                        >
-                                          {skill}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* Debug toggle + panels */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <button
-                    onClick={() => setDebugOpen((prev) => !prev)}
-                    className="flex w-full items-center justify-between text-left text-sm font-semibold text-slate-700"
-                  >
-                    <span>Debug (pour toi) — pas pour l’utilisateur final</span>
-                    <span className="text-xs text-slate-400">{debugOpen ? "▲" : "▼"}</span>
-                  </button>
-
-                  {debugOpen && (
-                    <div className="mt-4 space-y-3">
-                      <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] text-slate-500">
-                        Compétences (URIs): <span className="font-semibold text-slate-700">{skillsUriCount}</span>
-                        {" · "}
-                        Doublons collapse: <span className="font-semibold text-slate-700">{skillsUriCollapsed}</span>
-                        {" · "}
-                        Non mappées: <span className="font-semibold text-slate-700">{skillsUnmappedCount}</span>
-                      </div>
-
-                      {skillsDupes.length > 0 && (
-                        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] text-slate-500">
-                          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                            Doublons sémantiques collapse (URI)
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            {skillsDupes.map((d, idx) => (
-                              <div key={`${d.label}-${idx}`} className="text-slate-600">
-                                <span className="font-semibold text-slate-700">{d.label}</span>
-                                {d.surfaces?.length ? (
-                                  <span className="text-slate-400">
-                                    {" "}← {d.surfaces.slice(0, 4).join(", ")}
-                                  </span>
-                                ) : null}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Domain signal panels (Compass E) */}
-                      {isDev && pipelineUsed && (
-                        <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-[11px] text-blue-700">
-                          Pipeline: <span className="font-semibold">{pipelineUsed}</span>
-                          {pipelineVariant && (
-                            <span className="ml-2 text-blue-800">({pipelineVariant})</span>
-                          )}
-                          <span className="ml-2 text-slate-600">
-                            compass_e={String(compassEEnabled)}
-                          </span>
-                          <span className="ml-2 text-slate-600">
-                            esco={baselineEscoCount}/{totalEscoCount}
-                          </span>
-                          <span className="ml-2 text-slate-600">
-                            ai_available={String(recoveryMeta?.ai_available ?? false)}
-                          </span>
-                          <span className="ml-2 text-slate-600">
-                            ai_error={recoveryMeta?.ai_error ?? "none"}
-                          </span>
-                          {injectedEscoFromDomain > 0 && (
-                            <span className="ml-3 font-semibold text-blue-800">
-                              ↗ +{injectedEscoFromDomain} URI injectée{injectedEscoFromDomain > 1 ? "s" : ""} via mapping métier
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {domainSkillsActive.length > 0 && (
-                        <div className="rounded-xl border border-blue-100 bg-white p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wide text-blue-600 mb-2">
-                            DOMAIN_ACTIVE ({domainSkillsActive.length})
-                            {domainSkillsPendingCount > 0 && (
-                              <span className="ml-2 text-slate-400 font-normal">{domainSkillsPendingCount} pending</span>
-                            )}
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {domainSkillsActive.map((skill) => (
-                              <span key={skill} className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-800 ring-1 ring-blue-200">
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {resolvedToEsco.length > 0 && (
-                        <div className="rounded-xl border border-emerald-100 bg-white p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600 mb-2">
-                            RESOLVED_TO_ESCO ({resolvedToEsco.length})
-                          </div>
-                          <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
-                            {resolvedToEsco.map((r, idx) => (
-                              <div key={`${r.token_normalized}-${idx}`} className="text-[10px] text-slate-600">
-                                <span className="font-semibold text-slate-700">{r.token_normalized}</span>
-                                <span className="text-slate-400"> → </span>
-                                <span className="text-emerald-700">{r.esco_label ?? r.esco_uri}</span>
-                                {r.provenance && (
-                                  <span className="ml-1 text-[9px] text-slate-400">({r.provenance})</span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {rejectedTokens.length > 0 && (
-                        <div className="rounded-xl border border-rose-100 bg-white p-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wide text-rose-500 mb-2">
-                            REJECTED ({rejectedTokens.length})
-                          </div>
-                          <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
-                            {rejectedTokens.slice(0, 20).map((r, idx) => (
-                              <div key={`${r.token_norm}-${idx}`} className="text-[10px] text-slate-600">
-                                <span className="font-semibold text-slate-700">{r.token}</span>
-                                <span className="ml-1 rounded bg-rose-50 px-1 text-[9px] text-rose-600 ring-1 ring-rose-200">
-                                  {r.reason_code}
-                                </span>
-                              </div>
-                            ))}
-                            {rejectedTokens.length > 20 && (
-                              <div className="text-[10px] text-slate-400">+{rejectedTokens.length - 20} autres</div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="grid gap-3 md:grid-cols-3">
-                      {/* Validated */}
-                      <div className="rounded-xl border border-slate-200 bg-white p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Validées ESCO ({validatedCount})
-                            {aliasHitsCount > 0 && (
-                              <span
-                                title={`${aliasHitsCount} compétence(s) récupérée(s) via la table d'alias FR`}
-                                className="ml-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700 ring-1 ring-amber-300"
-                              >
-                                +{aliasHitsCount} alias
-                              </span>
-                            )}
-                          </span>
-                          <button
-                            onClick={() => copyToClipboard(filteredValidatedLabels)}
-                            className="text-xs font-medium text-cyan-600 hover:text-cyan-800"
-                            disabled={filteredValidatedLabels.length === 0}
-                          >
-                            Copier
-                          </button>
-                        </div>
-                        <input
-                          type="search"
-                          value={validatedSearch}
-                          onChange={(e) => setValidatedSearch(e.target.value)}
-                          placeholder="Rechercher..."
-                          className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
-                        />
-                        <div className="mt-2 max-h-40 overflow-y-auto text-xs text-slate-700">
-                          {filteredValidatedLabels.length === 0 ? (
-                            <p className="text-slate-400">Aucun résultat</p>
-                          ) : (
-                            <div className="flex flex-wrap gap-1">
-                              {filteredValidatedLabels.map((item) => (
-                                <span
-                                  key={item}
-                                  className="rounded-full bg-slate-100 px-2 py-0.5"
-                                >
-                                  {item}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        {aliasHits.length > 0 && (
-                          <div className="mt-2 border-t border-slate-100 pt-2">
-                            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
-                              Via alias ({aliasHits.length})
-                            </p>
-                            <div className="flex flex-wrap gap-1">
-                              {aliasHits.map((h) => (
-                                <span
-                                  key={h.alias}
-                                  title={`"${h.alias}" → ${h.label}`}
-                                  className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-800 ring-1 ring-amber-200"
-                                >
-                                  {h.alias} → {h.label}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Ignored */}
-                      <div className="rounded-xl border border-slate-200 bg-white p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Ignorées ({filteredOut})
-                          </span>
-                          <button
-                            onClick={() => copyToClipboard(filteredIgnoredTokens)}
-                            className="text-xs font-medium text-cyan-600 hover:text-cyan-800"
-                            disabled={filteredIgnoredTokens.length === 0}
-                          >
-                            Copier
-                          </button>
-                        </div>
-                        {filteredTokens ? (
-                          <>
-                            <input
-                              type="search"
-                              value={filteredSearch}
-                              onChange={(e) => setFilteredSearch(e.target.value)}
-                              placeholder="Rechercher..."
-                              className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
-                            />
-                            <div className="mt-2 max-h-40 overflow-y-auto text-xs text-slate-700">
-                              {filteredIgnoredTokens.length === 0 ? (
-                                <p className="text-slate-400">Aucun résultat</p>
-                              ) : (
-                                <div className="flex flex-wrap gap-1">
-                                  {filteredIgnoredTokens.map((item) => (
-                                    <span
-                                      key={item}
-                                      className="rounded-full bg-slate-100 px-2 py-0.5"
-                                    >
-                                      {item}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </>
-                        ) : (
-                          <p className="mt-2 text-xs text-slate-400">
-                            Liste indisponible — compte uniquement.
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Raw */}
-                      <div className="rounded-xl border border-slate-200 bg-white p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Brut détecté ({rawDetected})
-                          </span>
-                          <button
-                            onClick={() => copyToClipboard(filteredRawTokens)}
-                            className="text-xs font-medium text-cyan-600 hover:text-cyan-800"
-                            disabled={filteredRawTokens.length === 0}
-                          >
-                            Copier
-                          </button>
-                        </div>
-                        {rawTokens ? (
-                          <>
-                            <input
-                              type="search"
-                              value={rawSearch}
-                              onChange={(e) => setRawSearch(e.target.value)}
-                              placeholder="Rechercher..."
-                              className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
-                            />
-                            <div className="mt-2 max-h-40 overflow-y-auto text-xs text-slate-700">
-                              {filteredRawTokens.length === 0 ? (
-                                <p className="text-slate-400">Aucun résultat</p>
-                              ) : (
-                                <div className="flex flex-wrap gap-1">
-                                  {filteredRawTokens.map((item) => (
-                                    <span
-                                      key={item}
-                                      className="rounded-full bg-slate-100 px-2 py-0.5"
-                                    >
-                                      {item}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </>
-                        ) : (
-                          <p className="mt-2 text-xs text-slate-400">
-                            Liste indisponible — compte uniquement.
-                          </p>
-                        )}
-                      </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* CTA */}
-                <div className="flex justify-end pt-1">
+                <div className="flex justify-end">
                   <Button onClick={handleRunMatching} disabled={matchingLoading || validatedCount === 0}>
-                    {matchingLoading ? "Chargement..." : "Lancer le matching →"}
+                    {matchingLoading ? "Chargement..." : "Voir mes offres correspondantes"}
                   </Button>
                 </div>
+
+                {devMode && (
+                  <DevPanel
+                    data={{
+                      pipeline_used: pipelineUsed,
+                      pipeline_variant: pipelineVariant,
+                      compass_e_enabled: compassEEnabled,
+                      tight_candidates: parseResult.tight_candidates ?? [],
+                      filtered_tokens: filteredTokens ?? [],
+                      validated_labels: validatedLabels,
+                      skills_uri: profileSkillsUri,
+                      skills_uri_promoted: profileSkillsUriPromoted,
+                      skills_uri_effective: skillsUriEffective,
+                      warnings: visibleWarnings,
+                    }}
+                  />
+                )}
               </div>
             )}
           </GlassCard>

@@ -352,7 +352,11 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
         if domain_uri_list:
             skills_uri_list = _dedupe_preserve_order(skills_uri_list + domain_uri_list)
 
-    skills_uri = frozenset(skills_uri_list)
+    # Sprint 6 Step 1: effective URI set (promoted channel, flag-gated).
+    # When ELEVIA_PROMOTE_ESCO=0 (default) this is a simple frozenset(skills_uri_list)
+    # — bit-for-bit identical to the pre-Sprint-6 path.
+    from compass.profile.profile_effective_skills import build_effective_skills_uri
+    skills_uri = build_effective_skills_uri(skills_uri_list, raw_profile)
 
     # Langues normalisées
     # Support both formats: "languages": ["str"] and "languages": [{code, level}]

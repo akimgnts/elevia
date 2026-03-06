@@ -176,7 +176,11 @@ def load_catalog_offers() -> List[Dict]:
         for offer in offers:
             offer_id = str(offer.get("id") or "")
             if offer_id in skills_map:
-                offer["skills"] = skills_map[offer_id]
+                entry = skills_map[offer_id]
+                if entry.get("skills_uri"):
+                    offer["skills_uri"] = entry["skills_uri"]
+                if entry.get("skills"):
+                    offer["skills"] = entry["skills"]
             _attach_payload_fields(offer)
             offer.pop("payload_json", None)
 
@@ -334,7 +338,11 @@ def load_catalog_offers_filtered(
         for offer in offers:
             offer_id = str(offer.get("id") or "")
             if offer_id in skills_map:
-                offer["skills"] = skills_map[offer_id]
+                entry = skills_map[offer_id]
+                if entry.get("skills_uri"):
+                    offer["skills_uri"] = entry["skills_uri"]
+                if entry.get("skills"):
+                    offer["skills"] = entry["skills"]
             _attach_payload_fields(offer)
             offer.pop("payload_json", None)
 

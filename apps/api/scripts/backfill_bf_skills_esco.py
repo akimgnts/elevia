@@ -33,6 +33,7 @@ Constraints:
 """
 
 import json
+import os
 import sqlite3
 import sys
 import time
@@ -136,7 +137,7 @@ def migrate_bf_is_vie(conn: sqlite3.Connection) -> Dict[str, int]:
 # PHASE 2 — ESCO SKILLS BACKFILL
 # ==============================================================================
 
-def _extract_esco_labels(offer_dict: Dict[str, Any]) -> List[str]:
+def _extract_esco_labels(offer_dict: Dict[str, Any]) -> List[tuple[str, str | None]]:
     """
     Extract ESCO-mapped labels only (no unmapped raw tokens).
 
@@ -167,25 +168,26 @@ def _extract_esco_labels(offer_dict: Dict[str, Any]) -> List[str]:
     # Use skills_display to extract only ESCO-mapped labels
     # skills_display = [{uri, label, source}, ...]
     skills_display = normalized.get("skills_display") or []
-    esco_labels: List[str] = []
+    esco_pairs: List[tuple[str, str | None]] = []
     seen: set = set()
 
     for item in skills_display:
-        label = item.get("label") or item.get("uri") or ""
-        label = str(label).strip().lower()
-        if label and label not in seen:
-            seen.add(label)
-            esco_labels.append(label)
-        if len(esco_labels) >= MAX_SKILLS_PER_OFFER:
+        label = str(item.get("label") or item.get("uri") or "").strip().lower()
+        uri = str(item.get("uri") or "").strip() if item.get("uri") else None
+        key = (label, uri)
+        if label and key not in seen:
+            seen.add(key)
+            esco_pairs.append((label, uri))
+        if len(esco_pairs) >= MAX_SKILLS_PER_OFFER:
             break
 
-    return esco_labels
+    return esco_pairs
 
 
 def _replace_bf_offer_skills(
     cursor: sqlite3.Cursor,
     offer_id: str,
-    skills: List[str],
+    skills: List[tuple[str, str | None]],
     timestamp: str,
 ) -> int:
     """
@@ -201,17 +203,42 @@ def _replace_bf_offer_skills(
     )
 
     inserted = 0
-    for skill in skills:
+    uris_written = 0
+    null_uri = 0
+    for label, uri in skills:
+        if uri:
+            cursor.execute(
+                """
+                UPDATE fact_offer_skills
+                SET skill_uri=?
+                WHERE offer_id=? AND skill=? AND (skill_uri IS NULL OR skill_uri='')
+                """,
+                (uri, offer_id, label),
+            )
         cursor.execute(
             """
             INSERT OR IGNORE INTO fact_offer_skills
-            (offer_id, skill, source, confidence, created_at)
-            VALUES (?, ?, 'esco', NULL, ?)
+            (offer_id, skill, skill_uri, source, confidence, created_at)
+            VALUES (?, ?, ?, 'esco', NULL, ?)
             """,
-            (offer_id, skill, timestamp),
+            (offer_id, label, uri, timestamp),
         )
         if cursor.rowcount == 1:
             inserted += 1
+            if uri:
+                uris_written += 1
+            else:
+                null_uri += 1
+
+    if os.getenv("ELEVIA_DEBUG_OFFER_SKILLS", "").lower() in {"1", "true", "yes"}:
+        _log(
+            "offer_skills_insert",
+            "debug",
+            offer_id=offer_id,
+            rows_written=inserted,
+            uris_written_count=uris_written,
+            null_uri_count=null_uri,
+        )
 
     return inserted
 

@@ -22,6 +22,7 @@ from semantic.profile_cache import cache_profile_text, compute_profile_hash
 from compass.profile_structurer import structure_profile_text_v1
 from compass.canonical_pipeline import run_cv_pipeline, is_trace_enabled
 from compass.domain_uris import build_domain_uris_for_text
+from compass.promotion.apply_promotion import apply_profile_esco_promotion
 from api.utils.profile_summary_builder import build_profile_summary
 from api.utils.profile_summary_store import store_profile_summary
 
@@ -157,6 +158,15 @@ async def parse_baseline(req: ParseBaselineRequest, request: Request) -> ParseBa
         profile["domain_uris"] = domain_uris
         profile["domain_uri_count"] = len(domain_uris)
         profile["domain_tokens"] = domain_tokens
+
+    # Sprint 6 Step 2: ESCO promotion mapping (flag-gated)
+    if profile:
+        apply_profile_esco_promotion(
+            profile,
+            base_skills_uri=profile.get("skills_uri") or [],
+            filtered_tokens=result.get("filtered_tokens") or [],
+            cluster=cluster_key,
+        )
 
     return ParseBaselineResponse(
         **{k: v for k, v in result.items() if k not in ("warnings",)},

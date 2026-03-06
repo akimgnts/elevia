@@ -55,6 +55,20 @@ def test_offer_skills_table_created():
         row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
     }
     assert "fact_offer_skills" in tables
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(fact_offer_skills)").fetchall()}
+    assert "skill_uri" in columns
+    conn.close()
+
+
+def test_offer_skills_table_migration_adds_skill_uri():
+    conn = sqlite3.connect(":memory:")
+    conn.execute(
+        "CREATE TABLE fact_offer_skills (offer_id TEXT NOT NULL, skill TEXT NOT NULL, source TEXT NOT NULL, "
+        "confidence REAL, created_at TEXT NOT NULL, PRIMARY KEY (offer_id, skill))"
+    )
+    ensure_offer_skills_table(conn)
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(fact_offer_skills)").fetchall()}
+    assert "skill_uri" in columns
     conn.close()
 
 
@@ -68,22 +82,23 @@ def test_get_offer_skills_by_offer_ids():
     ensure_offer_skills_table(conn)
     conn.execute(
         """
-        INSERT INTO fact_offer_skills (offer_id, skill, source, confidence, created_at)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO fact_offer_skills (offer_id, skill, skill_uri, source, confidence, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        ("FT-1", "python", "france_travail", None, "2026-01-30T00:00:00Z"),
+        ("FT-1", "python", "http://data.europa.eu/esco/skill/py", "france_travail", None, "2026-01-30T00:00:00Z"),
     )
     conn.execute(
         """
-        INSERT INTO fact_offer_skills (offer_id, skill, source, confidence, created_at)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO fact_offer_skills (offer_id, skill, skill_uri, source, confidence, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        ("FT-1", "sql", "rome", None, "2026-01-30T00:00:00Z"),
+        ("FT-1", "sql", None, "rome", None, "2026-01-30T00:00:00Z"),
     )
     conn.commit()
 
     mapping = get_offer_skills_by_offer_ids(conn, ["FT-1", "FT-2"])
-    assert mapping["FT-1"] == ["python", "sql"]
+    assert mapping["FT-1"]["skills"] == ["python", "sql"]
+    assert mapping["FT-1"]["skills_uri"] == ["http://data.europa.eu/esco/skill/py"]
     assert "FT-2" not in mapping
     conn.close()
 
@@ -205,10 +220,10 @@ def test_matching_route_attaches_offer_skills(monkeypatch, tmp_path):
     ensure_offer_skills_table(conn)
     conn.execute(
         """
-        INSERT INTO fact_offer_skills (offer_id, skill, source, confidence, created_at)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO fact_offer_skills (offer_id, skill, skill_uri, source, confidence, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        ("FT-200", "python", "france_travail", None, "2026-01-30T00:00:00Z"),
+        ("FT-200", "python", None, "france_travail", None, "2026-01-30T00:00:00Z"),
     )
     conn.commit()
     conn.close()

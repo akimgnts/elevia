@@ -65,9 +65,16 @@ def test_recovery_button_is_dev_gated():
     assert "isDev" in context_before, (
         "Recovery button must be rendered inside an isDev-gated block"
     )
-    # Button must be disabled when recoveringSkills
-    assert "disabled={recoveringSkills}" in source, (
+    # Button must be disabled when recoveringSkills (and may include cache gating)
+    assert "disabled={recoveringSkills" in source, (
         "Recovery button must be disabled when recoveringSkills is true"
+    )
+
+
+def test_recovery_button_cache_label_present():
+    source = ANALYZE_PAGE
+    assert "Déjà récupéré" in source, (
+        "Recovery button should display 'Déjà récupéré' when cache is hit"
     )
 
 

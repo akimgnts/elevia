@@ -17,6 +17,7 @@ If no --path, uses the most recent raw file in data/raw/business_france/
 
 import hashlib
 import json
+import os
 import re
 import sqlite3
 import sys
@@ -35,6 +36,7 @@ sys.path.insert(0, str(API_ROOT / "src"))
 
 from api.utils.offer_skills import ensure_offer_skills_table
 from esco.extract import extract_raw_skills_from_offer
+from esco.mapper import map_skill
 from matching.extractors import normalize_skill_label
 
 # Required DB columns (fail if missing)
@@ -325,7 +327,9 @@ def upsert_offers(offers: list[dict], available_columns: set) -> int:
             # Skills enrichment (read-only additive)
             skills_from_payload = _extract_bf_skills(offer)
             if skills_from_payload:
-                _insert_offer_skills(cursor, offer["id"], skills_from_payload, "manual", timestamp)
+                _insert_offer_skills(
+                    cursor, offer["id"], _map_labels_to_uris(skills_from_payload), "manual", timestamp
+                )
 
         conn.commit()
         return count
@@ -345,23 +349,51 @@ def _extract_bf_skills(offer: dict) -> List[str]:
     return sorted({s for s in normalized if s})
 
 
+def _map_labels_to_uris(labels: List[str]) -> List[tuple[str, str | None]]:
+    out: List[tuple[str, str | None]] = []
+    for label in labels:
+        uri = None
+        result = map_skill(label, enable_fuzzy=False)
+        if result and result.get("esco_id"):
+            uri = str(result.get("esco_id"))
+        out.append((label, uri))
+    return out
+
+
 def _insert_offer_skills(
     cursor: sqlite3.Cursor,
     offer_id: str,
-    skills: List[str],
+    skills: List[tuple[str, str | None]],
     source: str,
     timestamp: str,
 ) -> None:
     """Insert skills into fact_offer_skills (idempotent)."""
-    for skill in skills:
+    rows_written = 0
+    uris_written = 0
+    null_uri = 0
+    for label, uri in skills:
         cursor.execute(
             """
             INSERT OR IGNORE INTO fact_offer_skills
-            (offer_id, skill, source, confidence, created_at)
-            VALUES (?, ?, ?, ?, ?)
+            (offer_id, skill, skill_uri, source, confidence, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (offer_id, skill, source, None, timestamp),
+            (offer_id, label, uri, source, None, timestamp),
         )
+        if cursor.rowcount == 1:
+            rows_written += 1
+            if uri:
+                uris_written += 1
+            else:
+                null_uri += 1
+    if os.getenv("ELEVIA_DEBUG_OFFER_SKILLS", "").lower() in {"1", "true", "yes"}:
+        print(json.dumps({
+            "event": "offer_skills_insert",
+            "offer_id": offer_id,
+            "rows_written": rows_written,
+            "uris_written_count": uris_written,
+            "null_uri_count": null_uri,
+        }, ensure_ascii=False))
 
 
 # ==============================================================================

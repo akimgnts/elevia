@@ -6,7 +6,7 @@
  *   Block B — Cluster badge
  *   Block C — Top 3 matched skill pills
  *   Block D — ONE priority insight (deterministic)
- *   Actions  — [Générer Lettre] [Voir détails]
+ *   Actions  — [Voir détails] [Shortlist] [Pass]
  *
  * No debug data. No raw tokens. No large arrays.
  */
@@ -20,9 +20,16 @@ export interface InboxCardV2Props {
   location?: string;
   /** 0–100 */
   score: number;
+  /** strict | neighbor | out */
+  domainBucket?: "strict" | "neighbor" | "out";
   cluster: { label: string; percent?: number };
   /** Already capped to 3 upstream */
   topMatchedSkills: string[];
+  matchedCount: number;
+  missingCount: number;
+  missingPrimary?: string;
+  /** Compact compass signal (optional) */
+  explainV1?: { confidence?: string } | null;
   injectedEscoFromDomain?: number;
   resolvedToEsco?: Array<{
     token_normalized: string;
@@ -33,7 +40,8 @@ export interface InboxCardV2Props {
   missingCriticalSkills?: string[];
   rareSignal?: { label: string } | null;
   onOpenDetails: (offerId: string) => void;
-  onGenerateLetter: (offerId: string) => void;
+  onShortlist: (offerId: string) => void;
+  onPass: (offerId: string) => void;
 }
 
 // ── Score color utilities ─────────────────────────────────────────────────────
@@ -67,6 +75,28 @@ const CLUSTER_LABELS: Record<string, string> = {
 
 function formatClusterLabel(raw: string): string {
   return CLUSTER_LABELS[raw.toUpperCase()] ?? raw;
+}
+
+function domainBadge(bucket?: "strict" | "neighbor" | "out") {
+  if (bucket === "strict") {
+    return {
+      label: "Domaine direct",
+      className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    };
+  }
+  if (bucket === "neighbor") {
+    return {
+      label: "Domaine proche",
+      className: "bg-amber-50 text-amber-700 border-amber-200",
+    };
+  }
+  if (bucket === "out") {
+    return {
+      label: "Hors domaine",
+      className: "bg-slate-100 text-slate-600 border-slate-200",
+    };
+  }
+  return null;
 }
 
 // ── Priority signal ───────────────────────────────────────────────────────────
@@ -152,14 +182,20 @@ export function InboxCardV2({
   title,
   location,
   score,
+  domainBucket,
   cluster,
   topMatchedSkills,
+  matchedCount,
+  missingCount,
+  missingPrimary,
+  explainV1,
   injectedEscoFromDomain,
   resolvedToEsco,
   missingCriticalSkills,
   rareSignal,
   onOpenDetails,
-  onGenerateLetter,
+  onShortlist,
+  onPass,
 }: InboxCardV2Props) {
   const insight = getPrioritySignal({
     injectedEscoFromDomain,
@@ -170,6 +206,17 @@ export function InboxCardV2({
 
   const clusterDisplay = formatClusterLabel(cluster.label);
   const hasPercent = typeof cluster.percent === "number";
+  const domain = domainBadge(domainBucket);
+  const hasMissing = missingCount > 0;
+  const missingText = hasMissing
+    ? `Manque : ${missingPrimary ?? "Compétence"}`
+    : "Aucune compétence critique manquante";
+  const matchingSummary = hasMissing
+    ? `${matchedCount} compétences alignées • ${missingCount} manquantes`
+    : "Correspondance complète";
+  const dominantReason = matchedCount > 0 && topMatchedSkills[0]
+    ? `Alignement fort sur ${topMatchedSkills[0]}`
+    : "Correspondance basée sur signaux généraux";
 
   return (
     <article
@@ -192,16 +239,25 @@ export function InboxCardV2({
         </div>
 
         {/* Score badge */}
-        <div
-          className={`shrink-0 flex flex-col items-center justify-center
-                      min-w-[3.5rem] h-14 rounded-xl ring-1 ${getScoreRingColor(score)}`}
-        >
-          <span className={`text-2xl font-bold leading-none tabular-nums ${getScoreColor(score)}`}>
-            {score}
-          </span>
-          <span className="text-[9px] font-semibold uppercase tracking-wide text-slate-400 mt-0.5">
-            %
-          </span>
+        <div className="shrink-0 flex flex-col items-end gap-1">
+          <div
+            className={`flex flex-col items-center justify-center
+                        min-w-[3.5rem] h-14 rounded-xl ring-1 ${getScoreRingColor(score)}`}
+          >
+            <span className={`text-2xl font-bold leading-none tabular-nums ${getScoreColor(score)}`}>
+              {score}
+            </span>
+            <span className="text-[9px] font-semibold uppercase tracking-wide text-slate-400 mt-0.5">
+              %
+            </span>
+          </div>
+          {domain && (
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${domain.className}`}
+            >
+              {domain.label}
+            </span>
+          )}
         </div>
       </div>
 
@@ -219,6 +275,11 @@ export function InboxCardV2({
         </div>
       )}
 
+      {/* ── Block B2: Matching summary ─────────────────────────────────────── */}
+      <div className="mt-3 text-xs font-medium text-slate-600">
+        {matchingSummary}
+      </div>
+
       {/* ── Block C: Top 3 skill pills ──────────────────────────────────────── */}
       {topMatchedSkills.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -235,6 +296,16 @@ export function InboxCardV2({
           ))}
         </div>
       )}
+
+      {/* ── Block C2: Missing skill ────────────────────────────────────────── */}
+      <div className="mt-2 text-xs text-slate-600">
+        {missingText}
+      </div>
+
+      {/* ── Block C3: Dominant reason ──────────────────────────────────────── */}
+      <div className="mt-2 text-xs font-medium text-slate-700">
+        {dominantReason}
+      </div>
 
       {/* ── Block D: Priority insight ───────────────────────────────────────── */}
       <div
@@ -263,22 +334,32 @@ export function InboxCardV2({
       <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onGenerateLetter(offerId); }}
-          className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-sm font-semibold
-                     bg-slate-900 text-white hover:bg-slate-700 transition
-                     focus:outline-none focus:ring-2 focus:ring-slate-500"
-        >
-          Générer lettre
-        </button>
-        <button
-          type="button"
-          onClick={() => onOpenDetails(offerId)}
+          onClick={(e) => { e.stopPropagation(); onOpenDetails(offerId); }}
           className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-sm font-semibold
                      bg-white border border-slate-200 text-slate-700
                      hover:bg-slate-50 transition
                      focus:outline-none focus:ring-2 focus:ring-slate-300"
         >
-          Détails
+          Voir détails
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onShortlist(offerId); }}
+          className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-sm font-semibold
+                     bg-emerald-600 text-white hover:bg-emerald-700 transition
+                     focus:outline-none focus:ring-2 focus:ring-emerald-400"
+        >
+          Shortlist
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onPass(offerId); }}
+          className="flex-1 sm:flex-none px-3 py-2 rounded-xl text-sm font-semibold
+                     bg-white border border-slate-200 text-slate-700
+                     hover:bg-slate-50 transition
+                     focus:outline-none focus:ring-2 focus:ring-slate-300"
+        >
+          Pass
         </button>
       </div>
     </article>

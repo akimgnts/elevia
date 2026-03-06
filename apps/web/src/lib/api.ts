@@ -674,6 +674,9 @@ export interface ParseFileResponse {
   filename: string;
   content_type: string;
   extracted_text_length: number;
+  extracted_text_hash?: string | null;
+  profile_fingerprint?: string | null;
+  recovery_pipeline_version?: string | null;
   canonical_count: number;
   raw_detected: number;
   validated_skills: number;
@@ -712,6 +715,15 @@ export interface ParseFileResponse {
   injected_esco_from_domain?: number;
   total_esco_count?: number;
   rejected_tokens?: Array<{ token: string; token_norm: string; reason_code: string }>;
+  /** Sprint 5: phrase-level tight extraction (pre-policy, pre-AI) */
+  tight_candidates?: string[];
+  tight_metrics?: {
+    raw_count: number;
+    candidate_count: number;
+    noise_ratio: number;
+    tech_density: number;
+    top_ngrams?: Array<{ phrase: string; score: number }>;
+  };
 }
 
 export interface ParseBaselineResponse {
@@ -1172,6 +1184,9 @@ export interface RecoverSkillsRequest {
   noise_tokens?: string[];
   validated_esco_labels?: string[];
   profile_text_excerpt?: string;
+  profile_fingerprint?: string | null;
+  extracted_text_hash?: string | null;
+  force?: boolean;
 }
 
 export interface RecoveredSkillItem {
@@ -1192,6 +1207,16 @@ export interface RecoverSkillsResponse {
   cluster: string;
   ignored_token_count: number;
   noise_token_count: number;
+  cache_hit?: boolean | null;
+  ai_fired?: boolean | null;
+  profile_fingerprint?: string | null;
+  request_hash?: string | null;
+  raw_count?: number | null;
+  candidate_count?: number | null;
+  dropped_count?: number | null;
+  noise_ratio?: number | null;
+  tech_density?: number | null;
+  dropped_reasons?: Record<string, number> | null;
   error: string | null;
   request_id: string;
 }
@@ -1222,6 +1247,15 @@ export async function fetchRecoverSkills(
       cluster: payload.cluster,
       ignored_token_count: payload.ignored_tokens.length,
       noise_token_count: payload.noise_tokens?.length ?? 0,
+      cache_hit: false,
+      ai_fired: false,
+      profile_fingerprint: payload.profile_fingerprint ?? null,
+      request_hash: null,
+      raw_count: payload.ignored_tokens.length + (payload.noise_tokens?.length ?? 0),
+      candidate_count: 0,
+      dropped_count: 0,
+      noise_ratio: 1,
+      tech_density: 0,
       error: "NETWORK_ERROR",
       request_id: "",
     };
@@ -1237,6 +1271,15 @@ export async function fetchRecoverSkills(
       cluster: payload.cluster,
       ignored_token_count: payload.ignored_tokens.length,
       noise_token_count: payload.noise_tokens?.length ?? 0,
+      cache_hit: false,
+      ai_fired: false,
+      profile_fingerprint: payload.profile_fingerprint ?? null,
+      request_hash: null,
+      raw_count: payload.ignored_tokens.length + (payload.noise_tokens?.length ?? 0),
+      candidate_count: 0,
+      dropped_count: 0,
+      noise_ratio: 1,
+      tech_density: 0,
       error: fallbackCode,
       request_id: "",
     };

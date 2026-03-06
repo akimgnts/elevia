@@ -13,7 +13,9 @@ import os
 from typing import Dict, List
 
 from compass.cluster_library import get_library
+from compass.cluster_signal_policy import filter_offer_domain_tokens
 from compass.domain_uris import build_domain_uris_for_text
+from compass.promotion.apply_promotion import apply_offer_esco_promotion
 from offer.offer_cluster import detect_offer_cluster
 
 # ESCO extraction and mapping (referential-based normalization)
@@ -205,11 +207,13 @@ def _extract_esco_labels(offer: Dict) -> List[str]:
 
 def _apply_domain_uris(offer: Dict, *, library=None) -> None:
     """Attach DOMAIN URIs derived from the active cluster library."""
-    cluster, _, _ = detect_offer_cluster(
-        offer.get("title"),
-        offer.get("description") or offer.get("display_description"),
-        offer.get("skills") or [],
-    )
+    cluster = offer.get("offer_cluster")
+    if not cluster:
+        cluster, _, _ = detect_offer_cluster(
+            offer.get("title"),
+            offer.get("description") or offer.get("display_description"),
+            offer.get("skills") or [],
+        )
     offer["offer_cluster"] = cluster
     if not cluster or cluster == "OTHER":
         offer["domain_uris"] = []
@@ -235,6 +239,23 @@ def _apply_domain_uris(offer: Dict, *, library=None) -> None:
         extra_tokens=extra_tokens,
         library=lib,
     )
+
+    # Deterministic cluster signal filter (symmetry with profile-side recovery)
+    if domain_tokens:
+        filtered = filter_offer_domain_tokens(cluster, domain_tokens)
+        kept_set = set(filtered.get("kept") or [])
+        if kept_set:
+            kept_tokens: List[str] = []
+            kept_uris: List[str] = []
+            for tok, uri in zip(domain_tokens, domain_uris):
+                if tok in kept_set:
+                    kept_tokens.append(tok)
+                    kept_uris.append(uri)
+            domain_tokens = kept_tokens
+            domain_uris = kept_uris
+        else:
+            domain_tokens = []
+            domain_uris = []
 
     # TOP-K rarity filter: prevent denominator explosion.
     # Keep only the K rarest domain tokens (lowest occurrences_offers = most specific).
@@ -310,6 +331,22 @@ def normalize_offers_to_uris(
             offer.setdefault("skills_uri_collapsed_dupes", 0)
             offer.setdefault("skills_unmapped", [])
             offer.setdefault("skills_unmapped_count", 0)
+
+        # Offer cluster (used for promotion + domain URIs)
+        cluster, _, _ = detect_offer_cluster(
+            offer.get("title"),
+            offer.get("description") or offer.get("display_description"),
+            offer.get("skills") or [],
+        )
+        offer["offer_cluster"] = cluster
+
+        # Sprint 6 Step 3: ESCO promotion for offers (flag-gated)
+        apply_offer_esco_promotion(
+            offer,
+            base_skills_uri=offer.get("skills_uri") or [],
+            candidate_labels=offer.get("skills_unmapped") or [],
+            cluster=cluster,
+        )
 
         if include_domain_uris:
             _apply_domain_uris(offer, library=lib)

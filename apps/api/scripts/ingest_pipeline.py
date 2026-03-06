@@ -17,6 +17,7 @@ Requires:
 
 import json
 import os
+import os
 import sqlite3
 import sys
 from datetime import datetime, timezone
@@ -310,30 +311,64 @@ def _extract_bf_skill_candidates(offer: dict) -> list[str]:
     return []
 
 
-def _normalize_offer_skills_for_ingest(offer_stub: dict) -> list[str]:
+def _normalize_offer_skills_for_ingest(offer_stub: dict) -> list[tuple[str, str | None]]:
     """Canonical ESCO normalization (includes domain URIs for consistency)."""
     normalize_offers_to_uris([offer_stub], include_domain_uris=True)
     skills = offer_stub.get("skills") or []
-    return [str(s) for s in skills if s]
+    display = offer_stub.get("skills_display") or []
+    uri_map: dict[str, str] = {}
+    if isinstance(display, list):
+        for item in display:
+            if not isinstance(item, dict):
+                continue
+            label = str(item.get("label") or "").strip().lower()
+            uri = str(item.get("uri") or "").strip()
+            if label and uri and label not in uri_map:
+                uri_map[label] = uri
+    out: list[tuple[str, str | None]] = []
+    for s in skills:
+        if not s:
+            continue
+        label = str(s)
+        uri = uri_map.get(str(s).strip().lower())
+        out.append((label, uri))
+    return out
 
 
 def _insert_offer_skills(
     cursor: sqlite3.Cursor,
     offer_id: str,
-    skills: list[str],
+    skills: list[tuple[str, str | None]],
     source: str,
     timestamp: str,
 ) -> None:
     """Insert skills into fact_offer_skills (idempotent)."""
-    for skill in skills:
+    rows_written = 0
+    uris_written = 0
+    null_uri = 0
+    for label, uri in skills:
         cursor.execute(
             """
             INSERT OR IGNORE INTO fact_offer_skills
-            (offer_id, skill, source, confidence, created_at)
-            VALUES (?, ?, ?, ?, ?)
+            (offer_id, skill, skill_uri, source, confidence, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (offer_id, skill, source, None, timestamp),
+            (offer_id, label, uri, source, None, timestamp),
         )
+        if cursor.rowcount == 1:
+            rows_written += 1
+            if uri:
+                uris_written += 1
+            else:
+                null_uri += 1
+    if os.getenv("ELEVIA_DEBUG_OFFER_SKILLS", "").lower() in {"1", "true", "yes"}:
+        print(json.dumps({
+            "event": "offer_skills_insert",
+            "offer_id": offer_id,
+            "rows_written": rows_written,
+            "uris_written_count": uris_written,
+            "null_uri_count": null_uri,
+        }, ensure_ascii=False))
 
 
 def run_pipeline() -> None:

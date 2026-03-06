@@ -38,6 +38,7 @@ Resilience (Sprint 20 + 20.1):
 import argparse
 import json
 import os
+import os
 import sqlite3
 import subprocess
 import sys
@@ -69,6 +70,7 @@ from api.utils.offer_skills import ensure_offer_skills_table
 from api.utils.rome_link import get_offer_rome_link, get_rome_competences_for_rome_codes
 from esco.extract import extract_raw_skills_from_offer
 from matching.extractors import normalize_skill_label
+from esco.mapper import map_skill
 
 # ==============================================================================
 # CONFIGURATION
@@ -334,11 +336,19 @@ def persist_ft_offers(offers: list, timestamp: str) -> int:
                 ]
                 rome_skills = [s for s in rome_skills if s]
                 if rome_skills:
-                    _insert_offer_skills(cursor, offer_id, rome_skills, "rome", timestamp)
+                    _insert_offer_skills(
+                        cursor, offer_id, _map_labels_to_uris(rome_skills), "rome", timestamp
+                    )
 
             skills_from_payload = _extract_ft_skills(offer)
             if skills_from_payload:
-                _insert_offer_skills(cursor, offer_id, skills_from_payload, "france_travail", timestamp)
+                _insert_offer_skills(
+                    cursor,
+                    offer_id,
+                    _map_labels_to_uris(skills_from_payload),
+                    "france_travail",
+                    timestamp,
+                )
 
         conn.commit()
     except Exception:
@@ -685,7 +695,9 @@ def persist_bf_offers(offers: list, timestamp: str) -> int:
             # ------------------------------------------------------------------
             skills_from_payload = _extract_bf_skills(offer)
             if skills_from_payload:
-                _insert_offer_skills(cursor, offer_id, skills_from_payload, "manual", timestamp)
+                _insert_offer_skills(
+                    cursor, offer_id, _map_labels_to_uris(skills_from_payload), "manual", timestamp
+                )
 
         conn.commit()
     except Exception:
@@ -766,22 +778,51 @@ def _extract_bf_skills(offer: Dict[str, Any]) -> List[str]:
     return sorted({s for s in normalized if s})
 
 
+def _map_labels_to_uris(labels: List[str]) -> List[tuple[str, str | None]]:
+    out: List[tuple[str, str | None]] = []
+    for label in labels:
+        uri = None
+        result = map_skill(label, enable_fuzzy=False)
+        if result and result.get("esco_id"):
+            uri = str(result.get("esco_id"))
+        out.append((label, uri))
+    return out
+
+
 def _insert_offer_skills(
     cursor: sqlite3.Cursor,
     offer_id: str,
-    skills: List[str],
+    skills: List[tuple[str, str | None]],
     source: str,
     timestamp: str,
 ) -> None:
     """Insert skills into fact_offer_skills (idempotent)."""
-    for skill in skills:
+    rows_written = 0
+    uris_written = 0
+    null_uri = 0
+    for label, uri in skills:
         cursor.execute(
             """
             INSERT OR IGNORE INTO fact_offer_skills
-            (offer_id, skill, source, confidence, created_at)
-            VALUES (?, ?, ?, ?, ?)
+            (offer_id, skill, skill_uri, source, confidence, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (offer_id, skill, source, None, timestamp),
+            (offer_id, label, uri, source, None, timestamp),
+        )
+        if cursor.rowcount == 1:
+            rows_written += 1
+            if uri:
+                uris_written += 1
+            else:
+                null_uri += 1
+    if os.getenv("ELEVIA_DEBUG_OFFER_SKILLS", "").lower() in {"1", "true", "yes"}:
+        logger.log(
+            "offer_skills_insert",
+            "debug",
+            offer_id=offer_id,
+            rows_written=rows_written,
+            uris_written_count=uris_written,
+            null_uri_count=null_uri,
         )
 
 

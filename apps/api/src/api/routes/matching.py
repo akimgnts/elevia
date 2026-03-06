@@ -59,11 +59,15 @@ def _attach_offer_skills(offers: List[Dict[str, Any]]) -> None:
         conn.close()
 
     for offer in offers:
-        if offer.get("skills"):
+        if offer.get("skills") or offer.get("skills_uri"):
             continue
         offer_id = offer.get("id") or offer.get("offer_id") or offer.get("offer_uid")
         if offer_id and str(offer_id) in skills_map:
-            offer["skills"] = skills_map[str(offer_id)]
+            entry = skills_map[str(offer_id)]
+            if entry.get("skills_uri"):
+                offer["skills_uri"] = entry["skills_uri"]
+            if entry.get("skills"):
+                offer["skills"] = entry["skills"]
 
 
 # ============================================================================

@@ -251,6 +251,7 @@ class TestEndpointDevOnlyGate:
                 "ignored_tokens": ["python"],
                 "noise_tokens": [],
                 "validated_esco_labels": [],
+                "profile_fingerprint": "pf-test-123",
             },
         )
 
@@ -262,6 +263,9 @@ class TestEndpointDevOnlyGate:
         assert body["ai_error"] == "OPENAI_KEY_MISSING"
         assert body["error_code"] == "OPENAI_KEY_MISSING"
         assert isinstance(body["recovered_skills"], list)
+        assert body.get("raw_count") is not None
+        assert body.get("candidate_count") is not None
+        assert body.get("candidate_count") <= 60
 
     def test_invalid_request_returns_error_code(self, monkeypatch):
         """Invalid payload should return stable INVALID_REQUEST error code."""

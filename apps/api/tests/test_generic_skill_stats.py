@@ -20,7 +20,7 @@ def _create_db(path: Path) -> None:
     conn = sqlite3.connect(str(path))
     conn.execute("CREATE TABLE fact_offers (id TEXT PRIMARY KEY)")
     conn.execute(
-        "CREATE TABLE fact_offer_skills (offer_id TEXT NOT NULL, skill TEXT NOT NULL)"
+        "CREATE TABLE fact_offer_skills (offer_id TEXT NOT NULL, skill TEXT NOT NULL, skill_uri TEXT)"
     )
     conn.executemany("INSERT INTO fact_offers (id) VALUES (?)", [("o1",), ("o2",), ("o3",)])
     conn.executemany(
