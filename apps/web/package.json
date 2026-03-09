@@ -7,7 +7,7 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "dev": "vite --port 3000",
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "ci:build": "npm ci && npm run build",
     "lint": "eslint .",

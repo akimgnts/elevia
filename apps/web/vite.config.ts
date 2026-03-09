@@ -12,6 +12,9 @@ export default defineConfig({
     },
   },
   server: {
+    host: "0.0.0.0",
+    port: 3001,       // fixed — use `make dev-up` or `make web`
+    strictPort: true, // fail hard if 3001 is taken — never silently shift to 5173
     proxy: {
       "/api": {
         target: API_TARGET,
