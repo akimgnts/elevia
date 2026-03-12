@@ -237,12 +237,30 @@ export interface ExplainBreakdown {
   total: number;
 }
 
+export interface NearMatchItem {
+  profile_skill_id: string;
+  profile_label: string;
+  offer_skill_id: string;
+  offer_label: string;
+  relation: string;
+  strength: number;
+}
+
+export interface NearMatchSummary {
+  count: number;
+  max_strength: number;
+  avg_strength: number;
+}
+
 export interface ExplainBlock {
   matched_display: SkillExplainItem[];  // top 6 for card
   missing_display: SkillExplainItem[];  // top 6 for card
   matched_full: SkillExplainItem[];     // all matched, max 30
   missing_full: SkillExplainItem[];     // all missing, max 30
   breakdown: ExplainBreakdown;
+  near_matches?: NearMatchItem[];
+  near_match_count?: number;
+  near_match_summary?: NearMatchSummary | null;
 }
 
 export interface InboxItem {
@@ -285,6 +303,7 @@ export interface InboxItem {
   domain_bucket?: "strict" | "neighbor" | "out";
   signal_score?: number;
   coherence?: "ok" | "suspicious";
+  near_match_count?: number;
   rome?: { rome_code: string; rome_label: string } | null;
   rome_competences?: Array<{
     competence_code: string;
@@ -723,6 +742,135 @@ export interface ParseFileResponse {
     noise_ratio: number;
     tech_density: number;
     top_ngrams?: Array<{ phrase: string; score: number }>;
+  };
+  /** Sprint 0700: canonical mapping layer */
+  canonical_skills?: Array<{
+    raw: string;
+    canonical_id: string;
+    label: string;
+    strategy: string;
+    confidence: number;
+    cluster_name?: string;
+    genericity_score?: number;
+  }>;
+  canonical_skills_count?: number;
+  canonical_hierarchy_added?: string[];
+  /** Skill proximity layer (display-only) */
+  skill_proximity_links?: Array<{
+    source_id: string;
+    target_id: string;
+    relation: string;
+    strength: number;
+  }>;
+  skill_proximity_count?: number;
+  skill_proximity_summary?: {
+    source_covered_by_proximity: number;
+    target_covered_by_proximity: number;
+    match_count: number;
+    max_strength: number;
+    avg_strength: number;
+  };
+  /** Analyze Dev Mode (DEV-only, optional) */
+  analyze_dev?: {
+    raw_extraction?: {
+      raw_extracted_skills?: string[];
+      raw_tokens?: string[];
+      raw_detected?: number;
+      validated_labels?: string[];
+    };
+    tight_candidates?: {
+      items?: string[];
+      count?: number;
+      top_candidates?: Array<{ phrase?: string; score?: number } | string>;
+      top_filtered?: Array<{ phrase?: string; reason?: string }>;
+      split_examples?: Array<{ source?: string; added?: string[]; generated?: string[] }>;
+      cv_structure_rejected_count?: number;
+      cv_structure_rejected_examples?: string[];
+    };
+    tight_split_trace?: Array<{
+      source?: string;
+      generated?: string[];
+      inserted?: string[];
+      survived_after_filter?: string[];
+      present_in_final_tight?: string[];
+      present_in_mapping_inputs?: string[];
+      dropped?: Array<{ chunk?: string; reason?: string }>;
+    }>;
+    tight_selection_trace?: Array<{
+      candidate?: string;
+      origin?: string;
+      base_score?: number;
+      adjustments?: string[];
+      final_score?: number;
+      selected?: boolean;
+    }>;
+    top_candidates_source?: string;
+    mapping_inputs_source?: string;
+    mapping_inputs_preview?: string[];
+    noise_removed?: string[];
+    split_chunks?: string[];
+    split_chunks_count?: number;
+    cleaned_chunks?: string[];
+    cleaned_chunks_count?: number;
+    lemmatized_chunks_count?: number;
+    pos_rejected_count?: number;
+    stage_flags?: {
+      phrase_splitting?: boolean;
+      chunk_normalizer?: boolean;
+      light_lemmatization?: boolean;
+      pos_filter?: boolean;
+    };
+    canonical_mapping?: {
+      mappings?: Array<Record<string, unknown>>;
+      matched_count?: number;
+      unresolved_count?: number;
+      synonym_count?: number;
+      tool_count?: number;
+    };
+    hierarchy_expansion?: {
+      input_ids?: string[];
+      added_parents?: string[];
+      expansion_map?: Record<string, string>;
+      expanded_ids?: string[];
+    };
+    esco_promotion?: {
+      canonical_labels?: string[];
+      skills_uri_promoted?: string[];
+      promoted_uri_count?: number;
+    };
+    proximity?: {
+      links?: Array<Record<string, unknown>>;
+      summary?: Record<string, unknown>;
+      count?: number;
+    };
+    explainability?: { status?: string; reason?: string };
+    counters?: {
+      raw_count?: number;
+      tight_count?: number;
+      split_chunks_count?: number;
+      cleaned_chunks_count?: number;
+      lemmatized_chunks_count?: number;
+      pos_rejected_count?: number;
+      canonical_count?: number;
+      unresolved_count?: number;
+      expanded_count?: number;
+      promoted_uri_count?: number;
+      near_match_count?: number;
+      noise_removed_count?: number;
+      canonical_success_rate?: number;
+      compass_skill_candidates?: number;
+      compass_skill_rejected?: number;
+      tight_single_token_count?: number;
+      tight_generic_rejected_count?: number;
+      tight_numeric_rejected_count?: number;
+      tight_repeated_fragment_count?: number;
+      tight_filtered_out_count?: number;
+      tight_split_generated_count?: number;
+      broken_token_repair_count?: number;
+      generated_composite_rejected_count?: number;
+      cv_structure_rejected_count?: number;
+    };
+    broken_token_repair_examples?: Array<{ from?: string; to?: string }>;
   };
 }
 
@@ -1416,4 +1564,62 @@ export async function generateLetterForOffer(
   }
 
   return res.json() as Promise<ForOfferLetterResponse>;
+}
+
+// ── Market Insights ───────────────────────────────────────────────────────────
+
+export interface MarketInsightsCountry {
+  country: string;
+  count: number;
+}
+
+export interface MarketInsightsSector {
+  sector: string;
+  label: string;
+  count: number;
+}
+
+export interface MarketInsightsSkill {
+  skill: string;
+  count: number;
+  dominant_sector: string;
+}
+
+export interface MarketInsightsMatrixEntry {
+  sector: string;
+  skill: string;
+  count: number;
+  relative: number;
+}
+
+export interface MarketInsightsSectorCountry {
+  sector: string;
+  country: string;
+  count: number;
+}
+
+export interface MarketInsightsSectorCompany {
+  sector: string;
+  company: string;
+  count: number;
+}
+
+export interface MarketInsightsResponse {
+  total_offers: number;
+  total_countries: number;
+  total_sectors: number;
+  total_skills: number;
+  top_countries: MarketInsightsCountry[];
+  sectors_distribution: MarketInsightsSector[];
+  top_skills: MarketInsightsSkill[];
+  sector_skill_matrix: MarketInsightsMatrixEntry[];
+  sector_country_matrix: MarketInsightsSectorCountry[];
+  sector_companies: MarketInsightsSectorCompany[];
+  key_insights: string[];
+}
+
+export async function fetchMarketInsights(): Promise<MarketInsightsResponse> {
+  const res = await fetch(`${API_BASE}/insights/vie-market`);
+  if (!res.ok) throw new Error(`Market insights fetch failed: ${res.status}`);
+  return res.json() as Promise<MarketInsightsResponse>;
 }

@@ -121,6 +121,35 @@ _GENERIC_BLOCKLIST = {
     "gestion", "coordination", "pilotage",
 }
 
+_CV_STRUCTURE_BLOCKLIST = {
+    # CV headings / sections
+    "experience", "experiences", "professional experience", "work experience",
+    "education", "formation", "diplome", "diplomes",
+    "skills", "skill", "competences", "compétences",
+    "languages", "language", "langues",
+    "certification", "certifications",
+    "projects", "project", "projets", "projet",
+    "profile", "profil", "summary", "objective",
+    "contact", "references", "références", "cv", "resume", "curriculum vitae",
+    "hobbies", "interests", "loisirs", "interets", "centres d'interet",
+}
+
+
+def _is_cv_structure_fragment(phrase_lower: str) -> bool:
+    if not phrase_lower:
+        return False
+    if phrase_lower in _CV_STRUCTURE_BLOCKLIST:
+        return True
+    words = phrase_lower.split()
+    if len(words) <= 3:
+        if words[0] in {
+            "experience", "education", "skills", "competences", "compétences",
+            "languages", "langues", "certification", "certifications", "projects",
+            "project", "profil", "profile", "contact", "references",
+        }:
+            return True
+    return False
+
 # ── Data structures ───────────────────────────────────────────────────────────
 
 
@@ -300,6 +329,18 @@ def extract_tight_skills(
     # Cap at MAX_SKILL_CANDIDATES
     final: List[str] = [phrase_orig for phrase_orig, _, _ in scored[:MAX_SKILL_CANDIDATES]]
 
+    # Minimal CV-structure filter (post-selection)
+    cv_rejected: List[str] = []
+    filtered_final: List[str] = []
+    for p in final:
+        if _is_cv_structure_fragment(p.lower()):
+            cv_rejected.append(p)
+            if len(dropped) < MAX_DROPPED_TRACKED:
+                dropped.append(DroppedToken(phrase=p, reason="cv_structure"))
+        else:
+            filtered_final.append(p)
+    final = filtered_final
+
     # Metrics
     raw_count = len(seen_lower)
     candidate_count = len(final)
@@ -323,6 +364,8 @@ def extract_tight_skills(
         "noise_ratio": noise_ratio,
         "tech_density": tech_density,
         "top_ngrams": top_ngrams,
+        "cv_structure_rejected_count": len(cv_rejected),
+        "cv_structure_rejected_examples": cv_rejected[:10],
     }
 
     # raw_tokens: unique 1-gram tokens (preserves first-seen casing, insertion order)
