@@ -1078,7 +1078,11 @@
             "analyse data",
             "analyse des données",
             "data analyst",
-            "analyse analytique"
+            "analyse analytique",
+            "analyse des donn es multi-sources",
+            "analyse des donn es multi sources",
+            "analyse donnees multi sources",
+            "analyse donnees multi-sources"
           ],
           "tools": [
             "python",
@@ -1108,7 +1112,9 @@
             "reporting",
             "tableaux de bord",
             "dashboard",
-            "visualisation décisionnelle"
+            "visualisation décisionnelle",
+            "analysis power bi",
+            "analysis power bi sql"
           ],
           "tools": [
             "power bi",
@@ -1275,7 +1281,9 @@
             "visualisation data",
             "datavisualization",
             "datavis",
-            "création de dashboards"
+            "création de dashboards",
+            "dashboards",
+            "dashboard"
           ],
           "tools": [
             "tableau",
@@ -1575,6 +1583,44 @@
           "genericity_score": 0.35,
           "mapping_confidence": "low",
           "status": "active"
+        },
+        {
+          "canonical_skill_id": "skill:statistical_programming",
+          "label": "Statistical Programming",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "r",
+            "statistical programming",
+            "programmation statistique"
+          ],
+          "tools": [
+            "r",
+            "rstudio"
+          ],
+          "potential_esco_mapping_label": "statistical programming",
+          "genericity_score": 0.35,
+          "mapping_confidence": "low",
+          "status": "active"
+        },
+        {
+          "canonical_skill_id": "skill:data_science_platform",
+          "label": "Data Science Platform",
+          "skill_type": "support",
+          "concept_type": "tool",
+          "aliases": [
+            "data science platform",
+            "plateforme data science",
+            "platforme data science",
+            "dataiku"
+          ],
+          "tools": [
+            "dataiku"
+          ],
+          "potential_esco_mapping_label": "data science platform",
+          "genericity_score": 0.4,
+          "mapping_confidence": "low",
+          "status": "active"
         }
       ]
     },
@@ -1595,7 +1641,8 @@
             "développement back-end",
             "développement backend",
             "développement d'api",
-            "développement serveur"
+            "développement serveur",
+            "architecture backend"
           ],
           "tools": [
             "fastapi",
@@ -2015,6 +2062,50 @@
             "powershell"
           ],
           "potential_esco_mapping_label": "automate workflows",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active"
+        },
+        {
+          "canonical_skill_id": "skill:software_api",
+          "label": "Software API",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "api",
+            "software api",
+            "application programming interface",
+            "apis"
+          ],
+          "tools": [
+            "postman",
+            "openapi"
+          ],
+          "potential_esco_mapping_label": "application programming interface",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active"
+        },
+        {
+          "canonical_skill_id": "skill:web_service_api",
+          "label": "Web Service API",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "rest",
+            "rest api",
+            "web service api",
+            "web services",
+            "api rest",
+            "restful",
+            "api rest json",
+            "apis rest"
+          ],
+          "tools": [
+            "postman",
+            "openapi"
+          ],
+          "potential_esco_mapping_label": "web services",
           "genericity_score": 0.3,
           "mapping_confidence": "low",
           "status": "active"
