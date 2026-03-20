@@ -46,6 +46,7 @@ from .routes.profile_summary import router as profile_summary_router
 from .routes.cluster_library_api import router as cluster_library_router
 from .routes.analyze_recovery import router as analyze_recovery_router
 from .routes.analyze_ai_quality import router as analyze_ai_quality_router
+from .routes.market_insights import router as market_insights_router
 from documents.llm_client import is_llm_available
 
 
@@ -100,6 +101,7 @@ app.include_router(profile_summary_router)  # GET /profile/summary (compact prof
 app.include_router(cluster_library_router)  # GET /cluster/library/* + POST /cluster/library/enrich/cv
 app.include_router(analyze_recovery_router)  # POST /analyze/recover-skills (DEV-only)
 app.include_router(analyze_ai_quality_router)  # POST /analyze/audit-ai-quality (DEV-only)
+app.include_router(market_insights_router)  # GET /insights/vie-market (read-only, cached)
 
 
 @app.exception_handler(RequestValidationError)

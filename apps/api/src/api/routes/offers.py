@@ -153,6 +153,8 @@ from offer.offer_description_structurer import structure_offer_description
 from compass.signal_layer import build_explain_payload_v1, get_signal_cfg
 from compass.contracts import SkillRef
 from compass.text_structurer import structure_offer_text_v1
+from compass.offer.offer_intelligence import build_offer_intelligence
+from compass.explainability.semantic_explanation_builder import build_semantic_explainability
 
 # Path to SQLite database
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
@@ -471,7 +473,13 @@ Return a single offer with deterministic structured description sections.
 Returns 404 if offer not found in the database.
 """,
 )
-async def get_offer_detail(offer_id: str) -> JSONResponse:
+async def get_offer_detail(
+    offer_id: str,
+    profile_role_block: Optional[str] = Query(default=None),
+    profile_domains: Optional[List[str]] = Query(default=None),
+    profile_signals: Optional[List[str]] = Query(default=None),
+    profile_summary: Optional[str] = Query(default=None),
+) -> JSONResponse:
     """
     Fetch one offer by ID and return it with structured description sections.
 
@@ -555,6 +563,23 @@ async def get_offer_detail(offer_id: str) -> JSONResponse:
         offer_cluster=None,
         cluster_idf_table=None,
     )
+    offer_intelligence = build_offer_intelligence(
+        offer=normalized | {"skills_display": [{"label": s} for s in esco_skills], "skills": esco_skills},
+        description_structured=description_structured,
+        description_structured_v1=description_structured_v1,
+    )
+    semantic_explainability = None
+    if profile_role_block or profile_domains or profile_signals or profile_summary:
+        semantic_explainability = build_semantic_explainability(
+            profile_intelligence={
+                "dominant_role_block": profile_role_block or "",
+                "dominant_domains": list(profile_domains or []),
+                "top_profile_signals": list(profile_signals or []),
+                "profile_summary": profile_summary or "",
+            },
+            offer_intelligence=offer_intelligence,
+            explanation=None,
+        )
 
     duration_ms = int((time.time() - start_time) * 1000)
     obs_log(
@@ -580,4 +605,6 @@ async def get_offer_detail(offer_id: str) -> JSONResponse:
         "description_structured": description_structured,
         "description_structured_v1": description_structured_v1.model_dump(),
         "explain_v1_full": explain_v1_full.model_dump(),
+        "offer_intelligence": offer_intelligence,
+        "semantic_explainability": semantic_explainability,
     })

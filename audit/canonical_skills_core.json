@@ -34,8 +34,8 @@
       "Structure kept compatible with Sprint 0700 canonical and ESCO bridge pipeline."
     ],
     "normalization_stats": {
-      "tool_entries": 60,
-      "synonym_entries": 749
+      "tool_entries": 62,
+      "synonym_entries": 771
     }
   },
   "matching_engine_rules": {
@@ -306,6 +306,12 @@
       ],
       "wordpress": [
         "skill:content_marketing"
+      ],
+      "power query": [
+        "skill:business_intelligence"
+      ],
+      "dax": [
+        "skill:business_intelligence"
       ]
     },
     "synonym_to_canonical": {
@@ -1057,7 +1063,29 @@
       "étude de marché": "skill:market_research",
       "évaluation de modèle": "skill:model_evaluation",
       "évaluation de modèles": "skill:model_evaluation",
-      "évaluation des risques": "skill:risk_analysis"
+      "évaluation des risques": "skill:risk_analysis",
+      "ai": "skill:machine_learning",
+      "ai-driven": "skill:machine_learning",
+      "ai-driven scoring": "skill:machine_learning",
+      "ai-driven scoring models": "skill:machine_learning",
+      "fine-tuning": "skill:machine_learning",
+      "fine tuning": "skill:machine_learning",
+      "fine-tuning for llms": "skill:machine_learning",
+      "fine tuning for llms": "skill:machine_learning",
+      "machine learning fine-tuning": "skill:machine_learning",
+      "machine learning fine tuning": "skill:machine_learning",
+      "data-driven insights": "skill:data_analysis",
+      "data-driven processes": "skill:data_analysis",
+      "decision-support tools": "skill:business_intelligence",
+      "decision support tools": "skill:business_intelligence",
+      "sales forecasting": "skill:forecasting",
+      "acquisition funnels": "skill:growth_analytics",
+      "data visualisation": "skill:data_visualization",
+      "exploration de données": "skill:data_analysis",
+      "analyse exploratoire": "skill:data_analysis",
+      "exploratory data analysis": "skill:data_analysis",
+      "data pipeline": "skill:data_engineering",
+      "kpi": "skill:business_intelligence"
     }
   },
   "ontology": [

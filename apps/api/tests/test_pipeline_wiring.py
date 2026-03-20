@@ -136,24 +136,19 @@ def test_score_invariance_compass_e_on_off():
 
 def test_no_parallel_pipeline_routing():
     """
-    profile_baseline.py and profile_file.py must import from
-    compass.canonical_pipeline (run_cv_pipeline / is_trace_enabled).
-
-    This ensures they use the single canonical flag rather than
-    defining their own env-var checks.
+    profile_baseline.py and profile_file.py must delegate to the shared modular
+    pipeline rather than re-implementing parsing orchestration locally.
     """
     baseline_path = Path(__file__).parent.parent / "src/api/routes/profile_baseline.py"
     file_path = Path(__file__).parent.parent / "src/api/routes/profile_file.py"
 
-    for route_file in [baseline_path, file_path]:
-        source = route_file.read_text(encoding="utf-8")
-        assert "from compass.canonical_pipeline import" in source, (
-            f"{route_file.name} must import from compass.canonical_pipeline "
-            f"(run_cv_pipeline / is_trace_enabled)"
-        )
-        assert "run_cv_pipeline" in source, (
-            f"{route_file.name} must use run_cv_pipeline() from canonical_pipeline"
-        )
+    baseline_source = baseline_path.read_text(encoding="utf-8")
+    file_source = file_path.read_text(encoding="utf-8")
+    assert "build_parse_baseline_response_payload" in baseline_source
+    assert "build_parse_file_response_payload" in file_source
+
+    pipeline_source = (Path(__file__).parent.parent / "src/compass/pipeline/profile_parse_pipeline.py").read_text(encoding="utf-8")
+    assert "run_cv_pipeline" in pipeline_source, "shared pipeline must own canonical pipeline orchestration"
 
     # Also assert matching_v1.py is NOT imported by any enrichment module
     enricher_path = Path(__file__).parent.parent / "src/compass/cv_enricher.py"

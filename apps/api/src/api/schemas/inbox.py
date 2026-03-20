@@ -58,6 +58,21 @@ class ExplainBreakdown(BaseModel):
     total: float          # 0–100 (pre-rounding)
 
 
+class NearMatchItem(BaseModel):
+    profile_skill_id: str
+    profile_label: str
+    offer_skill_id: str
+    offer_label: str
+    relation: str
+    strength: float
+
+
+class NearMatchSummary(BaseModel):
+    count: int = 0
+    max_strength: float = 0.0
+    avg_strength: float = 0.0
+
+
 class ExplainBlock(BaseModel):
     """
     Display-only justification per offer.
@@ -68,7 +83,69 @@ class ExplainBlock(BaseModel):
     missing_display: List[SkillExplainItem]  # top 6 for card
     matched_full: List[SkillExplainItem]     # all matched, max 30
     missing_full: List[SkillExplainItem]     # all missing, max 30
+    matched_core: List[SkillExplainItem] = Field(default_factory=list)
+    missing_core: List[SkillExplainItem] = Field(default_factory=list)
+    matched_secondary: List[SkillExplainItem] = Field(default_factory=list)
+    missing_secondary: List[SkillExplainItem] = Field(default_factory=list)
+    matched_context: List[SkillExplainItem] = Field(default_factory=list)
+    missing_context: List[SkillExplainItem] = Field(default_factory=list)
     breakdown: ExplainBreakdown
+    near_matches: List[NearMatchItem] = Field(default_factory=list)
+    near_match_count: int = 0
+    near_match_summary: Optional[NearMatchSummary] = None
+
+
+class OfferExplanation(BaseModel):
+    """Clean front-ready explanation payload. Purely derived from matching output."""
+    score: Optional[int] = Field(default=None, ge=0, le=100)
+    fit_label: str
+    summary_reason: str
+    strengths: List[str] = Field(default_factory=list)
+    gaps: List[str] = Field(default_factory=list)
+    blockers: List[str] = Field(default_factory=list)
+    next_actions: List[str] = Field(default_factory=list)
+
+
+class OfferRoleHypothesis(BaseModel):
+    label: str
+    confidence: float = Field(..., ge=0.0, le=1.0)
+
+
+class OfferIntelligence(BaseModel):
+    dominant_role_block: str
+    secondary_role_blocks: List[str] = Field(default_factory=list)
+    dominant_domains: List[str] = Field(default_factory=list)
+    top_offer_signals: List[str] = Field(default_factory=list)
+    required_skills: List[str] = Field(default_factory=list)
+    optional_skills: List[str] = Field(default_factory=list)
+    role_hypotheses: List[OfferRoleHypothesis] = Field(default_factory=list)
+    offer_summary: str
+    role_block_scores: List[Dict[str, Any]] = Field(default_factory=list)
+    debug: Optional[Dict[str, Any]] = None
+
+
+class SemanticRoleAlignment(BaseModel):
+    profile_role: str
+    offer_role: str
+    alignment: str = Field(..., pattern="^(high|medium|low)$")
+
+
+class SemanticDomainAlignment(BaseModel):
+    shared_domains: List[str] = Field(default_factory=list)
+    profile_only_domains: List[str] = Field(default_factory=list)
+    offer_only_domains: List[str] = Field(default_factory=list)
+
+
+class SemanticSignalAlignment(BaseModel):
+    matched_signals: List[str] = Field(default_factory=list)
+    missing_core_signals: List[str] = Field(default_factory=list)
+
+
+class SemanticExplainability(BaseModel):
+    role_alignment: SemanticRoleAlignment
+    domain_alignment: SemanticDomainAlignment
+    signal_alignment: SemanticSignalAlignment
+    alignment_summary: str
 
 
 # ── Compass signal compact (display-only, always computed) ────────────────────
@@ -129,7 +206,20 @@ class InboxItem(BaseModel):
     rome_competences: List[RomeCompetence] = Field(default_factory=list)
     rome_inferred: Optional[RomeInferred] = None
     explain: Optional[ExplainBlock] = None  # populated when request.explain=True
+    explanation: Optional[OfferExplanation] = None  # always populated when matching ran
+    offer_intelligence: Optional[OfferIntelligence] = None
+    semantic_explainability: Optional[SemanticExplainability] = None
     explain_v1: Optional[CompassExplainCompact] = None  # compass signal (always computed)
+    near_match_count: Optional[int] = None  # compact, display-only (list view)
+    match_strength: Optional[str] = Field(default=None, pattern="^(STRONG|MEDIUM|WEAK)$")
+    core_matched_count: Optional[int] = None
+    core_total_count: Optional[int] = None
+    dominant_reason: Optional[str] = None
+    fit_score: Optional[int] = Field(default=None, ge=0, le=100)
+    why_match: List[str] = Field(default_factory=list)
+    main_blockers: List[str] = Field(default_factory=list)
+    distance: Optional[str] = None
+    next_move: Optional[str] = None
 
 
 class InboxMeta(BaseModel):

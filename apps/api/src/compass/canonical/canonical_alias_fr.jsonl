@@ -1,0 +1,41 @@
+# alias -> canonical_skill_id
+ai -> skill:machine_learning
+ai-driven -> skill:machine_learning
+ai-driven scoring -> skill:machine_learning
+ai-driven scoring models -> skill:machine_learning
+fine-tuning -> skill:machine_learning
+fine tuning -> skill:machine_learning
+fine-tuning for llms -> skill:machine_learning
+fine tuning for llms -> skill:machine_learning
+machine learning fine-tuning -> skill:machine_learning
+machine learning fine tuning -> skill:machine_learning
+
+data-driven insights -> skill:data_analysis
+data-driven processes -> skill:data_analysis
+
+# Decision-support / BI
+decision-support tools -> skill:business_intelligence
+decision support tools -> skill:business_intelligence
+
+# Forecasting / growth
+sales forecasting -> skill:forecasting
+acquisition funnels -> skill:growth_analytics
+
+# Visualization / BI tools
+power query -> skill:business_intelligence
+dax -> skill:business_intelligence
+kpi -> skill:business_intelligence
+
+data visualisation -> skill:data_visualization
+tableau de bord -> skill:data_visualization
+dashboarding -> skill:data_visualization
+
+# Data analysis variants
+exploration de données -> skill:data_analysis
+analyse exploratoire -> skill:data_analysis
+exploratory data analysis -> skill:data_analysis
+data mining -> skill:data_analysis
+
+# Data engineering variants
+data pipeline -> skill:data_engineering
+data pipelines -> skill:data_engineering

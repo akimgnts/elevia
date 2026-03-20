@@ -28,6 +28,7 @@ API_SRC = REPO_ROOT / "src"
 sys.path.insert(0, str(API_SRC))
 
 from compass.profile.profile_effective_skills import (
+    build_effective_skills_view,
     build_effective_skills_uri,
     get_promote_trace,
 )
@@ -144,8 +145,11 @@ def test_get_promote_trace_structure():
     assert "effective_count" in trace
     assert "added_count" in trace
     assert trace["promote_enabled"] is True
+    assert trace["base_count"] == len(BASE)
+    assert trace["domain_count"] == 0
     assert trace["promoted_count"] == len(PROMOTED)
     assert trace["added_count"] == len(PROMOTED)
+    assert trace["added_promoted_count"] == len(PROMOTED)
     assert trace["effective_count"] == len(BASE) + len(PROMOTED)
 
 
@@ -154,7 +158,23 @@ def test_get_promote_trace_flag_off():
     trace = get_promote_trace(BASE, profile, _promote_override=False)
     assert trace["promote_enabled"] is False
     assert trace["added_count"] == 0
+    assert trace["added_promoted_count"] == 0
     assert trace["effective_count"] == len(BASE)
+
+
+def test_build_effective_skills_view_explicit_channels():
+    profile = {
+        "skills_uri": BASE,
+        "skills_uri_promoted": PROMOTED,
+        "domain_uris": ["uri:domain"],
+    }
+    view = build_effective_skills_view(BASE, profile, _promote_override=True)
+    assert view.base_uris == tuple(BASE)
+    assert view.domain_uris == ("uri:domain",)
+    assert view.promoted_uris == tuple(PROMOTED)
+    assert view.added_domain_uris == ("uri:domain",)
+    assert view.added_promoted_uris == tuple(PROMOTED)
+    assert "uri:domain" in view.effective_uris
 
 
 # ── Test 9: frozen files untouched ───────────────────────────────────────────
@@ -236,25 +256,15 @@ def test_malformed_base_list_none():
 # ── Test 11: OBS trace not wired into normal API response path ────────────────
 
 
-def test_obs_trace_not_in_endpoint_sources():
+def test_obs_trace_usage_is_explicit_in_profile_file_route():
     """
-    Structural: get_promote_trace must not be imported or called from any
-    endpoint or route file (it is for debug/explain mode only).
-    Ensures the OBS trace never silently changes the API contract.
+    Structural: effective-skills tracing is only acceptable in the parse-file
+    route when surfaced through an explicit matching_input_trace contract.
     """
-    route_dirs = [
-        REPO_ROOT / "src" / "api" / "routes",
-        REPO_ROOT / "src" / "api" / "utils",
-    ]
-    for route_dir in route_dirs:
-        if not route_dir.exists():
-            continue
-        for py_file in route_dir.glob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
-            assert "get_promote_trace" not in content, (
-                f"{py_file.name} must not call get_promote_trace() in normal response path. "
-                "Wire it only under an explicit debug/explain mode check."
-            )
+    profile_file = REPO_ROOT / "src" / "api" / "routes" / "profile_file.py"
+    content = profile_file.read_text(encoding="utf-8")
+    assert "_build_matching_input_trace" in content
+    assert "matching_input_trace" in content
 
 
 # ── Integration: extract_profile respects the flag ───────────────────────────

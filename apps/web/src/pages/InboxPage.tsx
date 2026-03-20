@@ -19,24 +19,26 @@ import {
   fetchProfileContext,
   fetchContextFit,
   fetchProfileSummary,
-  applyPack,
   postDecision,
   type ApplyPackResponse,
   type ExplainBlock,
+  type OfferExplanation,
+  type OfferIntelligence,
+  type SemanticExplainability,
   type OfferSemanticResponse,
   type OfferContext,
   type ProfileContext,
   type ContextFit,
-  type CompassExplainCompact,
   type ProfileSummaryV1,
   type InboxFilters,
 } from "../lib/api";
-import { buildMatchingProfile, type SkillsSource } from "../lib/profileMatching";
+import { buildMatchingProfile, type SkillsSource, type ProfileMatchingV1 } from "../lib/profileMatching";
 import { useProfileStore } from "../store/profileStore";
 import { SEED_PROFILE } from "../fixtures/seedProfile";
 import { OfferDetailModal, type OfferDetail } from "../components/OfferDetailModal";
 import { cleanOfferTitle, truncateOfferTitle } from "../lib/titleUtils";
 import { InboxCardV2 } from "../components/inbox/InboxCardV2";
+import { PremiumAppShell } from "../components/layout/PremiumAppShell";
 
 // ============================================================================
 // Constants
@@ -84,6 +86,23 @@ type DomainSignals = {
   injected_esco_from_domain: number;
   total_esco_count: number;
 };
+
+type InboxProfileSnapshot = {
+  profile_id: string;
+  matching_profile: ProfileMatchingV1;
+  skills_source: SkillsSource;
+  created_at: string;
+};
+
+const INBOX_PROFILE_SNAPSHOT_KEY = "elevia_inbox_profile_snapshot";
+
+function writeInboxProfileSnapshot(snapshot: InboxProfileSnapshot): void {
+  try {
+    localStorage.setItem(INBOX_PROFILE_SNAPSHOT_KEY, JSON.stringify(snapshot));
+  } catch {
+    // ignore storage errors
+  }
+}
 
 function readDomainSignals(): DomainSignals | null {
   try {
@@ -142,11 +161,17 @@ type NormalizedInboxItem = {
   is_vie?: boolean;
   skills_source?: string;
   explain: ExplainBlock | null;
-  explain_v1?: CompassExplainCompact | null;
+  explanation: OfferExplanation;
+  offer_intelligence?: OfferIntelligence | null;
+  semantic_explainability?: SemanticExplainability | null;
   offer_cluster?: string;
   domain_bucket?: "strict" | "neighbor" | "out";
   signal_score?: number;
   coherence?: "ok" | "suspicious";
+  near_match_count?: number;
+  core_matched_count?: number;
+  core_total_count?: number;
+  dominant_reason?: string;
 };
 
 type LastApiCall = {
@@ -186,8 +211,38 @@ function writeJson<T>(key: string, value: T) {
 
 function normalizeScore(value: unknown): number {
   if (typeof value !== "number" || Number.isNaN(value)) return 0;
-  const scaled = value >= 0 && value <= 1 ? value * 100 : value;
+  const scaled = value > 0 && value < 1 ? value * 100 : value;
   return Math.max(0, Math.min(100, Math.round(scaled)));
+}
+
+function explanationScore(item: Pick<NormalizedInboxItem, "score" | "explanation">): number {
+  return typeof item.explanation.score === "number" ? item.explanation.score : item.score;
+}
+
+function blockersCount(item: Pick<NormalizedInboxItem, "explanation">): number {
+  return Array.isArray(item.explanation.blockers) ? item.explanation.blockers.length : 0;
+}
+
+function strengthsCount(item: Pick<NormalizedInboxItem, "explanation">): number {
+  return Array.isArray(item.explanation.strengths) ? item.explanation.strengths.length : 0;
+}
+
+function recencyValue(publicationDate?: string | null): number {
+  if (!publicationDate) return 0;
+  const parsed = Date.parse(publicationDate);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function sortInboxItemsForDisplay(items: NormalizedInboxItem[]): NormalizedInboxItem[] {
+  return [...items].sort((a, b) => {
+    return (
+      explanationScore(b) - explanationScore(a) ||
+      blockersCount(a) - blockersCount(b) ||
+      strengthsCount(b) - strengthsCount(a) ||
+      recencyValue(b.publication_date) - recencyValue(a.publication_date) ||
+      a.offer_id.localeCompare(b.offer_id)
+    );
+  });
 }
 
 function cleanDescriptionSnippet(value?: string | null, maxLen = 180): string {
@@ -257,6 +312,14 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       : Array.isArray(rec.missing_skills)
         ? (rec.missing_skills as string[])
         : [];
+    const explanation =
+      rec.explanation && typeof rec.explanation === "object"
+        ? (rec.explanation as OfferExplanation)
+        : null;
+    if (!explanation) {
+      console.warn("[inbox] Item missing explanation contract:", rec);
+      continue;
+    }
 
     results.push({
       offer_id: offerId,
@@ -269,11 +332,13 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       city: typeof rec.city === "string" ? rec.city : null,
       publication_date: typeof rec.publication_date === "string" ? rec.publication_date : null,
       score: normalizeScore(
-        typeof rec.score_pct === "number"
-          ? rec.score_pct
-          : typeof rec.score === "number"
-            ? rec.score
-            : rec.match_score
+        typeof explanation.score === "number"
+          ? explanation.score
+          : typeof rec.score_pct === "number"
+            ? rec.score_pct
+            : typeof rec.score === "number"
+              ? rec.score
+              : rec.match_score
       ),
       score_pct: typeof rec.score_pct === "number" ? rec.score_pct : undefined,
       score_raw: typeof rec.score_raw === "number" ? rec.score_raw : undefined,
@@ -323,7 +388,15 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       is_vie: typeof rec.is_vie === "boolean" ? rec.is_vie : undefined,
       skills_source: typeof rec.skills_source === "string" ? rec.skills_source : undefined,
       explain: rec.explain && typeof rec.explain === "object" ? (rec.explain as ExplainBlock) : null,
-      explain_v1: rec.explain_v1 && typeof rec.explain_v1 === "object" ? (rec.explain_v1 as CompassExplainCompact) : null,
+      explanation,
+      offer_intelligence:
+        rec.offer_intelligence && typeof rec.offer_intelligence === "object"
+          ? (rec.offer_intelligence as OfferIntelligence)
+          : null,
+      semantic_explainability:
+        rec.semantic_explainability && typeof rec.semantic_explainability === "object"
+          ? (rec.semantic_explainability as SemanticExplainability)
+          : null,
       offer_cluster: typeof rec.offer_cluster === "string" ? rec.offer_cluster : undefined,
       domain_bucket:
         rec.domain_bucket === "strict" || rec.domain_bucket === "neighbor" || rec.domain_bucket === "out"
@@ -331,6 +404,10 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
           : undefined,
       signal_score: typeof rec.signal_score === "number" ? rec.signal_score : undefined,
       coherence: rec.coherence === "ok" || rec.coherence === "suspicious" ? rec.coherence : undefined,
+      near_match_count: typeof rec.near_match_count === "number" ? rec.near_match_count : undefined,
+      core_matched_count: typeof rec.core_matched_count === "number" ? rec.core_matched_count : undefined,
+      core_total_count: typeof rec.core_total_count === "number" ? rec.core_total_count : undefined,
+      dominant_reason: typeof rec.dominant_reason === "string" ? rec.dominant_reason : undefined,
     });
   }
   return results;
@@ -369,36 +446,17 @@ function OfferCard({
   onOpen,
   onShortlist,
   onPass,
-  domainSignals,
 }: {
   offer: NormalizedInboxItem;
   onOpen: () => void;
   onShortlist: () => void;
   onPass: () => void;
-  isPending: boolean;
-  domainSignals: DomainSignals | null;
 }) {
   const relativeTitle = offer.title_clean || offer.title;
   const titleInfo = cleanOfferTitle(relativeTitle);
   const displayTitle = truncateOfferTitle(titleInfo.display, 90);
 
   const location = formatLocation(offer.city, offer.country) ?? undefined;
-
-  const matchedAll = offer.matched_skills_display?.length
-    ? offer.matched_skills_display
-    : offer.matched_skills ?? [];
-  const missingAll = offer.missing_skills_display?.length
-    ? offer.missing_skills_display
-    : offer.missing_skills ?? [];
-
-  const topMatchedSkills = matchedAll.slice(0, 3);
-  const missingCriticalSkills = missingAll.slice(0, 1);
-  const missingPrimary = missingAll[0];
-
-  const rareSignal =
-    offer.explain_v1?.rare_signal_level === "HIGH"
-      ? { label: offer.explain_v1.sector_signal_note ?? "Signal de rareté élevé" }
-      : null;
 
   return (
     <InboxCardV2
@@ -407,17 +465,11 @@ function OfferCard({
       title={displayTitle}
       location={location}
       score={offer.score}
+      explanation={offer.explanation}
+      offerIntelligence={offer.offer_intelligence}
+      semanticExplainability={offer.semantic_explainability}
       domainBucket={offer.domain_bucket}
       cluster={{ label: offer.offer_cluster ?? "" }}
-      topMatchedSkills={topMatchedSkills}
-      matchedCount={matchedAll.length}
-      missingCount={missingAll.length}
-      missingPrimary={missingPrimary}
-      explainV1={offer.explain_v1 ?? null}
-      missingCriticalSkills={missingCriticalSkills}
-      rareSignal={rareSignal}
-      injectedEscoFromDomain={domainSignals?.injected_esco_from_domain}
-      resolvedToEsco={domainSignals?.resolved_to_esco}
       onOpenDetails={() => onOpen()}
       onShortlist={() => onShortlist()}
       onPass={() => onPass()}
@@ -675,14 +727,11 @@ function ProfileSummarySidebar({
 }) {
   return (
     <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-4">
-      <div className="flex items-center justify-between">
+      <div>
         <div>
-          <div className="text-xs uppercase tracking-wide text-slate-400 font-semibold">Ton profil</div>
-          <div className="text-sm font-semibold text-slate-900">Profil comparé</div>
+          <div className="text-xs uppercase tracking-wide text-slate-400 font-semibold">Repères</div>
+          <div className="text-sm font-semibold text-slate-900">Qualité et signaux utiles</div>
         </div>
-        <Link to="/profile" className="text-xs font-medium text-emerald-600 hover:text-emerald-700">
-          Voir analyse
-        </Link>
       </div>
 
       {loading && (
@@ -695,7 +744,7 @@ function ProfileSummarySidebar({
 
       {!loading && missing && (
         <div className="text-sm text-slate-600">
-          Aucun profil résumé disponible.
+          Aucun repere disponible pour l&apos;instant.
           <div className="mt-3">
             <Link to="/analyze" className="inline-flex px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
               Importer un CV
@@ -926,7 +975,7 @@ export default function InboxPage() {
     return typeof stored === "number" ? stored : DEFAULT_THRESHOLD;
   });
   const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
-  const [sortMode] = useState<"published_desc" | "score_desc" | "confidence_desc">("published_desc");
+  const sortMode = "score_desc" as const;
   const [page, setPage] = useState(1);
   const [pageSize] = useState(24);
   const [decisions, setDecisions] = useState<Record<string, DecisionRecord>>({});
@@ -936,7 +985,7 @@ export default function InboxPage() {
   // Apply Pack modal state
   const [applyPackOffer, setApplyPackOffer] = useState<NormalizedInboxItem | null>(null);
   const [applyPackResult, setApplyPackResult] = useState<ApplyPackResponse | null>(null);
-  const [applyPackLoading, setApplyPackLoading] = useState(false);
+  const [applyPackLoading] = useState(false);
   const [applyPackError, setApplyPackError] = useState<string | null>(null);
   const [applyPackTab, setApplyPackTab] = useState<"cv" | "letter">("cv");
   const [selectedOffer, setSelectedOffer] = useState<OfferDetail | null>(null);
@@ -1154,6 +1203,13 @@ export default function InboxPage() {
       );
 
       setSkillsSource(source);
+      const snapshot: InboxProfileSnapshot = {
+        profile_id: profileId,
+        matching_profile: matchingProfile,
+        skills_source: source,
+        created_at: new Date().toISOString(),
+      };
+      writeInboxProfileSnapshot(snapshot);
 
       // PROD: Block if no skills
       if (source === "none" && !import.meta.env.DEV) {
@@ -1222,7 +1278,7 @@ export default function InboxPage() {
         });
       }
 
-      const normalized = normalizeInboxItems(data.items);
+      const normalized = sortInboxItemsForDisplay(normalizeInboxItems(data.items));
       setItems(normalized);
 
       if (DEBUG_INBOX) {
@@ -1253,7 +1309,7 @@ export default function InboxPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [threshold, sortMode]);
+  }, [threshold]);
 
   // ============================================================================
   // Filtering Logic - TRUTH FROM API ITEMS
@@ -1269,7 +1325,7 @@ export default function InboxPage() {
   );
 
   // Displayed = available after server-side filters
-  const displayedItems = useMemo(() => availableItems, [availableItems]);
+  const displayedItems = useMemo(() => sortInboxItemsForDisplay(availableItems), [availableItems]);
 
   const displayedCount = displayedItems.length;
   const maskedCount = receivedCount - displayedCount;
@@ -1327,42 +1383,6 @@ export default function InboxPage() {
   // ============================================================================
   // Handlers
   // ============================================================================
-
-  const handleApply = async (item: NormalizedInboxItem) => {
-    setApplyPackOffer(item);
-    setApplyPackResult(null);
-    setApplyPackError(null);
-    setApplyPackTab("cv");
-    setApplyPackLoading(true);
-
-    try {
-      const profileSkills: string[] = Array.isArray((userProfile as Record<string, unknown>)?.skills)
-        ? ((userProfile as Record<string, unknown>).skills as string[])
-        : Array.isArray((userProfile as Record<string, unknown>)?.matching_skills)
-        ? ((userProfile as Record<string, unknown>).matching_skills as string[])
-        : [];
-
-      const result = await applyPack({
-        profile: { id: profileId, skills: profileSkills },
-        offer: {
-          id: item.offer_id,
-          title: item.title,
-          company: item.company,
-          country: item.country,
-          city: item.city,
-          skills: [],
-        },
-        matched_core: item.matched_skills_display,
-        missing_core: item.missing_skills_display,
-        enrich_llm: 0,
-      });
-      setApplyPackResult(result);
-    } catch (err) {
-      setApplyPackError(err instanceof Error ? err.message : "Erreur lors de la génération");
-    } finally {
-      setApplyPackLoading(false);
-    }
-  };
 
   const handleDecision = useCallback(
     async (item: NormalizedInboxItem, status: DecisionStatus) => {
@@ -1509,52 +1529,50 @@ export default function InboxPage() {
 
   // Main render
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <header className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <Inbox className="w-7 h-7 text-slate-900" />
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Inbox</h1>
-              {import.meta.env.DEV && skillsSource === "seed" && (
-                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-medium rounded-full border border-emerald-200">
-                  Seed
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              {DEBUG_INBOX && (
-                <button
-                  onClick={() => setDebugOpen(!debugOpen)}
-                  className={`p-2 rounded-lg transition ${debugOpen ? "bg-emerald-100 text-emerald-700" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                  <Bug className="w-4 h-4" />
-                </button>
-              )}
-              <Link to="/applications" className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition">
-                <Sparkles className="w-4 h-4" />
-                Candidatures
-              </Link>
-            </div>
-          </div>
-          <p className="text-sm text-slate-500">
-            Offres correspondant à votre profil.
-          </p>
-          {DEBUG_INBOX && lastApiCall && (
-            <div className="mt-3 text-[11px] text-slate-500">
-              <span className="mr-3">profile_id: {lastApiCall.profile_id.slice(0, 10)}…</span>
-              <span className="mr-3">total_matched: {lastApiCall.total_matched}</span>
-              <span className="mr-3">total_decided: {lastApiCall.total_decided}</span>
-              <span>first: {items[0]?.offer_id?.slice(0, 10) ?? "—"} / {items[0]?.score ?? "—"}</span>
-            </div>
+    <PremiumAppShell
+      eyebrow="Inbox"
+      title="Inbox de matching"
+      description="Les offres sont triees a partir du profil, puis relues avec filtres, contexte et decisions. Le but ici est la lisibilite."
+      actions={
+        <>
+          {DEBUG_INBOX && (
+            <button
+              onClick={() => setDebugOpen(!debugOpen)}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition ${
+                debugOpen
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              <Bug className="h-4 w-4" />
+              Debug
+            </button>
           )}
-        </header>
+          <Link
+            to="/applications"
+            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          >
+            <Sparkles className="h-4 w-4" />
+            Candidatures
+          </Link>
+        </>
+      }
+      contentClassName="max-w-7xl"
+    >
+      <div className="py-2">
+        {DEBUG_INBOX && lastApiCall && (
+          <div className="mb-5 rounded-[1.25rem] border border-white/80 bg-white/70 px-4 py-3 text-[11px] text-slate-500 shadow-sm backdrop-blur">
+            <span className="mr-3">profile_id: {lastApiCall.profile_id.slice(0, 10)}…</span>
+            <span className="mr-3">total_matched: {lastApiCall.total_matched}</span>
+            <span className="mr-3">total_decided: {lastApiCall.total_decided}</span>
+            <span>first: {items[0]?.offer_id?.slice(0, 10) ?? "—"} / {items[0]?.score ?? "—"}</span>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
           {/* Main content */}
           <main>
-            <div className="sticky top-0 z-20 bg-slate-50/90 backdrop-blur border-y border-slate-100 py-3 mb-5">
+            <div className="sticky top-[88px] z-20 mb-5 rounded-[1.5rem] border border-white/80 bg-white/75 px-3 py-3 shadow-sm backdrop-blur-xl">
               <div className="flex flex-wrap items-center gap-3">
                 <div className="relative flex-1 min-w-[220px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -1565,12 +1583,12 @@ export default function InboxPage() {
                     onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit(); }}
                     onBlur={handleSearchSubmit}
                     placeholder="Entreprise…"
-                    className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-white/90 pl-9 pr-3 py-2 text-sm text-slate-700 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none"
                   />
                 </div>
                 <button
                   onClick={handleOpenFilters}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
                   <Filter className="w-4 h-4" />
                   Filtres
@@ -1578,7 +1596,7 @@ export default function InboxPage() {
                 {hasActiveFilters && (
                   <button
                     onClick={handleResetFilters}
-                    className="px-3 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
+                    className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
                     Reset
                   </button>
@@ -1653,8 +1671,6 @@ export default function InboxPage() {
                         onOpen={() => setSelectedOffer(offer)}
                         onShortlist={() => handleDecision(offer, "SHORTLISTED")}
                         onPass={() => handleDecision(offer, "DISMISSED")}
-                        isPending={false}
-                        domainSignals={domainSignals}
                       />
                     ))}
                   </div>
@@ -1756,7 +1772,7 @@ export default function InboxPage() {
           profile={userProfile as Record<string, unknown> ?? undefined}
         />
       )}
-    </div>
+    </PremiumAppShell>
   );
 }
 

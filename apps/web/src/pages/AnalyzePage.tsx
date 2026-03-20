@@ -1,12 +1,11 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, FileUp, ScanSearch, Sparkles, Type } from "lucide-react";
 import {
   ingestCv,
   parseFile,
   parseFileEnriched,
   fetchKeySkills,
-  fetchRecoverSkills,
-  fetchAuditAiQuality,
   type ParseFileResponse,
   type SkillGroupItem,
   type KeySkillItem,
@@ -17,12 +16,12 @@ import {
 import { useProfileStore } from "../store/profileStore";
 import { Button } from "../components/ui/Button";
 import { GlassCard } from "../components/ui/GlassCard";
-import { PageContainer } from "../components/layout/PageContainer";
 import { DevStatusCard } from "../components/DevStatusCard";
 import { ProfileCard } from "../components/analyze/ProfileCard";
 import { MarketPositionCard } from "../components/analyze/MarketPositionCard";
 import { ActionsCard } from "../components/analyze/ActionsCard";
 import { DevPanel } from "../components/analyze/DevPanel";
+import { PremiumAppShell } from "../components/layout/PremiumAppShell";
 import {
   buildUriLabelMap,
   labelFromUri,
@@ -89,46 +88,26 @@ export default function AnalyzePage() {
     typeof window !== "undefined" &&
     (new URLSearchParams(window.location.search).get("dev") === "1" ||
       localStorage.getItem("devMode") === "1");
+  const showDevPanel = isDev && (!!parseResult?.analyze_dev || devMode);
 
   // ── Key skills state (from API) ───────────────────────────────────────────
   const [keySkillsResult, setKeySkillsResult] = useState<KeySkillsResponse | null>(null);
 
   // ── Results UI state ─────────────────────────────────────────────────────────
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [_expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [showFullList, setShowFullList] = useState(false);
   const [fullListSearch, setFullListSearch] = useState("");
-  const [debugOpen, setDebugOpen] = useState(false);
-  const [recoveredSkills, setRecoveredSkills] = useState<RecoveredSkillItem[]>([]);
-  const [recoveringSkills, setRecoveringSkills] = useState(false);
-  const [recoveryError, setRecoveryError] = useState<string | null>(null);
-  const [recoveryMeta, setRecoveryMeta] = useState<{
-    ai_available: boolean;
-    ai_error: string | null;
-    request_id: string | null;
-    raw_count?: number | null;
-    candidate_count?: number | null;
-    dropped_count?: number | null;
-    noise_ratio?: number | null;
-    tech_density?: number | null;
-    cache_hit?: boolean | null;
-    ai_fired?: boolean | null;
-  } | null>(null);
-  const [auditLoading, setAuditLoading] = useState(false);
-  const [auditError, setAuditError] = useState<string | null>(null);
-  const [auditResult, setAuditResult] = useState<AuditAIQualityResponse | null>(null);
-  const [validatedSearch, setValidatedSearch] = useState("");
-  const [filteredSearch, setFilteredSearch] = useState("");
-  const [rawSearch, setRawSearch] = useState("");
+  const [_debugOpen, setDebugOpen] = useState(false);
+  const [_recoveredSkills, setRecoveredSkills] = useState<RecoveredSkillItem[]>([]);
+  const [_recoveringSkills, setRecoveringSkills] = useState(false);
+  const [_recoveryError, setRecoveryError] = useState<string | null>(null);
+  const [_auditLoading, setAuditLoading] = useState(false);
+  const [_auditError, setAuditError] = useState<string | null>(null);
+  const [_auditResult, setAuditResult] = useState<AuditAIQualityResponse | null>(null);
+  const [_validatedSearch, setValidatedSearch] = useState("");
+  const [_filteredSearch, setFilteredSearch] = useState("");
+  const [_rawSearch, setRawSearch] = useState("");
 
-
-  const toggleGroup = (group: string) => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(group)) next.delete(group);
-      else next.add(group);
-      return next;
-    });
-  };
 
   // ── Text tab handlers ────────────────────────────────────────────────────────
 
@@ -242,121 +221,13 @@ export default function AnalyzePage() {
     }
   };
 
-  // ── AI skill recovery (DEV-only) ─────────────────────────────────────────────
-  const handleRecover = async (force = false) => {
-    const cluster = profileCluster?.dominant_cluster;
-    if (!cluster) return;
-    setRecoveringSkills(true);
-    setRecoveryError(null);
-    setRecoveredSkills([]);
-    setRecoveryMeta(null);
-    try {
-      const validatedSet = new Set(validatedLabels.map((l) => l.toLowerCase()));
-      const ignored = filteredTokens ?? [];
-      const ignoredSet = new Set(ignored.map((t) => t.toLowerCase()));
-      const noise = (rawTokens ?? []).filter(
-        (t) => !validatedSet.has(t.toLowerCase()) && !ignoredSet.has(t.toLowerCase()),
-      );
-      const profileFingerprint = parseResult?.profile_fingerprint ?? null;
-      const extractedTextHash = parseResult?.extracted_text_hash ?? null;
-      const resp = await fetchRecoverSkills({
-        cluster,
-        ignored_tokens: ignored,
-        noise_tokens: noise,
-        validated_esco_labels: validatedLabels,
-        profile_fingerprint: profileFingerprint,
-        extracted_text_hash: extractedTextHash,
-        force,
-      });
-      const errorCode = resp.error_code || resp.ai_error || resp.error || null;
-      let resolvedCode = errorCode ?? (resp.ai_available === false ? "AI_DISABLED" : null);
-      if (!resolvedCode && resp.error_message) {
-        resolvedCode = "UNKNOWN_ERROR";
-      }
-      setRecoveryMeta({
-        ai_available: resp.ai_available,
-        ai_error: resolvedCode,
-        request_id: resp.request_id ?? null,
-        raw_count: resp.raw_count ?? null,
-        candidate_count: resp.candidate_count ?? null,
-        dropped_count: resp.dropped_count ?? null,
-        noise_ratio: resp.noise_ratio ?? null,
-        tech_density: resp.tech_density ?? null,
-        cache_hit: resp.cache_hit ?? false,
-        ai_fired: resp.ai_fired ?? null,
-      });
-      if (resp.recovered_skills.length > 0) {
-        setRecoveredSkills(resp.recovered_skills);
-        if (resp.cache_hit) {
-          setRecoveryError("Résultat récupéré (cache).");
-        }
-      } else if (resolvedCode === "OPENAI_KEY_MISSING") {
-        setRecoveryError("Clé IA non configurée (OPENAI_API_KEY manquante côté API).");
-      } else if (resolvedCode === "DEV_TOOLS_DISABLED") {
-        setRecoveryError("DEV tools désactivés (ELEVIA_DEV_TOOLS=1 requis).");
-      } else if (resolvedCode === "MODEL_MISSING") {
-        setRecoveryError("Modèle IA non configuré (OPENAI_MODEL manquant côté API).");
-      } else if (resolvedCode === "LLM_CALL_FAILED") {
-        setRecoveryError("IA indisponible : échec d'appel LLM (voir logs).");
-      } else if (resolvedCode === "CLUSTER_MISSING") {
-        setRecoveryError("Cluster manquant pour la récupération IA.");
-      } else if (resolvedCode === "INVALID_REQUEST") {
-        setRecoveryError("Requête invalide (fingerprint manquant).");
-      } else if (resolvedCode === "NETWORK_ERROR") {
-        setRecoveryError("Erreur réseau : impossible de joindre l'API.");
-      } else if (resolvedCode === "AI_DISABLED") {
-        setRecoveryError("IA désactivée ou non disponible (pas de clé/config).");
-      } else if (resolvedCode === "UNKNOWN_ERROR") {
-        setRecoveryError(`IA indisponible : ${resp.error_message || "UNKNOWN_ERROR"}`);
-      } else if (resp.error_message) {
-        setRecoveryError(`IA indisponible : ${resp.error_message}`);
-      } else {
-        setRecoveryError("Aucune compétence supplémentaire détectée.");
-      }
-    } catch (err) {
-      setRecoveryError("Erreur réseau : impossible de joindre l'API.");
-    } finally {
-      setRecoveringSkills(false);
-    }
-  };
-
-  const handleAuditQuality = async () => {
-    const cluster = profileCluster?.dominant_cluster;
-    if (!cluster) return;
-    setAuditLoading(true);
-    setAuditError(null);
-    setAuditResult(null);
-    try {
-      const resp = await fetchAuditAiQuality({
-        cluster,
-        validated_esco_labels: validatedLabels,
-        recovered_skills: recoveredSkills.map((s) => s.label),
-      });
-      if (resp.error_code) {
-        setAuditError(resp.error_message || resp.error_code);
-      } else {
-        setAuditResult(resp);
-      }
-    } catch (err) {
-      setAuditError(err instanceof Error ? err.message : "Audit IA indisponible");
-    } finally {
-      setAuditLoading(false);
-    }
-  };
-
   // ── Derived display data ──────────────────────────────────────────────────────
 
   const skillGroups: SkillGroupItem[] = parseResult?.skill_groups ?? [];
   const allLabels: string[] = parseResult?.skills_canonical ?? [];
   const validatedItems = parseResult?.validated_items ?? [];
-  const rawDetected = parseResult?.raw_detected ?? 0;
   const validatedCount = parseResult?.validated_skills ?? validatedItems.length;
-  const filteredOut = parseResult?.filtered_out ?? Math.max(0, rawDetected - validatedCount);
   const legacyLlmRequested = isDev && legacyLlmEnabled;
-  const llmEffective = parseResult?.pipeline_variant === "legacy_llm_enrichment";
-  const aiAvailable = parseResult?.ai_available ?? false;
-  const aiError = parseResult?.ai_error ?? null;
-  const aiAdded = parseResult?.ai_added_count ?? 0;
 
   // Key skills: API-ranked (with badges) or fallback (no badges)
   const apiKeySkills: KeySkillItem[] = keySkillsResult?.key_skills ?? [];
@@ -367,9 +238,6 @@ export default function AnalyzePage() {
   const topSkills = topSkillUris.map((uri) => labelMap[uri] ?? labelFromUri(uri));
   const languageGroup = skillGroups.find((g) => g.group.toLowerCase().includes("lang"));
   const languages = languageGroup?.items ?? [];
-
-  const autreGroup = skillGroups.find((g) => g.group === "Autres");
-  const autreRatio = validatedCount > 0 ? (autreGroup?.count ?? 0) / validatedCount : 0;
 
   // Modal list: API all_skills_ranked (with badges) or plain labels
   const apiAllSkills: KeySkillItem[] = keySkillsResult?.all_skills_ranked ?? [];
@@ -387,32 +255,18 @@ export default function AnalyzePage() {
   );
 
   const validatedLabels = validatedItems.map((item) => item.label);
-  const rawTokens = parseResult?.raw_tokens ?? null;
   const filteredTokens = parseResult?.filtered_tokens ?? null;
   const pipelineUsed = parseResult?.pipeline_used ?? null;
   const pipelineVariant = parseResult?.pipeline_variant ?? null;
   const compassEEnabled = parseResult?.compass_e_enabled ?? false;
-  const baselineEscoCount = parseResult?.baseline_esco_count ?? 0;
-  const totalEscoCount = parseResult?.total_esco_count ?? 0;
-  const aliasHitsCount = parseResult?.alias_hits_count ?? 0;
-  const aliasHits = parseResult?.alias_hits ?? [];
-  const skillsUriCount = parseResult?.skills_uri_count ?? validatedItems.length;
-  const skillsUriCollapsed = parseResult?.skills_uri_collapsed_dupes ?? 0;
-  const skillsUnmappedCount = parseResult?.skills_unmapped_count ?? filteredOut;
-  const skillsDupes = parseResult?.skills_dupes ?? [];
   const allWarnings = parseResult?.warnings ?? [];
   const visibleWarnings = legacyLlmRequested
     ? allWarnings
     : allWarnings.filter((w) => !w.includes("DEPRECATED: enrich_llm=1"));
 
   const profileCluster = parseResult?.profile_cluster ?? null;
-  const clusterDistribution = profileCluster?.distribution_percent ?? {};
 
   // Domain signal derived data
-  const domainSkillsActive = parseResult?.domain_skills_active ?? [];
-  const domainSkillsPendingCount = parseResult?.domain_skills_pending_count ?? 0;
-  const resolvedToEsco = parseResult?.resolved_to_esco ?? [];
-  const rejectedTokens = parseResult?.rejected_tokens ?? [];
 
   const profileSkillsUri = (parseResult?.profile?.skills_uri ?? []) as string[];
   const profileSkillsUriPromoted =
@@ -430,86 +284,123 @@ export default function AnalyzePage() {
   if (profileCluster?.dominant_cluster) {
     actionItems.push(`Générer un CV optimisé pour ${profileCluster.dominant_cluster}`);
   }
-  const injectedEscoFromDomain = parseResult?.injected_esco_from_domain ?? 0;
-  const recoveryCached = recoveryMeta?.cache_hit ?? false;
-  const topClusterDist = Object.entries(clusterDistribution)
-    .filter(([, value]) => value > 0)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
-
-  const filterTokens = (items: string[], query: string) => {
-    const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((item) => item.toLowerCase().includes(q));
-  };
-
-  const filteredValidatedLabels = filterTokens(validatedLabels, validatedSearch);
-  const filteredRawTokens = rawTokens ? filterTokens(rawTokens, rawSearch) : [];
-  const filteredIgnoredTokens = filteredTokens ? filterTokens(filteredTokens, filteredSearch) : [];
-
-  const copyToClipboard = async (items: string[]) => {
-    if (!items.length) return;
-    try {
-      await navigator.clipboard.writeText(items.join("\n"));
-    } catch {
-      // ignore clipboard failures
-    }
-  };
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <PageContainer className="pt-12 pb-16">
+    <PremiumAppShell
+      eyebrow="Analyse"
+      title="Transformer le CV en profil exploitable"
+      description="Le but ici n'est pas seulement d'extraire du texte. Elevia construit un profil lisible pour le matching, le profil, l'inbox et le cockpit."
+      actions={
+        <>
+          <Link
+            to="/profile"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Ouvrir le profil
+          </Link>
+          <Link
+            to="/inbox"
+            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          >
+            Voir l&apos;inbox
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </>
+      }
+    >
+      <div className="pt-2 pb-16">
         <DevStatusCard />
 
-        <div className="mb-8">
-          <div className="text-sm font-semibold text-slate-500">Analyse</div>
-          <h1 className="text-3xl font-bold text-slate-900">Déposez votre CV</h1>
-          <p className="mt-2 text-slate-600">
-            Nous analysons vos compétences pour activer le matching VIE.
-          </p>
-        </div>
+        <section className="mb-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <GlassCard className="border-white/80 bg-white/80 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
+              <ScanSearch className="h-4 w-4" />
+              Point d&apos;entree du flux
+            </div>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+              Deposez votre CV ou collez le texte.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
+              Cette page alimente le profil, l&apos;inbox, le cockpit et les documents. L&apos;enjeu UX est donc simple:
+              rendre l&apos;analyse lisible avant toute decision.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                Parsing deterministe
+              </span>
+              <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                Profil normalise
+              </span>
+              <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
+                Base du matching
+              </span>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="border-white/80 bg-white/80 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Ce que vous obtenez
+            </div>
+            <div className="mt-4 space-y-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="font-semibold text-slate-900">1. Un profil compar able</div>
+                <div className="mt-1">Competences, langues et signaux structurants transformes en base de matching.</div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="font-semibold text-slate-900">2. Une lecture immediate</div>
+                <div className="mt-1">Top skills, cluster detecte, et premieres pistes d&apos;action avant passage a l&apos;inbox.</div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="font-semibold text-slate-900">3. Une suite produit coherente</div>
+                <div className="mt-1">La meme base sert ensuite au profil, aux offres et au cockpit.</div>
+              </div>
+            </div>
+          </GlassCard>
+        </section>
 
         {/* Tabs */}
-        <div className="mb-4 flex gap-0 border-b border-slate-200">
+        <div className="mb-4 inline-flex rounded-full border border-slate-200 bg-white/80 p-1 shadow-sm">
           <button
             onClick={() => setTab("file")}
-            className={`px-5 py-2.5 text-sm font-semibold transition-colors ${
+            className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
               tab === "file"
-                ? "border-b-2 border-cyan-500 text-cyan-600"
+                ? "bg-slate-900 text-white shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
+            <FileUp className="h-4 w-4" />
             Fichier PDF / TXT
           </button>
           <button
             onClick={() => setTab("text")}
-            className={`px-5 py-2.5 text-sm font-semibold transition-colors ${
+            className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
               tab === "text"
-                ? "border-b-2 border-cyan-500 text-cyan-600"
+                ? "bg-slate-900 text-white shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
+            <Type className="h-4 w-4" />
             Coller le texte
           </button>
         </div>
 
         {/* ── File tab ─────────────────────────────────────────────────────────── */}
         {tab === "file" && (
-          <GlassCard className="p-6">
+          <GlassCard className="border-white/80 bg-white/80 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
             {/* Drop zone */}
             <div
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`cursor-pointer rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
+              className={`cursor-pointer rounded-[1.5rem] border-2 border-dashed p-10 text-center transition-colors ${
                 dragOver
                   ? "border-cyan-400 bg-cyan-50"
                   : selectedFile
-                  ? "border-emerald-400 bg-emerald-50"
-                  : "border-slate-200 bg-white/60 hover:border-cyan-300 hover:bg-cyan-50/40"
+                    ? "border-emerald-400 bg-emerald-50"
+                    : "border-slate-200 bg-white/60 hover:border-cyan-300 hover:bg-cyan-50/40"
               }`}
             >
               <input
@@ -546,7 +437,7 @@ export default function AnalyzePage() {
               <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Mode
               </span>
-              <div className="inline-flex rounded-full bg-slate-100 p-1 text-xs font-semibold">
+              <div className="inline-flex rounded-full border border-slate-200 bg-slate-100 p-1 text-xs font-semibold">
                 <button
                   onClick={() => setAnalysisMode("baseline")}
                   className={`rounded-full px-3 py-1 transition ${
@@ -602,6 +493,35 @@ export default function AnalyzePage() {
             {/* ── Results ─────────────────────────────────────────────────────── */}
             {parseResult && (
               <div className="mt-6 space-y-6 border-t border-slate-100 pt-6">
+                <div className="rounded-[1.5rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-cyan-50 p-5">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                        <Sparkles className="h-4 w-4" />
+                        Analyse terminee
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-slate-950">
+                        {validatedCount} competence{validatedCount !== 1 ? "s" : ""} validee{validatedCount !== 1 ? "s" : ""}
+                      </div>
+                      <div className="mt-1 text-sm text-slate-600">
+                        {parseResult.extracted_text_length} caracteres extraits · {parseResult.filename}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowFullList(true)}
+                        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                      >
+                        Voir toutes les competences
+                      </button>
+                      <Button onClick={handleRunMatching} disabled={matchingLoading || validatedCount === 0}>
+                        {matchingLoading ? "Chargement..." : "Voir mes offres correspondantes"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid gap-4 lg:grid-cols-3">
                   <ProfileCard
                     cluster={profileCluster?.dominant_cluster ?? null}
@@ -622,13 +542,7 @@ export default function AnalyzePage() {
                   <ActionsCard actions={actionItems} />
                 </div>
 
-                <div className="flex justify-end">
-                  <Button onClick={handleRunMatching} disabled={matchingLoading || validatedCount === 0}>
-                    {matchingLoading ? "Chargement..." : "Voir mes offres correspondantes"}
-                  </Button>
-                </div>
-
-                {devMode && (
+                {showDevPanel && (
                   <DevPanel
                     data={{
                       pipeline_used: pipelineUsed,
@@ -641,6 +555,7 @@ export default function AnalyzePage() {
                       skills_uri_promoted: profileSkillsUriPromoted,
                       skills_uri_effective: skillsUriEffective,
                       warnings: visibleWarnings,
+                      analyze_dev: parseResult.analyze_dev,
                     }}
                   />
                 )}
@@ -651,8 +566,13 @@ export default function AnalyzePage() {
 
         {/* ── Text tab ─────────────────────────────────────────────────────────── */}
         {tab === "text" && (
-          <GlassCard className="p-6">
-            <label className="text-sm font-semibold text-slate-700">Texte du CV</label>
+          <GlassCard className="border-white/80 bg-white/80 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="mb-3">
+              <label className="text-sm font-semibold text-slate-700">Texte du CV</label>
+              <p className="mt-1 text-sm text-slate-500">
+                Utile pour un test rapide, une reprise manuelle ou un debug sans passer par l&apos;upload de fichier.
+              </p>
+            </div>
             <textarea
               value={cvText}
               onChange={(e) => setCvText(e.target.value)}
@@ -667,7 +587,7 @@ export default function AnalyzePage() {
             )}
             <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <span className="text-xs text-slate-500">
-                Aucun fichier n'est importé. Le texte reste sous votre contrôle.
+                Aucun fichier n&apos;est importe. Le texte reste sous votre controle.
               </span>
               <Button onClick={handleTextSubmit} disabled={textLoading}>
                 {textLoading ? "Analyse en cours..." : "Trouver mes offres"}
@@ -675,7 +595,7 @@ export default function AnalyzePage() {
             </div>
           </GlassCard>
         )}
-      </PageContainer>
+      </div>
 
       {/* ── D) Full-list modal ────────────────────────────────────────────────── */}
       {showFullList && (
@@ -756,6 +676,6 @@ export default function AnalyzePage() {
           </div>
         </div>
       )}
-    </div>
+    </PremiumAppShell>
   );
 }

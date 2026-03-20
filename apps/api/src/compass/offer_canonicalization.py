@@ -232,7 +232,7 @@ def _apply_domain_uris(offer: Dict, *, library=None) -> None:
             text_parts.append(val)
     combined_text = " ".join(text_parts)
 
-    domain_tokens, domain_uris = build_domain_uris_for_text(
+    domain_tokens, domain_uris, _domain_debug = build_domain_uris_for_text(
         combined_text,
         esco_labels,
         cluster,

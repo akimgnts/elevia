@@ -71,6 +71,26 @@ def _post_txt(client, text: str, filename: str = "cv.txt"):
     )
 
 
+def test_extracted_profile_snapshot_isolated_copy():
+    from compass.canonical_pipeline import CVPipelineResult, get_extracted_profile_snapshot
+
+    pipeline = CVPipelineResult(
+        baseline_result={
+            "profile": {
+                "skills_uri": ["uri:a"],
+                "skills": ["Python"],
+            }
+        }
+    )
+
+    snapshot = get_extracted_profile_snapshot(pipeline)
+    snapshot["skills_uri"].append("uri:b")
+    snapshot["skills"].append("SQL")
+
+    assert pipeline.baseline_result["profile"]["skills_uri"] == ["uri:a"]
+    assert pipeline.baseline_result["profile"]["skills"] == ["Python"]
+
+
 # ── Test 1 — COMPASS_E ON → pipeline_used contains "compass_e" ────────────────
 
 def test_compass_e_on_sets_pipeline_tag(client):
@@ -229,6 +249,11 @@ def test_classify_noise_rejected():
         ("akim",     "REJECT_NAME_HANDLE"),
         ("gmail",    "REJECT_EMAIL"),
         ("paris",    "REJECT_NAME_HANDLE"),
+        ("france",   "REJECT_STOPWORD"),
+        ("contact",  "REJECT_STOPWORD"),
+        ("school",   "REJECT_STOPWORD"),
+        ("services", "REJECT_STOPWORD"),
+        ("technologies", "REJECT_STOPWORD"),
         ("after",    "REJECT_GENERIC"),
         ("across",   "REJECT_GENERIC"),
         ("@foo",     "REJECT_EMAIL"),

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowUp,
   Check,
@@ -24,6 +25,7 @@ const BODY_CLASS =
   "antialiased text-neutral-900 bg-white dark:bg-black dark:text-white transition-colors duration-500 flex flex-col relative overflow-x-hidden selection:bg-emerald-500/30";
 
 export default function AdCoachTestPage() {
+  const navigate = useNavigate();
   const [activeView, setActiveView] = useState("home");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
@@ -70,6 +72,12 @@ export default function AdCoachTestPage() {
     setMobileOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
     setTimeout(() => initScrollAnimations(), 50);
+  };
+
+  const openPage = (path: string) => {
+    setMobileOpen(false);
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const toggleTheme = () => {
@@ -404,10 +412,10 @@ export default function AdCoachTestPage() {
                   {view === "home"
                     ? "Accueil"
                     : view === "features"
-                      ? "Usage"
+                      ? "Methode"
                       : view === "pricing"
-                        ? "Entrer"
-                        : "Cadre"}
+                        ? "Commencer"
+                        : "Garanties"}
                 </button>
               ))}
             </div>
@@ -452,21 +460,21 @@ export default function AdCoachTestPage() {
               onClick={() => route("features")}
               className="text-lg font-medium text-neutral-600 dark:text-white/70 text-left"
             >
-              Usage
+              Methode
             </button>
             <button
               type="button"
               onClick={() => route("pricing")}
               className="text-lg font-medium text-neutral-600 dark:text-white/70 text-left"
             >
-              Entrer
+              Commencer
             </button>
             <button
               type="button"
               onClick={() => route("roadmap")}
               className="text-lg font-medium text-neutral-600 dark:text-white/70 text-left"
             >
-              Cadre
+              Garanties
             </button>
           </div>
         </div>
@@ -481,21 +489,21 @@ export default function AdCoachTestPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                Outil personnel, pas un raccourci
+                Matching explicable · France Travail · ESCO · ROME
               </div>
               <h1 className="text-5xl sm:text-7xl md:text-8xl tracking-tighter font-semibold text-neutral-900 dark:text-white mb-8 leading-[1.1]">
-                Postuler avec clarté.
-                <br className="hidden sm:block" /> Sans fatigue inutile.
+                Decider ou candidater.
+                <br className="hidden sm:block" /> Preparer sans repartir de zero.
               </h1>
               <p className="text-lg sm:text-xl text-neutral-600 dark:text-white/60 max-w-2xl mx-auto mb-12 font-light leading-relaxed">
-                Elevia est un outil personnel pour décider à quelles offres candidater, préparer tes candidatures plus
-                vite, et garder une vue claire sur ce que tu as fait.
+                Elevia analyse ton CV, te montre les offres les plus coherentes, explique les ecarts a traiter et
+                t'aide a suivre chaque candidature dans un seul espace.
               </p>
               <div className="relative h-[280px] w-full max-w-2xl mx-auto mb-0 group mt-12">
                 <div className="absolute left-1/2 top-0 w-44 h-56 rounded-xl border dark:border-white/10 bg-gradient-to-br dark:from-zinc-900 dark:to-zinc-950 shadow-xl transform -translate-x-[200%] rotate-[-12deg] transition-all duration-700 ease-out group-hover:-translate-x-[220%] group-hover:rotate-[-16deg] flex items-center justify-center overflow-hidden border-zinc-200 from-zinc-50 to-zinc-100">
                   <div className="w-full p-4 space-y-2 opacity-60">
-                    <div className="text-xs font-semibold text-zinc-800 dark:text-white">24 offres analysées</div>
-                    <div className="text-[10px] text-zinc-500 dark:text-white/50">3 pertinentes</div>
+                    <div className="text-xs font-semibold text-zinc-800 dark:text-white">24 offres evaluees</div>
+                    <div className="text-[10px] text-zinc-500 dark:text-white/50">3 a prioriser</div>
                     <div className="h-2 w-1/2 dark:bg-white/20 rounded-full bg-zinc-300"></div>
                     <div className="h-2 w-full dark:bg-white/10 rounded-full bg-zinc-200"></div>
                     <div className="h-2 w-3/4 dark:bg-white/10 rounded-full bg-zinc-200"></div>
@@ -503,10 +511,10 @@ export default function AdCoachTestPage() {
                 </div>
                 <div className="absolute left-1/2 top-0 w-44 h-56 rounded-xl border dark:border-white/10 dark:bg-[#0A0A0A] shadow-xl transform -translate-x-[130%] rotate-[-6deg] transition-all duration-700 ease-out group-hover:-translate-x-[140%] group-hover:rotate-[-8deg] flex flex-col items-center justify-center z-10 border-zinc-200 bg-white">
                   <div className="w-12 h-12 rounded-full border dark:bg-yellow-500/10 dark:border-yellow-500/20 flex items-center justify-center mb-3 border-yellow-100 bg-yellow-50">
-                  <div className="text-xs font-semibold text-yellow-700">Validée ✓</div>
+                  <div className="text-xs font-semibold text-yellow-700">Verifiee ✓</div>
                 </div>
-                <div className="text-xs font-medium text-zinc-800 dark:text-white">Éligibilité V.I.E</div>
-                <div className="text-[10px] text-zinc-500 dark:text-white/50 mt-2">Âge · Nationalité · Diplôme</div>
+                <div className="text-xs font-medium text-zinc-800 dark:text-white">Eligibilite V.I.E</div>
+                <div className="text-[10px] text-zinc-500 dark:text-white/50 mt-2">Age · Nationalite · Diplome</div>
               </div>
               <div className="absolute left-1/2 top-0 w-44 h-56 rounded-xl border dark:border-white/10 dark:bg-white shadow-xl transform -translate-x-[60%] rotate-[0deg] transition-all duration-700 ease-out group-hover:scale-105 z-20 flex flex-col items-start justify-between border-zinc-200 bg-zinc-900 p-4">
                 <div className="text-xs text-white/70">Match 88 %</div>
@@ -516,8 +524,8 @@ export default function AdCoachTestPage() {
               </div>
               <div className="absolute left-1/2 top-0 w-44 h-56 rounded-xl border dark:border-white/10 bg-[#E0F2FE] dark:bg-[#0c2d48] shadow-xl transform translate-x-[10%] rotate-[6deg] transition-all duration-700 ease-out group-hover:translate-x-[20%] group-hover:rotate-[8deg] flex items-center justify-center z-10 overflow-hidden border-zinc-200">
                 <div className="p-4 text-left w-full">
-                  <div className="text-xs text-sky-700 dark:text-sky-200 font-semibold">Pourquoi ça matche</div>
-                  <div className="text-sm font-semibold text-slate-900 dark:text-white mt-2">Compétences alignées</div>
+                  <div className="text-xs text-sky-700 dark:text-sky-200 font-semibold">Pourquoi cette offre ressort</div>
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white mt-2">Competences deja alignees</div>
                   <div className="text-[10px] text-slate-600 dark:text-white/60">
                     Analyse · Reporting · Environnement international
                   </div>
@@ -525,19 +533,19 @@ export default function AdCoachTestPage() {
               </div>
               <div className="absolute left-1/2 top-0 w-44 h-56 rounded-xl border dark:border-white/10 bg-gradient-to-b dark:from-emerald-950/30 dark:to-black shadow-xl transform translate-x-[80%] rotate-[12deg] transition-all duration-700 ease-out group-hover:translate-x-[100%] group-hover:rotate-[16deg] flex items-center justify-center border-zinc-200 from-emerald-50 to-white">
                 <div className="grid grid-cols-1 gap-2 p-4 text-left">
-                  <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Candidature prête</div>
-                  <div className="text-sm font-semibold text-slate-900 dark:text-white">en 45 secondes</div>
-                  <div className="text-[10px] text-slate-600 dark:text-white/60">CV + message générés</div>
+                  <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Preparation guidee</div>
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white">a partir de ton profil</div>
+                  <div className="text-[10px] text-slate-600 dark:text-white/60">CV cible + brouillon de message</div>
                 </div>
               </div>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   type="button"
-                  onClick={() => route("pricing")}
+                  onClick={() => openPage("/analyze")}
                   className="w-full sm:w-auto group relative inline-flex items-center justify-center bg-neutral-900 dark:bg-white text-white dark:text-black h-14 px-8 rounded-full text-sm font-semibold transition-all hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/20"
                 >
-                  <span>Ouvrir Elevia</span>
+                  <span>Analyser mon CV</span>
                   <ChevronRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </button>
               </div>
@@ -573,17 +581,17 @@ export default function AdCoachTestPage() {
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
                     <p className="line-clamp-2">
-                      Match fort sur analyse de données & reporting (preuves dans ton profil).
+                      Competences et indices de profil deja aligns avec l'offre.
                     </p>
                   </div>
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
-                    <p className="line-clamp-2">Niveau d’études aligné (bac+5 requis / bac+5 profil).</p>
+                    <p className="line-clamp-2">Ecart principal identifie avant l'envoi: SQL et Power BI.</p>
                   </div>
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
                     <p className="line-clamp-2">
-                      ROME lié : Analyste data (référentiel FT) — compétences proches.
+                      Rapprochement metier via ROME et competences proches cote offre.
                     </p>
                   </div>
                 </div>
@@ -598,16 +606,28 @@ export default function AdCoachTestPage() {
                 </div>
 
                 <div className="mt-auto pt-5 flex flex-wrap items-center gap-2">
-                  <button className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
-                    Générer CV + LM
+                  <button
+                    type="button"
+                    onClick={() => openPage("/inbox")}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
+                  >
+                    Voir les offres compatibles
                   </button>
 
-                  <button className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
-                    Shortlist
+                  <button
+                    type="button"
+                    onClick={() => openPage("/applications")}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Suivre mes candidatures
                   </button>
 
-                  <button className="ml-auto px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition">
-                    Ouvrir
+                  <button
+                    type="button"
+                    onClick={() => openPage("/dashboard")}
+                    className="ml-auto px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition"
+                  >
+                    Ouvrir le cockpit
                   </button>
                 </div>
               </div>
@@ -638,15 +658,15 @@ export default function AdCoachTestPage() {
                 <div className="mt-4 space-y-3">
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
-                    <p className="line-clamp-2">React + Node présents dans ton profil, match direct.</p>
+                    <p className="line-clamp-2">Le profil sert de base de comparaison pour filtrer ce qui est pertinent.</p>
                   </div>
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
-                    <p className="line-clamp-2">Expérience internationale déjà mentionnée.</p>
+                    <p className="line-clamp-2">Les ecarts restent visibles avant d'adapter le CV et le message.</p>
                   </div>
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
-                    <p className="line-clamp-2">ROME lié : Développeur web (compétences proches).</p>
+                    <p className="line-clamp-2">Tu peux ensuite passer du tri au brouillon sans changer d'outil.</p>
                   </div>
                 </div>
 
@@ -660,16 +680,28 @@ export default function AdCoachTestPage() {
                 </div>
 
                 <div className="mt-auto pt-5 flex flex-wrap items-center gap-2">
-                  <button className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
-                    Générer CV + LM
+                  <button
+                    type="button"
+                    onClick={() => openPage("/analyze")}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
+                  >
+                    Analyser mon CV
                   </button>
 
-                  <button className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
-                    Shortlist
+                  <button
+                    type="button"
+                    onClick={() => openPage("/market-insights")}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Ouvrir Market Insights
                   </button>
 
-                  <button className="ml-auto px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition">
-                    Ouvrir
+                  <button
+                    type="button"
+                    onClick={() => openPage("/inbox")}
+                    className="ml-auto px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition"
+                  >
+                    Ouvrir l'inbox
                   </button>
                 </div>
               </div>
@@ -700,15 +732,15 @@ export default function AdCoachTestPage() {
                 <div className="mt-4 space-y-3">
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
-                    <p className="line-clamp-2">CRM + négociation alignés avec ton profil.</p>
+                    <p className="line-clamp-2">La priorisation ne depend pas d'un score opaque uniquement.</p>
                   </div>
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
-                    <p className="line-clamp-2">Langue requise : anglais OK.</p>
+                    <p className="line-clamp-2">Tu vois aussi les langues, le pays cible et les points de vigilance.</p>
                   </div>
                   <div className="flex items-start gap-2 text-sm text-slate-700">
                     <Check className="mt-0.5 w-4 h-4 text-emerald-500 shrink-0" />
-                    <p className="line-clamp-2">ROME lié : Commercial export (référentiel FT).</p>
+                    <p className="line-clamp-2">Le suivi reste dans le meme espace une fois la candidature envoyee.</p>
                   </div>
                 </div>
 
@@ -722,16 +754,28 @@ export default function AdCoachTestPage() {
                 </div>
 
                 <div className="mt-auto pt-5 flex flex-wrap items-center gap-2">
-                  <button className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
-                    Générer CV + LM
+                  <button
+                    type="button"
+                    onClick={() => openPage("/market-insights")}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
+                  >
+                    Explorer le marche
                   </button>
 
-                  <button className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
-                    Shortlist
+                  <button
+                    type="button"
+                    onClick={() => openPage("/applications")}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Suivre mes candidatures
                   </button>
 
-                  <button className="ml-auto px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition">
-                    Ouvrir
+                  <button
+                    type="button"
+                    onClick={() => openPage("/dashboard")}
+                    className="ml-auto px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100 transition"
+                  >
+                    Ouvrir le cockpit
                   </button>
                 </div>
               </div>
@@ -794,7 +838,7 @@ export default function AdCoachTestPage() {
                     Le problème
                   </h2>
                   <h3 className="text-4xl sm:text-5xl font-semibold text-neutral-900 dark:text-white">
-                    Le problème n&apos;est pas la compétence. C&apos;est la répétition.
+                    Le vrai cout, ce n&apos;est pas candidater. C&apos;est recommencer sans repere.
                   </h3>
                 </div>
                 <button
@@ -808,27 +852,27 @@ export default function AdCoachTestPage() {
 
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="p-8 rounded-3xl bg-white dark:bg-black border border-neutral-100 dark:border-white/10 shadow-xl shadow-neutral-200/50 dark:shadow-black/50 reveal-on-scroll delay-100">
-                  <h4 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">Ce qui fatigue</h4>
+                  <h4 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">Ce qui use</h4>
                   <ul className="space-y-3 text-neutral-600 dark:text-white/60">
                     <li className="flex gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Réécrire des messages similaires
+                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Trier trop d&apos;offres sans savoir lesquelles valent vraiment ton temps
                     </li>
                     <li className="flex gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Adapter le CV à chaque offre
+                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Repartir de zero pour adapter CV et message
                     </li>
                     <li className="flex gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Oublier où tu as postulé
+                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Perdre la trace des candidatures envoyees
                     </li>
                     <li className="flex gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Ne plus savoir quand relancer
+                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Ne plus savoir quand relancer ni quoi reprendre
                     </li>
                   </ul>
                 </div>
                 <div className="p-8 rounded-3xl bg-white dark:bg-black border border-neutral-100 dark:border-white/10 shadow-xl shadow-neutral-200/50 dark:shadow-black/50 reveal-on-scroll delay-200">
-                  <h4 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">Ce que ça crée</h4>
+                  <h4 className="text-xl font-bold text-neutral-900 dark:text-white mb-4">Ce que Elevia remet en ordre</h4>
                   <p className="text-neutral-500 dark:text-white/60 leading-relaxed">
-                    Ce n&apos;est pas difficile. C&apos;est usant. Tu perds du temps, tu doutes, et tu n&apos;as plus une vision claire
-                    de ce qui a été envoyé.
+                    Un profil exploitable, une inbox de matching lisible, un cockpit de suivi et des candidatures
+                    centralisees. Le produit existe deja dans le repo, il faut le raconter plus directement.
                   </p>
                 </div>
               </div>
@@ -844,7 +888,7 @@ export default function AdCoachTestPage() {
                     Pipeline Elevia
                   </h2>
                   <p className="text-subtle text-sm max-w-md mx-auto">
-                    Simple, court, sans automatisme caché.
+                    Du profil a la relance, avec des ecrans reels derriere chaque etape.
                   </p>
                 </div>
                 <div className="relative w-full max-w-2xl flex-1 flex flex-col justify-center my-auto">
@@ -860,7 +904,7 @@ export default function AdCoachTestPage() {
                           Point de départ
                         </h3>
                         <p className="text-xs text-subtle mt-1 hidden md:block">
-                          Tu poses ton contexte.
+                          Tu analyses ton CV et tu poses un profil exploitable.
                         </p>
                       </div>
                       <div className="relative shrink-0 z-10">
@@ -884,7 +928,7 @@ export default function AdCoachTestPage() {
                             Filtre
                           </span>
                           <span className="text-xs font-medium text-obsidian">
-                            Offres pertinentes uniquement
+                            Inbox de matching explicable
                           </span>
                         </div>
                       </div>
@@ -899,7 +943,7 @@ export default function AdCoachTestPage() {
                           Sélection claire
                         </h3>
                         <p className="text-xs text-subtle mt-1 hidden md:block">
-                          Tu gardes le focus.
+                          Tu vois pourquoi une offre ressort et ce qui manque.
                         </p>
                       </div>
                     </div>
@@ -912,7 +956,7 @@ export default function AdCoachTestPage() {
                           Brouillon + CV
                         </h3>
                         <p className="text-xs text-subtle mt-1 hidden md:block">
-                          Ajustements ciblés.
+                          Ajustements cibles plutot qu&apos;une page blanche.
                         </p>
                       </div>
                       <div className="relative shrink-0 z-10">
@@ -943,7 +987,7 @@ export default function AdCoachTestPage() {
                             <div className="w-1.5 h-1.5 rounded-full bg-border"></div>
                           </div>
                           <span className="text-xs font-medium text-obsidian">
-                            Candidature prête, décision claire.
+                            Candidature preparee, decision plus nette.
                           </span>
                         </div>
                       </div>
@@ -958,7 +1002,7 @@ export default function AdCoachTestPage() {
                           Historique
                         </h3>
                         <p className="text-xs text-subtle mt-1 hidden md:block">
-                          Tu sais où tu en es.
+                          Statuts, notes et prochaines actions au meme endroit.
                         </p>
                       </div>
                     </div>
@@ -971,7 +1015,7 @@ export default function AdCoachTestPage() {
                           J+7, J+14
                         </h3>
                         <p className="text-xs text-subtle mt-1 hidden md:block">
-                          Rien n’est oublié.
+                          Les relances reviennent dans le flux de travail.
                         </p>
                       </div>
                       <div className="relative shrink-0 z-10">
@@ -1001,7 +1045,7 @@ export default function AdCoachTestPage() {
                           Historique stable
                         </h3>
                         <p className="text-xs text-subtle mt-1 hidden md:block">
-                          Tout reste clair.
+                          Historique stable pour eviter de repartir de zero.
                         </p>
                       </div>
                     </div>
@@ -1017,15 +1061,15 @@ export default function AdCoachTestPage() {
               <div className="text-center mb-12 reveal-on-scroll">
                 <h2 className="text-3xl sm:text-5xl font-semibold mb-6">Ce que Elevia ne fait pas</h2>
                 <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
-                  Important : pas de promesses, pas d&apos;automatisation de tes décisions.
+                  La confiance vient aussi des limites claires: pas d&apos;automatisation cachee, pas de promesse floue.
                 </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
                 {[
-                  "Ne postule pas à ta place",
-                  "Ne garantit aucun résultat",
-                  "N'automatise pas tes décisions",
+                  "Ne postule pas a ta place",
+                  "Ne garantit aucun resultat",
+                  "N'automatise pas ta decision",
                   "Ne remplace pas ton jugement",
                 ].map((item, index) => (
                   <div
@@ -1040,7 +1084,7 @@ export default function AdCoachTestPage() {
               </div>
 
               <div className="mt-12 text-center text-neutral-400">
-                C&apos;est un outil. Pas un raccourci.
+                C&apos;est un outil de clarte. Pas un raccourci.
               </div>
             </div>
           </section>
@@ -1048,17 +1092,17 @@ export default function AdCoachTestPage() {
           <section className="py-28 px-6 max-w-5xl mx-auto text-center">
             <div className="reveal-on-scroll">
               <h2 className="text-4xl sm:text-6xl font-semibold text-neutral-900 dark:text-white mb-6">
-                Une façon plus calme de candidater.
+                Une facon plus nette de candidater.
               </h2>
               <p className="text-xl text-neutral-600 dark:text-white/60 mb-10">
-                Commencer avec ton profil. Une offre à la fois.
+                Commence par ton profil, puis decide offre par offre.
               </p>
               <button
                 type="button"
-                onClick={() => route("pricing")}
+                onClick={() => openPage("/analyze")}
                 className="group inline-flex items-center justify-center bg-emerald-500 text-white h-16 px-10 rounded-full text-lg font-semibold shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-600 hover:scale-105"
               >
-                Entrer dans l&apos;espace
+                Commencer avec mon CV
                 <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -1069,33 +1113,33 @@ export default function AdCoachTestPage() {
           <section className="pt-32 pb-20 px-6 max-w-6xl mx-auto">
             <div className="text-center max-w-3xl mx-auto mb-16 reveal-on-scroll">
               <h1 className="text-5xl sm:text-6xl font-bold text-neutral-900 dark:text-white mb-6">
-                Le flux Elevia
+                Comment Elevia t&apos;aide a decider
               </h1>
               <p className="text-xl text-neutral-600 dark:text-white/60">
-                Un tunnel clair, sans surprise. Tu gardes la main du début à la fin.
+                Analyser, comparer, preparer, suivre. Sans automatisation opaque.
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
               {[
                 {
-                  title: "1. Définir ton profil",
-                  text: "Tu poses ton cadre : compétences, langues, préférences pays.",
+                  title: "1. Analyser ton profil",
+                  text: "Le CV devient un profil exploitable pour le matching et les ecrans suivants.",
                   icon: <Compass className="w-6 h-6" />,
                 },
                 {
-                  title: "2. Choisir une offre",
-                  text: "Tu vois ce qui correspond, sans bruit parasite.",
+                  title: "2. Prioriser les offres",
+                  text: "L'inbox montre les offres compatibles et les ecarts a traiter avant candidature.",
                   icon: <Target className="w-6 h-6" />,
                 },
                 {
-                  title: "3. Préparer la candidature",
-                  text: "Brouillon de message + ajustements CV ciblés.",
+                  title: "3. Preparer l&apos;envoi",
+                  text: "Tu pars d'un brouillon et d'ajustements cibles, pas d'une page blanche.",
                   icon: <FileText className="w-6 h-6" />,
                 },
                 {
-                  title: "4. Suivre l&apos;envoi",
-                  text: "État, relances, historique clair.",
+                  title: "4. Suivre les candidatures",
+                  text: "Statuts, notes et relances restent dans le meme espace.",
                   icon: <Inbox className="w-6 h-6" />,
                 },
               ].map((step, index) => (
@@ -1120,57 +1164,59 @@ export default function AdCoachTestPage() {
           <section className="pt-32 pb-20 px-6 max-w-6xl mx-auto">
             <div className="text-center max-w-3xl mx-auto mb-16 reveal-on-scroll">
               <h1 className="text-5xl sm:text-6xl font-bold text-neutral-900 dark:text-white mb-6">
-                Entrer dans Elevia
+                Choisir ton point d&apos;entree
               </h1>
               <p className="text-xl text-neutral-600 dark:text-white/60">
-                Choisis ton rythme. Pas de promesse, juste un cadre clair.
+                Deux facons concretes de commencer avec les ecrans deja presents dans le produit.
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
               <div className="rounded-3xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-10 reveal-on-scroll">
-                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Accès personnel</h3>
-                <div className="text-neutral-500 mb-8">Commencer seul, une offre à la fois.</div>
+                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Demarrer avec mon profil</h3>
+                <div className="text-neutral-500 mb-8">Analyse CV, matching, inbox et suivi.</div>
                 <button
                   type="button"
+                  onClick={() => openPage("/analyze")}
                   className="w-full py-4 rounded-xl border border-neutral-300 dark:border-white/20 hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors font-semibold"
                 >
-                  Ouvrir Elevia
+                  Analyser mon CV
                 </button>
                 <div className="mt-8 space-y-4 text-sm text-neutral-600 dark:text-white/60">
                   <div className="flex gap-3">
-                    <Check className="w-5 h-5 text-emerald-500" /> Clarifier les offres pertinentes
+                    <Check className="w-5 h-5 text-emerald-500" /> Comparer les offres sur des criteres lisibles
                   </div>
                   <div className="flex gap-3">
-                    <Check className="w-5 h-5 text-emerald-500" /> Préparer un brouillon propre
+                    <Check className="w-5 h-5 text-emerald-500" /> Comprendre les ecarts avant d&apos;envoyer
                   </div>
                   <div className="flex gap-3">
-                    <Check className="w-5 h-5 text-emerald-500" /> Suivre tes candidatures
+                    <Check className="w-5 h-5 text-emerald-500" /> Suivre tes candidatures dans la duree
                   </div>
                 </div>
               </div>
 
               <div className="rounded-3xl border-2 border-emerald-500 bg-neutral-900 dark:bg-black p-10 relative reveal-on-scroll delay-100">
                 <div className="absolute top-0 right-0 bg-emerald-500 text-white px-4 py-1 rounded-bl-xl rounded-tr-2xl text-xs font-bold uppercase">
-                  Option guidée
+                  Vue marche
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Parcours accompagné</h3>
-                <div className="text-neutral-400 mb-8">Un cadre plus structuré, même sobriété.</div>
+                <h3 className="text-2xl font-bold text-white mb-2">Explorer le marche</h3>
+                <div className="text-neutral-400 mb-8">Roles, competences et signaux utiles pour mieux choisir.</div>
                 <button
                   type="button"
+                  onClick={() => openPage("/market-insights")}
                   className="w-full py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white transition-colors font-semibold shadow-lg shadow-emerald-500/30"
                 >
-                  Entrer dans l&apos;espace
+                  Ouvrir Market Insights
                 </button>
                 <div className="mt-8 space-y-4 text-white text-sm">
                   <div className="flex gap-3">
-                    <Check className="w-5 h-5 text-emerald-500" /> Cadre de candidature en 4 étapes
+                    <Check className="w-5 h-5 text-emerald-500" /> Voir les roles qui ressortent
                   </div>
                   <div className="flex gap-3">
-                    <Check className="w-5 h-5 text-emerald-500" /> Notes de relance centralisées
+                    <Check className="w-5 h-5 text-emerald-500" /> Identifier les competences frequentes
                   </div>
                   <div className="flex gap-3">
-                    <Check className="w-5 h-5 text-emerald-500" /> Historique clair et stable
+                    <Check className="w-5 h-5 text-emerald-500" /> Ajouter du contexte a tes decisions
                   </div>
                 </div>
               </div>
@@ -1185,7 +1231,7 @@ export default function AdCoachTestPage() {
                 Cadre de confiance
               </h1>
               <p className="text-xl text-neutral-600 dark:text-white/60">
-                Ce qui est accepté, ce qui est interdit. Pour rester sur les rails.
+                Ce qui est permis, ce qui est limite, et pourquoi c&apos;est plus fiable comme ca.
               </p>
             </div>
 
@@ -1199,13 +1245,13 @@ export default function AdCoachTestPage() {
                 </div>
                 <ul className="space-y-3 text-neutral-600 dark:text-white/60">
                   <li className="flex gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Pas d&apos;automatisation des décisions
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Pas d&apos;automatisation cachee des decisions
                   </li>
                   <li className="flex gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Pas de promesse de résultat
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Pas de promesse de resultat
                   </li>
                   <li className="flex gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Transparence sur les sources
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Transparence sur les sources et referentiels
                   </li>
                 </ul>
               </div>
@@ -1219,13 +1265,13 @@ export default function AdCoachTestPage() {
                 </div>
                 <ul className="space-y-3 text-neutral-600 dark:text-white/60">
                   <li className="flex gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Réduire la fatigue de candidature
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Reduire la fatigue de candidature
                   </li>
                   <li className="flex gap-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Garder un historique clair
                   </li>
                   <li className="flex gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Rester maître de ses choix
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 mt-2" /> Rester maitre de ses choix
                   </li>
                 </ul>
               </div>
@@ -1241,7 +1287,7 @@ export default function AdCoachTestPage() {
               <span className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">Elevia</span>
             </div>
             <p className="text-sm text-neutral-500 dark:text-white/50 max-w-sm leading-relaxed mb-6">
-              Un outil personnel pour garder un cadre clair quand tu postules. Pas de promesse. Juste de l&apos;ordre.
+              Un point d&apos;entree pour analyser ton profil, comprendre tes matches et suivre tes candidatures sans perdre le fil.
             </p>
           </div>
           <div>
@@ -1262,7 +1308,7 @@ export default function AdCoachTestPage() {
                   onClick={() => route("features")}
                   className="hover:text-emerald-500 transition-colors"
                 >
-                  Usage
+                  Methode
                 </button>
               </li>
               <li>
@@ -1271,7 +1317,7 @@ export default function AdCoachTestPage() {
                   onClick={() => route("pricing")}
                   className="hover:text-emerald-500 transition-colors"
                 >
-                  Entrer
+                  Commencer
                 </button>
               </li>
               <li>
@@ -1280,16 +1326,29 @@ export default function AdCoachTestPage() {
                   onClick={() => route("roadmap")}
                   className="hover:text-emerald-500 transition-colors"
                 >
-                  Cadre
+                  Garanties
                 </button>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="text-sm font-bold text-neutral-900 dark:text-white mb-6 uppercase tracking-wider">Contact</h4>
+            <h4 className="text-sm font-bold text-neutral-900 dark:text-white mb-6 uppercase tracking-wider">Acces rapides</h4>
             <ul className="space-y-3 text-sm text-neutral-500 dark:text-white/60">
-              <li>Entrer dans l&apos;espace</li>
-              <li>Commencer avec ton profil</li>
+              <li>
+                <button type="button" onClick={() => openPage("/analyze")} className="hover:text-emerald-500 transition-colors">
+                  Analyser mon CV
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => openPage("/inbox")} className="hover:text-emerald-500 transition-colors">
+                  Ouvrir l&apos;inbox
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={() => openPage("/applications")} className="hover:text-emerald-500 transition-colors">
+                  Suivre mes candidatures
+                </button>
+              </li>
             </ul>
           </div>
         </div>

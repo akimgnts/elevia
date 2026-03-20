@@ -1,0 +1,207 @@
+[
+  {
+    "name": "cv_01_lina_morel.txt",
+    "candidate_name": "Lina Morel",
+    "domain": "Business / Sales",
+    "layout_type": "structured",
+    "difficulty": "easy",
+    "title": "Commerciale sédentaire B2B",
+    "expected_core_skills": [
+      "CRM Management",
+      "Salesforce",
+      "Excel",
+      "Lead Qualification",
+      "Prospecting",
+      "Sales Follow-up",
+      "Quote Preparation"
+    ],
+    "expected_missing_skills": [
+      "complex negotiation",
+      "autonomous pipeline ownership",
+      "advanced reporting"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_01_lina_morel.txt"
+  },
+  {
+    "name": "cv_02_hugo_renaud.txt",
+    "candidate_name": "Hugo Renaud",
+    "domain": "Business / Sales",
+    "layout_type": "mixed",
+    "difficulty": "medium",
+    "title": "Business Developer Junior Export",
+    "expected_core_skills": [
+      "Business Development",
+      "Market Analysis",
+      "CRM Management",
+      "HubSpot",
+      "Commercial Reporting",
+      "Sales Argumentation",
+      "English"
+    ],
+    "expected_missing_skills": [
+      "full-cycle sales ownership",
+      "contract negotiation",
+      "advanced forecasting"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_02_hugo_renaud.txt"
+  },
+  {
+    "name": "cv_03_sarah_el_mansouri.txt",
+    "candidate_name": "Sarah El Mansouri",
+    "domain": "Supply Chain / Procurement",
+    "layout_type": "structured",
+    "difficulty": "medium",
+    "title": "Approvisionneuse junior",
+    "expected_core_skills": [
+      "Supply Chain Management",
+      "Procurement",
+      "ERP Usage",
+      "SAP",
+      "Excel",
+      "Inventory Management",
+      "Vendor Follow-up"
+    ],
+    "expected_missing_skills": [
+      "supplier negotiation",
+      "strategic purchasing",
+      "S&OP exposure"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_03_sarah_el_mansouri.txt"
+  },
+  {
+    "name": "cv_04_benoit_caron.txt",
+    "candidate_name": "Benoit Caron",
+    "domain": "Supply Chain / Operations",
+    "layout_type": "narrative",
+    "difficulty": "hard",
+    "title": "Coordinateur logistique",
+    "expected_core_skills": [
+      "Logistics Coordination",
+      "Transport Operations",
+      "Incident Management",
+      "Excel",
+      "Reporting",
+      "Operational Coordination"
+    ],
+    "expected_missing_skills": [
+      "formal warehouse management tools",
+      "KPI ownership",
+      "advanced TMS usage"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_04_benoit_caron.txt"
+  },
+  {
+    "name": "cv_05_camille_vasseur.txt",
+    "candidate_name": "Camille Vasseur",
+    "domain": "Marketing / Communication",
+    "layout_type": "structured",
+    "difficulty": "easy",
+    "title": "Chargee de communication interne",
+    "expected_core_skills": [
+      "Internal Communication",
+      "Content Writing",
+      "Newsletter Production",
+      "Event Coordination",
+      "Editorial Planning",
+      "Canva",
+      "PowerPoint"
+    ],
+    "expected_missing_skills": [
+      "analytics",
+      "campaign performance tracking",
+      "employer branding strategy"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_05_camille_vasseur.txt"
+  },
+  {
+    "name": "cv_06_yasmine_haddad.txt",
+    "candidate_name": "Yasmine Haddad",
+    "domain": "Marketing / Communication",
+    "layout_type": "mixed",
+    "difficulty": "medium",
+    "title": "Assistante marketing digital",
+    "expected_core_skills": [
+      "Digital Marketing",
+      "Email Marketing",
+      "Campaign Reporting",
+      "WordPress",
+      "Mailchimp",
+      "Excel",
+      "Looker Studio"
+    ],
+    "expected_missing_skills": [
+      "paid acquisition",
+      "SEO ownership",
+      "marketing automation advanced setup"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_06_yasmine_haddad.txt"
+  },
+  {
+    "name": "cv_07_pierre_lemaire.txt",
+    "candidate_name": "Pierre Lemaire",
+    "domain": "Finance / Controlling",
+    "layout_type": "column-like",
+    "difficulty": "medium",
+    "title": "Assistant controleur de gestion",
+    "expected_core_skills": [
+      "Management Control",
+      "Financial Analysis",
+      "Reporting",
+      "Budget Tracking",
+      "Excel",
+      "Power BI",
+      "Monthly Closing"
+    ],
+    "expected_missing_skills": [
+      "full P&L ownership",
+      "forecasting autonomy",
+      "IFRS depth"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_07_pierre_lemaire.txt"
+  },
+  {
+    "name": "cv_08_amel_dufour.txt",
+    "candidate_name": "Amel Dufour",
+    "domain": "Finance / Accounting",
+    "layout_type": "narrative",
+    "difficulty": "medium",
+    "title": "Comptable fournisseurs",
+    "expected_core_skills": [
+      "Accounts Payable",
+      "Invoice Processing",
+      "Reconciliation",
+      "SAP",
+      "Excel",
+      "Dispute Handling",
+      "Payment Scheduling"
+    ],
+    "expected_missing_skills": [
+      "tax accounting",
+      "month-end ownership",
+      "supplier balance analysis depth"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_08_amel_dufour.txt"
+  },
+  {
+    "name": "cv_09_ines_barbier.txt",
+    "candidate_name": "Ines Barbier",
+    "domain": "HR / Generalist",
+    "layout_type": "mixed",
+    "difficulty": "medium",
+    "title": "Chargee RH generaliste junior",
+    "expected_core_skills": [
+      "HR Administration",
+      "Recruitment",
+      "Onboarding",
+      "Excel",
+      "Personnel File Management",
+      "Training Coordination"
+    ],
+    "expected_missing_skills": [
+      "full payroll management",
+      "labor law expertise",
+      "HRIS administration advanced"
+    ],
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_09_ines_barbier.txt"
+  }
+]

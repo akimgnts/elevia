@@ -1,25 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
-import { PageContainer } from "../components/layout/PageContainer";
-import { OfferCard } from "../components/ui/OfferCard";
-import { Input } from "../components/ui/Input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/Select";
+import { Link } from "react-router-dom";
+import { ArrowRight, Building2, MapPin, Search, Sparkles } from "lucide-react";
+import { PremiumAppShell } from "../components/layout/PremiumAppShell";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { fetchCatalogOffers, type OfferNormalized } from "../lib/api";
 import { buildOfferPreview } from "../lib/text";
+import { useProfileStore } from "../store/profileStore";
+
+type SourceFilter = "all" | "france_travail" | "business_france";
+
+function sourceLabel(source: OfferNormalized["source"]): string {
+  if (source === "business_france") return "Business France";
+  if (source === "france_travail") return "France Travail";
+  return "Source inconnue";
+}
+
+function sourceTone(source: OfferNormalized["source"]): string {
+  if (source === "business_france") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (source === "france_travail") return "bg-sky-50 text-sky-700 border-sky-200";
+  return "bg-slate-100 text-slate-600 border-slate-200";
+}
 
 export default function OffersPage() {
+  const { userProfile } = useProfileStore();
   const [offers, setOffers] = useState<OfferNormalized[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [country, setCountry] = useState<string | undefined>(undefined);
+  const [country, setCountry] = useState<string>("all");
+  const [source, setSource] = useState<SourceFilter>("all");
 
   const countries = useMemo(() => {
     const unique = new Set<string>();
@@ -49,76 +59,176 @@ export default function OffersPage() {
   const filtered = useMemo(() => {
     return offers.filter((offer) => {
       const company = offer.company ?? "";
-      const matchesQuery =
-        offer.title.toLowerCase().includes(query.toLowerCase()) ||
-        company.toLowerCase().includes(query.toLowerCase());
-      const matchesCountry = !country || offer.country === country;
-      return matchesQuery && matchesCountry;
+      const haystack = `${offer.title} ${company} ${offer.city ?? ""} ${offer.country ?? ""}`.toLowerCase();
+      const matchesQuery = query.trim() === "" || haystack.includes(query.trim().toLowerCase());
+      const matchesCountry = country === "all" || offer.country === country;
+      const matchesSource = source === "all" || offer.source === source;
+      return matchesQuery && matchesCountry && matchesSource;
     });
-  }, [offers, query, country]);
+  }, [offers, query, country, source]);
+
+  const featured = filtered.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <PageContainer className="pt-10 pb-16">
-        <div className="mb-8">
-          <div className="text-sm font-semibold text-slate-500">Offres V.I.E</div>
-          <h1 className="text-3xl font-bold text-slate-900">Explorez les meilleures opportunités</h1>
-          <p className="mt-2 text-slate-600">Filtres avancés et matching pour accélérer votre sélection.</p>
-        </div>
+    <PremiumAppShell
+      eyebrow="Catalogue"
+      title="Consulter les offres avant meme d'utiliser l'outil"
+      description="Cette page montre qu'il existe deja des offres reelles et consultables. L'analyse du CV sert ensuite a dire lesquelles mer itent vraiment ton energie."
+      actions={
+        <>
+          <Link
+            to={userProfile ? "/inbox" : "/analyze"}
+            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          >
+            {userProfile ? "Voir mes offres compatibles" : "Analyser mon CV"}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            to="/market-insights"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            <Sparkles className="h-4 w-4" />
+            Explorer le marche
+          </Link>
+        </>
+      }
+      contentClassName="max-w-7xl"
+    >
+      <div className="grid gap-6">
+        <section className="grid gap-4 lg:grid-cols-3">
+          <div className="rounded-[1.5rem] border border-white/80 bg-white/80 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Offres chargees</div>
+            <div className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{offers.length}</div>
+            <div className="mt-2 text-sm text-slate-500">catalogue disponible actuellement</div>
+          </div>
+          <div className="rounded-[1.5rem] border border-white/80 bg-white/80 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Apres filtres</div>
+            <div className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{filtered.length}</div>
+            <div className="mt-2 text-sm text-slate-500">offre{filtered.length > 1 ? "s" : ""} visible{filtered.length > 1 ? "s" : ""}</div>
+          </div>
+          <div className="rounded-[1.5rem] border border-white/80 bg-white/80 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Usage recommande</div>
+            <div className="mt-2 text-base font-semibold text-slate-950">
+              Regarder d&apos;abord, qualifier ensuite.
+            </div>
+            <div className="mt-2 text-sm text-slate-500">
+              La vitrine rassure. L&apos;analyse CV sert a prioriser, pas juste a decouvrir.
+            </div>
+          </div>
+        </section>
 
-        <div className="mb-8 grid gap-4 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-soft md:grid-cols-[2fr_1fr]">
-          <Input
-            placeholder="Rechercher par intitulé ou entreprise"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-          <Select onValueChange={setCountry}>
-            <SelectTrigger>
-              <SelectValue placeholder="Pays" />
-            </SelectTrigger>
-            <SelectContent>
+        <section className="rounded-[1.75rem] border border-white/80 bg-white/80 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1.6fr)_220px_220px]">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                placeholder="Rechercher par intitule, entreprise, ville ou pays"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-10 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+              />
+            </div>
+
+            <select
+              value={country}
+              onChange={(event) => setCountry(event.target.value)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+            >
+              <option value="all">Tous les pays</option>
               {countries.map((item) => (
-                <SelectItem key={item} value={item}>
+                <option key={item} value={item}>
                   {item}
-                </SelectItem>
+                </option>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
+            </select>
+
+            <select
+              value={source}
+              onChange={(event) => setSource(event.target.value as SourceFilter)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+            >
+              <option value="all">Toutes les sources</option>
+              <option value="france_travail">France Travail</option>
+              <option value="business_france">Business France</option>
+            </select>
+          </div>
+        </section>
 
         {error && <ErrorState description={error} />}
         {loading && !error && (
-          <div className="text-sm text-slate-500">Chargement des offres…</div>
+          <div className="rounded-[1.75rem] border border-white/80 bg-white/80 px-6 py-8 text-sm text-slate-500 shadow-sm">
+            Chargement des offres...
+          </div>
         )}
 
         {!loading && !error && filtered.length === 0 && (
-          <EmptyState title="Aucune offre trouvée" description="Ajustez vos filtres ou réessayez." />
+          <EmptyState title="Aucune offre trouvee" description="Ajustez vos filtres ou reessayez." />
         )}
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {filtered.map((offer) => {
-            const location = [offer.city, offer.country].filter(Boolean).join(", ");
-            return (
-              <OfferCard
-                key={offer.id}
-                title={offer.title || "Offre"}
-                company={offer.company || "Entreprise"}
-                location={location || "Localisation à préciser"}
-                preview={buildOfferPreview(offer.display_description, offer.description)}
-                score={undefined}
-                tags={[
-                  offer.source === "business_france"
-                    ? "Business France"
-                    : offer.source === "france_travail"
-                      ? "France Travail"
-                      : "Source inconnue",
-                ]}
-                href={`/offers/${encodeURIComponent(offer.id)}`}
-              />
-            );
-          })}
-        </div>
-      </PageContainer>
-    </div>
+        {!loading && !error && filtered.length > 0 && (
+          <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {featured.map((offer) => {
+              const location = [offer.city, offer.country].filter(Boolean).join(", ");
+              const preview = buildOfferPreview(offer.display_description, offer.description);
+              return (
+                <Link
+                  key={offer.id}
+                  to={`/offers/${encodeURIComponent(offer.id)}`}
+                  className="group block rounded-[1.75rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_24px_55px_rgba(15,23,42,0.12)]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="mb-2 flex flex-wrap gap-1.5">
+                        <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${sourceTone(offer.source)}`}>
+                          {sourceLabel(offer.source)}
+                        </span>
+                      </div>
+                      <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-slate-950">
+                        {offer.title || "Offre"}
+                      </h3>
+                      <div className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+                        <Building2 className="h-4 w-4 text-slate-400" />
+                        <span className="line-clamp-1">{offer.company || "Entreprise"}</span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2 text-sm text-slate-500">
+                        <MapPin className="h-4 w-4 text-slate-400" />
+                        <span className="line-clamp-1">{location || "Localisation a preciser"}</span>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 rounded-2xl border border-sky-100 bg-sky-50 px-3 py-3 text-center">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
+                        Offre
+                      </div>
+                      <div className="mt-1 text-sm font-semibold text-slate-900">Reelle</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-[1.25rem] border border-sky-100 bg-sky-50/80 p-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-700">
+                      Ce que vous pouvez verifier
+                    </div>
+                    <div className="mt-2 text-sm leading-relaxed text-slate-700 line-clamp-4">
+                      {preview || "Description indisponible."}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <div className="text-xs text-slate-500">
+                      Analyse le CV pour savoir si cette offre vaut vraiment ton temps.
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-slate-900">
+                      Voir l&apos;offre
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </section>
+        )}
+      </div>
+    </PremiumAppShell>
   );
 }

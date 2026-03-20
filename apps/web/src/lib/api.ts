@@ -257,10 +257,72 @@ export interface ExplainBlock {
   missing_display: SkillExplainItem[];  // top 6 for card
   matched_full: SkillExplainItem[];     // all matched, max 30
   missing_full: SkillExplainItem[];     // all missing, max 30
+  matched_core?: SkillExplainItem[];
+  missing_core?: SkillExplainItem[];
+  matched_secondary?: SkillExplainItem[];
+  missing_secondary?: SkillExplainItem[];
+  matched_context?: SkillExplainItem[];
+  missing_context?: SkillExplainItem[];
   breakdown: ExplainBreakdown;
   near_matches?: NearMatchItem[];
   near_match_count?: number;
   near_match_summary?: NearMatchSummary | null;
+}
+
+export interface OfferExplanation {
+  score?: number | null;
+  fit_label: string;
+  summary_reason: string;
+  strengths: string[];
+  gaps: string[];
+  blockers: string[];
+  next_actions: string[];
+}
+
+export interface OfferRoleHypothesis {
+  label: string;
+  confidence: number;
+}
+
+export interface OfferIntelligence {
+  dominant_role_block: string;
+  secondary_role_blocks: string[];
+  dominant_domains: string[];
+  top_offer_signals: string[];
+  required_skills: string[];
+  optional_skills: string[];
+  role_hypotheses: OfferRoleHypothesis[];
+  offer_summary: string;
+  role_block_scores?: Array<{
+    role_block: string;
+    score: number;
+    share: number;
+  }>;
+  debug?: Record<string, unknown> | null;
+}
+
+export interface SemanticRoleAlignment {
+  profile_role: string;
+  offer_role: string;
+  alignment: "high" | "medium" | "low";
+}
+
+export interface SemanticDomainAlignment {
+  shared_domains: string[];
+  profile_only_domains: string[];
+  offer_only_domains: string[];
+}
+
+export interface SemanticSignalAlignment {
+  matched_signals: string[];
+  missing_core_signals: string[];
+}
+
+export interface SemanticExplainability {
+  role_alignment: SemanticRoleAlignment;
+  domain_alignment: SemanticDomainAlignment;
+  signal_alignment: SemanticSignalAlignment;
+  alignment_summary: string;
 }
 
 export interface InboxItem {
@@ -304,6 +366,11 @@ export interface InboxItem {
   signal_score?: number;
   coherence?: "ok" | "suspicious";
   near_match_count?: number;
+  /** @deprecated Inbox UI no longer uses this. Safe backend cleanup candidate. */
+  match_strength?: "STRONG" | "MEDIUM" | "WEAK";
+  core_matched_count?: number;
+  core_total_count?: number;
+  dominant_reason?: string;
   rome?: { rome_code: string; rome_label: string } | null;
   rome_competences?: Array<{
     competence_code: string;
@@ -311,6 +378,10 @@ export interface InboxItem {
     esco_uri?: string | null;
   }> | null;
   explain?: ExplainBlock | null;
+  explanation: OfferExplanation;
+  offer_intelligence?: OfferIntelligence | null;
+  semantic_explainability?: SemanticExplainability | null;
+  /** @deprecated Inbox UI no longer uses this. Safe backend cleanup candidate. */
   explain_v1?: CompassExplainCompact | null;
 }
 
@@ -1238,14 +1309,40 @@ export interface OfferDetailResponse {
   description_structured: DescriptionStructured | null;
   description_structured_v1?: DescriptionStructuredV1 | null;
   explain_v1_full?: ExplainPayloadV1Full | null;
+  offer_intelligence?: OfferIntelligence | null;
+  semantic_explainability?: SemanticExplainability | null;
+}
+
+export interface ProfileSemanticContext {
+  dominant_role_block?: string | null;
+  dominant_domains?: string[];
+  top_profile_signals?: string[];
+  profile_summary?: string | null;
 }
 
 /**
  * Fetch single offer with structured description sections.
  * GET /offers/{offer_id}/detail
  */
-export async function fetchOfferDetail(offerId: string): Promise<OfferDetailResponse> {
-  const url = `${API_BASE}/offers/${encodeURIComponent(offerId)}/detail`;
+export async function fetchOfferDetail(
+  offerId: string,
+  profileSemanticContext?: ProfileSemanticContext | null
+): Promise<OfferDetailResponse> {
+  const params = new URLSearchParams();
+  if (profileSemanticContext?.dominant_role_block) {
+    params.set("profile_role_block", profileSemanticContext.dominant_role_block);
+  }
+  for (const domain of profileSemanticContext?.dominant_domains ?? []) {
+    if (domain) params.append("profile_domains", domain);
+  }
+  for (const signal of profileSemanticContext?.top_profile_signals ?? []) {
+    if (signal) params.append("profile_signals", signal);
+  }
+  if (profileSemanticContext?.profile_summary) {
+    params.set("profile_summary", profileSemanticContext.profile_summary);
+  }
+  const query = params.toString();
+  const url = `${API_BASE}/offers/${encodeURIComponent(offerId)}/detail${query ? `?${query}` : ""}`;
   const res = await fetch(url);
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
@@ -1583,6 +1680,7 @@ export interface MarketInsightsSkill {
   skill: string;
   count: number;
   dominant_sector: string;
+  display_label?: string;
 }
 
 export interface MarketInsightsMatrixEntry {
@@ -1590,6 +1688,16 @@ export interface MarketInsightsMatrixEntry {
   skill: string;
   count: number;
   relative: number;
+}
+
+export interface MarketInsightsDistinctiveSkill {
+  sector: string;
+  skill: string;
+  count: number;
+  sector_share: number;
+  global_share: number;
+  distinctiveness: number;
+  display_label?: string;
 }
 
 export interface MarketInsightsSectorCountry {
@@ -1604,18 +1712,41 @@ export interface MarketInsightsSectorCompany {
   count: number;
 }
 
+export interface MarketInsightsCompany {
+  company: string;
+  count: number;
+}
+
+export interface MarketInsightsRole {
+  role: string;
+  count: number;
+  skills?: string[];
+  mode?: string;
+}
+
+export interface MarketInsightsSectorRole extends MarketInsightsRole {
+  sector: string;
+}
+
 export interface MarketInsightsResponse {
   total_offers: number;
   total_countries: number;
   total_sectors: number;
   total_skills: number;
+  country_counts?: MarketInsightsCountry[];
   top_countries: MarketInsightsCountry[];
   sectors_distribution: MarketInsightsSector[];
   top_skills: MarketInsightsSkill[];
   sector_skill_matrix: MarketInsightsMatrixEntry[];
+  sector_distinctive_skills?: MarketInsightsDistinctiveSkill[];
   sector_country_matrix: MarketInsightsSectorCountry[];
+  sector_country_counts?: MarketInsightsSectorCountry[];
   sector_companies: MarketInsightsSectorCompany[];
+  sector_company_counts?: MarketInsightsSectorCompany[];
+  company_counts?: MarketInsightsCompany[];
   key_insights: string[];
+  top_roles?: MarketInsightsRole[];
+  sector_top_roles?: MarketInsightsSectorRole[];
 }
 
 export async function fetchMarketInsights(): Promise<MarketInsightsResponse> {

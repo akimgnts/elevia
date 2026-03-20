@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from .cluster_library import ClusterLibraryStore, get_library, normalize_token
+from .cluster_library import ClusterLibraryStore, get_library, normalize_token, is_skill_candidate
 from .cv_enricher import extract_candidate_tokens
 
 DOMAIN_URI_PREFIX = "compass:skill"
@@ -34,7 +34,7 @@ def build_domain_uris_for_text(
     *,
     extra_tokens: Optional[List[str]] = None,
     library: Optional[ClusterLibraryStore] = None,
-) -> Tuple[List[str], List[str]]:
+) -> Tuple[List[str], List[str], dict]:
     """
     Build DOMAIN URIs from text using active cluster library tokens.
 
@@ -42,21 +42,30 @@ def build_domain_uris_for_text(
       (domain_tokens_norm, domain_uris)
     """
     if not text or not cluster:
-        return [], []
+        return [], [], {"candidates_count": 0, "rejected_count": 0, "rejected_tokens": []}
 
     lib = library or get_library()
     active_tokens = lib.get_active_skills(cluster)
     if not active_tokens:
-        return [], []
+        return [], [], {"candidates_count": 0, "rejected_count": 0, "rejected_tokens": []}
 
     active_set = set(active_tokens)
     candidates = extract_candidate_tokens(text, esco_skills or [])
     if extra_tokens:
         candidates.extend([t for t in extra_tokens if t])
 
+    candidates_count = len(candidates)
+    rejected: List[str] = []
+    filtered_candidates: List[str] = []
+    for token in candidates:
+        if not is_skill_candidate(token, cluster):
+            rejected.append(str(token))
+            continue
+        filtered_candidates.append(token)
+
     domain_tokens: List[str] = []
     seen = set()
-    for token in candidates:
+    for token in filtered_candidates:
         norm = normalize_token(str(token))
         if not norm or norm in seen:
             continue
@@ -70,4 +79,9 @@ def build_domain_uris_for_text(
         if uri:
             domain_uris.append(uri)
 
-    return domain_tokens, domain_uris
+    debug = {
+        "candidates_count": candidates_count,
+        "rejected_count": len(rejected),
+        "rejected_tokens": rejected[:50],
+    }
+    return domain_tokens, domain_uris, debug

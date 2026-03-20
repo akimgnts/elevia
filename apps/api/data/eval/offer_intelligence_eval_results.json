@@ -1,0 +1,201 @@
+{
+  "catalog_offer_count": 965,
+  "validation_case_count": 8,
+  "strict_accuracy": 1.0,
+  "cases": [
+    {
+      "offer_id": "BF-AZ-SAMPLE-0001",
+      "label": "data / bi",
+      "title": "Volontaire International VIE - Ingénieur Data #1",
+      "expected_role_block": "data_analytics",
+      "predicted_role_block": "data_analytics",
+      "dominant_domains": [
+        "data"
+      ],
+      "top_offer_signals": [
+        "Python (programmation informatique)",
+        "SQL",
+        "analyse de données",
+        "exploration de données"
+      ],
+      "required_skills": [
+        "Python (programmation informatique)",
+        "SQL",
+        "analyse de données",
+        "exploration de données",
+        "programmation informatique"
+      ],
+      "optional_skills": [],
+      "offer_summary": "Poste orienté analyse de donnees avec ancrage Python (programmation informatique) et SQL."
+    },
+    {
+      "offer_id": "BF-AZ-0001",
+      "label": "finance / controlling",
+      "title": "VIE - Finance - LVMH Allemagne",
+      "expected_role_block": "finance_ops",
+      "predicted_role_block": "finance_ops",
+      "dominant_domains": [
+        "finance"
+      ],
+      "top_offer_signals": [
+        "audit",
+        "comptabilité",
+        "modélisation financière"
+      ],
+      "required_skills": [
+        "audit",
+        "comptabilité",
+        "modélisation financière",
+        "VBA",
+        "excel"
+      ],
+      "optional_skills": [],
+      "offer_summary": "Poste orienté finance operationnelle avec ancrage audit et comptabilité."
+    },
+    {
+      "offer_id": "BF-AZ-0004",
+      "label": "sales / business development",
+      "title": "VIE - Commerce - AXA Japon",
+      "expected_role_block": "sales_business_dev",
+      "predicted_role_block": "sales_business_dev",
+      "dominant_domains": [
+        "sales"
+      ],
+      "top_offer_signals": [
+        "développement commercial",
+        "CRM",
+        "gestion de la relation client",
+        "négociation"
+      ],
+      "required_skills": [
+        "développement commercial",
+        "CRM",
+        "négociation",
+        "prospection",
+        "reporting"
+      ],
+      "optional_skills": [],
+      "offer_summary": "Poste orienté developpement commercial avec ancrage développement commercial et CRM."
+    },
+    {
+      "offer_id": "BF-AZ-0005",
+      "label": "supply chain / logistics",
+      "title": "VIE - Supply Chain - Bouygues Royaume-Uni",
+      "expected_role_block": "supply_chain_ops",
+      "predicted_role_block": "supply_chain_ops",
+      "dominant_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "top_offer_signals": [
+        "logistique",
+        "gestion des stocks"
+      ],
+      "required_skills": [
+        "logistique",
+        "gestion des stocks",
+        "supply chain"
+      ],
+      "optional_skills": [],
+      "offer_summary": "Poste orienté supply chain / operations avec ancrage logistique et gestion des stocks."
+    },
+    {
+      "offer_id": "BF-AZ-0010",
+      "label": "hr",
+      "title": "VIE - RH - Pernod Ricard Singapour",
+      "expected_role_block": "hr_ops",
+      "predicted_role_block": "hr_ops",
+      "dominant_domains": [
+        "hr"
+      ],
+      "top_offer_signals": [
+        "recrutement",
+        "formation",
+        "gestion des talents"
+      ],
+      "required_skills": [
+        "recrutement",
+        "formation",
+        "gestion des talents",
+        "SIRH"
+      ],
+      "optional_skills": [],
+      "offer_summary": "Poste orienté rh operationnelles avec ancrage recrutement et formation."
+    },
+    {
+      "offer_id": "BF-AZ-0012",
+      "label": "communication",
+      "title": "VIE - Communication - Hermès Mexique",
+      "expected_role_block": "marketing_communication",
+      "predicted_role_block": "marketing_communication",
+      "dominant_domains": [
+        "marketing",
+        "communication"
+      ],
+      "top_offer_signals": [
+        "communication interne",
+        "événementiel"
+      ],
+      "required_skills": [
+        "communication interne",
+        "événementiel",
+        "relations presse"
+      ],
+      "optional_skills": [],
+      "offer_summary": "Poste orienté marketing / communication avec ancrage communication interne et événementiel."
+    },
+    {
+      "offer_id": "BF-AZ-0016",
+      "label": "marketing",
+      "title": "VIE - Marketing - Faurecia Émirats arabes unis",
+      "expected_role_block": "marketing_communication",
+      "predicted_role_block": "marketing_communication",
+      "dominant_domains": [
+        "marketing",
+        "communication"
+      ],
+      "top_offer_signals": [
+        "marketing digital",
+        "analyse marketing",
+        "branding",
+        "CRM",
+        "réseaux sociaux"
+      ],
+      "required_skills": [
+        "marketing digital",
+        "branding",
+        "CRM",
+        "réseaux sociaux",
+        "SEO"
+      ],
+      "optional_skills": [],
+      "offer_summary": "Poste orienté marketing / communication avec ancrage marketing digital et analyse marketing."
+    },
+    {
+      "offer_id": "BF-AZ-0008",
+      "label": "legal / compliance",
+      "title": "VIE - Juridique - Business France Espagne",
+      "expected_role_block": "legal_compliance",
+      "predicted_role_block": "legal_compliance",
+      "dominant_domains": [
+        "legal",
+        "finance"
+      ],
+      "top_offer_signals": [
+        "audit juridique",
+        "compliance",
+        "juridique",
+        "droit des affaires"
+      ],
+      "required_skills": [
+        "audit juridique",
+        "compliance",
+        "droit des affaires",
+        "RGPD",
+        "juridique"
+      ],
+      "optional_skills": [],
+      "offer_summary": "Poste orienté conformite / juridique avec ancrage audit juridique et compliance."
+    }
+  ]
+}

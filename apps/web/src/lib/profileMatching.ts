@@ -12,6 +12,7 @@ export type ProfileMatchingV1 = {
   preferred_countries?: string[];
   detected_capabilities?: unknown;
   skills_source: SkillsSource;
+  profile_intelligence?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
 };
 
@@ -33,6 +34,7 @@ type ProfileInput = {
   preferred_countries?: string[];
   detected_capabilities?: Capability[];
   unmapped_skills_high_confidence?: UnmappedSkill[];
+  profile_intelligence?: Record<string, unknown>;
 };
 
 export type BuildMatchingProfileResult = {
@@ -121,6 +123,7 @@ export function buildMatchingProfile(profile: ProfileInput, profileId: string): 
     preferred_countries: profile.preferred_countries || [],
     detected_capabilities: profile.detected_capabilities,
     skills_source: skillsSource,
+    profile_intelligence: profile.profile_intelligence,
     metadata: {
       source: "profileMatchingV1",
       skills_source: skillsSource,

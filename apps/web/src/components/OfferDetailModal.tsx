@@ -11,7 +11,11 @@ import type {
   ForOfferLetterResponse,
   InboxContextPayload,
   OfferContext,
+  OfferExplanation,
+  OfferIntelligence,
+  ProfileSemanticContext,
   ProfileContext,
+  SemanticExplainability,
 } from "../lib/api";
 import { fetchOfferDetail, generateCvForOffer, generateCvHtmlForOffer, generateLetterForOffer } from "../lib/api";
 import { CvHtmlPreviewModal } from "./CvHtmlPreviewModal";
@@ -19,12 +23,6 @@ import { LetterPreviewModal } from "./LetterPreviewModal";
 import { CvPreviewModal } from "./CvPreviewModal";
 import { cleanOfferTitle } from "../lib/titleUtils";
 import { formatRelativeDate } from "../lib/dateUtils";
-
-export type StrategySummary = {
-  mission_summary?: string;
-  distance?: string;
-  action_guidance?: string;
-};
 
 export type OfferDetail = {
   offer_id?: string;
@@ -48,13 +46,15 @@ export type OfferDetail = {
   offer_uri_count?: number;
   intersection_count?: number;
   scoring_unit?: string;
-  strategy_summary?: StrategySummary | null;
   semantic_score?: number | null;
   semantic_model_version?: string | null;
   relevant_passages?: string[];
   ai_available?: boolean;
   ai_error?: string | null;
   explain?: ExplainBlock | null;
+  explanation: OfferExplanation;
+  offer_intelligence?: OfferIntelligence | null;
+  semantic_explainability?: SemanticExplainability | null;
   description_structured?: DescriptionStructured | null;
   description_structured_v1?: DescriptionStructuredV1 | null;
   explain_v1_full?: ExplainPayloadV1Full | null;
@@ -94,11 +94,15 @@ function scoreBadgeClass(score?: number | null) {
   return "bg-rose-500/20 text-rose-300";
 }
 
-function distanceBadgeClass(distance?: string) {
-  const value = (distance || "").toLowerCase();
-  if (value.includes("faible")) return "bg-emerald-500/20 text-emerald-300";
-  if (value.includes("inter")) return "bg-amber-500/20 text-amber-300";
-  if (value.includes("élev") || value.includes("ele")) return "bg-rose-500/20 text-rose-300";
+function fitLabelBadgeClass(label?: string | null) {
+  const value = (label || "").toLowerCase();
+  if (value.includes("strong") || value.includes("fort")) return "bg-emerald-500/20 text-emerald-300";
+  if (value.includes("medium") || value.includes("partial") || value.includes("mod")) {
+    return "bg-amber-500/20 text-amber-300";
+  }
+  if (value.includes("weak") || value.includes("low") || value.includes("faible")) {
+    return "bg-rose-500/20 text-rose-300";
+  }
   return "bg-neutral-700 text-neutral-200";
 }
 
@@ -123,76 +127,48 @@ function formatClusterLabel(cluster?: string | null) {
   }
 }
 
-function mapRoleTypeToCluster(role?: OfferContext["role_type"] | OfferContext["primary_role_type"]) {
-  if (!role) return null;
-  switch (role) {
-    case "BI_REPORTING":
-    case "DATA_ANALYSIS":
-    case "DATA_ENGINEERING":
-    case "PRODUCT_ANALYTICS":
-    case "OPS_ANALYTICS":
-    case "MIXED":
-      return "DATA_IT";
+function formatRoleBlockLabel(raw?: string | null) {
+  switch (raw) {
+    case "data_analytics":
+      return "Data / BI";
+    case "business_analysis":
+      return "Business Analysis";
+    case "finance_ops":
+      return "Finance Ops";
+    case "legal_compliance":
+      return "Legal / Compliance";
+    case "sales_business_dev":
+      return "Sales / BizDev";
+    case "marketing_communication":
+      return "Marketing / Communication";
+    case "hr_ops":
+      return "RH";
+    case "supply_chain_ops":
+      return "Supply Chain";
+    case "project_ops":
+      return "Project Ops";
+    case "software_it":
+      return "Software / IT";
+    case "generalist_other":
+      return "Polyvalent";
     default:
       return null;
   }
 }
 
-function getVerdict(score?: number | null): "BON" | "MOYEN" | "STRETCH" {
-  if (score === null || score === undefined) return "STRETCH";
-  if (score >= 75) return "BON";
-  if (score >= 60) return "MOYEN";
-  return "STRETCH";
-}
-
-function verdictBadgeClass(verdict: "BON" | "MOYEN" | "STRETCH") {
-  switch (verdict) {
-    case "BON":
-      return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-    case "MOYEN":
-      return "bg-amber-500/20 text-amber-300 border border-amber-500/30";
-    default:
-      return "bg-rose-500/20 text-rose-300 border border-rose-500/30";
+function uniqueVisible(items: string[], limit: number) {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const raw of items) {
+    const item = raw.trim();
+    if (!item) continue;
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(item);
+    if (result.length >= limit) break;
   }
-}
-
-function derivePositionElevia({
-  score,
-  matchedCore,
-  missingCore,
-  clusterMismatch,
-  isRecent,
-}: {
-  score?: number | null;
-  matchedCore: number;
-  missingCore: number;
-  clusterMismatch: boolean;
-  isRecent: boolean;
-}) {
-  const scoreDefined = score !== null && score !== undefined;
-  const verdict = getVerdict(score);
-  let signal = "Signal à confirmer";
-  if (matchedCore >= 1) {
-    signal = "Compétences cœur présentes";
-  } else if (isRecent) {
-    signal = "Opportunité récente dans ton périmètre";
-  }
-
-  let risk = "Risque modéré";
-  if (missingCore >= 3) {
-    risk = "Manque compétences clés";
-  } else if (clusterMismatch) {
-    risk = "Domaine différent";
-  }
-
-  let action = "À faire : clarifier les attentes avant d'avancer";
-  if (isRecent && (verdict === "BON" || verdict === "MOYEN")) {
-    action = "À faire : postuler maintenant";
-  } else if (verdict === "STRETCH" && scoreDefined) {
-    action = "À faire : postuler seulement si tu acceptes un pivot";
-  }
-
-  return { verdict, signal, risk, action };
+  return result;
 }
 
 function SkillGroup({
@@ -293,6 +269,12 @@ export function OfferDetailModal({
   const [explainV1Full, setExplainV1Full] = useState<ExplainPayloadV1Full | null>(
     offer.explain_v1_full ?? null
   );
+  const [offerIntelligence, setOfferIntelligence] = useState<OfferIntelligence | null>(
+    offer.offer_intelligence ?? null
+  );
+  const [semanticExplainability, setSemanticExplainability] = useState<SemanticExplainability | null>(
+    offer.semantic_explainability ?? null
+  );
 
   // CV generation state
   const [cvLoading, setCvLoading] = useState(false);
@@ -385,8 +367,12 @@ export function OfferDetailModal({
     if (structured) return; // already have it
     const offerId = offer.offer_id || offer.id;
     if (!offerId) return;
+    const profileIntelligence =
+      profile && typeof profile === "object" && profile !== null
+        ? ((profile as { profile_intelligence?: ProfileSemanticContext }).profile_intelligence ?? null)
+        : null;
     setStructuredLoading(true);
-    fetchOfferDetail(offerId)
+    fetchOfferDetail(offerId, profileIntelligence)
       .then((detail) => {
         if (detail.description_structured) {
           setStructured(detail.description_structured);
@@ -397,13 +383,19 @@ export function OfferDetailModal({
         if (detail.explain_v1_full) {
           setExplainV1Full(detail.explain_v1_full);
         }
+        if (detail.offer_intelligence) {
+          setOfferIntelligence(detail.offer_intelligence);
+        }
+        if (detail.semantic_explainability) {
+          setSemanticExplainability(detail.semantic_explainability);
+        }
       })
       .catch(() => {
         // Silently fail — fallback to raw description below
       })
       .finally(() => setStructuredLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offer.offer_id, offer.id]);
+  }, [offer.offer_id, offer.id, profile, structured]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -420,31 +412,61 @@ export function OfferDetailModal({
   const missing = offer.missing_skills_display ?? offer.missing_skills ?? [];
   const unmapped = offer.unmapped_tokens ?? [];
   const explain = offer.explain ?? null;
-  const summary = offer.strategy_summary || undefined;
+  const explanation = offer.explanation;
+  const intelligence = offerIntelligence ?? offer.offer_intelligence ?? null;
+  const semantic = semanticExplainability ?? offer.semantic_explainability ?? null;
+  const nearMatches = explain?.near_matches ?? [];
+  const nearSummary = explain?.near_match_summary ?? null;
   const titleInfo = useMemo(() => cleanOfferTitle(offer.title), [offer.title]);
-  const profileDominantCluster =
-    profileContext && typeof (profileContext as { dominant_cluster?: string }).dominant_cluster === "string"
-      ? (profileContext as { dominant_cluster?: string }).dominant_cluster
-      : null;
-  const offerCluster = mapRoleTypeToCluster(offerContext?.primary_role_type);
-  const roleClusterMismatch = Boolean(profileDominantCluster && offerCluster && profileDominantCluster !== offerCluster);
-  const matchedCoreCount = explain?.matched_full?.filter((item) => item.weighted).length ?? 0;
-  const missingCoreCount = explain?.missing_full?.filter((item) => item.weighted).length ?? 0;
   const relativeDate = offer.publication_date
     ? formatRelativeDate(offer.publication_date)
     : null;
-  const isRecent = relativeDate?.freshness === "new";
   const clusterLabel = formatClusterLabel(offer.offer_cluster);
   const signalLabel =
     typeof offer.signal_score === "number" ? `Signal ${offer.signal_score.toFixed(1)}` : null;
   const isSuspicious = offer.coherence === "suspicious";
-  const positionElevia = derivePositionElevia({
-    score: offer.score ?? undefined,
-    matchedCore: matchedCoreCount,
-    missingCore: missingCoreCount,
-    clusterMismatch: roleClusterMismatch,
-    isRecent,
-  });
+  const visibleStrengths = uniqueVisible(explanation.strengths, 5);
+  const visibleBlockers = uniqueVisible(explanation.blockers, 3);
+  const visibleGaps = uniqueVisible(
+    explanation.gaps.filter(
+      (gap) => !visibleBlockers.some((blocker) => blocker.toLowerCase() === gap.toLowerCase())
+    ),
+    visibleBlockers.length > 0 ? 2 : 3
+  );
+  const visibleMissing = [...visibleBlockers, ...visibleGaps];
+  const visibleNextActions = uniqueVisible(explanation.next_actions, 3);
+  const primaryNextAction = visibleNextActions[0] ?? null;
+  const secondaryNextActions = visibleNextActions.slice(1);
+  const roleBlockLabel = formatRoleBlockLabel(intelligence?.dominant_role_block);
+  const visibleOfferSignals = uniqueVisible(
+    intelligence?.top_offer_signals?.length
+      ? intelligence.top_offer_signals
+      : intelligence?.required_skills ?? [],
+    5
+  );
+  const visibleRequiredSkills = uniqueVisible(intelligence?.required_skills ?? [], 5);
+  const visibleOptionalSkills = uniqueVisible(intelligence?.optional_skills ?? [], 3);
+  const semanticMatchedSignals = uniqueVisible(semantic?.signal_alignment?.matched_signals ?? [], 5);
+  const semanticMissingSignals = uniqueVisible(semantic?.signal_alignment?.missing_core_signals ?? [], 3);
+  const semanticSharedDomains = uniqueVisible(semantic?.domain_alignment?.shared_domains ?? [], 3);
+  const profileRoleLabel = formatRoleBlockLabel(semantic?.role_alignment?.profile_role);
+  const offerRoleLabel = formatRoleBlockLabel(semantic?.role_alignment?.offer_role);
+  const semanticSummary = semantic?.alignment_summary ?? explanation.summary_reason;
+  const semanticAlignment = semantic?.role_alignment?.alignment;
+  const semanticAlignmentLabel =
+    semanticAlignment === "high"
+      ? "Alignement fort"
+      : semanticAlignment === "medium"
+        ? "Alignement moyen"
+        : semanticAlignment === "low"
+          ? "Alignement faible"
+          : null;
+  const semanticAlignmentTone =
+    semanticAlignment === "high"
+      ? "bg-emerald-500/20 text-emerald-300"
+      : semanticAlignment === "medium"
+        ? "bg-amber-500/20 text-amber-300"
+        : "bg-neutral-800 text-neutral-200";
 
   const descriptionPreview = useMemo(() => {
     if (!description) return "";
@@ -489,8 +511,21 @@ export function OfferDetailModal({
                   {clusterLabel}
                 </span>
               )}
+              {roleBlockLabel && (
+                <span className="rounded-full bg-cyan-500/15 px-3 py-1 text-xs text-cyan-200">
+                  {roleBlockLabel}
+                </span>
+              )}
+              {relativeDate && (
+                <span className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-300">
+                  {relativeDate.label}
+                </span>
+              )}
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${scoreBadgeClass(offer.score)}`}>
                 Score {offer.score ?? "—"}
+              </span>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${fitLabelBadgeClass(explanation.fit_label)}`}>
+                {explanation.fit_label}
               </span>
               {signalLabel && (
                 <span className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-300">
@@ -556,6 +591,31 @@ export function OfferDetailModal({
           </div>
         </div>
 
+        <section className="mt-6">
+          <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-5">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="space-y-2">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                  Verdict
+                </div>
+                <p className="max-w-2xl text-sm leading-relaxed text-neutral-200">
+                  {semanticSummary}
+                </p>
+                {intelligence?.offer_summary && (
+                  <p className="max-w-2xl text-xs leading-relaxed text-neutral-400">
+                    {intelligence.offer_summary}
+                  </p>
+                )}
+              </div>
+              <div className="rounded-xl border border-neutral-800 bg-neutral-900/70 px-4 py-3 text-right">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-500">Fit</div>
+                <div className="mt-1 text-2xl font-semibold text-white">{explanation.score ?? offer.score ?? "—"}</div>
+                <div className="mt-1 text-xs text-neutral-400">{explanation.fit_label}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CV error notice */}
         {cvError && (
           <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 px-4 py-2 text-xs text-rose-300">
@@ -573,20 +633,196 @@ export function OfferDetailModal({
           </div>
         )}
 
-        {/* Position Elevia */}
-        <section className="mt-6">
-          <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300 space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-neutral-100">Position Elevia</h3>
-              <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${verdictBadgeClass(positionElevia.verdict)}`}>
-                {positionElevia.verdict}
-              </span>
+        <section className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          {semantic && (
+            <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 lg:col-span-2">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-neutral-100">Lecture du match</h3>
+                  <p className="mt-2 max-w-3xl text-sm leading-relaxed text-neutral-300">
+                    {semantic.alignment_summary}
+                  </p>
+                </div>
+                {semanticAlignmentLabel && (
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${semanticAlignmentTone}`}>
+                    {semanticAlignmentLabel}
+                  </span>
+                )}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {profileRoleLabel && (
+                  <span className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-200">
+                    Profil: {profileRoleLabel}
+                  </span>
+                )}
+                {offerRoleLabel && (
+                  <span className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-200">
+                    Poste: {offerRoleLabel}
+                  </span>
+                )}
+                {semanticSharedDomains.map((domain) => (
+                  <span
+                    key={`semantic-shared-domain-${domain}`}
+                    className="rounded-full bg-sky-500/15 px-3 py-1 text-xs font-medium text-sky-200"
+                  >
+                    Domaine commun: {domain}
+                  </span>
+                ))}
+              </div>
+              {(semanticMatchedSignals.length > 0 || semanticMissingSignals.length > 0) && (
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  {semanticMatchedSignals.length > 0 && (
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                        Signaux communs
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {semanticMatchedSignals.map((signal) => (
+                          <span
+                            key={`semantic-match-${signal}`}
+                            className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-300"
+                          >
+                            {signal}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {semanticMissingSignals.length > 0 && (
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                        Signaux manquants
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {semanticMissingSignals.map((signal) => (
+                          <span
+                            key={`semantic-missing-${signal}`}
+                            className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-medium text-amber-300"
+                          >
+                            {signal}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <p className="text-[11px] text-neutral-300">
-              Signal fort : {positionElevia.signal} · Risque : {positionElevia.risk}
-            </p>
-            <p className="text-[11px] text-neutral-400">{positionElevia.action}</p>
-          </div>
+          )}
+          {(visibleOfferSignals.length > 0 || (intelligence?.dominant_domains?.length ?? 0) > 0) && (
+            <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 lg:col-span-2">
+              <h3 className="text-sm font-semibold text-neutral-100">Ce que le poste demande vraiment</h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(intelligence?.dominant_domains ?? []).slice(0, 3).map((domain) => (
+                  <span
+                    key={`offer-domain-${domain}`}
+                    className="rounded-full bg-sky-500/15 px-3 py-1 text-xs font-medium text-sky-200"
+                  >
+                    {domain}
+                  </span>
+                ))}
+                {visibleOfferSignals.map((signal) => (
+                  <span
+                    key={`offer-signal-${signal}`}
+                    className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-200"
+                  >
+                    {signal}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {visibleStrengths.length > 0 && (
+            <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
+              <h3 className="text-sm font-semibold text-neutral-100">Pourquoi ça colle</h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {visibleStrengths.map((strength) => (
+                  <span
+                    key={strength}
+                    className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-300"
+                  >
+                    {strength}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {(visibleMissing.length > 0 || primaryNextAction) && (
+            <div className="space-y-4">
+              {visibleMissing.length > 0 && (
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
+                  <h3 className="text-sm font-semibold text-neutral-100">Ce qui manque</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {visibleMissing.map((item, index) => (
+                      <span
+                        key={`${item}-${index}`}
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          index < visibleBlockers.length
+                            ? "bg-rose-500/15 text-rose-300"
+                            : "bg-amber-500/15 text-amber-300"
+                        }`}
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {primaryNextAction && (
+                <div className="rounded-xl border border-cyan-900/50 bg-cyan-950/20 p-4">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-400">
+                    Prochaine action
+                  </div>
+                  <p className="mt-2 text-sm text-cyan-50">{primaryNextAction}</p>
+                  {secondaryNextActions.length > 0 && (
+                    <ul className="mt-3 space-y-1 text-xs text-cyan-100/80">
+                      {secondaryNextActions.map((action) => (
+                        <li key={action} className="flex gap-2">
+                          <span className="text-cyan-400">•</span>
+                          <span>{action}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          {(visibleRequiredSkills.length > 0 || visibleOptionalSkills.length > 0) && (
+            <div className="space-y-4">
+              {visibleRequiredSkills.length > 0 && (
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
+                  <h3 className="text-sm font-semibold text-neutral-100">Compétences requises</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {visibleRequiredSkills.map((item) => (
+                      <span
+                        key={`required-${item}`}
+                        className="rounded-full bg-slate-100/10 px-3 py-1 text-xs font-medium text-slate-100"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {visibleOptionalSkills.length > 0 && (
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
+                  <h3 className="text-sm font-semibold text-neutral-100">Compétences bonus</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {visibleOptionalSkills.map((item) => (
+                      <span
+                        key={`optional-${item}`}
+                        className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-medium text-amber-200"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         {/* Description — structured sections (with raw fallback) */}
@@ -701,65 +937,59 @@ export function OfferDetailModal({
           )}
         </section>
 
-        {/* ── ALIGNEMENT — always visible, trimmed in user mode ────────────────── */}
-        <section className="mt-6 space-y-3">
-          <h3 className="text-sm font-semibold text-neutral-200">Alignement</h3>
-          {contextLoading && !contextFit && (
-            <div className="text-xs text-neutral-500">Calcul de l'alignement…</div>
-          )}
-          {!contextLoading && !contextFit && (
-            <div className="text-xs text-neutral-500">Alignement indisponible pour le moment.</div>
-          )}
-          {contextFit && (
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300 space-y-3">
-              {/* fit_summary — always shown */}
-              {contextFit.fit_summary && (
-                <div className="text-sm font-medium text-neutral-100 leading-relaxed">
-                  {contextFit.fit_summary}
-                </div>
+        {showDebug && (
+          <>
+            <section className="mt-6 space-y-3">
+              <h3 className="text-sm font-semibold text-neutral-200">Alignement</h3>
+              {contextLoading && !contextFit && (
+                <div className="text-xs text-neutral-500">Calcul de l'alignement…</div>
               )}
-              <div className="flex flex-wrap gap-2">
-                <span className="rounded-full bg-neutral-800 px-3 py-1 text-[10px] text-neutral-300">
-                  Confiance · {Math.round((contextFit.confidence || 0) * 100)}%
-                </span>
-              </div>
-
-              {/* USER: 1 why + 1 friction + 1 question. DEV: all. */}
-              {contextFit.why_it_fits.length > 0 && (
-                <div>
-                  <div className="text-[10px] uppercase tracking-wide text-neutral-500">Pourquoi ça colle</div>
-                  <ul className="mt-1 list-disc list-inside space-y-1">
-                    {(showDebug ? contextFit.why_it_fits : contextFit.why_it_fits.slice(0, 1)).map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
+              {!contextLoading && !contextFit && (
+                <div className="text-xs text-neutral-500">Alignement indisponible pour le moment.</div>
               )}
-              {contextFit.likely_frictions.length > 0 && (
-                <div>
-                  <div className="text-[10px] uppercase tracking-wide text-neutral-500">Points de friction</div>
-                  <ul className="mt-1 list-disc list-inside space-y-1">
-                    {(showDebug ? contextFit.likely_frictions : contextFit.likely_frictions.slice(0, 1)).map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {contextFit.clarifying_questions.length > 0 && (
-                <div>
-                  <div className="text-[10px] uppercase tracking-wide text-neutral-500">Questions de clarification</div>
-                  <ul className="mt-1 list-disc list-inside space-y-1">
-                    {(showDebug ? contextFit.clarifying_questions : contextFit.clarifying_questions.slice(0, 1)).map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* recommended_angle + evidence_spans: DEV only */}
-              {showDebug && (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {contextFit && (
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300 space-y-3">
+                  {contextFit.fit_summary && (
+                    <div className="text-sm font-medium text-neutral-100 leading-relaxed">
+                      {contextFit.fit_summary}
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-neutral-800 px-3 py-1 text-[10px] text-neutral-300">
+                      Confiance · {Math.round((contextFit.confidence || 0) * 100)}%
+                    </span>
+                  </div>
+                  {contextFit.why_it_fits.length > 0 && (
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wide text-neutral-500">Pourquoi ça colle</div>
+                      <ul className="mt-1 list-disc list-inside space-y-1">
+                        {contextFit.why_it_fits.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {contextFit.likely_frictions.length > 0 && (
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wide text-neutral-500">Points de friction</div>
+                      <ul className="mt-1 list-disc list-inside space-y-1">
+                        {contextFit.likely_frictions.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {contextFit.clarifying_questions.length > 0 && (
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wide text-neutral-500">Questions de clarification</div>
+                      <ul className="mt-1 list-disc list-inside space-y-1">
+                        {contextFit.clarifying_questions.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                       <div className="text-[10px] uppercase tracking-wide text-neutral-500">Angle CV</div>
                       <ul className="mt-1 list-disc list-inside space-y-1">
@@ -789,170 +1019,173 @@ export function OfferDetailModal({
                       </ul>
                     </div>
                   )}
-                </>
-              )}
-            </div>
-          )}
-          {contextError && (
-            <div className="text-xs text-rose-300">Erreur contexte: {contextError}</div>
-          )}
-        </section>
-
-        {/* ── SCORE ESCO — always visible ───────────────────────────────────────── */}
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold text-neutral-200">Score ESCO</h3>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-neutral-300">
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${scoreBadgeClass(offer.score)}`}>
-              Score {offer.score ?? "—"}
-            </span>
-            <span className="text-xs text-neutral-500">
-              Score déterministe basé sur les compétences ESCO et critères langue/formation/pays.
-            </span>
-          </div>
-        </section>
-
-        {/* ── COMPÉTENCES — always visible ─────────────────────────────────────── */}
-        <section className="mt-6 space-y-5">
-          <h3 className="text-sm font-semibold text-neutral-200">Compétences demandées</h3>
-          {typeof offer.intersection_count === "number" && typeof offer.offer_uri_count === "number" && (
-            <div className="text-xs text-neutral-500">
-              {offer.intersection_count} compétences reconnues sur {offer.offer_uri_count}
-            </div>
-          )}
-          <SkillGroup label="Compétences alignées" skills={matched} className="bg-green-600/20 text-green-400" />
-          <SkillGroup label="Compétences manquantes" skills={missing} className="bg-red-600/20 text-red-400" />
-          {showDebug && (
-            <SkillGroup label="Non mappées ESCO (debug)" skills={unmapped} className="bg-neutral-700 text-neutral-300" />
-          )}
-          {matched.length === 0 && missing.length === 0 && unmapped.length === 0 && (
-            <p className="text-sm text-neutral-500">Aucune compétence fournie.</p>
-          )}
-        </section>
-
-        {/* ── DÉTAIL DU SCORE — always visible ─────────────────────────────────── */}
-        {explain && (
-          <section className="mt-6 space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-200">Détail du score</h3>
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300">
-              <div className="flex items-center justify-between">
-                <span>Compétences ({explain.breakdown.skills_weight}%)</span>
-                <span>{explain.breakdown.skills_score.toFixed(1)} pts</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Langues ({explain.breakdown.language_weight}%)</span>
-                <span>{explain.breakdown.language_score.toFixed(1)} pts</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Formation ({explain.breakdown.education_weight}%)</span>
-                <span>{explain.breakdown.education_score.toFixed(1)} pts</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Pays ({explain.breakdown.country_weight}%)</span>
-                <span>{explain.breakdown.country_score.toFixed(1)} pts</span>
-              </div>
-              <div className="mt-2 flex items-center justify-between font-semibold text-neutral-100">
-                <span>Total</span>
-                <span>{explain.breakdown.total.toFixed(1)} / 100</span>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── PREUVE DU MATCH (Compass signal layer) ───────────────────────────── */}
-        {explainV1Full && (
-          <section className="mt-6 space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-200">Preuve du match</h3>
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300 space-y-3">
-
-              {/* Confidence + signals row */}
-              <div className="flex flex-wrap gap-2">
-                <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
-                  explainV1Full.confidence === "HIGH"
-                    ? "bg-emerald-500/20 text-emerald-300"
-                    : explainV1Full.confidence === "MED"
-                      ? "bg-amber-500/20 text-amber-300"
-                      : "bg-rose-500/20 text-rose-300"
-                }`}>
-                  Confiance {explainV1Full.confidence}
-                </span>
-                <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
-                  explainV1Full.rare_signal_level === "HIGH"
-                    ? "bg-emerald-500/20 text-emerald-300"
-                    : explainV1Full.rare_signal_level === "MED"
-                      ? "bg-amber-500/20 text-amber-300"
-                      : "bg-rose-500/20 text-rose-300"
-                }`}>
-                  Signal rare {explainV1Full.rare_signal_level}
-                </span>
-                {explainV1Full.sector_signal_level && (
-                  <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
-                    explainV1Full.sector_signal_level === "HIGH"
-                      ? "bg-emerald-500/20 text-emerald-300"
-                      : explainV1Full.sector_signal_level === "MED"
-                        ? "bg-amber-500/20 text-amber-300"
-                        : "bg-rose-500/20 text-rose-300"
-                  }`}>
-                    Secteur {explainV1Full.sector_signal_level}
-                    {explainV1Full.sector_signal_note && ` · ${explainV1Full.sector_signal_note}`}
-                  </span>
-                )}
-              </div>
-
-              {/* Incoherence reasons */}
-              {explainV1Full.incoherence_reasons.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {explainV1Full.incoherence_reasons.map((reason) => (
-                    <span key={reason} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-[10px] text-neutral-400">
-                      {reason.replace("TOOL_UNSPECIFIED:", "Outil non précisé : ").replace(/_/g, " ").toLowerCase()}
-                    </span>
-                  ))}
                 </div>
               )}
+              {contextError && (
+                <div className="text-xs text-rose-300">Erreur contexte: {contextError}</div>
+              )}
+            </section>
 
-              {/* Missing skills from offer */}
-              {explainV1Full.missing_offer_skills.length > 0 && (
-                <div>
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wide text-neutral-500">
-                    Compétences de l'offre ({explainV1Full.missing_offer_skills.length})
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {explainV1Full.missing_offer_skills.map((s, i) => (
-                      <span key={`ms-${i}`} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-[10px] text-neutral-300">
-                        {s.label}
+            <section className="mt-6 space-y-5">
+              <h3 className="text-sm font-semibold text-neutral-200">Compétences demandées</h3>
+              {typeof offer.intersection_count === "number" && typeof offer.offer_uri_count === "number" && (
+                <div className="text-xs text-neutral-500">
+                  {offer.intersection_count} compétences reconnues sur {offer.offer_uri_count}
+                </div>
+              )}
+              <SkillGroup label="Compétences alignées" skills={matched} className="bg-green-600/20 text-green-400" />
+              <SkillGroup label="Compétences manquantes" skills={missing} className="bg-red-600/20 text-red-400" />
+              {nearMatches.length > 0 && (
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-semibold text-neutral-200">Compétences proches</h4>
+                    {nearSummary && (
+                      <span className="text-[10px] text-neutral-500">
+                        {nearSummary.count} signaux · max {nearSummary.max_strength.toFixed(2)}
                       </span>
-                    ))}
+                    )}
                   </div>
-                </div>
-              )}
-
-              {/* Tool notes */}
-              {explainV1Full.tool_notes.length > 0 && (
-                <div>
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wide text-neutral-500">Outils détectés</div>
-                  <div className="space-y-1">
-                    {explainV1Full.tool_notes.map((note) => (
-                      <div key={note.tool_key} className="flex items-center gap-2 text-[10px]">
-                        <span className="font-semibold text-neutral-200 uppercase">{note.tool_key}</span>
-                        <span className={`rounded-full px-2 py-0.5 ${
-                          note.status === "SPECIFIED"
-                            ? "bg-emerald-500/20 text-emerald-300"
-                            : note.status === "UNSPECIFIED"
-                              ? "bg-amber-500/20 text-amber-300"
-                              : "bg-neutral-700 text-neutral-400"
-                        }`}>
-                          {note.status === "SPECIFIED" && note.sense
-                            ? `précisé · ${note.sense}`
-                            : note.status === "UNSPECIFIED"
-                              ? "outil non précisé"
-                              : note.status.toLowerCase()}
+                  <p className="mt-1 text-[10px] text-neutral-500">
+                    Signal proche, non compté comme match exact.
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {nearMatches.slice(0, 6).map((item, idx) => (
+                      <li key={`near-${idx}`} className="text-xs text-neutral-300">
+                        {item.profile_label} → {item.offer_label}
+                        <span className="text-[10px] text-neutral-500">
+                          {" "}· {item.relation} · {item.strength.toFixed(2)}
                         </span>
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               )}
-            </div>
-          </section>
+              <SkillGroup label="Non mappées ESCO (debug)" skills={unmapped} className="bg-neutral-700 text-neutral-300" />
+              {matched.length === 0 && missing.length === 0 && unmapped.length === 0 && (
+                <p className="text-sm text-neutral-500">Aucune compétence fournie.</p>
+              )}
+            </section>
+
+            {explain && (
+              <section className="mt-6 space-y-3">
+                <h3 className="text-sm font-semibold text-neutral-200">Détail du score</h3>
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300">
+                  <div className="flex items-center justify-between">
+                    <span>Compétences ({explain.breakdown.skills_weight}%)</span>
+                    <span>{explain.breakdown.skills_score.toFixed(1)} pts</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Langues ({explain.breakdown.language_weight}%)</span>
+                    <span>{explain.breakdown.language_score.toFixed(1)} pts</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Formation ({explain.breakdown.education_weight}%)</span>
+                    <span>{explain.breakdown.education_score.toFixed(1)} pts</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Pays ({explain.breakdown.country_weight}%)</span>
+                    <span>{explain.breakdown.country_score.toFixed(1)} pts</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between font-semibold text-neutral-100">
+                    <span>Total</span>
+                    <span>{explain.breakdown.total.toFixed(1)} / 100</span>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {explainV1Full && (
+              <section className="mt-6 space-y-3">
+                <h3 className="text-sm font-semibold text-neutral-200">Preuve du match</h3>
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4 text-xs text-neutral-300 space-y-3">
+
+                  <div className="flex flex-wrap gap-2">
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                      explainV1Full.confidence === "HIGH"
+                        ? "bg-emerald-500/20 text-emerald-300"
+                        : explainV1Full.confidence === "MED"
+                          ? "bg-amber-500/20 text-amber-300"
+                          : "bg-rose-500/20 text-rose-300"
+                    }`}>
+                      Confiance {explainV1Full.confidence}
+                    </span>
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                      explainV1Full.rare_signal_level === "HIGH"
+                        ? "bg-emerald-500/20 text-emerald-300"
+                        : explainV1Full.rare_signal_level === "MED"
+                          ? "bg-amber-500/20 text-amber-300"
+                          : "bg-rose-500/20 text-rose-300"
+                    }`}>
+                      Signal rare {explainV1Full.rare_signal_level}
+                    </span>
+                    {explainV1Full.sector_signal_level && (
+                      <span className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                        explainV1Full.sector_signal_level === "HIGH"
+                          ? "bg-emerald-500/20 text-emerald-300"
+                          : explainV1Full.sector_signal_level === "MED"
+                            ? "bg-amber-500/20 text-amber-300"
+                            : "bg-rose-500/20 text-rose-300"
+                      }`}>
+                        Secteur {explainV1Full.sector_signal_level}
+                        {explainV1Full.sector_signal_note && ` · ${explainV1Full.sector_signal_note}`}
+                      </span>
+                    )}
+                  </div>
+
+                  {explainV1Full.incoherence_reasons.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {explainV1Full.incoherence_reasons.map((reason) => (
+                        <span key={reason} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-[10px] text-neutral-400">
+                          {reason.replace("TOOL_UNSPECIFIED:", "Outil non précisé : ").replace(/_/g, " ").toLowerCase()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {explainV1Full.missing_offer_skills.length > 0 && (
+                    <div>
+                      <div className="mb-1.5 text-[10px] uppercase tracking-wide text-neutral-500">
+                        Compétences de l'offre ({explainV1Full.missing_offer_skills.length})
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {explainV1Full.missing_offer_skills.map((s, i) => (
+                          <span key={`ms-${i}`} className="rounded-full bg-neutral-800 px-2.5 py-0.5 text-[10px] text-neutral-300">
+                            {s.label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {explainV1Full.tool_notes.length > 0 && (
+                    <div>
+                      <div className="mb-1.5 text-[10px] uppercase tracking-wide text-neutral-500">Outils détectés</div>
+                      <div className="space-y-1">
+                        {explainV1Full.tool_notes.map((note) => (
+                          <div key={note.tool_key} className="flex items-center gap-2 text-[10px]">
+                            <span className="font-semibold text-neutral-200 uppercase">{note.tool_key}</span>
+                            <span className={`rounded-full px-2 py-0.5 ${
+                              note.status === "SPECIFIED"
+                                ? "bg-emerald-500/20 text-emerald-300"
+                                : note.status === "UNSPECIFIED"
+                                  ? "bg-amber-500/20 text-amber-300"
+                                  : "bg-neutral-700 text-neutral-400"
+                            }`}>
+                              {note.status === "SPECIFIED" && note.sense
+                                ? `précisé · ${note.sense}`
+                                : note.status === "UNSPECIFIED"
+                                  ? "outil non précisé"
+                                  : note.status.toLowerCase()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+          </>
         )}
 
         {/* ── DESCRIPTION STRUCTURÉE v1 (Compass text structurer) ──────────────── */}
@@ -1193,49 +1426,7 @@ export function OfferDetailModal({
                 )}
               </DebugSection>
             )}
-
-            {/* DEV: Strategic summary */}
-            {summary && (
-              <DebugSection title="Synthèse stratégique">
-                <div>
-                  <div className="text-[10px] uppercase tracking-wide text-neutral-500">Mission principale</div>
-                  <div className="mt-1">{summary.mission_summary || "—"}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wide text-neutral-500">Distance</div>
-                  <span className={`mt-1 inline-flex rounded-full px-3 py-1 text-[10px] ${distanceBadgeClass(summary.distance)}`}>
-                    {summary.distance || "—"}
-                  </span>
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wide text-neutral-500">Action recommandée</div>
-                  <div className="mt-1">{summary.action_guidance || "—"}</div>
-                </div>
-              </DebugSection>
-            )}
-
-            {/* Actions placeholder */}
-            <section className="mt-4 flex flex-wrap items-center gap-3">
-              <button disabled className="rounded-xl bg-neutral-800 px-4 py-2 text-sm font-semibold text-neutral-500">
-                Action principale (bientôt)
-              </button>
-              <button disabled className="rounded-xl border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-500">
-                Action secondaire (bientôt)
-              </button>
-            </section>
           </div>
-        )}
-
-        {/* Actions placeholder (user mode) */}
-        {!showDebug && (
-          <section className="mt-8 flex flex-wrap items-center gap-3">
-            <button disabled className="rounded-xl bg-neutral-800 px-4 py-2 text-sm font-semibold text-neutral-500">
-              Action principale (bientôt)
-            </button>
-            <button disabled className="rounded-xl border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-500">
-              Action secondaire (bientôt)
-            </button>
-          </section>
         )}
       </div>
     </div>

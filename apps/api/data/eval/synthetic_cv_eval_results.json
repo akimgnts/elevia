@@ -1,0 +1,984 @@
+{
+  "aggregate": {
+    "cv_count": 9,
+    "avg_preserved_hit_rate": 0.981,
+    "avg_summary_hit_rate": 0.934,
+    "avg_canonical_hit_rate": 0.981,
+    "avg_preserved_count": 9.44,
+    "avg_dropped_count": 13.33,
+    "false_positive_count": 0
+  },
+  "results": [
+    {
+      "candidate_name": "Lina Morel",
+      "title": "Commerciale sédentaire B2B",
+      "domain": "Business / Sales",
+      "layout_type": "structured",
+      "difficulty": "easy",
+      "expected_core_skill_count": 7,
+      "preserved_hit_count": 7,
+      "summary_hit_count": 7,
+      "canonical_hit_count": 7,
+      "preserved_hit_rate": 1.0,
+      "summary_hit_rate": 1.0,
+      "canonical_hit_rate": 1.0,
+      "priority_stats": {
+        "preserved_count": 10,
+        "summary_count": 9,
+        "dropped_count": 30,
+        "added_mapping_inputs_count": 0,
+        "protected_atomic_count": 2,
+        "task_phrase_match_count": 5,
+        "guard_dropped_count": 1
+      },
+      "expected_skill_results": [
+        {
+          "skill": "CRM Management",
+          "canonical_id": "skill:crm_management",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Salesforce",
+          "canonical_id": "skill:salesforce",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Excel",
+          "canonical_id": "skill:excel",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Lead Qualification",
+          "canonical_id": "skill:lead_generation",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Prospecting",
+          "canonical_id": "skill:lead_generation",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Sales Follow-up",
+          "canonical_id": "skill:account_management",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Quote Preparation",
+          "canonical_id": "skill:quotation_preparation",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Excel",
+        "Salesforce",
+        "CRM Management",
+        "English",
+        "Prospecting",
+        "Commercial Reporting",
+        "Lead Qualification",
+        "Quote Preparation",
+        "Reporting",
+        "Sales Follow-up"
+      ],
+      "profile_summary_skills": [
+        "Prospecting",
+        "Commercial Reporting",
+        "Lead Qualification",
+        "Quote Preparation",
+        "Reporting",
+        "Sales Follow-up",
+        "CRM Management",
+        "Excel",
+        "Salesforce"
+      ],
+      "canonical_skills": [
+        "Excel",
+        "Salesforce",
+        "English",
+        "CRM Management",
+        "Lead Generation",
+        "Account Management",
+        "Quote Preparation",
+        "Business Intelligence"
+      ],
+      "dropped_count": 30,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    },
+    {
+      "candidate_name": "Hugo Renaud",
+      "title": "Business Developer Junior Export",
+      "domain": "Business / Sales",
+      "layout_type": "mixed",
+      "difficulty": "medium",
+      "expected_core_skill_count": 7,
+      "preserved_hit_count": 7,
+      "summary_hit_count": 6,
+      "canonical_hit_count": 7,
+      "preserved_hit_rate": 1.0,
+      "summary_hit_rate": 0.857,
+      "canonical_hit_rate": 1.0,
+      "priority_stats": {
+        "preserved_count": 11,
+        "summary_count": 10,
+        "dropped_count": 23,
+        "added_mapping_inputs_count": 0,
+        "protected_atomic_count": 2,
+        "task_phrase_match_count": 7,
+        "guard_dropped_count": 1
+      },
+      "expected_skill_results": [
+        {
+          "skill": "Business Development",
+          "canonical_id": "skill:b2b_sales",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Market Analysis",
+          "canonical_id": "skill:market_analysis",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "CRM Management",
+          "canonical_id": "skill:crm_management",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "HubSpot",
+          "canonical_id": "skill:hubspot",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Commercial Reporting",
+          "canonical_id": "skill:business_intelligence",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Sales Argumentation",
+          "canonical_id": "skill:b2b_sales",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "English",
+          "canonical_id": "skill:english_language",
+          "preserved_hit": true,
+          "summary_hit": false,
+          "canonical_hit": true
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Excel",
+        "HubSpot",
+        "CRM Management",
+        "English",
+        "Prospecting",
+        "Market Analysis",
+        "Sales Argumentation",
+        "Business Development",
+        "Lead Qualification",
+        "Commercial Reporting",
+        "Sales Follow-up"
+      ],
+      "profile_summary_skills": [
+        "Prospecting",
+        "Market Analysis",
+        "Sales Argumentation",
+        "Lead Qualification",
+        "Commercial Reporting",
+        "Sales Follow-up",
+        "CRM Management",
+        "Business Development",
+        "Excel",
+        "HubSpot"
+      ],
+      "canonical_skills": [
+        "Excel",
+        "HubSpot",
+        "English",
+        "CRM Management",
+        "Lead Generation",
+        "Account Management",
+        "B2B Sales",
+        "Market Analysis",
+        "Business Intelligence"
+      ],
+      "dropped_count": 23,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    },
+    {
+      "candidate_name": "Sarah El Mansouri",
+      "title": "Approvisionneuse junior",
+      "domain": "Supply Chain / Procurement",
+      "layout_type": "structured",
+      "difficulty": "medium",
+      "expected_core_skill_count": 7,
+      "preserved_hit_count": 7,
+      "summary_hit_count": 7,
+      "canonical_hit_count": 7,
+      "preserved_hit_rate": 1.0,
+      "summary_hit_rate": 1.0,
+      "canonical_hit_rate": 1.0,
+      "priority_stats": {
+        "preserved_count": 11,
+        "summary_count": 10,
+        "dropped_count": 6,
+        "added_mapping_inputs_count": 6,
+        "protected_atomic_count": 2,
+        "task_phrase_match_count": 6,
+        "guard_dropped_count": 1
+      },
+      "expected_skill_results": [
+        {
+          "skill": "Supply Chain Management",
+          "canonical_id": "skill:supply_chain_management",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Procurement",
+          "canonical_id": "skill:procurement_basics",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "ERP Usage",
+          "canonical_id": "skill:erp_usage",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "SAP",
+          "canonical_id": "skill:sap",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Excel",
+          "canonical_id": "skill:excel",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Inventory Management",
+          "canonical_id": "skill:supply_chain_management",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Vendor Follow-up",
+          "canonical_id": "skill:vendor_management",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Excel",
+        "SAP",
+        "English",
+        "Procurement",
+        "Inventory Management",
+        "Operational Coordination",
+        "Vendor Follow-up",
+        "ERP Usage",
+        "Purchase Order Management",
+        "Reporting",
+        "Supply Chain Management"
+      ],
+      "profile_summary_skills": [
+        "Procurement",
+        "Inventory Management",
+        "Operational Coordination",
+        "Vendor Follow-up",
+        "Purchase Order Management",
+        "Reporting",
+        "ERP Usage",
+        "Supply Chain Management",
+        "Excel",
+        "SAP"
+      ],
+      "canonical_skills": [
+        "Excel",
+        "SAP",
+        "English",
+        "Supply Chain Management",
+        "Procurement Basics",
+        "ERP Usage",
+        "Vendor Management",
+        "Operations Management",
+        "Business Intelligence"
+      ],
+      "dropped_count": 6,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    },
+    {
+      "candidate_name": "Benoit Caron",
+      "title": "Coordinateur logistique",
+      "domain": "Supply Chain / Operations",
+      "layout_type": "narrative",
+      "difficulty": "hard",
+      "expected_core_skill_count": 6,
+      "preserved_hit_count": 5,
+      "summary_hit_count": 5,
+      "canonical_hit_count": 5,
+      "preserved_hit_rate": 0.833,
+      "summary_hit_rate": 0.833,
+      "canonical_hit_rate": 0.833,
+      "priority_stats": {
+        "preserved_count": 7,
+        "summary_count": 6,
+        "dropped_count": 8,
+        "added_mapping_inputs_count": 0,
+        "protected_atomic_count": 1,
+        "task_phrase_match_count": 5,
+        "guard_dropped_count": 0
+      },
+      "expected_skill_results": [
+        {
+          "skill": "Logistics Coordination",
+          "canonical_id": "skill:logistics_coordination",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Transport Operations",
+          "canonical_id": "skill:transport_operations",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Incident Management",
+          "canonical_id": "skill:incident_management",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Excel",
+          "canonical_id": "skill:excel",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Reporting",
+          "canonical_id": "skill:business_intelligence",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Operational Coordination",
+          "canonical_id": "skill:operations_management",
+          "preserved_hit": false,
+          "summary_hit": false,
+          "canonical_hit": false
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Excel",
+        "English",
+        "Transport Operations",
+        "ERP Usage",
+        "Incident Management",
+        "Logistics Coordination",
+        "Reporting"
+      ],
+      "profile_summary_skills": [
+        "Transport Operations",
+        "ERP Usage",
+        "Incident Management",
+        "Logistics Coordination",
+        "Reporting",
+        "Excel"
+      ],
+      "canonical_skills": [
+        "Excel",
+        "English",
+        "ERP Usage",
+        "Logistics Coordination",
+        "Transport Operations",
+        "Incident Management",
+        "Business Intelligence"
+      ],
+      "dropped_count": 8,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    },
+    {
+      "candidate_name": "Camille Vasseur",
+      "title": "Chargee de communication interne",
+      "domain": "Marketing / Communication",
+      "layout_type": "structured",
+      "difficulty": "easy",
+      "expected_core_skill_count": 7,
+      "preserved_hit_count": 7,
+      "summary_hit_count": 7,
+      "canonical_hit_count": 7,
+      "preserved_hit_rate": 1.0,
+      "summary_hit_rate": 1.0,
+      "canonical_hit_rate": 1.0,
+      "priority_stats": {
+        "preserved_count": 8,
+        "summary_count": 7,
+        "dropped_count": 6,
+        "added_mapping_inputs_count": 3,
+        "protected_atomic_count": 2,
+        "task_phrase_match_count": 5,
+        "guard_dropped_count": 0
+      },
+      "expected_skill_results": [
+        {
+          "skill": "Internal Communication",
+          "canonical_id": "skill:internal_communication",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Content Writing",
+          "canonical_id": "skill:content_writing",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Newsletter Production",
+          "canonical_id": "skill:newsletter_production",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Event Coordination",
+          "canonical_id": "skill:event_coordination",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Editorial Planning",
+          "canonical_id": "skill:editorial_planning",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Canva",
+          "canonical_id": "skill:canva",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "PowerPoint",
+          "canonical_id": "skill:powerpoint",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Canva",
+        "PowerPoint",
+        "English",
+        "Content Writing",
+        "Editorial Planning",
+        "Event Coordination",
+        "Internal Communication",
+        "Newsletter Production"
+      ],
+      "profile_summary_skills": [
+        "Content Writing",
+        "Editorial Planning",
+        "Event Coordination",
+        "Newsletter Production",
+        "Internal Communication",
+        "Canva",
+        "PowerPoint"
+      ],
+      "canonical_skills": [
+        "Canva",
+        "PowerPoint",
+        "English",
+        "Internal Communication",
+        "Content Writing",
+        "Newsletter Production",
+        "Event Coordination",
+        "Editorial Planning"
+      ],
+      "dropped_count": 6,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    },
+    {
+      "candidate_name": "Yasmine Haddad",
+      "title": "Assistante marketing digital",
+      "domain": "Marketing / Communication",
+      "layout_type": "mixed",
+      "difficulty": "medium",
+      "expected_core_skill_count": 7,
+      "preserved_hit_count": 7,
+      "summary_hit_count": 5,
+      "canonical_hit_count": 7,
+      "preserved_hit_rate": 1.0,
+      "summary_hit_rate": 0.714,
+      "canonical_hit_rate": 1.0,
+      "priority_stats": {
+        "preserved_count": 13,
+        "summary_count": 10,
+        "dropped_count": 8,
+        "added_mapping_inputs_count": 4,
+        "protected_atomic_count": 5,
+        "task_phrase_match_count": 5,
+        "guard_dropped_count": 1
+      },
+      "expected_skill_results": [
+        {
+          "skill": "Digital Marketing",
+          "canonical_id": "skill:digital_marketing",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Email Marketing",
+          "canonical_id": "skill:email_marketing",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Campaign Reporting",
+          "canonical_id": "skill:campaign_reporting",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "WordPress",
+          "canonical_id": "skill:wordpress",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Mailchimp",
+          "canonical_id": "skill:mailchimp",
+          "preserved_hit": true,
+          "summary_hit": false,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Excel",
+          "canonical_id": "skill:excel",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Looker Studio",
+          "canonical_id": "skill:looker_studio",
+          "preserved_hit": true,
+          "summary_hit": false,
+          "canonical_hit": true
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Excel",
+        "WordPress",
+        "Canva",
+        "Looker Studio",
+        "Mailchimp",
+        "Data Analysis",
+        "Digital Marketing",
+        "English",
+        "Campaign Reporting",
+        "Email Marketing",
+        "Reporting",
+        "Content Writing",
+        "Editorial Planning"
+      ],
+      "profile_summary_skills": [
+        "Campaign Reporting",
+        "Reporting",
+        "Content Writing",
+        "Editorial Planning",
+        "Data Analysis",
+        "Digital Marketing",
+        "Business Intelligence",
+        "Email Marketing",
+        "Excel",
+        "WordPress"
+      ],
+      "canonical_skills": [
+        "Excel",
+        "Looker Studio",
+        "WordPress",
+        "Mailchimp",
+        "Canva",
+        "English",
+        "Digital Marketing",
+        "Email Marketing",
+        "Data Analysis",
+        "Content Writing",
+        "Editorial Planning",
+        "Campaign Reporting",
+        "Business Intelligence"
+      ],
+      "dropped_count": 8,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    },
+    {
+      "candidate_name": "Pierre Lemaire",
+      "title": "Assistant controleur de gestion",
+      "domain": "Finance / Controlling",
+      "layout_type": "column-like",
+      "difficulty": "medium",
+      "expected_core_skill_count": 7,
+      "preserved_hit_count": 7,
+      "summary_hit_count": 7,
+      "canonical_hit_count": 7,
+      "preserved_hit_rate": 1.0,
+      "summary_hit_rate": 1.0,
+      "canonical_hit_rate": 1.0,
+      "priority_stats": {
+        "preserved_count": 9,
+        "summary_count": 9,
+        "dropped_count": 13,
+        "added_mapping_inputs_count": 0,
+        "protected_atomic_count": 2,
+        "task_phrase_match_count": 3,
+        "guard_dropped_count": 0
+      },
+      "expected_skill_results": [
+        {
+          "skill": "Management Control",
+          "canonical_id": "skill:management_control",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Financial Analysis",
+          "canonical_id": "skill:financial_analysis",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Reporting",
+          "canonical_id": "skill:business_intelligence",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Budget Tracking",
+          "canonical_id": "skill:budgeting",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Excel",
+          "canonical_id": "skill:excel",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Power BI",
+          "canonical_id": "skill:power_bi",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Monthly Closing",
+          "canonical_id": "skill:monthly_closing",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Excel",
+        "Power BI",
+        "Data Analysis",
+        "English",
+        "Financial Analysis",
+        "Management Control",
+        "Reporting",
+        "Budget Tracking",
+        "Monthly Closing"
+      ],
+      "profile_summary_skills": [
+        "Reporting",
+        "Budget Tracking",
+        "Monthly Closing",
+        "Data Analysis",
+        "Business Intelligence",
+        "Financial Analysis",
+        "Management Control",
+        "Excel",
+        "Power BI"
+      ],
+      "canonical_skills": [
+        "Excel",
+        "Power BI",
+        "English",
+        "Financial Analysis",
+        "Data Analysis",
+        "Management Control",
+        "Budgeting",
+        "Monthly Closing",
+        "Business Intelligence"
+      ],
+      "dropped_count": 13,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    },
+    {
+      "candidate_name": "Amel Dufour",
+      "title": "Comptable fournisseurs",
+      "domain": "Finance / Accounting",
+      "layout_type": "narrative",
+      "difficulty": "medium",
+      "expected_core_skill_count": 7,
+      "preserved_hit_count": 7,
+      "summary_hit_count": 7,
+      "canonical_hit_count": 7,
+      "preserved_hit_rate": 1.0,
+      "summary_hit_rate": 1.0,
+      "canonical_hit_rate": 1.0,
+      "priority_stats": {
+        "preserved_count": 9,
+        "summary_count": 9,
+        "dropped_count": 8,
+        "added_mapping_inputs_count": 1,
+        "protected_atomic_count": 2,
+        "task_phrase_match_count": 5,
+        "guard_dropped_count": 1
+      },
+      "expected_skill_results": [
+        {
+          "skill": "Accounts Payable",
+          "canonical_id": "skill:accounts_payable",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Invoice Processing",
+          "canonical_id": "skill:accounts_payable",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Reconciliation",
+          "canonical_id": "skill:reconciliation",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "SAP",
+          "canonical_id": "skill:sap",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Excel",
+          "canonical_id": "skill:excel",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Dispute Handling",
+          "canonical_id": "skill:dispute_handling",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Payment Scheduling",
+          "canonical_id": "skill:payment_scheduling",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Excel",
+        "SAP",
+        "English",
+        "Procurement",
+        "Accounts Payable",
+        "Dispute Handling",
+        "Payment Scheduling",
+        "Reconciliation",
+        "Invoice Processing"
+      ],
+      "profile_summary_skills": [
+        "Procurement",
+        "Dispute Handling",
+        "Payment Scheduling",
+        "Reconciliation",
+        "Invoice Processing",
+        "Accounts Payable",
+        "ERP Usage",
+        "Excel",
+        "SAP"
+      ],
+      "canonical_skills": [
+        "Excel",
+        "SAP",
+        "English",
+        "Procurement Basics",
+        "Accounts Payable",
+        "Reconciliation",
+        "Dispute Handling",
+        "Payment Scheduling"
+      ],
+      "dropped_count": 8,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    },
+    {
+      "candidate_name": "Ines Barbier",
+      "title": "Chargee RH generaliste junior",
+      "domain": "HR / Generalist",
+      "layout_type": "mixed",
+      "difficulty": "medium",
+      "expected_core_skill_count": 6,
+      "preserved_hit_count": 6,
+      "summary_hit_count": 6,
+      "canonical_hit_count": 6,
+      "preserved_hit_rate": 1.0,
+      "summary_hit_rate": 1.0,
+      "canonical_hit_rate": 1.0,
+      "priority_stats": {
+        "preserved_count": 7,
+        "summary_count": 6,
+        "dropped_count": 18,
+        "added_mapping_inputs_count": 0,
+        "protected_atomic_count": 1,
+        "task_phrase_match_count": 5,
+        "guard_dropped_count": 1
+      },
+      "expected_skill_results": [
+        {
+          "skill": "HR Administration",
+          "canonical_id": "skill:hr_administration",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Recruitment",
+          "canonical_id": "skill:recruitment",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Onboarding",
+          "canonical_id": "skill:onboarding",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Excel",
+          "canonical_id": "skill:excel",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Personnel File Management",
+          "canonical_id": "skill:hr_administration",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        },
+        {
+          "skill": "Training Coordination",
+          "canonical_id": "skill:training_coordination",
+          "preserved_hit": true,
+          "summary_hit": true,
+          "canonical_hit": true
+        }
+      ],
+      "preserved_explicit_skills": [
+        "Excel",
+        "English",
+        "HR Administration",
+        "Onboarding",
+        "Recruitment",
+        "Personnel File Management",
+        "Training Coordination"
+      ],
+      "profile_summary_skills": [
+        "Onboarding",
+        "Recruitment",
+        "Personnel File Management",
+        "Training Coordination",
+        "HR Administration",
+        "Excel"
+      ],
+      "canonical_skills": [
+        "Excel",
+        "English",
+        "HR Administration",
+        "Recruitment",
+        "Onboarding",
+        "Training Coordination"
+      ],
+      "dropped_count": 18,
+      "false_positive_labels": [],
+      "false_positive_count": 0
+    }
+  ]
+}

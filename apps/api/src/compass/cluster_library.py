@@ -70,6 +70,7 @@ _STOPWORDS: Set[str] = {
     "an", "ans", "mois", "annee", "annees", "niveau", "sens",
     "objectif", "resultat", "mission", "activite", "service", "client",
     "secteur", "domaine", "processus",
+    "contact", "contacts", "france", "school", "services", "service", "technologies", "technology",
     # EN articles / prepositions
     "the", "a", "an", "of", "in", "on", "at", "to", "for", "with", "from",
     "by", "is", "are", "was", "were", "be", "been", "have", "has", "had",
@@ -105,6 +106,7 @@ _TOOL_ALLOWLIST: Set[str] = {
     "tableau", "dashboards", "dashboard", "forecasting", "forecast",
     "adobe", "photoshop", "premiere", "crm", "kpi", "kpis",
     "api", "apis", "analytics", "opc", "opcvm", "power bi", "powerbi",
+    "reporting", "automation",
     # Finance/asset management
     "ucits", "etf", "etfs", "dcf", "irr", "npv",
     # Common acronyms (safe to record as domain-pending)
@@ -137,6 +139,12 @@ _GENERIC_ENGLISH: Set[str] = {
     # Generic tech words (too vague alone)
     "system", "systems", "tool", "process", "processes",
     "report", "reports", "using", "used",
+}
+
+# ── Generic nouns (too vague even in domain context) ─────────────────────────
+_GENERIC_NOUNS: Set[str] = {
+    "contact", "contacts", "france", "school", "services", "service",
+    "technologies", "technology",
 }
 
 # ── Email / domain noise ───────────────────────────────────────────────────────
@@ -181,6 +189,7 @@ RC_WORD_COUNT = "REJECT_WORD_COUNT"
 RC_NUMBER = "REJECT_NUMBER"
 RC_STOPWORD = "REJECT_STOPWORD"
 RC_GENERIC = "REJECT_GENERIC"
+RC_GENERIC_NOUN = "REJECT_GENERIC_NOUN"
 RC_SOFT_SKILL = "REJECT_SOFT_SKILL"
 RC_EMAIL = "REJECT_EMAIL"
 RC_URL = "REJECT_URL"
@@ -273,6 +282,10 @@ def classify_token(token: str, cluster: Optional[str] = None) -> Tuple[str, str]
     if norm in _GENERIC_ENGLISH:
         return _REJECT, RC_GENERIC
 
+    # 7b. Generic nouns (non-skill)
+    if norm in _GENERIC_NOUNS:
+        return _REJECT, RC_GENERIC_NOUN
+
     # 8. Short alpha name heuristic: ≤4 all-alpha chars with ≥2 vowels → likely a name
     if _SHORT_ALPHA_NAME.match(norm) and _vowel_count(norm) >= 2:
         return _REJECT, RC_HANDLE
@@ -283,6 +296,12 @@ def classify_token(token: str, cluster: Optional[str] = None) -> Tuple[str, str]
             return _REJECT, RC_SOFT_SKILL
 
     return _DOMAIN_PENDING, "VALID"
+
+
+def is_skill_candidate(token: str, cluster: Optional[str] = None) -> bool:
+    """Return True if token is a valid domain skill candidate."""
+    decision, _ = classify_token(token, cluster)
+    return decision == _DOMAIN_PENDING
 
 # ── Schema ────────────────────────────────────────────────────────────────────
 

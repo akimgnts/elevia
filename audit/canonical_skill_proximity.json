@@ -1,0 +1,145 @@
+{
+  "version": "0.1.0",
+  "proximity_rules": [
+    {
+      "source": "skill:deep_learning",
+      "target": "skill:machine_learning",
+      "relation": "specialization_of",
+      "strength": 0.9,
+      "status": "active"
+    },
+    {
+      "source": "skill:nlp",
+      "target": "skill:machine_learning",
+      "relation": "specialization_of",
+      "strength": 0.85,
+      "status": "active"
+    },
+    {
+      "source": "skill:feature_engineering",
+      "target": "skill:machine_learning",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:model_evaluation",
+      "target": "skill:machine_learning",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:time_series_analysis",
+      "target": "skill:data_analysis",
+      "relation": "specialization_of",
+      "strength": 0.8,
+      "status": "active"
+    },
+    {
+      "source": "skill:ab_testing",
+      "target": "skill:data_analysis",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:data_visualization",
+      "target": "skill:business_intelligence",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:business_intelligence",
+      "target": "skill:data_visualization",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:data_storytelling",
+      "target": "skill:business_intelligence",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:business_intelligence",
+      "target": "skill:data_storytelling",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:data_cleaning",
+      "target": "skill:data_engineering",
+      "relation": "specialization_of",
+      "strength": 0.8,
+      "status": "active"
+    },
+    {
+      "source": "skill:data_modeling",
+      "target": "skill:data_engineering",
+      "relation": "adjacent_to",
+      "strength": 0.75,
+      "status": "active"
+    },
+    {
+      "source": "skill:sql_querying",
+      "target": "skill:data_engineering",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:containerization",
+      "target": "skill:devops",
+      "relation": "specialization_of",
+      "strength": 0.85,
+      "status": "active"
+    },
+    {
+      "source": "skill:observability",
+      "target": "skill:devops",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:linux_administration",
+      "target": "skill:devops",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:authentication_authorization",
+      "target": "skill:backend_development",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:scripting_automation",
+      "target": "skill:backend_development",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    },
+    {
+      "source": "skill:microservices_architecture",
+      "target": "skill:software_architecture",
+      "relation": "specialization_of",
+      "strength": 0.8,
+      "status": "active"
+    },
+    {
+      "source": "skill:ui_ux_integration",
+      "target": "skill:frontend_development",
+      "relation": "adjacent_to",
+      "strength": 0.7,
+      "status": "active"
+    }
+  ]
+}

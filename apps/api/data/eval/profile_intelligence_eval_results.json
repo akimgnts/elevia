@@ -1,0 +1,1480 @@
+{
+  "generated_at": "2026-03-19T23:05:44.784005Z",
+  "synthetic_summary": {
+    "count": 9,
+    "parsed_count": 9,
+    "error_count": 0,
+    "strict_primary_accuracy": 1.0,
+    "accepted_primary_accuracy": 1.0,
+    "ai_triggered_count": 2,
+    "ai_accepted_count": 0,
+    "ai_helped_count": 0,
+    "ai_hurt_count": 0,
+    "family_breakdown": {
+      "Business / Sales": {
+        "count": 2,
+        "strict_hits": 2,
+        "accepted_hits": 2
+      },
+      "Supply Chain / Procurement": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      },
+      "Supply Chain / Operations": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      },
+      "Marketing / Communication": {
+        "count": 2,
+        "strict_hits": 2,
+        "accepted_hits": 2
+      },
+      "Finance / Controlling": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      },
+      "Finance / Accounting": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      },
+      "HR / Generalist": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      }
+    }
+  },
+  "real_summary": {
+    "count": 7,
+    "parsed_count": 7,
+    "error_count": 0,
+    "strict_primary_accuracy": 0.5714,
+    "accepted_primary_accuracy": 1.0,
+    "ai_triggered_count": 7,
+    "ai_accepted_count": 0,
+    "ai_helped_count": 0,
+    "ai_hurt_count": 0,
+    "family_breakdown": {
+      "data_bi": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      },
+      "finance_controlling": {
+        "count": 1,
+        "strict_hits": 0,
+        "accepted_hits": 1
+      },
+      "business_analysis": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      },
+      "marketing_communication": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      },
+      "supply_chain_ops": {
+        "count": 1,
+        "strict_hits": 1,
+        "accepted_hits": 1
+      },
+      "software_it": {
+        "count": 1,
+        "strict_hits": 0,
+        "accepted_hits": 1
+      },
+      "legal_compliance": {
+        "count": 1,
+        "strict_hits": 0,
+        "accepted_hits": 1
+      }
+    }
+  },
+  "coverage_notes": [
+    "Real CV validation uses local PDF CVs available on this machine.",
+    "No strong real HR or pure sales CV was found locally; those families remain synthetic-only in this sprint."
+  ],
+  "synthetic_cases": [
+    {
+      "label": "Lina Morel",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_01_lina_morel.txt",
+      "family": "Business / Sales",
+      "expected_primary_block": "sales_business_dev",
+      "accepted_primary_blocks": [
+        "sales_business_dev"
+      ],
+      "predicted_primary_block": "sales_business_dev",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "sales"
+      ],
+      "top_profile_signals": [
+        "suivi portefeuille clients",
+        "suivi commandes clients",
+        "mise a jour opportunites salesforce",
+        "Commercial Reporting",
+        "CRM Management"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Business Developer",
+          "confidence": 0.87
+        },
+        {
+          "label": "Commercial B2B",
+          "confidence": 0.86
+        }
+      ],
+      "profile_summary": "Profil orienté developpement commercial avec ancrage suivi portefeuille clients et suivi commandes clients.",
+      "role_block_scores": [
+        {
+          "role_block": "sales_business_dev",
+          "score": 39.8719,
+          "share": 0.8261
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 4.0755,
+          "share": 0.0844
+        },
+        {
+          "role_block": "marketing_communication",
+          "score": 3.4053,
+          "share": 0.0706
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 0.9105,
+          "share": 0.0189
+        },
+        {
+          "role_block": "project_ops",
+          "score": 0.757,
+          "share": 0.0157
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": false,
+        "accepted": false,
+        "suggestion": null,
+        "trigger_reason": "not_ambiguous"
+      },
+      "ai_triggered": false,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Commerciale sédentaire B2B"
+    },
+    {
+      "label": "Hugo Renaud",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_02_hugo_renaud.txt",
+      "family": "Business / Sales",
+      "expected_primary_block": "sales_business_dev",
+      "accepted_primary_blocks": [
+        "sales_business_dev"
+      ],
+      "predicted_primary_block": "sales_business_dev",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "sales"
+      ],
+      "top_profile_signals": [
+        "preparation fichiers cibles",
+        "preparation rendez vous presentations commerciales",
+        "mise a jour base clients",
+        "Business Development",
+        "CRM Management"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Business Developer",
+          "confidence": 0.87
+        },
+        {
+          "label": "Commercial B2B",
+          "confidence": 0.86
+        }
+      ],
+      "profile_summary": "Profil orienté developpement commercial avec ancrage preparation fichiers cibles et preparation rendez vous presentations commerciales.",
+      "role_block_scores": [
+        {
+          "role_block": "sales_business_dev",
+          "score": 36.1373,
+          "share": 0.7837
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 4.9181,
+          "share": 0.1067
+        },
+        {
+          "role_block": "marketing_communication",
+          "score": 4.1462,
+          "share": 0.0899
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 0.9105,
+          "share": 0.0197
+        },
+        {
+          "role_block": "project_ops",
+          "score": 0.3571,
+          "share": 0.0077
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": false,
+        "accepted": false,
+        "suggestion": null,
+        "trigger_reason": "not_ambiguous"
+      },
+      "ai_triggered": false,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Business Developer Junior Export"
+    },
+    {
+      "label": "Sarah El Mansouri",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_03_sarah_el_mansouri.txt",
+      "family": "Supply Chain / Procurement",
+      "expected_primary_block": "supply_chain_ops",
+      "accepted_primary_blocks": [
+        "supply_chain_ops"
+      ],
+      "predicted_primary_block": "supply_chain_ops",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "operations",
+        "supply_chain",
+        "supply chain"
+      ],
+      "top_profile_signals": [
+        "suivi confirmations dates livraison",
+        "mise a jour parametres approvisionnement",
+        "suivi stocks composants",
+        "Inventory Management",
+        "Procurement"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Coordinateur Supply Chain",
+          "confidence": 0.9
+        },
+        {
+          "label": "Approvisionneur",
+          "confidence": 0.88
+        }
+      ],
+      "profile_summary": "Profil orienté supply chain / operations avec ancrage suivi confirmations dates livraison et mise a jour parametres approvisionnement.",
+      "role_block_scores": [
+        {
+          "role_block": "supply_chain_ops",
+          "score": 34.8673,
+          "share": 0.7307
+        },
+        {
+          "role_block": "project_ops",
+          "score": 6.9879,
+          "share": 0.1464
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 3.249,
+          "share": 0.0681
+        },
+        {
+          "role_block": "finance_ops",
+          "score": 2.6126,
+          "share": 0.0548
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 1.1065,
+          "share": 0.0232
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": false,
+          "suggested_role_block": "",
+          "confidence": 0.9,
+          "reasoning": "The dominant role block 'supply_chain_ops' aligns well with the top profile signals and the profile summary, which indicate a strong focus on supply chain operations and inventory management.",
+          "used_signals": [
+            "suivi confirmations dates livraison",
+            "mise a jour parametres approvisionnement",
+            "suivi stocks composants",
+            "Inventory Management",
+            "Procurement"
+          ]
+        },
+        "trigger_reason": "close_domain_scores",
+        "gate_reason": "no_challenge"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Approvisionneuse junior"
+    },
+    {
+      "label": "Benoit Caron",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_04_benoit_caron.txt",
+      "family": "Supply Chain / Operations",
+      "expected_primary_block": "supply_chain_ops",
+      "accepted_primary_blocks": [
+        "supply_chain_ops"
+      ],
+      "predicted_primary_block": "supply_chain_ops",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "operations",
+        "supply_chain",
+        "supply chain"
+      ],
+      "top_profile_signals": [
+        "suivi expeditions france benelux",
+        "gerer priorites livraison",
+        "Incident Management",
+        "Logistics Coordination",
+        "Transport Operations"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Coordinateur logistique",
+          "confidence": 0.88
+        },
+        {
+          "label": "Coordinateur Supply Chain",
+          "confidence": 0.87
+        }
+      ],
+      "profile_summary": "Profil orienté supply chain / operations avec ancrage suivi expeditions france benelux et gerer priorites livraison.",
+      "role_block_scores": [
+        {
+          "role_block": "supply_chain_ops",
+          "score": 36.4435,
+          "share": 0.7129
+        },
+        {
+          "role_block": "project_ops",
+          "score": 11.9455,
+          "share": 0.2337
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 2.0179,
+          "share": 0.0395
+        },
+        {
+          "role_block": "software_it",
+          "score": 0.7128,
+          "share": 0.0139
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 0.4491,
+          "share": 0.0088
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": false,
+        "accepted": false,
+        "suggestion": null,
+        "trigger_reason": "not_ambiguous"
+      },
+      "ai_triggered": false,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Coordinateur logistique"
+    },
+    {
+      "label": "Camille Vasseur",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_05_camille_vasseur.txt",
+      "family": "Marketing / Communication",
+      "expected_primary_block": "marketing_communication",
+      "accepted_primary_blocks": [
+        "marketing_communication"
+      ],
+      "predicted_primary_block": "marketing_communication",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "marketing",
+        "communication"
+      ],
+      "top_profile_signals": [
+        "preparation contenus intranet",
+        "suivi calendrier editorial",
+        "preparation mails internes",
+        "Canva",
+        "Content Writing"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Chargé de communication",
+          "confidence": 0.87
+        }
+      ],
+      "profile_summary": "Profil orienté marketing / communication avec ancrage preparation contenus intranet et suivi calendrier editorial.",
+      "role_block_scores": [
+        {
+          "role_block": "marketing_communication",
+          "score": 34.9356,
+          "share": 0.7804
+        },
+        {
+          "role_block": "project_ops",
+          "score": 3.9995,
+          "share": 0.0893
+        },
+        {
+          "role_block": "sales_business_dev",
+          "score": 3.683,
+          "share": 0.0823
+        },
+        {
+          "role_block": "supply_chain_ops",
+          "score": 2.147,
+          "share": 0.048
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 0.3978,
+          "share": 0.0089
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": false,
+        "accepted": false,
+        "suggestion": null,
+        "trigger_reason": "not_ambiguous"
+      },
+      "ai_triggered": false,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Chargee de communication interne"
+    },
+    {
+      "label": "Yasmine Haddad",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_06_yasmine_haddad.txt",
+      "family": "Marketing / Communication",
+      "expected_primary_block": "marketing_communication",
+      "accepted_primary_blocks": [
+        "marketing_communication"
+      ],
+      "predicted_primary_block": "marketing_communication",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "marketing"
+      ],
+      "top_profile_signals": [
+        "preparation envoi campagnes email",
+        "coordination contenus reseaux sociaux",
+        "publication articles mises",
+        "Canva",
+        "Mailchimp"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Assistant marketing digital",
+          "confidence": 0.88
+        },
+        {
+          "label": "Chargé de communication",
+          "confidence": 0.87
+        }
+      ],
+      "profile_summary": "Profil orienté marketing / communication avec ancrage preparation envoi campagnes email et coordination contenus reseaux sociaux.",
+      "role_block_scores": [
+        {
+          "role_block": "marketing_communication",
+          "score": 53.7224,
+          "share": 0.7876
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 5.7797,
+          "share": 0.0847
+        },
+        {
+          "role_block": "sales_business_dev",
+          "score": 4.6555,
+          "share": 0.0682
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 4.0565,
+          "share": 0.0595
+        },
+        {
+          "role_block": "project_ops",
+          "score": 1.4103,
+          "share": 0.0207
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": false,
+        "accepted": false,
+        "suggestion": null,
+        "trigger_reason": "not_ambiguous"
+      },
+      "ai_triggered": false,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Assistante marketing digital"
+    },
+    {
+      "label": "Pierre Lemaire",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_07_pierre_lemaire.txt",
+      "family": "Finance / Controlling",
+      "expected_primary_block": "finance_ops",
+      "accepted_primary_blocks": [
+        "finance_ops"
+      ],
+      "predicted_primary_block": "finance_ops",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [
+        "data_analytics",
+        "business_analysis"
+      ],
+      "dominant_domains": [
+        "data",
+        "finance",
+        "business"
+      ],
+      "top_profile_signals": [
+        "preparation reportings mensuels",
+        "suivi ecarts couts production",
+        "extraction donnees erp",
+        "Budget Tracking",
+        "Financial Analysis"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Contrôleur de gestion",
+          "confidence": 0.89
+        },
+        {
+          "label": "Financial Analyst",
+          "confidence": 0.87
+        },
+        {
+          "label": "Business Analyst",
+          "confidence": 0.55
+        }
+      ],
+      "profile_summary": "Profil orienté finance operationnelle avec ancrage preparation reportings mensuels et suivi ecarts couts production.",
+      "role_block_scores": [
+        {
+          "role_block": "finance_ops",
+          "score": 16.8432,
+          "share": 0.4129
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 13.7718,
+          "share": 0.3376
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 9.3636,
+          "share": 0.2295
+        },
+        {
+          "role_block": "sales_business_dev",
+          "score": 0.8131,
+          "share": 0.0199
+        },
+        {
+          "role_block": "software_it",
+          "score": 0.6737,
+          "share": 0.0165
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": false,
+          "suggested_role_block": "",
+          "confidence": 0.85,
+          "reasoning": "The dominant role block 'finance_ops' aligns well with the profile summary and top profile signals, which emphasize financial operations and analysis. The secondary role blocks also support this alignment, indicating a strong focus on finance-related tasks.",
+          "used_signals": [
+            "preparation reportings mensuels",
+            "suivi ecarts couts production",
+            "extraction donnees erp",
+            "Budget Tracking",
+            "Financial Analysis"
+          ]
+        },
+        "trigger_reason": "close_role_scores",
+        "gate_reason": "no_challenge"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Assistant controleur de gestion"
+    },
+    {
+      "label": "Amel Dufour",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_08_amel_dufour.txt",
+      "family": "Finance / Accounting",
+      "expected_primary_block": "finance_ops",
+      "accepted_primary_blocks": [
+        "finance_ops"
+      ],
+      "predicted_primary_block": "finance_ops",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "finance"
+      ],
+      "top_profile_signals": [
+        "controle factures rapprochement echanges services",
+        "traitement factures",
+        "Accounts Payable",
+        "Reconciliation",
+        "Dispute Handling"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Comptable fournisseurs",
+          "confidence": 0.89
+        },
+        {
+          "label": "Financial Analyst",
+          "confidence": 0.87
+        }
+      ],
+      "profile_summary": "Profil orienté finance operationnelle avec ancrage controle factures rapprochement echanges services et traitement factures.",
+      "role_block_scores": [
+        {
+          "role_block": "finance_ops",
+          "score": 26.7033,
+          "share": 0.8439
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 2.0746,
+          "share": 0.0656
+        },
+        {
+          "role_block": "supply_chain_ops",
+          "score": 1.605,
+          "share": 0.0507
+        },
+        {
+          "role_block": "project_ops",
+          "score": 1.2611,
+          "share": 0.0399
+        },
+        {
+          "role_block": "legal_compliance",
+          "score": 0.6848,
+          "share": 0.0216
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": false,
+        "accepted": false,
+        "suggestion": null,
+        "trigger_reason": "not_ambiguous"
+      },
+      "ai_triggered": false,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Comptable fournisseurs"
+    },
+    {
+      "label": "Ines Barbier",
+      "source_type": "synthetic",
+      "path": "/Users/akimguentas/Dev/elevia-compass/apps/api/data/eval/synthetic_cv_dataset_v1/cv_09_ines_barbier.txt",
+      "family": "HR / Generalist",
+      "expected_primary_block": "hr_ops",
+      "accepted_primary_blocks": [
+        "hr_ops"
+      ],
+      "predicted_primary_block": "hr_ops",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "hr"
+      ],
+      "top_profile_signals": [
+        "suivi dossiers salaries",
+        "administration personnel",
+        "coordination managers cabinet externe",
+        "HR Administration",
+        "Onboarding"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Chargé RH",
+          "confidence": 0.87
+        },
+        {
+          "label": "Assistant RH",
+          "confidence": 0.86
+        }
+      ],
+      "profile_summary": "Profil orienté rh operationnelles avec ancrage suivi dossiers salaries et administration personnel.",
+      "role_block_scores": [
+        {
+          "role_block": "hr_ops",
+          "score": 29.5518,
+          "share": 0.7684
+        },
+        {
+          "role_block": "project_ops",
+          "score": 5.0447,
+          "share": 0.1312
+        },
+        {
+          "role_block": "finance_ops",
+          "score": 2.9895,
+          "share": 0.0777
+        },
+        {
+          "role_block": "supply_chain_ops",
+          "score": 0.8712,
+          "share": 0.0227
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 0.7084,
+          "share": 0.0184
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": false,
+        "accepted": false,
+        "suggestion": null,
+        "trigger_reason": "not_ambiguous"
+      },
+      "ai_triggered": false,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Chargee RH generaliste junior"
+    }
+  ],
+  "real_cases": [
+    {
+      "label": "Akim Resume Data",
+      "source_type": "real",
+      "path": "/Users/akimguentas/Downloads/cvtest/Akim_Guentas_Resume.pdf",
+      "family": "data_bi",
+      "expected_primary_block": "data_analytics",
+      "accepted_primary_blocks": [
+        "data_analytics",
+        "business_analysis"
+      ],
+      "predicted_primary_block": "data_analytics",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "data",
+        "business"
+      ],
+      "top_profile_signals": [
+        "reporting time by 15",
+        "reporting business data into actionable",
+        "reporting workflows using python",
+        "Data Analysis",
+        "PostgreSQL"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Data Analyst",
+          "confidence": 0.9
+        },
+        {
+          "label": "BI Analyst",
+          "confidence": 0.86
+        }
+      ],
+      "profile_summary": "Profil orienté analyse de donnees avec ancrage reporting time by 15 et reporting business data into actionable.",
+      "role_block_scores": [
+        {
+          "role_block": "data_analytics",
+          "score": 36.9121,
+          "share": 0.6351
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 9.6463,
+          "share": 0.166
+        },
+        {
+          "role_block": "sales_business_dev",
+          "score": 6.0404,
+          "share": 0.1039
+        },
+        {
+          "role_block": "software_it",
+          "score": 5.5191,
+          "share": 0.095
+        },
+        {
+          "role_block": "marketing_communication",
+          "score": 4.4026,
+          "share": 0.0758
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": false,
+          "suggested_role_block": "",
+          "confidence": 0.85,
+          "reasoning": "The dominant role block 'data_analytics' aligns well with the profile signals indicating a strong focus on data analysis and reporting. The skills and tools mentioned support this classification.",
+          "used_signals": [
+            "reporting time by 15",
+            "reporting business data into actionable",
+            "reporting workflows using python",
+            "Data Analysis",
+            "PostgreSQL"
+          ]
+        },
+        "trigger_reason": "hybrid_domain_mix",
+        "gate_reason": "no_challenge"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": ""
+    },
+    {
+      "label": "Akim Audit Data Analyst",
+      "source_type": "real",
+      "path": "/Users/akimguentas/Downloads/cvtest/Akim Guentas – Audit & Data Analyst.pdf",
+      "family": "finance_controlling",
+      "expected_primary_block": "finance_ops",
+      "accepted_primary_blocks": [
+        "finance_ops",
+        "data_analytics",
+        "business_analysis"
+      ],
+      "predicted_primary_block": "business_analysis",
+      "strict_primary_match": false,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [
+        "data_analytics"
+      ],
+      "dominant_domains": [
+        "data",
+        "business",
+        "finance"
+      ],
+      "top_profile_signals": [
+        "analyser donnees provenant differentes sources",
+        "analyse analyste oriente donnees forte",
+        "analyse donnees operationnelles commerciales financieres",
+        "Audit",
+        "Data Analysis"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Data Analyst",
+          "confidence": 0.9
+        },
+        {
+          "label": "Business Analyst",
+          "confidence": 0.87
+        },
+        {
+          "label": "Business Intelligence Analysts",
+          "confidence": 0.86
+        }
+      ],
+      "profile_summary": "Profil orienté analyse metier avec ancrage analyser donnees provenant differentes sources et analyse analyste oriente donnees forte.",
+      "role_block_scores": [
+        {
+          "role_block": "business_analysis",
+          "score": 28.6805,
+          "share": 0.4955
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 12.8077,
+          "share": 0.2213
+        },
+        {
+          "role_block": "finance_ops",
+          "score": 10.2735,
+          "share": 0.1775
+        },
+        {
+          "role_block": "sales_business_dev",
+          "score": 6.1204,
+          "share": 0.1057
+        },
+        {
+          "role_block": "project_ops",
+          "score": 2.3222,
+          "share": 0.0401
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": false,
+          "suggested_role_block": "",
+          "confidence": 0.85,
+          "reasoning": "The dominant role block 'business_analysis' aligns well with the profile signals indicating strong data analysis skills and a focus on business operations. The secondary role block 'data_analytics' further supports this alignment, indicating that the current role block is appropriate.",
+          "used_signals": [
+            "analyser donnees provenant differentes sources",
+            "analyse analyste oriente donnees forte",
+            "analyse donnees operationnelles commerciales financieres",
+            "Audit",
+            "Data Analysis"
+          ]
+        },
+        "trigger_reason": "hybrid_domain_mix",
+        "gate_reason": "no_challenge"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": "Hybrid audit/data CV; finance or data dominant can both be acceptable if the summary stays coherent."
+    },
+    {
+      "label": "Akim Business Analyst",
+      "source_type": "real",
+      "path": "/Users/akimguentas/Downloads/Akim Guentas – Business Analyst.pdf",
+      "family": "business_analysis",
+      "expected_primary_block": "business_analysis",
+      "accepted_primary_blocks": [
+        "business_analysis",
+        "data_analytics"
+      ],
+      "predicted_primary_block": "business_analysis",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [
+        "data_analytics",
+        "sales_business_dev"
+      ],
+      "dominant_domains": [
+        "business",
+        "data",
+        "operations"
+      ],
+      "top_profile_signals": [
+        "analyse processus crm",
+        "preparation execution phases tests validation",
+        "analyse anomalies amelioration continue processus",
+        "Business Development",
+        "CRM Management"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Business Analyst",
+          "confidence": 0.9
+        },
+        {
+          "label": "Business Intelligence Analysts",
+          "confidence": 0.9
+        },
+        {
+          "label": "Operations Analyst",
+          "confidence": 0.86
+        }
+      ],
+      "profile_summary": "Profil orienté analyse metier avec ancrage analyse processus crm et preparation execution phases tests validation.",
+      "role_block_scores": [
+        {
+          "role_block": "business_analysis",
+          "score": 23.0221,
+          "share": 0.4726
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 10.3478,
+          "share": 0.2124
+        },
+        {
+          "role_block": "sales_business_dev",
+          "score": 9.3496,
+          "share": 0.1919
+        },
+        {
+          "role_block": "project_ops",
+          "score": 5.9909,
+          "share": 0.123
+        },
+        {
+          "role_block": "marketing_communication",
+          "score": 2.2978,
+          "share": 0.0472
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": false,
+          "suggested_role_block": "",
+          "confidence": 0.85,
+          "reasoning": "The dominant role block 'business_analysis' aligns well with the profile summary and top profile signals, which emphasize business process analysis and CRM management. The secondary role blocks also support this alignment. Therefore, there is no need to challenge the current dominant role block.",
+          "used_signals": [
+            "analyse processus crm",
+            "preparation execution phases tests validation",
+            "analyse anomalies amelioration continue processus",
+            "Business Development",
+            "CRM Management"
+          ]
+        },
+        "trigger_reason": "close_domain_scores",
+        "gate_reason": "no_challenge"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": ""
+    },
+    {
+      "label": "Akim Marketing Analyst",
+      "source_type": "real",
+      "path": "/Users/akimguentas/Downloads/Akim_Guentas_CV_Marketing_Analyst_Decathlon.pdf",
+      "family": "marketing_communication",
+      "expected_primary_block": "marketing_communication",
+      "accepted_primary_blocks": [
+        "marketing_communication",
+        "business_analysis"
+      ],
+      "predicted_primary_block": "marketing_communication",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [
+        "data_analytics"
+      ],
+      "dominant_domains": [
+        "data",
+        "marketing",
+        "communication"
+      ],
+      "top_profile_signals": [
+        "extraction and transformation improving report",
+        "automated content generation",
+        "proficient in",
+        "CRM Management",
+        "Data Analysis"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Marketing Analyst",
+          "confidence": 0.9
+        },
+        {
+          "label": "Chargé de communication",
+          "confidence": 0.87
+        },
+        {
+          "label": "Data Analyst",
+          "confidence": 0.55
+        }
+      ],
+      "profile_summary": "Profil orienté marketing / communication avec ancrage extraction and transformation improving report et automated content generation.",
+      "role_block_scores": [
+        {
+          "role_block": "marketing_communication",
+          "score": 25.4918,
+          "share": 0.4969
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 9.9941,
+          "share": 0.1948
+        },
+        {
+          "role_block": "sales_business_dev",
+          "score": 9.4945,
+          "share": 0.1851
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 6.3221,
+          "share": 0.1232
+        },
+        {
+          "role_block": "software_it",
+          "score": 1.163,
+          "share": 0.0227
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": true,
+          "suggested_role_block": "data_analytics",
+          "confidence": 0.6,
+          "reasoning": "The profile summary and top profile signals indicate a strong focus on data extraction, transformation, and analysis, which aligns more closely with data analytics than marketing communication. The presence of 'Data Analysis' and tools like 'Power BI' further support this shift.",
+          "used_signals": [
+            "extraction and transformation improving report",
+            "automated content generation",
+            "Data Analysis"
+          ]
+        },
+        "trigger_reason": "hybrid_domain_mix",
+        "gate_reason": "low_confidence"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": "data_analytics",
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": ""
+    },
+    {
+      "label": "Supply Chain Performance Analyst",
+      "source_type": "real",
+      "path": "/Users/akimguentas/Downloads/APPLICATION/CV – Akim Guentas – Future Talent Supply Chain Performance Analyst.pdf",
+      "family": "supply_chain_ops",
+      "expected_primary_block": "supply_chain_ops",
+      "accepted_primary_blocks": [
+        "supply_chain_ops",
+        "business_analysis",
+        "data_analytics"
+      ],
+      "predicted_primary_block": "supply_chain_ops",
+      "strict_primary_match": true,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [],
+      "dominant_domains": [
+        "data",
+        "supply_chain",
+        "operations"
+      ],
+      "top_profile_signals": [
+        "reporting data kpi supply chain",
+        "ingestion structuration donnees api",
+        "reporting creation contenus",
+        "Data Analysis",
+        "Power BI"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Coordinateur Supply Chain",
+          "confidence": 0.9
+        }
+      ],
+      "profile_summary": "Profil orienté supply chain / operations avec ancrage reporting data kpi supply chain et ingestion structuration donnees api.",
+      "role_block_scores": [
+        {
+          "role_block": "supply_chain_ops",
+          "score": 24.746,
+          "share": 0.5305
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 8.2496,
+          "share": 0.1769
+        },
+        {
+          "role_block": "marketing_communication",
+          "score": 7.3214,
+          "share": 0.157
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 6.3262,
+          "share": 0.1356
+        },
+        {
+          "role_block": "software_it",
+          "score": 5.7244,
+          "share": 0.1227
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": false,
+          "suggested_role_block": "",
+          "confidence": 0.8,
+          "reasoning": "The dominant role block 'supply_chain_ops' aligns well with the profile signals related to supply chain and data reporting. The presence of relevant skills such as 'reporting data kpi supply chain' and 'ingestion structuration donnees api' supports this role block.",
+          "used_signals": [
+            "reporting data kpi supply chain",
+            "ingestion structuration donnees api",
+            "Data Analysis",
+            "Power BI"
+          ]
+        },
+        "trigger_reason": "hybrid_domain_mix",
+        "gate_reason": "no_challenge"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": ""
+    },
+    {
+      "label": "CV Wecker",
+      "source_type": "real",
+      "path": "/Users/akimguentas/Downloads/cvtest/CV WECKER.pdf",
+      "family": "software_it",
+      "expected_primary_block": "software_it",
+      "accepted_primary_blocks": [
+        "software_it",
+        "data_analytics"
+      ],
+      "predicted_primary_block": "data_analytics",
+      "strict_primary_match": false,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [
+        "software_it"
+      ],
+      "dominant_domains": [
+        "data",
+        "software",
+        "it"
+      ],
+      "top_profile_signals": [
+        "gerer cv entreprise",
+        "connaissances decouvrir schemas comportementaux",
+        "fonctionnalite recherche db assiste",
+        "PostgreSQL",
+        "Python"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Data Analyst",
+          "confidence": 0.87
+        },
+        {
+          "label": "BI Analyst",
+          "confidence": 0.86
+        },
+        {
+          "label": "Software Engineer",
+          "confidence": 0.55
+        }
+      ],
+      "profile_summary": "Profil orienté analyse de donnees avec ancrage gerer cv entreprise et connaissances decouvrir schemas comportementaux.",
+      "role_block_scores": [
+        {
+          "role_block": "data_analytics",
+          "score": 20.4388,
+          "share": 0.4767
+        },
+        {
+          "role_block": "software_it",
+          "score": 17.0785,
+          "share": 0.3984
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 4.1078,
+          "share": 0.0958
+        },
+        {
+          "role_block": "hr_ops",
+          "score": 1.2471,
+          "share": 0.0291
+        },
+        {
+          "role_block": "project_ops",
+          "score": 0.7311,
+          "share": 0.0171
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": false,
+          "suggested_role_block": "",
+          "confidence": 0.85,
+          "reasoning": "The dominant role block 'data_analytics' aligns well with the top profile signals indicating a focus on data analysis and relevant tools like PostgreSQL and Python. The secondary role block 'software_it' also supports this alignment. Therefore, there is no need to challenge the current dominant role block.",
+          "used_signals": [
+            "gerer cv entreprise",
+            "connaissances decouvrir schemas comportementaux",
+            "fonctionnalite recherche db assiste",
+            "PostgreSQL",
+            "Python"
+          ]
+        },
+        "trigger_reason": "close_role_scores",
+        "gate_reason": "no_challenge"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": ""
+    },
+    {
+      "label": "Ania Benabbas",
+      "source_type": "real",
+      "path": "/Users/akimguentas/Downloads/cvtest/CV_2026-02-17_Ania_Benabbas (1).pdf",
+      "family": "legal_compliance",
+      "expected_primary_block": "legal_compliance",
+      "accepted_primary_blocks": [
+        "legal_compliance",
+        "finance_ops"
+      ],
+      "predicted_primary_block": "finance_ops",
+      "strict_primary_match": false,
+      "accepted_primary_match": true,
+      "secondary_role_blocks": [
+        "legal_compliance",
+        "business_analysis"
+      ],
+      "dominant_domains": [
+        "legal",
+        "business"
+      ],
+      "top_profile_signals": [
+        "analyse reglementaire examen conformite cadre",
+        "coordination differents services internes externes",
+        "organisation juridique opcvm fia",
+        "Financial Analysis",
+        "Compliance"
+      ],
+      "role_hypotheses": [
+        {
+          "label": "Contrôleur de gestion",
+          "confidence": 0.89
+        },
+        {
+          "label": "Financial Analyst",
+          "confidence": 0.87
+        },
+        {
+          "label": "Business Analyst",
+          "confidence": 0.55
+        }
+      ],
+      "profile_summary": "Profil orienté finance operationnelle avec ancrage analyse reglementaire examen conformite cadre et coordination differents services internes externes.",
+      "role_block_scores": [
+        {
+          "role_block": "finance_ops",
+          "score": 6.8915,
+          "share": 0.3716
+        },
+        {
+          "role_block": "legal_compliance",
+          "score": 6.0459,
+          "share": 0.326
+        },
+        {
+          "role_block": "business_analysis",
+          "score": 3.4509,
+          "share": 0.1861
+        },
+        {
+          "role_block": "data_analytics",
+          "score": 2.1564,
+          "share": 0.1163
+        },
+        {
+          "role_block": "project_ops",
+          "score": 1.28,
+          "share": 0.069
+        }
+      ],
+      "profile_intelligence_ai_assist": {
+        "enabled": true,
+        "triggered": true,
+        "accepted": false,
+        "suggestion": {
+          "challenge": false,
+          "suggested_role_block": "",
+          "confidence": 0.85,
+          "reasoning": "The dominant role block 'finance_ops' aligns well with the profile summary and top profile signals, which emphasize financial analysis and compliance. The secondary role blocks also support this alignment without indicating a need for a challenge.",
+          "used_signals": [
+            "analyse reglementaire examen conformite cadre",
+            "coordination differents services internes externes",
+            "organisation juridique opcvm fia",
+            "Financial Analysis",
+            "Compliance"
+          ]
+        },
+        "trigger_reason": "close_role_scores",
+        "gate_reason": "no_challenge"
+      },
+      "ai_triggered": true,
+      "ai_accepted": false,
+      "ai_suggested_role_block": null,
+      "ai_helped": false,
+      "ai_hurt": false,
+      "notes": ""
+    }
+  ]
+}

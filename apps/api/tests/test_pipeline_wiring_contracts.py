@@ -12,14 +12,22 @@ def _read(path: Path) -> str:
 
 def test_parse_file_uses_baseline_parser_and_compass_enricher():
     source = _read(ROOT / "api/routes/profile_file.py")
-    assert "run_cv_pipeline" in source, "parse-file must use compass.canonical_pipeline.run_cv_pipeline"
-    assert "build_domain_uris_for_text" in source, "parse-file must build DOMAIN URIs"
+    assert "build_parse_file_response_payload" in source, (
+        "parse-file must delegate orchestration to the modular parsing pipeline"
+    )
+    pipeline = _read(ROOT / "compass/pipeline/profile_parse_pipeline.py")
+    assert "run_cv_pipeline" in pipeline, "pipeline must use compass.canonical_pipeline.run_cv_pipeline"
+    assert "run_enrichment_stage" in pipeline, "pipeline must use explicit enrichment stage"
+    assert "run_canonical_mapping_stage" in pipeline, "pipeline must use explicit canonical mapping stage"
 
 
 def test_parse_baseline_uses_baseline_parser_and_compass_enricher():
     source = _read(ROOT / "api/routes/profile_baseline.py")
-    assert "run_cv_pipeline" in source, "parse-baseline must use compass.canonical_pipeline.run_cv_pipeline"
-    assert "build_domain_uris_for_text" in source, "parse-baseline must build DOMAIN URIs"
+    assert "build_parse_baseline_response_payload" in source, (
+        "parse-baseline must delegate orchestration to the modular parsing pipeline"
+    )
+    pipeline = _read(ROOT / "compass/pipeline/profile_parse_pipeline.py")
+    assert "build_parse_baseline_response_payload" in pipeline
 
 
 def test_inbox_uses_catalog_and_matching_engine():

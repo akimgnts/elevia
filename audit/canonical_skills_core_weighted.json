@@ -1,0 +1,2732 @@
+{
+  "ontology_metadata": {
+    "version": "1.1.0",
+    "target_platform": "Elevia",
+    "status": "core_ready",
+    "layer": "CORE",
+    "default_language": "fr",
+    "supported_languages": [
+      "fr",
+      "en"
+    ],
+    "clusters": [
+      "DATA_ANALYTICS_AI",
+      "SOFTWARE_IT",
+      "ENGINEERING_INDUSTRY",
+      "MARKETING_SALES_GROWTH",
+      "FINANCE_BUSINESS_OPERATIONS",
+      "GENERIC_TRANSVERSAL"
+    ],
+    "skill_types": [
+      "core",
+      "support",
+      "generic"
+    ],
+    "concept_types": [
+      "concept",
+      "tool",
+      "method"
+    ],
+    "total_skills": 100,
+    "contextual_weighting": {
+      "enabled_schema": true,
+      "importance_levels": [
+        "CORE",
+        "SECONDARY",
+        "CONTEXT"
+      ],
+      "default_weights": {
+        "CORE": 1.2,
+        "SECONDARY": 1.0,
+        "CONTEXT": 0.8
+      },
+      "fields_added_to_skill": [
+        "importance_level",
+        "contextual_weight",
+        "offer_cluster_affinity"
+      ],
+      "note": "Contextual weighting metadata added on top of canonical skills for deterministic scoring and explainability."
+    }
+  },
+  "matching_engine_rules": {
+    "pivot_skills": {
+      "DATA_ANALYTICS_AI": [
+        "skill:data_analysis",
+        "skill:business_intelligence",
+        "skill:data_engineering",
+        "skill:machine_learning"
+      ],
+      "SOFTWARE_IT": [
+        "skill:backend_development",
+        "skill:frontend_development",
+        "skill:devops",
+        "skill:cloud_architecture"
+      ],
+      "ENGINEERING_INDUSTRY": [
+        "skill:mechanical_design",
+        "skill:process_optimization",
+        "skill:industrial_automation",
+        "skill:quality_engineering"
+      ],
+      "MARKETING_SALES_GROWTH": [
+        "skill:digital_marketing",
+        "skill:growth_analytics",
+        "skill:b2b_sales",
+        "skill:crm_management"
+      ],
+      "FINANCE_BUSINESS_OPERATIONS": [
+        "skill:financial_analysis",
+        "skill:financial_modeling",
+        "skill:business_analysis",
+        "skill:project_management"
+      ],
+      "GENERIC_TRANSVERSAL": []
+    },
+    "generic_skills_to_downweight": [
+      {
+        "canonical_skill_id": "skill:communication",
+        "genericity_score": 0.95,
+        "penalty_weight": 0.8
+      },
+      {
+        "canonical_skill_id": "skill:teamwork",
+        "genericity_score": 0.95,
+        "penalty_weight": 0.85
+      },
+      {
+        "canonical_skill_id": "skill:leadership",
+        "genericity_score": 0.85,
+        "penalty_weight": 0.7
+      },
+      {
+        "canonical_skill_id": "skill:problem_solving",
+        "genericity_score": 0.75,
+        "penalty_weight": 0.9
+      }
+    ],
+    "contextual_weight_defaults": {
+      "CORE": 1.5,
+      "SECONDARY": 1.0,
+      "CONTEXT": 0.5
+    },
+    "contextual_weighting_source": "ontology.skill.importance_level + ontology.skill.contextual_weight + ontology.skill.offer_cluster_affinity"
+  },
+  "normalization_mappings": {
+    "tool_to_canonical": {
+      "python": [
+        "skill:data_analysis",
+        "skill:machine_learning",
+        "skill:backend_development"
+      ],
+      "sql": [
+        "skill:data_analysis",
+        "skill:data_engineering",
+        "skill:business_analysis"
+      ],
+      "power bi": [
+        "skill:business_intelligence"
+      ],
+      "tableau": [
+        "skill:business_intelligence"
+      ],
+      "excel": [
+        "skill:spreadsheet_analysis",
+        "skill:financial_analysis",
+        "skill:financial_modeling"
+      ],
+      "google sheets": [
+        "skill:spreadsheet_analysis"
+      ],
+      "airflow": [
+        "skill:data_engineering"
+      ],
+      "dbt": [
+        "skill:data_engineering"
+      ],
+      "spark": [
+        "skill:data_engineering"
+      ],
+      "tensorflow": [
+        "skill:machine_learning"
+      ],
+      "pytorch": [
+        "skill:machine_learning"
+      ],
+      "fastapi": [
+        "skill:backend_development"
+      ],
+      "django": [
+        "skill:backend_development"
+      ],
+      "node.js": [
+        "skill:backend_development"
+      ],
+      "react": [
+        "skill:frontend_development"
+      ],
+      "vue": [
+        "skill:frontend_development"
+      ],
+      "docker": [
+        "skill:devops"
+      ],
+      "kubernetes": [
+        "skill:devops"
+      ],
+      "terraform": [
+        "skill:devops",
+        "skill:cloud_architecture"
+      ],
+      "aws": [
+        "skill:cloud_architecture"
+      ],
+      "azure": [
+        "skill:cloud_architecture"
+      ],
+      "gcp": [
+        "skill:cloud_architecture"
+      ],
+      "solidworks": [
+        "skill:mechanical_design"
+      ],
+      "catia": [
+        "skill:mechanical_design"
+      ],
+      "autocad": [
+        "skill:mechanical_design"
+      ],
+      "sap": [
+        "skill:supply_chain_management",
+        "skill:erp_usage"
+      ],
+      "salesforce": [
+        "skill:crm_management",
+        "skill:b2b_sales"
+      ],
+      "hubspot": [
+        "skill:crm_management",
+        "skill:digital_marketing"
+      ],
+      "google analytics": [
+        "skill:growth_analytics",
+        "skill:web_analytics"
+      ],
+      "mixpanel": [
+        "skill:growth_analytics",
+        "skill:product_analytics"
+      ],
+      "amplitude": [
+        "skill:growth_analytics",
+        "skill:product_analytics"
+      ],
+      "jira": [
+        "skill:project_management",
+        "skill:agile_delivery"
+      ],
+      "trello": [
+        "skill:project_management"
+      ],
+      "asana": [
+        "skill:project_management"
+      ]
+    },
+    "synonym_to_canonical": {
+      "data analytics": "skill:data_analysis",
+      "analyse de données": "skill:data_analysis",
+      "dashboarding": "skill:business_intelligence",
+      "data viz": "skill:business_intelligence",
+      "etl": "skill:data_engineering",
+      "elt": "skill:data_engineering",
+      "ml": "skill:machine_learning",
+      "apprentissage automatique": "skill:machine_learning",
+      "backend": "skill:backend_development",
+      "api development": "skill:backend_development",
+      "frontend": "skill:frontend_development",
+      "ci/cd": "skill:devops",
+      "iac": "skill:devops",
+      "cloud computing": "skill:cloud_architecture",
+      "cad": "skill:mechanical_design",
+      "lean manufacturing": "skill:process_optimization",
+      "continuous improvement": "skill:process_optimization",
+      "automation engineering": "skill:industrial_automation",
+      "marketing digital": "skill:digital_marketing",
+      "growth hacking": "skill:growth_analytics",
+      "cro": "skill:growth_analytics",
+      "enterprise sales": "skill:b2b_sales",
+      "financial modelling": "skill:financial_modeling",
+      "modélisation financière": "skill:financial_modeling",
+      "gestion de projet": "skill:project_management",
+      "scrum": "skill:agile_delivery",
+      "communication orale et écrite": "skill:communication",
+      "critical thinking": "skill:problem_solving"
+    }
+  },
+  "ontology": [
+    {
+      "cluster_name": "DATA_ANALYTICS_AI",
+      "skills": [
+        {
+          "canonical_skill_id": "skill:data_analysis",
+          "label": "Data Analysis",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "data analytics",
+            "analyse de données",
+            "eda"
+          ],
+          "tools": [
+            "python",
+            "pandas",
+            "numpy",
+            "sql",
+            "jupyter"
+          ],
+          "potential_esco_mapping_label": "data analysis",
+          "genericity_score": 0.2,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "analyse de données",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:business_intelligence",
+          "label": "Business Intelligence",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "bi",
+            "dashboarding",
+            "data visualization",
+            "informatique décisionnelle"
+          ],
+          "tools": [
+            "power bi",
+            "tableau",
+            "looker",
+            "metabase"
+          ],
+          "potential_esco_mapping_label": "business intelligence",
+          "genericity_score": 0.25,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "systèmes d'aide à la décision",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:data_engineering",
+          "label": "Data Engineering",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "etl",
+            "elt",
+            "data pipelines"
+          ],
+          "tools": [
+            "sql",
+            "airflow",
+            "dbt",
+            "spark",
+            "kafka"
+          ],
+          "potential_esco_mapping_label": "data engineering",
+          "genericity_score": 0.15,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "ingénierie de données",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:machine_learning",
+          "label": "Machine Learning",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "ml",
+            "apprentissage automatique",
+            "predictive modeling"
+          ],
+          "tools": [
+            "python",
+            "scikit-learn",
+            "tensorflow",
+            "pytorch"
+          ],
+          "potential_esco_mapping_label": "machine learning",
+          "genericity_score": 0.1,
+          "mapping_confidence": "high",
+          "status": "active",
+          "esco_fr_label": "apprentissage automatique",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:spreadsheet_analysis",
+          "label": "Spreadsheet Analysis",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "excel analysis",
+            "spreadsheet modeling",
+            "tableur",
+            "utiliser un logiciel de tableur"
+          ],
+          "tools": [
+            "excel",
+            "google sheets"
+          ],
+          "potential_esco_mapping_label": "use spreadsheet software",
+          "genericity_score": 0.45,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "utiliser un logiciel de tableur",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:statistical_analysis",
+          "label": "Statistical Analysis",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "statistics",
+            "analyse statistique",
+            "hypothesis testing"
+          ],
+          "tools": [
+            "r",
+            "python",
+            "spss"
+          ],
+          "potential_esco_mapping_label": "perform statistical analysis",
+          "genericity_score": 0.2,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "définir des modèles statistiques",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:data_cleaning",
+          "label": "Data Cleaning",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "data cleansing",
+            "nettoyage de données",
+            "data wrangling"
+          ],
+          "tools": [
+            "python",
+            "sql",
+            "excel"
+          ],
+          "potential_esco_mapping_label": "clean data",
+          "genericity_score": 0.35,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "effectuer un nettoyage de données",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:data_visualization",
+          "label": "Data Visualization",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "dataviz",
+            "visualisation de données",
+            "visual analytics",
+            "dashboards"
+          ],
+          "tools": [
+            "tableau",
+            "power bi",
+            "python"
+          ],
+          "potential_esco_mapping_label": "visualise data",
+          "genericity_score": 0.3,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "logiciel de visualisation des données",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:sql_querying",
+          "label": "SQL Querying",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "sql",
+            "database querying",
+            "requêtes sql"
+          ],
+          "tools": [
+            "sql",
+            "postgresql",
+            "mysql"
+          ],
+          "potential_esco_mapping_label": "use query languages",
+          "genericity_score": 0.2,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "SQL",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:data_modeling",
+          "label": "Data Modeling",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "data modelling",
+            "schema design",
+            "modélisation de données"
+          ],
+          "tools": [
+            "sql",
+            "dbt",
+            "erwin"
+          ],
+          "potential_esco_mapping_label": "create data models",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:data_governance",
+          "label": "Data Governance",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "data quality governance",
+            "governance des données"
+          ],
+          "tools": [
+            "collibra",
+            "excel"
+          ],
+          "potential_esco_mapping_label": "manage data quality",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:feature_engineering",
+          "label": "Feature Engineering",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "feature creation",
+            "engineering features"
+          ],
+          "tools": [
+            "python",
+            "scikit-learn"
+          ],
+          "potential_esco_mapping_label": "prepare data for analysis",
+          "genericity_score": 0.15,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:model_evaluation",
+          "label": "Model Evaluation",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "model validation",
+            "evaluate models"
+          ],
+          "tools": [
+            "python",
+            "mlflow"
+          ],
+          "potential_esco_mapping_label": "evaluate analytical models",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:time_series_analysis",
+          "label": "Time Series Analysis",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "forecasting time series",
+            "séries temporelles"
+          ],
+          "tools": [
+            "python",
+            "r"
+          ],
+          "potential_esco_mapping_label": "perform time series analysis",
+          "genericity_score": 0.15,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:ab_testing",
+          "label": "A/B Testing",
+          "skill_type": "support",
+          "concept_type": "method",
+          "aliases": [
+            "split testing",
+            "ab test"
+          ],
+          "tools": [
+            "optimizely",
+            "google analytics"
+          ],
+          "potential_esco_mapping_label": "test strategies",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:nlp",
+          "label": "Natural Language Processing",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "nlp",
+            "traitement du langage naturel"
+          ],
+          "tools": [
+            "python",
+            "spacy",
+            "transformers"
+          ],
+          "potential_esco_mapping_label": "natural language processing",
+          "genericity_score": 0.1,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "traitement automatique du langage naturel",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:deep_learning",
+          "label": "Deep Learning",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "neural networks",
+            "deep neural networks"
+          ],
+          "tools": [
+            "tensorflow",
+            "pytorch"
+          ],
+          "potential_esco_mapping_label": "deep learning",
+          "genericity_score": 0.1,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "apprentissage profond",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:mlops",
+          "label": "MLOps",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "machine learning operations",
+            "model ops"
+          ],
+          "tools": [
+            "mlflow",
+            "docker",
+            "kubernetes"
+          ],
+          "potential_esco_mapping_label": "deploy artificial intelligence systems",
+          "genericity_score": 0.1,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:prompt_engineering",
+          "label": "Prompt Engineering",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "llm prompting",
+            "ai prompting"
+          ],
+          "tools": [
+            "openai api",
+            "claude",
+            "langchain"
+          ],
+          "potential_esco_mapping_label": "interact with artificial intelligence systems",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:data_storytelling",
+          "label": "Data Storytelling",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "narrative analytics",
+            "storytelling de données"
+          ],
+          "tools": [
+            "power bi",
+            "tableau",
+            "powerpoint"
+          ],
+          "potential_esco_mapping_label": "present analytical findings",
+          "genericity_score": 0.35,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:python_programming",
+          "label": "Python Programming",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "python",
+            "python programming"
+          ],
+          "tools": [
+            "python"
+          ],
+          "potential_esco_mapping_label": "python (programming language)",
+          "genericity_score": 0.2,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "programmation Python",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:api_usage",
+          "label": "API Usage",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "api usage",
+            "api rest",
+            "rest api usage"
+          ],
+          "tools": [
+            "postman",
+            "openapi"
+          ],
+          "potential_esco_mapping_label": "use web service APIs",
+          "genericity_score": 0.35,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "utiliser des API web",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:data_mining",
+          "label": "Data Mining",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "exploration de données",
+            "data mining"
+          ],
+          "tools": [
+            "python",
+            "sql"
+          ],
+          "potential_esco_mapping_label": "data mining",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "exploration de données",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "DATA_ANALYTICS_AI"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_name": "SOFTWARE_IT",
+      "skills": [
+        {
+          "canonical_skill_id": "skill:backend_development",
+          "label": "Backend Development",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "backend",
+            "server-side development",
+            "api development"
+          ],
+          "tools": [
+            "fastapi",
+            "django",
+            "node.js",
+            "spring boot"
+          ],
+          "potential_esco_mapping_label": "back-end development",
+          "genericity_score": 0.15,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:frontend_development",
+          "label": "Frontend Development",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "frontend",
+            "ui development",
+            "client-side development"
+          ],
+          "tools": [
+            "react",
+            "vue",
+            "angular",
+            "html",
+            "css"
+          ],
+          "potential_esco_mapping_label": "front-end development",
+          "genericity_score": 0.2,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:devops",
+          "label": "DevOps",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "ci/cd",
+            "infrastructure as code",
+            "iac"
+          ],
+          "tools": [
+            "docker",
+            "kubernetes",
+            "terraform",
+            "github actions"
+          ],
+          "potential_esco_mapping_label": "implement continuous integration",
+          "genericity_score": 0.15,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "DevOps",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:cloud_architecture",
+          "label": "Cloud Architecture",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "cloud computing",
+            "cloud infrastructure"
+          ],
+          "tools": [
+            "aws",
+            "azure",
+            "gcp",
+            "terraform"
+          ],
+          "potential_esco_mapping_label": "design cloud architecture",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "technologies de dématérialisation",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:api_design",
+          "label": "API Design",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "rest api design",
+            "api architecture"
+          ],
+          "tools": [
+            "openapi",
+            "postman"
+          ],
+          "potential_esco_mapping_label": "design application interfaces",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:database_design",
+          "label": "Database Design",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "schema design",
+            "database modelling"
+          ],
+          "tools": [
+            "postgresql",
+            "mysql",
+            "sql"
+          ],
+          "potential_esco_mapping_label": "design databases",
+          "genericity_score": 0.2,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "base de données",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:software_testing",
+          "label": "Software Testing",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "test automation",
+            "testing"
+          ],
+          "tools": [
+            "pytest",
+            "jest",
+            "cypress"
+          ],
+          "potential_esco_mapping_label": "test software",
+          "genericity_score": 0.3,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:software_architecture",
+          "label": "Software Architecture",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "system architecture",
+            "application architecture"
+          ],
+          "tools": [
+            "uml",
+            "c4 model"
+          ],
+          "potential_esco_mapping_label": "design software architecture",
+          "genericity_score": 0.15,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:microservices_architecture",
+          "label": "Microservices Architecture",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "microservices",
+            "distributed services"
+          ],
+          "tools": [
+            "kafka",
+            "rabbitmq",
+            "grpc"
+          ],
+          "potential_esco_mapping_label": "design software architecture",
+          "genericity_score": 0.15,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:linux_administration",
+          "label": "Linux Administration",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "linux systems",
+            "sysadmin linux"
+          ],
+          "tools": [
+            "linux",
+            "bash"
+          ],
+          "potential_esco_mapping_label": "administer ICT system",
+          "genericity_score": 0.25,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:networking_basics",
+          "label": "Networking Basics",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "computer networking",
+            "network fundamentals"
+          ],
+          "tools": [
+            "tcp/ip"
+          ],
+          "potential_esco_mapping_label": "manage network resources",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:cybersecurity_basics",
+          "label": "Cybersecurity Basics",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "security fundamentals",
+            "application security basics"
+          ],
+          "tools": [
+            "owasp"
+          ],
+          "potential_esco_mapping_label": "apply ICT security policies",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "cybersécurité",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:version_control",
+          "label": "Version Control",
+          "skill_type": "support",
+          "concept_type": "tool",
+          "aliases": [
+            "git",
+            "source control"
+          ],
+          "tools": [
+            "git",
+            "github",
+            "gitlab"
+          ],
+          "potential_esco_mapping_label": "use version control software",
+          "genericity_score": 0.35,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "outils de gestion de configuration logicielle",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:ui_ux_integration",
+          "label": "UI/UX Integration",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "design implementation",
+            "ui integration"
+          ],
+          "tools": [
+            "figma",
+            "react"
+          ],
+          "potential_esco_mapping_label": "implement front-end website design",
+          "genericity_score": 0.3,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:containerization",
+          "label": "Containerization",
+          "skill_type": "support",
+          "concept_type": "method",
+          "aliases": [
+            "containers",
+            "dockerization"
+          ],
+          "tools": [
+            "docker"
+          ],
+          "potential_esco_mapping_label": "manage virtualisation environments",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:observability",
+          "label": "Observability",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "monitoring",
+            "logging and metrics"
+          ],
+          "tools": [
+            "grafana",
+            "prometheus",
+            "sentry"
+          ],
+          "potential_esco_mapping_label": "monitor system performance",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:authentication_authorization",
+          "label": "Authentication and Authorization",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "auth",
+            "access control",
+            "oauth"
+          ],
+          "tools": [
+            "oauth",
+            "jwt"
+          ],
+          "potential_esco_mapping_label": "implement authentication systems",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:scripting_automation",
+          "label": "Scripting Automation",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "automation scripts",
+            "task automation"
+          ],
+          "tools": [
+            "python",
+            "bash",
+            "powershell"
+          ],
+          "potential_esco_mapping_label": "automate workflows",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "SOFTWARE_IT"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_name": "ENGINEERING_INDUSTRY",
+      "skills": [
+        {
+          "canonical_skill_id": "skill:mechanical_design",
+          "label": "Mechanical Design",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "cad design",
+            "conception mécanique",
+            "3d modeling"
+          ],
+          "tools": [
+            "solidworks",
+            "catia",
+            "autocad"
+          ],
+          "potential_esco_mapping_label": "design mechanical components",
+          "genericity_score": 0.15,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:process_optimization",
+          "label": "Process Optimization",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "continuous improvement",
+            "lean manufacturing"
+          ],
+          "tools": [
+            "excel",
+            "minitab",
+            "visio"
+          ],
+          "potential_esco_mapping_label": "optimise production processes",
+          "genericity_score": 0.25,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:industrial_automation",
+          "label": "Industrial Automation",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "automation engineering",
+            "automatisation industrielle"
+          ],
+          "tools": [
+            "plc",
+            "scada"
+          ],
+          "potential_esco_mapping_label": "automation engineering",
+          "genericity_score": 0.15,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:quality_engineering",
+          "label": "Quality Engineering",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "quality control",
+            "quality assurance engineering"
+          ],
+          "tools": [
+            "minitab",
+            "excel"
+          ],
+          "potential_esco_mapping_label": "perform quality control analysis",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:supply_chain_management",
+          "label": "Supply Chain Management",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "logistics management",
+            "inventory management"
+          ],
+          "tools": [
+            "sap",
+            "oracle scm",
+            "excel"
+          ],
+          "potential_esco_mapping_label": "manage supply chain",
+          "genericity_score": 0.35,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:lean_six_sigma",
+          "label": "Lean Six Sigma",
+          "skill_type": "support",
+          "concept_type": "method",
+          "aliases": [
+            "six sigma",
+            "lean",
+            "dmaic"
+          ],
+          "tools": [
+            "minitab"
+          ],
+          "potential_esco_mapping_label": "apply quality standards",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:maintenance_planning",
+          "label": "Maintenance Planning",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "preventive maintenance",
+            "maintenance scheduling"
+          ],
+          "tools": [
+            "sap",
+            "excel"
+          ],
+          "potential_esco_mapping_label": "plan maintenance activities",
+          "genericity_score": 0.3,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:production_planning",
+          "label": "Production Planning",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "production scheduling",
+            "planning industriel"
+          ],
+          "tools": [
+            "sap",
+            "excel"
+          ],
+          "potential_esco_mapping_label": "plan production",
+          "genericity_score": 0.25,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:electrical_engineering_basics",
+          "label": "Electrical Engineering Basics",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "electrical systems",
+            "electrical design basics"
+          ],
+          "tools": [
+            "autocad electrical"
+          ],
+          "potential_esco_mapping_label": "design electrical systems",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:root_cause_analysis",
+          "label": "Root Cause Analysis",
+          "skill_type": "support",
+          "concept_type": "method",
+          "aliases": [
+            "rca",
+            "cause analysis"
+          ],
+          "tools": [
+            "excel",
+            "visio"
+          ],
+          "potential_esco_mapping_label": "analyse causes of incidents",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:technical_drawing",
+          "label": "Technical Drawing",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "engineering drawing",
+            "dessin technique"
+          ],
+          "tools": [
+            "autocad",
+            "catia"
+          ],
+          "potential_esco_mapping_label": "create technical drawings",
+          "genericity_score": 0.25,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:manufacturing_processes",
+          "label": "Manufacturing Processes",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "industrial manufacturing",
+            "production methods"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "manage manufacturing processes",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:cad_modeling",
+          "label": "CAD Modeling",
+          "skill_type": "support",
+          "concept_type": "tool",
+          "aliases": [
+            "cad modeling",
+            "3d cad"
+          ],
+          "tools": [
+            "solidworks",
+            "catia",
+            "autocad"
+          ],
+          "potential_esco_mapping_label": "use computer-aided design software",
+          "genericity_score": 0.25,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:health_safety_compliance",
+          "label": "Health and Safety Compliance",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "hse",
+            "safety compliance"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "ensure compliance with health and safety legislation",
+          "genericity_score": 0.35,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:erp_usage",
+          "label": "ERP Usage",
+          "skill_type": "support",
+          "concept_type": "tool",
+          "aliases": [
+            "erp",
+            "enterprise resource planning"
+          ],
+          "tools": [
+            "sap",
+            "oracle erp"
+          ],
+          "potential_esco_mapping_label": "use enterprise resource planning software",
+          "genericity_score": 0.4,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:warehouse_operations",
+          "label": "Warehouse Operations",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "warehousing",
+            "warehouse management"
+          ],
+          "tools": [
+            "sap"
+          ],
+          "potential_esco_mapping_label": "manage warehouse operations",
+          "genericity_score": 0.35,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "ENGINEERING_INDUSTRY"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_name": "MARKETING_SALES_GROWTH",
+      "skills": [
+        {
+          "canonical_skill_id": "skill:digital_marketing",
+          "label": "Digital Marketing",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "marketing digital",
+            "online marketing"
+          ],
+          "tools": [
+            "google ads",
+            "meta ads",
+            "hubspot",
+            "mailchimp"
+          ],
+          "potential_esco_mapping_label": "implement digital marketing",
+          "genericity_score": 0.25,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:growth_analytics",
+          "label": "Growth Analytics",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "growth hacking",
+            "cro",
+            "conversion rate optimization"
+          ],
+          "tools": [
+            "google analytics",
+            "mixpanel",
+            "amplitude",
+            "optimizely"
+          ],
+          "potential_esco_mapping_label": "analyse marketing data",
+          "genericity_score": 0.2,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:b2b_sales",
+          "label": "B2B Sales",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "enterprise sales",
+            "business-to-business sales",
+            "commercial"
+          ],
+          "tools": [
+            "salesforce",
+            "hubspot",
+            "linkedin sales navigator"
+          ],
+          "potential_esco_mapping_label": "sell products to businesses",
+          "genericity_score": 0.3,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:crm_management",
+          "label": "CRM Management",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "crm",
+            "customer relationship management",
+            "gestion de la relation client"
+          ],
+          "tools": [
+            "salesforce",
+            "hubspot",
+            "pipedrive"
+          ],
+          "potential_esco_mapping_label": "manage customer relationships",
+          "genericity_score": 0.4,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:seo",
+          "label": "SEO",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "search engine optimization",
+            "référencement naturel"
+          ],
+          "tools": [
+            "google search console",
+            "semrush"
+          ],
+          "potential_esco_mapping_label": "optimise websites for search engines",
+          "genericity_score": 0.2,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:sem",
+          "label": "SEM",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "search engine marketing",
+            "paid search"
+          ],
+          "tools": [
+            "google ads"
+          ],
+          "potential_esco_mapping_label": "manage search engine marketing campaigns",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:content_marketing",
+          "label": "Content Marketing",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "content strategy",
+            "editorial marketing"
+          ],
+          "tools": [
+            "hubspot",
+            "wordpress"
+          ],
+          "potential_esco_mapping_label": "develop content strategy",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:email_marketing",
+          "label": "Email Marketing",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "email campaigns",
+            "newsletter marketing"
+          ],
+          "tools": [
+            "mailchimp",
+            "hubspot"
+          ],
+          "potential_esco_mapping_label": "manage email marketing campaigns",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:social_media_marketing",
+          "label": "Social Media Marketing",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "social media campaigns",
+            "community marketing"
+          ],
+          "tools": [
+            "meta ads",
+            "linkedin"
+          ],
+          "potential_esco_mapping_label": "implement social media marketing",
+          "genericity_score": 0.35,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:lead_generation",
+          "label": "Lead Generation",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "prospecting",
+            "lead sourcing"
+          ],
+          "tools": [
+            "salesforce",
+            "apollo",
+            "linkedin sales navigator"
+          ],
+          "potential_esco_mapping_label": "generate sales leads",
+          "genericity_score": 0.3,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:account_management",
+          "label": "Account Management",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "client account management",
+            "customer portfolio management"
+          ],
+          "tools": [
+            "salesforce",
+            "hubspot"
+          ],
+          "potential_esco_mapping_label": "manage client accounts",
+          "genericity_score": 0.35,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:web_analytics",
+          "label": "Web Analytics",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "website analytics",
+            "analytics web"
+          ],
+          "tools": [
+            "google analytics",
+            "google tag manager"
+          ],
+          "potential_esco_mapping_label": "analyse website traffic",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:market_research",
+          "label": "Market Research",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "consumer research",
+            "research market"
+          ],
+          "tools": [
+            "excel",
+            "survey tools"
+          ],
+          "potential_esco_mapping_label": "conduct market research",
+          "genericity_score": 0.3,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:brand_management",
+          "label": "Brand Management",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "brand strategy",
+            "brand marketing"
+          ],
+          "tools": [
+            "figma",
+            "powerpoint"
+          ],
+          "potential_esco_mapping_label": "manage brand identity",
+          "genericity_score": 0.35,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_name": "FINANCE_BUSINESS_OPERATIONS",
+      "skills": [
+        {
+          "canonical_skill_id": "skill:financial_analysis",
+          "label": "Financial Analysis",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "finance analysis",
+            "analyse financière"
+          ],
+          "tools": [
+            "excel",
+            "power bi"
+          ],
+          "potential_esco_mapping_label": "perform financial analysis",
+          "genericity_score": 0.2,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "analyse financière",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:financial_modeling",
+          "label": "Financial Modeling",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "financial modelling",
+            "modélisation financière"
+          ],
+          "tools": [
+            "excel"
+          ],
+          "potential_esco_mapping_label": "create financial models",
+          "genericity_score": 0.15,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:business_analysis",
+          "label": "Business Analysis",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "business analytics",
+            "analyse métier"
+          ],
+          "tools": [
+            "sql",
+            "excel",
+            "power bi"
+          ],
+          "potential_esco_mapping_label": "business analysis",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:project_management",
+          "label": "Project Management",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "gestion de projet",
+            "program management",
+            "gestion de projets"
+          ],
+          "tools": [
+            "jira",
+            "trello",
+            "asana"
+          ],
+          "potential_esco_mapping_label": "manage projects",
+          "genericity_score": 0.5,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:product_analytics",
+          "label": "Product Analytics",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "product performance analysis",
+            "feature analysis"
+          ],
+          "tools": [
+            "mixpanel",
+            "amplitude",
+            "sql"
+          ],
+          "potential_esco_mapping_label": "analyse product performance",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:agile_delivery",
+          "label": "Agile Delivery",
+          "skill_type": "support",
+          "concept_type": "method",
+          "aliases": [
+            "scrum",
+            "kanban",
+            "agile"
+          ],
+          "tools": [
+            "jira"
+          ],
+          "potential_esco_mapping_label": "use agile project management",
+          "genericity_score": 0.45,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "méthodes de gestion de projets TIC",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:budgeting",
+          "label": "Budgeting",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "budget planning",
+            "budget management"
+          ],
+          "tools": [
+            "excel"
+          ],
+          "potential_esco_mapping_label": "prepare budgets",
+          "genericity_score": 0.3,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:forecasting",
+          "label": "Forecasting",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "financial forecasting",
+            "business forecasting"
+          ],
+          "tools": [
+            "excel",
+            "power bi"
+          ],
+          "potential_esco_mapping_label": "forecast economic trends",
+          "genericity_score": 0.25,
+          "mapping_confidence": "low",
+          "status": "active",
+          "esco_fr_label": "prévision financière",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:accounting_basics",
+          "label": "Accounting Basics",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "accounting",
+            "comptabilité"
+          ],
+          "tools": [
+            "excel",
+            "erp"
+          ],
+          "potential_esco_mapping_label": "apply accounting techniques",
+          "genericity_score": 0.35,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:risk_analysis",
+          "label": "Risk Analysis",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "risk assessment",
+            "analyse des risques"
+          ],
+          "tools": [
+            "excel"
+          ],
+          "potential_esco_mapping_label": "assess risks",
+          "genericity_score": 0.3,
+          "mapping_confidence": "high",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:stakeholder_management",
+          "label": "Stakeholder Management",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "stakeholder coordination",
+            "gestion des parties prenantes"
+          ],
+          "tools": [
+            "jira",
+            "powerpoint"
+          ],
+          "potential_esco_mapping_label": "manage stakeholders",
+          "genericity_score": 0.45,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:requirements_gathering",
+          "label": "Requirements Gathering",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "requirements analysis",
+            "recueil des besoins"
+          ],
+          "tools": [
+            "confluence",
+            "jira"
+          ],
+          "potential_esco_mapping_label": "identify client needs",
+          "genericity_score": 0.35,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:process_mapping",
+          "label": "Process Mapping",
+          "skill_type": "support",
+          "concept_type": "method",
+          "aliases": [
+            "workflow mapping",
+            "cartographie des processus"
+          ],
+          "tools": [
+            "visio",
+            "draw.io"
+          ],
+          "potential_esco_mapping_label": "map business processes",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:operations_management",
+          "label": "Operations Management",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "business operations",
+            "operational management"
+          ],
+          "tools": [
+            "excel",
+            "erp"
+          ],
+          "potential_esco_mapping_label": "manage operations",
+          "genericity_score": 0.35,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
+          "contextual_weight": 1.5,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:procurement_basics",
+          "label": "Procurement Basics",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "purchasing",
+            "procurement"
+          ],
+          "tools": [
+            "sap",
+            "excel"
+          ],
+          "potential_esco_mapping_label": "manage procurement",
+          "genericity_score": 0.35,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:pricing_analysis",
+          "label": "Pricing Analysis",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "price analysis",
+            "pricing strategy support"
+          ],
+          "tools": [
+            "excel"
+          ],
+          "potential_esco_mapping_label": "analyse pricing strategies",
+          "genericity_score": 0.3,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:process_documentation",
+          "label": "Process Documentation",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "documentation des processus",
+            "sop writing"
+          ],
+          "tools": [
+            "confluence",
+            "word"
+          ],
+          "potential_esco_mapping_label": "document workflows",
+          "genericity_score": 0.45,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:vendor_management",
+          "label": "Vendor Management",
+          "skill_type": "support",
+          "concept_type": "concept",
+          "aliases": [
+            "supplier management",
+            "gestion fournisseurs"
+          ],
+          "tools": [
+            "sap",
+            "excel"
+          ],
+          "potential_esco_mapping_label": "manage suppliers",
+          "genericity_score": 0.35,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "FINANCE_BUSINESS_OPERATIONS"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_name": "GENERIC_TRANSVERSAL",
+      "skills": [
+        {
+          "canonical_skill_id": "skill:communication",
+          "label": "Communication",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "written communication",
+            "verbal communication",
+            "presentation skills"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "communicate effectively",
+          "genericity_score": 0.95,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:teamwork",
+          "label": "Teamwork",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "collaboration",
+            "team collaboration"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "work in teams",
+          "genericity_score": 0.95,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:leadership",
+          "label": "Leadership",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "team management",
+            "people management",
+            "mentoring"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "lead a team",
+          "genericity_score": 0.85,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:problem_solving",
+          "label": "Problem Solving",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "critical thinking",
+            "analytical thinking"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "solve problems",
+          "genericity_score": 0.75,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:adaptability",
+          "label": "Adaptability",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "flexibility",
+            "adaptation"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "adapt to change",
+          "genericity_score": 0.85,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:time_management",
+          "label": "Time Management",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "manage deadlines",
+            "organisation du temps"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "manage time",
+          "genericity_score": 0.85,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:stakeholder_communication",
+          "label": "Stakeholder Communication",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "client communication",
+            "reporting to stakeholders"
+          ],
+          "tools": [
+            "powerpoint"
+          ],
+          "potential_esco_mapping_label": "liaise with stakeholders",
+          "genericity_score": 0.7,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:presentation_skills",
+          "label": "Presentation Skills",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "public speaking",
+            "oral presentation"
+          ],
+          "tools": [
+            "powerpoint",
+            "keynote"
+          ],
+          "potential_esco_mapping_label": "deliver presentations",
+          "genericity_score": 0.8,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:negotiation",
+          "label": "Negotiation",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "commercial negotiation",
+            "negotiation skills"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "negotiate agreements",
+          "genericity_score": 0.7,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:decision_making",
+          "label": "Decision Making",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "making decisions",
+            "prise de décision"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "make decisions",
+          "genericity_score": 0.75,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:documentation",
+          "label": "Documentation",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "technical documentation",
+            "written documentation"
+          ],
+          "tools": [
+            "word",
+            "confluence"
+          ],
+          "potential_esco_mapping_label": "write technical documentation",
+          "genericity_score": 0.6,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:autonomy",
+          "label": "Autonomy",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "self-management",
+            "independence"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "work independently",
+          "genericity_score": 0.85,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:attention_to_detail",
+          "label": "Attention to Detail",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "detail orientation",
+            "rigour"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "pay attention to detail",
+          "genericity_score": 0.8,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:learning_agility",
+          "label": "Learning Agility",
+          "skill_type": "generic",
+          "concept_type": "concept",
+          "aliases": [
+            "ability to learn",
+            "continuous learning"
+          ],
+          "tools": [],
+          "potential_esco_mapping_label": "manage personal professional development",
+          "genericity_score": 0.8,
+          "mapping_confidence": "low",
+          "status": "active",
+          "importance_level": "CONTEXT",
+          "contextual_weight": 0.5,
+          "offer_cluster_affinity": [
+            "ALL"
+          ]
+        }
+      ]
+    }
+  ],
+  "hierarchy": {
+    "_comment": "Explicit 1-level parent relations only. Child -> parent. Deterministic, no inference.",
+    "skill:deep_learning": "skill:machine_learning",
+    "skill:nlp": "skill:machine_learning",
+    "skill:mlops": "skill:machine_learning",
+    "skill:feature_engineering": "skill:machine_learning",
+    "skill:model_evaluation": "skill:machine_learning",
+    "skill:time_series_analysis": "skill:data_analysis",
+    "skill:ab_testing": "skill:data_analysis",
+    "skill:data_visualization": "skill:business_intelligence",
+    "skill:data_storytelling": "skill:business_intelligence",
+    "skill:data_cleaning": "skill:data_engineering",
+    "skill:data_modeling": "skill:data_engineering",
+    "skill:sql_querying": "skill:data_engineering",
+    "skill:data_governance": "skill:data_engineering",
+    "skill:containerization": "skill:devops",
+    "skill:observability": "skill:devops",
+    "skill:linux_administration": "skill:devops",
+    "skill:ui_ux_integration": "skill:frontend_development",
+    "skill:authentication_authorization": "skill:backend_development",
+    "skill:scripting_automation": "skill:backend_development",
+    "skill:microservices_architecture": "skill:software_architecture"
+  }
+}

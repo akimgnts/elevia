@@ -1,0 +1,162 @@
+{
+  "metrics": {
+    "overall": {
+      "total_cases": 40,
+      "occupation_resolution_rate": 0.775,
+      "avg_confidence": 0.7153,
+      "role_family_accuracy": 0.7297,
+      "title_normalization_rate": 0.6923,
+      "inferred_skills_avg": 3.075,
+      "false_positive_rate": 0.15,
+      "skills_added_distribution": {
+        "0": 15,
+        "3": 1,
+        "5": 24
+      },
+      "resolved_count": 31,
+      "family_evaluable_count": 37,
+      "family_match_count": 27
+    },
+    "by_type": {
+      "profile": {
+        "total_cases": 20,
+        "occupation_resolution_rate": 0.8,
+        "avg_confidence": 0.7854,
+        "role_family_accuracy": 0.7222,
+        "title_normalization_rate": 0.6316,
+        "inferred_skills_avg": 3.65,
+        "false_positive_rate": 0.05,
+        "skills_added_distribution": {
+          "0": 5,
+          "3": 1,
+          "5": 14
+        },
+        "resolved_count": 16,
+        "family_evaluable_count": 18,
+        "family_match_count": 13
+      },
+      "offer": {
+        "total_cases": 20,
+        "occupation_resolution_rate": 0.75,
+        "avg_confidence": 0.6406,
+        "role_family_accuracy": 0.7368,
+        "title_normalization_rate": 0.75,
+        "inferred_skills_avg": 2.5,
+        "false_positive_rate": 0.25,
+        "skills_added_distribution": {
+          "0": 10,
+          "5": 10
+        },
+        "resolved_count": 15,
+        "family_evaluable_count": 19,
+        "family_match_count": 14
+      }
+    },
+    "by_language": {
+      "fr_or_bilingual": {
+        "total_cases": 29,
+        "occupation_resolution_rate": 0.7241,
+        "avg_confidence": 0.7126,
+        "role_family_accuracy": 0.6923,
+        "title_normalization_rate": 0.8214,
+        "inferred_skills_avg": 2.931,
+        "false_positive_rate": 0.1379,
+        "skills_added_distribution": {
+          "0": 12,
+          "5": 17
+        },
+        "resolved_count": 21,
+        "family_evaluable_count": 26,
+        "family_match_count": 18
+      },
+      "en": {
+        "total_cases": 11,
+        "occupation_resolution_rate": 0.9091,
+        "avg_confidence": 0.7211,
+        "role_family_accuracy": 0.8182,
+        "title_normalization_rate": 0.3636,
+        "inferred_skills_avg": 3.4545,
+        "false_positive_rate": 0.1818,
+        "skills_added_distribution": {
+          "0": 3,
+          "3": 1,
+          "5": 7
+        },
+        "resolved_count": 10,
+        "family_evaluable_count": 11,
+        "family_match_count": 9
+      }
+    }
+  },
+  "family_frequency": {
+    "none": 9,
+    "software_engineering": 6,
+    "data_analytics": 4,
+    "finance": 4,
+    "project_management": 3,
+    "engineering": 3,
+    "sales": 2,
+    "supply_chain": 2,
+    "marketing": 2,
+    "legal": 1,
+    "hr": 1,
+    "product_management": 1,
+    "consulting": 1,
+    "other": 1
+  },
+  "family_confusion_matrix": {
+    "data_analytics": {
+      "data_analytics": 4,
+      "engineering": 1,
+      "none": 1
+    },
+    "finance": {
+      "finance": 4
+    },
+    "consulting": {
+      "none": 2,
+      "consulting": 1
+    },
+    "sales": {
+      "sales": 2,
+      "software_engineering": 2
+    },
+    "project_management": {
+      "project_management": 3
+    },
+    "engineering": {
+      "none": 2,
+      "engineering": 2
+    },
+    "supply_chain": {
+      "none": 1,
+      "supply_chain": 2
+    },
+    "software_engineering": {
+      "software_engineering": 4
+    },
+    "legal": {
+      "legal": 1
+    },
+    "hr": {
+      "hr": 1
+    },
+    "other": {
+      "none": 3
+    },
+    "product_management": {
+      "product_management": 1
+    },
+    "marketing": {
+      "marketing": 2
+    },
+    "operations": {
+      "other": 1
+    }
+  },
+  "failure_mode_distribution": {
+    "no_onet_match": 8,
+    "wrong_role_family": 3,
+    "no_title": 1
+  }
+}

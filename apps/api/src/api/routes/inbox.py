@@ -22,11 +22,14 @@ from ..schemas.inbox import (
     InboxMeta,
     InboxRequest,
     InboxResponse,
+    OfferExplanation,
+    OfferIntelligence,
     OfferSemanticRequest,
     OfferSemanticResponse,
     RomeCompetence,
     RomeInferred,
     RomeLink,
+    SemanticExplainability,
     SkillExplainItem,
 )
 from ..utils.db import get_connection
@@ -46,9 +49,14 @@ from profile.profile_cluster import detect_profile_cluster
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from matching import MatchingEngine
+from matching.explanation_builder import build_explanation
 from matching.extractors import extract_profile
 from compass.contracts import SkillRef
+from compass.explainability.explanation_builder import build_offer_explanation
+from compass.explainability.semantic_explanation_builder import build_semantic_explainability
+from compass.offer.offer_intelligence import build_offer_intelligence
 from compass.signal_layer import build_explain_payload_v1, build_explain_compact, get_signal_cfg
+from compass.matching_explainability import build_matching_explainability
 from compass.cluster_signal import compute_cluster_skill_stats, compute_cluster_idf
 
 logger = logging.getLogger("uvicorn.error")
@@ -208,6 +216,87 @@ def _debug_inbox_filters_enabled() -> bool:
     return value in {"1", "true", "yes", "on"}
 
 
+def _map_match_strength(confidence: Optional[str]) -> Optional[str]:
+    if not confidence:
+        return None
+    conf = confidence.strip().upper()
+    if conf == "HIGH":
+        return "STRONG"
+    if conf == "MED":
+        return "MEDIUM"
+    return "WEAK"
+
+
+def _derive_dominant_reason(
+    confidence: Optional[str],
+    *,
+    near_match_count: int,
+    rare_signal_level: Optional[str] = None,
+) -> Optional[str]:
+    if not confidence and not rare_signal_level and near_match_count <= 0:
+        return None
+    conf = (confidence or "LOW").strip().upper()
+    rare = (rare_signal_level or "").strip().upper()
+    if conf == "HIGH":
+        return "Strong core alignment"
+    if rare == "HIGH":
+        return "Rare skill signal detected"
+    if near_match_count > 0:
+        return "Partial match with near skills"
+    if conf == "MED":
+        return "Partial match"
+    return "Weak match"
+
+
+def _apply_front_explanation(
+    item: InboxItem,
+    *,
+    match_debug: Dict,
+    confidence: Optional[str],
+    profile_labels: List[str],
+    offer_labels: List[str],
+) -> None:
+    explanation_payload = build_offer_explanation(
+        match_debug,
+        score=item.score,
+        confidence=confidence,
+        profile_effective_skills=profile_labels,
+        job_required_skills=offer_labels,
+    )
+    item.explanation = OfferExplanation(**explanation_payload)
+
+    legacy = build_explanation(
+        match_debug,
+        score=item.score,
+        confidence=confidence,
+    )
+    item.fit_score = legacy.get("fit_score")
+    if legacy.get("match_strength"):
+        item.match_strength = legacy.get("match_strength")
+    item.why_match = legacy.get("why_match") or []
+    item.main_blockers = legacy.get("main_blockers") or []
+    item.distance = legacy.get("distance")
+    item.next_move = legacy.get("next_move")
+
+
+def _extract_profile_intelligence_payload(profile_payload: Dict) -> Optional[Dict]:
+    value = profile_payload.get("profile_intelligence")
+    return value if isinstance(value, dict) else None
+
+
+def _apply_semantic_explainability(
+    item: InboxItem,
+    *,
+    profile_intelligence: Optional[Dict],
+) -> None:
+    payload = build_semantic_explainability(
+        profile_intelligence=profile_intelligence,
+        offer_intelligence=item.offer_intelligence.model_dump() if item.offer_intelligence else None,
+        explanation=item.explanation.model_dump() if item.explanation else None,
+    )
+    item.semantic_explainability = SemanticExplainability(**payload) if payload else None
+
+
 def _parse_date_param(value: str) -> date:
     try:
         return datetime.strptime(value, "%Y-%m-%d").date()
@@ -230,6 +319,9 @@ def _normalize_contract_type(value: Optional[str]) -> Optional[str]:
 def _build_explain(
     match_debug: Dict,
     rome_competence_list: List[RomeCompetence],
+    *,
+    near_matches: Optional[List[dict]] = None,
+    near_match_summary: Optional[dict] = None,
 ) -> ExplainBlock:
     """
     Build a display-only ExplainBlock from existing match_debug data.
@@ -247,6 +339,12 @@ def _build_explain(
     skills_debug = match_debug.get("skills", {}) if isinstance(match_debug, dict) else {}
     matched_raw: List[str] = skills_debug.get("matched", []) if isinstance(skills_debug, dict) else []
     missing_raw: List[str] = skills_debug.get("missing", []) if isinstance(skills_debug, dict) else []
+    matched_core_raw: List[str] = skills_debug.get("matched_core", []) if isinstance(skills_debug, dict) else []
+    missing_core_raw: List[str] = skills_debug.get("missing_core", []) if isinstance(skills_debug, dict) else []
+    matched_secondary_raw: List[str] = skills_debug.get("matched_secondary", []) if isinstance(skills_debug, dict) else []
+    missing_secondary_raw: List[str] = skills_debug.get("missing_secondary", []) if isinstance(skills_debug, dict) else []
+    matched_context_raw: List[str] = skills_debug.get("matched_context", []) if isinstance(skills_debug, dict) else []
+    missing_context_raw: List[str] = skills_debug.get("missing_context", []) if isinstance(skills_debug, dict) else []
 
     def _to_explain_items(skills: List[str], limit: int) -> List[SkillExplainItem]:
         return [
@@ -276,13 +374,43 @@ def _build_explain(
         total=float(match_debug.get("total", 0.0)) if isinstance(match_debug, dict) else 0.0,
     )
 
+    near_matches_list = near_matches or []
+    near_summary = near_match_summary or {}
+
+    if near_matches_list:
+        logger.info(json.dumps({
+            "event": "MATCH_EXPLAINABILITY_STATS",
+            "exact_matches": len(matched_raw),
+            "missing_core": len(missing_raw),
+            "near_matches": len(near_matches_list),
+            "max_near_strength": float(near_summary.get("max_strength", 0.0)),
+        }))
+
     return ExplainBlock(
         matched_display=_to_explain_items(matched_raw, 6),
         missing_display=_to_explain_items(missing_raw, 6),
         matched_full=_to_explain_items(matched_raw, 30),
         missing_full=_to_explain_items(missing_raw, 30),
+        matched_core=_to_explain_items(matched_core_raw, 30),
+        missing_core=_to_explain_items(missing_core_raw, 30),
+        matched_secondary=_to_explain_items(matched_secondary_raw, 30),
+        missing_secondary=_to_explain_items(missing_secondary_raw, 30),
+        matched_context=_to_explain_items(matched_context_raw, 30),
+        missing_context=_to_explain_items(missing_context_raw, 30),
         breakdown=breakdown,
+        near_matches=near_matches_list,
+        near_match_count=int(near_summary.get("count", len(near_matches_list))),
+        near_match_summary=near_summary if near_matches_list else None,
     )
+
+
+def _unpack_explain_debug(payload: tuple) -> tuple[Dict, List[str], List[str], List[dict], dict]:
+    match_debug = payload[0] if len(payload) > 0 else {}
+    matched = payload[1] if len(payload) > 1 else []
+    missing = payload[2] if len(payload) > 2 else []
+    near_matches = payload[3] if len(payload) > 3 else []
+    near_summary = payload[4] if len(payload) > 4 else {}
+    return match_debug, matched, missing, near_matches, near_summary
 
 
 def _score_offers(
@@ -291,6 +419,8 @@ def _score_offers(
     decided_ids: Set[str],
     engine: MatchingEngine,
     extracted,
+    profile_payload: Dict,
+    explain_enabled: bool,
     min_score: int,
     freq_table: Dict,
     offer_count: int,
@@ -359,8 +489,16 @@ def _score_offers(
         else:
             score_raw = float(result.score) / 100.0
 
-        items.append(
-            InboxItem(
+        near_matches = []
+        near_summary = {}
+        if explain_enabled:
+            profile_labels = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
+            offer_labels = offer.get("skills_display") or offer.get("skills") or []
+            near = build_matching_explainability(profile_labels, offer_labels)
+            near_matches = near.get("near_matches", [])
+            near_summary = near.get("near_match_summary", {})
+
+        item = InboxItem(
                 offer_id=result.offer_id,
                 source=offer.get("source"),
                 title=offer.get("title") or "",
@@ -398,8 +536,12 @@ def _score_offers(
                 skills_uri_collapsed_dupes=offer.get("skills_uri_collapsed_dupes"),
                 skills_unmapped_count=offer.get("skills_unmapped_count"),
             )
-        )
-        _explain_debug[result.offer_id] = (match_debug, matched_skills, missing_skills)
+        if near_matches:
+            item.near_match_count = len(near_matches)
+        item.offer_intelligence = OfferIntelligence(**build_offer_intelligence(offer=offer))
+        items.append(item)
+
+        _explain_debug[result.offer_id] = (match_debug, matched_skills, missing_skills, near_matches, near_summary)
 
     return items, _explain_debug, source_map, offer_lookup
 
@@ -566,6 +708,7 @@ async def get_inbox(
     """Score catalog offers against profile, excluding already-decided ones."""
     t0 = time.perf_counter()
     profile_payload, lookup_status = _load_profile_fixture(req.profile_id, req.profile)
+    profile_intelligence = _extract_profile_intelligence_payload(profile_payload)
     if _debug_matching_enabled():
         raw_skills = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
         logger.info(
@@ -711,8 +854,16 @@ async def get_inbox(
         else:
             score_raw = float(result.score) / 100.0
 
-        items.append(
-            InboxItem(
+        near_matches = []
+        near_summary = {}
+        if req.explain:
+            profile_labels = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
+            offer_labels = offer.get("skills_display") or offer.get("skills") or []
+            near = build_matching_explainability(profile_labels, offer_labels)
+            near_matches = near.get("near_matches", [])
+            near_summary = near.get("near_match_summary", {})
+
+        item = InboxItem(
                 offer_id=result.offer_id,
                 source=offer.get("source"),
                 title=offer.get("title") or "",
@@ -751,9 +902,11 @@ async def get_inbox(
                 skills_unmapped_count=offer.get("skills_unmapped_count"),
                 # explain is populated after ROME enrichment below
             )
-        )
-        # Always stash debug: used for ExplainBlock (when req.explain=True) + compass signal
-        _explain_debug[result.offer_id] = (match_debug, matched_skills, missing_skills)
+        if near_matches:
+            item.near_match_count = len(near_matches)
+        item.offer_intelligence = OfferIntelligence(**build_offer_intelligence(offer=offer))
+        items.append(item)
+        _explain_debug[result.offer_id] = (match_debug, matched_skills, missing_skills, near_matches, near_summary)
 
     t_scoring = time.perf_counter()
 
@@ -898,8 +1051,23 @@ async def get_inbox(
 
         # Populate explain block (display-only, no scoring change)
         if req.explain and item.offer_id in _explain_debug:
-            debug, _matched, _missing = _explain_debug[item.offer_id]
-            item.explain = _build_explain(debug, item.rome_competences)
+            debug, _matched, _missing, near_matches, near_summary = _unpack_explain_debug(
+                _explain_debug[item.offer_id]
+            )
+            item.explain = _build_explain(
+                debug,
+                item.rome_competences,
+                near_matches=near_matches,
+                near_match_summary=near_summary,
+            )
+            if item.explain.matched_core or item.explain.missing_core:
+                item.core_matched_count = len(item.explain.matched_core)
+                item.core_total_count = len(item.explain.matched_core) + len(item.explain.missing_core)
+            else:
+                matched_core = [s for s in item.explain.matched_full if s.weighted]
+                missing_core = [s for s in item.explain.missing_full if s.weighted]
+                item.core_matched_count = len(matched_core)
+                item.core_total_count = len(matched_core) + len(missing_core)
 
         # Compass signal (always computed, compact — no scoring impact)
         _c_stash = _explain_debug.get(item.offer_id)
@@ -946,6 +1114,26 @@ async def get_inbox(
             )
             _compact = build_explain_compact(_compass_full, len(_offer_uris))
             item.explain_v1 = CompassExplainCompact(**_compact.model_dump())
+            item.match_strength = _map_match_strength(item.explain_v1.confidence if item.explain_v1 else None)
+            item.dominant_reason = _derive_dominant_reason(
+                item.explain_v1.confidence if item.explain_v1 else None,
+                near_match_count=int(item.near_match_count or 0),
+                rare_signal_level=item.explain_v1.rare_signal_level if item.explain_v1 else None,
+            )
+            _profile_labels = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
+            _offer_labels = _offer_c.get("skills_display") or _offer_c.get("skills") or []
+            _offer_labels = _extract_skill_labels(_offer_labels)
+            _apply_front_explanation(
+                item,
+                match_debug=_match_debug_c,
+                confidence=item.explain_v1.confidence if item.explain_v1 else None,
+                profile_labels=_profile_labels,
+                offer_labels=_offer_labels,
+            )
+            _apply_semantic_explainability(
+                item,
+                profile_intelligence=profile_intelligence,
+            )
 
     # Optional sector-aware rerank (no score change — secondary sort only)
     if _rerank_enabled and items:
@@ -1030,6 +1218,7 @@ async def _get_inbox_filtered(
     t0 = time.perf_counter()
     decided_ids = _load_decided_ids(req.profile_id)
     t_decisions = time.perf_counter()
+    profile_intelligence = _extract_profile_intelligence_payload(profile_payload)
 
     # Parse dates (inclusive end-date via next-day boundary)
     published_from_iso = None
@@ -1116,6 +1305,8 @@ async def _get_inbox_filtered(
             decided_ids=decided_ids,
             engine=engine,
             extracted=extracted,
+            profile_payload=profile_payload,
+            explain_enabled=req.explain,
             min_score=min_score_effective,
             freq_table=freq_table,
             offer_count=offer_count,
@@ -1189,6 +1380,26 @@ async def _get_inbox_filtered(
         )
         _compact = build_explain_compact(_compass_full, len(_offer_uris))
         item.explain_v1 = CompassExplainCompact(**_compact.model_dump())
+        item.match_strength = _map_match_strength(item.explain_v1.confidence if item.explain_v1 else None)
+        item.dominant_reason = _derive_dominant_reason(
+            item.explain_v1.confidence if item.explain_v1 else None,
+            near_match_count=int(item.near_match_count or 0),
+            rare_signal_level=item.explain_v1.rare_signal_level if item.explain_v1 else None,
+        )
+        _profile_labels = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
+        _offer_labels = _offer_c.get("skills_display") or _offer_c.get("skills") or []
+        _offer_labels = _extract_skill_labels(_offer_labels)
+        _apply_front_explanation(
+            item,
+            match_debug=_match_debug_c,
+            confidence=item.explain_v1.confidence if item.explain_v1 else None,
+            profile_labels=_profile_labels,
+            offer_labels=_offer_labels,
+        )
+        _apply_semantic_explainability(
+            item,
+            profile_intelligence=profile_intelligence,
+        )
 
     filtered_items = _apply_compass_filters(
         gated_items,
@@ -1298,8 +1509,15 @@ async def _get_inbox_filtered(
             item.rome_inferred = None
 
         if req.explain and item.offer_id in _explain_debug:
-            debug, _matched, _missing = _explain_debug[item.offer_id]
-            item.explain = _build_explain(debug, item.rome_competences)
+            debug, _matched, _missing, near_matches, near_summary = _unpack_explain_debug(
+                _explain_debug[item.offer_id]
+            )
+            item.explain = _build_explain(
+                debug,
+                item.rome_competences,
+                near_matches=near_matches,
+                near_match_summary=near_summary,
+            )
 
     t_rome = time.perf_counter()
 

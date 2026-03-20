@@ -54,7 +54,7 @@ def test_inbox_explain_returns_200(client, profile_demo):
 
 
 def test_inbox_explain_schema_contract(client, profile_demo):
-    """With explain=True, each item must have a valid explain block or null."""
+    """With explain=True, each item must have a valid explain block and clean explanation payload."""
     resp = _post_inbox(client, profile_demo, explain=True)
     assert resp.status_code == 200
     data = resp.json()
@@ -82,9 +82,20 @@ def test_inbox_explain_schema_contract(client, profile_demo):
         assert "country_match" in bd
         assert "total" in bd
 
+    for item in data["items"]:
+        explanation = item.get("explanation")
+        assert explanation is not None
+        assert "score" in explanation
+        assert "fit_label" in explanation
+        assert "summary_reason" in explanation
+        assert "strengths" in explanation
+        assert "gaps" in explanation
+        assert "blockers" in explanation
+        assert "next_actions" in explanation
+
 
 def test_inbox_explain_default_no_block(client, profile_demo):
-    """With explain=False (default), explain field should be null."""
+    """With explain=False, raw explain stays null but clean explanation remains available."""
     resp = _post_inbox(client, profile_demo, explain=False)
     assert resp.status_code == 200
     data = resp.json()
@@ -92,6 +103,7 @@ def test_inbox_explain_default_no_block(client, profile_demo):
         assert item.get("explain") is None, (
             f"explain should be null when explain=False, got: {item.get('explain')}"
         )
+        assert item.get("explanation") is not None, "clean explanation must be present for the frontend"
 
 
 def test_inbox_explain_breakdown_values(client, profile_demo):
@@ -161,7 +173,7 @@ def test_inbox_explain_skill_items_shape(client, profile_demo):
 
 
 def test_inbox_explain_deterministic(client, profile_demo):
-    """Same inputs → identical explain data (deterministic)."""
+    """Same inputs → identical explain and explanation data (deterministic)."""
     r1 = _post_inbox(client, profile_demo, explain=True)
     r2 = _post_inbox(client, profile_demo, explain=True)
     assert r1.status_code == 200
@@ -169,6 +181,9 @@ def test_inbox_explain_deterministic(client, profile_demo):
     items1 = {i["offer_id"]: i.get("explain") for i in r1.json()["items"]}
     items2 = {i["offer_id"]: i.get("explain") for i in r2.json()["items"]}
     assert items1 == items2, "explain data must be deterministic"
+    explanations1 = {i["offer_id"]: i.get("explanation") for i in r1.json()["items"]}
+    explanations2 = {i["offer_id"]: i.get("explanation") for i in r2.json()["items"]}
+    assert explanations1 == explanations2, "clean explanation data must be deterministic"
 
 
 def test_inbox_explain_empty_profile(client):
@@ -178,6 +193,7 @@ def test_inbox_explain_empty_profile(client):
     data = resp.json()
     # Should not crash; items may be empty or have explain=null (no skills matched)
     for item in data["items"]:
+        assert item.get("explanation") is not None
         ex = item.get("explain")
         if ex is not None:
             assert isinstance(ex["matched_display"], list)

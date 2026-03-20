@@ -24,9 +24,12 @@ FLAGS:
 SCORE INVARIANCE:
   score_core is NEVER read or written by this module.
   DOMAIN_SKILLS_ACTIVE are display/context only — NOT injected into matching weights.
+  This pipeline returns enrichment metadata only; URI injection into matching
+  inputs must remain explicit in the caller.
 """
 from __future__ import annotations
 
+from copy import deepcopy
 import logging
 import os
 from dataclasses import dataclass, field
@@ -91,6 +94,17 @@ class CVPipelineResult:
     legacy_llm_available: bool = False
     legacy_llm_added_count: int = 0
     legacy_llm_error: Optional[str] = None
+
+
+def get_extracted_profile_snapshot(result: CVPipelineResult) -> Dict[str, Any]:
+    """
+    Return an isolated copy of the extraction-layer profile.
+
+    Parsing/extraction owns the baseline profile shape. Any later enrichment or
+    matching-preparation mutation must happen on a copy returned by this helper.
+    """
+    baseline_result = result.baseline_result or {}
+    return deepcopy(baseline_result.get("profile") or {})
 
 
 # ── Canonical pipeline ────────────────────────────────────────────────────────

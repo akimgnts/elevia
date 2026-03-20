@@ -10,6 +10,13 @@ Ce moteur:
 - n'invente rien
 - n'interprète pas
 - explique chaque décision avec des faits observables
+
+Freeze boundary contract:
+- the score formula, weights, and IDF behavior are frozen
+- the engine must not depend on canonical mapping, hierarchy expansion, or proposal governance
+- one explicit exception is allowed in the current sprint:
+  `compass.canonical.weighted_store`, which is read-only contextual policy data
+  applied after offer cluster detection and without mutating canonical IDs
 """
 
 import logging
@@ -27,8 +34,20 @@ from .extractors import (
     normalize_language,
 )
 from .idf import compute_idf
+from offer.offer_cluster import detect_offer_cluster
+# Explicit freeze exception: read-only contextual weighting policy, no canonical mapping writes.
+from compass.canonical.weighted_store import (
+    get_weighted_store,
+    map_offer_cluster_to_weighted,
+    resolve_weighted_skill,
+)
 
 logger = logging.getLogger(__name__)
+
+# Architecture contract for the current sprint:
+# - State A would mean zero canonical dependency.
+# - State B allows one explicit read-only dependency on weighted_store.
+MATCHING_BOUNDARY_STATE = "STATE_B_EXPLICIT_WEIGHTED_STORE"
 
 # Optional ESCO helpers for URI-based scoring
 try:
@@ -57,6 +76,16 @@ def _debug_enabled() -> bool:
 def _use_uri_scoring() -> bool:
     value = os.getenv("ELEVIA_SCORE_USE_URIS", "1").strip().lower()
     return value in {"1", "true", "yes", "on"}
+
+
+def _contextual_weighting_enabled() -> bool:
+    value = os.getenv("ELEVIA_CONTEXTUAL_WEIGHTING", "1").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _scoring_model() -> str:
+    value = os.getenv("ELEVIA_SCORING_MODEL", "baseline").strip().lower()
+    return value or "baseline"
 
 
 def _dedupe_preserve_order(values: List[str]) -> List[str]:
@@ -326,7 +355,7 @@ class MatchingEngine:
 
     def _score_skills(
         self, profile: ExtractedProfile, offer: Dict
-    ) -> Tuple[float, List[str], List[str], bool]:
+    ) -> Tuple[float, List[str], List[str], bool, Optional[Dict[str, List[str]]]]:
         """
         Score skills (signal principal) - spec lignes 100-114.
 
@@ -364,7 +393,7 @@ class MatchingEngine:
 
             # Spec ligne 113: "Si l'offre n'a aucune skill → skills_score = 0"
             if not offer_skills:
-                return 0.0, [], [], True
+                return 0.0, [], [], True, None
 
             profile_skills_set = getattr(profile, "skills_uri", frozenset()) or frozenset()
             matched_uris = [uri for uri in offer_skills if uri in profile_skills_set]
@@ -374,10 +403,65 @@ class MatchingEngine:
             missing_labels = [label_map.get(uri, uri) for uri in missing_uris]
 
             if not matched_uris:
-                return 0.0, [], missing_labels, False
+                return 0.0, [], missing_labels, False, None
+
+            context_debug: Optional[Dict[str, List[str]]] = None
+            if _contextual_weighting_enabled():
+                store = get_weighted_store()
+                if store.is_loaded():
+                    offer_cluster = offer.get("offer_cluster")
+                    if not offer_cluster:
+                        try:
+                            offer_cluster, _, _ = detect_offer_cluster(
+                                offer.get("title"),
+                                offer.get("description") or offer.get("display_description"),
+                                list(label_map.values()),
+                            )
+                        except Exception:
+                            offer_cluster = None
+                    weighted_cluster = map_offer_cluster_to_weighted(str(offer_cluster)) if offer_cluster else None
+
+                    matched_set = set(matched_uris)
+                    total_weight = 0.0
+                    matched_weight = 0.0
+                    ctx = {
+                        "matched_core": [],
+                        "missing_core": [],
+                        "matched_secondary": [],
+                        "missing_secondary": [],
+                        "matched_context": [],
+                        "missing_context": [],
+                    }
+                    for uri in offer_skills:
+                        label = label_map.get(uri, uri)
+                        res = resolve_weighted_skill(
+                            label,
+                            weighted_cluster,
+                            store=store,
+                            clamp_min=CONTEXT_CLAMP_MIN,
+                            clamp_max=CONTEXT_CLAMP_MAX,
+                        )
+                        total_weight += res.weight
+                        if uri in matched_set:
+                            matched_weight += res.weight
+                        importance = (res.importance_level or "SECONDARY").upper()
+                        bucket = "context"
+                        if importance == "CORE":
+                            bucket = "core"
+                        elif importance == "SECONDARY":
+                            bucket = "secondary"
+                        if uri in matched_set:
+                            ctx[f"matched_{bucket}"].append(label)
+                        else:
+                            ctx[f"missing_{bucket}"].append(label)
+
+                    if total_weight > 0:
+                        score = matched_weight / total_weight
+                        context_debug = ctx
+                        return score, matched_labels, missing_labels, False, context_debug
 
             score = len(matched_uris) / len(offer_skills)
-            return score, matched_labels, missing_labels, False
+            return score, matched_labels, missing_labels, False, context_debug
 
         raw_skills = offer.get("skills", [])
         if isinstance(raw_skills, str):
@@ -388,7 +472,7 @@ class MatchingEngine:
 
         # Spec ligne 113: "Si l'offre n'a aucune skill → skills_score = 0"
         if not offer_skills:
-            return 0.0, [], [], True
+            return 0.0, [], [], True, None
 
         # Intersection profil ∩ offre
         matched_skills_set = profile.skills & offer_skills_set
@@ -396,10 +480,10 @@ class MatchingEngine:
         missing_skills = [s for s in offer_skills if s not in matched_skills_set]
 
         if not matched_skills:
-            return 0.0, [], missing_skills, False
+            return 0.0, [], missing_skills, False, None
 
         score = len(matched_skills) / len(offer_skills)
-        return score, matched_skills, missing_skills, False
+        return score, matched_skills, missing_skills, False, None
 
     def _score_languages(
         self, profile: ExtractedProfile, offer: Dict
@@ -473,6 +557,7 @@ class MatchingEngine:
         education_score: float,
         country_score: float,
         score_is_partial: bool = False,
+        context_breakdown: Optional[Dict[str, List[str]]] = None,
     ) -> int:
         """
         Calcule le score final - spec lignes 87-94.
@@ -490,7 +575,54 @@ class MatchingEngine:
             WEIGHT_EDUCATION * education_score +
             WEIGHT_COUNTRY * country_score
         )
-        score = int(round(100 * total))
+        model = _scoring_model()
+        adjusted_total = total
+        if model != "baseline":
+            core_matched = len((context_breakdown or {}).get("matched_core") or [])
+            core_missing = len((context_breakdown or {}).get("missing_core") or [])
+            core_total = core_matched + core_missing
+            core_ratio = (core_matched / core_total) if core_total else None
+
+            if model == "core_penalty" and core_ratio is not None:
+                # Penalize missing core skills; cap penalty to keep model stable.
+                # Model: penalty = min(cap, missing_core * penalty_factor)
+                try:
+                    penalty_factor = float(os.getenv("ELEVIA_CORE_PENALTY_FACTOR", "0.04").strip())
+                except ValueError:
+                    penalty_factor = 0.04
+                try:
+                    penalty_cap = float(os.getenv("ELEVIA_CORE_PENALTY_CAP", "0.15").strip())
+                except ValueError:
+                    penalty_cap = 0.15
+                penalty = min(penalty_cap, core_missing * penalty_factor)
+                adjusted_total = max(0.0, total - penalty)
+            elif model == "hierarchical" and core_ratio is not None:
+                # If core alignment is weak, cap the score (deterministic cap).
+                if core_ratio < 0.5:
+                    adjusted_total = min(total, 0.55)
+            elif model == "weighted_tier" and context_breakdown:
+                # Rebuild skills_score from tier ratios (core-heavy).
+                sec_matched = len(context_breakdown.get("matched_secondary") or [])
+                sec_missing = len(context_breakdown.get("missing_secondary") or [])
+                ctx_matched = len(context_breakdown.get("matched_context") or [])
+                ctx_missing = len(context_breakdown.get("missing_context") or [])
+
+                sec_total = sec_matched + sec_missing
+                ctx_total = ctx_matched + ctx_missing
+
+                core_component = core_ratio if core_ratio is not None else skills_score
+                sec_component = (sec_matched / sec_total) if sec_total else skills_score
+                ctx_component = (ctx_matched / ctx_total) if ctx_total else skills_score
+
+                tiered_skills_score = (0.6 * core_component) + (0.3 * sec_component) + (0.1 * ctx_component)
+                adjusted_total = (
+                    WEIGHT_SKILLS * tiered_skills_score +
+                    WEIGHT_LANGUAGES * languages_score +
+                    WEIGHT_EDUCATION * education_score +
+                    WEIGHT_COUNTRY * country_score
+                )
+
+        score = int(round(100 * adjusted_total))
         if score_is_partial:
             return min(score, PARTIAL_MAX_SCORE)
         return score
@@ -505,6 +637,7 @@ class MatchingEngine:
         country_score: float,
         profile: ExtractedProfile,
         offer: Dict,
+        context_breakdown: Optional[Dict[str, List[str]]] = None,
     ) -> Dict[str, Any]:
         """Build a transparent debug payload for scoring."""
         total = (
@@ -528,6 +661,8 @@ class MatchingEngine:
             "weight": int(WEIGHT_SKILLS * 100),
             "score": round(skills_score * WEIGHT_SKILLS * 100, 1),
         }
+        if context_breakdown:
+            skills_debug.update(context_breakdown)
         if _use_uri_scoring():
             offer_uri_list = offer.get("skills_uri") or []
             skills_debug.update({
@@ -649,13 +784,18 @@ class MatchingEngine:
             )
 
         # Calcul scores
-        skills_score, matched_skills, missing_skills, skills_missing = self._score_skills(profile, offer)
+        skills_score, matched_skills, missing_skills, skills_missing, context_breakdown = self._score_skills(profile, offer)
         languages_score = self._score_languages(profile, offer)
         education_score = self._score_education(profile, offer)
         country_score = self._score_country(profile, offer)
 
         final_score = self._compute_final_score(
-            skills_score, languages_score, education_score, country_score, skills_missing
+            skills_score,
+            languages_score,
+            education_score,
+            country_score,
+            skills_missing,
+            context_breakdown,
         )
 
         reasons = self._generate_reasons(
@@ -713,6 +853,7 @@ class MatchingEngine:
                 country_score,
                 profile,
                 offer,
+                context_breakdown=context_breakdown,
             ),
             score_is_partial=skills_missing,
         )
@@ -748,7 +889,7 @@ class MatchingEngine:
                 continue
 
             # 3. Score skills (signal principal)
-            skills_score, matched_skills, missing_skills, skills_missing = self._score_skills(extracted_profile, offer)
+            skills_score, matched_skills, missing_skills, skills_missing, context_breakdown = self._score_skills(extracted_profile, offer)
 
             # 4. Early-skip mathématique (spec ligne 63)
             if self._early_skip(skills_score):
@@ -761,7 +902,12 @@ class MatchingEngine:
 
             # 6. Score final
             final_score = self._compute_final_score(
-                skills_score, languages_score, education_score, country_score, skills_missing
+                skills_score,
+                languages_score,
+                education_score,
+                country_score,
+                skills_missing,
+                context_breakdown,
             )
 
             # 7. Seuil strict (spec ligne 46)
@@ -825,6 +971,7 @@ class MatchingEngine:
                     country_score,
                     extracted_profile,
                     offer,
+                    context_breakdown=context_breakdown,
                 ),
                 score_is_partial=skills_missing,
             ))
