@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/staging/api.Dockerfile
+    env_file:
+      - ./api.env
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ${ELEVIA_STATE_DIR}/db
+        target: /app/apps/api/data/db
+      - type: bind
+        source: ${ELEVIA_STATE_DIR}/backups
+        target: /backups
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()\" >/dev/null 2>&1 || exit 1",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/staging/web.Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    environment:
+      APP_SITE_ADDRESS: ${APP_SITE_ADDRESS}
+      STAGING_BASIC_AUTH_USER: ${STAGING_BASIC_AUTH_USER}
+      STAGING_BASIC_AUTH_HASH: ${STAGING_BASIC_AUTH_HASH}
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - type: bind
+        source: ${ELEVIA_STATE_DIR}/caddy-data
+        target: /data
+      - type: bind
+        source: ${ELEVIA_STATE_DIR}/caddy-config
+        target: /config
+
