@@ -638,6 +638,7 @@ def _select_top_profile_signals(
     top_signal_units: Sequence[dict],
     preserved_explicit_skills: Sequence[dict],
     profile_summary_skills: Sequence[dict],
+    enriched_signals: Sequence[dict],
     dominant_block: str,
 ) -> List[str]:
     candidates: List[tuple[float, str]] = []
@@ -661,6 +662,14 @@ def _select_top_profile_signals(
             continue
         bonus = 0.25 if _score_text_against_block(label, dominant_block) > 0 else 0.0
         candidates.append((1.0 + bonus, label))
+
+    for item in list(enriched_signals or [])[:10]:
+        label = str(item.get("normalized") or item.get("raw") or "")
+        if not label or _is_generic_signal(label):
+            continue
+        confidence = float(item.get("confidence") or 0.0)
+        bonus = 0.18 if _score_text_against_block(label, dominant_block) > 0 else 0.0
+        candidates.append((0.72 + min(confidence, 1.0) * 0.22 + bonus, label))
 
     deduped: List[str] = []
     seen: set[str] = set()
@@ -953,6 +962,7 @@ def build_profile_intelligence(
     preserved_explicit_skills: Sequence[dict],
     profile_summary_skills: Sequence[dict],
     canonical_skills: Sequence[dict],
+    enriched_signals: Sequence[dict] = (),
 ) -> Dict[str, Any]:
     acc = _BlockAccumulator()
     role_resolution = _safe_role_resolution(cv_text, canonical_skills)
@@ -1163,6 +1173,7 @@ def build_profile_intelligence(
         top_signal_units=top_signal_units,
         preserved_explicit_skills=preserved_explicit_skills,
         profile_summary_skills=profile_summary_skills,
+        enriched_signals=enriched_signals,
         dominant_block=dominant_role_block,
     )
 

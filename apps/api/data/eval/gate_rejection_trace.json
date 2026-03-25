@@ -1,0 +1,3129 @@
+{
+  "entries": [
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236245",
+      "offer_title": "Purchasing Controlling VIE (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "finance_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "finance",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236276",
+      "offer_title": "DATA ANALYST (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236280",
+      "offer_title": "Data Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236281",
+      "offer_title": "BI Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236282",
+      "offer_title": "BA Data Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236509",
+      "offer_title": "TALENT ACQUISITION BXL H/F (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "hr",
+        "data",
+        "marketing"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-236975",
+      "offer_title": "V.I.E. Human Resources Project Manager (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-237019",
+      "offer_title": "Talent Acquisition IT (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-237035",
+      "offer_title": "Data analyst/engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-237199",
+      "offer_title": "Program Purchasing (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-237252",
+      "offer_title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_1",
+      "offer_id": "BF-237353",
+      "offer_title": "VIE-Data Scientist(m/f/d) (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236245",
+      "offer_title": "Purchasing Controlling VIE (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "finance_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "finance",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236276",
+      "offer_title": "DATA ANALYST (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236280",
+      "offer_title": "Data Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236281",
+      "offer_title": "BI Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236282",
+      "offer_title": "BA Data Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236509",
+      "offer_title": "TALENT ACQUISITION BXL H/F (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "hr",
+        "data",
+        "marketing"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-236975",
+      "offer_title": "V.I.E. Human Resources Project Manager (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-237019",
+      "offer_title": "Talent Acquisition IT (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-237035",
+      "offer_title": "Data analyst/engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-237199",
+      "offer_title": "Program Purchasing (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-237252",
+      "offer_title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_2",
+      "offer_id": "BF-237353",
+      "offer_title": "VIE-Data Scientist(m/f/d) (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236245",
+      "offer_title": "Purchasing Controlling VIE (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "finance_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "finance",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": [
+        "sap"
+      ]
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236276",
+      "offer_title": "DATA ANALYST (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236280",
+      "offer_title": "Data Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236281",
+      "offer_title": "BI Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236282",
+      "offer_title": "BA Data Engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236509",
+      "offer_title": "TALENT ACQUISITION BXL H/F (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "hr",
+        "data",
+        "marketing"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-236975",
+      "offer_title": "V.I.E. Human Resources Project Manager (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-237019",
+      "offer_title": "Talent Acquisition IT (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-237035",
+      "offer_title": "Data analyst/engineer (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-237199",
+      "offer_title": "Program Purchasing (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-237252",
+      "offer_title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "supply_3",
+      "offer_id": "BF-237353",
+      "offer_title": "VIE-Data Scientist(m/f/d) (H/F)",
+      "profile_role": "supply_chain_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236245",
+      "offer_title": "Purchasing Controlling VIE (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "finance_ops",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "finance",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236276",
+      "offer_title": "DATA ANALYST (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236280",
+      "offer_title": "Data Engineer (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236281",
+      "offer_title": "BI Engineer (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236282",
+      "offer_title": "BA Data Engineer (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236882",
+      "offer_title": "Coordinateur Supply Chain & Relations Fournisseurs (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "supply chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236912",
+      "offer_title": "Chef de projet Excellence Expérience Client – Supply Chain (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-236960",
+      "offer_title": "Regional Supply Chain Professional (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-237035",
+      "offer_title": "Data analyst/engineer (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-237066",
+      "offer_title": "INGÉNIEUR SUPPLY CHAIN (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [
+        "operations"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-237138",
+      "offer_title": "Coordinateur(trice) Logistique et Technique (VIE – États-Unis) (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [
+        "operations"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-237199",
+      "offer_title": "Program Purchasing (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-237252",
+      "offer_title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-237353",
+      "offer_title": "VIE-Data Scientist(m/f/d) (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-AZ-0005",
+      "offer_title": "VIE - Supply Chain - Bouygues Royaume-Uni",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_1",
+      "offer_id": "BF-AZ-0009",
+      "offer_title": "VIE - Supply Chain - Engie Chine",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236245",
+      "offer_title": "Purchasing Controlling VIE (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "finance_ops",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "finance",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236276",
+      "offer_title": "DATA ANALYST (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236280",
+      "offer_title": "Data Engineer (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": [
+        "formation"
+      ]
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236281",
+      "offer_title": "BI Engineer (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236282",
+      "offer_title": "BA Data Engineer (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236882",
+      "offer_title": "Coordinateur Supply Chain & Relations Fournisseurs (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "supply chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236912",
+      "offer_title": "Chef de projet Excellence Expérience Client – Supply Chain (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-236960",
+      "offer_title": "Regional Supply Chain Professional (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-237035",
+      "offer_title": "Data analyst/engineer (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-237066",
+      "offer_title": "INGÉNIEUR SUPPLY CHAIN (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [],
+      "secondary_supported_domains": [
+        "operations"
+      ],
+      "matched_signals": [
+        "formation"
+      ]
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-237138",
+      "offer_title": "Coordinateur(trice) Logistique et Technique (VIE – États-Unis) (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [
+        "operations"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-237199",
+      "offer_title": "Program Purchasing (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-237252",
+      "offer_title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-237353",
+      "offer_title": "VIE-Data Scientist(m/f/d) (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "data_analytics",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-AZ-0005",
+      "offer_title": "VIE - Supply Chain - Bouygues Royaume-Uni",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_2",
+      "offer_id": "BF-AZ-0009",
+      "offer_title": "VIE - Supply Chain - Engie Chine",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "project"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-236245",
+      "offer_title": "Purchasing Controlling VIE (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "finance_ops",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "finance",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-236882",
+      "offer_title": "Coordinateur Supply Chain & Relations Fournisseurs (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "supply chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-236912",
+      "offer_title": "Chef de projet Excellence Expérience Client – Supply Chain (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-236960",
+      "offer_title": "Regional Supply Chain Professional (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-237066",
+      "offer_title": "INGÉNIEUR SUPPLY CHAIN (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-237138",
+      "offer_title": "Coordinateur(trice) Logistique et Technique (VIE – États-Unis) (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "hr_ops",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-AZ-0005",
+      "offer_title": "VIE - Supply Chain - Bouygues Royaume-Uni",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "hr_3",
+      "offer_id": "BF-AZ-0009",
+      "offer_title": "VIE - Supply Chain - Engie Chine",
+      "profile_role": "hr_ops",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "hr",
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-236245",
+      "offer_title": "Purchasing Controlling VIE (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "finance_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "finance",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "weak",
+      "domain_overlap": true,
+      "rejection_reason": "weak_role_without_enough_domain_or_signal_support",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-236882",
+      "offer_title": "Coordinateur Supply Chain & Relations Fournisseurs (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "supply chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-236912",
+      "offer_title": "Chef de projet Excellence Expérience Client – Supply Chain (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis",
+        "power bi"
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-236960",
+      "offer_title": "Regional Supply Chain Professional (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis",
+        "power bi"
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-236975",
+      "offer_title": "V.I.E. Human Resources Project Manager (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-237019",
+      "offer_title": "Talent Acquisition IT (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-237066",
+      "offer_title": "INGÉNIEUR SUPPLY CHAIN (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data",
+        "operations"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-237138",
+      "offer_title": "Coordinateur(trice) Logistique et Technique (VIE – États-Unis) (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [
+        "operations"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-AZ-0005",
+      "offer_title": "VIE - Supply Chain - Bouygues Royaume-Uni",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_1",
+      "offer_id": "BF-AZ-0009",
+      "offer_title": "VIE - Supply Chain - Engie Chine",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "finance"
+      ],
+      "secondary_supported_domains": [
+        "finance"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "weak",
+      "domain_overlap": true,
+      "rejection_reason": "weak_role_without_enough_domain_or_signal_support",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-236882",
+      "offer_title": "Coordinateur Supply Chain & Relations Fournisseurs (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "supply chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-236912",
+      "offer_title": "Chef de projet Excellence Expérience Client – Supply Chain (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "power bi",
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-236960",
+      "offer_title": "Regional Supply Chain Professional (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "power bi",
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-236975",
+      "offer_title": "V.I.E. Human Resources Project Manager (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-237019",
+      "offer_title": "Talent Acquisition IT (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-237066",
+      "offer_title": "INGÉNIEUR SUPPLY CHAIN (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-237138",
+      "offer_title": "Coordinateur(trice) Logistique et Technique (VIE – États-Unis) (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "supply_chain",
+        "operations"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": true,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": [
+        "data analysis"
+      ]
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-AZ-0005",
+      "offer_title": "VIE - Supply Chain - Bouygues Royaume-Uni",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_2",
+      "offer_id": "BF-AZ-0009",
+      "offer_title": "VIE - Supply Chain - Engie Chine",
+      "profile_role": "data_analytics",
+      "offer_role": "supply_chain_ops",
+      "profile_domains": [
+        "data",
+        "finance"
+      ],
+      "offer_domains": [
+        "supply_chain"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_3",
+      "offer_id": "BF-236122",
+      "offer_title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "data",
+        "supply_chain"
+      ],
+      "offer_domains": [
+        "data",
+        "sales"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_3",
+      "offer_id": "BF-236245",
+      "offer_title": "Purchasing Controlling VIE (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "finance_ops",
+      "profile_domains": [
+        "data",
+        "supply_chain"
+      ],
+      "offer_domains": [
+        "finance",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_3",
+      "offer_id": "BF-236525",
+      "offer_title": "Junior Legal Counsel (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "legal_compliance",
+      "profile_domains": [
+        "data",
+        "supply_chain"
+      ],
+      "offer_domains": [
+        "legal",
+        "finance"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": false,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [],
+      "secondary_supported_domains": [],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_3",
+      "offer_id": "BF-236826",
+      "offer_title": "Chemical Engineering (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "software_it",
+      "profile_domains": [
+        "data",
+        "supply_chain"
+      ],
+      "offer_domains": [
+        "software",
+        "it",
+        "data"
+      ],
+      "role_match": "weak",
+      "domain_overlap": true,
+      "rejection_reason": "weak_role_without_enough_domain_or_signal_support",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_3",
+      "offer_id": "BF-236975",
+      "offer_title": "V.I.E. Human Resources Project Manager (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "data",
+        "supply_chain"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_3",
+      "offer_id": "BF-237019",
+      "offer_title": "Talent Acquisition IT (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "hr_ops",
+      "profile_domains": [
+        "data",
+        "supply_chain"
+      ],
+      "offer_domains": [
+        "hr",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    },
+    {
+      "profile_id": "data_3",
+      "offer_id": "BF-237292",
+      "offer_title": "Strategy and Business Development Asia (H/F)",
+      "profile_role": "data_analytics",
+      "offer_role": "sales_business_dev",
+      "profile_domains": [
+        "data",
+        "supply_chain"
+      ],
+      "offer_domains": [
+        "sales",
+        "data"
+      ],
+      "role_match": "invalid",
+      "domain_overlap": true,
+      "rejection_reason": "invalid_role_match",
+      "was_potentially_valid": false,
+      "shared_domains": [
+        "data"
+      ],
+      "secondary_supported_domains": [
+        "data"
+      ],
+      "matched_signals": []
+    }
+  ]
+}

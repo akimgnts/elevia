@@ -71,6 +71,18 @@ class StructuredExtractionStageResult:
 
 
 @dataclass(frozen=True)
+class EnrichedSignalStageResult:
+    enriched_signals: List[dict] = field(default_factory=list)
+    stats: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class EnrichedConceptStageResult:
+    concept_signals: List[dict] = field(default_factory=list)
+    stats: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class CanonicalMappingStageResult:
     mapping_inputs: List[str] = field(default_factory=list)
     canonical_skills_list: List[dict] = field(default_factory=list)
@@ -142,6 +154,8 @@ class ParseFilePipelineArtifacts:
     profile_cluster: Dict[str, Any]
     skill_candidates: SkillCandidateStageResult
     structured_extraction: StructuredExtractionStageResult
+    enriched_signals: EnrichedSignalStageResult
+    concept_signals: EnrichedConceptStageResult
     canonical_mapping: CanonicalMappingStageResult
     enrichment: EnrichmentStageResult
     matching_input: MatchingInputStageResult

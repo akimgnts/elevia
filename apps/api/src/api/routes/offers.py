@@ -154,7 +154,10 @@ from compass.signal_layer import build_explain_payload_v1, get_signal_cfg
 from compass.contracts import SkillRef
 from compass.text_structurer import structure_offer_text_v1
 from compass.offer.offer_intelligence import build_offer_intelligence
+from compass.offer.offer_parse_pipeline import build_offer_canonical_representation
 from compass.explainability.semantic_explanation_builder import build_semantic_explainability
+from compass.scoring.scoring_v2 import build_scoring_v2
+from compass.scoring.scoring_v3 import build_scoring_v3
 
 # Path to SQLite database
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
@@ -476,9 +479,11 @@ Returns 404 if offer not found in the database.
 async def get_offer_detail(
     offer_id: str,
     profile_role_block: Optional[str] = Query(default=None),
+    profile_secondary_role_blocks: Optional[List[str]] = Query(default=None),
     profile_domains: Optional[List[str]] = Query(default=None),
     profile_signals: Optional[List[str]] = Query(default=None),
     profile_summary: Optional[str] = Query(default=None),
+    matching_score: Optional[float] = Query(default=None),
 ) -> JSONResponse:
     """
     Fetch one offer by ID and return it with structured description sections.
@@ -535,18 +540,11 @@ async def get_offer_detail(
     normalized = _normalize_offer(raw)
     raw_description = raw.get("description") or ""
 
-    # Legacy structured description (v0)
-    description_structured = structure_offer_description(
-        raw_description,
-        esco_skills=esco_skills,
-        lang_hint="fr",
+    canonical_offer = build_offer_canonical_representation(
+        normalized | {"skills_display": [{"label": s} for s in esco_skills], "skills": esco_skills}
     )
-
-    # Compass text structurer v1 (deterministic, no LLM)
-    description_structured_v1 = structure_offer_text_v1(
-        raw_description,
-        esco_labels=esco_skills,
-    )
+    description_structured = canonical_offer["description_structured"]
+    description_structured_v1 = canonical_offer["description_structured_v1"]
 
     # Compass explain_v1_full (Part A — standalone view, no profile match)
     offer_skills_refs = [SkillRef(uri=None, label=s) for s in esco_skills]
@@ -567,19 +565,38 @@ async def get_offer_detail(
         offer=normalized | {"skills_display": [{"label": s} for s in esco_skills], "skills": esco_skills},
         description_structured=description_structured,
         description_structured_v1=description_structured_v1,
+        canonical_offer=canonical_offer,
     )
     semantic_explainability = None
+    scoring_v2 = None
+    scoring_v3 = None
     if profile_role_block or profile_domains or profile_signals or profile_summary:
+        profile_intelligence = {
+            "dominant_role_block": profile_role_block or "",
+            "secondary_role_blocks": list(profile_secondary_role_blocks or []),
+            "dominant_domains": list(profile_domains or []),
+            "top_profile_signals": list(profile_signals or []),
+            "profile_summary": profile_summary or "",
+        }
         semantic_explainability = build_semantic_explainability(
-            profile_intelligence={
-                "dominant_role_block": profile_role_block or "",
-                "dominant_domains": list(profile_domains or []),
-                "top_profile_signals": list(profile_signals or []),
-                "profile_summary": profile_summary or "",
-            },
+            profile_intelligence=profile_intelligence,
             offer_intelligence=offer_intelligence,
             explanation=None,
         )
+        if matching_score is not None:
+            scoring_v2 = build_scoring_v2(
+                profile_intelligence=profile_intelligence,
+                offer_intelligence=offer_intelligence,
+                semantic_explainability=semantic_explainability,
+                matching_score=matching_score,
+            )
+            scoring_v3 = build_scoring_v3(
+                profile_intelligence=profile_intelligence,
+                offer_intelligence=offer_intelligence,
+                semantic_explainability=semantic_explainability,
+                matching_score=matching_score,
+                explanation=None,
+            )
 
     duration_ms = int((time.time() - start_time) * 1000)
     obs_log(
@@ -607,4 +624,6 @@ async def get_offer_detail(
         "explain_v1_full": explain_v1_full.model_dump(),
         "offer_intelligence": offer_intelligence,
         "semantic_explainability": semantic_explainability,
+        "scoring_v2": scoring_v2,
+        "scoring_v3": scoring_v3,
     })

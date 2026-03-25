@@ -1,0 +1,2027 @@
+{
+  "config": {
+    "catalog_mode": "stable_fast_real_bf_az_slice",
+    "max_offers": 10,
+    "min_threshold": 0,
+    "max_candidates": 40,
+    "top_k": 5
+  },
+  "profiles": [
+    {
+      "profile_id": "supply_1",
+      "profile_domain": "Supply Chain / Operations",
+      "profile_role": "supply_chain_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "company": "Michelin",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore English et Lean Six Sigma.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "company": "Engie",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore SAP et English.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "company": "Michelin",
+          "matching_v1": 0,
+          "scoring_v3": 55,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore English et Lean Six Sigma.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "company": "Engie",
+          "matching_v1": 0,
+          "scoring_v3": 55,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore SAP et English.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        }
+      ],
+      "potentially_valid_rejections": []
+    },
+    {
+      "profile_id": "supply_2",
+      "profile_domain": "Supply Chain / Operations",
+      "profile_role": "supply_chain_ops",
+      "profile_domains": [
+        "supply_chain",
+        "data",
+        "supply chain"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "company": "Michelin",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore English et Lean Six Sigma.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "company": "Engie",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore SAP et English.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "company": "Michelin",
+          "matching_v1": 0,
+          "scoring_v3": 61,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore English et Lean Six Sigma.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "company": "Engie",
+          "matching_v1": 0,
+          "scoring_v3": 61,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore SAP et English.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        }
+      ],
+      "potentially_valid_rejections": []
+    },
+    {
+      "profile_id": "supply_3",
+      "profile_domain": "Supply Chain / Operations",
+      "profile_role": "supply_chain_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "company": "Michelin",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore English et Lean Six Sigma.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "company": "Engie",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore SAP et English.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "company": "Michelin",
+          "matching_v1": 0,
+          "scoring_v3": 55,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore English et Lean Six Sigma.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "company": "Engie",
+          "matching_v1": 0,
+          "scoring_v3": 55,
+          "role_alignment": "high",
+          "shared_domains": [
+            "supply_chain"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur supply chain, avec un socle commun en supply chain, mais il manque encore SAP et English.",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        }
+      ],
+      "potentially_valid_rejections": []
+    },
+    {
+      "profile_id": "hr_1",
+      "profile_domain": "HR",
+      "profile_role": "hr_ops",
+      "profile_domains": [
+        "hr",
+        "data",
+        "business"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "company": "Bolloré",
+          "matching_v1": 0,
+          "scoring_v2": 54,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "company": "Schneider Electric",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "company": "Bolloré",
+          "matching_v1": 0,
+          "scoring_v3": 57,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "company": "Schneider Electric",
+          "matching_v1": 0,
+          "scoring_v3": 56,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Data Analysis"
+          ],
+          "was_potentially_valid": true
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Data Analysis"
+          ],
+          "was_potentially_valid": true
+        }
+      ],
+      "potentially_valid_rejections": [
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Data Analysis"
+          ],
+          "was_potentially_valid": true
+        },
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Data Analysis"
+          ],
+          "was_potentially_valid": true
+        }
+      ]
+    },
+    {
+      "profile_id": "hr_2",
+      "profile_domain": "HR",
+      "profile_role": "hr_ops",
+      "profile_domains": [
+        "hr",
+        "data",
+        "business"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "company": "Bolloré",
+          "matching_v1": 0,
+          "scoring_v2": 54,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "company": "Schneider Electric",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "company": "Bolloré",
+          "matching_v1": 0,
+          "scoring_v3": 57,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "company": "Schneider Electric",
+          "matching_v1": 0,
+          "scoring_v3": 56,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Data Analysis"
+          ],
+          "was_potentially_valid": true
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Data Analysis"
+          ],
+          "was_potentially_valid": true
+        }
+      ],
+      "potentially_valid_rejections": [
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Data Analysis"
+          ],
+          "was_potentially_valid": true
+        },
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Data Analysis"
+          ],
+          "was_potentially_valid": true
+        }
+      ]
+    },
+    {
+      "profile_id": "hr_3",
+      "profile_domain": "HR",
+      "profile_role": "hr_ops",
+      "profile_domains": [
+        "hr",
+        "data",
+        "business"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "company": "Bolloré",
+          "matching_v1": 0,
+          "scoring_v2": 54,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "company": "Schneider Electric",
+          "matching_v1": 0,
+          "scoring_v2": 53,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "company": "Bolloré",
+          "matching_v1": 0,
+          "scoring_v3": 57,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "company": "Schneider Electric",
+          "matching_v1": 0,
+          "scoring_v3": 56,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr"
+          ],
+          "summary": "Ton profil et ce poste sont alignes sur rh, avec un socle commun en Recruitment, mais il manque encore SIRH et English.",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Business Intelligence"
+          ],
+          "was_potentially_valid": true
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        }
+      ],
+      "potentially_valid_rejections": [
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [
+            "data"
+          ],
+          "matched_signals": [
+            "Business Intelligence"
+          ],
+          "was_potentially_valid": true
+        }
+      ]
+    },
+    {
+      "profile_id": "data_1",
+      "profile_domain": "Data / BI",
+      "profile_role": "data_analytics",
+      "profile_domains": [
+        "data"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "company": "Entreprise Internationale 1 SA",
+          "matching_v1": 0,
+          "scoring_v2": 27,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur SQL Querying et Cycle de développement logiciel.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "company": "Plastic Omnium",
+          "matching_v1": 0,
+          "scoring_v2": 12,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur DevOps et Machine Learning.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "company": "Entreprise Internationale 1 SA",
+          "matching_v1": 0,
+          "scoring_v3": 38,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur SQL Querying et Cycle de développement logiciel.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "company": "Plastic Omnium",
+          "matching_v1": 0,
+          "scoring_v3": 28,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur DevOps et Machine Learning.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        }
+      ],
+      "potentially_valid_rejections": []
+    },
+    {
+      "profile_id": "data_2",
+      "profile_domain": "Data / BI",
+      "profile_role": "data_analytics",
+      "profile_domains": [
+        "data"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "company": "Entreprise Internationale 1 SA",
+          "matching_v1": 0,
+          "scoring_v2": 27,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur SQL Querying et Cycle de développement logiciel.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "company": "Plastic Omnium",
+          "matching_v1": 0,
+          "scoring_v2": 12,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur DevOps et Machine Learning.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "company": "Entreprise Internationale 1 SA",
+          "matching_v1": 0,
+          "scoring_v3": 38,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur SQL Querying et Cycle de développement logiciel.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "company": "Plastic Omnium",
+          "matching_v1": 0,
+          "scoring_v3": 28,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur DevOps et Machine Learning.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        }
+      ],
+      "potentially_valid_rejections": []
+    },
+    {
+      "profile_id": "data_3",
+      "profile_domain": "Data / BI",
+      "profile_role": "data_analytics",
+      "profile_domains": [
+        "data",
+        "business"
+      ],
+      "pool_before": 10,
+      "pool_after": 2,
+      "top_v2": [
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "company": "Entreprise Internationale 1 SA",
+          "matching_v1": 0,
+          "scoring_v2": 27,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur SQL Querying et Cycle de développement logiciel.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "company": "Plastic Omnium",
+          "matching_v1": 0,
+          "scoring_v2": 12,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur DevOps et Machine Learning.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ]
+        }
+      ],
+      "top_v3": [
+        {
+          "offer_id": "BF-AZ-SAMPLE-0001",
+          "title": "Volontaire International VIE - Ingénieur Data #1",
+          "company": "Entreprise Internationale 1 SA",
+          "matching_v1": 0,
+          "scoring_v3": 31,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur SQL Querying et Cycle de développement logiciel.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "data",
+            "software"
+          ]
+        },
+        {
+          "offer_id": "BF-AZ-0018",
+          "title": "VIE - Informatique - Plastic Omnium Danemark",
+          "company": "Plastic Omnium",
+          "matching_v1": 0,
+          "scoring_v3": 28,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ],
+          "summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente software / it avec un manque sur DevOps et Machine Learning.",
+          "offer_role": "software_it",
+          "offer_domains": [
+            "software",
+            "it",
+            "data"
+          ]
+        }
+      ],
+      "false_positives": {
+        "scoring_v2": [],
+        "scoring_v3": []
+      },
+      "rejections": [
+        {
+          "offer_id": "BF-AZ-0001",
+          "title": "VIE - Finance - LVMH Allemagne",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0012",
+          "title": "VIE - Communication - Hermès Mexique",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0013",
+          "title": "VIE - Finance - Alstom Inde",
+          "offer_role": "finance_ops",
+          "offer_domains": [
+            "finance"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0024",
+          "title": "VIE - Supply Chain - Engie Corée du Sud",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0044",
+          "title": "VIE - Marketing - Sanofi Portugal",
+          "offer_role": "marketing_communication",
+          "offer_domains": [
+            "marketing",
+            "communication"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0056",
+          "title": "VIE - Supply Chain - Michelin Danemark",
+          "offer_role": "supply_chain_ops",
+          "offer_domains": [
+            "supply_chain"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0082",
+          "title": "VIE - RH - Schneider Electric Canada",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        },
+        {
+          "offer_id": "BF-AZ-0120",
+          "title": "VIE - RH - Bolloré Suisse",
+          "offer_role": "hr_ops",
+          "offer_domains": [
+            "hr"
+          ],
+          "role_match": "invalid",
+          "rejection_reason": "invalid_role_match",
+          "shared_domains": [],
+          "matched_signals": [],
+          "was_potentially_valid": false
+        }
+      ],
+      "potentially_valid_rejections": []
+    }
+  ],
+  "metrics_summary": {
+    "profile_count": 9,
+    "top5_correct_metier_pct": {
+      "scoring_v2": 100.0,
+      "scoring_v3": 100.0
+    },
+    "top5_false_positive_pct": {
+      "scoring_v2": 0.0,
+      "scoring_v3": 0.0
+    },
+    "avg_pool_before": 10,
+    "avg_pool_after": 2,
+    "min_pool_after": 2,
+    "max_pool_after": 2,
+    "potentially_valid_rejections": 5
+  },
+  "summary_rows": [
+    {
+      "profile_id": "supply_1",
+      "profile_domain": "Supply Chain / Operations",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 0
+    },
+    {
+      "profile_id": "supply_2",
+      "profile_domain": "Supply Chain / Operations",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 0
+    },
+    {
+      "profile_id": "supply_3",
+      "profile_domain": "Supply Chain / Operations",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 0
+    },
+    {
+      "profile_id": "hr_1",
+      "profile_domain": "HR",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 2
+    },
+    {
+      "profile_id": "hr_2",
+      "profile_domain": "HR",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 2
+    },
+    {
+      "profile_id": "hr_3",
+      "profile_domain": "HR",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 1
+    },
+    {
+      "profile_id": "data_1",
+      "profile_domain": "Data / BI",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 0
+    },
+    {
+      "profile_id": "data_2",
+      "profile_domain": "Data / BI",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 0
+    },
+    {
+      "profile_id": "data_3",
+      "profile_domain": "Data / BI",
+      "pool_before": 10,
+      "pool_after": 2,
+      "top5_correct_v2": 2,
+      "top5_correct_v3": 2,
+      "false_positives_v2": 0,
+      "false_positives_v3": 0,
+      "potentially_valid_rejections": 0
+    }
+  ],
+  "runtime_seconds": 106.74
+}

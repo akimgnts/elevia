@@ -60,6 +60,17 @@ function ReasonBadge({ reason }: { reason: KeySkillItem["reason"] }) {
 
 type Tab = "file" | "text";
 
+function buildPersistedAnalyzeProfile(result: ParseFileResponse): Record<string, unknown> {
+  const profile = { ...(result.profile || {}) } as Record<string, unknown>;
+  if (result.profile_intelligence && !profile.profile_intelligence) {
+    profile.profile_intelligence = result.profile_intelligence;
+  }
+  if (result.profile_intelligence_ai_assist && !profile.profile_intelligence_ai_assist) {
+    profile.profile_intelligence_ai_assist = result.profile_intelligence_ai_assist;
+  }
+  return profile;
+}
+
 export default function AnalyzePage() {
   const navigate = useNavigate();
   const { setIngestResult } = useProfileStore();
@@ -181,6 +192,7 @@ export default function AnalyzePage() {
         ? await parseFileEnriched(selectedFile)
         : await parseFile(selectedFile);
       setParseResult(result);
+      await setIngestResult(buildPersistedAnalyzeProfile(result));
 
       // Bridge domain signals to InboxPage (profile-level, not per-offer)
       if ((result.injected_esco_from_domain ?? 0) > 0 || (result.domain_skills_active?.length ?? 0) > 0) {
@@ -214,7 +226,7 @@ export default function AnalyzePage() {
     if (!parseResult) return;
     setMatchingLoading(true);
     try {
-      await setIngestResult(parseResult.profile);
+      await setIngestResult(buildPersistedAnalyzeProfile(parseResult));
       navigate("/inbox");
     } finally {
       setMatchingLoading(false);
@@ -300,13 +312,15 @@ export default function AnalyzePage() {
           >
             Ouvrir le profil
           </Link>
-          <Link
-            to="/inbox"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          <button
+            type="button"
+            onClick={handleRunMatching}
+            disabled={!parseResult || matchingLoading}
+            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            Voir l&apos;inbox
+            {matchingLoading ? "Chargement..." : "Voir l&apos;inbox"}
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </button>
         </>
       }
     >

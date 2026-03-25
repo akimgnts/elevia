@@ -115,6 +115,10 @@ def test_parse_file_exposes_skill_priority_outputs(client):
     assert "structured_signal_stats" in body
     assert "profile_intelligence" in body
     assert "profile_intelligence_ai_assist" in body
+    assert "enriched_signals" in body
+    assert "concept_signals" in body
+    assert isinstance(body["enriched_signals"], list)
+    assert isinstance(body["concept_signals"], list)
     assert "mapping_inputs_count" in body
     assert "mapping_inputs_count" in body["structured_signal_stats"]
     assert "structured_units_promoted_count" in body["structured_signal_stats"]
@@ -125,6 +129,8 @@ def test_parse_file_exposes_skill_priority_outputs(client):
     analyze_dev = body.get("analyze_dev") or {}
     assert "skill_priority" in analyze_dev
     assert "structured_extraction" in analyze_dev
+    assert "enriched_signals" in analyze_dev
+    assert "concept_signals" in analyze_dev
     assert "profile_intelligence" in analyze_dev
     assert "profile_intelligence_ai_assist" in analyze_dev
     assert "semantic_rag_assist" not in body

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, FileText, Loader2, X } from "lucide-react";
 import type {
   ContextFit,
@@ -15,6 +15,7 @@ import type {
   OfferIntelligence,
   ProfileSemanticContext,
   ProfileContext,
+  ScoringV2,
   SemanticExplainability,
 } from "../lib/api";
 import { fetchOfferDetail, generateCvForOffer, generateCvHtmlForOffer, generateLetterForOffer } from "../lib/api";
@@ -55,6 +56,7 @@ export type OfferDetail = {
   explanation: OfferExplanation;
   offer_intelligence?: OfferIntelligence | null;
   semantic_explainability?: SemanticExplainability | null;
+  scoring_v2?: ScoringV2 | null;
   description_structured?: DescriptionStructured | null;
   description_structured_v1?: DescriptionStructuredV1 | null;
   explain_v1_full?: ExplainPayloadV1Full | null;
@@ -154,6 +156,18 @@ function formatRoleBlockLabel(raw?: string | null) {
     default:
       return null;
   }
+}
+
+function toLevel(value: number) {
+  if (value >= 0.8) return "fort";
+  if (value >= 0.5) return "moyen";
+  return "faible";
+}
+
+function gapLabel(value: number) {
+  if (value >= 0.6) return "gaps importants";
+  if (value >= 0.3) return "gaps modérés";
+  return "faibles gaps";
 }
 
 function uniqueVisible(items: string[], limit: number) {
@@ -275,6 +289,9 @@ export function OfferDetailModal({
   const [semanticExplainability, setSemanticExplainability] = useState<SemanticExplainability | null>(
     offer.semantic_explainability ?? null
   );
+  const [scoringV2, setScoringV2] = useState<ScoringV2 | null>(
+    offer.scoring_v2 ?? null
+  );
 
   // CV generation state
   const [cvLoading, setCvLoading] = useState(false);
@@ -288,6 +305,7 @@ export function OfferDetailModal({
   const [letterLoading, setLetterLoading] = useState(false);
   const [letterPreview, setLetterPreview] = useState<ForOfferLetterResponse | null>(null);
   const [letterError, setLetterError] = useState<string | null>(null);
+  const detailFetchKeyRef = useRef<string | null>(null);
 
   async function handleGenerateCv() {
     const offerId = offer.offer_id || offer.id;
@@ -362,17 +380,29 @@ export function OfferDetailModal({
     return () => { document.body.style.overflow = original; };
   }, []);
 
+  const profileIntelligence = useMemo(
+    () =>
+      profile && typeof profile === "object" && profile !== null
+        ? ((profile as { profile_intelligence?: ProfileSemanticContext }).profile_intelligence ?? null)
+        : null,
+    [profile]
+  );
+
   // Fetch structured description on mount if not already provided
   useEffect(() => {
     if (structured) return; // already have it
     const offerId = offer.offer_id || offer.id;
     if (!offerId) return;
-    const profileIntelligence =
-      profile && typeof profile === "object" && profile !== null
-        ? ((profile as { profile_intelligence?: ProfileSemanticContext }).profile_intelligence ?? null)
-        : null;
+    const requestKey = JSON.stringify({
+      offerId,
+      matchingScore: offer.score ?? null,
+      profileRole: profileIntelligence?.dominant_role_block ?? null,
+      profileDomains: profileIntelligence?.dominant_domains ?? [],
+    });
+    if (detailFetchKeyRef.current === requestKey) return;
+    detailFetchKeyRef.current = requestKey;
     setStructuredLoading(true);
-    fetchOfferDetail(offerId, profileIntelligence)
+    fetchOfferDetail(offerId, profileIntelligence, offer.score ?? null)
       .then((detail) => {
         if (detail.description_structured) {
           setStructured(detail.description_structured);
@@ -389,13 +419,22 @@ export function OfferDetailModal({
         if (detail.semantic_explainability) {
           setSemanticExplainability(detail.semantic_explainability);
         }
+        if (detail.scoring_v2) {
+          setScoringV2(detail.scoring_v2);
+        }
       })
-      .catch(() => {
-        // Silently fail — fallback to raw description below
+      .catch((err: unknown) => {
+        console.error("[offer-detail] enrichment fetch failed:", err);
+        setStructuredLoading(false);
       })
-      .finally(() => setStructuredLoading(false));
+      .finally(() => {
+        if (detailFetchKeyRef.current === requestKey) {
+          detailFetchKeyRef.current = null;
+        }
+        setStructuredLoading(false);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offer.offer_id, offer.id, profile, structured]);
+  }, [offer.offer_id, offer.id, offer.score, profileIntelligence, structured]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -415,6 +454,7 @@ export function OfferDetailModal({
   const explanation = offer.explanation;
   const intelligence = offerIntelligence ?? offer.offer_intelligence ?? null;
   const semantic = semanticExplainability ?? offer.semantic_explainability ?? null;
+  const scoreV2 = scoringV2 ?? offer.scoring_v2 ?? null;
   const nearMatches = explain?.near_matches ?? [];
   const nearSummary = explain?.near_match_summary ?? null;
   const titleInfo = useMemo(() => cleanOfferTitle(offer.title), [offer.title]);
@@ -467,6 +507,12 @@ export function OfferDetailModal({
       : semanticAlignment === "medium"
         ? "bg-amber-500/20 text-amber-300"
         : "bg-neutral-800 text-neutral-200";
+  const scoreV2Pct =
+    typeof scoreV2?.score_pct === "number"
+      ? scoreV2.score_pct
+      : typeof scoreV2?.score === "number"
+        ? Math.round(scoreV2.score * 100)
+        : null;
 
   const descriptionPreview = useMemo(() => {
     if (!description) return "";
@@ -705,6 +751,22 @@ export function OfferDetailModal({
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+              {scoreV2 && scoreV2Pct !== null && (
+                <div className="mt-4 rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                    Lecture du score
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-white">
+                    Score métier: {scoreV2Pct}%
+                  </div>
+                  <div className="mt-3 grid gap-2 text-xs text-neutral-300 sm:grid-cols-2">
+                    <div>Métier: {toLevel(scoreV2.components.role_alignment)}</div>
+                    <div>Domaines: {toLevel(scoreV2.components.domain_alignment)}</div>
+                    <div>Matching: {toLevel(scoreV2.components.matching_base)}</div>
+                    <div>Gaps: {gapLabel(scoreV2.components.gap_penalty)}</div>
+                  </div>
                 </div>
               )}
             </div>

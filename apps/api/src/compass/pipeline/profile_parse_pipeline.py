@@ -7,12 +7,16 @@ from typing import Dict, Optional
 
 from api.utils.analyze_recovery_cache import PIPELINE_VERSION
 from compass.canonical_pipeline import get_extracted_profile_snapshot, is_trace_enabled, run_cv_pipeline
+from compass.extraction.enriched_concept_builder import build_enriched_concepts
+from compass.extraction.enriched_signal_builder import build_enriched_signals
 from compass.profile.profile_intelligence import build_profile_intelligence
 from compass.profile.profile_intelligence_ai_assist import build_profile_intelligence_ai_assist
 
 from .cache_hooks import run_profile_cache_hooks
 from .canonical_mapping_stage import run_canonical_mapping_stage, select_mapping_inputs
 from .contracts import (
+    EnrichedConceptStageResult,
+    EnrichedSignalStageResult,
     ParseFilePipelineArtifacts,
     ParseFilePipelineRequest,
     ProfileIntelligenceAiAssistStageResult,
@@ -97,6 +101,23 @@ def _run_profile_text_pipeline(
         cv_text=cv_text,
         base_mapping_inputs=select_mapping_inputs(skill_candidates),
     )
+    enriched_signals = EnrichedSignalStageResult(
+        enriched_signals=list(
+            build_enriched_signals(
+                structured_units=structured_extraction.structured_units,
+                raw_text=cv_text,
+            ).get("enriched_signals")
+            or []
+        ),
+    )
+    concept_signals = EnrichedConceptStageResult(
+        concept_signals=list(
+            build_enriched_concepts(
+                enriched_signals.enriched_signals,
+            ).get("concept_signals")
+            or []
+        ),
+    )
     canonical_mapping = run_canonical_mapping_stage(
         request_id=request_id,
         cluster_key=cluster_key,
@@ -130,6 +151,7 @@ def _run_profile_text_pipeline(
             preserved_explicit_skills=canonical_mapping.preserved_explicit_skills,
             profile_summary_skills=canonical_mapping.profile_summary_skills,
             canonical_skills=canonical_mapping.canonical_skills_list,
+            enriched_signals=enriched_signals.enriched_signals,
         )
     )
     profile_intelligence_ai_assist = ProfileIntelligenceAiAssistStageResult(
@@ -171,6 +193,8 @@ def _run_profile_text_pipeline(
         profile_cluster=profile_cluster,
         skill_candidates=skill_candidates,
         structured_extraction=structured_extraction,
+        enriched_signals=enriched_signals,
+        concept_signals=concept_signals,
         canonical_mapping=canonical_mapping,
         enrichment=enrichment,
         matching_input=matching_input,

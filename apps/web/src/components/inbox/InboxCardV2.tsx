@@ -40,6 +40,16 @@ export interface InboxCardV2Props {
     };
     alignment_summary: string;
   } | null;
+  scoringV2?: {
+    score: number;
+    score_pct: number;
+    components: {
+      role_alignment: number;
+      domain_alignment: number;
+      matching_base: number;
+      gap_penalty: number;
+    };
+  } | null;
   offerIntelligence?: {
     dominant_role_block: string;
     dominant_domains: string[];
@@ -174,6 +184,7 @@ export function InboxCardV2({
   score,
   explanation,
   semanticExplainability,
+  scoringV2,
   offerIntelligence,
   domainBucket,
   cluster,
@@ -217,6 +228,21 @@ export function InboxCardV2({
   const offerSummary = offerIntelligence?.offer_summary;
   const missingLabel = explanation.blockers.length > 0 ? "Blocages" : "À combler";
   const semanticAlignment = semanticExplainability?.role_alignment?.alignment;
+  const roleAlignmentValue = scoringV2?.components?.role_alignment;
+  const scoringV2Pct =
+    typeof scoringV2?.score_pct === "number"
+      ? scoringV2.score_pct
+      : typeof scoringV2?.score === "number"
+        ? Math.round(scoringV2.score * 100)
+        : null;
+  const scoringV2Label =
+    typeof roleAlignmentValue === "number" && roleAlignmentValue >= 0.8
+      ? "Alignement métier fort"
+      : typeof roleAlignmentValue === "number" && roleAlignmentValue >= 0.5
+        ? "Alignement métier moyen"
+        : typeof roleAlignmentValue === "number"
+          ? "Alignement métier faible"
+          : null;
   const semanticAlignmentLabel =
     semanticAlignment === "high"
       ? "Alignement fort"
@@ -304,6 +330,12 @@ export function InboxCardV2({
         {summaryReason && (
           <div className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-700">
             {summaryReason}
+          </div>
+        )}
+        {scoringV2Pct !== null && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+            <span>Score métier: {scoringV2Pct}%</span>
+            {scoringV2Label && <span>{scoringV2Label}</span>}
           </div>
         )}
         {semanticMatchedSignals.length > 0 && (

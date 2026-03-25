@@ -8,6 +8,9 @@ const API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   "/api";
 
+const inboxRequestCache = new Map<string, Promise<InboxResponse>>();
+const offerDetailRequestCache = new Map<string, Promise<OfferDetailResponse>>();
+
 export interface OfferNormalized {
   id: string;
   source: "france_travail" | "business_france" | "unknown";
@@ -325,6 +328,17 @@ export interface SemanticExplainability {
   alignment_summary: string;
 }
 
+export interface ScoringV2 {
+  score: number;
+  score_pct: number;
+  components: {
+    role_alignment: number;
+    domain_alignment: number;
+    matching_base: number;
+    gap_penalty: number;
+  };
+}
+
 export interface InboxItem {
   offer_id: string;
   id?: string;
@@ -381,6 +395,7 @@ export interface InboxItem {
   explanation: OfferExplanation;
   offer_intelligence?: OfferIntelligence | null;
   semantic_explainability?: SemanticExplainability | null;
+  scoring_v2?: ScoringV2 | null;
   /** @deprecated Inbox UI no longer uses this. Safe backend cleanup candidate. */
   explain_v1?: CompassExplainCompact | null;
 }
@@ -553,16 +568,30 @@ export async function fetchInbox(
   if (filters?.sort) params.set("sort", filters.sort);
 
   const url = `${API_BASE}/inbox?${params.toString()}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ profile_id: profileId, profile, min_score: minScore, limit, explain }),
-  });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    throw new Error(`API ${res.status}: ${txt}`);
+  const requestBody = { profile_id: profileId, profile, min_score: minScore, limit, explain };
+  const cacheKey = JSON.stringify({ url, body: requestBody });
+  const cached = inboxRequestCache.get(cacheKey);
+  if (cached) return cached;
+
+  const request = (async () => {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(`API ${res.status}: ${txt}`);
+    }
+    return res.json();
+  })();
+
+  inboxRequestCache.set(cacheKey, request);
+  try {
+    return await request;
+  } finally {
+    inboxRequestCache.delete(cacheKey);
   }
-  return res.json();
 }
 
 export async function postDecision(
@@ -825,6 +854,8 @@ export interface ParseFileResponse {
     genericity_score?: number;
   }>;
   canonical_skills_count?: number;
+  profile_intelligence?: Record<string, unknown>;
+  profile_intelligence_ai_assist?: Record<string, unknown>;
   canonical_hierarchy_added?: string[];
   /** Skill proximity layer (display-only) */
   skill_proximity_links?: Array<{
@@ -1311,10 +1342,12 @@ export interface OfferDetailResponse {
   explain_v1_full?: ExplainPayloadV1Full | null;
   offer_intelligence?: OfferIntelligence | null;
   semantic_explainability?: SemanticExplainability | null;
+  scoring_v2?: ScoringV2 | null;
 }
 
 export interface ProfileSemanticContext {
   dominant_role_block?: string | null;
+  secondary_role_blocks?: string[];
   dominant_domains?: string[];
   top_profile_signals?: string[];
   profile_summary?: string | null;
@@ -1326,11 +1359,15 @@ export interface ProfileSemanticContext {
  */
 export async function fetchOfferDetail(
   offerId: string,
-  profileSemanticContext?: ProfileSemanticContext | null
+  profileSemanticContext?: ProfileSemanticContext | null,
+  matchingScore?: number | null
 ): Promise<OfferDetailResponse> {
   const params = new URLSearchParams();
   if (profileSemanticContext?.dominant_role_block) {
     params.set("profile_role_block", profileSemanticContext.dominant_role_block);
+  }
+  for (const roleBlock of profileSemanticContext?.secondary_role_blocks ?? []) {
+    if (roleBlock) params.append("profile_secondary_role_blocks", roleBlock);
   }
   for (const domain of profileSemanticContext?.dominant_domains ?? []) {
     if (domain) params.append("profile_domains", domain);
@@ -1341,14 +1378,29 @@ export async function fetchOfferDetail(
   if (profileSemanticContext?.profile_summary) {
     params.set("profile_summary", profileSemanticContext.profile_summary);
   }
+  if (typeof matchingScore === "number" && Number.isFinite(matchingScore)) {
+    params.set("matching_score", String(matchingScore));
+  }
   const query = params.toString();
   const url = `${API_BASE}/offers/${encodeURIComponent(offerId)}/detail${query ? `?${query}` : ""}`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    throw new Error(`API ${res.status}: ${txt}`);
+  const cached = offerDetailRequestCache.get(url);
+  if (cached) return cached;
+
+  const request = (async () => {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(`API ${res.status}: ${txt}`);
+    }
+    return res.json() as Promise<OfferDetailResponse>;
+  })();
+
+  offerDetailRequestCache.set(url, request);
+  try {
+    return await request;
+  } finally {
+    offerDetailRequestCache.delete(url);
   }
-  return res.json() as Promise<OfferDetailResponse>;
 }
 
 /**

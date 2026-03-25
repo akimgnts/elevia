@@ -60,6 +60,8 @@ class ParseBaselineResponse(BaseModel):
     secondary_signal_units: List[dict] = []
     structured_signal_stats: dict = {}
     generic_filter_removed: List[dict] = []
+    enriched_signals: List[dict] = []
+    concept_signals: List[dict] = []
     preserved_explicit_skills: List[dict] = []
     profile_summary_skills: List[dict] = []
     dropped_by_priority: List[dict] = []

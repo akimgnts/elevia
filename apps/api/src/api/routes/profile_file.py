@@ -77,6 +77,8 @@ class ParseFileResponse(BaseModel):
     secondary_signal_units: List[dict] = []
     structured_signal_stats: dict = {}
     generic_filter_removed: List[dict] = []
+    enriched_signals: List[dict] = []
+    concept_signals: List[dict] = []
     canonical_skills: List[dict] = []
     canonical_skills_count: int = 0
     canonical_hierarchy_added: List[str] = []

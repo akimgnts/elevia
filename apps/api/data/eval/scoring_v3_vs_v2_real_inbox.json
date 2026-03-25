@@ -1,0 +1,3837 @@
+{
+  "executive_verdict": "MIXED",
+  "catalog_scope": {
+    "mode": "latest_unfiltered_slice",
+    "offer_count": 250
+  },
+  "profiles": [
+    {
+      "profile_domain": "Finance",
+      "profile_id": "finance",
+      "profile_role": "finance_ops",
+      "profile_domains": [
+        "finance",
+        "business",
+        "data"
+      ],
+      "parse_summary": "Profil orienté finance operationnelle avec ancrage reporting couts budget follow up et gestion factures fournisseurs cash forecast.",
+      "total_offers": 5,
+      "all_items": [
+        {
+          "offer_id": "BF-237118",
+          "title": "Contrôleur Financier (H/F)",
+          "company": "STMICROELECTRONICS (CROLLES 2) SAS",
+          "score": 57,
+          "scoring_v2": 42,
+          "scoring_v3": 54,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting regulier analyses ad hoc",
+            "controle couts depenses definition objectifs",
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI"
+          ],
+          "required_skills": [
+            "SAP",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "Power BI"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur SAP et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237092",
+          "title": "Chargé de projet (H/F)",
+          "company": "CA INDOSUEZ",
+          "score": 56,
+          "scoring_v2": 40,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Adaptability",
+            "Data Analysis",
+            "Power BI",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "PowerPoint",
+            "Adaptability",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur PowerPoint et Adaptability.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "finance",
+              "business"
+            ],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        },
+        {
+          "offer_id": "BF-237171",
+          "title": "Traffic/Affiliate Manager (H/F)",
+          "company": "CAR DATA",
+          "score": 55,
+          "scoring_v2": 41,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "marketing"
+            ]
+          },
+          "top_offer_signals": [
+            "gerer portefeuille publishers marche francais",
+            "recruter nouveaux partenaires",
+            "Business Intelligence",
+            "Data Analysis",
+            "CRM Management"
+          ],
+          "required_skills": [
+            "gerer portefeuille publishers marche francais",
+            "Business Intelligence",
+            "Data Analysis",
+            "recruter nouveaux partenaires",
+            "CRM Management"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur gerer portefeuille publishers marche francais et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 52,
+          "scoring_v2": 41,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "business",
+              "data"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "sales"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur metier et data, mais le poste reste plus oriente developpement commercial avec un manque sur Data Analysis et English.",
+          "offer_role": "sales_business_dev"
+        }
+      ],
+      "top5_v2": [
+        {
+          "offer_id": "BF-237118",
+          "title": "Contrôleur Financier (H/F)",
+          "company": "STMICROELECTRONICS (CROLLES 2) SAS",
+          "score": 57,
+          "scoring_v2": 42,
+          "scoring_v3": 54,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting regulier analyses ad hoc",
+            "controle couts depenses definition objectifs",
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI"
+          ],
+          "required_skills": [
+            "SAP",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "Power BI"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur SAP et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237171",
+          "title": "Traffic/Affiliate Manager (H/F)",
+          "company": "CAR DATA",
+          "score": 55,
+          "scoring_v2": 41,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "marketing"
+            ]
+          },
+          "top_offer_signals": [
+            "gerer portefeuille publishers marche francais",
+            "recruter nouveaux partenaires",
+            "Business Intelligence",
+            "Data Analysis",
+            "CRM Management"
+          ],
+          "required_skills": [
+            "gerer portefeuille publishers marche francais",
+            "Business Intelligence",
+            "Data Analysis",
+            "recruter nouveaux partenaires",
+            "CRM Management"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur gerer portefeuille publishers marche francais et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 52,
+          "scoring_v2": 41,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "business",
+              "data"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "sales"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur metier et data, mais le poste reste plus oriente developpement commercial avec un manque sur Data Analysis et English.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237092",
+          "title": "Chargé de projet (H/F)",
+          "company": "CA INDOSUEZ",
+          "score": 56,
+          "scoring_v2": 40,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Adaptability",
+            "Data Analysis",
+            "Power BI",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "PowerPoint",
+            "Adaptability",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur PowerPoint et Adaptability.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "finance",
+              "business"
+            ],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        }
+      ],
+      "top5_v3": [
+        {
+          "offer_id": "BF-237118",
+          "title": "Contrôleur Financier (H/F)",
+          "company": "STMICROELECTRONICS (CROLLES 2) SAS",
+          "score": 57,
+          "scoring_v2": 42,
+          "scoring_v3": 54,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting regulier analyses ad hoc",
+            "controle couts depenses definition objectifs",
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI"
+          ],
+          "required_skills": [
+            "SAP",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "Power BI"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur SAP et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 52,
+          "scoring_v2": 41,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "business",
+              "data"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "sales"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur metier et data, mais le poste reste plus oriente developpement commercial avec un manque sur Data Analysis et English.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237092",
+          "title": "Chargé de projet (H/F)",
+          "company": "CA INDOSUEZ",
+          "score": 56,
+          "scoring_v2": 40,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Adaptability",
+            "Data Analysis",
+            "Power BI",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "PowerPoint",
+            "Adaptability",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur PowerPoint et Adaptability.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237171",
+          "title": "Traffic/Affiliate Manager (H/F)",
+          "company": "CAR DATA",
+          "score": 55,
+          "scoring_v2": 41,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "finance"
+            ],
+            "offer_only_domains": [
+              "marketing"
+            ]
+          },
+          "top_offer_signals": [
+            "gerer portefeuille publishers marche francais",
+            "recruter nouveaux partenaires",
+            "Business Intelligence",
+            "Data Analysis",
+            "CRM Management"
+          ],
+          "required_skills": [
+            "gerer portefeuille publishers marche francais",
+            "Business Intelligence",
+            "Data Analysis",
+            "recruter nouveaux partenaires",
+            "CRM Management"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur gerer portefeuille publishers marche francais et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "finance",
+              "business"
+            ],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        }
+      ],
+      "analysis_grid": {
+        "top1_relevance": {
+          "scoring_v2": "High",
+          "scoring_v3": "High"
+        },
+        "false_positives_in_top5": {
+          "scoring_v2": 0,
+          "scoring_v3": 0
+        },
+        "correct_metier_in_top5": {
+          "scoring_v2": "5/5",
+          "scoring_v3": "5/5"
+        },
+        "transition_cases": {
+          "scoring_v2": "Well positioned",
+          "scoring_v3": "Well positioned"
+        }
+      },
+      "ranking_differences": [
+        {
+          "offer_id": "BF-237118",
+          "title": "Contrôleur Financier (H/F)",
+          "v2_rank": 1,
+          "v3_rank": 1,
+          "scoring_v2": 42,
+          "scoring_v3": 54,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data",
+            "business"
+          ]
+        },
+        {
+          "offer_id": "BF-237171",
+          "title": "Traffic/Affiliate Manager (H/F)",
+          "v2_rank": 2,
+          "v3_rank": 4,
+          "scoring_v2": 41,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data",
+            "business"
+          ]
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "v2_rank": 3,
+          "v3_rank": 2,
+          "scoring_v2": 41,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "business",
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-237092",
+          "title": "Chargé de projet (H/F)",
+          "v2_rank": 4,
+          "v3_rank": 3,
+          "scoring_v2": 40,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data",
+            "business"
+          ]
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "v2_rank": 5,
+          "v3_rank": 5,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        }
+      ],
+      "failure_cases": {
+        "false_positives_introduced_by_v3": [],
+        "good_matches_downgraded_by_v3": []
+      }
+    },
+    {
+      "profile_domain": "Sales / Business Dev",
+      "profile_id": "sales---business-dev",
+      "profile_role": "sales_business_dev",
+      "profile_domains": [
+        "sales"
+      ],
+      "parse_summary": "Profil orienté developpement commercial avec ancrage gestion portefeuille clients prospection outbound et suivi pipeline peu.",
+      "total_offers": 5,
+      "all_items": [
+        {
+          "offer_id": "BF-237328",
+          "title": "RevOps Analyst (H/F)",
+          "company": "SPLIO",
+          "score": 66,
+          "scoring_v2": 32,
+          "scoring_v3": 47,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "data",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting databases apis etc",
+            "Business Intelligence",
+            "Data Analysis",
+            "CRM Management",
+            "HubSpot"
+          ],
+          "required_skills": [
+            "HubSpot",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "reporting databases apis etc"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur commercial, mais le poste reste plus oriente analyse de donnees avec un manque sur HubSpot et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236045",
+          "title": "Sales Executive (H/F)",
+          "company": "WESYPE",
+          "score": 61,
+          "scoring_v2": 72,
+          "scoring_v3": 67,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "communication",
+              "marketing"
+            ]
+          },
+          "top_offer_signals": [
+            "suivi crm assurer",
+            "developper portefeuille existant",
+            "CRM Management",
+            "Frontend Development",
+            "HubSpot"
+          ],
+          "required_skills": [
+            "suivi crm assurer",
+            "developper portefeuille existant",
+            "CRM Management",
+            "Frontend Development",
+            "HubSpot"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en CRM Management, mais il manque encore suivi crm assurer et developper portefeuille existant.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236226",
+          "title": "Training Academy Intern (H/F)",
+          "company": "IVECO FRANCE",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "marketing",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "Spreadsheet Analysis"
+          ],
+          "required_skills": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "English",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur commercial, mais le poste reste plus oriente marketing / communication avec un manque sur preparation support proper roll out et Data Analysis.",
+          "offer_role": "marketing_communication"
+        },
+        {
+          "offer_id": "BF-236562",
+          "title": "Business Development Manager - B2B - VIE - Barcelone (H/F)",
+          "company": "FLASH CONTRACT",
+          "score": 54,
+          "scoring_v2": 69,
+          "scoring_v3": 66,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "data"
+            ]
+          },
+          "top_offer_signals": [
+            "gestion contrats rendant souscription",
+            "developper nouvelles verticales affirmant ainsi",
+            "gerer leurs contrats energetiques b2b",
+            "CRM Management",
+            "Business Intelligence"
+          ],
+          "required_skills": [
+            "gestion contrats rendant souscription",
+            "CRM Management",
+            "developper nouvelles verticales affirmant ainsi",
+            "gerer leurs contrats energetiques b2b"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en CRM Management, mais il manque encore gestion contrats rendant souscription et developper nouvelles verticales affirmant ainsi.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237242",
+          "title": "BUSINESS DEVELOPER HF (H/F)",
+          "company": "HUTCHINSON",
+          "score": 54,
+          "scoring_v2": 69,
+          "scoring_v3": 64,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting lines asean sales manager",
+            "Autonomy",
+            "Business Intelligence",
+            "echnical skills",
+            "lines asean sales manager"
+          ],
+          "required_skills": [
+            "Must have",
+            "reporting lines asean sales manager",
+            "Autonomy",
+            "Business Intelligence",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en Argumentaire de vente et Gestion de projets, mais il manque encore Must have et reporting lines asean sales manager.",
+          "offer_role": "sales_business_dev"
+        }
+      ],
+      "top5_v2": [
+        {
+          "offer_id": "BF-236045",
+          "title": "Sales Executive (H/F)",
+          "company": "WESYPE",
+          "score": 61,
+          "scoring_v2": 72,
+          "scoring_v3": 67,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "communication",
+              "marketing"
+            ]
+          },
+          "top_offer_signals": [
+            "suivi crm assurer",
+            "developper portefeuille existant",
+            "CRM Management",
+            "Frontend Development",
+            "HubSpot"
+          ],
+          "required_skills": [
+            "suivi crm assurer",
+            "developper portefeuille existant",
+            "CRM Management",
+            "Frontend Development",
+            "HubSpot"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en CRM Management, mais il manque encore suivi crm assurer et developper portefeuille existant.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236562",
+          "title": "Business Development Manager - B2B - VIE - Barcelone (H/F)",
+          "company": "FLASH CONTRACT",
+          "score": 54,
+          "scoring_v2": 69,
+          "scoring_v3": 66,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "data"
+            ]
+          },
+          "top_offer_signals": [
+            "gestion contrats rendant souscription",
+            "developper nouvelles verticales affirmant ainsi",
+            "gerer leurs contrats energetiques b2b",
+            "CRM Management",
+            "Business Intelligence"
+          ],
+          "required_skills": [
+            "gestion contrats rendant souscription",
+            "CRM Management",
+            "developper nouvelles verticales affirmant ainsi",
+            "gerer leurs contrats energetiques b2b"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en CRM Management, mais il manque encore gestion contrats rendant souscription et developper nouvelles verticales affirmant ainsi.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237242",
+          "title": "BUSINESS DEVELOPER HF (H/F)",
+          "company": "HUTCHINSON",
+          "score": 54,
+          "scoring_v2": 69,
+          "scoring_v3": 64,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting lines asean sales manager",
+            "Autonomy",
+            "Business Intelligence",
+            "echnical skills",
+            "lines asean sales manager"
+          ],
+          "required_skills": [
+            "Must have",
+            "reporting lines asean sales manager",
+            "Autonomy",
+            "Business Intelligence",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en Argumentaire de vente et Gestion de projets, mais il manque encore Must have et reporting lines asean sales manager.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237328",
+          "title": "RevOps Analyst (H/F)",
+          "company": "SPLIO",
+          "score": 66,
+          "scoring_v2": 32,
+          "scoring_v3": 47,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "data",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting databases apis etc",
+            "Business Intelligence",
+            "Data Analysis",
+            "CRM Management",
+            "HubSpot"
+          ],
+          "required_skills": [
+            "HubSpot",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "reporting databases apis etc"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur commercial, mais le poste reste plus oriente analyse de donnees avec un manque sur HubSpot et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236226",
+          "title": "Training Academy Intern (H/F)",
+          "company": "IVECO FRANCE",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "marketing",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "Spreadsheet Analysis"
+          ],
+          "required_skills": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "English",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur commercial, mais le poste reste plus oriente marketing / communication avec un manque sur preparation support proper roll out et Data Analysis.",
+          "offer_role": "marketing_communication"
+        }
+      ],
+      "top5_v3": [
+        {
+          "offer_id": "BF-236045",
+          "title": "Sales Executive (H/F)",
+          "company": "WESYPE",
+          "score": 61,
+          "scoring_v2": 72,
+          "scoring_v3": 67,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "communication",
+              "marketing"
+            ]
+          },
+          "top_offer_signals": [
+            "suivi crm assurer",
+            "developper portefeuille existant",
+            "CRM Management",
+            "Frontend Development",
+            "HubSpot"
+          ],
+          "required_skills": [
+            "suivi crm assurer",
+            "developper portefeuille existant",
+            "CRM Management",
+            "Frontend Development",
+            "HubSpot"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en CRM Management, mais il manque encore suivi crm assurer et developper portefeuille existant.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236562",
+          "title": "Business Development Manager - B2B - VIE - Barcelone (H/F)",
+          "company": "FLASH CONTRACT",
+          "score": 54,
+          "scoring_v2": 69,
+          "scoring_v3": 66,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "data"
+            ]
+          },
+          "top_offer_signals": [
+            "gestion contrats rendant souscription",
+            "developper nouvelles verticales affirmant ainsi",
+            "gerer leurs contrats energetiques b2b",
+            "CRM Management",
+            "Business Intelligence"
+          ],
+          "required_skills": [
+            "gestion contrats rendant souscription",
+            "CRM Management",
+            "developper nouvelles verticales affirmant ainsi",
+            "gerer leurs contrats energetiques b2b"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en CRM Management, mais il manque encore gestion contrats rendant souscription et developper nouvelles verticales affirmant ainsi.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237242",
+          "title": "BUSINESS DEVELOPER HF (H/F)",
+          "company": "HUTCHINSON",
+          "score": 54,
+          "scoring_v2": 69,
+          "scoring_v3": 64,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting lines asean sales manager",
+            "Autonomy",
+            "Business Intelligence",
+            "echnical skills",
+            "lines asean sales manager"
+          ],
+          "required_skills": [
+            "Must have",
+            "reporting lines asean sales manager",
+            "Autonomy",
+            "Business Intelligence",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur commercial, avec un socle commun en Argumentaire de vente et Gestion de projets, mais il manque encore Must have et reporting lines asean sales manager.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237328",
+          "title": "RevOps Analyst (H/F)",
+          "company": "SPLIO",
+          "score": 66,
+          "scoring_v2": 32,
+          "scoring_v3": 47,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "data",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting databases apis etc",
+            "Business Intelligence",
+            "Data Analysis",
+            "CRM Management",
+            "HubSpot"
+          ],
+          "required_skills": [
+            "HubSpot",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "reporting databases apis etc"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur commercial, mais le poste reste plus oriente analyse de donnees avec un manque sur HubSpot et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236226",
+          "title": "Training Academy Intern (H/F)",
+          "company": "IVECO FRANCE",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "sales"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "marketing",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "Spreadsheet Analysis"
+          ],
+          "required_skills": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "English",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur commercial, mais le poste reste plus oriente marketing / communication avec un manque sur preparation support proper roll out et Data Analysis.",
+          "offer_role": "marketing_communication"
+        }
+      ],
+      "analysis_grid": {
+        "top1_relevance": {
+          "scoring_v2": "High",
+          "scoring_v3": "High"
+        },
+        "false_positives_in_top5": {
+          "scoring_v2": 0,
+          "scoring_v3": 0
+        },
+        "correct_metier_in_top5": {
+          "scoring_v2": "5/5",
+          "scoring_v3": "5/5"
+        },
+        "transition_cases": {
+          "scoring_v2": "Well positioned",
+          "scoring_v3": "Well positioned"
+        }
+      },
+      "ranking_differences": [
+        {
+          "offer_id": "BF-236045",
+          "title": "Sales Executive (H/F)",
+          "v2_rank": 1,
+          "v3_rank": 1,
+          "scoring_v2": 72,
+          "scoring_v3": 67,
+          "role_alignment": "high",
+          "shared_domains": [
+            "sales"
+          ]
+        },
+        {
+          "offer_id": "BF-236562",
+          "title": "Business Development Manager - B2B - VIE - Barcelone (H/F)",
+          "v2_rank": 2,
+          "v3_rank": 2,
+          "scoring_v2": 69,
+          "scoring_v3": 66,
+          "role_alignment": "high",
+          "shared_domains": [
+            "sales"
+          ]
+        },
+        {
+          "offer_id": "BF-237242",
+          "title": "BUSINESS DEVELOPER HF (H/F)",
+          "v2_rank": 3,
+          "v3_rank": 3,
+          "scoring_v2": 69,
+          "scoring_v3": 64,
+          "role_alignment": "high",
+          "shared_domains": [
+            "sales"
+          ]
+        },
+        {
+          "offer_id": "BF-237328",
+          "title": "RevOps Analyst (H/F)",
+          "v2_rank": 4,
+          "v3_rank": 4,
+          "scoring_v2": 32,
+          "scoring_v3": 47,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "sales"
+          ]
+        },
+        {
+          "offer_id": "BF-236226",
+          "title": "Training Academy Intern (H/F)",
+          "v2_rank": 5,
+          "v3_rank": 5,
+          "scoring_v2": 29,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "sales"
+          ]
+        }
+      ],
+      "failure_cases": {
+        "false_positives_introduced_by_v3": [],
+        "good_matches_downgraded_by_v3": []
+      }
+    },
+    {
+      "profile_domain": "Marketing / Communication",
+      "profile_id": "marketing---communication",
+      "profile_role": "marketing_communication",
+      "profile_domains": [
+        "marketing"
+      ],
+      "parse_summary": "Profil orienté marketing / communication avec ancrage mise a jour site articles participation campagnes et communication interne aussi demandes.",
+      "total_offers": 5,
+      "all_items": [
+        {
+          "offer_id": "BF-236625",
+          "title": "COORDINATEUR HSE (H/F)",
+          "company": "TOTALENERGIES MARKETING SERVICES",
+          "score": 60,
+          "scoring_v2": 20,
+          "scoring_v3": 10,
+          "role_alignment": "low",
+          "domain_alignment": {
+            "shared_domains": [],
+            "profile_only_domains": [
+              "marketing"
+            ],
+            "offer_only_domains": [
+              "data",
+              "business",
+              "finance"
+            ]
+          },
+          "top_offer_signals": [
+            "coordonner audits inspections plans action",
+            "gerer incidents realiser analyses risques",
+            "Business Intelligence",
+            "Data Analysis",
+            "Audit"
+          ],
+          "required_skills": [
+            "Business Intelligence",
+            "Data Analysis",
+            "coordonner audits inspections plans action",
+            "gerer incidents realiser analyses risques",
+            "Audit"
+          ],
+          "semantic_summary": "Le poste est surtout oriente analyse de donnees, alors que ton profil penche davantage vers marketing / communication, avec seulement un recouvrement partiel sur Analyse de données et Analyse marketing.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236226",
+          "title": "Training Academy Intern (H/F)",
+          "company": "IVECO FRANCE",
+          "score": 55,
+          "scoring_v2": 69,
+          "scoring_v3": 65,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "sales"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "Spreadsheet Analysis"
+          ],
+          "required_skills": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "English",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur marketing, avec un socle commun en Analyse de données et Analyse marketing, mais il manque encore preparation support proper roll out et Data Analysis.",
+          "offer_role": "marketing_communication"
+        },
+        {
+          "offer_id": "BF-237286",
+          "title": "BUSINESS DEVELOPER (H/F)",
+          "company": "GUILCOR",
+          "score": 54,
+          "scoring_v2": 18,
+          "scoring_v3": 29,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [],
+            "profile_only_domains": [
+              "marketing"
+            ],
+            "offer_only_domains": [
+              "sales",
+              "data",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "developper portefeuille clients identifier nouvelles",
+            "suivre entretenir relations clients fidelisation",
+            "Autonomy",
+            "Data Analysis",
+            "Lead Generation"
+          ],
+          "required_skills": [
+            "developper portefeuille clients identifier nouvelles",
+            "suivre entretenir relations clients fidelisation",
+            "Autonomy",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur Analyse de données et Analyse marketing, mais le poste reste plus oriente developpement commercial avec un manque sur developper portefeuille clients identifier nouvelles et suivre entretenir relations clients fidelisation.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236570",
+          "title": "Chargé d'affaires télécoms (H/F)",
+          "company": "SAGEMCOM BROADBAND SAS",
+          "score": 52,
+          "scoring_v2": 67,
+          "scoring_v3": 64,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "data",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "coordination direction sagemcom",
+            "Autonomy",
+            "Data Analysis",
+            "Statistical Programming",
+            "analyse marketing"
+          ],
+          "required_skills": [
+            "coordination direction sagemcom",
+            "Autonomy",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur marketing, avec un socle commun en Analyse de données et Analyse marketing, mais il manque encore coordination direction sagemcom et Autonomy.",
+          "offer_role": "marketing_communication"
+        },
+        {
+          "offer_id": "BF-236122",
+          "title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+          "company": "AS 24",
+          "score": 51,
+          "scoring_v2": 40,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "sales",
+              "data"
+            ]
+          },
+          "top_offer_signals": [
+            "analyse marche tarifs ainsi que",
+            "coordonner activites commerciales marketing communication",
+            "coordination siege as24 france",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "required_skills": [
+            "coordonner activites commerciales marketing communication",
+            "analyse marche tarifs ainsi que",
+            "Compétences techniques",
+            "coordination siege as24 france"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur marketing, mais le poste reste plus oriente developpement commercial avec un manque sur coordonner activites commerciales marketing communication et analyse marche tarifs ainsi que.",
+          "offer_role": "sales_business_dev"
+        }
+      ],
+      "top5_v2": [
+        {
+          "offer_id": "BF-236226",
+          "title": "Training Academy Intern (H/F)",
+          "company": "IVECO FRANCE",
+          "score": 55,
+          "scoring_v2": 69,
+          "scoring_v3": 65,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "sales"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "Spreadsheet Analysis"
+          ],
+          "required_skills": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "English",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur marketing, avec un socle commun en Analyse de données et Analyse marketing, mais il manque encore preparation support proper roll out et Data Analysis.",
+          "offer_role": "marketing_communication"
+        },
+        {
+          "offer_id": "BF-236570",
+          "title": "Chargé d'affaires télécoms (H/F)",
+          "company": "SAGEMCOM BROADBAND SAS",
+          "score": 52,
+          "scoring_v2": 67,
+          "scoring_v3": 64,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "data",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "coordination direction sagemcom",
+            "Autonomy",
+            "Data Analysis",
+            "Statistical Programming",
+            "analyse marketing"
+          ],
+          "required_skills": [
+            "coordination direction sagemcom",
+            "Autonomy",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur marketing, avec un socle commun en Analyse de données et Analyse marketing, mais il manque encore coordination direction sagemcom et Autonomy.",
+          "offer_role": "marketing_communication"
+        },
+        {
+          "offer_id": "BF-236122",
+          "title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+          "company": "AS 24",
+          "score": 51,
+          "scoring_v2": 40,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "sales",
+              "data"
+            ]
+          },
+          "top_offer_signals": [
+            "analyse marche tarifs ainsi que",
+            "coordonner activites commerciales marketing communication",
+            "coordination siege as24 france",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "required_skills": [
+            "coordonner activites commerciales marketing communication",
+            "analyse marche tarifs ainsi que",
+            "Compétences techniques",
+            "coordination siege as24 france"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur marketing, mais le poste reste plus oriente developpement commercial avec un manque sur coordonner activites commerciales marketing communication et analyse marche tarifs ainsi que.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236625",
+          "title": "COORDINATEUR HSE (H/F)",
+          "company": "TOTALENERGIES MARKETING SERVICES",
+          "score": 60,
+          "scoring_v2": 20,
+          "scoring_v3": 10,
+          "role_alignment": "low",
+          "domain_alignment": {
+            "shared_domains": [],
+            "profile_only_domains": [
+              "marketing"
+            ],
+            "offer_only_domains": [
+              "data",
+              "business",
+              "finance"
+            ]
+          },
+          "top_offer_signals": [
+            "coordonner audits inspections plans action",
+            "gerer incidents realiser analyses risques",
+            "Business Intelligence",
+            "Data Analysis",
+            "Audit"
+          ],
+          "required_skills": [
+            "Business Intelligence",
+            "Data Analysis",
+            "coordonner audits inspections plans action",
+            "gerer incidents realiser analyses risques",
+            "Audit"
+          ],
+          "semantic_summary": "Le poste est surtout oriente analyse de donnees, alors que ton profil penche davantage vers marketing / communication, avec seulement un recouvrement partiel sur Analyse de données et Analyse marketing.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237286",
+          "title": "BUSINESS DEVELOPER (H/F)",
+          "company": "GUILCOR",
+          "score": 54,
+          "scoring_v2": 18,
+          "scoring_v3": 29,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [],
+            "profile_only_domains": [
+              "marketing"
+            ],
+            "offer_only_domains": [
+              "sales",
+              "data",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "developper portefeuille clients identifier nouvelles",
+            "suivre entretenir relations clients fidelisation",
+            "Autonomy",
+            "Data Analysis",
+            "Lead Generation"
+          ],
+          "required_skills": [
+            "developper portefeuille clients identifier nouvelles",
+            "suivre entretenir relations clients fidelisation",
+            "Autonomy",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur Analyse de données et Analyse marketing, mais le poste reste plus oriente developpement commercial avec un manque sur developper portefeuille clients identifier nouvelles et suivre entretenir relations clients fidelisation.",
+          "offer_role": "sales_business_dev"
+        }
+      ],
+      "top5_v3": [
+        {
+          "offer_id": "BF-236226",
+          "title": "Training Academy Intern (H/F)",
+          "company": "IVECO FRANCE",
+          "score": 55,
+          "scoring_v2": 69,
+          "scoring_v3": 65,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "sales"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "Spreadsheet Analysis"
+          ],
+          "required_skills": [
+            "preparation support proper roll out",
+            "Data Analysis",
+            "Documentation",
+            "English",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur marketing, avec un socle commun en Analyse de données et Analyse marketing, mais il manque encore preparation support proper roll out et Data Analysis.",
+          "offer_role": "marketing_communication"
+        },
+        {
+          "offer_id": "BF-236570",
+          "title": "Chargé d'affaires télécoms (H/F)",
+          "company": "SAGEMCOM BROADBAND SAS",
+          "score": 52,
+          "scoring_v2": 67,
+          "scoring_v3": 64,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "data",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "coordination direction sagemcom",
+            "Autonomy",
+            "Data Analysis",
+            "Statistical Programming",
+            "analyse marketing"
+          ],
+          "required_skills": [
+            "coordination direction sagemcom",
+            "Autonomy",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur marketing, avec un socle commun en Analyse de données et Analyse marketing, mais il manque encore coordination direction sagemcom et Autonomy.",
+          "offer_role": "marketing_communication"
+        },
+        {
+          "offer_id": "BF-236122",
+          "title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+          "company": "AS 24",
+          "score": 51,
+          "scoring_v2": 40,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "marketing"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "sales",
+              "data"
+            ]
+          },
+          "top_offer_signals": [
+            "analyse marche tarifs ainsi que",
+            "coordonner activites commerciales marketing communication",
+            "coordination siege as24 france",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "required_skills": [
+            "coordonner activites commerciales marketing communication",
+            "analyse marche tarifs ainsi que",
+            "Compétences techniques",
+            "coordination siege as24 france"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur marketing, mais le poste reste plus oriente developpement commercial avec un manque sur coordonner activites commerciales marketing communication et analyse marche tarifs ainsi que.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237286",
+          "title": "BUSINESS DEVELOPER (H/F)",
+          "company": "GUILCOR",
+          "score": 54,
+          "scoring_v2": 18,
+          "scoring_v3": 29,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [],
+            "profile_only_domains": [
+              "marketing"
+            ],
+            "offer_only_domains": [
+              "sales",
+              "data",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "developper portefeuille clients identifier nouvelles",
+            "suivre entretenir relations clients fidelisation",
+            "Autonomy",
+            "Data Analysis",
+            "Lead Generation"
+          ],
+          "required_skills": [
+            "developper portefeuille clients identifier nouvelles",
+            "suivre entretenir relations clients fidelisation",
+            "Autonomy",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur Analyse de données et Analyse marketing, mais le poste reste plus oriente developpement commercial avec un manque sur developper portefeuille clients identifier nouvelles et suivre entretenir relations clients fidelisation.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236625",
+          "title": "COORDINATEUR HSE (H/F)",
+          "company": "TOTALENERGIES MARKETING SERVICES",
+          "score": 60,
+          "scoring_v2": 20,
+          "scoring_v3": 10,
+          "role_alignment": "low",
+          "domain_alignment": {
+            "shared_domains": [],
+            "profile_only_domains": [
+              "marketing"
+            ],
+            "offer_only_domains": [
+              "data",
+              "business",
+              "finance"
+            ]
+          },
+          "top_offer_signals": [
+            "coordonner audits inspections plans action",
+            "gerer incidents realiser analyses risques",
+            "Business Intelligence",
+            "Data Analysis",
+            "Audit"
+          ],
+          "required_skills": [
+            "Business Intelligence",
+            "Data Analysis",
+            "coordonner audits inspections plans action",
+            "gerer incidents realiser analyses risques",
+            "Audit"
+          ],
+          "semantic_summary": "Le poste est surtout oriente analyse de donnees, alors que ton profil penche davantage vers marketing / communication, avec seulement un recouvrement partiel sur Analyse de données et Analyse marketing.",
+          "offer_role": "data_analytics"
+        }
+      ],
+      "analysis_grid": {
+        "top1_relevance": {
+          "scoring_v2": "High",
+          "scoring_v3": "High"
+        },
+        "false_positives_in_top5": {
+          "scoring_v2": 0,
+          "scoring_v3": 0
+        },
+        "correct_metier_in_top5": {
+          "scoring_v2": "3/5",
+          "scoring_v3": "3/5"
+        },
+        "transition_cases": {
+          "scoring_v2": "Visible but limited",
+          "scoring_v3": "Visible but limited"
+        }
+      },
+      "ranking_differences": [
+        {
+          "offer_id": "BF-236226",
+          "title": "Training Academy Intern (H/F)",
+          "v2_rank": 1,
+          "v3_rank": 1,
+          "scoring_v2": 69,
+          "scoring_v3": 65,
+          "role_alignment": "high",
+          "shared_domains": [
+            "marketing"
+          ]
+        },
+        {
+          "offer_id": "BF-236570",
+          "title": "Chargé d'affaires télécoms (H/F)",
+          "v2_rank": 2,
+          "v3_rank": 2,
+          "scoring_v2": 67,
+          "scoring_v3": 64,
+          "role_alignment": "high",
+          "shared_domains": [
+            "marketing"
+          ]
+        },
+        {
+          "offer_id": "BF-236122",
+          "title": "Chargé(e) Marketing, Communication & Business Development (H/F)",
+          "v2_rank": 3,
+          "v3_rank": 3,
+          "scoring_v2": 40,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "marketing"
+          ]
+        },
+        {
+          "offer_id": "BF-236625",
+          "title": "COORDINATEUR HSE (H/F)",
+          "v2_rank": 4,
+          "v3_rank": 5,
+          "scoring_v2": 20,
+          "scoring_v3": 10,
+          "role_alignment": "low",
+          "shared_domains": []
+        },
+        {
+          "offer_id": "BF-237286",
+          "title": "BUSINESS DEVELOPER (H/F)",
+          "v2_rank": 5,
+          "v3_rank": 4,
+          "scoring_v2": 18,
+          "scoring_v3": 29,
+          "role_alignment": "medium",
+          "shared_domains": []
+        }
+      ],
+      "failure_cases": {
+        "false_positives_introduced_by_v3": [],
+        "good_matches_downgraded_by_v3": []
+      }
+    },
+    {
+      "profile_domain": "Supply Chain / Operations",
+      "profile_id": "supply-chain---operations",
+      "profile_role": "supply_chain_ops",
+      "profile_domains": [
+        "supply_chain",
+        "operations",
+        "data"
+      ],
+      "parse_summary": "Profil orienté supply chain / operations avec ancrage coordination transport livraisons stocks incidents et suivi approvisionnement fournisseurs commandes achat.",
+      "total_offers": 5,
+      "all_items": [
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 52,
+          "scoring_v2": 28,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "sales",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente developpement commercial avec un manque sur Data Analysis et English.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237353",
+          "title": "VIE-Data Scientist(m/f/d) (H/F)",
+          "company": "L'AIR LIQUIDE SOCIETE ANONYME POUR L'ETUDE ET L'EXPLOITATION DES PROCEDES GEORGES CLAUDE",
+          "score": 51,
+          "scoring_v2": 27,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI",
+            "data scientist",
+            "Languages"
+          ],
+          "required_skills": [
+            "English",
+            "Business Intelligence",
+            "Data Analysis",
+            "data scientist",
+            "interest"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur English et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236245",
+          "title": "Purchasing Controlling VIE (H/F)",
+          "company": "FAURECIA AUTOMOTIVE HOLDINGS",
+          "score": 50,
+          "scoring_v2": 28,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "finance",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation budget forecast",
+            "Data Analysis",
+            "Procurement Basics",
+            "SAP",
+            "budget forecast"
+          ],
+          "required_skills": [
+            "preparation budget forecast",
+            "Data Analysis",
+            "English",
+            "Procurement Basics",
+            "SAP"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente finance operationnelle avec un manque sur preparation budget forecast et Data Analysis.",
+          "offer_role": "finance_ops"
+        },
+        {
+          "offer_id": "BF-237013",
+          "title": "VIE Analyst M&A | Latin America (Portuguese speaking) (H/F)",
+          "company": "EURO LATINA FINANCE",
+          "score": 50,
+          "scoring_v2": 27,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "business",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Spreadsheet Analysis",
+            "clients",
+            "latin",
+            "paris"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Spreadsheet Analysis",
+            "buyer",
+            "clients"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur Data Analysis et English.",
+          "offer_role": "data_analytics"
+        }
+      ],
+      "top5_v2": [
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 52,
+          "scoring_v2": 28,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "sales",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente developpement commercial avec un manque sur Data Analysis et English.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236245",
+          "title": "Purchasing Controlling VIE (H/F)",
+          "company": "FAURECIA AUTOMOTIVE HOLDINGS",
+          "score": 50,
+          "scoring_v2": 28,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "finance",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation budget forecast",
+            "Data Analysis",
+            "Procurement Basics",
+            "SAP",
+            "budget forecast"
+          ],
+          "required_skills": [
+            "preparation budget forecast",
+            "Data Analysis",
+            "English",
+            "Procurement Basics",
+            "SAP"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente finance operationnelle avec un manque sur preparation budget forecast et Data Analysis.",
+          "offer_role": "finance_ops"
+        },
+        {
+          "offer_id": "BF-237353",
+          "title": "VIE-Data Scientist(m/f/d) (H/F)",
+          "company": "L'AIR LIQUIDE SOCIETE ANONYME POUR L'ETUDE ET L'EXPLOITATION DES PROCEDES GEORGES CLAUDE",
+          "score": 51,
+          "scoring_v2": 27,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI",
+            "data scientist",
+            "Languages"
+          ],
+          "required_skills": [
+            "English",
+            "Business Intelligence",
+            "Data Analysis",
+            "data scientist",
+            "interest"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur English et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237013",
+          "title": "VIE Analyst M&A | Latin America (Portuguese speaking) (H/F)",
+          "company": "EURO LATINA FINANCE",
+          "score": 50,
+          "scoring_v2": 27,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "business",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Spreadsheet Analysis",
+            "clients",
+            "latin",
+            "paris"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Spreadsheet Analysis",
+            "buyer",
+            "clients"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur Data Analysis et English.",
+          "offer_role": "data_analytics"
+        }
+      ],
+      "top5_v3": [
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 52,
+          "scoring_v2": 28,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "sales",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente developpement commercial avec un manque sur Data Analysis et English.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-237353",
+          "title": "VIE-Data Scientist(m/f/d) (H/F)",
+          "company": "L'AIR LIQUIDE SOCIETE ANONYME POUR L'ETUDE ET L'EXPLOITATION DES PROCEDES GEORGES CLAUDE",
+          "score": 51,
+          "scoring_v2": 27,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI",
+            "data scientist",
+            "Languages"
+          ],
+          "required_skills": [
+            "English",
+            "Business Intelligence",
+            "Data Analysis",
+            "data scientist",
+            "interest"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur English et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236245",
+          "title": "Purchasing Controlling VIE (H/F)",
+          "company": "FAURECIA AUTOMOTIVE HOLDINGS",
+          "score": 50,
+          "scoring_v2": 28,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "finance",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "preparation budget forecast",
+            "Data Analysis",
+            "Procurement Basics",
+            "SAP",
+            "budget forecast"
+          ],
+          "required_skills": [
+            "preparation budget forecast",
+            "Data Analysis",
+            "English",
+            "Procurement Basics",
+            "SAP"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente finance operationnelle avec un manque sur preparation budget forecast et Data Analysis.",
+          "offer_role": "finance_ops"
+        },
+        {
+          "offer_id": "BF-237013",
+          "title": "VIE Analyst M&A | Latin America (Portuguese speaking) (H/F)",
+          "company": "EURO LATINA FINANCE",
+          "score": 50,
+          "scoring_v2": 27,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "supply_chain",
+              "operations"
+            ],
+            "offer_only_domains": [
+              "business",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Spreadsheet Analysis",
+            "clients",
+            "latin",
+            "paris"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Spreadsheet Analysis",
+            "buyer",
+            "clients"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur Data Analysis et English.",
+          "offer_role": "data_analytics"
+        }
+      ],
+      "analysis_grid": {
+        "top1_relevance": {
+          "scoring_v2": "High",
+          "scoring_v3": "High"
+        },
+        "false_positives_in_top5": {
+          "scoring_v2": 0,
+          "scoring_v3": 0
+        },
+        "correct_metier_in_top5": {
+          "scoring_v2": "5/5",
+          "scoring_v3": "5/5"
+        },
+        "transition_cases": {
+          "scoring_v2": "Well positioned",
+          "scoring_v3": "Well positioned"
+        }
+      },
+      "ranking_differences": [
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "v2_rank": 1,
+          "v3_rank": 1,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "v2_rank": 2,
+          "v3_rank": 2,
+          "scoring_v2": 28,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-236245",
+          "title": "Purchasing Controlling VIE (H/F)",
+          "v2_rank": 3,
+          "v3_rank": 4,
+          "scoring_v2": 28,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-237353",
+          "title": "VIE-Data Scientist(m/f/d) (H/F)",
+          "v2_rank": 4,
+          "v3_rank": 3,
+          "scoring_v2": 27,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-237013",
+          "title": "VIE Analyst M&A | Latin America (Portuguese speaking) (H/F)",
+          "v2_rank": 5,
+          "v3_rank": 5,
+          "scoring_v2": 27,
+          "scoring_v3": 42,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        }
+      ],
+      "failure_cases": {
+        "false_positives_introduced_by_v3": [],
+        "good_matches_downgraded_by_v3": []
+      }
+    },
+    {
+      "profile_domain": "HR",
+      "profile_id": "hr",
+      "profile_role": "hr_ops",
+      "profile_domains": [
+        "hr",
+        "data",
+        "business"
+      ],
+      "parse_summary": "Profil orienté rh operationnelles avec ancrage administration personnel dossiers salaries et HR Administration.",
+      "total_offers": 5,
+      "all_items": [
+        {
+          "offer_id": "BF-237092",
+          "title": "Chargé de projet (H/F)",
+          "company": "CA INDOSUEZ",
+          "score": 56,
+          "scoring_v2": 41,
+          "scoring_v3": 54,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Adaptability",
+            "Data Analysis",
+            "Power BI",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "PowerPoint",
+            "Adaptability",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur PowerPoint et Adaptability.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 70,
+          "scoring_v3": 76,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "hr",
+              "data"
+            ],
+            "profile_only_domains": [
+              "business"
+            ],
+            "offer_only_domains": [
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur rh et data, avec un socle commun en Data Analysis, mais il manque encore Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        },
+        {
+          "offer_id": "BF-236989",
+          "title": "Actuaire junior (H/F)",
+          "company": "SOGECAP",
+          "score": 51,
+          "scoring_v2": 27,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "hr",
+              "business"
+            ],
+            "offer_only_domains": [
+              "finance",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "analyser calculer resultats schemas reassurance",
+            "analyse run offs sinistres provisions",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "required_skills": [
+            "analyser calculer resultats schemas reassurance",
+            "Business Intelligence",
+            "Data Analysis",
+            "analyse run offs sinistres provisions"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur analyser calculer resultats schemas reassurance et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237118",
+          "title": "Contrôleur Financier (H/F)",
+          "company": "STMICROELECTRONICS (CROLLES 2) SAS",
+          "score": 50,
+          "scoring_v2": 41,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting regulier analyses ad hoc",
+            "controle couts depenses definition objectifs",
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI"
+          ],
+          "required_skills": [
+            "SAP",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "Power BI"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur SAP et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237013",
+          "title": "VIE Analyst M&A | Latin America (Portuguese speaking) (H/F)",
+          "company": "EURO LATINA FINANCE",
+          "score": 49,
+          "scoring_v2": 40,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Spreadsheet Analysis",
+            "clients",
+            "latin",
+            "paris"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Spreadsheet Analysis",
+            "buyer",
+            "clients"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur English et Spreadsheet Analysis.",
+          "offer_role": "data_analytics"
+        }
+      ],
+      "top5_v2": [
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 70,
+          "scoring_v3": 76,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "hr",
+              "data"
+            ],
+            "profile_only_domains": [
+              "business"
+            ],
+            "offer_only_domains": [
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur rh et data, avec un socle commun en Data Analysis, mais il manque encore Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        },
+        {
+          "offer_id": "BF-237092",
+          "title": "Chargé de projet (H/F)",
+          "company": "CA INDOSUEZ",
+          "score": 56,
+          "scoring_v2": 41,
+          "scoring_v3": 54,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Adaptability",
+            "Data Analysis",
+            "Power BI",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "PowerPoint",
+            "Adaptability",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur PowerPoint et Adaptability.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237118",
+          "title": "Contrôleur Financier (H/F)",
+          "company": "STMICROELECTRONICS (CROLLES 2) SAS",
+          "score": 50,
+          "scoring_v2": 41,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting regulier analyses ad hoc",
+            "controle couts depenses definition objectifs",
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI"
+          ],
+          "required_skills": [
+            "SAP",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "Power BI"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur SAP et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237013",
+          "title": "VIE Analyst M&A | Latin America (Portuguese speaking) (H/F)",
+          "company": "EURO LATINA FINANCE",
+          "score": 49,
+          "scoring_v2": 40,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Spreadsheet Analysis",
+            "clients",
+            "latin",
+            "paris"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Spreadsheet Analysis",
+            "buyer",
+            "clients"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur English et Spreadsheet Analysis.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236989",
+          "title": "Actuaire junior (H/F)",
+          "company": "SOGECAP",
+          "score": 51,
+          "scoring_v2": 27,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "hr",
+              "business"
+            ],
+            "offer_only_domains": [
+              "finance",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "analyser calculer resultats schemas reassurance",
+            "analyse run offs sinistres provisions",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "required_skills": [
+            "analyser calculer resultats schemas reassurance",
+            "Business Intelligence",
+            "Data Analysis",
+            "analyse run offs sinistres provisions"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur analyser calculer resultats schemas reassurance et Business Intelligence.",
+          "offer_role": "data_analytics"
+        }
+      ],
+      "top5_v3": [
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 70,
+          "scoring_v3": 76,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "hr",
+              "data"
+            ],
+            "profile_only_domains": [
+              "business"
+            ],
+            "offer_only_domains": [
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur rh et data, avec un socle commun en Data Analysis, mais il manque encore Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        },
+        {
+          "offer_id": "BF-237092",
+          "title": "Chargé de projet (H/F)",
+          "company": "CA INDOSUEZ",
+          "score": 56,
+          "scoring_v2": 41,
+          "scoring_v3": 54,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Adaptability",
+            "Data Analysis",
+            "Power BI",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "PowerPoint",
+            "Adaptability",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur PowerPoint et Adaptability.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237118",
+          "title": "Contrôleur Financier (H/F)",
+          "company": "STMICROELECTRONICS (CROLLES 2) SAS",
+          "score": 50,
+          "scoring_v2": 41,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "reporting regulier analyses ad hoc",
+            "controle couts depenses definition objectifs",
+            "Business Intelligence",
+            "Data Analysis",
+            "Power BI"
+          ],
+          "required_skills": [
+            "SAP",
+            "Business Intelligence",
+            "Data Analysis",
+            "Excel",
+            "Power BI"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur SAP et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237013",
+          "title": "VIE Analyst M&A | Latin America (Portuguese speaking) (H/F)",
+          "company": "EURO LATINA FINANCE",
+          "score": 49,
+          "scoring_v2": 40,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data",
+              "business"
+            ],
+            "profile_only_domains": [
+              "hr"
+            ],
+            "offer_only_domains": [
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Spreadsheet Analysis",
+            "clients",
+            "latin",
+            "paris"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Spreadsheet Analysis",
+            "buyer",
+            "clients"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data et metier, mais le poste reste plus oriente analyse de donnees avec un manque sur English et Spreadsheet Analysis.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236989",
+          "title": "Actuaire junior (H/F)",
+          "company": "SOGECAP",
+          "score": 51,
+          "scoring_v2": 27,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [
+              "hr",
+              "business"
+            ],
+            "offer_only_domains": [
+              "finance",
+              "general"
+            ]
+          },
+          "top_offer_signals": [
+            "analyser calculer resultats schemas reassurance",
+            "analyse run offs sinistres provisions",
+            "Business Intelligence",
+            "Data Analysis"
+          ],
+          "required_skills": [
+            "analyser calculer resultats schemas reassurance",
+            "Business Intelligence",
+            "Data Analysis",
+            "analyse run offs sinistres provisions"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente analyse de donnees avec un manque sur analyser calculer resultats schemas reassurance et Business Intelligence.",
+          "offer_role": "data_analytics"
+        }
+      ],
+      "analysis_grid": {
+        "top1_relevance": {
+          "scoring_v2": "High",
+          "scoring_v3": "High"
+        },
+        "false_positives_in_top5": {
+          "scoring_v2": 0,
+          "scoring_v3": 0
+        },
+        "correct_metier_in_top5": {
+          "scoring_v2": "5/5",
+          "scoring_v3": "5/5"
+        },
+        "transition_cases": {
+          "scoring_v2": "Well positioned",
+          "scoring_v3": "Well positioned"
+        }
+      },
+      "ranking_differences": [
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "v2_rank": 1,
+          "v3_rank": 1,
+          "scoring_v2": 70,
+          "scoring_v3": 76,
+          "role_alignment": "high",
+          "shared_domains": [
+            "hr",
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-237092",
+          "title": "Chargé de projet (H/F)",
+          "v2_rank": 2,
+          "v3_rank": 2,
+          "scoring_v2": 41,
+          "scoring_v3": 54,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data",
+            "business"
+          ]
+        },
+        {
+          "offer_id": "BF-237118",
+          "title": "Contrôleur Financier (H/F)",
+          "v2_rank": 3,
+          "v3_rank": 3,
+          "scoring_v2": 41,
+          "scoring_v3": 53,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data",
+            "business"
+          ]
+        },
+        {
+          "offer_id": "BF-237013",
+          "title": "VIE Analyst M&A | Latin America (Portuguese speaking) (H/F)",
+          "v2_rank": 4,
+          "v3_rank": 4,
+          "scoring_v2": 40,
+          "scoring_v3": 52,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data",
+            "business"
+          ]
+        },
+        {
+          "offer_id": "BF-236989",
+          "title": "Actuaire junior (H/F)",
+          "v2_rank": 5,
+          "v3_rank": 5,
+          "scoring_v2": 27,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        }
+      ],
+      "failure_cases": {
+        "false_positives_introduced_by_v3": [],
+        "good_matches_downgraded_by_v3": []
+      }
+    },
+    {
+      "profile_domain": "Data / BI",
+      "profile_id": "data---bi",
+      "profile_role": "data_analytics",
+      "profile_domains": [
+        "data"
+      ],
+      "parse_summary": "Profil orienté analyse de donnees avec ancrage extraction kpi design forecasting et reporting automatique python.",
+      "total_offers": 5,
+      "all_items": [
+        {
+          "offer_id": "BF-236826",
+          "title": "Chemical Engineering (H/F)",
+          "company": "SERVICES TECHNIQUES SCHLUMBERGER",
+          "score": 62,
+          "scoring_v2": 72,
+          "scoring_v3": 68,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "software",
+              "it"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Software Testing",
+            "both",
+            "designing",
+            "engineers"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "Software Testing",
+            "Teamwork",
+            "actively",
+            "address"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore Software Testing et actively.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237252",
+          "title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+          "company": "AMARIS FRANCE SAS",
+          "score": 59,
+          "scoring_v2": 70,
+          "scoring_v3": 67,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "finance"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Procurement Basics",
+            "front"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Procurement Basics"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore Observability et Compliance.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 58,
+          "scoring_v2": 31,
+          "scoring_v3": 45,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "sales",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente developpement commercial avec un manque sur English et Observability.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236525",
+          "title": "Junior Legal Counsel (H/F)",
+          "company": "ARCELORMITTAL FRANCE",
+          "score": 56,
+          "scoring_v2": 70,
+          "scoring_v3": 66,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "legal",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Statistical Analysis"
+          ],
+          "required_skills": [
+            "English",
+            "Business Intelligence",
+            "Data Analysis",
+            "Observability"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore English et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        }
+      ],
+      "top5_v2": [
+        {
+          "offer_id": "BF-236826",
+          "title": "Chemical Engineering (H/F)",
+          "company": "SERVICES TECHNIQUES SCHLUMBERGER",
+          "score": 62,
+          "scoring_v2": 72,
+          "scoring_v3": 68,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "software",
+              "it"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Software Testing",
+            "both",
+            "designing",
+            "engineers"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "Software Testing",
+            "Teamwork",
+            "actively",
+            "address"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore Software Testing et actively.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237252",
+          "title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+          "company": "AMARIS FRANCE SAS",
+          "score": 59,
+          "scoring_v2": 70,
+          "scoring_v3": 67,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "finance"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Procurement Basics",
+            "front"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Procurement Basics"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore Observability et Compliance.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236525",
+          "title": "Junior Legal Counsel (H/F)",
+          "company": "ARCELORMITTAL FRANCE",
+          "score": 56,
+          "scoring_v2": 70,
+          "scoring_v3": 66,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "legal",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Statistical Analysis"
+          ],
+          "required_skills": [
+            "English",
+            "Business Intelligence",
+            "Data Analysis",
+            "Observability"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore English et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 58,
+          "scoring_v2": 31,
+          "scoring_v3": 45,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "sales",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente developpement commercial avec un manque sur English et Observability.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        }
+      ],
+      "top5_v3": [
+        {
+          "offer_id": "BF-236826",
+          "title": "Chemical Engineering (H/F)",
+          "company": "SERVICES TECHNIQUES SCHLUMBERGER",
+          "score": 62,
+          "scoring_v2": 72,
+          "scoring_v3": 68,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "software",
+              "it"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Software Testing",
+            "both",
+            "designing",
+            "engineers"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "Software Testing",
+            "Teamwork",
+            "actively",
+            "address"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore Software Testing et actively.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237252",
+          "title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+          "company": "AMARIS FRANCE SAS",
+          "score": 59,
+          "scoring_v2": 70,
+          "scoring_v3": 67,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "business",
+              "finance"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Procurement Basics",
+            "front"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Procurement Basics"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore Observability et Compliance.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-236525",
+          "title": "Junior Legal Counsel (H/F)",
+          "company": "ARCELORMITTAL FRANCE",
+          "score": 56,
+          "scoring_v2": 70,
+          "scoring_v3": 66,
+          "role_alignment": "high",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "legal",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Data Analysis",
+            "Observability",
+            "Compliance",
+            "Statistical Analysis"
+          ],
+          "required_skills": [
+            "English",
+            "Business Intelligence",
+            "Data Analysis",
+            "Observability"
+          ],
+          "semantic_summary": "Ton profil et ce poste sont alignes sur data, avec un socle commun en Data Analysis, mais il manque encore English et Business Intelligence.",
+          "offer_role": "data_analytics"
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "company": "HTL",
+          "score": 58,
+          "scoring_v2": 31,
+          "scoring_v3": 45,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "sales",
+              "business"
+            ]
+          },
+          "top_offer_signals": [
+            "Data Analysis",
+            "Observability",
+            "Spreadsheet Analysis",
+            "Statistical Programming"
+          ],
+          "required_skills": [
+            "Data Analysis",
+            "English",
+            "Leadership",
+            "Observability",
+            "PowerPoint"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente developpement commercial avec un manque sur English et Observability.",
+          "offer_role": "sales_business_dev"
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "company": "TRANSDEV GROUP",
+          "score": 55,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "domain_alignment": {
+            "shared_domains": [
+              "data"
+            ],
+            "profile_only_domains": [],
+            "offer_only_domains": [
+              "hr",
+              "project"
+            ]
+          },
+          "top_offer_signals": [
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "Observability"
+          ],
+          "required_skills": [
+            "Project Management",
+            "Business Intelligence",
+            "Compliance",
+            "Data Analysis",
+            "English"
+          ],
+          "semantic_summary": "Ton profil recoupe ce poste sur data, mais le poste reste plus oriente rh operationnelles avec un manque sur Project Management et Business Intelligence.",
+          "offer_role": "hr_ops"
+        }
+      ],
+      "analysis_grid": {
+        "top1_relevance": {
+          "scoring_v2": "High",
+          "scoring_v3": "High"
+        },
+        "false_positives_in_top5": {
+          "scoring_v2": 0,
+          "scoring_v3": 0
+        },
+        "correct_metier_in_top5": {
+          "scoring_v2": "5/5",
+          "scoring_v3": "5/5"
+        },
+        "transition_cases": {
+          "scoring_v2": "Well positioned",
+          "scoring_v3": "Well positioned"
+        }
+      },
+      "ranking_differences": [
+        {
+          "offer_id": "BF-236826",
+          "title": "Chemical Engineering (H/F)",
+          "v2_rank": 1,
+          "v3_rank": 1,
+          "scoring_v2": 72,
+          "scoring_v3": 68,
+          "role_alignment": "high",
+          "shared_domains": [
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-237252",
+          "title": "Junior Data Engineer (Procurement Analytics) (H/F)",
+          "v2_rank": 2,
+          "v3_rank": 2,
+          "scoring_v2": 70,
+          "scoring_v3": 67,
+          "role_alignment": "high",
+          "shared_domains": [
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-236525",
+          "title": "Junior Legal Counsel (H/F)",
+          "v2_rank": 3,
+          "v3_rank": 3,
+          "scoring_v2": 70,
+          "scoring_v3": 66,
+          "role_alignment": "high",
+          "shared_domains": [
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-237292",
+          "title": "Strategy and Business Development Asia (H/F)",
+          "v2_rank": 4,
+          "v3_rank": 4,
+          "scoring_v2": 31,
+          "scoring_v3": 45,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        },
+        {
+          "offer_id": "BF-236975",
+          "title": "V.I.E. Human Resources Project Manager (H/F)",
+          "v2_rank": 5,
+          "v3_rank": 5,
+          "scoring_v2": 29,
+          "scoring_v3": 43,
+          "role_alignment": "medium",
+          "shared_domains": [
+            "data"
+          ]
+        }
+      ],
+      "failure_cases": {
+        "false_positives_introduced_by_v3": [],
+        "good_matches_downgraded_by_v3": []
+      }
+    }
+  ],
+  "metrics_summary": {
+    "top5_correct_metier_pct": {
+      "scoring_v2": 93.3,
+      "scoring_v3": 93.3
+    },
+    "top5_false_positive_pct": {
+      "scoring_v2": 3.3,
+      "scoring_v3": 3.3
+    },
+    "average_score_difference_v3_minus_v2": 7.73,
+    "improved_cases": 0,
+    "degraded_cases": 0,
+    "case_count": 6
+  }
+}

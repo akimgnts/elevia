@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Briefcase, Compass, Inbox, ScanSearch, UserRound } from "lucide-react";
+import { BarChart3, Briefcase, Compass, Inbox, ScanSearch, Search, UserRound } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { PageContainer } from "./PageContainer";
 
@@ -15,6 +15,7 @@ type PremiumAppShellProps = {
 
 const NAV_ITEMS = [
   { to: "/analyze", label: "Analyser", icon: ScanSearch },
+  { to: "/explorer", label: "Explorer", icon: Search },
   { to: "/inbox", label: "Inbox", icon: Inbox },
   { to: "/dashboard", label: "Cockpit", icon: Compass },
   { to: "/applications", label: "Candidatures", icon: Briefcase },

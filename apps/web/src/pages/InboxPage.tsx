@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertCircle,
@@ -24,6 +24,7 @@ import {
   type ExplainBlock,
   type OfferExplanation,
   type OfferIntelligence,
+  type ScoringV2,
   type SemanticExplainability,
   type OfferSemanticResponse,
   type OfferContext,
@@ -164,6 +165,7 @@ type NormalizedInboxItem = {
   explanation: OfferExplanation;
   offer_intelligence?: OfferIntelligence | null;
   semantic_explainability?: SemanticExplainability | null;
+  scoring_v2?: ScoringV2 | null;
   offer_cluster?: string;
   domain_bucket?: "strict" | "neighbor" | "out";
   signal_score?: number;
@@ -397,6 +399,10 @@ function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
         rec.semantic_explainability && typeof rec.semantic_explainability === "object"
           ? (rec.semantic_explainability as SemanticExplainability)
           : null,
+      scoring_v2:
+        rec.scoring_v2 && typeof rec.scoring_v2 === "object"
+          ? (rec.scoring_v2 as ScoringV2)
+          : null,
       offer_cluster: typeof rec.offer_cluster === "string" ? rec.offer_cluster : undefined,
       domain_bucket:
         rec.domain_bucket === "strict" || rec.domain_bucket === "neighbor" || rec.domain_bucket === "out"
@@ -468,6 +474,7 @@ function OfferCard({
       explanation={offer.explanation}
       offerIntelligence={offer.offer_intelligence}
       semanticExplainability={offer.semantic_explainability}
+      scoringV2={offer.scoring_v2}
       domainBucket={offer.domain_bucket}
       cluster={{ label: offer.offer_cluster ?? "" }}
       onOpenDetails={() => onOpen()}
@@ -1002,6 +1009,7 @@ export default function InboxPage() {
   const [contextLoadingIds, setContextLoadingIds] = useState<Set<string>>(new Set());
   const [contextFitLoadingIds, setContextFitLoadingIds] = useState<Set<string>>(new Set());
   const [contextErrorByOfferId, setContextErrorByOfferId] = useState<Record<string, string>>({});
+  const inboxLoadKeyRef = useRef<string | null>(null);
 
   // Domain signals: read once from localStorage (written by AnalyzePage after parse)
   const [domainSignals] = useState<DomainSignals | null>(() => readDomainSignals());
@@ -1022,15 +1030,17 @@ export default function InboxPage() {
     if (!offerId) return;
     if (semanticByOfferId[offerId] || semanticLoadingIds.has(offerId)) return;
 
+    const controller = new AbortController();
     setSemanticLoadingIds((prev) => new Set(prev).add(offerId));
     fetchOfferSemantic(offerId, profileId)
       .then((data) => {
-        setSemanticByOfferId((prev) => ({ ...prev, [offerId]: data }));
+        if (!controller.signal.aborted) {
+          setSemanticByOfferId((prev) => ({ ...prev, [offerId]: data }));
+        }
       })
       .catch((err) => {
-        if (import.meta.env.DEV) {
-          console.warn("[inbox] semantic fetch failed:", err);
-        }
+        if (controller.signal.aborted) return;
+        console.warn("[inbox] semantic fetch failed:", err);
         setSemanticByOfferId((prev) => ({
           ...prev,
           [offerId]: {
@@ -1044,30 +1054,34 @@ export default function InboxPage() {
         }));
       })
       .finally(() => {
-        setSemanticLoadingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(offerId);
-          return next;
-        });
+        if (!controller.signal.aborted) {
+          setSemanticLoadingIds((prev) => {
+            const next = new Set(prev);
+            next.delete(offerId);
+            return next;
+          });
+        }
       });
+    return () => controller.abort();
   }, [selectedOffer, profileId, semanticByOfferId, semanticLoadingIds]);
 
   useEffect(() => {
     if (!userProfile || !profileId) return;
+    const controller = new AbortController();
     setProfileContextLoading(true);
     fetchProfileContext(profileId, userProfile)
       .then((data) => {
-        setProfileContext(data);
+        if (!controller.signal.aborted) setProfileContext(data);
       })
       .catch((err) => {
-        if (import.meta.env.DEV) {
-          console.warn("[inbox] profile context fetch failed:", err);
-        }
+        if (controller.signal.aborted) return;
+        console.warn("[inbox] profile context fetch failed:", err);
         setProfileContext(null);
       })
       .finally(() => {
-        setProfileContextLoading(false);
+        if (!controller.signal.aborted) setProfileContextLoading(false);
       });
+    return () => controller.abort();
   }, [userProfile, profileId]);
 
   useEffect(() => {
@@ -1106,27 +1120,32 @@ export default function InboxPage() {
       selectedOffer.description_snippet ||
       "";
 
+    const controller = new AbortController();
     setContextLoadingIds((prev) => new Set(prev).add(offerId));
     fetchOfferContext(offerId, description)
       .then((data) => {
-        setOfferContextById((prev) => ({ ...prev, [offerId]: data }));
+        if (!controller.signal.aborted) {
+          setOfferContextById((prev) => ({ ...prev, [offerId]: data }));
+        }
       })
       .catch((err) => {
-        if (import.meta.env.DEV) {
-          console.warn("[inbox] offer context fetch failed:", err);
-        }
+        if (controller.signal.aborted) return;
+        console.warn("[inbox] offer context fetch failed:", err);
         setContextErrorByOfferId((prev) => ({
           ...prev,
           [offerId]: "context_offer_failed",
         }));
       })
       .finally(() => {
-        setContextLoadingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(offerId);
-          return next;
-        });
+        if (!controller.signal.aborted) {
+          setContextLoadingIds((prev) => {
+            const next = new Set(prev);
+            next.delete(offerId);
+            return next;
+          });
+        }
       });
+    return () => controller.abort();
   }, [selectedOffer, offerContextById, contextLoadingIds]);
 
   useEffect(() => {
@@ -1144,27 +1163,32 @@ export default function InboxPage() {
         ? selectedOffer.missing_skills_display
         : selectedOffer?.missing_skills || [];
 
+    const controller = new AbortController();
     setContextFitLoadingIds((prev) => new Set(prev).add(selectedOfferId));
     fetchContextFit(profileContext, offerContext, matched, missing)
       .then((data) => {
-        setContextFitByOfferId((prev) => ({ ...prev, [selectedOfferId]: data }));
+        if (!controller.signal.aborted) {
+          setContextFitByOfferId((prev) => ({ ...prev, [selectedOfferId]: data }));
+        }
       })
       .catch((err) => {
-        if (import.meta.env.DEV) {
-          console.warn("[inbox] context fit fetch failed:", err);
-        }
+        if (controller.signal.aborted) return;
+        console.warn("[inbox] context fit fetch failed:", err);
         setContextErrorByOfferId((prev) => ({
           ...prev,
           [selectedOfferId]: "context_fit_failed",
         }));
       })
       .finally(() => {
-        setContextFitLoadingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(selectedOfferId);
-          return next;
-        });
+        if (!controller.signal.aborted) {
+          setContextFitLoadingIds((prev) => {
+            const next = new Set(prev);
+            next.delete(selectedOfferId);
+            return next;
+          });
+        }
       });
+    return () => controller.abort();
   }, [
     selectedOfferId,
     selectedOffer,
@@ -1192,6 +1216,7 @@ export default function InboxPage() {
   // Load inbox from API - APPROACH B: client filters, API min_score=0
   const load = useCallback(async () => {
     if (!userProfile) return;
+    let requestKey: string | null = null;
     setLoading(true);
     setError(null);
     setProfileIncomplete(false);
@@ -1244,6 +1269,20 @@ export default function InboxPage() {
         page_size: pageSize,
         sort: sortMode,
       };
+      requestKey = JSON.stringify({
+        profileId,
+        threshold,
+        page,
+        pageSize,
+        sortMode,
+        filters: apiFilters,
+        skills: matchingProfile.matching_skills,
+      });
+      if (inboxLoadKeyRef.current === requestKey) {
+        setLoading(false);
+        return;
+      }
+      inboxLoadKeyRef.current = requestKey;
 
       if (DEBUG_INBOX) {
         console.info("[inbox] Calling API with:", {
@@ -1289,6 +1328,9 @@ export default function InboxPage() {
       setError(msg);
       console.error("[inbox] Load error:", e);
     } finally {
+      if (requestKey && inboxLoadKeyRef.current === requestKey) {
+        inboxLoadKeyRef.current = null;
+      }
       setLoading(false);
     }
   }, [

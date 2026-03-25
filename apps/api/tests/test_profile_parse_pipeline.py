@@ -43,6 +43,8 @@ def test_parse_pipeline_is_deterministic(monkeypatch):
     assert a["profile_summary_skills"] == b["profile_summary_skills"]
     assert a["top_signal_units"] == b["top_signal_units"]
     assert a["structured_signal_stats"] == b["structured_signal_stats"]
+    assert a["enriched_signals"] == b["enriched_signals"]
+    assert a["concept_signals"] == b["concept_signals"]
     assert a["profile_intelligence"] == b["profile_intelligence"]
     assert a["profile_intelligence_ai_assist"] == b["profile_intelligence_ai_assist"]
 
@@ -81,6 +83,8 @@ def test_parse_route_and_pipeline_share_same_contract(monkeypatch):
         "profile_summary_skills",
         "top_signal_units",
         "structured_signal_stats",
+        "enriched_signals",
+        "concept_signals",
         "profile_intelligence",
         "profile_intelligence_ai_assist",
     ]:

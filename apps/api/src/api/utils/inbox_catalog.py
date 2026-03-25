@@ -15,6 +15,7 @@ from typing import Dict, List, Optional
 
 from .offer_skills import get_offer_skills_by_offer_ids
 from compass.offer_canonicalization import normalize_offers_to_uris
+from offer.offer_cluster import detect_offer_cluster
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,8 @@ DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.d
 VIE_FIXTURES_PATH = Path(__file__).parent.parent.parent.parent / "fixtures" / "offers" / "vie_catalog.json"
 VIE_FIXTURES_ENV = "ELEVIA_INBOX_USE_VIE_FIXTURES"
 MAX_DESCRIPTION_SNIPPET = 280
+_CATALOG_CACHE: Optional[List[Dict]] = None
+_CATALOG_CACHE_KEY: Optional[str] = None
 
 _BR_RE = re.compile(r"(?i)<br\\s*/?>")
 _P_OPEN_RE = re.compile(r"(?i)<p[^>]*>")
@@ -57,6 +60,36 @@ def _description_snippet(text: str, limit: int = MAX_DESCRIPTION_SNIPPET) -> str
 def _use_vie_fixtures() -> bool:
     value = os.getenv(VIE_FIXTURES_ENV, "").strip().lower()
     return value in {"1", "true", "yes", "on"}
+
+
+def _catalog_cache_key() -> str:
+    if _use_vie_fixtures():
+        try:
+            stat = VIE_FIXTURES_PATH.stat()
+            return f"fixtures:{stat.st_mtime_ns}:{stat.st_size}"
+        except FileNotFoundError:
+            return "fixtures:missing"
+    if not DB_PATH.exists():
+        return "db:missing"
+    stat = DB_PATH.stat()
+    return f"db:{stat.st_mtime_ns}:{stat.st_size}"
+
+
+def _get_cached_catalog() -> Optional[List[Dict]]:
+    global _CATALOG_CACHE, _CATALOG_CACHE_KEY
+    cache_key = _catalog_cache_key()
+    if _CATALOG_CACHE is None or _CATALOG_CACHE_KEY != cache_key:
+        _CATALOG_CACHE = None
+        _CATALOG_CACHE_KEY = cache_key
+        return None
+    return _CATALOG_CACHE
+
+
+def _set_cached_catalog(offers: List[Dict]) -> List[Dict]:
+    global _CATALOG_CACHE, _CATALOG_CACHE_KEY
+    _CATALOG_CACHE = offers
+    _CATALOG_CACHE_KEY = _catalog_cache_key()
+    return offers
 
 
 def _load_vie_fixtures() -> List[Dict]:
@@ -131,8 +164,22 @@ def _attach_payload_fields(offer: Dict) -> None:
             offer["education"] = education
 
 
+def _extract_skill_labels_for_cluster(offer: Dict) -> list:
+    """Extract flat skill label list for cluster detection."""
+    skills = offer.get("skills_display") or offer.get("skills") or []
+    labels = []
+    for item in skills:
+        if isinstance(item, dict):
+            label = str(item.get("label") or "").strip()
+            if label:
+                labels.append(label)
+        elif isinstance(item, str) and item.strip():
+            labels.append(item.strip())
+    return labels
+
+
 def _apply_esco_normalization(offers: List[Dict]) -> List[Dict]:
-    """Apply ESCO extraction + normalization to all offers."""
+    """Apply ESCO extraction + normalization to all offers, and precompute offer_cluster."""
     for offer in offers:
         description_raw = offer.get("description") or offer.get("display_description") or ""
         description_clean = _clean_description(description_raw) if isinstance(description_raw, str) else ""
@@ -140,6 +187,20 @@ def _apply_esco_normalization(offers: List[Dict]) -> List[Dict]:
         offer["description_snippet"] = _description_snippet(description_clean)
 
     normalize_offers_to_uris(offers)
+
+    # Precompute offer_cluster once per catalog load — eliminates N+1 in inbox scoring loop
+    for offer in offers:
+        if not offer.get("offer_cluster"):
+            try:
+                cluster, _, _ = detect_offer_cluster(
+                    offer.get("title"),
+                    offer.get("description") or offer.get("display_description"),
+                    _extract_skill_labels_for_cluster(offer),
+                )
+                offer["offer_cluster"] = cluster or "OTHER"
+            except Exception:
+                offer["offer_cluster"] = "OTHER"
+
     return offers
 
 
@@ -151,14 +212,18 @@ def load_catalog_offers() -> List[Dict]:
     2. Extract skills from payload_json (if not already present)
     3. Normalize all skills via ESCO referential
     """
+    cached = _get_cached_catalog()
+    if cached is not None:
+        return cached
+
     if _use_vie_fixtures():
         fixtures = _load_vie_fixtures()
         if fixtures:
-            return _apply_esco_normalization(fixtures)
+            return _set_cached_catalog(_apply_esco_normalization(fixtures))
 
     if not DB_PATH.exists():
         fixtures = _load_vie_fixtures()
-        return _apply_esco_normalization(fixtures) if fixtures else []
+        return _set_cached_catalog(_apply_esco_normalization(fixtures)) if fixtures else []
 
     try:
         conn = sqlite3.connect(str(DB_PATH), timeout=2)
@@ -188,18 +253,18 @@ def load_catalog_offers() -> List[Dict]:
 
         if not offers:
             fixtures = _load_vie_fixtures()
-            return _apply_esco_normalization(fixtures) if fixtures else []
+            return _set_cached_catalog(_apply_esco_normalization(fixtures)) if fixtures else []
 
         if not any(offer.get("is_vie") is True for offer in offers):
             fixtures = _load_vie_fixtures()
             if fixtures:
-                return _apply_esco_normalization(fixtures)
+                return _set_cached_catalog(_apply_esco_normalization(fixtures))
 
-        return _apply_esco_normalization(offers)
+        return _set_cached_catalog(_apply_esco_normalization(offers))
     except Exception as e:
         logger.warning(f"[inbox] Failed to load catalog: {e}")
         fixtures = _load_vie_fixtures()
-        return _apply_esco_normalization(fixtures) if fixtures else []
+        return _set_cached_catalog(_apply_esco_normalization(fixtures)) if fixtures else []
 
 
 def _filter_offers_in_memory(
@@ -260,36 +325,21 @@ def load_catalog_offers_filtered(
 
     Falls back to fixtures or in-memory filtering when DB is missing.
     """
-    if _use_vie_fixtures():
-        fixtures = _load_vie_fixtures()
-        if fixtures:
-            filtered = _filter_offers_in_memory(
-                fixtures,
-                q_company=q_company,
-                country=country,
-                city=city,
-                source=source,
-                published_from=published_from,
-                published_to=published_to,
-            )
-            filtered = filtered[offset : offset + limit] if limit else filtered[offset:]
-            return _apply_esco_normalization(filtered)
-
-    if not DB_PATH.exists():
-        fixtures = _load_vie_fixtures()
-        if fixtures:
-            filtered = _filter_offers_in_memory(
-                fixtures,
-                q_company=q_company,
-                country=country,
-                city=city,
-                source=source,
-                published_from=published_from,
-                published_to=published_to,
-            )
-            filtered = filtered[offset : offset + limit] if limit else filtered[offset:]
-            return _apply_esco_normalization(filtered)
-        return []
+    catalog = load_catalog_offers()
+    if catalog:
+        filtered = _filter_offers_in_memory(
+            catalog,
+            q_company=q_company,
+            country=country,
+            city=city,
+            source=source,
+            published_from=published_from,
+            published_to=published_to,
+        )
+        # Sort by publication_date DESC, id ASC — matches SQL ORDER BY for stable pagination
+        filtered.sort(key=lambda o: str(o.get("id") or ""))
+        filtered.sort(key=lambda o: str(o.get("publication_date") or ""), reverse=True)
+        return filtered[offset : offset + limit] if limit else filtered[offset:]
 
     try:
         conn = sqlite3.connect(str(DB_PATH), timeout=2)
@@ -369,37 +419,17 @@ def count_catalog_offers_filtered(
     published_to: Optional[str] = None,
 ) -> Optional[int]:
     """Return COUNT(*) for prefilter, or None when unavailable."""
-    if _use_vie_fixtures() or not DB_PATH.exists():
-        return None
-    try:
-        conn = sqlite3.connect(str(DB_PATH), timeout=2)
-        conn.row_factory = sqlite3.Row
-        where_clauses: List[str] = []
-        params: List[object] = []
-
-        if q_company:
-            where_clauses.append("LOWER(company) LIKE ?")
-            params.append(f"%{q_company.strip().lower()}%")
-        if country:
-            where_clauses.append("LOWER(country) = ?")
-            params.append(country.strip().lower())
-        if city:
-            where_clauses.append("LOWER(city) = ?")
-            params.append(city.strip().lower())
-        if source:
-            where_clauses.append("source = ?")
-            params.append(source)
-        if published_from:
-            where_clauses.append("publication_date >= ?")
-            params.append(published_from)
-        if published_to:
-            where_clauses.append("publication_date < ?")
-            params.append(published_to)
-
-        where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
-        query = f"SELECT COUNT(*) as cnt FROM fact_offers {where_sql}"
-        row = conn.execute(query, params).fetchone()
-        conn.close()
-        return int(row["cnt"]) if row and row["cnt"] is not None else None
-    except Exception:
-        return None
+    catalog = load_catalog_offers()
+    if not catalog:
+        return 0
+    return len(
+        _filter_offers_in_memory(
+            catalog,
+            q_company=q_company,
+            country=country,
+            city=city,
+            source=source,
+            published_from=published_from,
+            published_to=published_to,
+        )
+    )

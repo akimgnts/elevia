@@ -29,6 +29,8 @@ from ..schemas.inbox import (
     RomeCompetence,
     RomeInferred,
     RomeLink,
+    ScoringV2,
+    ScoringV3,
     SemanticExplainability,
     SkillExplainItem,
 )
@@ -54,7 +56,13 @@ from matching.extractors import extract_profile
 from compass.contracts import SkillRef
 from compass.explainability.explanation_builder import build_offer_explanation
 from compass.explainability.semantic_explanation_builder import build_semantic_explainability
-from compass.offer.offer_intelligence import build_offer_intelligence
+from compass.offer.offer_intelligence import (
+    build_offer_intelligence,
+    evaluate_role_domain_gate,
+    is_role_domain_compatible,
+)
+from compass.scoring.scoring_v2 import build_scoring_v2
+from compass.scoring.scoring_v3 import build_scoring_v3
 from compass.signal_layer import build_explain_payload_v1, build_explain_compact, get_signal_cfg
 from compass.matching_explainability import build_matching_explainability
 from compass.cluster_signal import compute_cluster_skill_stats, compute_cluster_idf
@@ -64,6 +72,7 @@ logger = logging.getLogger("uvicorn.error")
 router = APIRouter(tags=["inbox"])
 
 PROFILE_FIXTURES_DIR = Path(__file__).parent.parent.parent.parent / "fixtures" / "profiles"
+GATE_TRACE_PATH = Path(__file__).parent.parent.parent.parent / "data" / "eval" / "gate_rejection_trace.json"
 MIN_RESULTS = 10
 MIN_STRICT = 5   # below this, auto-widen to neighbors
 SUSPICIOUS_SCORE_THRESHOLD = 95
@@ -71,6 +80,8 @@ SIGNAL_MIN_K = 1.0
 
 # Module-level cache for cluster IDF tables (built once, reused per request)
 _cluster_idf_cache: Optional[Dict[str, Dict[str, float]]] = None
+_engine_cache_catalog_id: Optional[int] = None
+_engine_cache: Optional[MatchingEngine] = None
 
 
 def _build_or_get_cluster_idf(catalog: List[Dict]) -> Dict[str, Dict[str, float]]:
@@ -99,6 +110,16 @@ def _build_or_get_cluster_idf(catalog: List[Dict]) -> Dict[str, Dict[str, float]
     stats = compute_cluster_skill_stats(catalog, offer_clusters, skill_field="skills_uri")
     _cluster_idf_cache = compute_cluster_idf(stats)
     return _cluster_idf_cache
+
+
+def _build_or_get_engine(catalog: List[Dict]) -> MatchingEngine:
+    global _engine_cache_catalog_id, _engine_cache
+    catalog_id = id(catalog)
+    if _engine_cache is not None and _engine_cache_catalog_id == catalog_id:
+        return _engine_cache
+    _engine_cache = MatchingEngine(offers=catalog)
+    _engine_cache_catalog_id = catalog_id
+    return _engine_cache
 
 
 # Fixed adjacency matrix (cluster → neighbor clusters)
@@ -216,6 +237,32 @@ def _debug_inbox_filters_enabled() -> bool:
     return value in {"1", "true", "yes", "on"}
 
 
+def _gate_trace_enabled() -> bool:
+    value = os.getenv("ELEVIA_DEBUG_GATE_TRACE", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _append_gate_trace(entries: List[Dict]) -> None:
+    if not entries:
+        return
+    payload = {"entries": []}
+    if GATE_TRACE_PATH.exists():
+        try:
+            payload = json.loads(GATE_TRACE_PATH.read_text(encoding="utf-8"))
+            if not isinstance(payload, dict):
+                payload = {"entries": []}
+        except Exception:
+            payload = {"entries": []}
+    current_entries = payload.get("entries")
+    if not isinstance(current_entries, list):
+        current_entries = []
+    current_entries.extend(entries)
+    payload["entries"] = current_entries
+    payload["updated_at"] = datetime.now(timezone.utc).isoformat()
+    GATE_TRACE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    GATE_TRACE_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def _map_match_strength(confidence: Optional[str]) -> Optional[str]:
     if not confidence:
         return None
@@ -284,6 +331,21 @@ def _extract_profile_intelligence_payload(profile_payload: Dict) -> Optional[Dic
     return value if isinstance(value, dict) else None
 
 
+def _apply_offer_intelligence(
+    item: InboxItem,
+    *,
+    offer_payload: Dict,
+    precomputed_payload: Optional[Dict] = None,
+) -> None:
+    payload = precomputed_payload
+    if payload is None:
+        try:
+            payload = build_offer_intelligence(offer=offer_payload)
+        except Exception:
+            payload = None
+    item.offer_intelligence = OfferIntelligence(**payload) if payload else None
+
+
 def _apply_semantic_explainability(
     item: InboxItem,
     *,
@@ -295,6 +357,35 @@ def _apply_semantic_explainability(
         explanation=item.explanation.model_dump() if item.explanation else None,
     )
     item.semantic_explainability = SemanticExplainability(**payload) if payload else None
+
+
+def _apply_scoring_v2(
+    item: InboxItem,
+    *,
+    profile_intelligence: Optional[Dict],
+) -> None:
+    payload = build_scoring_v2(
+        profile_intelligence=profile_intelligence,
+        offer_intelligence=item.offer_intelligence.model_dump() if item.offer_intelligence else None,
+        semantic_explainability=item.semantic_explainability.model_dump() if item.semantic_explainability else None,
+        matching_score=item.score_raw if item.score_raw is not None else item.score,
+    )
+    item.scoring_v2 = ScoringV2(**payload) if payload else None
+
+
+def _apply_scoring_v3(
+    item: InboxItem,
+    *,
+    profile_intelligence: Optional[Dict],
+) -> None:
+    payload = build_scoring_v3(
+        profile_intelligence=profile_intelligence,
+        offer_intelligence=item.offer_intelligence.model_dump() if item.offer_intelligence else None,
+        semantic_explainability=item.semantic_explainability.model_dump() if item.semantic_explainability else None,
+        explanation=item.explanation.model_dump() if item.explanation else None,
+        matching_score=item.score_raw if item.score_raw is not None else item.score,
+    )
+    item.scoring_v3 = ScoringV3(**payload) if payload else None
 
 
 def _parse_date_param(value: str) -> date:
@@ -420,16 +511,19 @@ def _score_offers(
     engine: MatchingEngine,
     extracted,
     profile_payload: Dict,
+    profile_intelligence: Optional[Dict],
     explain_enabled: bool,
     min_score: int,
     freq_table: Dict,
     offer_count: int,
     contract_type_norm: Optional[str] = None,
-) -> tuple[List[InboxItem], Dict[str, tuple], Dict[str, str], Dict[str, Dict]]:
+) -> tuple[List[InboxItem], Dict[str, tuple], Dict[str, str], Dict[str, Dict], Dict[str, Dict], List[Dict]]:
     items: List[InboxItem] = []
     _explain_debug: Dict[str, tuple] = {}
     source_map: Dict[str, str] = {str(offer.get("id") or ""): offer.get("source") or "" for offer in offers}
     offer_lookup: Dict[str, Dict] = {str(o.get("id") or ""): o for o in offers}
+    offer_intelligence_map: Dict[str, Dict] = {}
+    gate_rejections: List[Dict] = []
 
     for offer in offers:
         oid = str(offer.get("id") or "")
@@ -439,7 +533,44 @@ def _score_offers(
             if offer.get("is_vie") is not True and offer.get("source") != "business_france":
                 continue
 
-        result = engine.score_offer(extracted, offer)
+        offer_intelligence_payload = None
+        if profile_intelligence:
+            try:
+                offer_intelligence_payload = build_offer_intelligence(offer=offer)
+            except Exception as _offer_int_exc:
+                logger.warning("[inbox] offer_intelligence failed for offer %s: %s", oid, _offer_int_exc)
+                continue
+            gate_decision = evaluate_role_domain_gate(
+                profile_intelligence=profile_intelligence,
+                offer_intelligence=offer_intelligence_payload,
+            )
+            if not gate_decision.get("compatible"):
+                if _gate_trace_enabled():
+                    gate_rejections.append(
+                        {
+                            "profile_id": str(profile_payload.get("id") or profile_payload.get("profile_id") or ""),
+                            "offer_id": oid,
+                            "offer_title": offer.get("title") or "",
+                            "profile_role": str(profile_intelligence.get("dominant_role_block") or ""),
+                            "offer_role": str(offer_intelligence_payload.get("dominant_role_block") or ""),
+                            "profile_domains": list(profile_intelligence.get("dominant_domains") or []),
+                            "offer_domains": list(offer_intelligence_payload.get("dominant_domains") or []),
+                            "role_match": gate_decision.get("role_match"),
+                            "domain_overlap": bool(gate_decision.get("domain_overlap")),
+                            "rejection_reason": gate_decision.get("rejection_reason"),
+                            "was_potentially_valid": bool(gate_decision.get("was_potentially_valid")),
+                            "shared_domains": list(gate_decision.get("shared_domains") or []),
+                            "matched_signals": list((gate_decision.get("signal_overlap") or {}).get("matched_signals") or []),
+                        }
+                    )
+                continue
+            offer_intelligence_map[oid] = offer_intelligence_payload
+
+        try:
+            result = engine.score_offer(extracted, offer)
+        except Exception as _score_exc:
+            logger.warning("[inbox] score_offer failed for offer %s: %s", oid, _score_exc)
+            continue
         if result.score < min_score:
             continue
 
@@ -471,11 +602,13 @@ def _score_offers(
 
         matched_skills_all = matched_skills if isinstance(matched_skills, list) else []
         offer_skill_labels = _extract_skill_labels(offer.get("skills_display") or offer.get("skills") or [])
-        offer_cluster, _, _ = detect_offer_cluster(
-            offer.get("title"),
-            offer.get("description") or offer.get("display_description"),
-            offer_skill_labels,
-        )
+        offer_cluster = offer.get("offer_cluster") or ""
+        if not offer_cluster:
+            offer_cluster, _, _ = detect_offer_cluster(
+                offer.get("title"),
+                offer.get("description") or offer.get("display_description"),
+                offer_skill_labels,
+            )
         signal = signal_score(matched_skills_all, freq_table, offer_count)
         coherence = (
             "suspicious"
@@ -538,12 +671,11 @@ def _score_offers(
             )
         if near_matches:
             item.near_match_count = len(near_matches)
-        item.offer_intelligence = OfferIntelligence(**build_offer_intelligence(offer=offer))
         items.append(item)
 
         _explain_debug[result.offer_id] = (match_debug, matched_skills, missing_skills, near_matches, near_summary)
 
-    return items, _explain_debug, source_map, offer_lookup
+    return items, _explain_debug, source_map, offer_lookup, offer_intelligence_map, gate_rejections
 
 
 def _apply_domain_gating(
@@ -780,7 +912,7 @@ async def get_inbox(
         )
 
     # Build engine + extract profile
-    engine = MatchingEngine(offers=catalog)
+    engine = _build_or_get_engine(catalog)
     extracted = extract_profile(profile_payload)
     t_profile = time.perf_counter()
     profile_cluster = detect_profile_cluster(list(getattr(extracted, "skills", []))).get("dominant_cluster")
@@ -796,117 +928,20 @@ async def get_inbox(
         _build_or_get_cluster_idf(catalog) if _sector_enabled else None
     )
 
-    items: List[InboxItem] = []
-    _explain_debug: Dict[str, tuple] = {}  # offer_id → (match_debug, matched, missing)
-    source_map: Dict[str, str] = {str(offer.get("id") or ""): offer.get("source") or "" for offer in catalog}
-    for offer in catalog:
-        oid = str(offer.get("id") or "")
-        if oid in decided_ids:
-            continue
-
-        result = engine.score_offer(extracted, offer)
-        if result.score < req.min_score:
-            continue
-
-        match_debug = result.match_debug or {}
-        skills_debug = match_debug.get("skills") if isinstance(match_debug, dict) else {}
-        matched_skills = []
-        missing_skills = []
-        matched_display = []
-        missing_display = []
-        scoring_unit = None
-        intersection_count = None
-        offer_uri_count = None
-        profile_uri_count = None
-        if isinstance(skills_debug, dict):
-            matched_skills = skills_debug.get("matched") or []
-            missing_skills = skills_debug.get("missing") or []
-            matched_display = matched_skills
-            missing_display = missing_skills
-            scoring_unit = skills_debug.get("scoring_unit")
-            intersection_count = skills_debug.get("intersection_count")
-            offer_uri_count = skills_debug.get("offer_skill_uri_count")
-            profile_uri_count = skills_debug.get("profile_skill_uri_count")
-        if scoring_unit is None:
-            scoring_unit = "uri" if offer.get("skills_uri") is not None else "string"
-        if intersection_count is None:
-            intersection_count = len(matched_display)
-        if profile_uri_count is None:
-            profile_uri_count = getattr(extracted, "skills_uri_count", None)
-
-        matched_skills_all = matched_skills if isinstance(matched_skills, list) else []
-        offer_skill_labels = _extract_skill_labels(offer.get("skills_display") or offer.get("skills") or [])
-        offer_cluster, _, _ = detect_offer_cluster(
-            offer.get("title"),
-            offer.get("description") or offer.get("display_description"),
-            offer_skill_labels,
-        )
-        signal = signal_score(matched_skills_all, freq_table, offer_count)
-        coherence = (
-            "suspicious"
-            if result.score >= SUSPICIOUS_SCORE_THRESHOLD and signal < SIGNAL_MIN_K
-            else "ok"
-        )
-
-        score_raw = None
-        if isinstance(match_debug, dict) and isinstance(match_debug.get("total"), (int, float)):
-            score_raw = float(match_debug["total"]) / 100.0
-        else:
-            score_raw = float(result.score) / 100.0
-
-        near_matches = []
-        near_summary = {}
-        if req.explain:
-            profile_labels = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
-            offer_labels = offer.get("skills_display") or offer.get("skills") or []
-            near = build_matching_explainability(profile_labels, offer_labels)
-            near_matches = near.get("near_matches", [])
-            near_summary = near.get("near_match_summary", {})
-
-        item = InboxItem(
-                offer_id=result.offer_id,
-                source=offer.get("source"),
-                title=offer.get("title") or "",
-                company=offer.get("company"),
-                country=offer.get("country"),
-                city=offer.get("city"),
-                publication_date=offer.get("publication_date"),
-                is_vie=offer.get("is_vie"),
-                score=result.score,
-                score_pct=result.score,
-                score_raw=round(score_raw, 4),
-                reasons=result.reasons[:3],
-                description=offer.get("description"),
-                display_description=offer.get("display_description"),
-                description_snippet=offer.get("description_snippet"),
-                matched_skills=matched_skills[:3],
-                missing_skills=missing_skills[:3],
-                matched_skills_display=matched_display,
-                missing_skills_display=missing_display,
-                unmapped_tokens=offer.get("skills_unmapped") or [],
-                offer_cluster=offer_cluster,
-                signal_score=signal,
-                coherence=coherence,
-                offer_uri_count=offer_uri_count
-                if offer_uri_count is not None
-                else (
-                    offer.get("skills_uri_count")
-                    if offer.get("skills_uri_count") is not None
-                    else len(offer.get("skills_uri") or [])
-                ),
-                profile_uri_count=profile_uri_count if profile_uri_count is not None else None,
-                intersection_count=intersection_count if intersection_count is not None else None,
-                scoring_unit=scoring_unit if scoring_unit is not None else None,
-                skills_uri_count=offer.get("skills_uri_count"),
-                skills_uri_collapsed_dupes=offer.get("skills_uri_collapsed_dupes"),
-                skills_unmapped_count=offer.get("skills_unmapped_count"),
-                # explain is populated after ROME enrichment below
-            )
-        if near_matches:
-            item.near_match_count = len(near_matches)
-        item.offer_intelligence = OfferIntelligence(**build_offer_intelligence(offer=offer))
-        items.append(item)
-        _explain_debug[result.offer_id] = (match_debug, matched_skills, missing_skills, near_matches, near_summary)
+    items, _explain_debug, source_map, offer_lookup, offer_intelligence_map, gate_rejections = _score_offers(
+        catalog,
+        decided_ids=decided_ids,
+        engine=engine,
+        extracted=extracted,
+        profile_payload=profile_payload,
+        profile_intelligence=profile_intelligence,
+        explain_enabled=req.explain,
+        min_score=req.min_score,
+        freq_table=freq_table,
+        offer_count=offer_count,
+    )
+    if _gate_trace_enabled():
+        _append_gate_trace(gate_rejections)
 
     t_scoring = time.perf_counter()
 
@@ -1016,9 +1051,6 @@ async def get_inbox(
                 rome_competences = get_rome_competences_for_rome_codes(conn, rome_codes, limit_per_rome=3)
         finally:
             conn.close()
-
-    # Build offer lookup for rome_inferred enrichment
-    offer_lookup = {str(o.get("id") or ""): o for o in catalog}
 
     # Infer ROME for offers without native ROME (Business France VIE)
     non_ft_offers = [
@@ -1130,7 +1162,20 @@ async def get_inbox(
                 profile_labels=_profile_labels,
                 offer_labels=_offer_labels,
             )
+            _apply_offer_intelligence(
+                item,
+                offer_payload=_offer_c,
+                precomputed_payload=offer_intelligence_map.get(item.offer_id),
+            )
             _apply_semantic_explainability(
+                item,
+                profile_intelligence=profile_intelligence,
+            )
+            _apply_scoring_v2(
+                item,
+                profile_intelligence=profile_intelligence,
+            )
+            _apply_scoring_v3(
                 item,
                 profile_intelligence=profile_intelligence,
             )
@@ -1252,7 +1297,7 @@ async def _get_inbox_filtered(
         )
 
     # Build engine + extract profile
-    engine = MatchingEngine(offers=catalog_full)
+    engine = _build_or_get_engine(catalog_full)
     extracted = extract_profile(profile_payload)
     t_profile = time.perf_counter()
     profile_cluster = detect_profile_cluster(list(getattr(extracted, "skills", []))).get("dominant_cluster")
@@ -1281,6 +1326,7 @@ async def _get_inbox_filtered(
     _explain_debug: Dict[str, tuple] = {}
     source_map: Dict[str, str] = {}
     offer_lookup: Dict[str, Dict] = {}
+    offer_intelligence_map: Dict[str, Dict] = {}
     seen_ids: Set[str] = set()
 
     pages_fetched = 0
@@ -1300,12 +1346,13 @@ async def _get_inbox_filtered(
         if not offers_page:
             break
 
-        items_page, explain_page, source_page, lookup_page = _score_offers(
+        items_page, explain_page, source_page, lookup_page, intelligence_page, gate_rejections_page = _score_offers(
             offers_page,
             decided_ids=decided_ids,
             engine=engine,
             extracted=extracted,
             profile_payload=profile_payload,
+            profile_intelligence=profile_intelligence,
             explain_enabled=req.explain,
             min_score=min_score_effective,
             freq_table=freq_table,
@@ -1322,6 +1369,9 @@ async def _get_inbox_filtered(
         _explain_debug.update(explain_page)
         source_map.update(source_page)
         offer_lookup.update(lookup_page)
+        offer_intelligence_map.update(intelligence_page)
+        if _gate_trace_enabled():
+            _append_gate_trace(gate_rejections_page)
 
         pages_fetched += 1
         cursor_page += 1
@@ -1336,79 +1386,68 @@ async def _get_inbox_filtered(
         sort_buckets=False,
     )
 
-    # Compass signal for filters + UI
-    for item in gated_items:
-        _c_stash = _explain_debug.get(item.offer_id)
-        if _c_stash is None:
-            continue
-        _match_debug_c = _c_stash[0]
-        _offer_c = offer_lookup.get(item.offer_id, {})
-        _offer_uris: List[str] = _offer_c.get("skills_uri") or []
-
-        _label_map: Dict[str, str] = {}
-        for _sd in (_offer_c.get("skills_display") or []):
-            if isinstance(_sd, dict) and _sd.get("uri"):
-                _label_map[str(_sd["uri"])] = str(_sd.get("label") or _sd["uri"])
-
-        if _offer_uris:
-            _prof_uris: Set[str] = set(extracted.skills_uri)
-            _off_uri_set: Set[str] = set(_offer_uris)
-            _match_uri_set: Set[str] = _prof_uris & _off_uri_set
-            _compass_offer_skills = [
-                SkillRef(uri=u, label=_label_map.get(u, u)) for u in _offer_uris
-            ]
-            _compass_matched_skills = [
-                SkillRef(uri=u, label=_label_map.get(u, u)) for u in _match_uri_set
-            ]
-        else:
-            _s_dbg = _match_debug_c.get("skills", {}) if isinstance(_match_debug_c, dict) else {}
-            _m_lbls: List[str] = (_s_dbg.get("matched") or []) if isinstance(_s_dbg, dict) else []
-            _miss_lbls: List[str] = (_s_dbg.get("missing") or []) if isinstance(_s_dbg, dict) else []
-            _compass_offer_skills = [SkillRef(uri=None, label=l) for l in _m_lbls + _miss_lbls]
-            _compass_matched_skills = [SkillRef(uri=None, label=l) for l in _m_lbls]
-
-        _compass_full = build_explain_payload_v1(
-            score_core=item.score_raw or (item.score / 100.0),
-            matched_skills=_compass_matched_skills,
-            offer_skills=_compass_offer_skills,
-            offer_text=_offer_c.get("description") or "",
-            domain_bucket=item.domain_bucket or "out",
-            idf_map=engine.idf_table,
-            cfg=_inbox_cfg,
-            offer_cluster=item.offer_cluster,
-            cluster_idf_table=_cluster_idf,
-        )
-        _compact = build_explain_compact(_compass_full, len(_offer_uris))
-        item.explain_v1 = CompassExplainCompact(**_compact.model_dump())
-        item.match_strength = _map_match_strength(item.explain_v1.confidence if item.explain_v1 else None)
-        item.dominant_reason = _derive_dominant_reason(
-            item.explain_v1.confidence if item.explain_v1 else None,
-            near_match_count=int(item.near_match_count or 0),
-            rare_signal_level=item.explain_v1.rare_signal_level if item.explain_v1 else None,
-        )
-        _profile_labels = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
-        _offer_labels = _offer_c.get("skills_display") or _offer_c.get("skills") or []
-        _offer_labels = _extract_skill_labels(_offer_labels)
-        _apply_front_explanation(
-            item,
-            match_debug=_match_debug_c,
-            confidence=item.explain_v1.confidence if item.explain_v1 else None,
-            profile_labels=_profile_labels,
-            offer_labels=_offer_labels,
-        )
-        _apply_semantic_explainability(
-            item,
-            profile_intelligence=profile_intelligence,
-        )
-
-    filtered_items = _apply_compass_filters(
-        gated_items,
-        domain_bucket=domain_bucket,
-        confidence=confidence,
-        rare_level=rare_level,
-        sector_level=sector_level,
-        has_tool_unspecified=has_tool_unspecified,
+    needs_compass_filter_eval = bool(
+        confidence
+        or rare_level
+        or sector_level
+        or has_tool_unspecified is not None
     )
+
+    if needs_compass_filter_eval:
+        for item in gated_items:
+            _c_stash = _explain_debug.get(item.offer_id)
+            if _c_stash is None:
+                continue
+            _match_debug_c = _c_stash[0]
+            _offer_c = offer_lookup.get(item.offer_id, {})
+            _offer_uris: List[str] = _offer_c.get("skills_uri") or []
+
+            _label_map: Dict[str, str] = {}
+            for _sd in (_offer_c.get("skills_display") or []):
+                if isinstance(_sd, dict) and _sd.get("uri"):
+                    _label_map[str(_sd["uri"])] = str(_sd.get("label") or _sd["uri"])
+
+            if _offer_uris:
+                _prof_uris: Set[str] = set(extracted.skills_uri)
+                _off_uri_set: Set[str] = set(_offer_uris)
+                _match_uri_set: Set[str] = _prof_uris & _off_uri_set
+                _compass_offer_skills = [
+                    SkillRef(uri=u, label=_label_map.get(u, u)) for u in _offer_uris
+                ]
+                _compass_matched_skills = [
+                    SkillRef(uri=u, label=_label_map.get(u, u)) for u in _match_uri_set
+                ]
+            else:
+                _s_dbg = _match_debug_c.get("skills", {}) if isinstance(_match_debug_c, dict) else {}
+                _m_lbls: List[str] = (_s_dbg.get("matched") or []) if isinstance(_s_dbg, dict) else []
+                _miss_lbls: List[str] = (_s_dbg.get("missing") or []) if isinstance(_s_dbg, dict) else []
+                _compass_offer_skills = [SkillRef(uri=None, label=l) for l in _m_lbls + _miss_lbls]
+                _compass_matched_skills = [SkillRef(uri=None, label=l) for l in _m_lbls]
+
+            _compass_full = build_explain_payload_v1(
+                score_core=item.score_raw or (item.score / 100.0),
+                matched_skills=_compass_matched_skills,
+                offer_skills=_compass_offer_skills,
+                offer_text=_offer_c.get("description") or "",
+                domain_bucket=item.domain_bucket or "out",
+                idf_map=engine.idf_table,
+                cfg=_inbox_cfg,
+                offer_cluster=item.offer_cluster,
+                cluster_idf_table=_cluster_idf,
+            )
+            _compact = build_explain_compact(_compass_full, len(_offer_uris))
+            item.explain_v1 = CompassExplainCompact(**_compact.model_dump())
+
+        filtered_items = _apply_compass_filters(
+            gated_items,
+            domain_bucket=domain_bucket,
+            confidence=confidence,
+            rare_level=rare_level,
+            sector_level=sector_level,
+            has_tool_unspecified=has_tool_unspecified,
+        )
+    else:
+        filtered_items = gated_items
 
     # Optional sort on filtered set
     if sort_mode == "score_desc":
@@ -1429,6 +1468,74 @@ async def _get_inbox_filtered(
 
     total_matched = len(filtered_items)
     items = filtered_items[:page_size_effective]
+
+    for item in items:
+        _c_stash = _explain_debug.get(item.offer_id)
+        _match_debug_c = _c_stash[0] if _c_stash is not None else {}
+        offer = offer_lookup.get(item.offer_id, {})
+        _offer_uris: List[str] = offer.get("skills_uri") or []
+        _label_map: Dict[str, str] = {}
+        for _sd in (offer.get("skills_display") or []):
+            if isinstance(_sd, dict) and _sd.get("uri"):
+                _label_map[str(_sd["uri"])] = str(_sd.get("label") or _sd["uri"])
+        if _offer_uris:
+            _prof_uris: Set[str] = set(extracted.skills_uri)
+            _off_uri_set: Set[str] = set(_offer_uris)
+            _match_uri_set: Set[str] = _prof_uris & _off_uri_set
+            _compass_offer_skills = [SkillRef(uri=u, label=_label_map.get(u, u)) for u in _offer_uris]
+            _compass_matched_skills = [SkillRef(uri=u, label=_label_map.get(u, u)) for u in _match_uri_set]
+        else:
+            _s_dbg = _match_debug_c.get("skills", {}) if isinstance(_match_debug_c, dict) else {}
+            _m_lbls: List[str] = (_s_dbg.get("matched") or []) if isinstance(_s_dbg, dict) else []
+            _miss_lbls: List[str] = (_s_dbg.get("missing") or []) if isinstance(_s_dbg, dict) else []
+            _compass_offer_skills = [SkillRef(uri=None, label=l) for l in _m_lbls + _miss_lbls]
+            _compass_matched_skills = [SkillRef(uri=None, label=l) for l in _m_lbls]
+        _compass_full = build_explain_payload_v1(
+            score_core=item.score_raw or (item.score / 100.0),
+            matched_skills=_compass_matched_skills,
+            offer_skills=_compass_offer_skills,
+            offer_text=offer.get("description") or "",
+            domain_bucket=item.domain_bucket or "out",
+            idf_map=engine.idf_table,
+            cfg=_inbox_cfg,
+            offer_cluster=item.offer_cluster,
+            cluster_idf_table=_cluster_idf,
+        )
+        _compact = build_explain_compact(_compass_full, len(_offer_uris))
+        item.explain_v1 = CompassExplainCompact(**_compact.model_dump())
+        item.match_strength = _map_match_strength(item.explain_v1.confidence if item.explain_v1 else None)
+        item.dominant_reason = _derive_dominant_reason(
+            item.explain_v1.confidence if item.explain_v1 else None,
+            near_match_count=int(item.near_match_count or 0),
+            rare_signal_level=item.explain_v1.rare_signal_level if item.explain_v1 else None,
+        )
+        _profile_labels = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
+        _offer_labels = offer.get("skills_display") or offer.get("skills") or []
+        _offer_labels = _extract_skill_labels(_offer_labels)
+        _apply_front_explanation(
+            item,
+            match_debug=_match_debug_c,
+            confidence=item.explain_v1.confidence if item.explain_v1 else None,
+            profile_labels=_profile_labels,
+            offer_labels=_offer_labels,
+        )
+        _apply_offer_intelligence(
+            item,
+            offer_payload=offer,
+            precomputed_payload=offer_intelligence_map.get(item.offer_id),
+        )
+        _apply_semantic_explainability(
+            item,
+            profile_intelligence=profile_intelligence,
+        )
+        _apply_scoring_v2(
+            item,
+            profile_intelligence=profile_intelligence,
+        )
+        _apply_scoring_v3(
+            item,
+            profile_intelligence=profile_intelligence,
+        )
 
     # Observability (domain layer)
     top_generic_skills = sorted(freq_table.items(), key=lambda x: (-x[1], x[0]))[:5] if freq_table else []

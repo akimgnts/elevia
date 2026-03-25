@@ -20,6 +20,8 @@ def build_analyze_dev_payload(artifacts: ParseFilePipelineArtifacts) -> dict:
     profile = artifacts.enrichment.profile
     skill_candidates = artifacts.skill_candidates
     structured_extraction = artifacts.structured_extraction
+    enriched_signals = artifacts.enriched_signals
+    concept_signals = artifacts.concept_signals
     canonical_mapping = artifacts.canonical_mapping
     enrichment = artifacts.enrichment
 
@@ -102,6 +104,8 @@ def build_analyze_dev_payload(artifacts: ParseFilePipelineArtifacts) -> dict:
             "generic_filter_removed": structured_extraction.generic_filter_removed[:30],
             "stats": structured_extraction.stats,
         },
+        "enriched_signals": enriched_signals.enriched_signals[:80],
+        "concept_signals": concept_signals.concept_signals[:80],
         "signal_loss_audit": signal_loss_audit,
         "split_chunks": skill_candidates.split_chunks,
         "split_chunks_count": len(skill_candidates.split_chunks),
@@ -190,6 +194,8 @@ def build_analyze_dev_payload(artifacts: ParseFilePipelineArtifacts) -> dict:
             "structured_units_promoted_count": int(structured_extraction.stats.get("structured_units_promoted_count", 0) or 0),
             "structured_units_rejected_count": int(structured_extraction.stats.get("structured_units_rejected_count", 0) or 0),
             "mapping_inputs_count": int(structured_extraction.stats.get("mapping_inputs_count", 0) or 0),
+            "enriched_signal_count": int(len(enriched_signals.enriched_signals)),
+            "concept_signal_count": int(len(concept_signals.concept_signals)),
             "priority_preserved_count": int(canonical_mapping.priority_stats.get("preserved_count", 0) or 0),
             "priority_summary_count": int(canonical_mapping.priority_stats.get("summary_count", 0) or 0),
             "priority_dropped_count": int(canonical_mapping.priority_stats.get("dropped_count", 0) or 0),

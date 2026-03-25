@@ -1,0 +1,2166 @@
+{
+  "case_count": 6,
+  "missed_match_case_count": 1,
+  "weakest_domains": [
+    "Supply Chain / Operations"
+  ],
+  "data_analytics_bias_still_visible": false,
+  "concept_layer_reveals_business_value": true,
+  "final_verdict": "CONCEPT LAYER NOISY",
+  "cases": [
+    {
+      "domain": "Finance",
+      "offer_id": "BF-AZ-0001",
+      "offer_title": "VIE - Finance - LVMH Allemagne",
+      "canonical_skills": [
+        "Excel",
+        "Power BI",
+        "SAP",
+        "English",
+        "Audit",
+        "Financial Analysis",
+        "Data Analysis",
+        "Campaign Reporting",
+        "Business Intelligence",
+        "couts budget follow up",
+        "factures fournisseurs cash forecast",
+        "saisie facture paiements relances",
+        "budget follow-up",
+        "budget follow-up variance",
+        "Data Visualization",
+        "follow-up variance",
+        "follow-up variance ecarts",
+        "ts budget follow-up",
+        "follow-up",
+        "3 ans",
+        "admin documents",
+        "admin saisie",
+        "admin saisie facture",
+        "admin saisie facture paiements",
+        "ai touch",
+        "ai touch compta budget",
+        "analysis budget",
+        "analysis budget budget",
+        "analysis budget budget audit",
+        "analyst PME",
+        "assistanat comptable",
+        "assistanat comptable admin saisie",
+        "audit comptabilit",
+        "Avant assistanat",
+        "bi controle",
+        "BI SAP",
+        "BI SAP reporting",
+        "BI SAP reporting analyse",
+        "budget audit",
+        "budget audit comptabilit",
+        "budget budget",
+        "budget budget audit",
+        "budget budget audit comptabilit",
+        "budget closing",
+        "budget closing fichiers",
+        "budget closing fichiers Excel",
+        "cash forecast",
+        "cash forecast parfois",
+        "cash forecast parfois Avant",
+        "checks SAP",
+        "closing fichiers",
+        "cloture rapprochements",
+        "co ts",
+        "co ts budget",
+        "compta budget",
+        "compta budget closing",
+        "compta budget closing fichiers",
+        "comptable admin",
+        "comptable admin saisie",
+        "comptable admin saisie facture",
+        "controle donn",
+        "controlling analyst",
+        "couteau suisse",
+        "dashboards Excel",
+        "data analysis budget",
+        "data analysis budget budget",
+        "documents participation",
+        "donn es",
+        "ecarts participation",
+        "es checks"
+      ],
+      "concept_signals": [
+        {
+          "concept": "reporting",
+          "normalized": "reporting",
+          "variants": [
+            "reporting mensuel",
+            "reporting"
+          ],
+          "tokens": [
+            "reporting"
+          ],
+          "domain": "business",
+          "weight": 0.73
+        },
+        {
+          "concept": "factures fournisseurs cash forecast",
+          "normalized": "factures fournisseurs cash forecast",
+          "variants": [
+            "factures fournisseurs cash forecast"
+          ],
+          "tokens": [
+            "factures",
+            "fournisseurs",
+            "cash",
+            "forecast"
+          ],
+          "domain": "finance",
+          "weight": 0.73
+        },
+        {
+          "concept": "saisie facture paiements relances",
+          "normalized": "saisie facture paiements relances",
+          "variants": [
+            "saisie facture paiements relances"
+          ],
+          "tokens": [
+            "saisie",
+            "facture",
+            "paiements",
+            "relances"
+          ],
+          "domain": "finance",
+          "weight": 0.73
+        },
+        {
+          "concept": "couts budget follow",
+          "normalized": "couts budget follow",
+          "variants": [
+            "couts budget follow"
+          ],
+          "tokens": [
+            "couts",
+            "budget",
+            "follow"
+          ],
+          "domain": "finance",
+          "weight": 0.69
+        },
+        {
+          "concept": "suivi factures fournisseurs",
+          "normalized": "suivi factures fournisseurs",
+          "variants": [
+            "suivi factures fournisseurs"
+          ],
+          "tokens": [
+            "suivi",
+            "factures",
+            "fournisseurs"
+          ],
+          "domain": "finance",
+          "weight": 0.69
+        },
+        {
+          "concept": "dashboards excel",
+          "normalized": "dashboards excel",
+          "variants": [
+            "dashboards excel"
+          ],
+          "tokens": [
+            "dashboards",
+            "excel"
+          ],
+          "domain": "data",
+          "weight": 0.65
+        },
+        {
+          "concept": "data analysis",
+          "normalized": "data analysis",
+          "variants": [
+            "data analysis"
+          ],
+          "tokens": [
+            "data",
+            "analysis"
+          ],
+          "domain": "data",
+          "weight": 0.65
+        },
+        {
+          "concept": "power bi",
+          "normalized": "power bi",
+          "variants": [
+            "power bi"
+          ],
+          "tokens": [
+            "power",
+            "bi"
+          ],
+          "domain": "data",
+          "weight": 0.65
+        },
+        {
+          "concept": "analyse financiere",
+          "normalized": "analyse financiere",
+          "variants": [
+            "analyse financiere"
+          ],
+          "tokens": [
+            "analyse",
+            "financiere"
+          ],
+          "domain": "finance",
+          "weight": 0.65
+        },
+        {
+          "concept": "finance pure",
+          "normalized": "finance pure",
+          "variants": [
+            "finance pure"
+          ],
+          "tokens": [
+            "finance",
+            "pure"
+          ],
+          "domain": "finance",
+          "weight": 0.65
+        },
+        {
+          "concept": "analyse couts",
+          "normalized": "analyse couts",
+          "variants": [
+            "analyse couts"
+          ],
+          "tokens": [
+            "analyse",
+            "couts"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "gestion tableaux",
+          "normalized": "gestion tableaux",
+          "variants": [
+            "gestion tableaux"
+          ],
+          "tokens": [
+            "gestion",
+            "tableaux"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "support admin",
+          "normalized": "support admin",
+          "variants": [
+            "support admin"
+          ],
+          "tokens": [
+            "support",
+            "admin"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "support audit",
+          "normalized": "support audit",
+          "variants": [
+            "support audit"
+          ],
+          "tokens": [
+            "support",
+            "audit"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "donnees",
+          "normalized": "donnees",
+          "variants": [
+            "donnees"
+          ],
+          "tokens": [
+            "donnees"
+          ],
+          "domain": "data",
+          "weight": 0.61
+        },
+        {
+          "concept": "budget",
+          "normalized": "budget",
+          "variants": [
+            "budget"
+          ],
+          "tokens": [
+            "budget"
+          ],
+          "domain": "finance",
+          "weight": 0.61
+        },
+        {
+          "concept": "comptabilite",
+          "normalized": "comptabilite",
+          "variants": [
+            "comptabilite"
+          ],
+          "tokens": [
+            "comptabilite"
+          ],
+          "domain": "finance",
+          "weight": 0.61
+        },
+        {
+          "concept": "facture",
+          "normalized": "facture",
+          "variants": [
+            "facture"
+          ],
+          "tokens": [
+            "facture"
+          ],
+          "domain": "finance",
+          "weight": 0.61
+        },
+        {
+          "concept": "follow",
+          "normalized": "follow",
+          "variants": [
+            "follow"
+          ],
+          "tokens": [
+            "follow"
+          ],
+          "domain": "finance",
+          "weight": 0.61
+        },
+        {
+          "concept": "paiements",
+          "normalized": "paiements",
+          "variants": [
+            "paiements"
+          ],
+          "tokens": [
+            "paiements"
+          ],
+          "domain": "finance",
+          "weight": 0.61
+        },
+        {
+          "concept": "participation",
+          "normalized": "participation",
+          "variants": [
+            "participation"
+          ],
+          "tokens": [
+            "participation"
+          ],
+          "domain": "finance",
+          "weight": 0.61
+        },
+        {
+          "concept": "saisie",
+          "normalized": "saisie",
+          "variants": [
+            "saisie"
+          ],
+          "tokens": [
+            "saisie"
+          ],
+          "domain": "finance",
+          "weight": 0.61
+        },
+        {
+          "concept": "audit",
+          "normalized": "audit",
+          "variants": [
+            "audit"
+          ],
+          "tokens": [
+            "audit"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        },
+        {
+          "concept": "excel",
+          "normalized": "excel",
+          "variants": [
+            "excel"
+          ],
+          "tokens": [
+            "excel"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        },
+        {
+          "concept": "sap",
+          "normalized": "sap",
+          "variants": [
+            "sap"
+          ],
+          "tokens": [
+            "sap"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        }
+      ],
+      "top_offer_signals": [
+        "Audit",
+        "Accounting Basics",
+        "Financial Modeling",
+        "Spreadsheet Analysis",
+        "Statistical Programming"
+      ],
+      "required_skills": [
+        "Audit",
+        "VBA",
+        "Excel",
+        "Accounting Basics",
+        "English"
+      ],
+      "scoring_v2": {
+        "score": 0.555,
+        "score_pct": 56,
+        "components": {
+          "role_alignment": 1.0,
+          "domain_alignment": 1.0,
+          "matching_base": 0.0,
+          "gap_penalty": 0.45
+        }
+      },
+      "added_concepts": [
+        "analyse financiere",
+        "finance pure",
+        "analyse couts",
+        "gestion tableaux",
+        "support admin",
+        "donnees",
+        "comptabilite"
+      ],
+      "matched_concepts": [],
+      "missed_matches": [],
+      "captured_matches": [],
+      "noise": [
+        "analyse couts",
+        "audit",
+        "excel",
+        "gestion tableaux",
+        "reporting",
+        "sap",
+        "support admin",
+        "support audit"
+      ],
+      "verdict": "PARTIAL"
+    },
+    {
+      "domain": "Sales / Business Dev",
+      "offer_id": "BF-AZ-0004",
+      "offer_title": "VIE - Commerce - AXA Japon",
+      "canonical_skills": [
+        "Excel",
+        "Salesforce",
+        "HubSpot",
+        "CRM Management",
+        "Data Analysis",
+        "Lead Generation",
+        "B2B Sales",
+        "Business Intelligence",
+        "portefeuille clients prospection outbound",
+        "customer journey",
+        "Statistical Programming",
+        "affaires Biz",
+        "analysis suivi",
+        "AO Outils",
+        "B2B avec",
+        "benchmark march",
+        "Biz dev",
+        "but online",
+        "c t",
+        "calls mails",
+        "Charg d",
+        "client fid",
+        "clients customer",
+        "clients customer journey",
+        "closing parfois",
+        "commercial B2B",
+        "commercial relances",
+        "contacts autre",
+        "CRM Salesforce",
+        "CRM Salesforce Hubspot prospection",
+        "CRM update",
+        "customer needs",
+        "d affaires",
+        "d but",
+        "Data Cleaning",
+        "des r",
+        "dev prospection",
+        "dev prospection suivi",
+        "dev prospection suivi pipeline",
+        "development vente",
+        "devis closing",
+        "fid lisation",
+        "go portefeuille",
+        "go portefeuille clients",
+        "go portefeuille clients customer",
+        "Hubspot prospection",
+        "Hubspot selon",
+        "Je viens",
+        "leads rdv",
+        "lisation objectifs",
+        "mails qualification",
+        "march customer",
+        "mieux voir",
+        "n go",
+        "n go portefeuille",
+        "n go portefeuille clients",
+        "needs analysis",
+        "objectifs mise",
+        "offre participation"
+      ],
+      "concept_signals": [
+        {
+          "concept": "portfolio management",
+          "normalized": "portfolio management",
+          "variants": [
+            "portefeuille clients prospection outbound",
+            "gestion portefeuille",
+            "portefeuille clients"
+          ],
+          "tokens": [
+            "portfolio",
+            "management"
+          ],
+          "domain": "sales",
+          "weight": 0.89
+        },
+        {
+          "concept": "reporting",
+          "normalized": "reporting",
+          "variants": [
+            "reporting weekly",
+            "reporting"
+          ],
+          "tokens": [
+            "reporting"
+          ],
+          "domain": "business",
+          "weight": 0.73
+        },
+        {
+          "concept": "autre poste vente terrain",
+          "normalized": "autre poste vente terrain",
+          "variants": [
+            "autre poste vente terrain"
+          ],
+          "tokens": [
+            "autre",
+            "poste",
+            "vente",
+            "terrain"
+          ],
+          "domain": "sales",
+          "weight": 0.73
+        },
+        {
+          "concept": "customer journey",
+          "normalized": "customer journey",
+          "variants": [
+            "customer journey"
+          ],
+          "tokens": [
+            "customer",
+            "journey"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "data cleaning",
+          "normalized": "data cleaning",
+          "variants": [
+            "data cleaning"
+          ],
+          "tokens": [
+            "data",
+            "cleaning"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "needs analysis",
+          "normalized": "needs analysis",
+          "variants": [
+            "needs analysis"
+          ],
+          "tokens": [
+            "needs",
+            "analysis"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "pipeline peu",
+          "normalized": "pipeline peu",
+          "variants": [
+            "pipeline peu"
+          ],
+          "tokens": [
+            "pipeline",
+            "peu"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "suivi pipeline",
+          "normalized": "suivi pipeline",
+          "variants": [
+            "suivi pipeline"
+          ],
+          "tokens": [
+            "suivi",
+            "pipeline"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "support offre",
+          "normalized": "support offre",
+          "variants": [
+            "support offre"
+          ],
+          "tokens": [
+            "support",
+            "offre"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "client",
+          "normalized": "client",
+          "variants": [
+            "client"
+          ],
+          "tokens": [
+            "client"
+          ],
+          "domain": "sales",
+          "weight": 0.61
+        },
+        {
+          "concept": "clients",
+          "normalized": "clients",
+          "variants": [
+            "clients"
+          ],
+          "tokens": [
+            "clients"
+          ],
+          "domain": "sales",
+          "weight": 0.61
+        },
+        {
+          "concept": "crm",
+          "normalized": "crm",
+          "variants": [
+            "crm"
+          ],
+          "tokens": [
+            "crm"
+          ],
+          "domain": "sales",
+          "weight": 0.61
+        },
+        {
+          "concept": "devis",
+          "normalized": "devis",
+          "variants": [
+            "devis"
+          ],
+          "tokens": [
+            "devis"
+          ],
+          "domain": "sales",
+          "weight": 0.61
+        },
+        {
+          "concept": "vente",
+          "normalized": "vente",
+          "variants": [
+            "vente"
+          ],
+          "tokens": [
+            "vente"
+          ],
+          "domain": "sales",
+          "weight": 0.61
+        },
+        {
+          "concept": "excel",
+          "normalized": "excel",
+          "variants": [
+            "excel"
+          ],
+          "tokens": [
+            "excel"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        },
+        {
+          "concept": "prospection",
+          "normalized": "prospection",
+          "variants": [
+            "prospection"
+          ],
+          "tokens": [
+            "prospection"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        }
+      ],
+      "top_offer_signals": [
+        "CRM Management",
+        "B2B Sales",
+        "Business Intelligence",
+        "Lead Generation",
+        "Negotiation"
+      ],
+      "required_skills": [
+        "CRM Management",
+        "commercial",
+        "B2B Sales",
+        "Business Intelligence",
+        "English"
+      ],
+      "scoring_v2": {
+        "score": 0.54,
+        "score_pct": 54,
+        "components": {
+          "role_alignment": 1.0,
+          "domain_alignment": 1.0,
+          "matching_base": 0.0,
+          "gap_penalty": 0.6
+        }
+      },
+      "added_concepts": [
+        "portfolio management",
+        "reporting",
+        "autre poste vente terrain",
+        "pipeline peu",
+        "support offre"
+      ],
+      "matched_concepts": [],
+      "missed_matches": [],
+      "captured_matches": [],
+      "noise": [
+        "crm",
+        "customer journey",
+        "data cleaning",
+        "excel",
+        "needs analysis",
+        "pipeline peu",
+        "prospection",
+        "reporting",
+        "suivi pipeline",
+        "support offre"
+      ],
+      "verdict": "PARTIAL"
+    },
+    {
+      "domain": "Marketing / Communication",
+      "offer_id": "BF-AZ-0012",
+      "offer_title": "VIE - Communication - Hermès Mexique",
+      "canonical_skills": [
+        "Excel",
+        "Power BI",
+        "WordPress",
+        "Mailchimp",
+        "Canva",
+        "English",
+        "Digital Marketing",
+        "Email Marketing",
+        "Data Analysis",
+        "Internal Communication",
+        "Newsletter Production",
+        "Business Intelligence",
+        "site articles participation campagnes",
+        "communication interne aussi demandes",
+        "newsletters emailing content creation",
+        "social media",
+        "BI/Excel participation",
+        "BI/Excel participation l",
+        "BI/Excel participation l organisation",
+        "Canva/Adobe Stage",
+        "demandes diverses visuals Canva/Adobe",
+        "follow-up Skills communication",
+        "FR/EN website",
+        "marketing/com un",
+        "Power BI/Excel",
+        "Power BI/Excel participation",
+        "Power BI/Excel participation l",
+        "Statistical Programming",
+        "reporting Power BI/Excel participation",
+        "visuals Canva/Adobe",
+        "BI/Excel",
+        "Canva/Adobe",
+        "follow-up",
+        "FR/EN",
+        "marketing/com",
+        "ai fait",
+        "ai fait contenu campagnes",
+        "analysis open",
+        "articles participation",
+        "articles participation campagnes",
+        "articles participation campagnes help",
+        "assistant newsletters",
+        "assistant newsletters emailing",
+        "assistant newsletters emailing content",
+        "aussi demandes",
+        "aussi demandes diverses",
+        "aussi demandes diverses visuals",
+        "branding visuels",
+        "brochure event",
+        "campagnes help",
+        "campaign analysis",
+        "Canva Photoshop",
+        "cis Exp",
+        "cis Exp pro Marketing",
+        "clicks petit",
+        "com mise",
+        "com mise jour",
+        "com mise jour site",
+        "content contenus",
+        "content contenus newsletter",
+        "content contenus newsletter emailing",
+        "content creation",
+        "content creation support",
+        "content creation support social"
+      ],
+      "concept_signals": [
+        {
+          "concept": "communication interne aussi demandes",
+          "normalized": "communication interne aussi demandes",
+          "variants": [
+            "communication interne aussi demandes"
+          ],
+          "tokens": [
+            "communication",
+            "interne",
+            "aussi",
+            "demandes"
+          ],
+          "domain": "marketing",
+          "weight": 0.73
+        },
+        {
+          "concept": "newsletters emailing content creation",
+          "normalized": "newsletters emailing content creation",
+          "variants": [
+            "newsletters emailing content creation"
+          ],
+          "tokens": [
+            "newsletters",
+            "emailing",
+            "content",
+            "creation"
+          ],
+          "domain": "marketing",
+          "weight": 0.73
+        },
+        {
+          "concept": "site articles participation campagnes",
+          "normalized": "site articles participation campagnes",
+          "variants": [
+            "site articles participation campagnes"
+          ],
+          "tokens": [
+            "site",
+            "articles",
+            "participation",
+            "campagnes"
+          ],
+          "domain": "marketing",
+          "weight": 0.73
+        },
+        {
+          "concept": "event salon supports",
+          "normalized": "event salon supports",
+          "variants": [
+            "event salon supports"
+          ],
+          "tokens": [
+            "event",
+            "salon",
+            "supports"
+          ],
+          "domain": "unknown",
+          "weight": 0.69
+        },
+        {
+          "concept": "open rates clicks",
+          "normalized": "open rates clicks",
+          "variants": [
+            "open rates clicks"
+          ],
+          "tokens": [
+            "open",
+            "rates",
+            "clicks"
+          ],
+          "domain": "unknown",
+          "weight": 0.69
+        },
+        {
+          "concept": "support social media",
+          "normalized": "support social media",
+          "variants": [
+            "support social media"
+          ],
+          "tokens": [
+            "support",
+            "social",
+            "media"
+          ],
+          "domain": "unknown",
+          "weight": 0.69
+        },
+        {
+          "concept": "power bi",
+          "normalized": "power bi",
+          "variants": [
+            "power bi"
+          ],
+          "tokens": [
+            "power",
+            "bi"
+          ],
+          "domain": "data",
+          "weight": 0.65
+        },
+        {
+          "concept": "canva adobe",
+          "normalized": "canva adobe",
+          "variants": [
+            "canva adobe"
+          ],
+          "tokens": [
+            "canva",
+            "adobe"
+          ],
+          "domain": "marketing",
+          "weight": 0.65
+        },
+        {
+          "concept": "bi excel",
+          "normalized": "bi excel",
+          "variants": [
+            "bi excel"
+          ],
+          "tokens": [
+            "bi",
+            "excel"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "campaign analysis",
+          "normalized": "campaign analysis",
+          "variants": [
+            "campaign analysis"
+          ],
+          "tokens": [
+            "campaign",
+            "analysis"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "content creation",
+          "normalized": "content creation",
+          "variants": [
+            "content creation"
+          ],
+          "tokens": [
+            "content",
+            "creation"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "coordination agences",
+          "normalized": "coordination agences",
+          "variants": [
+            "coordination agences"
+          ],
+          "tokens": [
+            "coordination",
+            "agences"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "campagnes",
+          "normalized": "campagnes",
+          "variants": [
+            "campagnes"
+          ],
+          "tokens": [
+            "campagnes"
+          ],
+          "domain": "marketing",
+          "weight": 0.61
+        },
+        {
+          "concept": "canva",
+          "normalized": "canva",
+          "variants": [
+            "canva"
+          ],
+          "tokens": [
+            "canva"
+          ],
+          "domain": "marketing",
+          "weight": 0.61
+        },
+        {
+          "concept": "contenus",
+          "normalized": "contenus",
+          "variants": [
+            "contenus"
+          ],
+          "tokens": [
+            "contenus"
+          ],
+          "domain": "marketing",
+          "weight": 0.61
+        },
+        {
+          "concept": "emailing",
+          "normalized": "emailing",
+          "variants": [
+            "emailing"
+          ],
+          "tokens": [
+            "emailing"
+          ],
+          "domain": "marketing",
+          "weight": 0.61
+        },
+        {
+          "concept": "newsletter",
+          "normalized": "newsletter",
+          "variants": [
+            "newsletter"
+          ],
+          "tokens": [
+            "newsletter"
+          ],
+          "domain": "marketing",
+          "weight": 0.61
+        },
+        {
+          "concept": "newsletters",
+          "normalized": "newsletters",
+          "variants": [
+            "newsletters"
+          ],
+          "tokens": [
+            "newsletters"
+          ],
+          "domain": "marketing",
+          "weight": 0.61
+        },
+        {
+          "concept": "wordpress",
+          "normalized": "wordpress",
+          "variants": [
+            "wordpress"
+          ],
+          "tokens": [
+            "wordpress"
+          ],
+          "domain": "marketing",
+          "weight": 0.61
+        }
+      ],
+      "top_offer_signals": [
+        "Internal Communication",
+        "Statistical Programming",
+        "événementiel"
+      ],
+      "required_skills": [
+        "événementiel",
+        "relations presse"
+      ],
+      "scoring_v2": {
+        "score": 0.525,
+        "score_pct": 52,
+        "components": {
+          "role_alignment": 1.0,
+          "domain_alignment": 1.0,
+          "matching_base": 0.0,
+          "gap_penalty": 0.75
+        }
+      },
+      "added_concepts": [
+        "event salon supports",
+        "open rates clicks",
+        "coordination agences"
+      ],
+      "matched_concepts": [],
+      "missed_matches": [],
+      "captured_matches": [],
+      "noise": [
+        "bi excel",
+        "campaign analysis",
+        "content creation",
+        "coordination agences",
+        "event salon supports",
+        "open rates clicks",
+        "support social media"
+      ],
+      "verdict": "PARTIAL"
+    },
+    {
+      "domain": "Supply Chain / Operations",
+      "offer_id": "BF-AZ-0005",
+      "offer_title": "VIE - Supply Chain - Bouygues Royaume-Uni",
+      "canonical_skills": [
+        "Excel",
+        "SAP",
+        "Supply Chain Management",
+        "Procurement Basics",
+        "Data Analysis",
+        "Vendor Management",
+        "Transport Operations",
+        "Business Intelligence",
+        "transport livraisons stocks incidents",
+        "approvisionnement fournisseurs commandes achat",
+        "kpi service update fichiers",
+        "Coordinateur ops/logistique",
+        "ops/logistique parcours",
+        "follow-up",
+        "ops/logistique",
+        "achat purchase",
+        "achat purchase orders",
+        "activit support",
+        "ai fait",
+        "aire J",
+        "am lioration",
+        "appro flux",
+        "appro flux fournisseurs",
+        "appro flux fournisseurs transport",
+        "approvisionnement fournisseurs",
+        "approvisionnement fournisseurs commandes",
+        "approvisionnement stock",
+        "Avant operations",
+        "chain coordinator",
+        "chain coordinator suivi",
+        "chain coordinator suivi approvisionnement",
+        "chain logistique",
+        "chain logistique approvisionnement",
+        "chain logistique approvisionnement stock",
+        "claims litiges",
+        "commandes achat",
+        "commandes achat purchase",
+        "commandes achat purchase orders",
+        "coordinator suivi",
+        "coordinator suivi approvisionnement",
+        "coordinator suivi approvisionnement fournisseurs",
+        "customs docs",
+        "data Tools",
+        "dispatch participation",
+        "docs Avant",
+        "excel SAP",
+        "Excel TMS",
+        "exploitation dispatch",
+        "fait appro",
+        "fait appro flux fournisseurs",
+        "fichiers excel",
+        "fichiers excel SAP",
+        "fichiers excel SAP participation",
+        "flux fournisseurs",
+        "flux fournisseurs transport",
+        "flux performance",
+        "fournisseurs commandes",
+        "fournisseurs commandes achat",
+        "fournisseurs commandes achat purchase",
+        "fournisseurs transport",
+        "incidents entrepot",
+        "J ai",
+        "KPI service",
+        "KPI service update"
+      ],
+      "concept_signals": [
+        {
+          "concept": "kpi service update fichiers",
+          "normalized": "kpi service update fichiers",
+          "variants": [
+            "kpi service update fichiers"
+          ],
+          "tokens": [
+            "kpi",
+            "service",
+            "update",
+            "fichiers"
+          ],
+          "domain": "data",
+          "weight": 0.73
+        },
+        {
+          "concept": "approvisionnement fournisseurs commandes achat",
+          "normalized": "approvisionnement fournisseurs commandes achat",
+          "variants": [
+            "approvisionnement fournisseurs commandes achat"
+          ],
+          "tokens": [
+            "approvisionnement",
+            "fournisseurs",
+            "commandes",
+            "achat"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.73
+        },
+        {
+          "concept": "transport livraisons stocks incidents",
+          "normalized": "transport livraisons stocks incidents",
+          "variants": [
+            "transport livraisons stocks incidents"
+          ],
+          "tokens": [
+            "transport",
+            "livraisons",
+            "stocks",
+            "incidents"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.73
+        },
+        {
+          "concept": "ops logistique",
+          "normalized": "ops logistique",
+          "variants": [
+            "ops logistique"
+          ],
+          "tokens": [
+            "ops",
+            "logistique"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.65
+        },
+        {
+          "concept": "suivi approvisionnement",
+          "normalized": "suivi approvisionnement",
+          "variants": [
+            "suivi approvisionnement"
+          ],
+          "tokens": [
+            "suivi",
+            "approvisionnement"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.65
+        },
+        {
+          "concept": "transport coordination",
+          "normalized": "transport coordination",
+          "variants": [
+            "coordination transport"
+          ],
+          "tokens": [
+            "transport",
+            "coordination"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.65
+        },
+        {
+          "concept": "gestion tableaux",
+          "normalized": "gestion tableaux",
+          "variants": [
+            "gestion tableaux"
+          ],
+          "tokens": [
+            "gestion",
+            "tableaux"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "suivi activite",
+          "normalized": "suivi activite",
+          "variants": [
+            "suivi activite"
+          ],
+          "tokens": [
+            "suivi",
+            "activite"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "support exploitation",
+          "normalized": "support exploitation",
+          "variants": [
+            "support exploitation"
+          ],
+          "tokens": [
+            "support",
+            "exploitation"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "reporting",
+          "normalized": "reporting",
+          "variants": [
+            "reporting"
+          ],
+          "tokens": [
+            "reporting"
+          ],
+          "domain": "business",
+          "weight": 0.61
+        },
+        {
+          "concept": "approvisionnement",
+          "normalized": "approvisionnement",
+          "variants": [
+            "approvisionnement"
+          ],
+          "tokens": [
+            "approvisionnement"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "entrepot",
+          "normalized": "entrepot",
+          "variants": [
+            "entrepot"
+          ],
+          "tokens": [
+            "entrepot"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "fournisseur",
+          "normalized": "fournisseur",
+          "variants": [
+            "fournisseur"
+          ],
+          "tokens": [
+            "fournisseur"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "fournisseurs",
+          "normalized": "fournisseurs",
+          "variants": [
+            "fournisseurs"
+          ],
+          "tokens": [
+            "fournisseurs"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "livraisons",
+          "normalized": "livraisons",
+          "variants": [
+            "livraisons"
+          ],
+          "tokens": [
+            "livraisons"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "logistique",
+          "normalized": "logistique",
+          "variants": [
+            "logistique"
+          ],
+          "tokens": [
+            "logistique"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "stock",
+          "normalized": "stock",
+          "variants": [
+            "stock"
+          ],
+          "tokens": [
+            "stock"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "stocks",
+          "normalized": "stocks",
+          "variants": [
+            "stocks"
+          ],
+          "tokens": [
+            "stocks"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "tms",
+          "normalized": "tms",
+          "variants": [
+            "tms"
+          ],
+          "tokens": [
+            "tms"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "transport",
+          "normalized": "transport",
+          "variants": [
+            "transport"
+          ],
+          "tokens": [
+            "transport"
+          ],
+          "domain": "supply_chain_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "excel",
+          "normalized": "excel",
+          "variants": [
+            "excel"
+          ],
+          "tokens": [
+            "excel"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        },
+        {
+          "concept": "sap",
+          "normalized": "sap",
+          "variants": [
+            "sap"
+          ],
+          "tokens": [
+            "sap"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        }
+      ],
+      "top_offer_signals": [
+        "Statistical Programming",
+        "logistique",
+        "supply chain"
+      ],
+      "required_skills": [
+        "logistique",
+        "supply chain",
+        "English",
+        "Statistical Programming"
+      ],
+      "scoring_v2": {
+        "score": 0.5437,
+        "score_pct": 54,
+        "components": {
+          "role_alignment": 1.0,
+          "domain_alignment": 1.0,
+          "matching_base": 0.0,
+          "gap_penalty": 0.5625
+        }
+      },
+      "added_concepts": [
+        "ops logistique",
+        "transport coordination",
+        "gestion tableaux",
+        "suivi activite",
+        "support exploitation",
+        "reporting"
+      ],
+      "matched_concepts": [
+        "ops logistique"
+      ],
+      "missed_matches": [
+        "ops logistique"
+      ],
+      "captured_matches": [],
+      "noise": [
+        "excel",
+        "gestion tableaux",
+        "reporting",
+        "sap",
+        "suivi activite",
+        "support exploitation",
+        "tms"
+      ],
+      "verdict": "PROBLEM"
+    },
+    {
+      "domain": "HR",
+      "offer_id": "BF-AZ-0010",
+      "offer_title": "VIE - RH - Pernod Ricard Singapour",
+      "canonical_skills": [
+        "Excel",
+        "English",
+        "Data Analysis",
+        "Internal Communication",
+        "HR Administration",
+        "Recruitment",
+        "Onboarding",
+        "Business Intelligence",
+        "administration personnel dossiers salaries",
+        "office/admin participation",
+        "rience office/admin",
+        "office/admin",
+        "absences documents",
+        "ai aussi",
+        "Assistant RH",
+        "Assistant RH administration",
+        "aussi fait",
+        "autre exp",
+        "avenants recrutement",
+        "besoins staffing",
+        "candidats onboarding",
+        "comp tences",
+        "contrats avenants",
+        "CV entretiens",
+        "documents organisation",
+        "dossiers salari",
+        "dossiers salari s",
+        "dossiers salari s contrats",
+        "Excel support",
+        "exp rience",
+        "fait beaucoup",
+        "flou transversal",
+        "g n",
+        "int gration",
+        "interne ponctuelle",
+        "J ai",
+        "jour SIRH",
+        "KPI recrutement",
+        "mise jour",
+        "n raliste",
+        "onboarding administration",
+        "onboarding J",
+        "onboarding participation",
+        "organisation sessions",
+        "Outils comp",
+        "paie absences",
+        "participation paie",
+        "personnel dossiers",
+        "personnel dossiers salari",
+        "personnel dossiers salari s",
+        "personnel recrutement",
+        "personnel recrutement onboarding"
+      ],
+      "concept_signals": [
+        {
+          "concept": "administration personnel dossiers salaries",
+          "normalized": "administration personnel dossiers salaries",
+          "variants": [
+            "administration personnel dossiers salaries"
+          ],
+          "tokens": [
+            "administration",
+            "personnel",
+            "dossiers",
+            "salaries"
+          ],
+          "domain": "hr_ops",
+          "weight": 0.73
+        },
+        {
+          "concept": "rh generaliste junior",
+          "normalized": "rh generaliste junior",
+          "variants": [
+            "rh generaliste junior"
+          ],
+          "tokens": [
+            "rh",
+            "generaliste",
+            "junior"
+          ],
+          "domain": "hr_ops",
+          "weight": 0.69
+        },
+        {
+          "concept": "office admin",
+          "normalized": "office admin",
+          "variants": [
+            "office admin"
+          ],
+          "tokens": [
+            "office",
+            "admin"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "suivi candidats",
+          "normalized": "suivi candidats",
+          "variants": [
+            "suivi candidats"
+          ],
+          "tokens": [
+            "suivi",
+            "candidats"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "reporting",
+          "normalized": "reporting",
+          "variants": [
+            "reporting"
+          ],
+          "tokens": [
+            "reporting"
+          ],
+          "domain": "business",
+          "weight": 0.61
+        },
+        {
+          "concept": "kpi",
+          "normalized": "kpi",
+          "variants": [
+            "kpi"
+          ],
+          "tokens": [
+            "kpi"
+          ],
+          "domain": "data",
+          "weight": 0.61
+        },
+        {
+          "concept": "entretiens",
+          "normalized": "entretiens",
+          "variants": [
+            "entretiens"
+          ],
+          "tokens": [
+            "entretiens"
+          ],
+          "domain": "hr_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "onboarding",
+          "normalized": "onboarding",
+          "variants": [
+            "onboarding"
+          ],
+          "tokens": [
+            "onboarding"
+          ],
+          "domain": "hr_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "personnel",
+          "normalized": "personnel",
+          "variants": [
+            "personnel"
+          ],
+          "tokens": [
+            "personnel"
+          ],
+          "domain": "hr_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "recrutement",
+          "normalized": "recrutement",
+          "variants": [
+            "recrutement"
+          ],
+          "tokens": [
+            "recrutement"
+          ],
+          "domain": "hr_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "rh",
+          "normalized": "rh",
+          "variants": [
+            "rh"
+          ],
+          "tokens": [
+            "rh"
+          ],
+          "domain": "hr_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "salaries",
+          "normalized": "salaries",
+          "variants": [
+            "salaries"
+          ],
+          "tokens": [
+            "salaries"
+          ],
+          "domain": "hr_ops",
+          "weight": 0.61
+        },
+        {
+          "concept": "excel",
+          "normalized": "excel",
+          "variants": [
+            "excel"
+          ],
+          "tokens": [
+            "excel"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        },
+        {
+          "concept": "sirh",
+          "normalized": "sirh",
+          "variants": [
+            "sirh"
+          ],
+          "tokens": [
+            "sirh"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        }
+      ],
+      "top_offer_signals": [
+        "Recruitment",
+        "Statistical Programming",
+        "SIRH"
+      ],
+      "required_skills": [
+        "SIRH",
+        "Recruitment",
+        "English",
+        "Statistical Programming"
+      ],
+      "scoring_v2": {
+        "score": 0.5437,
+        "score_pct": 54,
+        "components": {
+          "role_alignment": 1.0,
+          "domain_alignment": 1.0,
+          "matching_base": 0.0,
+          "gap_penalty": 0.5625
+        }
+      },
+      "added_concepts": [
+        "rh generaliste junior",
+        "office admin",
+        "suivi candidats",
+        "reporting"
+      ],
+      "matched_concepts": [],
+      "missed_matches": [],
+      "captured_matches": [],
+      "noise": [
+        "excel",
+        "office admin",
+        "reporting",
+        "sirh",
+        "suivi candidats"
+      ],
+      "verdict": "PARTIAL"
+    },
+    {
+      "domain": "Data / BI",
+      "offer_id": "BF-AZ-SAMPLE-0001",
+      "offer_title": "Volontaire International VIE - Ingénieur Data #1",
+      "canonical_skills": [
+        "Data Analysis",
+        "SQL Querying",
+        "Excel",
+        "Power BI",
+        "English",
+        "Scripting Automation",
+        "Business Intelligence",
+        "extraction kpi design forecasting",
+        "kpi design forecasting",
+        "reporting automatique python",
+        "automatique python",
+        "extraction messy files",
+        "messy files",
+        "Data Visualization",
+        "Time Series Analysis",
+        "French/English because",
+        "Mixed French/English",
+        "Machine Learning",
+        "Web Service API",
+        "French/English",
+        "multi-source",
+        "ad hoc",
+        "analysis data",
+        "analysis signal",
+        "analysis signal extraction",
+        "analyst BI",
+        "and some",
+        "anomaly detection",
+        "APIs data",
+        "APIs datasets",
+        "automation Mixed",
+        "automatique Python Excel",
+        "automatique Python Excel understanding",
+        "because teams",
+        "BI Excel",
+        "BI SQL",
+        "BI SQL queries extraction",
+        "BI support",
+        "but not",
+        "cleaning anomaly",
+        "curiosity but",
+        "dashboarding Power",
+        "Data BI",
+        "Data Cleaning",
+        "data quality",
+        "some",
+        "some automation"
+      ],
+      "concept_signals": [
+        {
+          "concept": "data analysis",
+          "normalized": "data analysis",
+          "variants": [
+            "analyse donnees",
+            "data analysis"
+          ],
+          "tokens": [
+            "data",
+            "analysis"
+          ],
+          "domain": "data",
+          "weight": 0.77
+        },
+        {
+          "concept": "kpi design forecasting",
+          "normalized": "kpi design forecasting",
+          "variants": [
+            "kpi design forecasting"
+          ],
+          "tokens": [
+            "kpi",
+            "design",
+            "forecasting"
+          ],
+          "domain": "data",
+          "weight": 0.69
+        },
+        {
+          "concept": "multi source analysis",
+          "normalized": "multi source analysis",
+          "variants": [
+            "multi source analysis"
+          ],
+          "tokens": [
+            "multi",
+            "source",
+            "analysis"
+          ],
+          "domain": "unknown",
+          "weight": 0.69
+        },
+        {
+          "concept": "power bi",
+          "normalized": "power bi",
+          "variants": [
+            "power bi"
+          ],
+          "tokens": [
+            "power",
+            "bi"
+          ],
+          "domain": "data",
+          "weight": 0.65
+        },
+        {
+          "concept": "automatique python",
+          "normalized": "automatique python",
+          "variants": [
+            "automatique python"
+          ],
+          "tokens": [
+            "automatique",
+            "python"
+          ],
+          "domain": "finance",
+          "weight": 0.65
+        },
+        {
+          "concept": "anomaly detection",
+          "normalized": "anomaly detection",
+          "variants": [
+            "anomaly detection"
+          ],
+          "tokens": [
+            "anomaly",
+            "detection"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "data cleaning",
+          "normalized": "data cleaning",
+          "variants": [
+            "data cleaning"
+          ],
+          "tokens": [
+            "data",
+            "cleaning"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "data quality",
+          "normalized": "data quality",
+          "variants": [
+            "data quality"
+          ],
+          "tokens": [
+            "data",
+            "quality"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "messy files",
+          "normalized": "messy files",
+          "variants": [
+            "messy files"
+          ],
+          "tokens": [
+            "messy",
+            "files"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "power query",
+          "normalized": "power query",
+          "variants": [
+            "power query"
+          ],
+          "tokens": [
+            "power",
+            "query"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "process analysis",
+          "normalized": "process analysis",
+          "variants": [
+            "process analysis"
+          ],
+          "tokens": [
+            "process",
+            "analysis"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "rest apis",
+          "normalized": "rest apis",
+          "variants": [
+            "rest apis"
+          ],
+          "tokens": [
+            "rest",
+            "apis"
+          ],
+          "domain": "unknown",
+          "weight": 0.65
+        },
+        {
+          "concept": "reporting",
+          "normalized": "reporting",
+          "variants": [
+            "reporting"
+          ],
+          "tokens": [
+            "reporting"
+          ],
+          "domain": "business",
+          "weight": 0.61
+        },
+        {
+          "concept": "dashboard",
+          "normalized": "dashboard",
+          "variants": [
+            "dashboard"
+          ],
+          "tokens": [
+            "dashboard"
+          ],
+          "domain": "data",
+          "weight": 0.61
+        },
+        {
+          "concept": "kpi",
+          "normalized": "kpi",
+          "variants": [
+            "kpi"
+          ],
+          "tokens": [
+            "kpi"
+          ],
+          "domain": "data",
+          "weight": 0.61
+        },
+        {
+          "concept": "sql",
+          "normalized": "sql",
+          "variants": [
+            "sql"
+          ],
+          "tokens": [
+            "sql"
+          ],
+          "domain": "data",
+          "weight": 0.61
+        },
+        {
+          "concept": "ventes",
+          "normalized": "ventes",
+          "variants": [
+            "ventes"
+          ],
+          "tokens": [
+            "ventes"
+          ],
+          "domain": "sales",
+          "weight": 0.61
+        },
+        {
+          "concept": "excel",
+          "normalized": "excel",
+          "variants": [
+            "excel"
+          ],
+          "tokens": [
+            "excel"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        },
+        {
+          "concept": "forecasting",
+          "normalized": "forecasting",
+          "variants": [
+            "forecasting"
+          ],
+          "tokens": [
+            "forecasting"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        },
+        {
+          "concept": "python",
+          "normalized": "python",
+          "variants": [
+            "python"
+          ],
+          "tokens": [
+            "python"
+          ],
+          "domain": "unknown",
+          "weight": 0.61
+        }
+      ],
+      "top_offer_signals": [
+        "Business Intelligence",
+        "Data Analysis",
+        "SQL Querying"
+      ],
+      "required_skills": [
+        "Business Intelligence",
+        "Data Analysis",
+        "SQL Querying",
+        "python (programmation informatique)"
+      ],
+      "scoring_v2": {
+        "score": 0.5437,
+        "score_pct": 54,
+        "components": {
+          "role_alignment": 1.0,
+          "domain_alignment": 1.0,
+          "matching_base": 0.0,
+          "gap_penalty": 0.5625
+        }
+      },
+      "added_concepts": [
+        "power query",
+        "process analysis",
+        "rest apis",
+        "ventes"
+      ],
+      "matched_concepts": [],
+      "missed_matches": [],
+      "captured_matches": [],
+      "noise": [
+        "anomaly detection",
+        "data cleaning",
+        "data quality",
+        "excel",
+        "forecasting",
+        "messy files",
+        "multi source analysis",
+        "power query",
+        "process analysis",
+        "python",
+        "reporting",
+        "rest apis",
+        "sql"
+      ],
+      "verdict": "PARTIAL"
+    }
+  ]
+}

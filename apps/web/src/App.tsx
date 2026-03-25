@@ -4,6 +4,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DashboardPage from "./pages/DashboardPage";
 import MatchPage from "./pages/MatchPage";
 import OffersPage from "./pages/OffersPage";
+import ExplorePage from "./pages/ExplorePage";
 import LandingPage from "./pages/LandingPage";
 import OfferDetailPage from "./pages/OfferDetailPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -28,6 +29,7 @@ export default function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/match" element={<MatchPage />} />
       <Route path="/offres" element={<OffersPage />} />
+      <Route path="/explorer" element={<ExplorePage />} />
       <Route path="/inbox" element={<InboxPage />} />
       <Route path="/applications" element={<ApplicationsPage />} />
       <Route path="/dev/cv-delta" element={<CvDeltaPage />} />

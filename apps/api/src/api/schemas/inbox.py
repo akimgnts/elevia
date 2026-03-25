@@ -148,6 +148,33 @@ class SemanticExplainability(BaseModel):
     alignment_summary: str
 
 
+class ScoringV2Components(BaseModel):
+    role_alignment: float = Field(..., ge=0.0, le=1.0)
+    domain_alignment: float = Field(..., ge=0.0, le=1.0)
+    matching_base: float = Field(..., ge=0.0, le=1.0)
+    gap_penalty: float = Field(..., ge=0.0, le=1.0)
+
+
+class ScoringV2(BaseModel):
+    score: float = Field(..., ge=0.0, le=1.0)
+    score_pct: int = Field(..., ge=0, le=100)
+    components: ScoringV2Components
+
+
+class ScoringV3Components(BaseModel):
+    role_alignment: float = Field(..., ge=0.0, le=1.0)
+    domain_alignment: float = Field(..., ge=0.0, le=1.0)
+    matching_base: float = Field(..., ge=0.0, le=1.0)
+    gap_penalty: float = Field(..., ge=0.0, le=1.0)
+
+
+class ScoringV3(BaseModel):
+    score: float = Field(..., ge=0.0, le=1.0)
+    score_pct: int = Field(..., ge=0, le=100)
+    components: ScoringV3Components
+    summary: str
+
+
 # ── Compass signal compact (display-only, always computed) ────────────────────
 
 class CompassExplainCompact(BaseModel):
@@ -209,6 +236,8 @@ class InboxItem(BaseModel):
     explanation: Optional[OfferExplanation] = None  # always populated when matching ran
     offer_intelligence: Optional[OfferIntelligence] = None
     semantic_explainability: Optional[SemanticExplainability] = None
+    scoring_v2: Optional[ScoringV2] = None
+    scoring_v3: Optional[ScoringV3] = None
     explain_v1: Optional[CompassExplainCompact] = None  # compass signal (always computed)
     near_match_count: Optional[int] = None  # compact, display-only (list view)
     match_strength: Optional[str] = Field(default=None, pattern="^(STRONG|MEDIUM|WEAK)$")

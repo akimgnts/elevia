@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import copy
+import json
 from typing import Any, Dict, Iterable, List, Sequence
 import csv
 import io
@@ -45,12 +47,15 @@ from compass.profile.profile_intelligence import (
 from offer.offer_description_structurer import structure_offer_description
 from compass.text_structurer import structure_offer_text_v1
 from offer.offer_cluster import detect_offer_cluster
+from .offer_parse_pipeline import build_offer_canonical_representation
 
 _MAX_TOP_SIGNALS = 5
 _MAX_REQUIRED = 5
 _MAX_OPTIONAL = 4
 _MAX_SECONDARY = 2
 _MAX_ROLE_HYPOTHESES = 3
+_INTELLIGENCE_CACHE_CAP = 256
+_INTELLIGENCE_CACHE: Dict[str, Dict[str, Any]] = {}
 
 _REQUIRED_MARKERS = (
     "requis",
@@ -110,6 +115,47 @@ _GENERIC_SIGNAL_BLOCKLIST = {
     "ingenieur",
 }
 _GENERIC_SIGNAL_BLOCKLIST_NORM = {_normalize(value) for value in _GENERIC_SIGNAL_BLOCKLIST}
+_GENERIC_SHARED_DOMAINS = {"business", "operations", "project", "communication"}
+_GENERIC_DOMAIN_DRIFT = {"business", "operations", "project"}
+_BRIDGE_SHARED_DOMAIN_BLOCKLIST = {"data", "software", "it"}
+_WEAK_MATCH_DOMAIN_BLOCKLIST = {"data", "software", "it"}
+_DATA_SOFTWARE_TITLE_MARKERS = ("data", "bi", "analytics", "analytic", "reporting")
+_DATA_SOFTWARE_SIGNAL_MARKERS = (
+    "data analysis",
+    "business intelligence",
+    "sql",
+    "query",
+    "analytics",
+    "reporting",
+    "etl",
+    "power bi",
+    "machine learning",
+    "python",
+    "dashboard",
+)
+_ROLE_ADJACENCY = {
+    "data_analytics": {"business_analysis", "software_it"},
+    "business_analysis": {"finance_ops", "sales_business_dev", "marketing_communication", "supply_chain_ops", "project_ops"},
+    "finance_ops": {"business_analysis", "legal_compliance"},
+    "legal_compliance": {"finance_ops"},
+    "sales_business_dev": {"business_analysis", "marketing_communication"},
+    "marketing_communication": {"business_analysis", "sales_business_dev"},
+    "hr_ops": {"project_ops"},
+    "supply_chain_ops": {"business_analysis", "project_ops"},
+    "project_ops": {"business_analysis", "hr_ops", "supply_chain_ops"},
+    "software_it": {"data_analytics"},
+    "generalist_other": set(),
+}
+_BRIDGE_ROLE_PAIRS = {
+    frozenset({"data_analytics", "finance_ops"}),
+    frozenset({"data_analytics", "supply_chain_ops"}),
+    frozenset({"data_analytics", "hr_ops"}),
+    frozenset({"data_analytics", "marketing_communication"}),
+    frozenset({"data_analytics", "sales_business_dev"}),
+    frozenset({"data_analytics", "business_analysis"}),
+    frozenset({"project_ops", "hr_ops"}),
+    frozenset({"project_ops", "supply_chain_ops"}),
+}
 
 
 def _extract_skill_labels(skills_display: Iterable[Any] | None, skills: Iterable[Any] | None) -> List[str]:
@@ -175,8 +221,14 @@ def _infer_offer_title_block(title: str) -> tuple[str | None, float]:
     if not key:
         return None, 0.0
     exact_patterns: tuple[tuple[str, str, float], ...] = (
+        ("legal counsel", "legal_compliance", 0.99),
+        ("counsel", "legal_compliance", 0.95),
+        ("lawyer", "legal_compliance", 0.95),
         ("juridique", "legal_compliance", 0.98),
         ("compliance", "legal_compliance", 0.98),
+        ("financial controller", "finance_ops", 0.99),
+        ("controleur financier", "finance_ops", 0.99),
+        ("contrôleur financier", "finance_ops", 0.99),
         ("finance", "finance_ops", 0.98),
         ("controle de gestion", "finance_ops", 0.99),
         ("commerce", "sales_business_dev", 0.98),
@@ -189,6 +241,8 @@ def _infer_offer_title_block(title: str) -> tuple[str | None, float]:
         ("human resources", "hr_ops", 0.98),
         ("marketing", "marketing_communication", 0.98),
         ("communication", "marketing_communication", 0.98),
+        ("engineering", "software_it", 0.94),
+        ("ingenieur", "software_it", 0.94),
         ("informatique", "software_it", 0.97),
         ("data", "data_analytics", 0.96),
         ("bi", "data_analytics", 0.94),
@@ -214,6 +268,361 @@ def _clean_signal_list(values: Sequence[str]) -> List[str]:
         seen.add(key)
         cleaned.append(label)
     return cleaned
+
+
+def _role_neighbors(block: str) -> set[str]:
+    return set(_ROLE_ADJACENCY.get(block, set()))
+
+
+def _is_bridge_role_pair(profile_block: str, offer_block: str) -> bool:
+    if not profile_block or not offer_block or profile_block == offer_block:
+        return False
+    return frozenset({profile_block, offer_block}) in _BRIDGE_ROLE_PAIRS
+
+
+def _signal_lists_for_gate(
+    profile_intelligence: Dict[str, Any] | None,
+    offer_intelligence: Dict[str, Any] | None,
+) -> tuple[List[str], List[str], List[str]]:
+    profile_signals = [
+        str(value).strip()
+        for value in list((profile_intelligence or {}).get("top_profile_signals") or [])
+        if str(value).strip()
+    ]
+    offer_top = [
+        str(value).strip()
+        for value in list((offer_intelligence or {}).get("top_offer_signals") or [])
+        if str(value).strip()
+    ]
+    offer_required = [
+        str(value).strip()
+        for value in list((offer_intelligence or {}).get("required_skills") or [])
+        if str(value).strip()
+    ]
+    return profile_signals[:8], offer_top[:8], offer_required[:8]
+
+
+def _signal_keys_overlap(left: str, right: str) -> bool:
+    left_key = _normalize(left)
+    right_key = _normalize(right)
+    if not left_key or not right_key:
+        return False
+    if left_key == right_key:
+        return True
+    if len(left_key) >= 5 and len(right_key) >= 5:
+        if left_key in right_key or right_key in left_key:
+            return True
+    return False
+
+
+def _signal_overlap_details(
+    profile_intelligence: Dict[str, Any] | None,
+    offer_intelligence: Dict[str, Any] | None,
+) -> Dict[str, Any]:
+    profile_signals, offer_top, offer_required = _signal_lists_for_gate(
+        profile_intelligence,
+        offer_intelligence,
+    )
+    overlap_labels: List[str] = []
+    required_overlap = 0
+    top_overlap = 0
+    seen_overlap: set[str] = set()
+
+    for profile_signal in profile_signals:
+        for offer_signal in [*offer_required, *offer_top]:
+            if not _signal_keys_overlap(profile_signal, offer_signal):
+                continue
+            key = _normalize(profile_signal) or _normalize(offer_signal)
+            if key and key not in seen_overlap:
+                overlap_labels.append(profile_signal)
+                seen_overlap.add(key)
+            if offer_signal in offer_required:
+                required_overlap += 1
+            else:
+                top_overlap += 1
+            break
+
+    required_overlap = min(required_overlap, len(offer_required))
+    top_overlap = min(top_overlap, len(offer_top))
+    overlap_count = len(overlap_labels)
+    strong_signal_overlap = required_overlap >= 1 or overlap_count >= 2
+
+    return {
+        "matched_signals": overlap_labels,
+        "overlap_count": overlap_count,
+        "required_overlap_count": required_overlap,
+        "top_overlap_count": top_overlap,
+        "strong_signal_overlap": strong_signal_overlap,
+    }
+
+
+def _role_supported_domains(intelligence: Dict[str, Any] | None) -> set[str]:
+    supported: set[str] = set()
+    if not isinstance(intelligence, dict):
+        return supported
+    blocks = [
+        str(intelligence.get("dominant_role_block") or "").strip(),
+        *[
+            str(value).strip()
+            for value in list(intelligence.get("secondary_role_blocks") or [])
+            if str(value).strip()
+        ],
+    ]
+    for block in blocks:
+        supported.update(_BLOCK_TO_DOMAINS.get(block, ()))
+    return supported
+
+
+def _contains_signal_marker(value: str, markers: Sequence[str]) -> bool:
+    key = _normalize(value)
+    if not key:
+        return False
+    return any(marker in key for marker in markers)
+
+
+def _data_domain_score(offer_intelligence: Dict[str, Any] | None) -> float:
+    debug = ((offer_intelligence or {}).get("debug") or {}) if isinstance(offer_intelligence, dict) else {}
+    domain_scores = debug.get("domain_scores") or []
+    for item in domain_scores:
+        if _normalize((item or {}).get("domain")) == "data":
+            try:
+                return float((item or {}).get("score") or 0.0)
+            except Exception:
+                return 0.0
+    return 0.0
+
+
+def _is_valid_data_software_bridge(
+    *,
+    profile_intelligence: Dict[str, Any] | None,
+    offer_intelligence: Dict[str, Any] | None,
+    shared_domains: Sequence[str],
+) -> bool:
+    profile_block = str((profile_intelligence or {}).get("dominant_role_block") or "").strip()
+    offer_block = str((offer_intelligence or {}).get("dominant_role_block") or "").strip()
+    if profile_block != "data_analytics" or offer_block != "software_it":
+        return False
+    if "data" not in {_normalize(domain) for domain in shared_domains}:
+        return False
+
+    debug = (offer_intelligence or {}).get("debug") or {}
+    title = str((((debug.get("title_probe") or {}).get("raw_title")) or "")).strip()
+    title_has_data_anchor = _contains_signal_marker(title, _DATA_SOFTWARE_TITLE_MARKERS)
+
+    top_signals = [
+        str(value).strip()
+        for value in list((offer_intelligence or {}).get("top_offer_signals") or [])
+        if str(value).strip()
+    ]
+    required_skills = [
+        str(value).strip()
+        for value in list((offer_intelligence or {}).get("required_skills") or [])
+        if str(value).strip()
+    ]
+
+    explicit_top = [signal for signal in top_signals if _contains_signal_marker(signal, _DATA_SOFTWARE_SIGNAL_MARKERS)]
+    explicit_required = [signal for signal in required_skills if _contains_signal_marker(signal, _DATA_SOFTWARE_SIGNAL_MARKERS)]
+    data_domain_score = _data_domain_score(offer_intelligence)
+
+    if title_has_data_anchor and data_domain_score >= 2.5:
+        return True
+    if data_domain_score >= 3.0 and len(explicit_required) >= 1 and len(set(map(_normalize, [*explicit_top, *explicit_required]))) >= 2:
+        return True
+    return False
+
+
+def classify_role_match(
+    *,
+    profile_intelligence: Dict[str, Any] | None,
+    offer_intelligence: Dict[str, Any] | None,
+) -> str:
+    if not isinstance(profile_intelligence, dict) or not isinstance(offer_intelligence, dict):
+        return "unknown"
+
+    profile_block = str(profile_intelligence.get("dominant_role_block") or "").strip()
+    offer_block = str(offer_intelligence.get("dominant_role_block") or "").strip()
+    if not profile_block or not offer_block:
+        return "unknown"
+    if profile_block == offer_block:
+        return "strong"
+
+    profile_secondary = {
+        str(value).strip()
+        for value in list(profile_intelligence.get("secondary_role_blocks") or [])
+        if str(value).strip()
+    }
+    offer_secondary = {
+        str(value).strip()
+        for value in list(offer_intelligence.get("secondary_role_blocks") or [])
+        if str(value).strip()
+    }
+    if offer_block in profile_secondary or profile_block in offer_secondary or (profile_secondary & offer_secondary):
+        return "acceptable"
+    if offer_block in _role_neighbors(profile_block) or profile_block in _role_neighbors(offer_block):
+        return "weak"
+    return "invalid"
+
+
+def is_role_domain_compatible(
+    *,
+    profile_intelligence: Dict[str, Any] | None,
+    offer_intelligence: Dict[str, Any] | None,
+) -> bool:
+    return bool(
+        evaluate_role_domain_gate(
+            profile_intelligence=profile_intelligence,
+            offer_intelligence=offer_intelligence,
+        ).get("compatible")
+    )
+
+
+def evaluate_role_domain_gate(
+    *,
+    profile_intelligence: Dict[str, Any] | None,
+    offer_intelligence: Dict[str, Any] | None,
+) -> Dict[str, Any]:
+    role_match = classify_role_match(
+        profile_intelligence=profile_intelligence,
+        offer_intelligence=offer_intelligence,
+    )
+    profile_block = str((profile_intelligence or {}).get("dominant_role_block") or "").strip()
+    offer_block = str((offer_intelligence or {}).get("dominant_role_block") or "").strip()
+    profile_secondary = {
+        str(value).strip()
+        for value in list((profile_intelligence or {}).get("secondary_role_blocks") or [])
+        if str(value).strip()
+    }
+    offer_secondary = {
+        str(value).strip()
+        for value in list((offer_intelligence or {}).get("secondary_role_blocks") or [])
+        if str(value).strip()
+    }
+
+    profile_domain_list = [
+        _normalize(value)
+        for value in list((profile_intelligence or {}).get("dominant_domains") or [])
+        if _normalize(value)
+    ]
+    offer_domain_list = [
+        _normalize(value)
+        for value in list((offer_intelligence or {}).get("dominant_domains") or [])
+        if _normalize(value)
+    ]
+    profile_domains = set(profile_domain_list)
+    offer_domains = set(offer_domain_list)
+    profile_role_supported_domains = _role_supported_domains(profile_intelligence)
+    offer_role_supported_domains = _role_supported_domains(offer_intelligence)
+    shared_domains = sorted(profile_domains & offer_domains)
+    non_generic_shared_domains = [domain for domain in shared_domains if domain not in _GENERIC_SHARED_DOMAINS]
+    weak_match_shared_domains = [
+        domain
+        for domain in non_generic_shared_domains
+        if domain not in _WEAK_MATCH_DOMAIN_BLOCKLIST
+    ]
+    bridge_shared_domains = [
+        domain
+        for domain in non_generic_shared_domains
+        if domain not in _BRIDGE_SHARED_DOMAIN_BLOCKLIST
+    ]
+    primary_shared_domains = sorted(set(profile_domain_list[:2]) & set(offer_domain_list[:2]))
+    secondary_supported_domains = sorted(
+        (profile_domains & offer_role_supported_domains)
+        | (offer_domains & profile_role_supported_domains)
+    )
+    meaningful_secondary_supported_domains = [
+        domain for domain in secondary_supported_domains if domain not in _GENERIC_SHARED_DOMAINS
+    ]
+    signal_overlap = _signal_overlap_details(profile_intelligence, offer_intelligence)
+    bridge_pair = _is_bridge_role_pair(profile_block, offer_block)
+    effective_role_match = role_match
+    if role_match == "invalid" and bridge_pair and bridge_shared_domains:
+        effective_role_match = "weak"
+    compatible = False
+    rejection_reason = None
+    allow_reason = None
+
+    if role_match == "unknown":
+        compatible = True
+        allow_reason = "missing_role_intelligence"
+    elif role_match == "strong":
+        compatible = True
+        allow_reason = "strong_role_match"
+    elif effective_role_match == "acceptable":
+        if non_generic_shared_domains:
+            compatible = True
+            allow_reason = "acceptable_role_with_shared_domain"
+        elif (
+            (profile_block and profile_block in offer_secondary)
+            or (offer_block and offer_block in profile_secondary)
+        ) and meaningful_secondary_supported_domains:
+            compatible = True
+            allow_reason = "acceptable_role_with_secondary_role_domain_support"
+        elif signal_overlap["strong_signal_overlap"]:
+            compatible = True
+            allow_reason = "acceptable_role_with_signal_overlap"
+        elif shared_domains and signal_overlap["overlap_count"] >= 1:
+            compatible = True
+            allow_reason = "acceptable_role_with_light_domain_signal_overlap"
+        else:
+            rejection_reason = "acceptable_role_without_domain_or_signal_support"
+    elif effective_role_match == "weak":
+        if _is_valid_data_software_bridge(
+            profile_intelligence=profile_intelligence,
+            offer_intelligence=offer_intelligence,
+            shared_domains=shared_domains,
+        ):
+            compatible = True
+            allow_reason = "data_software_bridge_with_explicit_data_support"
+        elif bridge_shared_domains and (signal_overlap["overlap_count"] >= 1 or primary_shared_domains):
+            compatible = True
+            allow_reason = "weak_role_with_bridge_domain"
+        elif weak_match_shared_domains and signal_overlap["strong_signal_overlap"]:
+            compatible = True
+            allow_reason = "weak_role_with_shared_domain_and_signal_overlap"
+        elif (
+            any(domain not in _WEAK_MATCH_DOMAIN_BLOCKLIST for domain in primary_shared_domains)
+            and signal_overlap["required_overlap_count"] >= 1
+        ):
+            compatible = True
+            allow_reason = "weak_role_with_primary_domain_and_required_overlap"
+        elif bridge_pair and bridge_shared_domains and signal_overlap["overlap_count"] >= 1:
+            compatible = True
+            allow_reason = "bridge_role_with_shared_domain"
+        else:
+            rejection_reason = "weak_role_without_enough_domain_or_signal_support"
+    else:
+        if bridge_pair and bridge_shared_domains and signal_overlap["required_overlap_count"] >= 1 and signal_overlap["strong_signal_overlap"]:
+            compatible = True
+            allow_reason = "bridge_role_with_strong_domain_and_required_signal_overlap"
+        else:
+            rejection_reason = "invalid_role_match"
+
+    was_potentially_valid = bool(
+        bridge_shared_domains
+        or (
+            any(domain not in _BRIDGE_SHARED_DOMAIN_BLOCKLIST for domain in primary_shared_domains)
+        )
+        or signal_overlap["overlap_count"] >= 1
+        or (bridge_pair and bridge_shared_domains)
+    )
+
+    return {
+        "compatible": compatible,
+        "role_match": role_match,
+        "domain_overlap": bool(shared_domains),
+        "shared_domains": shared_domains,
+        "non_generic_shared_domains": non_generic_shared_domains,
+        "weak_match_shared_domains": weak_match_shared_domains,
+        "bridge_shared_domains": bridge_shared_domains,
+        "primary_shared_domains": primary_shared_domains,
+        "secondary_supported_domains": secondary_supported_domains,
+        "signal_overlap": signal_overlap,
+        "bridge_role_pair": bridge_pair,
+        "effective_role_match": effective_role_match,
+        "rejection_reason": rejection_reason,
+        "allow_reason": allow_reason,
+        "was_potentially_valid": was_potentially_valid,
+    }
 
 
 def _build_offer_structured_text(
@@ -276,9 +685,18 @@ def _compute_domain_scores(
         scores[domain] = round(scores.get(domain, 0.0) + weight, 4)
 
     for line in [title, *mission_lines[:6], *requirement_lines[:6]]:
+        line_key = _normalize(line)
+        if line == title:
+            if any(marker in line_key for marker in ("financial controller", "controleur financier", "contrôleur financier", "financier", "controller")):
+                add("finance", 1.2)
+            if any(marker in line_key for marker in ("legal counsel", "counsel", "juriste", "lawyer")):
+                add("legal", 1.1)
         for domain_name, markers in _DOMAIN_KEYWORDS.items():
-            if any(re.search(rf"(?<!\w){re.escape(_normalize(marker))}(?!\w)", _normalize(line)) for marker in markers):
-                add(domain_name, 0.9 if line == title else 0.45)
+            if any(re.search(rf"(?<!\w){re.escape(_normalize(marker))}(?!\w)", line_key) for marker in markers):
+                weight = 0.9 if line == title else 0.45
+                if domain_name in _GENERIC_DOMAIN_DRIFT:
+                    weight *= 0.45 if line == title else 0.3
+                add(domain_name, weight)
 
     for unit in list(top_signal_units or [])[:5]:
         domain = _normalize(unit.get("domain"))
@@ -287,7 +705,10 @@ def _compute_domain_scores(
         signal_text = _extract_signal_text_from_unit(unit)
         for domain_name, markers in _DOMAIN_KEYWORDS.items():
             if any(re.search(rf"(?<!\w){re.escape(_normalize(marker))}(?!\w)", _normalize(signal_text)) for marker in markers):
-                add(domain_name, 0.35)
+                weight = 0.35
+                if domain_name in _GENERIC_DOMAIN_DRIFT:
+                    weight *= 0.45
+                add(domain_name, weight)
 
     for unit in list(secondary_signal_units or [])[:5]:
         domain = _normalize(unit.get("domain"))
@@ -306,7 +727,7 @@ def _compute_domain_scores(
             add("data", 0.45)
         elif cluster_name == "FINANCE_BUSINESS_OPERATIONS":
             add("finance", 0.45)
-            add("business", 0.18)
+            add("business", 0.08)
         elif cluster_name == "MARKETING_SALES_GROWTH":
             add("marketing", 0.35)
             add("sales", 0.35)
@@ -323,7 +744,7 @@ def _compute_domain_scores(
         add("legal", 0.45)
     elif cluster_key == "SUPPLY_OPS":
         add("supply_chain", 1.0)
-        add("operations", 0.45)
+        add("operations", 0.22)
     elif cluster_key == "MARKETING_SALES":
         add("sales", 0.8)
         add("marketing", 0.8)
@@ -502,52 +923,132 @@ def _select_skill_bucket_candidates(
     )
 
 
+def _dampen_incompatible_blocks(
+    acc: _BlockAccumulator,
+    *,
+    anchor_block: str | None,
+    factor: float,
+) -> None:
+    if not anchor_block or anchor_block == "generalist_other":
+        return
+    allowed = {anchor_block, *_role_neighbors(anchor_block)}
+    for block in ROLE_BLOCKS:
+        if block in allowed:
+            continue
+        acc.scores[block] = round(acc.scores[block] * factor, 4)
+
+
+def _select_secondary_roles(
+    *,
+    sorted_scores: Sequence[tuple[str, float]],
+    dominant_role_block: str,
+    dominant_score: float,
+    title_block: str | None,
+    dominant_domain: str | None,
+) -> List[str]:
+    selected: List[str] = []
+    if dominant_role_block == "generalist_other" or dominant_score <= 0:
+        return selected
+
+    title_neighbors = _role_neighbors(title_block or "")
+    dominant_neighbors = _role_neighbors(dominant_role_block)
+    dominant_domain_blocks = set(_DOMAIN_TO_BLOCK.get(dominant_domain or "", {}).keys())
+
+    for block, score in list(sorted_scores[1:5]):
+        if block == dominant_role_block or score <= 0:
+            continue
+        same_title_family = bool(title_block and (block == title_block or block in title_neighbors))
+        adjacent_to_dominant = block in dominant_neighbors
+        domain_supported = block in dominant_domain_blocks
+        if score < max(1.25, dominant_score * 0.56):
+            continue
+        if not (same_title_family or adjacent_to_dominant or domain_supported):
+            continue
+        selected.append(block)
+        if len(selected) >= 1:
+            break
+    return selected
+
+
 def build_offer_intelligence(
     *,
     offer: dict,
     description_structured: dict | None = None,
     description_structured_v1: OfferDescriptionStructuredV1 | dict | None = None,
+    canonical_offer: dict | None = None,
 ) -> Dict[str, Any]:
+    cache_payload = {
+        "offer": {
+            "id": offer.get("id"),
+            "title": offer.get("title"),
+            "description": offer.get("description") or offer.get("display_description"),
+            "skills": list(offer.get("skills") or []),
+            "skills_display": list(offer.get("skills_display") or []),
+            "offer_cluster": offer.get("offer_cluster"),
+        },
+        "canonical_offer": canonical_offer,
+    }
+    cache_key = json.dumps(cache_payload, sort_keys=True, ensure_ascii=False, default=str)
+    cached = _INTELLIGENCE_CACHE.get(cache_key)
+    if cached is not None:
+        return copy.deepcopy(cached)
+
     title = str(offer.get("title") or "").strip()
     description = str(offer.get("description") or offer.get("display_description") or "").strip()
     skill_labels = _extract_skill_labels(offer.get("skills_display"), offer.get("skills"))
 
-    if description_structured is None:
-        description_structured = structure_offer_description(description, esco_skills=skill_labels[:12], lang_hint="fr")
-    if description_structured_v1 is None:
-        description_structured_v1 = structure_offer_text_v1(description, esco_labels=skill_labels[:12])
-    elif isinstance(description_structured_v1, dict):
+    if canonical_offer is None:
+        if description_structured is None:
+            description_structured = structure_offer_description(description, esco_skills=skill_labels[:12], lang_hint="fr")
+        if description_structured_v1 is None:
+            description_structured_v1 = structure_offer_text_v1(description, esco_labels=skill_labels[:12])
+        elif isinstance(description_structured_v1, dict):
+            description_structured_v1 = OfferDescriptionStructuredV1(**description_structured_v1)
+        canonical_offer = build_offer_canonical_representation(
+            {
+                **offer,
+                "description": description,
+                "skills": offer.get("skills"),
+                "skills_display": offer.get("skills_display"),
+                "offer_cluster": offer.get("offer_cluster"),
+            }
+        )
+    else:
+        description_structured = canonical_offer.get("description_structured") or description_structured or {}
+        description_structured_v1 = canonical_offer.get("description_structured_v1") or description_structured_v1
+
+    if isinstance(description_structured_v1, dict):
         description_structured_v1 = OfferDescriptionStructuredV1(**description_structured_v1)
 
-    mission_lines = list(description_structured.get("missions") or [])[:8]
-    requirement_lines = list(description_structured.get("profile") or [])[:6]
-    if description_structured_v1:
-        for mission in list(description_structured_v1.missions or [])[:8]:
-            if mission and mission not in mission_lines:
-                mission_lines.append(mission)
-        for req in list(description_structured_v1.requirements or [])[:6]:
-            if req and req not in requirement_lines:
-                requirement_lines.append(req)
+    title = str(canonical_offer.get("title") or title).strip()
+    description = str(canonical_offer.get("description") or description).strip()
+    mission_lines = list(canonical_offer.get("mission_lines") or [])[:8]
+    requirement_lines = list(canonical_offer.get("requirement_lines") or [])[:6]
+    requirement_skill_candidates = list(canonical_offer.get("canonical_enriched_labels") or canonical_offer.get("requirement_skill_candidates") or [])[:12]
+    tools_stack = list(canonical_offer.get("tools_stack") or [])
+    top_signal_units = list(canonical_offer.get("top_signal_units") or [])[:5]
+    secondary_signal_units = list(canonical_offer.get("secondary_signal_units") or [])[:5]
 
-    requirement_skill_candidates = _extract_requirement_skill_candidates(requirement_lines)
-    tools_stack = list((description_structured_v1.tools_stack if description_structured_v1 else []) or [])
-    base_mapping_inputs = [title, *requirement_skill_candidates[:10], *skill_labels[:12], *tools_stack[:8]]
-    structured_text = _build_offer_structured_text(
-        title=title,
-        missions=mission_lines,
-        fallback_description=description,
-    )
-    structured_stage = run_structured_extraction_stage(
-        cv_text=structured_text,
-        base_mapping_inputs=base_mapping_inputs,
-    )
-    top_signal_units = list(structured_stage.top_signal_units or [])[:5]
-    secondary_signal_units = list(structured_stage.secondary_signal_units or [])[:5]
-    skill_records = _canonical_skill_records([*requirement_skill_candidates, *skill_labels])
+    canonical_skills = list(canonical_offer.get("canonical_skills") or [])
+    skill_records = canonical_skills or _canonical_skill_records([*requirement_skill_candidates, *skill_labels])
+    canonical_skill_labels = [str(item.get("label") or "") for item in canonical_skills if str(item.get("label") or "").strip()]
+    skill_labels = list(canonical_offer.get("skill_labels") or skill_labels)
+    if canonical_skill_labels:
+        skill_labels = _clean_signal_list([*canonical_skill_labels, *skill_labels])
 
-    offer_cluster = str(offer.get("offer_cluster") or "")
+    offer_cluster = str(canonical_offer.get("offer_cluster") or offer.get("offer_cluster") or "")
     if not offer_cluster:
         offer_cluster, _, _ = detect_offer_cluster(title, description, skill_labels)
+
+    structured_stage = type(
+        "OfferStructuredStageView",
+        (),
+        {
+            "enabled": True,
+            "structured_units": list(canonical_offer.get("structured_units") or []),
+            "stats": dict(canonical_offer.get("structured_extraction_stats") or {}),
+        },
+    )()
 
     role_resolution = {
         "raw_title": title,
@@ -637,11 +1138,15 @@ def build_offer_intelligence(
     business_anchor_hits = _count_anchor_hits(all_signal_texts, _BUSINESS_ANALYSIS_ANCHORS)
     data_support_hits = _count_anchor_hits(all_signal_texts, _DATA_SUPPORT_SIGNALS)
 
-    dominant_domain = _dominant_domain(domain_scores)
+    canonical_domains = list(canonical_offer.get("canonical_domains") or [])
+    dominant_domain = _dominant_domain(domain_scores) or (canonical_domains[0] if canonical_domains else None)
     sorted_domains = sorted(((domain, score) for domain, score in domain_scores.items() if score > 0), key=lambda item: (-item[1], item[0]))
     top_domain_score = sorted_domains[0][1] if sorted_domains else 0.0
     second_domain_score = sorted_domains[1][1] if len(sorted_domains) > 1 else 0.0
     domain_confidence = round(top_domain_score / max(top_domain_score + second_domain_score, 1.0), 4) if top_domain_score > 0 else 0.0
+
+    if title_block and title_block != "generalist_other" and title_confidence >= 0.88:
+        _dampen_incompatible_blocks(acc, anchor_block=title_block, factor=0.72)
 
     if title_block and title_block != "data_analytics" and title_confidence >= 0.84:
         acc.scores[title_block] = round(acc.scores[title_block] + (3.0 * title_confidence), 4)
@@ -659,6 +1164,8 @@ def build_offer_intelligence(
                 override_block = "supply_chain_ops"
             acc.scores[override_block] = round(acc.scores[override_block] + (2.3 + (top_domain_score * 0.12)), 4)
             acc.scores["data_analytics"] = round(acc.scores["data_analytics"] * 0.68, 4)
+            if domain_confidence >= 0.7:
+                _dampen_incompatible_blocks(acc, anchor_block=override_block, factor=0.8)
 
     if finance_anchor_hits >= 2 and acc.scores["finance_ops"] >= acc.scores["data_analytics"] * 0.62:
         acc.scores["finance_ops"] = round(acc.scores["finance_ops"] + (0.9 + (finance_anchor_hits * 0.18)), 4)
@@ -682,16 +1189,19 @@ def build_offer_intelligence(
     sorted_scores = _sorted_block_scores(acc.scores)
     dominant_role_block = sorted_scores[0][0] if sorted_scores and sorted_scores[0][1] > 0 else "generalist_other"
     dominant_score = sorted_scores[0][1] if sorted_scores else 0.0
-    secondary_role_blocks = [
-        block
-        for block, score in sorted_scores[1:4]
-        if score >= 1.0 and score >= dominant_score * 0.38 and block != dominant_role_block
-    ][:_MAX_SECONDARY]
+    secondary_role_blocks = _select_secondary_roles(
+        sorted_scores=sorted_scores,
+        dominant_role_block=dominant_role_block,
+        dominant_score=dominant_score,
+        title_block=title_block,
+        dominant_domain=dominant_domain,
+    )[:_MAX_SECONDARY]
 
     top_offer_signals = _clean_signal_list(_select_top_profile_signals(
         top_signal_units=top_signal_units,
         preserved_explicit_skills=skill_records,
         profile_summary_skills=[{"label": label} for label in requirement_skill_candidates + skill_labels],
+        enriched_signals=[],
         dominant_block=dominant_role_block,
     ))
 
@@ -715,8 +1225,23 @@ def build_offer_intelligence(
     dominant_domains = [
         domain
         for domain, score in sorted(domain_scores.items(), key=lambda item: (-item[1], item[0]))
-        if score >= max(0.75, (domain_scores.get(dominant_domain, 0.0) * 0.35 if dominant_domain else 0.75))
-    ][:3]
+        if score >= max(1.0, (domain_scores.get(dominant_domain, 0.0) * 0.55 if dominant_domain else 1.0))
+    ][:2]
+    allowed_domains = set(_BLOCK_TO_DOMAINS.get(dominant_role_block, ()))
+    for domain in canonical_domains:
+        if not domain or domain in dominant_domains:
+            continue
+        domain_score = float(domain_scores.get(domain, 0.0))
+        if domain in _GENERIC_DOMAIN_DRIFT and domain_score <= 0:
+            continue
+        if domain not in allowed_domains and domain_score < max(0.95, top_domain_score * 0.42 if top_domain_score else 0.95):
+            continue
+        if domain in _GENERIC_DOMAIN_DRIFT and domain not in allowed_domains and domain_score < max(1.2, top_domain_score * 0.6 if top_domain_score else 1.2):
+            continue
+        if domain and domain not in dominant_domains:
+            dominant_domains.append(domain)
+        if len(dominant_domains) >= 2:
+            break
 
     role_hypotheses = _derive_role_hypotheses(
         dominant_block=dominant_role_block,
@@ -742,7 +1267,7 @@ def build_offer_intelligence(
         if score > 0
     ]
 
-    return {
+    result = {
         "dominant_role_block": dominant_role_block,
         "secondary_role_blocks": secondary_role_blocks,
         "dominant_domains": dominant_domains,
@@ -776,9 +1301,17 @@ def build_offer_intelligence(
             "override_block": override_block,
             "mission_count": len(mission_lines),
             "requirement_count": len(requirement_lines),
-            "mapping_inputs_count": int((structured_stage.stats or {}).get("mapping_inputs_count", 0) or 0),
+            "mapping_inputs_count": int(len(canonical_offer.get("mapping_inputs") or []) or (structured_stage.stats or {}).get("mapping_inputs_count", 0) or 0),
+            "canonical_skill_count": len(canonical_skills),
+            "canonical_domain_count": len(canonical_domains),
+            "unresolved_count": len(canonical_offer.get("unresolved") or []),
         },
     }
+    if len(_INTELLIGENCE_CACHE) >= _INTELLIGENCE_CACHE_CAP:
+        oldest_key = next(iter(_INTELLIGENCE_CACHE))
+        _INTELLIGENCE_CACHE.pop(oldest_key, None)
+    _INTELLIGENCE_CACHE[cache_key] = copy.deepcopy(result)
+    return result
 
 
 def offer_intelligence_to_csv_rows(results: Sequence[dict]) -> str:
