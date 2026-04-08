@@ -28,6 +28,7 @@ from typing import List, Optional, Tuple
 
 from pydantic import ValidationError
 
+from .apply_pack_cv_engine import build_targeted_cv
 from .ats_keywords import extract_ats_keywords, keywords_overlap
 from .cache import cache_get, cache_set, make_cache_key
 from .llm_client import call_llm_json, is_llm_available
@@ -111,13 +112,28 @@ def _load_offer(offer_id: str) -> Optional[dict]:
 
 def _profile_fingerprint(profile: dict) -> str:
     """
-    Deterministic fingerprint from profile skills + education.
+    Deterministic fingerprint from skills + education + experiences.
+    Includes career_profile.experiences completeness so the cache invalidates
+    when the candidate reuploads a richer CV.
     Same profile → same fingerprint (order-independent).
     Returns 16 hex chars.
     """
     skills = sorted(str(s).lower().strip() for s in profile.get("skills", []) if s)
-    education = str(profile.get("education") or "").lower().strip()
-    raw = json.dumps({"skills": skills, "education": education}, ensure_ascii=False)
+    education = profile.get("education") or []
+    experiences = profile.get("experiences") or []
+    # Include career_profile completeness as a cache-busting signal
+    career_completeness = (profile.get("career_profile") or {}).get("completeness", 0.0)
+    raw = json.dumps(
+        {
+            "skills": skills,
+            "education": education,
+            "experiences": experiences,
+            "career_completeness": career_completeness,
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        default=str,
+    )
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 
@@ -163,48 +179,9 @@ def _build_fallback(
     reason: str = "llm_disabled",
 ) -> CvDocumentPayload:
     """
-    Build a safe deterministic CV from profile data + keywords.
-    Used when LLM is unavailable or times out. No fabrication.
+    Build a deterministic targeted CV from profile data + offer data.
     """
-    skills = [str(s).strip() for s in profile.get("skills", []) if s][:8]
-    matched, missing = keywords_overlap(skills, keywords)
-    ats_score = min(100, round(len(matched) / max(len(keywords), 1) * 100))
-
-    top_skills = ", ".join(skills[:4]) if skills else "compétences à confirmer"
-    offer_title = offer.get("title") or offer_id
-    company = offer.get("company") or ""
-
-    summary_lines = [
-        f"Profil axé {top_skills}, candidat·e pour le poste {offer_title}.",
-        f"Compétences en lien avec l'offre : {', '.join(matched[:5]) or 'voir profil complet'}.",
-        "Motivé·e à contribuer et à évoluer au sein de cette mission.",
-    ]
-
-    # Build experience blocks from profile (max 3)
-    blocks: List[ExperienceBlock] = []
-    experiences = profile.get("experiences", []) or []
-    for exp in experiences[:_MAX_EXPERIENCES]:
-        if not isinstance(exp, dict):
-            continue
-        title = str(exp.get("title") or exp.get("role") or "").strip()
-        comp = str(exp.get("company") or exp.get("entreprise") or "").strip()
-        if not title:
-            continue
-        exp_skills = [str(s) for s in skills[:3] if s]
-        blocks.append(
-            ExperienceBlock(
-                title=title,
-                company=comp or "—",
-                bullets=[
-                    f"Contribution à {title}",
-                    "Travail en équipe et coordination transverse",
-                    "Livraison selon cahier des charges",
-                ],
-                tools=exp_skills,
-                autonomy=AutonomyEnum.COPILOT,
-                impact=None,
-            )
-        )
+    engineered = build_targeted_cv(profile=profile, offer=offer)
 
     _log(
         "DOC_CV_FALLBACK_USED",
@@ -214,14 +191,12 @@ def _build_fallback(
     )
 
     return CvDocumentPayload(
-        summary="\n".join(summary_lines),
-        keywords_injected=matched[:8],
-        experience_blocks=blocks,
-        ats_notes=AtsNotes(
-            matched_keywords=matched,
-            missing_keywords=missing[:6],
-            ats_score_estimate=ats_score,
-        ),
+        summary=engineered["summary"],
+        keywords_injected=engineered["keywords_injected"],
+        experience_blocks=[ExperienceBlock.model_validate(block) for block in engineered["experience_blocks"]],
+        ats_notes=AtsNotes.model_validate(engineered["ats_notes"]),
+        cv=engineered["cv"],
+        debug=engineered["debug"],
         meta=CvMeta(
             offer_id=offer_id,
             profile_fingerprint=fingerprint,
@@ -234,6 +209,71 @@ def _build_fallback(
 
 # ── LLM prompt builder ────────────────────────────────────────────────────────
 
+def _build_experiences_text(profile: dict) -> Tuple[str, int]:
+    """
+    Build the experiences text block for the LLM prompt.
+
+    Priority:
+      1. career_profile.experiences — rich data with bullets, achievements, tools
+      2. profile.experiences        — basic dicts (title, company, duration)
+      3. Empty fallback
+
+    Returns (text, experience_count).
+    """
+    career_profile = profile.get("career_profile") or {}
+    career_exps = career_profile.get("experiences") or []
+
+    if career_exps:
+        # Rich mode — bullets and achievements from CareerProfile
+        lines: List[str] = []
+        for exp in career_exps[:_MAX_EXPERIENCES]:
+            if not isinstance(exp, dict):
+                continue
+            title = str(exp.get("title") or "").strip()
+            company = str(exp.get("company") or "").strip()
+            start = str(exp.get("start_date") or "").strip()
+            end = str(exp.get("end_date") or "").strip()
+            dates = f"{start} – {end}".strip(" –") if (start or end) else ""
+            autonomy = str(exp.get("autonomy") or "").strip()
+
+            header = f"--- {title}"
+            if company:
+                header += f" @ {company}"
+            if dates:
+                header += f" ({dates})"
+            if autonomy:
+                header += f" [{autonomy}]"
+            lines.append(header)
+
+            for resp in (exp.get("responsibilities") or [])[:4]:
+                lines.append(f"  • {resp}")
+            for ach in (exp.get("achievements") or [])[:2]:
+                lines.append(f"  → Impact: {ach}")
+            exp_tools = (exp.get("tools") or [])[:6]
+            if exp_tools:
+                lines.append(f"  Outils: {', '.join(exp_tools)}")
+
+        return ("\n".join(lines) if lines else "(aucune expérience fournie)", len(career_exps))
+
+    # Basic mode — legacy experience dicts
+    experiences = profile.get("experiences") or []
+    exp_lines: List[str] = []
+    for exp in experiences[:_MAX_EXPERIENCES]:
+        if not isinstance(exp, dict):
+            continue
+        t = str(exp.get("title") or exp.get("role") or "").strip()
+        c = str(exp.get("company") or "").strip()
+        d = str(exp.get("dates") or exp.get("duration") or exp.get("duree") or "").strip()
+        if t:
+            line = f"- {t}"
+            if c:
+                line += f" @ {c}"
+            if d:
+                line += f" ({d})"
+            exp_lines.append(line)
+    return ("\n".join(exp_lines) if exp_lines else "(aucune expérience fournie)", len(exp_lines))
+
+
 def _build_prompt(
     offer: dict,
     profile: dict,
@@ -242,9 +282,12 @@ def _build_prompt(
     """
     Build (system_prompt, user_prompt) from prompt_cv_v1.txt template.
     Truncates description to _MAX_DESC_CHARS. Allowlist of fields.
+
+    Uses career_profile.experiences when available for richer experience text
+    (includes responsibility bullets, achievements, and tools per experience).
+    Falls back to basic experience list for legacy profiles.
     """
     template = _PROMPT_PATH.read_text(encoding="utf-8")
-    # Split on "USER:" marker
     if "USER:" in template:
         sys_part, user_part = template.split("USER:", 1)
         system_prompt = sys_part.replace("SYSTEM:", "").strip()
@@ -253,25 +296,8 @@ def _build_prompt(
         system_prompt = "Réponds UNIQUEMENT en JSON valide. Aucun texte libre."
         user_template = template
 
-    # Build experiences text (allowlist: title, company, duration)
-    experiences = profile.get("experiences", []) or []
-    exp_lines = []
-    for exp in experiences[:_MAX_EXPERIENCES]:
-        if not isinstance(exp, dict):
-            continue
-        t = str(exp.get("title") or exp.get("role") or "").strip()
-        c = str(exp.get("company") or "").strip()
-        d = str(exp.get("duration") or exp.get("duree") or "").strip()
-        if t:
-            line = f"- {t}"
-            if c:
-                line += f" @ {c}"
-            if d:
-                line += f" ({d})"
-            exp_lines.append(line)
-    experiences_text = "\n".join(exp_lines) if exp_lines else "(aucune expérience fournie)"
+    experiences_text, exp_count = _build_experiences_text(profile)
 
-    # Allowlist substitution — no raw payload, truncated description
     desc_trunc = (offer.get("description") or "")[:_MAX_DESC_CHARS]
     user_prompt = (
         user_template
@@ -283,7 +309,7 @@ def _build_prompt(
         .replace("{skills}", ", ".join(str(s) for s in profile.get("skills", [])[:15]))
         .replace("{languages}", ", ".join(str(l) for l in profile.get("languages", [])))
         .replace("{education}", str(profile.get("education") or ""))
-        .replace("{experiences_count}", str(len(exp_lines)))
+        .replace("{experiences_count}", str(exp_count))
         .replace("{experiences_text}", experiences_text)
     )
 
@@ -372,49 +398,15 @@ def generate_cv(req: CvRequest) -> CvDocumentPayload:
         except Exception:
             pass  # cache corrupt → regenerate
 
-    # 5. ATS keywords (deterministic)
-    keywords = extract_ats_keywords(
-        title=offer.get("title") or "",
-        description=offer.get("description") or "",
-        max_kw=_MAX_KEYWORDS,
+    # 5. Deterministic targeted engine
+    payload = _build_fallback(
+        profile=profile,
+        offer=offer,
+        keywords=[],
+        fingerprint=fingerprint,
+        offer_id=req.offer_id,
+        reason="deterministic_engine",
     )
-
-    # 6. LLM or fallback
-    payload: Optional[CvDocumentPayload] = None
-
-    if is_llm_available():
-        try:
-            system_prompt, user_prompt = _build_prompt(offer, profile, keywords)
-            raw_json, _, _, _ = call_llm_json(system_prompt, user_prompt)
-            payload = _parse_llm_response(raw_json, req.offer_id, fingerprint)
-            if payload:
-                payload = _antilies(payload, profile, keywords)
-        except RuntimeError as exc:
-            reason = str(exc).split(":")[0]
-            _log(
-                "DOC_CV_FALLBACK_USED",
-                reason=reason,
-                offer_id=req.offer_id,
-                fingerprint_short=fingerprint_short,
-            )
-            payload = None
-        except Exception as exc:
-            _log(
-                "DOC_CV_FAIL",
-                error_class=type(exc).__name__,
-                safe_message="unexpected error during generation",
-            )
-            payload = None
-
-    if payload is None:
-        payload = _build_fallback(
-            profile=profile,
-            offer=offer,
-            keywords=keywords,
-            fingerprint=fingerprint,
-            offer_id=req.offer_id,
-            reason="llm_disabled" if not is_llm_available() else "llm_error_or_schema_fail",
-        )
 
     # 7. Cache write (best-effort)
     cache_set(

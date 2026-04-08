@@ -9,11 +9,12 @@ from api.utils.analyze_recovery_cache import PIPELINE_VERSION
 from compass.canonical_pipeline import get_extracted_profile_snapshot, is_trace_enabled, run_cv_pipeline
 from compass.extraction.enriched_concept_builder import build_enriched_concepts
 from compass.extraction.enriched_signal_builder import build_enriched_signals
+from compass.extraction.precanonical_recovery import build_precanonical_recovery
 from compass.profile.profile_intelligence import build_profile_intelligence
 from compass.profile.profile_intelligence_ai_assist import build_profile_intelligence_ai_assist
 
 from .cache_hooks import run_profile_cache_hooks
-from .canonical_mapping_stage import run_canonical_mapping_stage, select_mapping_inputs
+from .canonical_mapping_stage import dedupe_by_canonical_key, run_canonical_mapping_stage, select_mapping_inputs
 from .contracts import (
     EnrichedConceptStageResult,
     EnrichedSignalStageResult,
@@ -97,9 +98,14 @@ def _run_profile_text_pipeline(
     esco_labels = result.get("validated_labels") or []
 
     skill_candidates = run_skill_candidate_stage(cv_text, cluster_key)
+    precanonical_recovery = build_precanonical_recovery(cv_text)
+    base_mapping_inputs = dedupe_by_canonical_key(
+        list(select_mapping_inputs(skill_candidates))
+        + list(precanonical_recovery.get("relevant_phrases") or [])
+    )
     structured_extraction = run_structured_extraction_stage(
-        cv_text=cv_text,
-        base_mapping_inputs=select_mapping_inputs(skill_candidates),
+        cv_text=str(precanonical_recovery.get("cleaned_text") or cv_text),
+        base_mapping_inputs=base_mapping_inputs,
     )
     enriched_signals = EnrichedSignalStageResult(
         enriched_signals=list(
@@ -125,6 +131,7 @@ def _run_profile_text_pipeline(
         structured_extraction=structured_extraction,
         cv_text=cv_text,
         validated_labels=esco_labels,
+        base_mapping_inputs=base_mapping_inputs,
     )
     enrichment = run_enrichment_stage(
         cv_text=cv_text,

@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 # Safe startup signal — boolean only, key value never logged
 logger.info(
-    '{"event":"STARTUP","component":"documents","OPENAI_API_KEY_present":%s}',
+    '{"event":"STARTUP","component":"documents","OPENAI_API_KEY_present":%s,"cv_engine":"deterministic_targeted_v2"}',
     "true" if get_llm_api_key() else "false",
 )
 
@@ -94,7 +94,7 @@ async def create_cv(req: CvRequest) -> CvDocumentResponse:
         '{"event":"DOCUMENTS_REQUEST","kind":"cv","offer_id":"%s","cache_hit":%s,"llm_enabled":%s,"duration_ms":%d}',
         req.offer_id,
         "true" if payload.meta.cache_hit else "false",
-        "true" if is_llm_available() else "false",
+        "false",
         duration_ms,
     )
 
@@ -123,13 +123,12 @@ async def create_cv_for_offer(req: ForOfferRequest) -> ForOfferResponse:
     t0 = time.time()
     profile = req.profile or {}
 
-    _llm_enabled = is_llm_available()
     logger.info(
         '{"event":"DOCUMENTS_REQUEST","kind":"cv","offer_id":"%s","has_context":%s,"lang":"%s","llm_enabled":%s}',
         req.offer_id,
         "true" if req.context and req.context.matched_skills else "false",
         req.lang,
-        "true" if _llm_enabled else "false",
+        "false",
     )
 
     # Step 1: Build CV (cache-aware, LLM or fallback)
@@ -183,7 +182,7 @@ async def create_cv_for_offer(req: ForOfferRequest) -> ForOfferResponse:
         '{"event":"DOCUMENTS_REQUEST","kind":"cv","offer_id":"%s","cache_hit":%s,"llm_enabled":%s,"duration_ms":%d}',
         req.offer_id,
         "true" if enriched.meta.cache_hit else "false",
-        "true" if is_llm_available() else "false",
+        "false",
         duration_ms,
     )
 
@@ -245,7 +244,7 @@ async def create_cv_html_for_offer(req: ForOfferRequest) -> CvHtmlResponse:
         "true" if enriched.meta.cache_hit else "false",
         "cv_v1",
         duration_ms,
-        "true" if (is_llm_available() and not enriched.meta.fallback_used) else "false",
+        "false",
     )
     logger.info(
         '{"event":"DOCUMENTS_CV_HTML_RENDERED","offer_id":"%s","html_size":%d,"blocks_count":%d}',
@@ -340,13 +339,14 @@ async def create_letter_for_offer(req: ForOfferLetterRequest) -> ForOfferLetterR
 
 @router.get("/documents/cv/status")
 async def cv_status():
-    """Check CV generator readiness (LLM key presence, no value leaked)."""
+    """Check deterministic CV generator readiness."""
     llm_ok = is_llm_available()
     return {
         "endpoint": "documents/cv",
         "llm_provider": "openai",
         "llm_key_present": llm_ok,
-        "mode": "live" if llm_ok else "fallback_only",
+        "mode": "deterministic",
         "prompt_version": "cv_v1",
         "cache": "sqlite",
+        "llm_used_for_cv": False,
     }

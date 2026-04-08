@@ -7,6 +7,7 @@ Point d'entrée de l'API.
 
 import logging
 import os
+import threading
 import uuid
 from pathlib import Path
 
@@ -16,7 +17,7 @@ from dotenv import load_dotenv
 env_path = Path(__file__).parent.parent.parent / ".env"
 load_dotenv(env_path)
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 from .middleware.request_id import RequestIdMiddleware
 from .routes.health import router as health_router
+from .routes.auth import router as auth_router
 from .routes.matching import router as matching_router
 from .routes.metrics import router as metrics_router
 from .routes.offers import router as offers_router
@@ -47,6 +49,10 @@ from .routes.cluster_library_api import router as cluster_library_router
 from .routes.analyze_recovery import router as analyze_recovery_router
 from .routes.analyze_ai_quality import router as analyze_ai_quality_router
 from .routes.market_insights import router as market_insights_router
+from .routes.ai_justify import router as ai_justify_router
+from .routes.ai_structure import router as ai_structure_router
+from .deps.auth import require_auth
+from .routes.inbox import warm_inbox_runtime
 from documents.llm_client import is_llm_available
 
 
@@ -82,6 +88,7 @@ app.add_middleware(RequestIdMiddleware)
 
 # Routes
 app.include_router(health_router)          # GET /health, GET /health/deps
+app.include_router(auth_router)
 app.include_router(matching_router, prefix="/v1")
 app.include_router(metrics_router, prefix="/metrics")
 app.include_router(offers_router, prefix="/offers")
@@ -89,7 +96,7 @@ app.include_router(profile_router, prefix="/profile")
 app.include_router(profile_baseline_router)    # POST /profile/parse-baseline (no LLM)
 app.include_router(profile_file_router)        # POST /profile/parse-file (multipart, no LLM)
 app.include_router(inbox_router)
-app.include_router(applications_router)
+app.include_router(applications_router, dependencies=[Depends(require_auth)])
 app.include_router(apply_pack_router)  # POST /apply-pack (baseline + optional LLM)
 app.include_router(debug_router)  # DEV-only debug endpoints
 app.include_router(dev_tools_router)  # DEV-only tools (guarded by ELEVIA_DEV_TOOLS=1)
@@ -102,6 +109,8 @@ app.include_router(cluster_library_router)  # GET /cluster/library/* + POST /clu
 app.include_router(analyze_recovery_router)  # POST /analyze/recover-skills (DEV-only)
 app.include_router(analyze_ai_quality_router)  # POST /analyze/audit-ai-quality (DEV-only)
 app.include_router(market_insights_router)  # GET /insights/vie-market (read-only, cached)
+app.include_router(ai_justify_router)      # POST /ai/justify (AI business-fit justification)
+app.include_router(ai_structure_router)    # POST /ai/structure-offer (structured offer rewrite)
 
 
 @app.exception_handler(RequestValidationError)
@@ -141,6 +150,34 @@ logger.info(
     "[startup] OPENAI_API_KEY_present=%s",
     "true" if is_llm_available() else "false",
 )
+
+
+def _warm_runtime_caches_task() -> None:
+    """Warm heavy inbox caches without blocking API readiness."""
+    try:
+        import time
+
+        t0 = time.perf_counter()
+        stats = warm_inbox_runtime()
+        logger.info(
+            "[startup] inbox runtime warmed catalog=%s clusters=%s in %sms",
+            stats.get("catalog_count", 0),
+            stats.get("cluster_count", 0),
+            int((time.perf_counter() - t0) * 1000),
+        )
+    except Exception as exc:
+        logger.warning("[startup] inbox runtime warmup skipped: %s", exc)
+
+
+@app.on_event("startup")
+def _warm_runtime_caches() -> None:
+    """Kick off cache warmup in background so startup stays responsive."""
+    thread = threading.Thread(
+        target=_warm_runtime_caches_task,
+        name="elevia-inbox-warmup",
+        daemon=True,
+    )
+    thread.start()
 
 
 @app.get("/", tags=["root"])

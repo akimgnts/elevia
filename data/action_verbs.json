@@ -1,0 +1,31 @@
+{
+  "finance": {
+    "analyse": ["Analyser", "Examiner", "Évaluer", "Mesurer"],
+    "gestion": ["Budgéter", "Optimiser", "Consolider", "Comptabiliser"],
+    "pilotage": ["Piloter", "Suivre", "Contrôler", "Superviser"]
+  },
+  "business": {
+    "developpement": ["Développer", "Accroître", "Lancer", "Promouvoir"],
+    "negociation": ["Négocier", "Convaincre", "Argumenter"],
+    "analyse": ["Qualifier", "Structurer", "Suivre"]
+  },
+  "operations": {
+    "organisation": ["Planifier", "Coordonner", "Structurer"],
+    "execution": ["Réaliser", "Exécuter", "Appliquer"],
+    "pilotage": ["Orchestrer", "Suivre", "Fiabiliser"]
+  },
+  "data": {
+    "analyse": ["Analyser", "Croiser", "Modéliser", "Explorer"],
+    "reporting": ["Structurer", "Automatiser", "Consolider", "Produire"],
+    "qualite": ["Nettoyer", "Contrôler", "Fiabiliser"]
+  },
+  "hr": {
+    "recrutement": ["Qualifier", "Sélectionner", "Conduire"],
+    "gestion": ["Administrer", "Accompagner", "Structurer"]
+  },
+  "marketing": {
+    "analyse": ["Mesurer", "Suivre", "Qualifier"],
+    "contenu": ["Rédiger", "Concevoir", "Diffuser"],
+    "pilotage": ["Coordonner", "Optimiser", "Planifier"]
+  }
+}

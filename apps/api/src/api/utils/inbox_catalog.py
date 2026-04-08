@@ -180,13 +180,31 @@ def _extract_skill_labels_for_cluster(offer: Dict) -> list:
 
 def _apply_esco_normalization(offers: List[Dict]) -> List[Dict]:
     """Apply ESCO extraction + normalization to all offers, and precompute offer_cluster."""
+    offers_needing_normalization: List[Dict] = []
     for offer in offers:
         description_raw = offer.get("description") or offer.get("display_description") or ""
         description_clean = _clean_description(description_raw) if isinstance(description_raw, str) else ""
         offer["description"] = description_clean or (description_raw if isinstance(description_raw, str) else None)
         offer["description_snippet"] = _description_snippet(description_clean)
+        precomputed_uris = offer.get("skills_uri") or []
+        precomputed_skills = offer.get("skills") or []
+        if precomputed_uris:
+            offer["skills_source"] = offer.get("skills_source") or "precomputed"
+            offer["skills_uri_count"] = len(precomputed_uris)
+            offer["skills_uri_collapsed_dupes"] = int(offer.get("skills_uri_collapsed_dupes") or 0)
+            offer["skills_unmapped"] = offer.get("skills_unmapped") or []
+            offer["skills_unmapped_count"] = int(offer.get("skills_unmapped_count") or 0)
+            if not offer.get("skills_display") and isinstance(precomputed_skills, list):
+                offer["skills_display"] = [
+                    {"label": str(skill), "source": "precomputed"}
+                    for skill in precomputed_skills
+                    if str(skill).strip()
+                ]
+        else:
+            offers_needing_normalization.append(offer)
 
-    normalize_offers_to_uris(offers)
+    if offers_needing_normalization:
+        normalize_offers_to_uris(offers_needing_normalization)
 
     # Precompute offer_cluster once per catalog load — eliminates N+1 in inbox scoring loop
     for offer in offers:

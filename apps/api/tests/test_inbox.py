@@ -233,6 +233,29 @@ def test_inbox_profile_default_fallback(monkeypatch):
     assert len(profile["skills"]) >= 10
 
 
+def test_warm_inbox_runtime_builds_caches(monkeypatch):
+    catalog = [
+        {
+            "id": "offer-1",
+            "title": "Data Analyst",
+            "description": "Analyse data with SQL and Python",
+            "skills": ["sql", "python"],
+            "skills_uri": ["u:sql", "u:python"],
+            "skills_display": [{"uri": "u:sql", "label": "SQL"}, {"uri": "u:python", "label": "Python"}],
+            "offer_cluster": "DATA_IT",
+        }
+    ]
+    monkeypatch.setattr(inbox_routes, "_load_catalog_offers", lambda: catalog)
+    monkeypatch.setattr(inbox_routes, "_cluster_idf_cache", None)
+    monkeypatch.setattr(inbox_routes, "_engine_cache", None)
+    monkeypatch.setattr(inbox_routes, "_engine_cache_catalog_id", None)
+
+    stats = inbox_routes.warm_inbox_runtime()
+
+    assert stats["catalog_count"] == 1
+    assert inbox_routes._engine_cache is not None
+
+
 # ============================================================================
 # 6. Upsert: second decision updates status
 # ============================================================================

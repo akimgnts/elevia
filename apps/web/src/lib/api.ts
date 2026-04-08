@@ -11,6 +11,88 @@ const API_BASE =
 const inboxRequestCache = new Map<string, Promise<InboxResponse>>();
 const offerDetailRequestCache = new Map<string, Promise<OfferDetailResponse>>();
 
+type ApiUser = {
+  id: string;
+  email: string;
+  role: string;
+};
+
+export interface AuthLoginResponse {
+  expires_at: string;
+  user: ApiUser;
+}
+
+export interface AuthMeResponse {
+  authenticated: boolean;
+  auth_enabled: boolean;
+  user: ApiUser | null;
+}
+
+export async function apiFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
+  return fetch(input, {
+    ...init,
+    credentials: "include",
+  });
+}
+
+export async function login(email: string, password: string): Promise<AuthLoginResponse> {
+  const res = await apiFetch(`${API_BASE}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.json().catch(async () => ({ message: await res.text().catch(() => "Login failed") }));
+    const message = typeof detail?.detail?.message === "string"
+      ? detail.detail.message
+      : typeof detail?.message === "string"
+        ? detail.message
+        : "Login failed";
+    throw new Error(message);
+  }
+
+  return res.json();
+}
+
+export async function fetchCurrentUser(): Promise<AuthMeResponse> {
+  const res = await apiFetch(`${API_BASE}/auth/me`);
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+export async function logout(): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/auth/logout`, { method: "POST" });
+  if (!res.ok && res.status !== 204) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+}
+
+export async function fetchSavedProfile(): Promise<{ profile: Record<string, unknown> | null; updated_at: string | null }> {
+  const res = await apiFetch(`${API_BASE}/auth/profile`);
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+export async function saveSavedProfile(profile: Record<string, unknown>): Promise<void> {
+  const res = await apiFetch(`${API_BASE}/auth/profile`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile }),
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+}
+
 export interface OfferNormalized {
   id: string;
   source: "france_travail" | "business_france" | "unknown";
@@ -71,7 +153,7 @@ export async function fetchCatalogOffers(
 ): Promise<OffersCatalogResponse> {
   const url = `${API_BASE}/offers/catalog?limit=${limit}&source=${source}`;
 
-  const res = await fetch(url);
+  const res = await apiFetch(url);
 
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
@@ -88,7 +170,7 @@ export async function fetchCatalogOffers(
 export async function fetchSampleOffers(limit: number = 200): Promise<SampleOffersResponse> {
   const url = `${API_BASE}/offers/sample?limit=${limit}`;
 
-  const res = await fetch(url);
+  const res = await apiFetch(url);
 
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
@@ -108,7 +190,7 @@ export async function runMatch(
 ): Promise<MatchResponse> {
   const url = `${API_BASE}/v1/match`;
 
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -198,7 +280,7 @@ export async function postCorrectionMetric(event: CorrectionEvent): Promise<void
   const url = `${API_BASE}/metrics/correction`;
 
   try {
-    const res = await fetch(url, {
+    const res = await apiFetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -339,6 +421,18 @@ export interface ScoringV2 {
   };
 }
 
+export interface ScoringV3 {
+  score: number;
+  score_pct: number;
+  components: {
+    role_alignment: number;
+    domain_alignment: number;
+    matching_base: number;
+    gap_penalty: number;
+  };
+  summary: string;
+}
+
 export interface InboxItem {
   offer_id: string;
   id?: string;
@@ -396,6 +490,7 @@ export interface InboxItem {
   offer_intelligence?: OfferIntelligence | null;
   semantic_explainability?: SemanticExplainability | null;
   scoring_v2?: ScoringV2 | null;
+  scoring_v3?: ScoringV3 | null;
   /** @deprecated Inbox UI no longer uses this. Safe backend cleanup candidate. */
   explain_v1?: CompassExplainCompact | null;
 }
@@ -538,6 +633,58 @@ export interface InboxFilters {
   sort?: "published_desc" | "score_desc" | "confidence_desc";
 }
 
+const INBOX_REQUEST_TIMEOUT_MS = 15000;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function buildInboxRetryProfile(profile: unknown): Record<string, unknown> | null {
+  if (!isRecord(profile)) return null;
+  const hasProfileIntelligence =
+    isRecord(profile.profile_intelligence) || isRecord(profile.profile_intelligence_ai_assist);
+  const hasSkillsUri = Array.isArray(profile.skills_uri) && profile.skills_uri.length > 0;
+  if (!hasProfileIntelligence && !hasSkillsUri) return null;
+
+  const retryProfile: Record<string, unknown> = { ...profile };
+  delete retryProfile.profile_intelligence;
+  delete retryProfile.profile_intelligence_ai_assist;
+  delete retryProfile.skills_uri;
+  retryProfile.metadata = isRecord(profile.metadata)
+    ? { ...profile.metadata, inbox_retry_mode: "skills_only" }
+    : { inbox_retry_mode: "skills_only" };
+  return retryProfile;
+}
+
+async function fetchInboxOnce(
+  url: string,
+  requestBody: Record<string, unknown>,
+  timeoutMs: number,
+): Promise<InboxResponse> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await apiFetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(`API ${res.status}: ${txt}`);
+    }
+    return res.json();
+  } catch (error) {
+    if ((error as Error)?.name === "AbortError") {
+      throw new Error(`API timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function fetchInbox(
   profile: unknown,
   profileId: string,
@@ -574,16 +721,36 @@ export async function fetchInbox(
   if (cached) return cached;
 
   const request = (async () => {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody),
-    });
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new Error(`API ${res.status}: ${txt}`);
+    const retryProfile = buildInboxRetryProfile(profile);
+    let primaryError: Error | null = null;
+
+    try {
+      const primary = await fetchInboxOnce(url, requestBody, INBOX_REQUEST_TIMEOUT_MS);
+      if ((primary.items?.length ?? 0) > 0 || !retryProfile) {
+        return primary;
+      }
+      console.warn("[inbox] Empty response with full profile, retrying with simplified payload");
+      const retryBody = { ...requestBody, profile: retryProfile };
+      const retry = await fetchInboxOnce(url, retryBody, INBOX_REQUEST_TIMEOUT_MS);
+      return (retry.items?.length ?? 0) > 0 ? retry : primary;
+    } catch (error) {
+      primaryError = error instanceof Error ? error : new Error("Inbox request failed");
     }
-    return res.json();
+
+    if (!retryProfile) {
+      throw primaryError;
+    }
+
+    console.warn("[inbox] Primary request failed, retrying with simplified payload", primaryError);
+    const retryBody = { ...requestBody, profile: retryProfile };
+    try {
+      return await fetchInboxOnce(url, retryBody, INBOX_REQUEST_TIMEOUT_MS);
+    } catch (retryError) {
+      if (primaryError) {
+        throw primaryError;
+      }
+      throw retryError;
+    }
   })();
 
   inboxRequestCache.set(cacheKey, request);
@@ -600,7 +767,7 @@ export async function postDecision(
   status: "SHORTLISTED" | "DISMISSED"
 ): Promise<void> {
   const url = `${API_BASE}/offers/${encodeURIComponent(offerId)}/decision`;
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ profile_id: profileId, status }),
@@ -615,7 +782,7 @@ export async function fetchOfferSemantic(
   profileId: string
 ): Promise<OfferSemanticResponse> {
   const url = `${API_BASE}/offers/${encodeURIComponent(offerId)}/semantic`;
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ profile_id: profileId }),
@@ -632,7 +799,7 @@ export async function fetchOfferContext(
   description: string
 ): Promise<OfferContext> {
   const url = `${API_BASE}/context/offer`;
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ offer_id: offerId, description }),
@@ -649,7 +816,7 @@ export async function fetchProfileContext(
   profile?: unknown
 ): Promise<ProfileContext> {
   const url = `${API_BASE}/context/profile`;
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ profile_id: profileId, profile: profile ?? null }),
@@ -663,7 +830,7 @@ export async function fetchProfileContext(
 
 export async function fetchProfileSummary(profileId: string): Promise<ProfileSummaryV1> {
   const url = `${API_BASE}/profile/summary?profile_id=${encodeURIComponent(profileId)}`;
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -683,7 +850,7 @@ export async function fetchContextFit(
   missingSkills: string[]
 ): Promise<ContextFit> {
   const url = `${API_BASE}/context/fit`;
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -707,7 +874,7 @@ export async function fetchContextFit(
 export async function ingestCv(cvText: string): Promise<unknown> {
   const url = `${API_BASE}/profile/ingest_cv`;
 
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -852,6 +1019,21 @@ export interface ParseFileResponse {
     confidence: number;
     cluster_name?: string;
     genericity_score?: number;
+  }>;
+  enriched_signals?: Array<{
+    raw?: string;
+    normalized?: string;
+    tokens?: string[];
+    domain?: string | null;
+    confidence?: number;
+  }>;
+  concept_signals?: Array<{
+    concept?: string;
+    normalized?: string;
+    variants?: string[];
+    tokens?: string[];
+    domain?: string | null;
+    weight?: number;
   }>;
   canonical_skills_count?: number;
   profile_intelligence?: Record<string, unknown>;
@@ -1026,7 +1208,7 @@ export interface ProfileCluster {
 export async function parseFile(file: File): Promise<ParseFileResponse> {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${API_BASE}/profile/parse-file`, {
+  const res = await apiFetch(`${API_BASE}/profile/parse-file`, {
     method: "POST",
     body: form,
   });
@@ -1044,7 +1226,7 @@ export async function parseFile(file: File): Promise<ParseFileResponse> {
 export async function parseFileEnriched(file: File): Promise<ParseFileResponse> {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${API_BASE}/profile/parse-file?enrich_llm=1`, {
+  const res = await apiFetch(`${API_BASE}/profile/parse-file?enrich_llm=1`, {
     method: "POST",
     body: form,
   });
@@ -1101,7 +1283,7 @@ export interface ApplyPackResponse {
  * Baseline mode always works (no LLM key required).
  */
 export async function applyPack(payload: ApplyPackRequest): Promise<ApplyPackResponse> {
-  const res = await fetch(`${API_BASE}/apply-pack`, {
+  const res = await apiFetch(`${API_BASE}/apply-pack`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -1138,7 +1320,7 @@ export async function fetchKeySkills(
   validated_items: ValidatedItem[],
   rome_code?: string | null,
 ): Promise<KeySkillsResponse> {
-  const res = await fetch(`${API_BASE}/profile/key-skills`, {
+  const res = await apiFetch(`${API_BASE}/profile/key-skills`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ validated_items, rome_code: rome_code ?? null }),
@@ -1159,7 +1341,7 @@ export async function runCvDelta(request: CvDeltaRequest): Promise<CvDeltaRespon
     form.append("llm_model", request.model ?? "gpt-4o-mini");
   }
 
-  const res = await fetch(`${API_BASE}/dev/cv-delta`, {
+  const res = await apiFetch(`${API_BASE}/dev/cv-delta`, {
     method: "POST",
     body: form,
   });
@@ -1343,6 +1525,7 @@ export interface OfferDetailResponse {
   offer_intelligence?: OfferIntelligence | null;
   semantic_explainability?: SemanticExplainability | null;
   scoring_v2?: ScoringV2 | null;
+  scoring_v3?: ScoringV3 | null;
 }
 
 export interface ProfileSemanticContext {
@@ -1387,7 +1570,7 @@ export async function fetchOfferDetail(
   if (cached) return cached;
 
   const request = (async () => {
-    const res = await fetch(url);
+    const res = await apiFetch(url);
     if (!res.ok) {
       const txt = await res.text().catch(() => "");
       throw new Error(`API ${res.status}: ${txt}`);
@@ -1420,7 +1603,7 @@ export async function generateCvForOffer(
   const body: Record<string, unknown> = { offer_id: offerId, profile, lang: "fr" };
   if (context) body.context = context;
 
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -1452,7 +1635,7 @@ export async function generateCvHtmlForOffer(
   const body: Record<string, unknown> = { offer_id: offerId, profile, lang: "fr" };
   if (context) body.context = context;
 
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -1529,7 +1712,7 @@ export async function fetchRecoverSkills(
 ): Promise<RecoverSkillsResponse> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/analyze/recover-skills`, {
+    res = await apiFetch(`${API_BASE}/analyze/recover-skills`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -1628,7 +1811,7 @@ export async function fetchAuditAiQuality(
 ): Promise<AuditAIQualityResponse> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/analyze/audit-ai-quality`, {
+    res = await apiFetch(`${API_BASE}/analyze/audit-ai-quality`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -1696,7 +1879,7 @@ export async function generateLetterForOffer(
   const body: Record<string, unknown> = { offer_id: offerId, profile, lang: "fr" };
   if (context) body.context = context;
 
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -1802,7 +1985,145 @@ export interface MarketInsightsResponse {
 }
 
 export async function fetchMarketInsights(): Promise<MarketInsightsResponse> {
-  const res = await fetch(`${API_BASE}/insights/vie-market`);
+  const res = await apiFetch(`${API_BASE}/insights/vie-market`);
   if (!res.ok) throw new Error(`Market insights fetch failed: ${res.status}`);
   return res.json() as Promise<MarketInsightsResponse>;
+}
+
+// ---------------------------------------------------------------------------
+// AI Justify — POST /ai/justify
+// ---------------------------------------------------------------------------
+
+export interface TrueGap {
+  skill: string;
+  severity: "blocking" | "semi_blocking" | "minor";
+  why: string;
+  mitigation?: string | null;
+}
+
+export interface NonSkillRequirement {
+  text: string;
+  type: "tool" | "context" | "hr_jargon" | "seniority_marker" | "soft_skill" | "domain_knowledge";
+  why_not_gap: string;
+}
+
+export interface TransferableStrength {
+  strength: string;
+  evidence: string;
+  relevance: string;
+}
+
+export interface CvStrategy {
+  angle: string;
+  focus: string;
+  positioning_phrase: string;
+}
+
+export interface JustificationMeta {
+  offer_id: string;
+  profile_id?: string | null;
+  duration_ms: number;
+  llm_used: boolean;
+  fallback_used: boolean;
+  model?: string | null;
+}
+
+export interface JustificationPayload {
+  decision: "GO" | "MAYBE" | "NO_GO";
+  fit_summary: string;
+  true_gaps: TrueGap[];
+  non_skill_requirements: NonSkillRequirement[];
+  transferable_strengths: TransferableStrength[];
+  cv_strategy: CvStrategy;
+  application_effort: "LOW" | "MEDIUM" | "HIGH";
+  confidence: number;
+  archetype?: string | null;
+  meta: JustificationMeta;
+}
+
+export interface JustifyFitRequest {
+  offer_id: string;
+  profile: Record<string, unknown>;
+  profile_id?: string;
+  score?: number;
+  matched_skills?: string[];
+  missing_skills?: string[];
+  canonical_skills?: string[];
+  enriched_signals?: string[];
+  concept_signals?: string[];
+  profile_intelligence?: Record<string, unknown>;
+  offer_intelligence?: Record<string, unknown>;
+  include_cv?: boolean;
+}
+
+export interface JustifyFitResponse {
+  ok: boolean;
+  justification: JustificationPayload;
+  cv_document?: Record<string, unknown> | null;
+  duration_ms: number;
+}
+
+export async function justifyOffer(payload: JustifyFitRequest): Promise<JustifyFitResponse> {
+  const res = await apiFetch(`${API_BASE}/ai/justify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`AI justify failed: ${res.status} ${text}`);
+  }
+  return res.json() as Promise<JustifyFitResponse>;
+}
+
+// ---------------------------------------------------------------------------
+// AI Structure Offer — POST /ai/structure-offer
+// ---------------------------------------------------------------------------
+
+export interface StructuredOfferMeta {
+  offer_id: string;
+  llm_used: boolean;
+  fallback_used: boolean;
+  duration_ms: number;
+  model?: string | null;
+}
+
+export interface StructuredOfferSummary {
+  quick_read: string;
+  mission_summary: string;
+  responsibilities: string[];
+  tools_environment: string[];
+  role_context: string[];
+  key_requirements: string[];
+  nice_to_have: string[];
+  meta: StructuredOfferMeta;
+}
+
+export interface StructureOfferRequest {
+  offer_id: string;
+  missions?: string[];
+  requirements?: string[];
+  tools_stack?: string[];
+  context_tags?: string[];
+}
+
+export interface StructureOfferResponse {
+  ok: boolean;
+  summary: StructuredOfferSummary;
+  duration_ms: number;
+}
+
+export async function structureOffer(
+  payload: StructureOfferRequest,
+): Promise<StructureOfferResponse> {
+  const res = await apiFetch(`${API_BASE}/ai/structure-offer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`AI structure failed: ${res.status} ${text}`);
+  }
+  return res.json() as Promise<StructureOfferResponse>;
 }

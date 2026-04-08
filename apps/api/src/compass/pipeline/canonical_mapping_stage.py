@@ -102,6 +102,7 @@ def run_canonical_mapping_stage(
     structured_extraction: StructuredExtractionStageResult,
     cv_text: str,
     validated_labels: List[str],
+    base_mapping_inputs: List[str] | None = None,
 ) -> CanonicalMappingStageResult:
     canonical_skills_list: List[dict] = []
     canonical_hierarchy_added: List[str] = []
@@ -124,7 +125,7 @@ def run_canonical_mapping_stage(
     priority_trace: List[dict] = []
     priority_stats: dict = {}
 
-    raw_mapping_inputs = select_mapping_inputs(skill_candidates)
+    raw_mapping_inputs = list(base_mapping_inputs or select_mapping_inputs(skill_candidates))
     base_mapping_inputs = list(structured_extraction.mapping_inputs or raw_mapping_inputs)
     mapping_inputs = list(base_mapping_inputs)
     try:

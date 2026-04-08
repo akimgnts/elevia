@@ -9,7 +9,7 @@ CvDocumentResponse → API response envelope
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -30,6 +30,7 @@ class AutonomyEnum(str, Enum):
 class ExperienceBlock(BaseModel):
     title: str = Field(..., max_length=120)
     company: str = Field(..., max_length=100)
+    dates: Optional[str] = Field(default=None, max_length=80)
     bullets: List[str] = Field(..., min_length=1, max_length=5)
     tools: List[str] = Field(default_factory=list, max_length=8)
     autonomy: AutonomyEnum = AutonomyEnum.COPILOT
@@ -50,13 +51,60 @@ class CvMeta(BaseModel):
     fallback_used: bool = False
 
 
+class CvExperienceView(BaseModel):
+    role: str = Field(..., max_length=120)
+    company: str = Field(default="", max_length=120)
+    dates: Optional[str] = Field(default=None, max_length=80)
+    bullets: List[str] = Field(default_factory=list, max_length=5)
+    decision: Literal["keep", "compress", "drop"] = "keep"
+
+
+class CvStructuredView(BaseModel):
+    title: str = Field(..., max_length=160)
+    experiences: List[CvExperienceView] = Field(default_factory=list, max_length=5)
+    skills: List[str] = Field(default_factory=list, max_length=14)
+    education: List[str] = Field(default_factory=list, max_length=6)
+    layout: Literal["single_column"] = "single_column"
+
+
+class ExperienceScoreDebug(BaseModel):
+    role: str
+    company: str = ""
+    score: float
+    skill_match: float
+    job_similarity: float
+    quantified_evidence: float
+    sector_similarity: float
+    recency: float
+    autonomy: float
+    decision: Literal["keep", "compress", "drop"]
+    reasons: List[str] = Field(default_factory=list)
+
+
+class SelectedVerbDebug(BaseModel):
+    experience_role: str
+    source_fragment: str
+    domain: str
+    family: str
+    verb: str
+
+
+class CvDebugPayload(BaseModel):
+    parsed_offer: Dict[str, Any] = Field(default_factory=dict)
+    experience_scores: List[ExperienceScoreDebug] = Field(default_factory=list)
+    selected_verbs: List[SelectedVerbDebug] = Field(default_factory=list)
+    missing_data: List[str] = Field(default_factory=list)
+
+
 # ── Top-level payload (cached & returned) ─────────────────────────────────────
 
 class CvDocumentPayload(BaseModel):
     summary: str = Field(..., max_length=600)
     keywords_injected: List[str] = Field(default_factory=list, max_length=12)
-    experience_blocks: List[ExperienceBlock] = Field(default_factory=list, max_length=3)
+    experience_blocks: List[ExperienceBlock] = Field(default_factory=list, max_length=5)
     ats_notes: AtsNotes
+    cv: Optional[CvStructuredView] = None
+    debug: Optional[CvDebugPayload] = None
     meta: CvMeta
 
 

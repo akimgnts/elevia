@@ -114,7 +114,7 @@ def _load_offers_lazy() -> Tuple[List[Dict[str, Any]], str]:
     summary="Get sample VIE offers",
     description="Returns a list of sample VIE offers for testing. Max 500 offers.",
 )
-async def get_sample_offers(
+def get_sample_offers(
     limit: int = Query(default=200, ge=1, le=500, description="Number of offers to return (max 500)")
 ) -> JSONResponse:
     """
@@ -369,7 +369,7 @@ Falls back to static sample data if database is unavailable.
 **Contract:** Returns OfferNormalized objects (see docs/contracts/offer_normalized.md)
 """,
 )
-async def get_catalog_offers(
+def get_catalog_offers(
     limit: int = Query(default=200, ge=1, le=500, description="Number of offers to return (max 500)"),
     source: str = Query(default="all", description="Filter by source: all, france_travail, business_france"),
 ) -> JSONResponse:
@@ -476,7 +476,7 @@ Return a single offer with deterministic structured description sections.
 Returns 404 if offer not found in the database.
 """,
 )
-async def get_offer_detail(
+def get_offer_detail(
     offer_id: str,
     profile_role_block: Optional[str] = Query(default=None),
     profile_secondary_role_blocks: Optional[List[str]] = Query(default=None),

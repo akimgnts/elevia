@@ -14,8 +14,11 @@ Rules:
 from __future__ import annotations
 
 import textwrap
-from datetime import datetime, timezone
 from typing import List, Dict, Any
+
+from documents.apply_pack_cv_engine import build_targeted_cv
+from documents.preview_renderer import render_preview_markdown
+from documents.schemas import CvDocumentPayload, CvMeta
 
 _MAX_MATCHED = 12
 _MAX_MISSING = 8
@@ -36,78 +39,23 @@ def build_cv_markdown(
     matched: List[str],
     missing: List[str],
 ) -> str:
-    """
-    Build a plain-text CV in markdown tailored to the offer.
-
-    Args:
-        profile: profile dict with at least 'skills'.
-        offer:   offer dict with at least 'title' and optionally 'company'.
-        matched: intersection of profile skills and offer skills.
-        missing: offer skills not in profile.
-
-    Returns: markdown string.
-    """
-    candidate_name = profile.get("name") or profile.get("candidate_name") or "Candidat(e)"
-    offer_title = offer.get("title") or "Poste non spécifié"
-    company = offer.get("company") or "Entreprise non spécifiée"
-
-    all_skills: List[str] = list(profile.get("skills") or profile.get("matching_skills") or [])
-    shown_matched = matched[:_MAX_MATCHED]
-    # Other skills = all skills minus matched (to avoid repetition)
-    matched_set = set(shown_matched)
-    other_skills = [s for s in all_skills if s not in matched_set][:_MAX_SKILLS]
-
-    lines: List[str] = []
-
-    lines.append(f"# CV — {candidate_name}")
-    lines.append(f"**Poste visé :** {offer_title} — {company}\n")
-
-    lines.append("---\n")
-
-    lines.append("## Compétences clés pour le poste")
-    if shown_matched:
-        lines.append(_skill_list(shown_matched, _MAX_MATCHED))
-    else:
-        lines.append("- (aucune correspondance directe détectée — voir compétences générales)\n")
-
-    if other_skills:
-        lines.append("## Outils & technologies")
-        lines.append(_skill_list(other_skills, _MAX_SKILLS))
-
-    if missing[:_MAX_MISSING]:
-        lines.append("## Axes de développement (compétences de l'offre à renforcer)")
-        lines.append(_skill_list(missing, _MAX_MISSING))
-
-    lines.append("## Résumé de candidature")
-    summary_bullets = []
-    if shown_matched:
-        top3 = ", ".join(shown_matched[:3])
-        summary_bullets.append(
-            f"Maîtrise confirmée de {top3} — compétences directement requises pour ce poste."
-        )
-    else:
-        summary_bullets.append(
-            f"Profil orienté {offer_title}, avec une forte capacité d'adaptation."
-        )
-    summary_bullets.append(
-        f"Intérêt pour le poste {offer_title} chez {company} — motivé(e) à contribuer dès la prise de poste."
+    engineered = build_targeted_cv(profile=profile, offer=offer)
+    engineered["ats_notes"]["matched_keywords"] = matched[:_MAX_MATCHED] or engineered["ats_notes"]["matched_keywords"]
+    engineered["ats_notes"]["missing_keywords"] = missing[:_MAX_MISSING] or engineered["ats_notes"]["missing_keywords"]
+    engineered["meta"] = {
+        "offer_id": offer.get("id") or "offer",
+        "profile_fingerprint": "apply-pack",
+        "prompt_version": "cv_v1",
+        "cache_hit": False,
+        "fallback_used": True,
+    }
+    payload = CvDocumentPayload.model_validate(engineered)
+    return render_preview_markdown(
+        payload,
+        offer_title=offer.get("title") or "",
+        offer_company=offer.get("company") or "",
+        offer_country=offer.get("country") or "",
     )
-    if missing[:2]:
-        axis = " et ".join(missing[:2])
-        summary_bullets.append(
-            f"En cours de montée en compétences sur {axis} — axe de développement identifié."
-        )
-    for b in summary_bullets:
-        lines.append(f"- {b}")
-    lines.append("")
-
-    lines.append("---")
-    lines.append(
-        "_CV généré automatiquement par Elevia Compass (mode baseline). "
-        "À compléter avec vos informations personnelles._"
-    )
-
-    return "\n".join(lines)
 
 
 def build_letter_markdown(

@@ -25,6 +25,9 @@ class ApplyPackProfileIn(BaseModel):
     """Minimal profile data needed for apply-pack generation."""
     id: Optional[str] = None
     skills: List[str] = Field(default_factory=list)
+    experiences: List[Dict[str, Any] | str] = Field(default_factory=list)
+    education: List[Dict[str, Any] | str] | str | None = None
+    languages: List[str] = Field(default_factory=list)
     name: Optional[str] = None
 
 

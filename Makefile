@@ -9,7 +9,7 @@
 #   make gates            # Run all gates sequentially
 
 .PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test test-api help \
-        venv install api web test-cvdelta devtools env-check \
+        venv install api web test-cvdelta devtools env-check doctor \
         dev-up dev-down dev-status dev smoke smoke-mvp smoke-all
 
 # Default target
@@ -41,6 +41,7 @@ help:
 	@echo "  make gates         - All gates"
 	@echo "  make test          - Full test suite"
 	@echo "  make lint          - Lint"
+	@echo "  make doctor        - Run preflight checks (DB, auth, templates, env, schema)"
 
 # Agents review (per REVIEW_MATRIX)
 agents-review:
@@ -93,7 +94,9 @@ install:
 
 api:
 	@echo "Starting API on http://0.0.0.0:8000 (ELEVIA_DEV_TOOLS=1)..."
-	cd apps/api && ELEVIA_DEV_TOOLS=1 $(PWD)/.venv/bin/uvicorn api.main:app \
+	@.venv/bin/python -c 'import importlib.util; missing=[name for name in ("fastapi","uvicorn","multipart") if importlib.util.find_spec(name) is None]; \
+		(_ for _ in ()).throw(SystemExit("Missing packages in .venv: " + ", ".join(missing) + " — run: make install")) if missing else None'
+	cd apps/api && ELEVIA_DEV_TOOLS=1 $(PWD)/.venv/bin/python -m uvicorn api.main:app \
 	  --host 0.0.0.0 --port 8000 --reload
 
 web:
@@ -187,3 +190,7 @@ env-check:
 	else:
 	    print("OPENAI_API_KEY: missing")
 	PY
+
+# Preflight / doctor check
+doctor:
+	@python3 apps/api/scripts/doctor_runtime.py

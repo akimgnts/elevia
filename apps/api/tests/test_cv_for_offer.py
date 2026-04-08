@@ -101,6 +101,21 @@ def test_render_preview_markdown_sections():
             missing_keywords=["docker"],
             ats_score_estimate=60,
         ),
+        cv={
+            "title": "Data Analyst VIE",
+            "experiences": [
+                {
+                    "role": "Data Analyst",
+                    "company": "Acme",
+                    "dates": "2024-2025",
+                    "bullets": ["Analyser les données commerciales."],
+                    "decision": "keep",
+                }
+            ],
+            "skills": ["python", "sql"],
+            "education": ["Master data"],
+            "layout": "single_column",
+        },
         meta=CvMeta(offer_id="BF-1", profile_fingerprint="fp", prompt_version=PROMPT_VERSION),
     )
     preview = render_preview_markdown(
@@ -109,10 +124,9 @@ def test_render_preview_markdown_sections():
         offer_company="Acme",
         offer_country="DE",
     )
-    assert "## Profil" in preview
-    assert "## Compétences clés" in preview
-    assert "## ATS" in preview
-    assert "60%" in preview
+    assert "## Expériences" in preview
+    assert "## Formation" in preview
+    assert "## Compétences" in preview
     assert "Data Analyst VIE" in preview
 
 
@@ -270,12 +284,12 @@ def test_for_offer_determinism(client):
 
 
 def test_for_offer_preview_has_ats_section(client):
-    """preview_text contains '## ATS' section."""
+    """preview_text contains the ATS-friendly CV sections."""
     resp = client.post("/documents/cv/for-offer", json=_for_offer_payload())
     if resp.status_code != 200:
         pytest.skip("Offer not available")
-    assert "## ATS" in resp.json()["preview_text"]
-    assert "## Profil" in resp.json()["preview_text"]
+    assert "## Expériences" in resp.json()["preview_text"]
+    assert "## Compétences" in resp.json()["preview_text"]
 
 
 def test_for_offer_no_secret_in_response(client):

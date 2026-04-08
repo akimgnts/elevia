@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{page_title}}</title>
+<style>
+body{font-family:Inter,Arial,sans-serif;background:#f5f7fb;color:#0f172a;margin:0;padding:32px;line-height:1.45;}
+.page{max-width:820px;margin:0 auto;background:#fff;padding:40px 44px;box-shadow:0 16px 48px rgba(15,23,42,.08);}
+h1{font-size:28px;line-height:1.1;margin:0 0 8px;color:#0f172a;}
+.meta{font-size:13px;color:#475569;margin-bottom:24px;}
+h2{font-size:14px;text-transform:uppercase;letter-spacing:.08em;margin:28px 0 12px;color:#0f172a;border-bottom:1px solid #e2e8f0;padding-bottom:8px;}
+h3{font-size:16px;margin:0;color:#0f172a;}
+.job{margin-bottom:18px;}
+.job-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;}
+.company{font-size:13px;color:#334155;margin:4px 0 8px;}
+.dates{font-size:12px;color:#64748b;white-space:nowrap;}
+ul{margin:8px 0 0 18px;padding:0;}
+li{margin-bottom:6px;font-size:13px;color:#1e293b;}
+.skills{display:flex;flex-wrap:wrap;gap:8px;}
+.skill{border:1px solid #cbd5e1;background:#f8fafc;padding:5px 10px;border-radius:999px;font-size:12px;color:#0f172a;}
+.edu{margin-bottom:12px;}
+.edu-title{font-size:14px;font-weight:600;}
+.edu-sub{font-size:13px;color:#64748b;margin-top:2px;}
+@media print{body{background:#fff;padding:0;}.page{box-shadow:none;padding:24px;max-width:none;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>{{job_title}}</h1>
+  <div class="meta">{{candidate_name}}{{company_line}}</div>
+
+  <h2>Expérience</h2>
+  {{experience_html}}
+
+  <h2>Formation</h2>
+  {{education_html}}
+
+  <h2>Compétences</h2>
+  <div class="skills">{{skills_html}}</div>
+</div>
+</body>
+</html>

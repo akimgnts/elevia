@@ -29,6 +29,21 @@ def _sample_payload(summary: str = "Profil data") -> CvDocumentPayload:
             missing_keywords=["power bi"],
             ats_score_estimate=80,
         ),
+        cv={
+            "title": "Data Analyst",
+            "experiences": [
+                {
+                    "role": "Data Analyst",
+                    "company": "ACME",
+                    "dates": "2024-2025",
+                    "bullets": ["Analyser les données de vente."],
+                    "decision": "keep",
+                }
+            ],
+            "skills": ["SQL", "Python"],
+            "education": ["Master Data — ACME School"],
+            "layout": "single_column",
+        },
         meta=CvMeta(
             offer_id="offer-1",
             profile_fingerprint="abc123",
@@ -41,9 +56,10 @@ def _sample_payload(summary: str = "Profil data") -> CvDocumentPayload:
 def test_html_contains_sections():
     payload = _sample_payload()
     html = render_cv_html(payload, profile={"name": "Test"}, offer={"title": "Offer"})
-    assert "<aside class=\"sidebar\">" in html
-    assert "<main class=\"main-content\">" in html
-    assert "section-title\">Expérience" in html
+    assert "<h1>Data Analyst</h1>" in html
+    assert "<h2>Expérience</h2>" in html
+    assert "<h2>Formation</h2>" in html
+    assert "<h2>Compétences</h2>" in html
 
 
 def test_html_escapes_values():
@@ -58,3 +74,4 @@ def test_html_no_ats_terms():
     html = render_cv_html(payload, profile=None, offer=None)
     assert "ATS" not in html
     assert "ats_score_estimate" not in html
+    assert "sidebar" not in html

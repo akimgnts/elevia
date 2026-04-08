@@ -6,11 +6,12 @@ import json
 import logging
 import os
 import time
+import uuid
 from datetime import datetime, date, timezone, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..schemas.inbox import (
     CompassExplainCompact,
@@ -34,6 +35,7 @@ from ..schemas.inbox import (
     SemanticExplainability,
     SkillExplainItem,
 )
+from ..deps.auth import AuthenticatedUser, get_optional_user
 from ..utils.db import get_connection
 from ..utils.inbox_catalog import load_catalog_offers, load_catalog_offers_filtered, count_catalog_offers_filtered
 from ..utils.rome_link import get_offer_rome_links, get_rome_competences_for_rome_codes
@@ -77,6 +79,14 @@ MIN_RESULTS = 10
 MIN_STRICT = 5   # below this, auto-widen to neighbors
 SUSPICIOUS_SCORE_THRESHOLD = 95
 SIGNAL_MIN_K = 1.0
+PROFILE_INTELLIGENCE_WARM_LIMIT = 24
+# Was 1 — intentionally low to avoid O(n²) fuzzy ESCO scan in build_offer_intelligence.
+# After removing fuzzy scan in offer_canonical_mapping_stage, each offer takes ~1-3 ms,
+# so we can now scan the full catalog (≤60 pages × 24 offers = 1,440 offers) safely.
+# The while-loop early-exits as soon as candidate_items reaches page_size, so typical
+# requests stop after 3–6 pages regardless of this ceiling.
+PROFILE_INTELLIGENCE_MAX_PREFETCH_PAGES = 60
+DEFAULT_MAX_PREFETCH_PAGES = 3
 
 # Module-level cache for cluster IDF tables (built once, reused per request)
 _cluster_idf_cache: Optional[Dict[str, Dict[str, float]]] = None
@@ -120,6 +130,28 @@ def _build_or_get_engine(catalog: List[Dict]) -> MatchingEngine:
     _engine_cache = MatchingEngine(offers=catalog)
     _engine_cache_catalog_id = catalog_id
     return _engine_cache
+
+
+def warm_inbox_runtime() -> Dict[str, int]:
+    """
+    Preload the heavy inbox runtime caches once.
+
+    This avoids first-user cold-start spikes where catalog normalization,
+    engine construction, and cluster IDF all happen inside a live request.
+    """
+    catalog = _load_catalog_offers()
+    if not catalog:
+        return {"catalog_count": 0, "cluster_count": 0}
+
+    _build_or_get_engine(catalog)
+    cluster_idf = _build_or_get_cluster_idf(catalog)
+    # build_offer_intelligence warmup removed — takes 45 s/offer due to O(n²) fuzzy ESCO
+    # scan inside run_offer_canonical_mapping_stage. Lazy first-request caching is acceptable.
+    return {
+        "catalog_count": len(catalog),
+        "cluster_count": len(cluster_idf or {}),
+        "offer_intelligence_warmed": 0,
+    }
 
 
 # Fixed adjacency matrix (cluster → neighbor clusters)
@@ -336,9 +368,10 @@ def _apply_offer_intelligence(
     *,
     offer_payload: Dict,
     precomputed_payload: Optional[Dict] = None,
+    allow_recompute: bool = False,
 ) -> None:
     payload = precomputed_payload
-    if payload is None:
+    if payload is None and allow_recompute:
         try:
             payload = build_offer_intelligence(offer=offer_payload)
         except Exception:
@@ -818,7 +851,7 @@ def _load_catalog_offers() -> List[Dict]:
 
 
 @router.post("/inbox", summary="Get inbox items for a profile")
-async def get_inbox(
+def get_inbox(
     req: InboxRequest,
     domain_mode: str = Query(default="in_domain", pattern="^(strict|in_domain|all)$"),
     q_company: Optional[str] = Query(default=None, min_length=1),
@@ -873,7 +906,7 @@ async def get_inbox(
         )
     )
     if use_filters:
-        return await _get_inbox_filtered(
+        return _get_inbox_filtered(
             req=req,
             profile_payload=profile_payload,
             domain_mode=domain_mode,
@@ -1166,6 +1199,7 @@ async def get_inbox(
                 item,
                 offer_payload=_offer_c,
                 precomputed_payload=offer_intelligence_map.get(item.offer_id),
+                allow_recompute=False,
             )
             _apply_semantic_explainability(
                 item,
@@ -1239,7 +1273,7 @@ async def get_inbox(
     )
 
 
-async def _get_inbox_filtered(
+def _get_inbox_filtered(
     *,
     req: InboxRequest,
     profile_payload: Dict,
@@ -1329,9 +1363,12 @@ async def _get_inbox_filtered(
     offer_intelligence_map: Dict[str, Dict] = {}
     seen_ids: Set[str] = set()
 
+    max_prefetch_pages = (
+        PROFILE_INTELLIGENCE_MAX_PREFETCH_PAGES if profile_intelligence else DEFAULT_MAX_PREFETCH_PAGES
+    )
     pages_fetched = 0
     cursor_page = page_effective
-    while pages_fetched < 3 and len(candidate_items) < page_size_effective:
+    while pages_fetched < max_prefetch_pages and len(candidate_items) < page_size_effective:
         offset = (cursor_page - 1) * page_size_effective
         offers_page = load_catalog_offers_filtered(
             q_company=q_company,
@@ -1523,6 +1560,7 @@ async def _get_inbox_filtered(
             item,
             offer_payload=offer,
             precomputed_payload=offer_intelligence_map.get(item.offer_id),
+            allow_recompute=False,
         )
         _apply_semantic_explainability(
             item,
@@ -1704,9 +1742,20 @@ async def _get_inbox_filtered(
 
 
 @router.post("/offers/{offer_id}/decision", summary="Record a decision on an offer")
-async def post_decision(offer_id: str, req: DecisionRequest) -> DecisionResponse:
-    """Upsert a SHORTLISTED or DISMISSED decision."""
-    now = datetime.now(timezone.utc).isoformat()
+async def post_decision(
+    offer_id: str,
+    req: DecisionRequest,
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
+) -> DecisionResponse:
+    """
+    Upsert a SHORTLISTED or DISMISSED decision.
+
+    Always writes to offer_decisions (inbox filter — backward compat).
+    When authenticated, also writes a compat row to application_tracker:
+      SHORTLISTED → saved
+      DISMISSED   → archived
+    """
+    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     conn = get_connection()
     try:
         conn.execute(
@@ -1721,6 +1770,73 @@ async def post_decision(offer_id: str, req: DecisionRequest) -> DecisionResponse
             (req.profile_id, offer_id, req.status, req.note, now),
         )
         conn.commit()
+
+        # ── Compat layer: mirror decision into application_tracker ────────────
+        # Only runs when the request is authenticated.
+        # offer_decisions remains the source of truth for inbox filtering.
+        # application_tracker is the user-facing candidature tracker.
+        if current_user is not None:
+            _decision_status_map = {
+                "SHORTLISTED": "saved",
+                "DISMISSED": "archived",
+            }
+            tracker_status = _decision_status_map.get(req.status)
+            if tracker_status:
+                try:
+                    existing = conn.execute(
+                        "SELECT id, status FROM application_tracker "
+                        "WHERE offer_id = ? AND user_id = ?",
+                        (offer_id, current_user.user_id),
+                    ).fetchone()
+
+                    if existing is None:
+                        app_id = str(uuid.uuid4())
+                        conn.execute(
+                            "INSERT INTO application_tracker "
+                            "(id, user_id, offer_id, status, source, note, "
+                            "created_at, updated_at, last_status_change_at) "
+                            "VALUES (?, ?, ?, ?, 'assisted', ?, ?, ?, ?)",
+                            (
+                                app_id,
+                                current_user.user_id,
+                                offer_id,
+                                tracker_status,
+                                req.note,
+                                now, now, now,
+                            ),
+                        )
+                        conn.execute(
+                            "INSERT INTO application_status_history "
+                            "(id, application_id, from_status, to_status, changed_at) "
+                            "VALUES (?, ?, NULL, ?, ?)",
+                            (str(uuid.uuid4()), app_id, tracker_status, now),
+                        )
+                    else:
+                        app_id = existing["id"]
+                        old_status = existing["status"]
+                        if old_status != tracker_status:
+                            conn.execute(
+                                "UPDATE application_tracker SET "
+                                "status = ?, source = 'assisted', note = COALESCE(?, note), "
+                                "updated_at = ?, last_status_change_at = ? "
+                                "WHERE id = ?",
+                                (tracker_status, req.note, now, now, app_id),
+                            )
+                            conn.execute(
+                                "INSERT INTO application_status_history "
+                                "(id, application_id, from_status, to_status, changed_at) "
+                                "VALUES (?, ?, ?, ?, ?)",
+                                (str(uuid.uuid4()), app_id, old_status, tracker_status, now),
+                            )
+                    conn.commit()
+                except Exception as exc:
+                    logger.warning(
+                        "decision_compat_tracker_error offer_id=%s error=%s",
+                        offer_id,
+                        type(exc).__name__,
+                    )
+        # ── End compat layer ──────────────────────────────────────────────────
+
     finally:
         conn.close()
 

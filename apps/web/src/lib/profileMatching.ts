@@ -5,6 +5,7 @@ export type SkillsSource = "user" | "seed" | "none" | "capabilities_only";
 export type ProfileMatchingV1 = {
   id: string;
   matching_skills: string[];
+  skills_uri?: string[];
   capabilities: string[];
   languages: string[] | Array<{ code?: string; level?: string }>;
   education?: string;
@@ -12,7 +13,12 @@ export type ProfileMatchingV1 = {
   preferred_countries?: string[];
   detected_capabilities?: unknown;
   skills_source: SkillsSource;
+  canonical_skills?: Array<Record<string, unknown>>;
+  canonical_skills_count?: number;
+  enriched_signals?: Array<Record<string, unknown>>;
+  concept_signals?: Array<Record<string, unknown>>;
   profile_intelligence?: Record<string, unknown>;
+  profile_intelligence_ai_assist?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
 };
 
@@ -34,7 +40,13 @@ type ProfileInput = {
   preferred_countries?: string[];
   detected_capabilities?: Capability[];
   unmapped_skills_high_confidence?: UnmappedSkill[];
+  skills_uri?: string[];
+  canonical_skills?: Array<Record<string, unknown>>;
+  canonical_skills_count?: number;
+  enriched_signals?: Array<Record<string, unknown>>;
+  concept_signals?: Array<Record<string, unknown>>;
   profile_intelligence?: Record<string, unknown>;
+  profile_intelligence_ai_assist?: Record<string, unknown>;
 };
 
 export type BuildMatchingProfileResult = {
@@ -116,6 +128,7 @@ export function buildMatchingProfile(profile: ProfileInput, profileId: string): 
   const resultProfile: ProfileMatchingV1 = {
     id: profileId,
     matching_skills: matchingSkills,
+    skills_uri: Array.isArray(profile.skills_uri) ? profile.skills_uri : undefined,
     capabilities: uniqueStrings(capabilities).map((cap) => cap.toLowerCase()),
     languages: profile.languages || SEED_PROFILE.languages || [],
     education: profile.education || SEED_PROFILE.education,
@@ -123,10 +136,20 @@ export function buildMatchingProfile(profile: ProfileInput, profileId: string): 
     preferred_countries: profile.preferred_countries || [],
     detected_capabilities: profile.detected_capabilities,
     skills_source: skillsSource,
+    canonical_skills: Array.isArray(profile.canonical_skills) ? profile.canonical_skills : undefined,
+    canonical_skills_count:
+      typeof profile.canonical_skills_count === "number" ? profile.canonical_skills_count : undefined,
+    enriched_signals: Array.isArray(profile.enriched_signals) ? profile.enriched_signals : undefined,
+    concept_signals: Array.isArray(profile.concept_signals) ? profile.concept_signals : undefined,
     profile_intelligence: profile.profile_intelligence,
+    profile_intelligence_ai_assist: profile.profile_intelligence_ai_assist,
     metadata: {
       source: "profileMatchingV1",
       skills_source: skillsSource,
+      canonical_skills_count:
+        typeof profile.canonical_skills_count === "number" ? profile.canonical_skills_count : 0,
+      enriched_signal_count: Array.isArray(profile.enriched_signals) ? profile.enriched_signals.length : 0,
+      concept_signal_count: Array.isArray(profile.concept_signals) ? profile.concept_signals.length : 0,
     },
   };
 

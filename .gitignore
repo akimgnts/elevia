@@ -43,6 +43,7 @@ apps/api/data/sample_*.json
 # Scraping artifacts (raw data dumps — never commit)
 data/*.csv
 data/*.json
+!data/action_verbs.json
 raw_offers_*.json
 
 # Report artifacts (local QA exports)
