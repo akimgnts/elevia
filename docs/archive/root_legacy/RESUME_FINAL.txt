@@ -1,0 +1,120 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  🔍 RÉSUMÉ FINAL - ELEVIA COMPASS                           ║
+║                     APIs France Travail & Notebook                           ║
+║                         25 Novembre 2025                                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📊 STATUS DES APIs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ API                              │ Status    │ Scope requis              │
+├──────────────────────────────────┼───────────┼───────────────────────────┤
+│ 1. Offres d'emploi v2            │ ✅ OK     │ api_offresdemploiv2       │
+│ 2. ROME Métiers                  │ ❌ 401    │ api_romev1  ⚠️ MANQUANT  │
+│ 3. ROME Compétences              │ ❌ 401    │ api_romev1  🔴 CRITIQUE  │
+│ 4. ROME Contextes                │ ❌ 401    │ api_romev1                │
+│ 5. Marché du Travail             │ ❌ 401    │ api_marchetravailv1       │
+│ 6. Anotéa (formations)           │ ❌ 403    │ api_anoteav1 (déprécié?)  │
+└────────────────────────────────────────────────────────────────────────────┘
+
+  Résultat : 1/6 APIs fonctionnelles (17%)
+             4/6 APIs bloquées par scopes manquants (67%)
+             1/6 API avec erreur 403 (16%)
+
+📈 DONNÉES DISPONIBLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✅ 6,150 offres d'emploi récupérées
+  ✅ 41 fichiers JSON dans data/raw/
+  ✅ Champs complets : id, intitule, romeCode, lieuTravail, typeContrat
+  ⚠️  Compétences : VIDES dans la plupart des offres
+  ⚠️  Salaires : Souvent manquants
+
+📓 STATUS DU NOTEBOOK analysis_elevia_compass.ipynb
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Composant               │ Status        │ Remarque                        │
+├─────────────────────────┼───────────────┼─────────────────────────────────┤
+│ Environnement Python    │ ✅ OK         │ venv + toutes librairies        │
+│ fact_offers             │ ✅ OK         │ 6,150 lignes                    │
+│ dim_location            │ ✅ OK         │ Villes/départements complets    │
+│ dim_job                 │ ✅ OK         │ Codes ROME extraits             │
+│ dim_skill               │ ❌ VIDE       │ API ROME manquante              │
+│ bridge_offer_skill      │ ❌ VIDE       │ API ROME manquante              │
+│ Graphe Compass          │ ⚠️  INCOMPLET │ Nœuds OK, arêtes manquantes     │
+│ Visualisations métiers  │ ✅ OK         │ Top 20 ROME, villes, contrats   │
+│ Monte Carlo             │ ⚠️  BASIQUE   │ Matrice identité uniquement     │
+└────────────────────────────────────────────────────────────────────────────┘
+
+  🎯 VERDICT : Le notebook FONCTIONNE mais produit un graphe INCOMPLET
+              → Impossible de recommander des transitions métiers sans compétences
+
+🔴 PROBLÈME CRITIQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠️  Le graphe métiers-compétences est VIDE
+
+  Pourquoi ?
+  → Les offres n'ont presque AUCUNE compétence renseignée
+  → Les compétences viennent de l'API ROME (scope api_romev1 manquant)
+
+  Impact :
+  ❌ dim_skill : VIDE
+  ❌ bridge_offer_skill : VIDE
+  ❌ Graphe Compass : PAS d'arêtes job-skill
+  ❌ ICC (similarité) : IMPOSSIBLE à calculer
+  ❌ Recommandations transitions : IMPOSSIBLES
+
+🛠️ SOLUTION IMMÉDIATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1️⃣  Contacter France Travail
+      → Email : support-api@francetravail.fr
+      → Demander l'activation du scope : api_romev1
+
+      Ton CLIENT_ID :
+      PAR_elevia1_edccae836bbd05b5bb1eb4de5f91a9c10866abbf0a15dd89a90d96cc8f78b94d
+
+  2️⃣  Mettre à jour .env
+      FT_SCOPES=api_offresdemploiv2 o2dsoffre api_romev1
+
+  3️⃣  Récupérer les données ROME
+      python fetchers/fetch_rome_metiers.py
+      python fetchers/fetch_rome_competences.py
+
+  4️⃣  Relancer le notebook
+      source .venv/bin/activate
+      jupyter notebook analysis_elevia_compass.ipynb
+
+🚀 CE QUI FONCTIONNE DÈS MAINTENANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Tu PEUX lancer le notebook maintenant pour voir :
+  ✅ Analyses des métiers (Top 20 ROME)
+  ✅ Analyses des localisations (Top 20 villes)
+  ✅ Types de contrats
+  ✅ Distribution des salaires (partiels)
+
+  Commande :
+  cd /Users/akimguentas/Documents/elevia-compass
+  source .venv/bin/activate
+  jupyter notebook analysis_elevia_compass.ipynb
+
+📄 FICHIERS DE DIAGNOSTIC CRÉÉS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  📋 STATUS_APIS_FRANCE_TRAVAIL.md    → Détail complet de tous les tests API
+  📋 RESUME_ERREURS_NOTEBOOK.md       → Diagnostic complet du notebook
+  📋 ARCHITECTURE_TECHNIQUE.md        → Architecture du projet
+  📋 CORRECTIONS_APPLIED.md           → Corrections OAuth2 effectuées
+  🧪 test_all_apis.py                 → Script de test automatique
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━���━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Diagnostic effectué par Claude Code - 25 Novembre 2025
+🎯 1 API fonctionnelle, 5 APIs bloquées par scopes manquants
+🔴 ACTION REQUISE : Activer scope api_romev1 pour débloquer le projet
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -49,3 +49,16 @@ raw_offers_*.json
 # Report artifacts (local QA exports)
 report_elevia.*
 README_EXPORT_PDF.md
+
+# Local AI / recruiter workflow artifacts
+CLAUDE.md
+.graphifyignore
+_bmad-output/
+graphify-out/
+apps/graphify-out/
+apps/api/data/cache/
+apps/api/data/eval/cv_batch_full_audit.json
+apps/api/data/eval/cv_batch_full_audit.csv
+apps/api/data/eval/cv_batch_full_audit_report.md
+apps/api/data/eval/render_bloc3/
+tools/

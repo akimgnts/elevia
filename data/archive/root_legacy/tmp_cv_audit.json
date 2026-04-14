@@ -1,0 +1,2389 @@
+[
+  {
+    "file": "Akim Guentas – Audit & Data Analyst.pdf",
+    "text_len": 2346,
+    "text_preview": "CONTACT Akim Guentas Le Havre, France akimguentas13@gmail.com +33 7 83 75 04 83 COMPÉTENCES Analyse financière Audit des données Analyse des risques Contrôle interne Data Analysis Excel avancé SQL Python Power BI Data Quality LANGUES Français — Natif Anglais — B2 CENTRES D'INTÉRÊT Analyse économique Données financières Industrie musicale et data Technologies et innovation Akim Guentas AUDIT & DATA ANALYST PROFIL Analyste orienté données avec une forte capacité d’analyse et de structuration de l’information. Expérience dans l’analyse de données opérationnelles et commerciales, la création d’indicateurs de performance et l’amélioration de la qualité des données utilisées dans les reportings. Intérêt particulier pour l’audit, la compréhension des processus d’entreprise et l’analyse des risques financiers et opérationnels. EXPÉRIENCES PROFESSIONNELLES Business Analyst / Data Analyst Sidel Blowing & Services – Industrie internationale Analyse de données opérationnelles, commerciales et financières pour améliorer le pilotage de l’activité. Création de tableaux de bord Power BI permettant le suivi de plus de 20 indicateurs de performance (KPI). Identification d’anomalies et incohérences dans les bases de données internes. Amélioration de la fiabilité des données utilisées dans les reportings. Automatisation de reportings via Python et Excel permettant de réduire le temps de production d’environ 30 %. Collaboration avec les équipes métiers pour analyser les processus et améliorer l’exploitation des données. Business Development & Data Analyst Vassard OMB – Commerce B2B",
+    "canonical_count": 10,
+    "raw_detected": 137,
+    "validated_skills": 10,
+    "filtered_out": 127,
+    "skills_unmapped_count": 120,
+    "canonical_skills_count": 4,
+    "tight_candidates_count": 99,
+    "resolved_to_esco_count": 0,
+    "rejected_tokens_count": 10,
+    "validated_labels": [
+      "audit interne",
+      "gestion de projets",
+      "algorithmes",
+      "analyse de données",
+      "anglais",
+      "cycle de développement logiciel",
+      "exploration de données",
+      "utiliser un logiciel de tableur",
+      "Python (programmation informatique)",
+      "SQL"
+    ],
+    "skills_canonical": [
+      "audit interne",
+      "gestion de projets",
+      "algorithmes",
+      "analyse de données",
+      "anglais",
+      "cycle de développement logiciel",
+      "exploration de données",
+      "utiliser un logiciel de tableur",
+      "Python (programmation informatique)",
+      "SQL"
+    ],
+    "tight_candidates": [
+      "Data Analysis",
+      "Power BI",
+      "BI",
+      "Python",
+      "R",
+      "SQL",
+      "20 indicateurs",
+      "20 indicateurs de",
+      "20 indicateurs de performance",
+      "20 indicateurs de performance KPI",
+      "30 Collaboration",
+      "30 Collaboration avec",
+      "30 Collaboration avec les",
+      "30 Collaboration avec les quipes",
+      "83 COMP",
+      "83 COMP TENCES",
+      "83 COMP TENCES Analyse",
+      "83 COMP TENCES Analyse financi",
+      "activit Cr",
+      "activit Cr ation",
+      "ais Natif",
+      "ais Natif Anglais B2",
+      "ais Natif Anglais B2 CENTRES",
+      "Akim Guentas",
+      "Akim Guentas AUDIT",
+      "Akim Guentas AUDIT DATA",
+      "Akim Guentas AUDIT DATA ANALYST",
+      "am lioration",
+      "am liorer",
+      "am liorer l",
+      "am liorer l exploitation",
+      "Analysis Excel",
+      "Analysis Excel avanc",
+      "Analysis Excel avanc SQL",
+      "Analysis Excel avanc SQL Python",
+      "Analyst Data",
+      "Analyst Data Analyst",
+      "Analyst Data Analyst Sidel",
+      "Analyst Data Analyst Sidel Blowing",
+      "Analyst Sidel",
+      "Analyst Sidel Blowing",
+      "Analyst Sidel Blowing Services",
+      "Analyst Sidel Blowing Services Industrie",
+      "Analyst Vassard",
+      "Analyst Vassard OMB",
+      "Analyst Vassard OMB Commerce",
+      "Analyst Vassard OMB Commerce B2B",
+      "Analyste orient",
+      "Analyste orient donn",
+      "Analyste orient donn es"
+    ],
+    "canonical_skills": [
+      {
+        "raw": "Data Analysis",
+        "canonical_id": "skill:data_analysis",
+        "label": "Data Analysis",
+        "strategy": "synonym_match",
+        "confidence": 1.0,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.2
+      },
+      {
+        "raw": "Power BI",
+        "canonical_id": "skill:business_intelligence",
+        "label": "Business Intelligence",
+        "strategy": "tool_match",
+        "confidence": 0.8,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.25
+      },
+      {
+        "raw": "R",
+        "canonical_id": "skill:statistical_programming",
+        "label": "Statistical Programming",
+        "strategy": "synonym_match",
+        "confidence": 1.0,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.35
+      },
+      {
+        "raw": "SQL",
+        "canonical_id": "skill:sql_querying",
+        "label": "SQL Querying",
+        "strategy": "synonym_match",
+        "confidence": 1.0,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.2
+      },
+      {
+        "raw": "20 indicateurs",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "20 indicateurs de",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "20 indicateurs de performance",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "20 indicateurs de performance KPI",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "30 Collaboration",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "30 Collaboration avec",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "30 Collaboration avec les",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "30 Collaboration avec les quipes",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "83 COMP",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "83 COMP TENCES",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "83 COMP TENCES Analyse",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "83 COMP TENCES Analyse financi",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "activit Cr",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "activit Cr ation",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "ais Natif",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "ais Natif Anglais B2",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      }
+    ],
+    "analyze_dev_counters": {
+      "raw_count": 137,
+      "tight_count": 99,
+      "split_chunks_count": 0,
+      "cleaned_chunks_count": 0,
+      "lemmatized_chunks_count": 0,
+      "pos_rejected_count": 0,
+      "phrase_length_gt3_tokens": 39,
+      "canonical_count": 7,
+      "unresolved_count": 93,
+      "expanded_count": 1,
+      "promoted_uri_count": 0,
+      "near_match_count": 0,
+      "noise_removed_count": 21,
+      "canonical_success_rate": 0.0707,
+      "compass_skill_candidates": 58,
+      "compass_skill_rejected": 10,
+      "cv_structure_rejected_count": 0,
+      "tight_single_token_count": 0,
+      "tight_generic_rejected_count": 0,
+      "tight_numeric_rejected_count": 0,
+      "tight_repeated_fragment_count": 0,
+      "tight_filtered_out_count": 0,
+      "tight_split_generated_count": 0,
+      "broken_token_repair_count": 0,
+      "generated_composite_rejected_count": 0,
+      "duplicate_tokens": 0,
+      "broken_tokens": 18,
+      "multi_skill_phrases": 8,
+      "reduced_candidates_count": 23,
+      "cleaned_candidates_count": 88
+    },
+    "signal_loss_audit": [
+      {
+        "token": "20 indicateurs",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "20 indicateurs de",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "20 indicateurs de performance",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "20 indicateurs de performance KPI",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "30 Collaboration",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "30 Collaboration avec",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "30 Collaboration avec les",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "30 Collaboration avec les quipes",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "83 COMP",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "83 COMP TENCES",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "83 COMP TENCES Analyse",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "83 COMP TENCES Analyse financi",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "activit Cr",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "BROKEN_TOKEN"
+      },
+      {
+        "token": "activit Cr ation",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "BROKEN_TOKEN"
+      },
+      {
+        "token": "ais Natif",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "ais Natif Anglais B2",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "ais Natif Anglais B2 CENTRES",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Akim Guentas",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "Akim Guentas AUDIT",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "Akim Guentas AUDIT DATA",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Akim Guentas AUDIT DATA ANALYST",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "am lioration",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "am liorer",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "am liorer l",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "BROKEN_TOKEN"
+      },
+      {
+        "token": "am liorer l exploitation",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      }
+    ],
+    "noise_removed": [
+      "akimguentas13 gmail.com",
+      "akimguentas13 gmail.com 33",
+      "akimguentas13 gmail.com 33 7",
+      "akimguentas13 gmail.com 33 7 83",
+      "France akimguentas13 gmail.com",
+      "France akimguentas13 gmail.com 33",
+      "France akimguentas13 gmail.com 33 7",
+      "gmail.com 33",
+      "gmail.com 33 7",
+      "gmail.com 33 7 83",
+      "gmail.com 33 7 83 75",
+      "Havre France akimguentas13 gmail.com",
+      "Havre France akimguentas13 gmail.com 33",
+      "Le Havre France akimguentas13 gmail.com",
+      "gmail.com",
+      "04 83 COMP",
+      "04 83 COMP TENCES",
+      "04 83 COMP TENCES Analyse",
+      "75 04 83 COMP",
+      "75 04 83 COMP TENCES",
+      "83 75 04 83 COMP"
+    ]
+  },
+  {
+    "file": "Akim_Guentas_Resume.pdf",
+    "text_len": 3060,
+    "text_preview": "AKIM GUENTAS Data Analyst & Developer | Python, BI, Automation, ML \u000033783750483 akinguentas13@gmail.com LinkedIn Le Havre EXPERIENCES Data Analyst / MarCom Assistant Sidel 01/2024 \u0000 Présent Octeville-sur-Mer, France Leveraging Python, Power B and machine learning, I transformed raw business data into actionable insights, automated reporting processes, and delivered decision-support tools that improved efficiency and risk anticipation across departments Designed and automated KPI reporting workflows using Python, Power Bl, reducing reporting time by 15% Built interactive Power Bl dashboards to monitor sales, marketing, and after-sales performance across multiple departments Developed Python scripts to automate data preparation and ensure consistency for decision-making Collaborated with cross-functional international teams to provide data-driven insights supporting strategic and operational decisions Created and optimized marketing content using Adobe Photoshop and Premiere Pro, supporting campaigns and external communication. Contributed to the preparation of international trade shows and events by producing newsletters, visual and digital assets aligned with Sidel’s brand strategy. Business Development & CRM Analyst Vassard OMB Mobilier 10/2022 \u0000 08/2023 Le Havre, France Developed and optimized CRM pipelines and online acquisition funnels, using data-driven processes to improve client follow-ups, sales forecasting, and conversion rates.\" EDUCATION MCS Analytics for Business, Data analysis & IA Eugenia School 10/2023 \u0000 01/2025 Paris Learned Python programming for data analysis & automation Built interactive dashboards with Power BI Applied Machine Learning models",
+    "canonical_count": 16,
+    "raw_detected": 199,
+    "validated_skills": 16,
+    "filtered_out": 183,
+    "skills_unmapped_count": 174,
+    "canonical_skills_count": 9,
+    "tight_candidates_count": 71,
+    "resolved_to_esco_count": 0,
+    "rejected_tokens_count": 11,
+    "validated_labels": [
+      "gérer une équipe",
+      "analyse de données",
+      "analyse marketing",
+      "argumentaire de vente",
+      "communication",
+      "développement par itérations",
+      "exploration de données",
+      "gestion de la relation client",
+      "gestion de projets par méthode Agile",
+      "outils de gestion de configuration logicielle",
+      "utiliser un logiciel de tableur",
+      "paris",
+      "PostgreSQL",
+      "Python (programmation informatique)",
+      "SQL",
+      "techniques de marketing numérique"
+    ],
+    "skills_canonical": [
+      "gérer une équipe",
+      "analyse de données",
+      "analyse marketing",
+      "argumentaire de vente",
+      "communication",
+      "développement par itérations",
+      "exploration de données",
+      "gestion de la relation client",
+      "gestion de projets par méthode Agile",
+      "outils de gestion de configuration logicielle",
+      "utiliser un logiciel de tableur",
+      "paris",
+      "PostgreSQL",
+      "Python (programmation informatique)",
+      "SQL",
+      "techniques de marketing numérique"
+    ],
+    "tight_candidates": [
+      "Data analysis",
+      "machine learning",
+      "Power BI",
+      "acquisition funnels using data-driven",
+      "acquisition funnels using data-driven processes",
+      "after-sales performance",
+      "after-sales performance across",
+      "after-sales performance across multiple",
+      "after-sales performance across multiple departments",
+      "Agile",
+      "AI",
+      "and after-sales",
+      "and after-sales performance",
+      "and after-sales performance across",
+      "and after-sales performance across multiple",
+      "and decision-making",
+      "and decision-making REALISATION",
+      "and decision-making REALISATION Enhanced",
+      "and decision-making REALISATION Enhanced conversion",
+      "and delivered decision-support",
+      "and delivered decision-support tools",
+      "and delivered decision-support tools that",
+      "and ensure consistency for decision-making",
+      "API",
+      "BI",
+      "client follow-ups",
+      "client follow-ups sales",
+      "client follow-ups sales forecasting",
+      "client follow-ups sales forecasting and",
+      "Collaborated with cross-functional",
+      "Collaborated with cross-functional international",
+      "Collaborated with cross-functional international teams",
+      "communication and decision-making",
+      "communication and decision-making REALISATION",
+      "communication and decision-making REALISATION Enhanced",
+      "consistency for decision-making",
+      "consistency for decision-making Collaborated",
+      "consistency for decision-making Collaborated with",
+      "cross-functional international",
+      "cross-functional international teams",
+      "cross-functional international teams to",
+      "cross-functional international teams to provide",
+      "dashboards",
+      "data-driven insights",
+      "data-driven insights supporting",
+      "data-driven insights supporting strategic",
+      "data-driven insights supporting strategic and",
+      "data-driven processes",
+      "data-driven processes to",
+      "data-driven processes to improve"
+    ],
+    "canonical_skills": [
+      {
+        "raw": "Data analysis",
+        "canonical_id": "skill:data_analysis",
+        "label": "Data Analysis",
+        "strategy": "synonym_match",
+        "confidence": 1.0,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.2
+      },
+      {
+        "raw": "machine learning",
+        "canonical_id": "skill:machine_learning",
+        "label": "Machine Learning",
+        "strategy": "synonym_match",
+        "confidence": 1.0,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.1
+      },
+      {
+        "raw": "Power BI",
+        "canonical_id": "skill:business_intelligence",
+        "label": "Business Intelligence",
+        "strategy": "tool_match",
+        "confidence": 0.8,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.25
+      },
+      {
+        "raw": "acquisition funnels using data-driven",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "acquisition funnels using data-driven processes",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "after-sales performance",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "after-sales performance across",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "after-sales performance across multiple",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "after-sales performance across multiple departments",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Agile",
+        "canonical_id": "skill:agile_delivery",
+        "label": "Agile Delivery",
+        "strategy": "synonym_match",
+        "confidence": 1.0,
+        "cluster_name": "FINANCE_BUSINESS_OPERATIONS",
+        "genericity_score": 0.45
+      },
+      {
+        "raw": "and after-sales",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and after-sales performance",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and after-sales performance across",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and after-sales performance across multiple",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and decision-making",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and decision-making REALISATION",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and decision-making REALISATION Enhanced",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and decision-making REALISATION Enhanced conversion",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and delivered decision-support",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "and delivered decision-support tools",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      }
+    ],
+    "analyze_dev_counters": {
+      "raw_count": 199,
+      "tight_count": 71,
+      "split_chunks_count": 0,
+      "cleaned_chunks_count": 0,
+      "lemmatized_chunks_count": 0,
+      "pos_rejected_count": 0,
+      "phrase_length_gt3_tokens": 37,
+      "canonical_count": 14,
+      "unresolved_count": 61,
+      "expanded_count": 0,
+      "promoted_uri_count": 0,
+      "near_match_count": 2,
+      "noise_removed_count": 49,
+      "canonical_success_rate": 0.1972,
+      "compass_skill_candidates": 100,
+      "compass_skill_rejected": 11,
+      "cv_structure_rejected_count": 0,
+      "tight_single_token_count": 0,
+      "tight_generic_rejected_count": 0,
+      "tight_numeric_rejected_count": 0,
+      "tight_repeated_fragment_count": 0,
+      "tight_filtered_out_count": 0,
+      "tight_split_generated_count": 0,
+      "broken_token_repair_count": 0,
+      "generated_composite_rejected_count": 0,
+      "duplicate_tokens": 0,
+      "broken_tokens": 0,
+      "multi_skill_phrases": 2,
+      "reduced_candidates_count": 10,
+      "cleaned_candidates_count": 42
+    },
+    "signal_loss_audit": [
+      {
+        "token": "acquisition funnels using data-driven",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "acquisition funnels using data-driven processes",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "after-sales performance",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "after-sales performance across",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "after-sales performance across multiple",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "after-sales performance across multiple departments",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and after-sales",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "and after-sales performance",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "and after-sales performance across",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and after-sales performance across multiple",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and decision-making",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "and decision-making REALISATION",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "and decision-making REALISATION Enhanced",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and decision-making REALISATION Enhanced conversion",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and delivered decision-support",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "and delivered decision-support tools",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and delivered decision-support tools that",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and ensure consistency for decision-making",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "client follow-ups",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "client follow-ups sales",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "client follow-ups sales forecasting",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "client follow-ups sales forecasting and",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Collaborated with cross-functional",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "Collaborated with cross-functional international",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Collaborated with cross-functional international teams",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      }
+    ],
+    "noise_removed": [
+      "01/2024 Pr",
+      "01/2024 Pr sent",
+      "01/2024 Pr sent Octeville-sur-Mer",
+      "01/2024 Pr sent Octeville-sur-Mer France",
+      "01/2025 Paris",
+      "01/2025 Paris Learned",
+      "01/2025 Paris Learned Python",
+      "01/2025 Paris Learned Python programming",
+      "08/2023 Le",
+      "08/2023 Le Havre",
+      "08/2023 Le Havre France",
+      "08/2023 Le Havre France Developed",
+      "08/2023 Paris",
+      "08/2023 Paris Learned",
+      "08/2023 Paris Learned marketing",
+      "08/2023 Paris Learned marketing strategy",
+      "09/2022 08/2023",
+      "09/2022 08/2023 Paris",
+      "09/2022 08/2023 Paris Learned",
+      "09/2022 08/2023 Paris Learned marketing",
+      "10/2022 08/2023",
+      "10/2022 08/2023 Le",
+      "10/2022 08/2023 Le Havre",
+      "10/2022 08/2023 Le Havre France",
+      "10/2023 01/2025",
+      "10/2023 01/2025 Paris",
+      "10/2023 01/2025 Paris Learned",
+      "10/2023 01/2025 Paris Learned Python",
+      "33783750483 akinguentas13 gmail.com",
+      "33783750483 akinguentas13 gmail.com LinkedIn",
+      "33783750483 akinguentas13 gmail.com LinkedIn Le",
+      "akinguentas13 gmail.com",
+      "akinguentas13 gmail.com LinkedIn",
+      "akinguentas13 gmail.com LinkedIn Le",
+      "akinguentas13 gmail.com LinkedIn Le Havre",
+      "analysis IA Eugenia School 10/2023",
+      "Analyst MarCom Assistant Sidel 01/2024",
+      "Analyst Vassard OMB Mobilier 10/2022",
+      "Assistant Sidel 01/2024",
+      "Assistant Sidel 01/2024 Pr",
+      "Assistant Sidel 01/2024 Pr sent",
+      "Automation ML 33783750483 akinguentas13 gmail.com",
+      "Business School 09/2022",
+      "Business School 09/2022 08/2023",
+      "Business School 09/2022 08/2023 Paris",
+      "EM Normandie Business School 09/2022",
+      "Eugenia School 10/2023",
+      "Eugenia School 10/2023 01/2025",
+      "Eugenia School 10/2023 01/2025 Paris"
+    ]
+  },
+  {
+    "file": "CV WECKER.pdf",
+    "text_len": 3570,
+    "text_preview": "Wecker Adam Paris : +33 7 69 36 67 68 : adam.wecker0@gmail.com 23 ans – permis de conduire Web CV : adamwecker.fr FORMATION 2016 – 2021 ESME SUDRIA, Paris, France –Diplôme d’ingénieur majeur Intelligence artificielle et certification HUAWEI AI et Microsoft Azure A-Z 900. 2019 Semestre d’études à Kyunnpook nation university, Corée du Sud. 2016 Baccalauréat Scientifique - Série S - Mention B spécialité Informatique. COMPETENCES Informatique : Windows(batch), Linux(unix) Langages : Python, C/C++, C#, JavaScript/React, Scala Compétences : Data Science AWS, Azure, GCP, DevOps/Terraform/Git/Action, API flask/fastAPI Kubernetes/Docker, Postgre/Mongo, OpenCV et plus Intelligence Artificielle et Data science: Compétences : NLP, scikit-learn, Tensorflow/Keras/pytorch, Machine Learning (XGB,RdForest...), Deep Learning (CNN,RNN,LLM…), Reinforcement Learning, autre state of art algorithmes EXPERIENCES PROFESSIONNELLES 2021 -2023 Data Scientist chez Total energies : Dans un Lab de Data Science j’ai travaillé sur plusieurs projets AGILE: • Développé, amélioré, maintien d’un model OR-tools capable de résoudre un problème de type rcpsp • Développé un outil OCR (OpenCV) dans une webapp sur Azure pour faciliter l’entrée de données issues des process de sécurité, création et maintenance d’une PostgreSQL DB + Data analyses. • Data augmentation avec un model XGB pour compléter un dataset à propos du temps des travaux de maintenance offshore • Développé “from scratch” une web app, Back end(flask)/Front end (dash/react) github action pipeline. Fonctionnalité : recherche dans",
+    "canonical_count": 26,
+    "raw_detected": 263,
+    "validated_skills": 26,
+    "filtered_out": 237,
+    "skills_unmapped_count": 226,
+    "canonical_skills_count": 6,
+    "tight_candidates_count": 73,
+    "resolved_to_esco_count": 0,
+    "rejected_tokens_count": 12,
+    "validated_labels": [
+      "recruter des employés",
+      "algorithmes",
+      "analyse de données",
+      "anglais",
+      "conseiller d’autres personnes",
+      "cycle de développement logiciel",
+      "DevOps",
+      "développement par itérations",
+      "espagnol",
+      "exploration de données",
+      "gestion de projets",
+      "gestion de projets par méthode Agile",
+      "outils de gestion de configuration logicielle",
+      "informatique",
+      "informatique décisionnelle",
+      "japonais",
+      "JavaScript",
+      "JavaScript Framework",
+      "traitement automatique du langage naturel",
+      "programmation informatique",
+      "paris",
+      "photographie",
+      "PostgreSQL",
+      "Python (programmation informatique)",
+      "robotique",
+      "Scala"
+    ],
+    "skills_canonical": [
+      "recruter des employés",
+      "algorithmes",
+      "analyse de données",
+      "anglais",
+      "conseiller d’autres personnes",
+      "cycle de développement logiciel",
+      "DevOps",
+      "développement par itérations",
+      "espagnol",
+      "exploration de données",
+      "gestion de projets",
+      "gestion de projets par méthode Agile",
+      "outils de gestion de configuration logicielle",
+      "informatique",
+      "informatique décisionnelle",
+      "japonais",
+      "JavaScript",
+      "JavaScript Framework",
+      "traitement automatique du langage naturel",
+      "programmation informatique",
+      "paris",
+      "photographie",
+      "PostgreSQL",
+      "Python (programmation informatique)",
+      "robotique",
+      "Scala"
+    ],
+    "tight_candidates": [
+      "scikit-learn",
+      "Data Science",
+      "Deep Learning",
+      "Machine Learning",
+      "Reinforcement Learning",
+      "1 et 2 Bataille naval/Puissance4",
+      "2 Bataille naval/Puissance4",
+      "2 Bataille naval/Puissance4 LANGUES",
+      "2 Bataille naval/Puissance4 LANGUES ETRANGERES",
+      "68 adam.wecker0",
+      "900/990 TOEIC",
+      "900/990 TOEIC Japonais",
+      "900/990 TOEIC Japonais JLPT",
+      "900/990 TOEIC Japonais JLPT 5",
+      "A-Z 900",
+      "AGILE",
+      "AI",
+      "AI et Microsoft Azure A-Z",
+      "Anglais 900/990",
+      "Anglais 900/990 TOEIC",
+      "Anglais 900/990 TOEIC Japonais",
+      "Anglais 900/990 TOEIC Japonais JLPT",
+      "Anglais et japonais Contribution open-source",
+      "API",
+      "API flask/fastAPI",
+      "API flask/fastAPI Kubernetes/Docker",
+      "API flask/fastAPI Kubernetes/Docker Postgre/Mongo",
+      "API flask/fastAPI Kubernetes/Docker Postgre/Mongo OpenCV",
+      "ation/gestion de",
+      "ation/gestion de base",
+      "ation/gestion de base de",
+      "ation/gestion de base de donn",
+      "Auto-trader de",
+      "Auto-trader de cryptomonnaies",
+      "Auto-trader de cryptomonnaies SDWAN",
+      "Auto-trader de cryptomonnaies SDWAN reinforcement",
+      "AWS",
+      "AWS Azure GCP DevOps/Terraform/Git/Action",
+      "AWS Azure GCP DevOps/Terraform/Git/Action API",
+      "Azure",
+      "Azure A-Z",
+      "Azure A-Z 900",
+      "Azure GCP DevOps/Terraform/Git/Action",
+      "Azure GCP DevOps/Terraform/Git/Action API",
+      "Azure GCP DevOps/Terraform/Git/Action API flask/fastAPI",
+      "Bataille naval/Puissance4",
+      "Bataille naval/Puissance4 LANGUES",
+      "Bataille naval/Puissance4 LANGUES ETRANGERES",
+      "Bataille naval/Puissance4 LANGUES ETRANGERES Anglais",
+      "BI"
+    ],
+    "canonical_skills": [
+      {
+        "raw": "scikit-learn",
+        "canonical_id": "skill:machine_learning",
+        "label": "Machine Learning",
+        "strategy": "tool_match",
+        "confidence": 0.8,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.1
+      },
+      {
+        "raw": "Data Science",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Deep Learning",
+        "canonical_id": "skill:deep_learning",
+        "label": "Deep Learning",
+        "strategy": "synonym_match",
+        "confidence": 1.0,
+        "cluster_name": "DATA_ANALYTICS_AI",
+        "genericity_score": 0.1
+      },
+      {
+        "raw": "Reinforcement Learning",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "1 et 2 Bataille naval/Puissance4",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "2 Bataille naval/Puissance4",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "2 Bataille naval/Puissance4 LANGUES",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "2 Bataille naval/Puissance4 LANGUES ETRANGERES",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "68 adam.wecker0",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "900/990 TOEIC",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "900/990 TOEIC Japonais",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "900/990 TOEIC Japonais JLPT",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "900/990 TOEIC Japonais JLPT 5",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "A-Z 900",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "AGILE",
+        "canonical_id": "skill:agile_delivery",
+        "label": "Agile Delivery",
+        "strategy": "synonym_match",
+        "confidence": 1.0,
+        "cluster_name": "FINANCE_BUSINESS_OPERATIONS",
+        "genericity_score": 0.45
+      },
+      {
+        "raw": "AI et Microsoft Azure A-Z",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Anglais 900/990",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Anglais 900/990 TOEIC",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Anglais 900/990 TOEIC Japonais",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Anglais 900/990 TOEIC Japonais JLPT",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      }
+    ],
+    "analyze_dev_counters": {
+      "raw_count": 263,
+      "tight_count": 73,
+      "split_chunks_count": 0,
+      "cleaned_chunks_count": 0,
+      "lemmatized_chunks_count": 0,
+      "pos_rejected_count": 0,
+      "phrase_length_gt3_tokens": 35,
+      "canonical_count": 9,
+      "unresolved_count": 64,
+      "expanded_count": 0,
+      "promoted_uri_count": 0,
+      "near_match_count": 1,
+      "noise_removed_count": 47,
+      "canonical_success_rate": 0.1233,
+      "compass_skill_candidates": 100,
+      "compass_skill_rejected": 12,
+      "cv_structure_rejected_count": 0,
+      "tight_single_token_count": 0,
+      "tight_generic_rejected_count": 0,
+      "tight_numeric_rejected_count": 0,
+      "tight_repeated_fragment_count": 0,
+      "tight_filtered_out_count": 0,
+      "tight_split_generated_count": 0,
+      "broken_token_repair_count": 0,
+      "generated_composite_rejected_count": 0,
+      "duplicate_tokens": 0,
+      "broken_tokens": 12,
+      "multi_skill_phrases": 0,
+      "reduced_candidates_count": 7,
+      "cleaned_candidates_count": 67
+    },
+    "signal_loss_audit": [
+      {
+        "token": "Data Science",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "Reinforcement Learning",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "1 et 2 Bataille naval/Puissance4",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "2 Bataille naval/Puissance4",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "2 Bataille naval/Puissance4 LANGUES",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "2 Bataille naval/Puissance4 LANGUES ETRANGERES",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "68 adam.wecker0",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "900/990 TOEIC",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "900/990 TOEIC Japonais",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "900/990 TOEIC Japonais JLPT",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "900/990 TOEIC Japonais JLPT 5",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "A-Z 900",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "AI et Microsoft Azure A-Z",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Anglais 900/990",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "Anglais 900/990 TOEIC",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "Anglais 900/990 TOEIC Japonais",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Anglais 900/990 TOEIC Japonais JLPT",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Anglais et japonais Contribution open-source",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "API flask/fastAPI",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "API flask/fastAPI Kubernetes/Docker",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "API flask/fastAPI Kubernetes/Docker Postgre/Mongo",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "API flask/fastAPI Kubernetes/Docker Postgre/Mongo OpenCV",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "ation/gestion de",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "ation/gestion de base",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "ation/gestion de base de",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      }
+    ],
+    "noise_removed": [
+      "2013-17 Job",
+      "2013-17 Job Etudiant",
+      "2013-17 Job Etudiant Service",
+      "2013-17 Job Etudiant Service caisse",
+      "2021 Auto-trader",
+      "2021 Auto-trader de",
+      "2021 Auto-trader de cryptomonnaies",
+      "2021 Auto-trader de cryptomonnaies SDWAN",
+      "36 67 68 adam.wecker0",
+      "36 67 68 adam.wecker0 gmail.com",
+      "67 68 adam.wecker0",
+      "67 68 adam.wecker0 gmail.com",
+      "67 68 adam.wecker0 gmail.com 23",
+      "68 adam.wecker0 gmail.com",
+      "68 adam.wecker0 gmail.com 23",
+      "68 adam.wecker0 gmail.com 23 ans",
+      "69 36 67 68 adam.wecker0",
+      "A-Z 900 2019",
+      "A-Z 900 2019 Semestre",
+      "A-Z 900 2019 Semestre d",
+      "adam.wecker0 gmail.com",
+      "adam.wecker0 gmail.com 23",
+      "adam.wecker0 gmail.com 23 ans",
+      "adam.wecker0 gmail.com 23 ans permis",
+      "adamwecker.fr FORMATION",
+      "adamwecker.fr FORMATION 2016",
+      "adamwecker.fr FORMATION 2016 2021",
+      "adamwecker.fr FORMATION 2016 2021 ESME",
+      "adamwecker.fr ou",
+      "adamwecker.fr ou sur",
+      "adamwecker.fr ou sur GitHub",
+      "adamwecker.fr ou sur GitHub https",
+      "Azure A-Z 900 2019",
+      "Azure A-Z 900 2019 Semestre",
+      "base de donn es 2013-17",
+      "conduire Web CV adamwecker.fr",
+      "conduire Web CV adamwecker.fr FORMATION",
+      "CV adamwecker.fr",
+      "CV adamwecker.fr FORMATION",
+      "CV adamwecker.fr FORMATION 2016",
+      "CV adamwecker.fr FORMATION 2016 2021",
+      "CV adamwecker.fr ou",
+      "CV adamwecker.fr ou sur",
+      "CV adamwecker.fr ou sur GitHub",
+      "dash mantine 2021 Auto-trader",
+      "dash mantine 2021 Auto-trader de",
+      "dash/react github"
+    ]
+  },
+  {
+    "file": "CV_2026-02-17_Ania_Benabbas (1).pdf",
+    "text_len": 3509,
+    "text_preview": "Langues Anglais Niveau C1 Arabe Niveau scolaire (parlé, lu et écrit) Compétences Proactivité Négociation et résolution de conﬂits Aptitude à travailler sous pression et résilience Excellentes capacités rédactionnelles Capacité à gérer les risques et conformité Centres d'intérêt Voyages Art classique et contemporain Parfumerie Autres expériences - Financement Assistante pédagogique Année scolaire 2024-2025 Traiteur cuisine vénézuélienne Année 2023-2024 Ania BENABBAS Conseiller juridique / Legal Counsel Juriste ﬁnancier avec deux ans d'expérience dans le domaine ﬁnancier de la structuration de fonds, je suis à la recherche de nouveaux déﬁs à l'international qui me permettront de mettre à proﬁt mes acquis universitaires et professionnels. EXPERIENCE PROFESSIONNELLE Juriste Financier OPC - Structuration de fonds d'investissement Depuis janvier 2026CACEIS Bank–Groupe Crédit Agricole Paris Structuration et organisation juridique des OPCVM et des FIA en coordination avec les sociétés de gestion d'actifs et l’AMF Analyse réglementaire et examen de la conformité dans le cadre de la directive AIFMD et OPCVM Rédaction et révision de la documentation juridique des fonds Coordination avec différents services internes et externes Analyste Contrôle Dépositaire D'août 2025 à décembre 2025CACEIS Bank–Groupe Crédit Agricole Paris, France Surveillance des ﬂux ﬁnanciers des fonds et du respect des exigences statutaires des UCITS et des FIA. Identiﬁcation et escalade des infractions réglementaires et des incidents opérationnels Juriste Financier OPC - Structuration de fonds d'investissement De juillet 2024",
+    "canonical_count": 8,
+    "raw_detected": 227,
+    "validated_skills": 8,
+    "filtered_out": 219,
+    "skills_unmapped_count": 205,
+    "canonical_skills_count": 1,
+    "tight_candidates_count": 60,
+    "resolved_to_esco_count": 0,
+    "rejected_tokens_count": 11,
+    "validated_labels": [
+      "gérer une équipe",
+      "négocier avec des parties prenantes",
+      "analyse de données",
+      "analyse financière",
+      "anglais",
+      "arabe",
+      "gestion de projets",
+      "paris"
+    ],
+    "skills_canonical": [
+      "gérer une équipe",
+      "négocier avec des parties prenantes",
+      "analyse de données",
+      "analyse financière",
+      "anglais",
+      "arabe",
+      "gestion de projets",
+      "paris"
+    ],
+    "tight_candidates": [
+      "anglo-am ricain",
+      "anglo-am ricain De",
+      "anglo-am ricain De septembre",
+      "bilingue anglo-am",
+      "bilingue anglo-am ricain",
+      "bilingue anglo-am ricain De",
+      "bilingue anglo-am ricain De septembre",
+      "dissolution/liquidation Agent",
+      "dissolution/liquidation Agent du",
+      "dissolution/liquidation Agent du Greffe",
+      "dissolution/liquidation Agent du Greffe Service",
+      "Droit bilingue anglo-am",
+      "Droit bilingue anglo-am ricain",
+      "Droit bilingue anglo-am ricain De",
+      "Droit mention Droit bilingue anglo-am",
+      "la dissolution/liquidation",
+      "la dissolution/liquidation Agent",
+      "la dissolution/liquidation Agent du",
+      "la dissolution/liquidation Agent du Greffe",
+      "mention Droit bilingue anglo-am",
+      "mention Droit bilingue anglo-am ricain",
+      "ou SAS la dissolution/liquidation",
+      "ou SAS la dissolution/liquidation Agent",
+      "r",
+      "SA ou SAS la dissolution/liquidation",
+      "SAS la dissolution/liquidation",
+      "SAS la dissolution/liquidation Agent",
+      "SAS la dissolution/liquidation Agent du",
+      "anglo-am",
+      "dissolution/liquidation",
+      "2017Lyc e",
+      "2017Lyc e les",
+      "2017Lyc e les Bruy",
+      "2017Lyc e les Bruy res",
+      "2022Universit Le",
+      "2022Universit Le Havre",
+      "2022Universit Le Havre Normandie",
+      "2022Universit Le Havre Normandie Le",
+      "2023CACEIS Bank",
+      "2023CACEIS Bank Paris",
+      "2023CACEIS Bank Paris France",
+      "2023CACEIS Bank Paris France Assistance",
+      "2024Tribunal Judiciaire",
+      "2024Tribunal Judiciaire du",
+      "2024Tribunal Judiciaire du Havre",
+      "2024Tribunal Judiciaire du Havre Le",
+      "2024Universit Le",
+      "2024Universit Le Havre",
+      "2024Universit Le Havre Normandie",
+      "2024Universit Le Havre Normandie Le"
+    ],
+    "canonical_skills": [
+      {
+        "raw": "anglo-am ricain",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "anglo-am ricain De",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "anglo-am ricain De septembre",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "bilingue anglo-am",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "bilingue anglo-am ricain",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "bilingue anglo-am ricain De",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "bilingue anglo-am ricain De septembre",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "dissolution/liquidation Agent",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "dissolution/liquidation Agent du",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "dissolution/liquidation Agent du Greffe",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "dissolution/liquidation Agent du Greffe Service",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Droit bilingue anglo-am",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Droit bilingue anglo-am ricain",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Droit bilingue anglo-am ricain De",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "Droit mention Droit bilingue anglo-am",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "la dissolution/liquidation",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "la dissolution/liquidation Agent",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "la dissolution/liquidation Agent du",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "la dissolution/liquidation Agent du Greffe",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "mention Droit bilingue anglo-am",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      }
+    ],
+    "analyze_dev_counters": {
+      "raw_count": 227,
+      "tight_count": 60,
+      "split_chunks_count": 0,
+      "cleaned_chunks_count": 0,
+      "lemmatized_chunks_count": 0,
+      "pos_rejected_count": 0,
+      "phrase_length_gt3_tokens": 31,
+      "canonical_count": 1,
+      "unresolved_count": 59,
+      "expanded_count": 0,
+      "promoted_uri_count": 0,
+      "near_match_count": 0,
+      "noise_removed_count": 60,
+      "canonical_success_rate": 0.0167,
+      "compass_skill_candidates": 100,
+      "compass_skill_rejected": 11,
+      "cv_structure_rejected_count": 0,
+      "tight_single_token_count": 0,
+      "tight_generic_rejected_count": 0,
+      "tight_numeric_rejected_count": 0,
+      "tight_repeated_fragment_count": 0,
+      "tight_filtered_out_count": 0,
+      "tight_split_generated_count": 0,
+      "broken_token_repair_count": 0,
+      "generated_composite_rejected_count": 0,
+      "duplicate_tokens": 0,
+      "broken_tokens": 3,
+      "multi_skill_phrases": 6,
+      "reduced_candidates_count": 0,
+      "cleaned_candidates_count": 52
+    },
+    "signal_loss_audit": [
+      {
+        "token": "anglo-am ricain",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "anglo-am ricain De",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "anglo-am ricain De septembre",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "bilingue anglo-am",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "bilingue anglo-am ricain",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "bilingue anglo-am ricain De",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "bilingue anglo-am ricain De septembre",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "dissolution/liquidation Agent",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "dissolution/liquidation Agent du",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "dissolution/liquidation Agent du Greffe",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "dissolution/liquidation Agent du Greffe Service",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Droit bilingue anglo-am",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "Droit bilingue anglo-am ricain",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Droit bilingue anglo-am ricain De",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "Droit mention Droit bilingue anglo-am",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "la dissolution/liquidation",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "la dissolution/liquidation Agent",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "la dissolution/liquidation Agent du",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "la dissolution/liquidation Agent du Greffe",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "mention Droit bilingue anglo-am",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "mention Droit bilingue anglo-am ricain",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "ou SAS la dissolution/liquidation",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "ou SAS la dissolution/liquidation Agent",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "SA ou SAS la dissolution/liquidation",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "SAS la dissolution/liquidation",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      }
+    ],
+    "noise_removed": [
+      "2023-2024 Ania",
+      "2023-2024 Ania BENABBAS",
+      "2023-2024 Ania BENABBAS Conseiller",
+      "2023-2024 Ania BENABBAS Conseiller juridique",
+      "2024-2025 Traiteur",
+      "2024-2025 Traiteur cuisine",
+      "2024-2025 Traiteur cuisine v",
+      "2024-2025 Traiteur cuisine v n",
+      "anglo-am ricain De septembre 2019",
+      "Ann e 2023-2024",
+      "Ann e 2023-2024 Ania",
+      "Ann e 2023-2024 Ania BENABBAS",
+      "Ann e scolaire 2024-2025",
+      "Ann e scolaire 2024-2025 Traiteur",
+      "dagogique Ann e scolaire 2024-2025",
+      "e 2023-2024",
+      "e 2023-2024 Ania",
+      "e 2023-2024 Ania BENABBAS",
+      "e 2023-2024 Ania BENABBAS Conseiller",
+      "e scolaire 2024-2025",
+      "e scolaire 2024-2025 Traiteur",
+      "e scolaire 2024-2025 Traiteur cuisine",
+      "lienne Ann e 2023-2024",
+      "lienne Ann e 2023-2024 Ania",
+      "scolaire 2024-2025",
+      "scolaire 2024-2025 Traiteur",
+      "scolaire 2024-2025 Traiteur cuisine",
+      "scolaire 2024-2025 Traiteur cuisine v",
+      "zu lienne Ann e 2023-2024",
+      "2023-2024",
+      "2024-2025",
+      "2014 juin",
+      "2014 juin 2017Lyc",
+      "2014 juin 2017Lyc e",
+      "2014 juin 2017Lyc e les",
+      "2019 juin",
+      "2019 juin 2022Universit",
+      "2019 juin 2022Universit Le",
+      "2019 juin 2022Universit Le Havre",
+      "2021 juillet",
+      "2021 juillet 2024Tribunal",
+      "2021 juillet 2024Tribunal Judiciaire",
+      "2021 juillet 2024Tribunal Judiciaire du",
+      "2022 juin",
+      "2022 juin 2024Universit",
+      "2022 juin 2024Universit Le",
+      "2022 juin 2024Universit Le Havre",
+      "2023 septembre",
+      "2023 septembre 2023CACEIS",
+      "2023 septembre 2023CACEIS Bank"
+    ]
+  },
+  {
+    "file": "data-analyst-resume-example.pdf",
+    "text_len": 2102,
+    "text_preview": "FARAH MARTIN DATA ANALYST CONTACT farahmartin@email.com (123) 456-7890 New York, NY LinkedIn EDUCATION B.S. Mathematics and Economics University of Pittsburgh 2018 - 2022 Pittsburgh, PA SKILLS PostgreSQL CTEs and query optimization Python Looker Studio Databricks Data storytelling Problem framing WORK EXPERIENCE Data Analyst Fountain House February 2026 - current / New York, NY Built Databricks workﬂows that uniﬁed program, housing, and development data, trimming grant-report preparation by 7 hours each month. Framed vague service-delivery questions with department leaders, turning scattered requests into clear analyses that shaped outreach priorities. Presented board-ready narratives around member outcomes and program usage, lifting dashboard clarity ratings to 4.3/5 through stronger data storytelling. Identiﬁed and resolved data inconsistencies in intake and engagement records using SQL, providing error-free insights for leadership's strategic biweekly meetings. Junior Data Analyst Wavely November 2023 - January 2025 / New York, NY Automated listener cohort checks in Python, exposing a 13% onboarding drop-oﬀ tied to incomplete proﬁle setup. Designed Looker Studio dashboards that integrated key metrics for 54 campaigns, enhancing decision-making for growth managers. Synthesized product, marketing, and support trends into concise readouts, enabling 3 cross-functional teams to respond within 48 hours to shifts in audience behavior, using Looker Studio for visualization. Evaluated release and engagement data across 9 campaign cohorts to reﬁne audience segmentation and release timing for weekly content. Data",
+    "canonical_count": 7,
+    "raw_detected": 185,
+    "validated_skills": 7,
+    "filtered_out": 178,
+    "skills_unmapped_count": 174,
+    "canonical_skills_count": 4,
+    "tight_candidates_count": 96,
+    "resolved_to_esco_count": 0,
+    "rejected_tokens_count": 7,
+    "validated_labels": [
+      "principes de leadership",
+      "analyse de données",
+      "analyse marketing",
+      "exploration de données",
+      "PostgreSQL",
+      "Python (programmation informatique)",
+      "SQL"
+    ],
+    "skills_canonical": [
+      "principes de leadership",
+      "analyse de données",
+      "analyse marketing",
+      "exploration de données",
+      "PostgreSQL",
+      "Python (programmation informatique)",
+      "SQL"
+    ],
+    "tight_candidates": [
+      "13 onboarding drop-off",
+      "13 onboarding drop-off tied",
+      "13 onboarding drop-off tied to",
+      "3 cross-functional",
+      "3 cross-functional teams",
+      "3 cross-functional teams to",
+      "3 cross-functional teams to respond",
+      "4.3/5 through",
+      "4.3/5 through stronger",
+      "4.3/5 through stronger data",
+      "4.3/5 through stronger data storytelling",
+      "43.8K in",
+      "43.8K in reporting",
+      "43.8K in reporting discrepancies",
+      "43.8K in reporting discrepancies ahead",
+      "54 campaigns enhancing decision-making",
+      "54 campaigns enhancing decision-making for",
+      "a 13 onboarding drop-off",
+      "a 13 onboarding drop-off tied",
+      "accelerating refresh speeds for twice-weekly",
+      "ahead of month-end",
+      "ahead of month-end review",
+      "and development data trimming grant-report",
+      "and lapse-reporting",
+      "and lapse-reporting needs",
+      "and lapse-reporting needs across",
+      "and lapse-reporting needs across regional",
+      "and service-volume",
+      "and service-volume extracts",
+      "and service-volume extracts before",
+      "and service-volume extracts before distribution",
+      "B.S Mathematics",
+      "B.S Mathematics and",
+      "B.S Mathematics and Economics",
+      "B.S Mathematics and Economics University",
+      "before distribution catching 43.8K",
+      "before distribution catching 43.8K in",
+      "board-ready narratives",
+      "board-ready narratives around",
+      "board-ready narratives around member",
+      "board-ready narratives around member outcomes",
+      "campaigns enhancing decision-making",
+      "campaigns enhancing decision-making for",
+      "campaigns enhancing decision-making for growth",
+      "catching 43.8K",
+      "catching 43.8K in",
+      "catching 43.8K in reporting",
+      "catching 43.8K in reporting discrepancies",
+      "clarity ratings to 4.3/5",
+      "clarity ratings to 4.3/5 through"
+    ],
+    "canonical_skills": [
+      {
+        "raw": "13 onboarding drop-off",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "13 onboarding drop-off tied",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "13 onboarding drop-off tied to",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "3 cross-functional",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "3 cross-functional teams",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "3 cross-functional teams to",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "3 cross-functional teams to respond",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "4.3/5 through",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "4.3/5 through stronger",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "4.3/5 through stronger data",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "4.3/5 through stronger data storytelling",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "43.8K in",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "43.8K in reporting",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "43.8K in reporting discrepancies",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "43.8K in reporting discrepancies ahead",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "54 campaigns enhancing decision-making",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "54 campaigns enhancing decision-making for",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "a 13 onboarding drop-off",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "a 13 onboarding drop-off tied",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      },
+      {
+        "raw": "accelerating refresh speeds for twice-weekly",
+        "canonical_id": "",
+        "label": "",
+        "strategy": "unresolved",
+        "confidence": 0.0,
+        "cluster_name": "",
+        "genericity_score": 0.0
+      }
+    ],
+    "analyze_dev_counters": {
+      "raw_count": 185,
+      "tight_count": 96,
+      "split_chunks_count": 0,
+      "cleaned_chunks_count": 0,
+      "lemmatized_chunks_count": 0,
+      "pos_rejected_count": 0,
+      "phrase_length_gt3_tokens": 59,
+      "canonical_count": 5,
+      "unresolved_count": 103,
+      "expanded_count": 0,
+      "promoted_uri_count": 0,
+      "near_match_count": 2,
+      "noise_removed_count": 21,
+      "canonical_success_rate": 0.0521,
+      "compass_skill_candidates": 59,
+      "compass_skill_rejected": 7,
+      "cv_structure_rejected_count": 3,
+      "tight_single_token_count": 0,
+      "tight_generic_rejected_count": 0,
+      "tight_numeric_rejected_count": 0,
+      "tight_repeated_fragment_count": 0,
+      "tight_filtered_out_count": 0,
+      "tight_split_generated_count": 0,
+      "broken_token_repair_count": 0,
+      "generated_composite_rejected_count": 0,
+      "duplicate_tokens": 0,
+      "broken_tokens": 12,
+      "multi_skill_phrases": 1,
+      "reduced_candidates_count": 8,
+      "cleaned_candidates_count": 47
+    },
+    "signal_loss_audit": [
+      {
+        "token": "13 onboarding drop-off",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "13 onboarding drop-off tied",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "13 onboarding drop-off tied to",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "3 cross-functional",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "3 cross-functional teams",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "3 cross-functional teams to",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "3 cross-functional teams to respond",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "4.3/5 through",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "4.3/5 through stronger",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "4.3/5 through stronger data",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "4.3/5 through stronger data storytelling",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "43.8K in",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "43.8K in reporting",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "43.8K in reporting discrepancies",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "43.8K in reporting discrepancies ahead",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "54 campaigns enhancing decision-making",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "54 campaigns enhancing decision-making for",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "a 13 onboarding drop-off",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "a 13 onboarding drop-off tied",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "accelerating refresh speeds for twice-weekly",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "ahead of month-end",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "ahead of month-end review",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and development data trimming grant-report",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "LONG_PHRASE"
+      },
+      {
+        "token": "and lapse-reporting",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      },
+      {
+        "token": "and lapse-reporting needs",
+        "stage": "tight_candidates",
+        "reason_not_canonical": "UNKNOWN_SKILL"
+      }
+    ],
+    "noise_removed": [
+      "123 456-7890",
+      "123 456-7890 New",
+      "123 456-7890 New York",
+      "123 456-7890 New York NY",
+      "2023 October 2023 Washington D.C",
+      "2023 Washington D.C",
+      "2023 Washington D.C Compiled",
+      "2023 Washington D.C Compiled policy",
+      "456-7890 New",
+      "456-7890 New York",
+      "456-7890 New York NY",
+      "456-7890 New York NY LinkedIn",
+      "ANALYST CONTACT farahmartin email.com",
+      "ANALYST CONTACT farahmartin email.com 123",
+      "CONTACT farahmartin email.com 123",
+      "CONTACT farahmartin email.com 123 456-7890",
+      "DATA ANALYST CONTACT farahmartin email.com",
+      "email.com 123",
+      "email.com 123 456-7890",
+      "email.com 123 456-7890 New",
+      "email.com 123 456-7890 New York"
+    ]
+  }
+]

@@ -1,143 +1,170 @@
-# 🔥 Elevia Compass - Pipeline d'Ingestion France Travail
+# Elevia
 
-Pipeline complet d'ingestion multi-API France Travail pour le projet **Elevia Compass**.
+Elevia is a repository-aware AI job matching and application preparation system.
+It parses candidate profiles, structures offer data, surfaces relevant opportunities, and generates recruiter-ready application materials.
+The public-facing demo entry point is `agent_demo/`, which runs a safe LangChain analysis against one real offer stored in the repository.
+The core matching and scoring internals remain intentionally protected.
 
-## 📋 Vue d'ensemble
+## What problem this project solves
 
-Ce pipeline récupère automatiquement toutes les données disponibles via l'API France Travail :
+Recruiting workflows break when candidate data, offer data, and application preparation live in separate tools.
+Elevia brings them into one system:
+- parse and enrich a candidate profile
+- normalize and structure job offers
+- surface relevant opportunities
+- prepare CV and application artifacts from the same underlying profile context
 
-- ✅ **Offres d'emploi v2** - Pagination automatique (max 3150 offres)
-- ⚠️ **ROME 4.0 - Métiers** - Référentiel complet des métiers
-- ⚠️ **ROME 4.0 - Fiches métiers** - Fiches détaillées par code ROME
-- ⚠️ **ROME 4.0 - Compétences** - Référentiel des compétences
-- ⚠️ **ROME 4.0 - Contextes de travail** - Contextes professionnels
-- ⚠️ **Marché du travail v1** - Statistiques et tensions
-- ⚠️ **Anotéa v1** - Avis sur les formations
+## What the system does
 
-> **Note** : Les APIs ROME, Marché du Travail et Anotéa nécessitent des scopes supplémentaires. Seule l'API Offres d'emploi est fonctionnelle.
+At a high level, the repository contains:
+- a backend API for profile parsing, offer access, inbox/matching flows, and document generation
+- a web application for profile, cockpit, inbox, offers, market, and application tracking workflows
+- a recruiter-facing `agent_demo/` module that uses one real internal offer in read-only mode with LangChain + OpenAI
+- supporting referentials and datasets used for parsing and normalization
 
----
+This repository does **not** expose proprietary ranking rules or scoring weights in its public-facing documentation.
 
-## 🚀 Installation
+## Architecture
 
-### 1. Prérequis
+```text
+apps/
+├── api/        # FastAPI backend, parsing pipelines, offer access, documents
+└── web/        # React/Vite frontend
+
+agent_demo/     # Recruiter-facing LangChain demo using one real offer read-only
+scripts/        # Operational scripts and dev tooling
+scripts/archive/root_legacy/   # Archived one-off legacy scripts moved out of root
+
+docs/           # Product, architecture, sprint, and archive documentation
+data/           # Runtime-free datasets, snapshots, and archived historical exports
+labs/           # Experimental notebooks and archived analysis work
+```
+
+## Main components
+
+### `apps/api`
+Core backend system.
+
+Key responsibilities:
+- CV/profile parsing and normalization
+- offer catalog access from internal SQLite stores
+- inbox and application-tracker endpoints
+- CV and letter generation pipelines
+- market insight and context routes
+
+Primary entry point:
+- `apps/api/src/api/main.py`
+
+### `apps/web`
+Product UI.
+
+Key areas:
+- `Analyze`
+- `Profile`
+- `Cockpit`
+- `Inbox`
+- `Offers`
+- `Candidatures`
+- `Market`
+
+Primary entry point:
+- `apps/web/src/main.tsx`
+
+### `agent_demo`
+A lightweight recruiter-facing demo designed to be understood quickly.
+
+What it does:
+- reads one real offer from `apps/api/data/db/offers.db` in read-only mode
+- reads one candidate CV/profile text file
+- runs a structured LangChain + OpenAI fit analysis
+- returns a clean markdown report
+
+This is the fastest way for a recruiter or reviewer to see a concrete AI workflow without exposing proprietary matching internals.
+
+## Tech stack
+
+- Python
+- FastAPI
+- React + Vite + TypeScript
+- SQLite
+- LangChain Python
+- OpenAI
+- pytest
+
+## Quick start
+
+### 1. Create and install the Python environment
 
 ```bash
-Python 3.11+
-pip
-virtualenv (optionnel)
+make venv
+make install
 ```
 
-### 2. Configuration
-
-Créer un fichier `.env` à la racine :
-
-```env
-CLIENT_ID=PAR_elevia1_edccae836bbd05b5bb1eb4de5f91a9c10866abbf0a15dd89a90d96cc8f78b94d
-CLIENT_SECRET=<votre_secret>
-TOKEN_URL=https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=%2Fpartenaire
-BASE_URL=https://api.francetravail.io//partenaire
-SCOPE=api_offresdemploiv2 o2dsoffre
-REQUEST_TIMEOUT=10
-MAX_RETRIES=3
-```
-
-### 3. Installation des dépendances
+### 2. Start the product locally
 
 ```bash
-pip install requests python-dotenv
+make dev-up
 ```
 
----
+This starts:
+- API: `http://localhost:8000`
+- Web: `http://localhost:3001`
 
-## 📁 Structure du Projet
+### 3. Run the recruiter demo
 
-```
-elevia-compass/
-├── fetch_all.py                    # 🎯 Script principal
-├── .env                            # Configuration
-├── fetchers/                       # 📦 Modules
-│   ├── client_ft.py                #    Client OAuth2
-│   ├── fetch_offres.py             #    Offres d'emploi
-│   ├── fetch_rome_metiers.py       #    Métiers ROME
-│   ├── fetch_rome_fiches_metiers.py#    Fiches métiers
-│   ├── fetch_rome_competences.py   #    Compétences
-│   ├── fetch_rome_contextes.py     #    Contextes travail
-│   ├── fetch_marche_travail.py     #    Marché du travail
-│   └── fetch_anotea.py             #    Avis formations
-└── data/
-    └── raw/                        # 💾 Données JSON
-        ├── offres_2025-11-13_page0.json
-        └── ...
-```
-
----
-
-## 🎯 Usage
-
-### Mode complet
+List recent real offers:
 
 ```bash
-python fetch_all.py
+make agent-demo-list
 ```
 
-### Mode rapide (test)
+Run the demo against the latest offer with the bundled sample CV:
 
 ```bash
-python fetch_all.py --quick
+make agent-demo-run
 ```
 
-### Fetchers individuels
+Run the demo tests:
 
 ```bash
-python fetchers/fetch_offres.py
-python fetchers/fetch_rome_metiers.py
+make agent-demo-test
 ```
 
----
+## Recruiter entry point
 
-## 📊 Résultats
+If you only want the fastest path to evaluating the repository:
+- open `agent_demo/README.md`
+- run `make agent-demo-list`
+- run `make agent-demo-run`
+- review `agent_demo/output_example.md`
 
-### Données récupérées
+That path is intentionally isolated, real, and safe.
 
-| API | Statut | Volume | Fichiers |
-|-----|--------|--------|----------|
-| **Offres d'emploi** | ✅ Fonctionnel | 3,150 offres | 21 fichiers (~14 MB) |
-| **ROME Métiers** | ⚠️ Scope manquant | - | - |
-| **ROME Fiches** | ⚠️ Scope manquant | - | - |
+## Design principles
 
----
+- One repository, clear boundaries
+- Real data where safe, synthetic data only when necessary
+- Read-only access for demos
+- Deterministic core workflows where possible
+- Protected proprietary logic
+- Small, testable modules over fake complexity
+- Product workflows over disconnected experiments
 
-## 📊 Analyse des Données
+## What is intentionally not exposed
 
-### Notebook Jupyter
+To keep the repository safe to share publicly, the following are intentionally not surfaced as public demo logic:
+- proprietary matching internals
+- scoring weights and calibration rules
+- internal ranking heuristics
+- full production data dumps
+- secrets and runtime credentials
 
-Un notebook complet d'analyse est disponible : [analysis_elevia_compass.ipynb](analysis_elevia_compass.ipynb)
+## Repository hygiene decisions
 
-**Fonctionnalités :**
-- Construction des tables analytiques (fact_offers, dim_location, dim_job, dim_skill)
-- EDA (Exploratory Data Analysis) avec visualisations
-- Graphe Compass V0 (NetworkX) - réseau jobs-skills
-- Préparation structure Monte Carlo pour simulations de trajectoires
+This cleanup intentionally moved legacy noise out of the root directory into archive locations:
+- historical root scripts → `scripts/archive/root_legacy/`
+- historical root notes/docs → `docs/archive/root_legacy/`
+- historical root data exports → `data/archive/root_legacy/`
+- historical root notebooks → `labs/archive/root_notebooks/`
 
-**Installation :**
-
-```bash
-# Installer les dépendances
-pip install -r requirements.txt
-
-# Lancer Jupyter
-jupyter notebook analysis_elevia_compass.ipynb
-```
-
-**Guide complet :** Voir [NOTEBOOK_GUIDE.md](NOTEBOOK_GUIDE.md)
-
----
-
-## 📄 Licence
-
-Propriétaire - Elevia Compass © 2025
-
----
-
-**⚡ Made with Claude Code & France Travail API**
+The goal is simple: the root should explain the project, not obscure it.

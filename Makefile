@@ -10,7 +10,7 @@
 
 .PHONY: agents-review gate-1 gate-2 gate-3 gates lint test-fast test test-api help \
         venv install api web test-cvdelta devtools env-check doctor \
-        dev-up dev-down dev-status dev smoke smoke-mvp smoke-all
+        dev-up dev-down dev-status dev smoke smoke-mvp smoke-all agent-demo-run agent-demo-list agent-demo-test
 
 # Default target
 help:
@@ -42,6 +42,11 @@ help:
 	@echo "  make test          - Full test suite"
 	@echo "  make lint          - Lint"
 	@echo "  make doctor        - Run preflight checks (DB, auth, templates, env, schema)"
+	@echo ""
+	@echo "Recruiter Demo:"
+	@echo "  make agent-demo-list - List recent real offers used by the demo"
+	@echo "  make agent-demo-run  - Run the recruiter-facing LangChain demo"
+	@echo "  make agent-demo-test - Run demo tests"
 
 # Agents review (per REVIEW_MATRIX)
 agents-review:
@@ -194,3 +199,12 @@ env-check:
 # Preflight / doctor check
 doctor:
 	@python3 apps/api/scripts/doctor_runtime.py
+
+agent-demo-list:
+	@$(PWD)/.venv/bin/python agent_demo/main.py --list-offers --limit 5
+
+agent-demo-run:
+	@$(PWD)/.venv/bin/python agent_demo/main.py --cv agent_demo/sample_cv.txt
+
+agent-demo-test:
+	@$(PWD)/.venv/bin/python -m pytest -q agent_demo/tests

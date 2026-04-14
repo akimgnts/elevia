@@ -1,0 +1,30 @@
+Objet: Demande d'activation scopes API ROME et Marché du Travail
+
+Bonjour,
+
+Je développe Elevia Compass, un projet d'orientation professionnelle basé sur
+un graphe métiers-compétences.
+
+J'ai actuellement accès à l'API Offres d'emploi v2 (scope: api_offresdemploiv2)
+et je souhaiterais activer les scopes suivants :
+
+• api_romev1
+  → Pour accéder au référentiel ROME (métiers et compétences)
+
+• api_marchetravailv1
+  → Pour accéder aux statistiques du marché du travail
+
+Mon CLIENT_ID :
+PAR_elevia1_edccae836bbd05b5bb1eb4de5f91a9c10866abbf0a15dd89a90d96cc8f78b94d
+
+J'ai testé les APIs et j'obtiens des erreurs 401 (Unauthorized) sur les
+APIs ROME et Marché du Travail, confirmant que les scopes ne sont pas activés.
+
+Le projet nécessite le référentiel ROME complet pour construire un graphe
+de transitions professionnelles et recommander des reconversions basées
+sur les compétences communes entre métiers.
+
+Merci d'avance pour votre aide.
+
+Cordialement,
+[Ton nom]
