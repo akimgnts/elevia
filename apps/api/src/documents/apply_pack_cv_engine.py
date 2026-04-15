@@ -382,6 +382,10 @@ def _collect_profile_skills(profile: dict[str, Any]) -> list[str]:
         for s in (exp.get("skills") or []):
             if isinstance(s, str) and s.strip() and len(s.split()) <= 4:
                 base.append(s.strip())
+        for link in _extract_skill_link_payload(exp):
+            base.append(str(link.get("skill") or ""))
+            for tool in (link.get("tools") or []):
+                base.append(str(tool))
 
     return _dedupe(base, limit=30)
 
@@ -744,6 +748,134 @@ class AdaptedExperience:
     debug_score: dict[str, float]
 
 
+def _extract_skill_link_payload(exp: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for raw_link in (exp.get("skill_links") or []):
+        if not isinstance(raw_link, dict):
+            continue
+        raw_skill = raw_link.get("skill")
+        if isinstance(raw_skill, dict):
+            skill_label = str(raw_skill.get("label") or "").strip()
+        else:
+            skill_label = str(raw_skill or "").strip()
+        if not skill_label:
+            continue
+        key = _normalize(skill_label)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+
+        tools: list[str] = []
+        for raw_tool in (raw_link.get("tools") or []):
+            if isinstance(raw_tool, dict):
+                label = str(raw_tool.get("label") or "").strip()
+            else:
+                label = str(raw_tool or "").strip()
+            if label:
+                tools.append(label)
+
+        autonomy_level = str(raw_link.get("autonomy_level") or "").strip().lower()
+        if autonomy_level not in {"execution", "partial", "autonomous", "ownership"}:
+            autonomy_level = ""
+
+        out.append(
+            {
+                "skill": skill_label,
+                "tools": _dedupe(tools, limit=6),
+                "context": str(raw_link.get("context") or "").strip(),
+                "autonomy_level": autonomy_level or None,
+            }
+        )
+    return out
+
+
+def _join_human(items: list[str]) -> str:
+    values = [str(item).strip() for item in items if str(item).strip()]
+    if not values:
+        return ""
+    if len(values) == 1:
+        return values[0]
+    if len(values) == 2:
+        return f"{values[0]} et {values[1]}"
+    return f"{', '.join(values[:-1])} et {values[-1]}"
+
+
+def _skill_link_autonomy_bullet(skill_label: str, autonomy_level: str | None) -> str | None:
+    skill_lower = skill_label[:1].lower() + skill_label[1:] if skill_label else skill_label
+    mapping = {
+        "execution": f"Mise en oeuvre de {skill_lower} dans un cadre d'execution defini.",
+        "partial": f"Contribution partielle sur {skill_lower}, avec coordination partagee.",
+        "autonomous": f"Pratique autonome de {skill_lower}, avec arbitrages sur le perimetre.",
+        "ownership": f"Pilotage de {skill_lower}, avec responsabilite sur le sujet.",
+    }
+    return mapping.get(autonomy_level or "")
+
+
+def _build_skill_link_bullets(
+    exp: dict[str, Any],
+    target_terms: list[str],
+) -> tuple[list[str], list[str], list[str]]:
+    links = _extract_skill_link_payload(exp)
+    if not links:
+        return [], [], []
+
+    target_norm = [_normalize(term) for term in target_terms if _normalize(term)]
+
+    def _link_score(link: dict[str, Any]) -> tuple[int, int, int, str]:
+        source = " ".join(
+            [
+                str(link.get("skill") or ""),
+                " ".join(link.get("tools") or []),
+                str(link.get("context") or ""),
+            ]
+        )
+        norm_source = _normalize(source)
+        overlap = sum(1 for term in target_norm if term and term in norm_source)
+        return (
+            overlap,
+            len(link.get("tools") or []),
+            1 if link.get("autonomy_level") else 0,
+            str(link.get("skill") or "").lower(),
+        )
+
+    bullets: list[str] = []
+    matched_kw: list[str] = []
+    tools_seen: list[str] = []
+
+    for link in sorted(links, key=_link_score, reverse=True):
+        skill_label = str(link.get("skill") or "").strip()
+        if not skill_label:
+            continue
+        tools = [str(tool).strip() for tool in (link.get("tools") or []) if str(tool).strip()]
+        context = str(link.get("context") or "").strip()
+        autonomy_level = link.get("autonomy_level")
+
+        sentence = skill_label
+        if tools:
+            sentence += f" avec {_join_human(tools)}"
+        if context:
+            sentence += f" dans un contexte de {context}"
+        sentence = sentence.strip(" ,.;")
+        if sentence:
+            bullets.append(sentence + ".")
+
+        autonomy_bullet = _skill_link_autonomy_bullet(skill_label, autonomy_level)
+        if autonomy_bullet and len(bullets) < _MAX_BULLETS_ADAPTED:
+            bullets.append(autonomy_bullet)
+
+        for term in [skill_label, *tools, context]:
+            term_norm = _normalize(term)
+            if any(target in term_norm or term_norm in target for target in target_norm if target):
+                matched_kw.append(term)
+        tools_seen.extend(tools)
+
+        if len(bullets) >= _MAX_BULLETS_ADAPTED:
+            break
+
+    return _dedupe(bullets, limit=_MAX_BULLETS_ADAPTED), _dedupe(matched_kw, limit=6), _dedupe(tools_seen, limit=8)
+
+
 def _offer_target_terms(parsed_offer: ParsedOffer, offer: dict[str, Any]) -> list[str]:
     """
     Build the full list of target terms from:
@@ -1030,7 +1162,10 @@ def adapt_career_experiences(
         dim = _score_single_career_exp(exp, parsed_offer, target_terms, idx, total)
         score = _total_score(dim)
 
-        bullets, matched_kw = _select_and_rewrite_bullets(exp, parsed_offer, target_terms)
+        bullets, matched_kw, linked_tools = _build_skill_link_bullets(exp, target_terms)
+        if not bullets:
+            bullets, matched_kw = _select_and_rewrite_bullets(exp, parsed_offer, target_terms)
+            linked_tools = _dedupe(str(t) for t in (exp.get("tools") or []) if str(t).strip())
 
         # Fallback bullet when experience is empty of content
         if not bullets:
@@ -1049,7 +1184,7 @@ def adapt_career_experiences(
             start_date=str(exp.get("start_date") or ""),
             end_date=str(exp.get("end_date") or ""),
             bullets=bullets,
-            tools=_dedupe(str(t) for t in (exp.get("tools") or []) if str(t).strip()),
+            tools=linked_tools,
             autonomy=str(exp.get("autonomy") or "COPILOT"),
             score=score,
             decision="keep",   # set below

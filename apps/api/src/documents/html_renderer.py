@@ -17,7 +17,12 @@ from pathlib import Path
 from typing import List, Optional
 
 from .schemas import CvDocumentPayload
-from .apply_pack_cv_engine import adapt_career_experiences, score_projects, AdaptedExperience
+from .apply_pack_cv_engine import (
+    AdaptedExperience,
+    _build_skill_link_bullets,
+    adapt_career_experiences,
+    score_projects,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 _TEMPLATE_MAP = {
@@ -245,9 +250,10 @@ def _v2_experience_items(
             dates = _safe(f"{start} – {end}".strip(" –") if (start or end) else (exp.get("dates") or ""))
             company_loc = " · ".join(part for part in (company, location) if part)
 
-            responsibilities = exp.get("responsibilities") or []
+            skill_link_bullets, _, skill_link_tools = _build_skill_link_bullets(exp, [])
+            responsibilities = skill_link_bullets or (exp.get("responsibilities") or [])
             achievements = exp.get("achievements") or []
-            tools_list = exp.get("tools") or []
+            tools_list = skill_link_tools or (exp.get("tools") or [])
 
             bullets_html = ""
             for resp in responsibilities[:4]:
@@ -366,6 +372,42 @@ def _is_esco_description(s: str) -> bool:
     return bool(_ESCO_VERB_RE.match(s.strip())) and len(s.split()) >= 3
 
 
+def _extract_skill_link_skills_and_tools(profile: Optional[dict]) -> tuple[List[str], List[str]]:
+    career = (profile or {}).get("career_profile") or {}
+    skills: List[str] = []
+    tools: List[str] = []
+    seen_skills: set[str] = set()
+    seen_tools: set[str] = set()
+
+    for exp in (career.get("experiences") or []):
+        if not isinstance(exp, dict):
+            continue
+        for raw_link in (exp.get("skill_links") or []):
+            if not isinstance(raw_link, dict):
+                continue
+            raw_skill = raw_link.get("skill")
+            if isinstance(raw_skill, dict):
+                skill_label = str(raw_skill.get("label") or "").strip()
+            else:
+                skill_label = str(raw_skill or "").strip()
+            skill_key = skill_label.lower()
+            if skill_label and skill_key not in seen_skills and not _is_esco_description(skill_label):
+                seen_skills.add(skill_key)
+                skills.append(skill_label)
+
+            for raw_tool in (raw_link.get("tools") or []):
+                if isinstance(raw_tool, dict):
+                    tool_label = str(raw_tool.get("label") or "").strip()
+                else:
+                    tool_label = str(raw_tool or "").strip()
+                tool_key = tool_label.lower()
+                if tool_label and tool_key not in seen_tools:
+                    seen_tools.add(tool_key)
+                    tools.append(tool_label)
+
+    return skills, tools
+
+
 def _v2_split_skills(
     profile: Optional[dict],
     payload: CvDocumentPayload,
@@ -384,9 +426,10 @@ def _v2_split_skills(
     tools_stack     — tool-like skills from experience tools
     """
     career = (profile or {}).get("career_profile") or {}
+    linked_skills, linked_tools = _extract_skill_link_skills_and_tools(profile)
 
     # Pull from all sources: career.skills + profile.skills (same data) + exp skills
-    raw_profile_skills: List[str] = list(
+    raw_profile_skills: List[str] = linked_skills + list(
         career.get("skills") or (profile or {}).get("skills") or []
     )
     # Experience-level short keyword phrases from structurer
@@ -404,7 +447,7 @@ def _v2_split_skills(
     all_candidate_skills = [s for s in all_candidate_skills if not _is_esco_description(s)]
 
     # All profile tools (from career_profile.experiences)
-    all_tools: List[str] = []
+    all_tools: List[str] = list(linked_tools)
     for exp in (career.get("experiences") or []):
         if isinstance(exp, dict):
             all_tools.extend(str(t) for t in (exp.get("tools") or []))

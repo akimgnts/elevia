@@ -75,3 +75,39 @@ def test_html_no_ats_terms():
     assert "ATS" not in html
     assert "ats_score_estimate" not in html
     assert "sidebar" not in html
+
+
+def test_html_v2_uses_skill_links_for_experience_and_skills_sections():
+    payload = _sample_payload()
+    profile = {
+        "career_profile": {
+            "base_title": "Data Analyst",
+            "experiences": [
+                {
+                    "title": "Data Analyst",
+                    "company": "ACME",
+                    "start_date": "2024",
+                    "end_date": "2025",
+                    "skill_links": [
+                        {
+                            "skill": {"label": "Analyse de donnees"},
+                            "tools": [{"label": "Python"}, {"label": "SQL"}, {"label": "Power BI"}],
+                            "context": "analyse de performance",
+                            "autonomy_level": "autonomous",
+                        }
+                    ],
+                    "responsibilities": ["Ancienne ligne"],
+                    "tools": ["Excel"],
+                    "skills": ["reporting"],
+                }
+            ],
+        }
+    }
+
+    html = render_cv_html(payload, template_version="cv_v2", profile=profile, offer={"title": "Data Analyst"})
+
+    assert "Analyse de donnees avec Python, SQL et Power BI dans un contexte de analyse de performance." in html
+    assert "Pratique autonome de analyse de donnees, avec arbitrages sur le perimetre." in html
+    assert "Analyse de donnees" in html
+    assert "Python" in html
+    assert "Power BI" in html

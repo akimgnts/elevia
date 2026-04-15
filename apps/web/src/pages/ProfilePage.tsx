@@ -215,6 +215,20 @@ function dedupeSkillRefs(values: CanonicalSkillRef[]): CanonicalSkillRef[] {
   return out;
 }
 
+function dedupeTools(values: ToolRef[]): ToolRef[] {
+  const seen = new Set<string>();
+  const out: ToolRef[] = [];
+  for (const item of values) {
+    const label = item.label.trim();
+    if (!label) continue;
+    const key = label.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ label });
+  }
+  return out;
+}
+
 function legacyAutonomy(level: AutonomyLevel | undefined): "CONTRIB" | "COPILOT" | "LEAD" {
   return AUTONOMY_OPTIONS.find((option) => option.value === level)?.legacy || "COPILOT";
 }
@@ -250,12 +264,17 @@ function normalizeSkillLink(value: unknown): SkillLinkItem | null {
 
 function normalizeExperience(value: ExperienceV2 | Record<string, unknown> | undefined): ExperienceV2 {
   const rec = (value || {}) as Record<string, unknown>;
+  const normalizedSkillLinks = Array.isArray(rec.skill_links)
+    ? (rec.skill_links.map(normalizeSkillLink).filter(Boolean) as SkillLinkItem[])
+    : [];
   const rawTools = Array.isArray(rec.tools) ? rec.tools : [];
   const rawSkills = Array.isArray(rec.canonical_skills_used)
     ? rec.canonical_skills_used
     : Array.isArray(rec.skills)
       ? rec.skills
       : [];
+  const fallbackToolsFromLinks = normalizedSkillLinks.flatMap((link) => link.tools.map((tool) => ({ label: tool.label })));
+  const fallbackSkillsFromLinks = normalizedSkillLinks.map((link) => link.skill);
   const autonomyLevel =
     rec.autonomy_level === "execution" ||
     rec.autonomy_level === "partial" ||
@@ -278,8 +297,16 @@ function normalizeExperience(value: ExperienceV2 | Record<string, unknown> | und
       : Array.isArray(rec.bullets)
         ? rec.bullets.map(String).filter(Boolean)
         : [],
-    tools: dedupeSkillRefs(rawTools.map((item) => normalizeSkillRef(item)).filter(Boolean) as CanonicalSkillRef[]),
-    canonical_skills_used: dedupeSkillRefs(rawSkills.map((item) => normalizeSkillRef(item)).filter(Boolean) as CanonicalSkillRef[]),
+    tools: dedupeSkillRefs(
+      (rawTools.length > 0 ? rawTools : fallbackToolsFromLinks)
+        .map((item) => normalizeSkillRef(item))
+        .filter(Boolean) as CanonicalSkillRef[]
+    ),
+    canonical_skills_used: dedupeSkillRefs(
+      (rawSkills.length > 0 ? rawSkills : fallbackSkillsFromLinks)
+        .map((item) => normalizeSkillRef(item))
+        .filter(Boolean) as CanonicalSkillRef[]
+    ),
     autonomy_level: autonomyLevel,
     quantified_signals: Array.isArray(rec.quantified_signals) ? dedupeStrings(rec.quantified_signals.map(String)) : [],
     impact_signals: Array.isArray(rec.impact_signals)
@@ -291,9 +318,7 @@ function normalizeExperience(value: ExperienceV2 | Record<string, unknown> | und
     achievements: Array.isArray(rec.achievements) ? dedupeStrings(rec.achievements.map(String)) : [],
     skills: Array.isArray(rec.skills) ? dedupeStrings(rec.skills.map(String)) : [],
     autonomy: legacyAutonomy(autonomyLevel),
-    skill_links: Array.isArray(rec.skill_links)
-      ? (rec.skill_links.map(normalizeSkillLink).filter(Boolean) as SkillLinkItem[])
-      : [],
+    skill_links: normalizedSkillLinks,
   };
 }
 
@@ -343,6 +368,109 @@ function computeCompleteness(profile: {
 
 function SectionLabel({ text }: { text: string }) {
   return <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{text}</div>;
+}
+
+const AUTONOMY_LABELS: Record<AutonomyLevel, string> = {
+  execution: "Execution",
+  partial: "Partielle",
+  autonomous: "Autonome",
+  ownership: "Ownership",
+};
+
+const AUTONOMY_BADGE_STYLES: Record<AutonomyLevel, string> = {
+  execution: "border-slate-200 bg-slate-100 text-slate-600",
+  partial: "border-amber-200 bg-amber-50 text-amber-700",
+  autonomous: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  ownership: "border-indigo-200 bg-indigo-50 text-indigo-700",
+};
+
+function hasPrimarySkillLinks(experience: ExperienceV2): boolean {
+  return Boolean(experience.skill_links && experience.skill_links.length > 0);
+}
+
+function SkillLinkSummary({
+  link,
+  compact = false,
+}: {
+  link: SkillLinkItem;
+  compact?: boolean;
+}) {
+  return (
+    <div className={`rounded-[1rem] border border-slate-200 bg-white ${compact ? "px-3 py-2.5" : "px-4 py-3.5"}`}>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-slate-900">{link.skill.label}</div>
+          {link.tools.length > 0 && (
+            <div className={`mt-1 flex flex-wrap gap-1.5 ${compact ? "" : "pt-0.5"}`}>
+              {link.tools.map((tool) => (
+                <span
+                  key={tool.label}
+                  className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700"
+                >
+                  {tool.label}
+                </span>
+              ))}
+            </div>
+          )}
+          {link.context && <div className="mt-2 text-xs leading-5 text-slate-500">{link.context}</div>}
+        </div>
+        {link.autonomy_level && (
+          <span
+            className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${AUTONOMY_BADGE_STYLES[link.autonomy_level]}`}
+          >
+            {AUTONOMY_LABELS[link.autonomy_level]}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ExperiencePrimarySignals({ experience }: { experience: ExperienceV2 }) {
+  if (hasPrimarySkillLinks(experience)) {
+    return (
+      <div className="grid gap-2.5">
+        {(experience.skill_links || []).map((link, index) => (
+          <SkillLinkSummary key={`${link.skill.label}-${index}`} link={link} />
+        ))}
+      </div>
+    );
+  }
+
+  const tools = experience.tools || [];
+  const skills = experience.canonical_skills_used || [];
+  if (tools.length === 0 && skills.length === 0) {
+    return <div className="text-xs text-slate-400">Ajoutez un premier lien compétence → outils pour rendre cette expérience lisible côté produit et CV.</div>;
+  }
+
+  return (
+    <div className="grid gap-3 rounded-[1rem] border border-dashed border-slate-200 bg-slate-50/60 px-4 py-3">
+      {skills.length > 0 && (
+        <div className="grid gap-1">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Competences</div>
+          <div className="flex flex-wrap gap-1.5">
+            {skills.map((skill) => (
+              <span key={skill.label} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
+                {skill.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {tools.length > 0 && (
+        <div className="grid gap-1">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Outils</div>
+          <div className="flex flex-wrap gap-1.5">
+            {tools.map((tool) => (
+              <span key={tool.label} className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                {tool.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -756,36 +884,14 @@ function SkillLinkEditor({
     onChange(links.filter((_, i) => i !== idx));
   }
 
-  const autonomyLabel: Record<AutonomyLevel, string> = {
-    execution: "Exécution",
-    partial: "Partielle",
-    autonomous: "Autonome",
-    ownership: "Ownership",
-  };
-
   return (
     <div className="grid gap-3">
       {links.length > 0 && (
         <div className="grid gap-2">
           {links.map((link, idx) => (
-            <div key={idx} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5">
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="rounded-full border border-slate-300 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-800">
-                    {link.skill.label}
-                  </span>
-                  {link.tools.map((t) => (
-                    <span key={t.label} className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{t.label}</span>
-                  ))}
-                  {link.autonomy_level && (
-                    <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] text-slate-500">
-                      {autonomyLabel[link.autonomy_level]}
-                    </span>
-                  )}
-                  {link.context && (
-                    <span className="text-[11px] text-slate-400 italic">{link.context}</span>
-                  )}
-                </div>
+            <div key={idx} className="flex items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <SkillLinkSummary link={link} compact />
               </div>
               <button type="button" onClick={() => removLink(idx)} className="mt-0.5 text-slate-300 hover:text-rose-500 shrink-0">
                 <X className="h-3.5 w-3.5" />
@@ -833,7 +939,7 @@ function SkillLinkEditor({
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                   }`}
                 >
-                  {autonomyLabel[lvl]}
+                  {AUTONOMY_LABELS[lvl]}
                 </button>
               ))}
             </div>
@@ -882,8 +988,9 @@ function ExperienceEditor({
   onQueuePendingSkill: (value: string) => void;
 }) {
   const [open, setOpen] = useState(true);
-
   const autonomy = experience.autonomy_level || "autonomous";
+  const primaryLinks = experience.skill_links || [];
+  const usesPrimaryLinks = hasPrimarySkillLinks(experience);
 
   return (
     <div className="overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white">
@@ -895,6 +1002,16 @@ function ExperienceEditor({
               .filter(Boolean)
               .join(" · ") || "À compléter"}
           </div>
+          {usesPrimaryLinks && (
+            <div className="mt-3 grid gap-2">
+              {primaryLinks.slice(0, 2).map((link, index) => (
+                <SkillLinkSummary key={`${link.skill.label}-${index}`} link={link} compact />
+              ))}
+              {primaryLinks.length > 2 && (
+                <div className="text-xs font-medium text-slate-500">+{primaryLinks.length - 2} autre(s) lien(s) compétence → outils</div>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -913,6 +1030,14 @@ function ExperienceEditor({
 
       {open && (
         <div className="grid gap-4 border-t border-slate-100 px-4 py-4">
+          <div className="grid gap-2">
+            <FieldLabel>Compétences & outils utilisés</FieldLabel>
+            <p className="text-xs leading-5 text-slate-500">
+              Source principale affichée dans le produit et utilisée pour enrichir le CV. Chaque bloc relie une compétence, ses outils, son contexte et le niveau d&apos;autonomie.
+            </p>
+            <ExperiencePrimarySignals experience={experience} />
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1">
               <FieldLabel>Intitulé</FieldLabel>
@@ -950,48 +1075,6 @@ function ExperienceEditor({
             />
           </div>
 
-          <ControlledSkillSelector
-            label="Outils réellement utilisés"
-            description="Sélection contrôlée. Rien n&apos;entre librement dans le profil si ce n&apos;est pas suggéré ou envoyé en pending review."
-            placeholder="Power BI, Excel, SAP…"
-            selected={experience.tools || []}
-            onChange={(tools) => onChange({ ...experience, tools })}
-            onPendingCandidate={onQueuePendingSkill}
-          />
-
-          <ControlledSkillSelector
-            label="Compétences réellement mobilisées"
-            description="Sélection contrôlée reliée aux référentiels existants."
-            placeholder="Reporting, paie, customer relationship management…"
-            selected={experience.canonical_skills_used || []}
-            onChange={(canonicalSkillsUsed) => onChange({ ...experience, canonical_skills_used: canonicalSkillsUsed })}
-            onPendingCandidate={onQueuePendingSkill}
-          />
-
-          <div className="grid gap-2">
-            <FieldLabel>Niveau d&apos;autonomie</FieldLabel>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {AUTONOMY_OPTIONS.map((option) => {
-                const active = autonomy === option.value;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => onChange({ ...experience, autonomy_level: option.value, autonomy: option.legacy })}
-                    className={`rounded-[1rem] border px-4 py-3 text-left transition ${
-                      active
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="text-sm font-semibold">{option.label}</div>
-                    <div className={`mt-1 text-xs leading-5 ${active ? "text-slate-200" : "text-slate-500"}`}>{option.helper}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           <StringChipEditor
             label="Données chiffrées"
             values={experience.quantified_signals || []}
@@ -1021,6 +1104,59 @@ function ExperienceEditor({
               onQueuePendingSkill={onQueuePendingSkill}
             />
           </div>
+
+          {usesPrimaryLinks ? (
+            <div className="rounded-[1rem] border border-slate-200 bg-slate-50/70 px-4 py-3">
+              <div className="text-sm font-semibold text-slate-900">Champs legacy conservés en compatibilite</div>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Les anciennes listes `tools` et `skills` restent stockees pour compatibilite, mais elles sont maintenant derivees des `skill_links` a la sauvegarde.
+              </p>
+            </div>
+          ) : (
+            <>
+              <ControlledSkillSelector
+                label="Outils reellement utilises"
+                description="Fallback legacy si vous n&apos;avez pas encore structure l&apos;experience avec des skill_links."
+                placeholder="Power BI, Excel, SAP…"
+                selected={experience.tools || []}
+                onChange={(tools) => onChange({ ...experience, tools })}
+                onPendingCandidate={onQueuePendingSkill}
+              />
+
+              <ControlledSkillSelector
+                label="Competences reellement mobilisees"
+                description="Fallback legacy relié aux referentiels existants."
+                placeholder="Reporting, paie, customer relationship management…"
+                selected={experience.canonical_skills_used || []}
+                onChange={(canonicalSkillsUsed) => onChange({ ...experience, canonical_skills_used: canonicalSkillsUsed })}
+                onPendingCandidate={onQueuePendingSkill}
+              />
+
+              <div className="grid gap-2">
+                <FieldLabel>Niveau d&apos;autonomie</FieldLabel>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {AUTONOMY_OPTIONS.map((option) => {
+                    const active = autonomy === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => onChange({ ...experience, autonomy_level: option.value, autonomy: option.legacy })}
+                        className={`rounded-[1rem] border px-4 py-3 text-left transition ${
+                          active
+                            ? "border-slate-900 bg-slate-900 text-white"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="text-sm font-semibold">{option.label}</div>
+                        <div className={`mt-1 text-xs leading-5 ${active ? "text-slate-200" : "text-slate-500"}`}>{option.helper}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -1112,22 +1248,36 @@ export default function ProfilePage() {
     setSaved(false);
 
     const normalizedExperiences = experiences.map((experience) => {
-      const tools = dedupeSkillRefs(experience.tools || []);
-      const canonicalSkillsUsed = dedupeSkillRefs(experience.canonical_skills_used || []);
+      const rawSkillLinks = experience.skill_links || [];
+      const seenSkillLabels = new Set<string>();
+      const skillLinks = rawSkillLinks
+        .map((link) => ({
+          skill: { ...link.skill, label: link.skill.label.trim() },
+          tools: dedupeTools(link.tools || []),
+          context: link.context?.trim() || undefined,
+          autonomy_level: link.autonomy_level,
+        }))
+        .filter((link) => {
+          const key = link.skill.label.toLowerCase();
+          if (!key || seenSkillLabels.has(key)) return false;
+          seenSkillLabels.add(key);
+          return true;
+        });
+      const tools = dedupeSkillRefs(
+        (skillLinks.length > 0 ? skillLinks.flatMap((link) => link.tools.map((tool) => ({ label: tool.label }))) : (experience.tools || []))
+          .map((item) => normalizeSkillRef(item))
+          .filter(Boolean) as CanonicalSkillRef[]
+      );
+      const canonicalSkillsUsed = dedupeSkillRefs(
+        (skillLinks.length > 0 ? skillLinks.map((link) => link.skill) : (experience.canonical_skills_used || []))
+          .map((item) => normalizeSkillRef(item))
+          .filter(Boolean) as CanonicalSkillRef[]
+      );
       const quantifiedSignals = dedupeStrings(experience.quantified_signals || []);
       const impactSignals = dedupeStrings(experience.impact_signals || []);
       const achievements = dedupeStrings([...quantifiedSignals, ...impactSignals]);
       const contextTags = dedupeStrings(experience.context_tags || []);
       const autonomyLevel = experience.autonomy_level || "autonomous";
-      // Deduplicate skill_links by skill label (keep last)
-      const seenSkillLabels = new Set<string>();
-      const skillLinks = (experience.skill_links || [])
-        .filter((link) => {
-          const key = link.skill.label.toLowerCase();
-          if (seenSkillLabels.has(key)) return false;
-          seenSkillLabels.add(key);
-          return true;
-        });
       return {
         ...experience,
         tools,

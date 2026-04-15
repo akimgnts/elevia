@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from documents.apply_pack_cv_engine import build_targeted_cv, parse_offer, score_experiences
+from documents.apply_pack_cv_engine import adapt_career_experiences, build_targeted_cv, parse_offer, score_experiences
 
 
 OFFER = {
@@ -84,3 +84,58 @@ def test_skills_are_ordered_with_offer_matches_first():
     skills = payload["cv"]["skills"]
     assert skills[:3]
     assert any(skill.lower().startswith("excel") for skill in skills[:3])
+
+
+def test_adapt_career_experiences_prefers_skill_links_when_present():
+    profile = {
+        "career_profile": {
+            "experiences": [
+                {
+                    "title": "Data Analyst",
+                    "company": "ACME",
+                    "start_date": "2024",
+                    "end_date": "2025",
+                    "responsibilities": ["Suivi de tableaux de bord"],
+                    "tools": ["Excel"],
+                    "skills": ["reporting"],
+                    "skill_links": [
+                        {
+                            "skill": {"label": "Analyse de donnees"},
+                            "tools": [{"label": "Python"}, {"label": "SQL"}],
+                            "context": "analyse de performance",
+                            "autonomy_level": "autonomous",
+                        }
+                    ],
+                }
+            ]
+        }
+    }
+
+    adapted = adapt_career_experiences(profile, OFFER)
+
+    assert len(adapted) == 1
+    assert adapted[0].tools == ["Python", "SQL"]
+    assert adapted[0].bullets[0] == "Analyse de donnees avec Python et SQL dans un contexte de analyse de performance."
+    assert any("Pratique autonome de analyse de donnees" in bullet for bullet in adapted[0].bullets)
+
+
+def test_adapt_career_experiences_falls_back_without_skill_links():
+    profile = {
+        "career_profile": {
+            "experiences": [
+                {
+                    "title": "Analyste reporting",
+                    "company": "ACME",
+                    "responsibilities": ["Analyse des ecarts budgetaires"],
+                    "tools": ["Excel", "Power BI"],
+                    "skills": ["analyse budgetaire"],
+                }
+            ]
+        }
+    }
+
+    adapted = adapt_career_experiences(profile, OFFER)
+
+    assert len(adapted) == 1
+    assert adapted[0].tools == ["Excel", "Power BI"]
+    assert any(bullet.startswith("Analyser") or bullet.startswith("Examiner") or bullet.startswith("Evaluer") or bullet.startswith("Mesurer") for bullet in adapted[0].bullets)
