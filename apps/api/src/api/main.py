@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 env_path = Path(__file__).parent.parent.parent / ".env"
 load_dotenv(env_path)
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -45,13 +45,13 @@ from .routes.context import router as context_router
 from .routes.documents import router as documents_router
 from .routes.profile_structured import router as profile_structured_router
 from .routes.profile_summary import router as profile_summary_router
+from .routes.profile_enrichment import router as profile_enrichment_router
 from .routes.cluster_library_api import router as cluster_library_router
 from .routes.analyze_recovery import router as analyze_recovery_router
 from .routes.analyze_ai_quality import router as analyze_ai_quality_router
 from .routes.market_insights import router as market_insights_router
 from .routes.ai_justify import router as ai_justify_router
 from .routes.ai_structure import router as ai_structure_router
-from .deps.auth import require_auth
 from .routes.inbox import warm_inbox_runtime
 from documents.llm_client import is_llm_available
 
@@ -96,7 +96,7 @@ app.include_router(profile_router, prefix="/profile")
 app.include_router(profile_baseline_router)    # POST /profile/parse-baseline (no LLM)
 app.include_router(profile_file_router)        # POST /profile/parse-file (multipart, no LLM)
 app.include_router(inbox_router)
-app.include_router(applications_router, dependencies=[Depends(require_auth)])
+app.include_router(applications_router)
 app.include_router(apply_pack_router)  # POST /apply-pack (baseline + optional LLM)
 app.include_router(debug_router)  # DEV-only debug endpoints
 app.include_router(dev_tools_router)  # DEV-only tools (guarded by ELEVIA_DEV_TOOLS=1)
@@ -105,6 +105,7 @@ app.include_router(context_router)  # POST /context/*
 app.include_router(documents_router)  # POST /documents/cv (CV Generator v1)
 app.include_router(profile_structured_router)  # GET|POST /profile/structured (COMPASS D+)
 app.include_router(profile_summary_router)  # GET /profile/summary (compact profile panel)
+app.include_router(profile_enrichment_router)  # GET /profile/skills/suggest  GET /profile/tools/suggest
 app.include_router(cluster_library_router)  # GET /cluster/library/* + POST /cluster/library/enrich/cv
 app.include_router(analyze_recovery_router)  # POST /analyze/recover-skills (DEV-only)
 app.include_router(analyze_ai_quality_router)  # POST /analyze/audit-ai-quality (DEV-only)

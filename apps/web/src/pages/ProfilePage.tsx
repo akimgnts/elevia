@@ -12,10 +12,12 @@ import {
 } from "lucide-react";
 import {
   fetchProfileSkillSuggestions,
+  fetchProfileToolSuggestions,
   parseFile,
   saveSavedProfile,
   type ParseFileResponse,
   type ProfileSkillSuggestion,
+  type ProfileToolSuggestion,
 } from "../lib/api";
 import { useProfileStore } from "../store/profileStore";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
@@ -39,6 +41,22 @@ type IdentityV2 = {
 
 type AutonomyLevel = "execution" | "partial" | "autonomous" | "ownership";
 
+/** A software tool or platform — not ESCO-mapped. */
+type ToolRef = {
+  label: string;
+};
+
+/**
+ * Explicit skill ↔ tool ↔ context ↔ autonomy binding for one experience.
+ * Stored in CareerExperience.skill_links on the backend.
+ */
+type SkillLinkItem = {
+  skill: CanonicalSkillRef;
+  tools: ToolRef[];
+  context?: string;
+  autonomy_level?: AutonomyLevel;
+};
+
 type ExperienceV2 = {
   title?: string;
   company?: string;
@@ -54,6 +72,7 @@ type ExperienceV2 = {
   achievements?: string[];
   skills?: string[];
   autonomy?: "CONTRIB" | "COPILOT" | "LEAD";
+  skill_links?: SkillLinkItem[];
 };
 
 type EducationV2 = {
@@ -200,6 +219,35 @@ function legacyAutonomy(level: AutonomyLevel | undefined): "CONTRIB" | "COPILOT"
   return AUTONOMY_OPTIONS.find((option) => option.value === level)?.legacy || "COPILOT";
 }
 
+function normalizeSkillLink(value: unknown): SkillLinkItem | null {
+  if (!value || typeof value !== "object") return null;
+  const rec = value as Record<string, unknown>;
+  const skill = normalizeSkillRef(rec.skill);
+  if (!skill) return null;
+  const rawTools = Array.isArray(rec.tools) ? rec.tools : [];
+  const tools: ToolRef[] = rawTools
+    .map((t) => {
+      if (typeof t === "string") return t.trim() ? { label: t.trim() } : null;
+      if (t && typeof t === "object" && typeof (t as Record<string, unknown>).label === "string") {
+        const label = ((t as Record<string, unknown>).label as string).trim();
+        return label ? { label } : null;
+      }
+      return null;
+    })
+    .filter((t): t is ToolRef => t !== null);
+  const autonomy_level =
+    rec.autonomy_level === "execution" || rec.autonomy_level === "partial" ||
+    rec.autonomy_level === "autonomous" || rec.autonomy_level === "ownership"
+      ? rec.autonomy_level
+      : undefined;
+  return {
+    skill,
+    tools,
+    context: typeof rec.context === "string" ? rec.context.trim() || undefined : undefined,
+    autonomy_level,
+  };
+}
+
 function normalizeExperience(value: ExperienceV2 | Record<string, unknown> | undefined): ExperienceV2 {
   const rec = (value || {}) as Record<string, unknown>;
   const rawTools = Array.isArray(rec.tools) ? rec.tools : [];
@@ -243,6 +291,9 @@ function normalizeExperience(value: ExperienceV2 | Record<string, unknown> | und
     achievements: Array.isArray(rec.achievements) ? dedupeStrings(rec.achievements.map(String)) : [],
     skills: Array.isArray(rec.skills) ? dedupeStrings(rec.skills.map(String)) : [],
     autonomy: legacyAutonomy(autonomyLevel),
+    skill_links: Array.isArray(rec.skill_links)
+      ? (rec.skill_links.map(normalizeSkillLink).filter(Boolean) as SkillLinkItem[])
+      : [],
   };
 }
 
@@ -606,6 +657,219 @@ function ControlledSkillSelector({
   );
 }
 
+// ---------------------------------------------------------------------------
+// ToolChipSelector — autocomplete against /profile/tools/suggest (NOT ESCO)
+// ---------------------------------------------------------------------------
+function ToolChipSelector({
+  selected,
+  onChange,
+}: {
+  selected: ToolRef[];
+  onChange: (next: ToolRef[]) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<ProfileToolSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const value = query.trim();
+    if (value.length < 2) { setSuggestions([]); return; }
+    let cancelled = false;
+    setLoading(true);
+    const timer = window.setTimeout(async () => {
+      try {
+        const result = await fetchProfileToolSuggestions(value, 6);
+        if (!cancelled) setSuggestions(result);
+      } catch { if (!cancelled) setSuggestions([]); }
+      finally { if (!cancelled) setLoading(false); }
+    }, 150);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [query]);
+
+  function addTool(label: string) {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const exists = selected.some((t) => t.label.toLowerCase() === trimmed.toLowerCase());
+    if (!exists) onChange([...selected, { label: trimmed }]);
+    setQuery(""); setSuggestions([]);
+  }
+
+  function commitDraft() {
+    if (query.trim()) addTool(query.trim());
+  }
+
+  return (
+    <div className="grid gap-2">
+      <div className="flex flex-wrap gap-1.5">
+        {selected.map((t) => (
+          <span key={t.label} className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-800">
+            {t.label}
+            <button type="button" onClick={() => onChange(selected.filter((x) => x.label !== t.label))} className="text-blue-400 hover:text-rose-500">
+              <X className="h-2.5 w-2.5" />
+            </button>
+          </span>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <TextInput value={query} onChange={setQuery} placeholder="Excel, Power BI, SAP…" />
+        <button type="button" onClick={commitDraft} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+          Ajouter
+        </button>
+      </div>
+      {loading && <div className="text-xs text-slate-400">Recherche…</div>}
+      {!loading && suggestions.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {suggestions.map((s) => (
+            <button key={s.label} type="button" onClick={() => addTool(s.label)}
+              className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800 transition">
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// SkillLinkEditor — per-experience skill ↔ tool ↔ context ↔ autonomy links
+// ---------------------------------------------------------------------------
+function SkillLinkEditor({
+  links,
+  onChange,
+  onQueuePendingSkill,
+}: {
+  links: SkillLinkItem[];
+  onChange: (next: SkillLinkItem[]) => void;
+  onQueuePendingSkill: (value: string) => void;
+}) {
+  const blank: SkillLinkItem = { skill: { label: "" }, tools: [], context: "", autonomy_level: undefined };
+  const [draft, setDraft] = useState<SkillLinkItem | null>(null);
+
+  function commitDraft() {
+    if (!draft || !draft.skill.label.trim()) return;
+    onChange([...links, { ...draft, skill: { ...draft.skill, label: draft.skill.label.trim() }, context: draft.context?.trim() || undefined }]);
+    setDraft(null);
+  }
+
+  function removLink(idx: number) {
+    onChange(links.filter((_, i) => i !== idx));
+  }
+
+  const autonomyLabel: Record<AutonomyLevel, string> = {
+    execution: "Exécution",
+    partial: "Partielle",
+    autonomous: "Autonome",
+    ownership: "Ownership",
+  };
+
+  return (
+    <div className="grid gap-3">
+      {links.length > 0 && (
+        <div className="grid gap-2">
+          {links.map((link, idx) => (
+            <div key={idx} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="rounded-full border border-slate-300 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-800">
+                    {link.skill.label}
+                  </span>
+                  {link.tools.map((t) => (
+                    <span key={t.label} className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{t.label}</span>
+                  ))}
+                  {link.autonomy_level && (
+                    <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] text-slate-500">
+                      {autonomyLabel[link.autonomy_level]}
+                    </span>
+                  )}
+                  {link.context && (
+                    <span className="text-[11px] text-slate-400 italic">{link.context}</span>
+                  )}
+                </div>
+              </div>
+              <button type="button" onClick={() => removLink(idx)} className="mt-0.5 text-slate-300 hover:text-rose-500 shrink-0">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {draft ? (
+        <div className="rounded-[1rem] border border-slate-200 bg-white p-4 grid gap-4">
+          <div className="grid gap-1">
+            <FieldLabel>Compétence</FieldLabel>
+            <ControlledSkillSelector
+              label=""
+              placeholder="Data analysis, reporting, prospection…"
+              selected={draft.skill.label ? [draft.skill] : []}
+              onChange={(items) => setDraft((d) => d ? { ...d, skill: items[items.length - 1] || { label: "" } } : d)}
+              onPendingCandidate={onQueuePendingSkill}
+            />
+          </div>
+          <div className="grid gap-1">
+            <FieldLabel>Outils associés</FieldLabel>
+            <ToolChipSelector selected={draft.tools} onChange={(tools) => setDraft((d) => d ? { ...d, tools } : d)} />
+          </div>
+          <div className="grid gap-1">
+            <FieldLabel>Contexte (optionnel)</FieldLabel>
+            <TextInput
+              value={draft.context || ""}
+              onChange={(v) => setDraft((d) => d ? { ...d, context: v.slice(0, 80) } : d)}
+              placeholder="analyse de performance, gestion des commandes…"
+            />
+          </div>
+          <div className="grid gap-1">
+            <FieldLabel>Autonomie sur cette compétence</FieldLabel>
+            <div className="flex flex-wrap gap-2">
+              {(["execution", "partial", "autonomous", "ownership"] as AutonomyLevel[]).map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => setDraft((d) => d ? { ...d, autonomy_level: lvl } : d)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    draft.autonomy_level === lvl
+                      ? "border-slate-900 bg-slate-900 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  }`}
+                >
+                  {autonomyLabel[lvl]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={commitDraft}
+              disabled={!draft.skill.label.trim()}
+              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+            >
+              Ajouter ce lien
+            </button>
+            <button
+              type="button"
+              onClick={() => setDraft(null)}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setDraft(blank)}
+          className="inline-flex items-center gap-1.5 self-start rounded-full border border-dashed border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:border-slate-400 hover:text-slate-700"
+        >
+          <Plus className="h-3 w-3" />
+          Ajouter un lien compétence → outils
+        </button>
+      )}
+    </div>
+  );
+}
+
 function ExperienceEditor({
   experience,
   onChange,
@@ -744,6 +1008,19 @@ function ExperienceEditor({
             <FieldLabel>Contexte</FieldLabel>
             <ToggleTags options={CONTEXT_OPTIONS} values={experience.context_tags || []} onChange={(contextTags) => onChange({ ...experience, context_tags: contextTags })} />
           </div>
+
+          <div className="grid gap-2">
+            <FieldLabel>Liens compétence → outils</FieldLabel>
+            <p className="text-xs leading-5 text-slate-400">
+              Associez chaque compétence clé aux outils avec lesquels vous l&apos;exercez dans cette expérience.
+              Ce lien structure le signal pour le matching et la génération de CV.
+            </p>
+            <SkillLinkEditor
+              links={experience.skill_links || []}
+              onChange={(skill_links) => onChange({ ...experience, skill_links })}
+              onQueuePendingSkill={onQueuePendingSkill}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -842,11 +1119,21 @@ export default function ProfilePage() {
       const achievements = dedupeStrings([...quantifiedSignals, ...impactSignals]);
       const contextTags = dedupeStrings(experience.context_tags || []);
       const autonomyLevel = experience.autonomy_level || "autonomous";
+      // Deduplicate skill_links by skill label (keep last)
+      const seenSkillLabels = new Set<string>();
+      const skillLinks = (experience.skill_links || [])
+        .filter((link) => {
+          const key = link.skill.label.toLowerCase();
+          if (seenSkillLabels.has(key)) return false;
+          seenSkillLabels.add(key);
+          return true;
+        });
       return {
         ...experience,
         tools,
         canonical_skills_used: canonicalSkillsUsed,
         skills: canonicalSkillsUsed.map((item) => item.label),
+        skill_links: skillLinks,
         quantified_signals: quantifiedSignals,
         impact_signals: impactSignals,
         achievements,
@@ -897,6 +1184,7 @@ export default function ProfilePage() {
         impact_signals: experience.impact_signals || [],
         context_tags: experience.context_tags || [],
         canonical_skills_used: experience.canonical_skills_used || [],
+        skill_links: experience.skill_links || [],
       })),
       career_profile: careerProfile,
     };

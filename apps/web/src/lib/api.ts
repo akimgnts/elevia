@@ -93,6 +93,54 @@ export async function saveSavedProfile(profile: Record<string, unknown>): Promis
   }
 }
 
+export interface ProfileSkillSuggestion {
+  label: string;
+  uri?: string | null;
+  confidence: number;
+  method: string;
+  source: string;
+}
+
+export async function fetchProfileSkillSuggestions(
+  query: string,
+  limit: number = 8
+): Promise<ProfileSkillSuggestion[]> {
+  const value = query.trim();
+  if (value.length < 2) return [];
+
+  const url = `${API_BASE}/profile/skills/suggest?q=${encodeURIComponent(value)}&limit=${limit}`;
+  const res = await apiFetch(url);
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  const data = (await res.json()) as { suggestions?: ProfileSkillSuggestion[] };
+  return Array.isArray(data.suggestions) ? data.suggestions : [];
+}
+
+export interface ProfileToolSuggestion {
+  label: string;
+  confidence: number;
+  method: string;
+}
+
+export async function fetchProfileToolSuggestions(
+  query: string,
+  limit: number = 8
+): Promise<ProfileToolSuggestion[]> {
+  const value = query.trim();
+  if (value.length < 2) return [];
+
+  const url = `${API_BASE}/profile/tools/suggest?q=${encodeURIComponent(value)}&limit=${limit}`;
+  const res = await apiFetch(url);
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${txt}`);
+  }
+  const data = (await res.json()) as { suggestions?: ProfileToolSuggestion[] };
+  return Array.isArray(data.suggestions) ? data.suggestions : [];
+}
+
 export interface OfferNormalized {
   id: string;
   source: "france_travail" | "business_france" | "unknown";
@@ -1649,6 +1697,44 @@ export async function generateCvHtmlForOffer(
       offer_id: offerId,
     }));
     throw new Error("Génération du CV HTML échouée. Réessayez.");
+  }
+
+  return res.json() as Promise<CvHtmlResponse>;
+}
+
+/**
+ * Generate an adapted CV (cv_v2 template) for a given offer using the targeted engine.
+ * POST /documents/cv/html/for-offer with template_version=cv_v2
+ */
+export async function generateCvV2ForOffer(
+  offerId: string,
+  profile: Record<string, unknown>,
+  context?: InboxContextPayload,
+): Promise<CvHtmlResponse> {
+  const url = `${API_BASE}/documents/cv/html/for-offer`;
+  const body: Record<string, unknown> = {
+    offer_id: offerId,
+    profile,
+    lang: "fr",
+    template_version: "cv_v2",
+  };
+  if (context) body.context = context;
+
+  const res = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    console.warn(JSON.stringify({
+      event: "DOCUMENTS_CV_V2_FAILED",
+      endpoint: "/documents/cv/html/for-offer",
+      status: res.status,
+      offer_id: offerId,
+      template_version: "cv_v2",
+    }));
+    throw new Error("Génération du CV adapté échouée. Réessayez.");
   }
 
   return res.json() as Promise<CvHtmlResponse>;

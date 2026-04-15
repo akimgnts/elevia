@@ -40,6 +40,26 @@ class CareerSkillSelection(BaseModel):
     label: str
 
 
+class ToolRef(BaseModel):
+    """A software tool or platform used in an experience. Not mapped to ESCO."""
+    label: str
+
+
+class SkillLink(BaseModel):
+    """
+    Explicit binding: one skill exercised in an experience → the tools it was
+    practised with, the context it appeared in, and the autonomy level at which
+    the person operated.
+
+    Stored per-experience under CareerExperience.skill_links.
+    This is the primary model for skill ↔ tool ↔ context ↔ autonomy traceability.
+    """
+    skill: CareerSkillSelection                          # ESCO-mapped label + optional URI
+    tools: List[ToolRef] = Field(default_factory=list)  # tools used when practising that skill
+    context: Optional[str] = None                       # short free-text context ("analyse de performance")
+    autonomy_level: Optional[Literal["execution", "partial", "autonomous", "ownership"]] = None
+
+
 class CareerProject(BaseModel):
     title: str
     description: Optional[str] = None
@@ -66,6 +86,7 @@ class CareerExperience(BaseModel):
     impact_signals: List[str] = Field(default_factory=list)
     context_tags: List[str] = Field(default_factory=list)
     canonical_skills_used: List[CareerSkillSelection] = Field(default_factory=list)
+    skill_links: List[SkillLink] = Field(default_factory=list)
 
 
 class CareerEducation(BaseModel):
@@ -391,6 +412,7 @@ def to_experience_dicts(career_profile: CareerProfile) -> List[Dict[str, Any]]:
             "impact_signals": exp.impact_signals,
             "context_tags": exp.context_tags,
             "canonical_skills_used": [item.model_dump() for item in exp.canonical_skills_used],
+            "skill_links": [item.model_dump() for item in exp.skill_links],
             "duration_months": exp.duration_months,
             "autonomy": exp.autonomy,
         })
