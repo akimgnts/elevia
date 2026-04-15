@@ -1,485 +1,1208 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { AlertTriangle, Plus, RotateCcw, Save, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  AlertCircle,
+  CheckCircle2,
+  FileUp,
+  Loader2,
+  Plus,
+  Save,
+  Trash2,
+  X,
+} from "lucide-react";
+import {
+  fetchProfileSkillSuggestions,
+  parseFile,
+  saveSavedProfile,
+  type ParseFileResponse,
+  type ProfileSkillSuggestion,
+} from "../lib/api";
 import { useProfileStore } from "../store/profileStore";
-import { buildMatchingProfile } from "../lib/profileMatching";
-import { buildCorrectionEvent, postCorrectionMetric } from "../lib/api";
-import type { ProfileMatchingV1 } from "../lib/profileMatching";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
 
-const CAPABILITY_LEVELS = ["beginner", "intermediate", "expert"] as const;
-const CAPABILITY_NAMES = [
-  "data_visualization",
-  "spreadsheet_logic",
-  "crm_management",
-  "programming_scripting",
-  "project_management",
+type CanonicalSkillRef = {
+  label: string;
+  uri?: string | null;
+  confidence?: number;
+  method?: string;
+  source?: string;
+};
+
+type IdentityV2 = {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  linkedin?: string;
+  github?: string;
+};
+
+type AutonomyLevel = "execution" | "partial" | "autonomous" | "ownership";
+
+type ExperienceV2 = {
+  title?: string;
+  company?: string;
+  start_date?: string;
+  end_date?: string;
+  responsibilities?: string[];
+  tools?: CanonicalSkillRef[];
+  canonical_skills_used?: CanonicalSkillRef[];
+  autonomy_level?: AutonomyLevel;
+  quantified_signals?: string[];
+  impact_signals?: string[];
+  context_tags?: string[];
+  achievements?: string[];
+  skills?: string[];
+  autonomy?: "CONTRIB" | "COPILOT" | "LEAD";
+};
+
+type EducationV2 = {
+  degree?: string;
+  field?: string;
+  institution?: string;
+  start_date?: string;
+  end_date?: string;
+};
+
+type LanguageV2 = {
+  language?: string;
+  level?: string;
+};
+
+type ProjectV2 = {
+  title?: string;
+  technologies?: string[];
+  url?: string;
+  impact?: string;
+};
+
+type CareerProfileV2 = {
+  schema_version?: string;
+  base_title?: string;
+  summary_master?: string;
+  target_title?: string;
+  identity?: IdentityV2;
+  experiences?: ExperienceV2[];
+  education?: EducationV2[];
+  languages?: LanguageV2[];
+  projects?: ProjectV2[];
+  certifications?: string[];
+  selected_skills?: CanonicalSkillRef[];
+  pending_skill_candidates?: string[];
+  completeness?: number;
+  skills_highlights?: string[];
+};
+
+type FullProfile = {
+  career_profile?: CareerProfileV2;
+  canonical_skills?: CanonicalSkillRef[];
+  skills?: string[];
+  matching_skills?: string[];
+  experiences?: Record<string, unknown>[];
+  [key: string]: unknown;
+};
+
+const GLASS =
+  "rounded-[1.5rem] border border-slate-200/80 bg-white/90 p-6 shadow-sm";
+
+const AUTONOMY_OPTIONS: Array<{
+  value: AutonomyLevel;
+  label: string;
+  helper: string;
+  legacy: "CONTRIB" | "COPILOT" | "LEAD";
+}> = [
+  { value: "execution", label: "Exécution", helper: "Cadre défini, exécution attendue.", legacy: "CONTRIB" },
+  { value: "partial", label: "Contribution partielle", helper: "Contribution claire, pilotage partagé.", legacy: "CONTRIB" },
+  { value: "autonomous", label: "Autonome", helper: "Exécution et arbitrages sur son périmètre.", legacy: "COPILOT" },
+  { value: "ownership", label: "Pilotage / ownership", helper: "Pilotage du sujet, coordination et responsabilité.", legacy: "LEAD" },
+];
+
+const CONTEXT_OPTIONS = [
+  "environnement international",
+  "équipe transverse",
+  "retail",
+  "communication",
+  "marketing",
+  "finance",
+  "RH",
+  "supply chain",
+  "B2B",
+  "B2C",
 ] as const;
 
-type Capability = {
-  name: string;
-  level: string;
-  score: number;
-  proofs: string[];
-  tools_detected: string[];
-};
+const IMPACT_OPTIONS = [
+  "amélioration de fiabilité",
+  "automatisation",
+  "support à la décision",
+  "structuration du suivi",
+  "amélioration visibilité",
+  "meilleure coordination",
+] as const;
 
-type ProfileData = {
-  candidate_info?: {
-    first_name?: string;
-    last_name?: string;
-    email?: string;
-    years_of_experience?: number;
-  };
-  detected_capabilities?: Capability[];
-  languages?: { code: string; level: string; raw_text?: string }[];
-  education_summary?: { level: string; raw_text?: string };
-  unmapped_skills_high_confidence?: { raw_skill: string; confidence: number; proof: string }[];
-};
+function buildPersistedProfile(result: ParseFileResponse): Record<string, unknown> {
+  const profile = { ...(result.profile || {}) } as Record<string, unknown>;
+  if (Array.isArray(result.canonical_skills)) profile.canonical_skills = result.canonical_skills;
+  if (typeof result.canonical_skills_count === "number") profile.canonical_skills_count = result.canonical_skills_count;
+  if (Array.isArray(result.enriched_signals)) profile.enriched_signals = result.enriched_signals;
+  if (Array.isArray(result.concept_signals)) profile.concept_signals = result.concept_signals;
+  if (result.profile_intelligence && !profile.profile_intelligence) profile.profile_intelligence = result.profile_intelligence;
+  if (result.profile_intelligence_ai_assist && !profile.profile_intelligence_ai_assist) profile.profile_intelligence_ai_assist = result.profile_intelligence_ai_assist;
+  return profile;
+}
 
-type InboxProfileSnapshot = {
-  profile_id: string;
-  matching_profile: ProfileMatchingV1;
-  skills_source: string;
-  created_at: string;
-};
-
-const INBOX_PROFILE_SNAPSHOT_KEY = "elevia_inbox_profile_snapshot";
-
-function readInboxProfileSnapshot(): InboxProfileSnapshot | null {
-  try {
-    const raw = localStorage.getItem(INBOX_PROFILE_SNAPSHOT_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as InboxProfileSnapshot;
-  } catch {
-    return null;
+function normalizeSkillRef(value: unknown): CanonicalSkillRef | null {
+  if (typeof value === "string") {
+    const label = value.trim();
+    return label ? { label } : null;
   }
+  if (!value || typeof value !== "object") return null;
+  const rec = value as Record<string, unknown>;
+  const label = typeof rec.label === "string" ? rec.label.trim() : "";
+  if (!label) return null;
+  return {
+    label,
+    uri: typeof rec.uri === "string" ? rec.uri : null,
+    confidence: typeof rec.confidence === "number" ? rec.confidence : undefined,
+    method: typeof rec.method === "string" ? rec.method : undefined,
+    source: typeof rec.source === "string" ? rec.source : undefined,
+  };
 }
 
-function labelizeCapability(name: string): string {
-  return name.replace(/_/g, " ");
+function dedupeStrings(values: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of values) {
+    const normalized = value.trim();
+    if (!normalized) continue;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(normalized);
+  }
+  return out;
 }
 
-function levelBadgeClass(level: string): string {
-  if (level === "expert") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (level === "intermediate") return "bg-sky-50 text-sky-700 border-sky-200";
-  return "bg-slate-100 text-slate-600 border-slate-200";
+function dedupeSkillRefs(values: CanonicalSkillRef[]): CanonicalSkillRef[] {
+  const seen = new Set<string>();
+  const out: CanonicalSkillRef[] = [];
+  for (const item of values) {
+    const normalized = normalizeSkillRef(item);
+    if (!normalized) continue;
+    const key = normalized.uri || normalized.label.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(normalized);
+  }
+  return out;
+}
+
+function legacyAutonomy(level: AutonomyLevel | undefined): "CONTRIB" | "COPILOT" | "LEAD" {
+  return AUTONOMY_OPTIONS.find((option) => option.value === level)?.legacy || "COPILOT";
+}
+
+function normalizeExperience(value: ExperienceV2 | Record<string, unknown> | undefined): ExperienceV2 {
+  const rec = (value || {}) as Record<string, unknown>;
+  const rawTools = Array.isArray(rec.tools) ? rec.tools : [];
+  const rawSkills = Array.isArray(rec.canonical_skills_used)
+    ? rec.canonical_skills_used
+    : Array.isArray(rec.skills)
+      ? rec.skills
+      : [];
+  const autonomyLevel =
+    rec.autonomy_level === "execution" ||
+    rec.autonomy_level === "partial" ||
+    rec.autonomy_level === "autonomous" ||
+    rec.autonomy_level === "ownership"
+      ? rec.autonomy_level
+      : rec.autonomy === "LEAD"
+        ? "ownership"
+        : rec.autonomy === "CONTRIB"
+          ? "execution"
+          : "autonomous";
+
+  return {
+    title: typeof rec.title === "string" ? rec.title : "",
+    company: typeof rec.company === "string" ? rec.company : "",
+    start_date: typeof rec.start_date === "string" ? rec.start_date : "",
+    end_date: typeof rec.end_date === "string" ? rec.end_date : typeof rec.dates === "string" ? rec.dates : "",
+    responsibilities: Array.isArray(rec.responsibilities)
+      ? rec.responsibilities.map(String).filter(Boolean)
+      : Array.isArray(rec.bullets)
+        ? rec.bullets.map(String).filter(Boolean)
+        : [],
+    tools: dedupeSkillRefs(rawTools.map((item) => normalizeSkillRef(item)).filter(Boolean) as CanonicalSkillRef[]),
+    canonical_skills_used: dedupeSkillRefs(rawSkills.map((item) => normalizeSkillRef(item)).filter(Boolean) as CanonicalSkillRef[]),
+    autonomy_level: autonomyLevel,
+    quantified_signals: Array.isArray(rec.quantified_signals) ? dedupeStrings(rec.quantified_signals.map(String)) : [],
+    impact_signals: Array.isArray(rec.impact_signals)
+      ? dedupeStrings(rec.impact_signals.map(String))
+      : Array.isArray(rec.achievements)
+        ? dedupeStrings(rec.achievements.map(String))
+        : [],
+    context_tags: Array.isArray(rec.context_tags) ? dedupeStrings(rec.context_tags.map(String)) : [],
+    achievements: Array.isArray(rec.achievements) ? dedupeStrings(rec.achievements.map(String)) : [],
+    skills: Array.isArray(rec.skills) ? dedupeStrings(rec.skills.map(String)) : [],
+    autonomy: legacyAutonomy(autonomyLevel),
+  };
+}
+
+function normalizeCareerProfile(career: CareerProfileV2 | undefined, fullProfile: FullProfile): CareerProfileV2 {
+  const current = career || {};
+  return {
+    ...current,
+    schema_version: "v2",
+    base_title: current.base_title || current.target_title || "",
+    summary_master: current.summary_master || "",
+    identity: current.identity || {},
+    experiences: Array.isArray(current.experiences) ? current.experiences.map((exp) => normalizeExperience(exp)) : [],
+    education: Array.isArray(current.education) ? current.education : [],
+    languages: Array.isArray(current.languages) ? current.languages : [],
+    projects: Array.isArray(current.projects) ? current.projects : [],
+    certifications: Array.isArray(current.certifications) ? current.certifications.map(String) : [],
+    selected_skills: dedupeSkillRefs(
+      (Array.isArray(current.selected_skills) ? current.selected_skills : (Array.isArray(fullProfile.canonical_skills) ? fullProfile.canonical_skills : []))
+        .map((item) => normalizeSkillRef(item))
+        .filter(Boolean) as CanonicalSkillRef[]
+    ),
+    pending_skill_candidates: Array.isArray(current.pending_skill_candidates)
+      ? dedupeStrings(current.pending_skill_candidates.map(String))
+      : [],
+  };
+}
+
+function computeCompleteness(profile: {
+  identity: IdentityV2;
+  baseTitle: string;
+  summaryMaster: string;
+  selectedSkills: CanonicalSkillRef[];
+  experiences: ExperienceV2[];
+  education: EducationV2[];
+  languages: LanguageV2[];
+}): number {
+  let filled = 0;
+  const total = 6;
+  if (profile.identity.full_name) filled++;
+  if (profile.baseTitle.trim()) filled++;
+  if (profile.summaryMaster.trim()) filled++;
+  if (profile.selectedSkills.length > 0) filled++;
+  if (profile.experiences.length > 0) filled++;
+  if (profile.education.length > 0 || profile.languages.length > 0) filled++;
+  return filled / total;
+}
+
+function SectionLabel({ text }: { text: string }) {
+  return <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{text}</div>;
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return <label className="text-xs font-semibold text-slate-500">{children}</label>;
+}
+
+function TextInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+    />
+  );
+}
+
+function TextArea({
+  value,
+  onChange,
+  placeholder,
+  rows = 4,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+}) {
+  return (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+    />
+  );
+}
+
+function UploadZone({ onFile, compact = false }: { onFile: (f: File) => void; compact?: boolean }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        const f = e.dataTransfer.files[0];
+        if (f) onFile(f);
+      }}
+      onClick={() => fileRef.current?.click()}
+      className={`cursor-pointer rounded-2xl border-2 border-dashed transition-colors ${
+        dragOver
+          ? "border-slate-900 bg-slate-50"
+          : "border-slate-200 bg-white/60 hover:border-slate-300 hover:bg-slate-50/60"
+      } ${compact ? "p-5" : "p-14"} text-center`}
+    >
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".pdf,.txt"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onFile(f);
+        }}
+      />
+      <FileUp className={`mx-auto text-slate-400 ${compact ? "h-6 w-6" : "h-10 w-10"}`} />
+      <p className={`mt-2 font-semibold text-slate-700 ${compact ? "text-sm" : "text-base"}`}>
+        {compact ? "Glisser un fichier ou cliquer" : "Glissez-déposez votre CV ou cliquez pour sélectionner"}
+      </p>
+      <p className="mt-1 text-xs text-slate-400">PDF ou TXT · max 10 Mo</p>
+    </div>
+  );
+}
+
+function ToggleTags({
+  options,
+  values,
+  onChange,
+}: {
+  options: readonly string[];
+  values: string[];
+  onChange: (next: string[]) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => {
+        const active = values.includes(option);
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() =>
+              onChange(active ? values.filter((value) => value !== option) : [...values, option])
+            }
+            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+              active
+                ? "border-slate-900 bg-slate-900 text-white"
+                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+            }`}
+          >
+            {option}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function StringChipEditor({
+  label,
+  values,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  values: string[];
+  onChange: (next: string[]) => void;
+  placeholder: string;
+}) {
+  const [draft, setDraft] = useState("");
+
+  function commit() {
+    if (!draft.trim()) return;
+    onChange(dedupeStrings([...values, draft.trim()]));
+    setDraft("");
+  }
+
+  return (
+    <div className="grid gap-2">
+      <FieldLabel>{label}</FieldLabel>
+      <div className="flex flex-wrap gap-2">
+        {values.map((value) => (
+          <span
+            key={value}
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700"
+          >
+            {value}
+            <button type="button" onClick={() => onChange(values.filter((item) => item !== value))} className="text-slate-400 hover:text-rose-500">
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <TextInput value={draft} onChange={setDraft} placeholder={placeholder} />
+        <button
+          type="button"
+          onClick={commit}
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+        >
+          Ajouter
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ControlledSkillSelector({
+  label,
+  description,
+  placeholder,
+  selected,
+  onChange,
+  onPendingCandidate,
+}: {
+  label: string;
+  description?: string;
+  placeholder: string;
+  selected: CanonicalSkillRef[];
+  onChange: (next: CanonicalSkillRef[]) => void;
+  onPendingCandidate?: (value: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<ProfileSkillSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const value = query.trim();
+    if (value.length < 2) {
+      setSuggestions([]);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const result = await fetchProfileSkillSuggestions(value, 8);
+        if (!cancelled) setSuggestions(result);
+      } catch (err) {
+        if (!cancelled) {
+          setSuggestions([]);
+          setError(err instanceof Error ? err.message : "Impossible de charger les suggestions");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }, 180);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [query]);
+
+  function addSuggestion(item: ProfileSkillSuggestion) {
+    onChange(
+      dedupeSkillRefs([
+        ...selected,
+        {
+          label: item.label,
+          uri: item.uri ?? null,
+          confidence: item.confidence,
+          method: item.method,
+          source: item.source,
+        },
+      ])
+    );
+    setQuery("");
+    setSuggestions([]);
+  }
+
+  function sendToPending() {
+    const value = query.trim();
+    if (!value || !onPendingCandidate) return;
+    onPendingCandidate(value);
+    setQuery("");
+    setSuggestions([]);
+  }
+
+  return (
+    <div className="grid gap-2">
+      <div>
+        <FieldLabel>{label}</FieldLabel>
+        {description && <p className="mt-1 text-xs leading-5 text-slate-400">{description}</p>}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {selected.map((item) => (
+          <span
+            key={item.uri || item.label}
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700"
+          >
+            {item.label}
+            <button
+              type="button"
+              onClick={() => onChange(selected.filter((candidate) => (candidate.uri || candidate.label) !== (item.uri || item.label)))}
+              className="text-slate-400 hover:text-rose-500"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+      </div>
+      <div className="rounded-[1rem] border border-slate-200 bg-slate-50/70 p-3">
+        <div className="flex gap-2">
+          <TextInput value={query} onChange={setQuery} placeholder={placeholder} />
+          {onPendingCandidate && (
+            <button
+              type="button"
+              onClick={sendToPending}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+            >
+              Pending
+            </button>
+          )}
+        </div>
+        {loading && <div className="mt-2 text-xs text-slate-400">Recherche en cours…</div>}
+        {error && <div className="mt-2 text-xs text-rose-600">{error}</div>}
+        {!loading && !error && suggestions.length > 0 && (
+          <div className="mt-3 grid gap-2">
+            {suggestions.map((item) => (
+              <button
+                key={`${item.uri || item.label}-${item.method}`}
+                type="button"
+                onClick={() => addSuggestion(item)}
+                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <span className="font-medium text-slate-900">{item.label}</span>
+                <span className="text-[11px] uppercase tracking-[0.14em] text-slate-400">{item.method}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {!loading && !error && query.trim().length >= 2 && suggestions.length === 0 && (
+          <div className="mt-2 text-xs text-slate-500">
+            Aucune suggestion propre trouvée. Cette entrée peut partir en pending review au lieu d&apos;entrer directement dans le profil.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ExperienceEditor({
+  experience,
+  onChange,
+  onRemove,
+  onQueuePendingSkill,
+}: {
+  experience: ExperienceV2;
+  onChange: (next: ExperienceV2) => void;
+  onRemove: () => void;
+  onQueuePendingSkill: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(true);
+
+  const autonomy = experience.autonomy_level || "autonomous";
+
+  return (
+    <div className="overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white">
+      <div className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3" onClick={() => setOpen((value) => !value)}>
+        <div>
+          <div className="text-sm font-semibold text-slate-900">{experience.title || "Nouvelle expérience"}</div>
+          <div className="mt-1 text-xs text-slate-400">
+            {[experience.company, experience.start_date && experience.end_date ? `${experience.start_date} — ${experience.end_date}` : experience.start_date || experience.end_date]
+              .filter(Boolean)
+              .join(" · ") || "À compléter"}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onRemove();
+            }}
+            className="text-slate-300 hover:text-rose-500"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          <span className="text-xs text-slate-400">{open ? "▲" : "▼"}</span>
+        </div>
+      </div>
+
+      {open && (
+        <div className="grid gap-4 border-t border-slate-100 px-4 py-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-1">
+              <FieldLabel>Intitulé</FieldLabel>
+              <TextInput value={experience.title || ""} onChange={(value) => onChange({ ...experience, title: value })} placeholder="Chargé d'affaires, Data Analyst…" />
+            </div>
+            <div className="grid gap-1">
+              <FieldLabel>Entreprise</FieldLabel>
+              <TextInput value={experience.company || ""} onChange={(value) => onChange({ ...experience, company: value })} placeholder="Société Générale" />
+            </div>
+            <div className="grid gap-1">
+              <FieldLabel>Début</FieldLabel>
+              <TextInput value={experience.start_date || ""} onChange={(value) => onChange({ ...experience, start_date: value })} placeholder="2023" />
+            </div>
+            <div className="grid gap-1">
+              <FieldLabel>Fin</FieldLabel>
+              <TextInput value={experience.end_date || ""} onChange={(value) => onChange({ ...experience, end_date: value })} placeholder="2025 ou présent" />
+            </div>
+          </div>
+
+          <div className="grid gap-1">
+            <FieldLabel>Responsabilités principales</FieldLabel>
+            <TextArea
+              value={(experience.responsibilities || []).join("\n")}
+              onChange={(value) =>
+                onChange({
+                  ...experience,
+                  responsibilities: value
+                    .split("\n")
+                    .map((item) => item.trim())
+                    .filter(Boolean),
+                })
+              }
+              placeholder="Une ligne par responsabilité utile."
+              rows={4}
+            />
+          </div>
+
+          <ControlledSkillSelector
+            label="Outils réellement utilisés"
+            description="Sélection contrôlée. Rien n&apos;entre librement dans le profil si ce n&apos;est pas suggéré ou envoyé en pending review."
+            placeholder="Power BI, Excel, SAP…"
+            selected={experience.tools || []}
+            onChange={(tools) => onChange({ ...experience, tools })}
+            onPendingCandidate={onQueuePendingSkill}
+          />
+
+          <ControlledSkillSelector
+            label="Compétences réellement mobilisées"
+            description="Sélection contrôlée reliée aux référentiels existants."
+            placeholder="Reporting, paie, customer relationship management…"
+            selected={experience.canonical_skills_used || []}
+            onChange={(canonicalSkillsUsed) => onChange({ ...experience, canonical_skills_used: canonicalSkillsUsed })}
+            onPendingCandidate={onQueuePendingSkill}
+          />
+
+          <div className="grid gap-2">
+            <FieldLabel>Niveau d&apos;autonomie</FieldLabel>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {AUTONOMY_OPTIONS.map((option) => {
+                const active = autonomy === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => onChange({ ...experience, autonomy_level: option.value, autonomy: option.legacy })}
+                    className={`rounded-[1rem] border px-4 py-3 text-left transition ${
+                      active
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="text-sm font-semibold">{option.label}</div>
+                    <div className={`mt-1 text-xs leading-5 ${active ? "text-slate-200" : "text-slate-500"}`}>{option.helper}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <StringChipEditor
+            label="Données chiffrées"
+            values={experience.quantified_signals || []}
+            onChange={(quantifiedSignals) => onChange({ ...experience, quantified_signals: quantifiedSignals })}
+            placeholder="Ex. 12 KPI suivis, 30% de temps gagné, 150 clients"
+          />
+
+          <div className="grid gap-2">
+            <FieldLabel>Type d&apos;impact</FieldLabel>
+            <ToggleTags options={IMPACT_OPTIONS} values={experience.impact_signals || []} onChange={(impactSignals) => onChange({ ...experience, impact_signals: impactSignals })} />
+          </div>
+
+          <div className="grid gap-2">
+            <FieldLabel>Contexte</FieldLabel>
+            <ToggleTags options={CONTEXT_OPTIONS} values={experience.context_tags || []} onChange={(contextTags) => onChange({ ...experience, context_tags: contextTags })} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ProfilePage() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { aiProfile, userProfile, profileHash, sessionId, setUserProfile, clear } = useProfileStore();
-  const snapshotMode = new URLSearchParams(location.search).get("snapshot") === "inbox";
-  const inboxSnapshot = snapshotMode ? readInboxProfileSnapshot() : null;
-  const [capabilities, setCapabilities] = useState<Capability[]>([]);
+  const { userProfile, setIngestResult, setUserProfile } = useProfileStore();
+
+  const fullProfile = (userProfile || {}) as FullProfile;
+  const currentCareer = normalizeCareerProfile(fullProfile.career_profile, fullProfile);
+
+  const [identity, setIdentity] = useState<IdentityV2>(currentCareer.identity || {});
+  const [baseTitle, setBaseTitle] = useState(currentCareer.base_title || "");
+  const [summaryMaster, setSummaryMaster] = useState(currentCareer.summary_master || "");
+  const [experiences, setExperiences] = useState<ExperienceV2[]>(currentCareer.experiences || []);
+  const [education, setEducation] = useState<EducationV2[]>(currentCareer.education || []);
+  const [languages, setLanguages] = useState<LanguageV2[]>(currentCareer.languages || []);
+  const [projects, setProjects] = useState<ProjectV2[]>(currentCareer.projects || []);
+  const [certifications, setCertifications] = useState<string[]>(currentCareer.certifications || []);
+  const [selectedSkills, setSelectedSkills] = useState<CanonicalSkillRef[]>(currentCareer.selected_skills || []);
+  const [pendingSkillCandidates, setPendingSkillCandidates] = useState<string[]>(currentCareer.pending_skill_candidates || []);
+
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [showReimport, setShowReimport] = useState(false);
 
-  useEffect(() => {
-    if (!aiProfile || !userProfile) {
-      navigate("/analyze", { replace: true });
+  const hasProfile = Boolean(
+    identity.full_name ||
+      baseTitle ||
+      experiences.length > 0 ||
+      selectedSkills.length > 0 ||
+      (fullProfile.career_profile && typeof fullProfile.career_profile === "object")
+  );
+
+  const completeness = computeCompleteness({
+    identity,
+    baseTitle,
+    summaryMaster,
+    selectedSkills,
+    experiences,
+    education,
+    languages,
+  });
+  const completePct = Math.round(completeness * 100);
+  const completenessColor =
+    completePct >= 80
+      ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+      : completePct >= 40
+        ? "text-amber-700 bg-amber-50 border-amber-200"
+        : "text-rose-700 bg-rose-50 border-rose-200";
+
+  function queuePendingSkill(value: string) {
+    setPendingSkillCandidates((current) => dedupeStrings([...current, value]));
+  }
+
+  async function handleFile(file: File) {
+    setParsing(true);
+    setParseError(null);
+    try {
+      const result = await parseFile(file);
+      const persisted = buildPersistedProfile(result);
+      await setIngestResult(persisted);
+
+      const nextFullProfile = persisted as FullProfile;
+      const nextCareer = normalizeCareerProfile(nextFullProfile.career_profile, nextFullProfile);
+      setIdentity(nextCareer.identity || {});
+      setBaseTitle(nextCareer.base_title || "");
+      setSummaryMaster(nextCareer.summary_master || "");
+      setExperiences(nextCareer.experiences || []);
+      setEducation(nextCareer.education || []);
+      setLanguages(nextCareer.languages || []);
+      setProjects(nextCareer.projects || []);
+      setCertifications(nextCareer.certifications || []);
+      setSelectedSkills(nextCareer.selected_skills || []);
+      setPendingSkillCandidates(nextCareer.pending_skill_candidates || []);
+      setShowReimport(false);
+    } catch (err) {
+      setParseError(err instanceof Error ? err.message : "Erreur lors de l'analyse");
+    } finally {
+      setParsing(false);
     }
-  }, [aiProfile, userProfile, navigate]);
+  }
 
-  useEffect(() => {
-    if (userProfile) {
-      const profile = userProfile as ProfileData;
-      setCapabilities(profile.detected_capabilities || []);
-    }
-  }, [userProfile]);
+  async function handleSave() {
+    setSaving(true);
+    setSaved(false);
 
-  if (snapshotMode && inboxSnapshot) {
+    const normalizedExperiences = experiences.map((experience) => {
+      const tools = dedupeSkillRefs(experience.tools || []);
+      const canonicalSkillsUsed = dedupeSkillRefs(experience.canonical_skills_used || []);
+      const quantifiedSignals = dedupeStrings(experience.quantified_signals || []);
+      const impactSignals = dedupeStrings(experience.impact_signals || []);
+      const achievements = dedupeStrings([...quantifiedSignals, ...impactSignals]);
+      const contextTags = dedupeStrings(experience.context_tags || []);
+      const autonomyLevel = experience.autonomy_level || "autonomous";
+      return {
+        ...experience,
+        tools,
+        canonical_skills_used: canonicalSkillsUsed,
+        skills: canonicalSkillsUsed.map((item) => item.label),
+        quantified_signals: quantifiedSignals,
+        impact_signals: impactSignals,
+        achievements,
+        context_tags: contextTags,
+        autonomy_level: autonomyLevel,
+        autonomy: legacyAutonomy(autonomyLevel),
+      };
+    });
+
+    const selectedSkillItems = dedupeSkillRefs(selectedSkills);
+    const selectedSkillLabels = selectedSkillItems.map((item) => item.label);
+    const careerProfile: CareerProfileV2 = {
+      ...currentCareer,
+      schema_version: "v2",
+      base_title: baseTitle.trim(),
+      summary_master: summaryMaster.trim(),
+      target_title: currentCareer.target_title || undefined,
+      identity,
+      experiences: normalizedExperiences,
+      education,
+      languages,
+      projects,
+      certifications: dedupeStrings(certifications),
+      selected_skills: selectedSkillItems,
+      pending_skill_candidates: dedupeStrings(pendingSkillCandidates),
+      completeness,
+      skills_highlights: selectedSkillLabels.slice(0, 14),
+    };
+
+    const updatedProfile: FullProfile = {
+      ...fullProfile,
+      canonical_skills: selectedSkillItems,
+      skills: dedupeStrings([...(Array.isArray(fullProfile.skills) ? fullProfile.skills.map(String) : []), ...selectedSkillLabels]),
+      matching_skills: dedupeStrings([...(Array.isArray(fullProfile.matching_skills) ? fullProfile.matching_skills.map(String) : []), ...selectedSkillLabels]),
+      experiences: normalizedExperiences.map((experience) => ({
+        title: experience.title,
+        company: experience.company,
+        start_date: experience.start_date,
+        end_date: experience.end_date,
+        dates: [experience.start_date, experience.end_date].filter(Boolean).join(" — "),
+        bullets: experience.responsibilities || [],
+        achievements: experience.achievements || [],
+        tools: (experience.tools || []).map((item) => item.label),
+        skills: experience.skills || [],
+        autonomy: experience.autonomy,
+        autonomy_level: experience.autonomy_level,
+        quantified_signals: experience.quantified_signals || [],
+        impact_signals: experience.impact_signals || [],
+        context_tags: experience.context_tags || [],
+        canonical_skills_used: experience.canonical_skills_used || [],
+      })),
+      career_profile: careerProfile,
+    };
+
+    await setUserProfile(updatedProfile);
+    await saveSavedProfile(updatedProfile as Record<string, unknown>).catch(() => undefined);
+
+    setSaving(false);
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 3000);
+  }
+
+  if (!hasProfile && !parsing) {
     return (
       <PremiumAppShell
-        eyebrow="Snapshot"
-        title="Profil compare depuis l'Inbox"
-        description="Cette vue montre exactement les competences retenues pour le matching, afin d'expliquer les scores et les decisions."
-        actions={
-          <>
-            <button
-              onClick={() => navigate("/inbox")}
-              className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              Retour Inbox
-            </button>
-            <button
-              onClick={() => navigate("/profile")}
-              className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-              Profil complet
-            </button>
-          </>
-        }
+        eyebrow="Profil"
+        title="Construire la base de vérité du produit"
+        description="Importez votre CV pour démarrer. Le parsing est le point d'entrée, mais le profil enrichi sert ensuite au matching, aux documents et au suivi."
       >
-        <div className="grid gap-6">
-          <section className="rounded-[1.75rem] border border-white/80 bg-white/75 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
-            <div className="grid gap-2 text-sm text-slate-600 md:grid-cols-3">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">profile_id</div>
-                <div className="mt-1 font-medium text-slate-900">{inboxSnapshot.profile_id}</div>
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">source</div>
-                <div className="mt-1 font-medium text-slate-900">{inboxSnapshot.skills_source}</div>
-              </div>
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">snapshot</div>
-                <div className="mt-1 font-medium text-slate-900">
-                  {new Date(inboxSnapshot.created_at).toLocaleString()}
-                </div>
-              </div>
+        <div className="mx-auto max-w-2xl space-y-6">
+          <div className={GLASS}>
+            <SectionLabel text="Importer mon CV" />
+            <div className="mt-4">
+              <UploadZone onFile={handleFile} />
             </div>
-          </section>
-
-          <section className="rounded-[1.75rem] border border-white/80 bg-white/75 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
-            <h2 className="text-xl font-semibold text-slate-950">Competences utilisees pour le matching</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {inboxSnapshot.matching_profile.matching_skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </section>
+            {parseError && (
+              <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                {parseError}
+              </div>
+            )}
+          </div>
         </div>
       </PremiumAppShell>
     );
   }
 
-  if (!aiProfile || !userProfile) {
-    return <div className="p-6 text-sm text-slate-500">Redirection...</div>;
-  }
-
-  const profile = userProfile as ProfileData;
-  const aiProfileData = aiProfile as ProfileData;
-  const { profile: matchingProfile } = buildMatchingProfile(profile, profileHash || "anonymous");
-
-  const aiCapNames = new Set((aiProfileData.detected_capabilities || []).map((c) => c.name));
-  const userCapNames = new Set(capabilities.map((c) => c.name));
-  const added = capabilities.filter((c) => !aiCapNames.has(c.name));
-  const removed = (aiProfileData.detected_capabilities || []).filter((c) => !userCapNames.has(c.name));
-  const modified = capabilities.filter((c) => {
-    const aiCap = (aiProfileData.detected_capabilities || []).find((ac) => ac.name === c.name);
-    return aiCap && aiCap.level !== c.level;
-  });
-
-  const hasChanges = added.length > 0 || removed.length > 0 || modified.length > 0;
-  const availableToAdd = CAPABILITY_NAMES.filter((n) => !capabilities.some((c) => c.name === n));
-
-  function handleLevelChange(index: number, newLevel: string) {
-    const updated = [...capabilities];
-    updated[index] = { ...updated[index], level: newLevel };
-    setCapabilities(updated);
-  }
-
-  function handleRemove(index: number) {
-    setCapabilities(capabilities.filter((_, i) => i !== index));
-  }
-
-  function handleAdd(name: string) {
-    if (capabilities.some((c) => c.name === name)) return;
-    setCapabilities([
-      ...capabilities,
-      {
-        name,
-        level: "beginner",
-        score: 30,
-        proofs: ["Ajoute manuellement"],
-        tools_detected: [],
-      },
-    ]);
-  }
-
-  async function handleSaveAndMatch() {
-    setSaving(true);
-
-    const updatedProfile = {
-      ...profile,
-      detected_capabilities: capabilities,
-    };
-    await setUserProfile(updatedProfile);
-
-    const correctionEvent = buildCorrectionEvent({
-      sessionId: sessionId || `session_${Date.now()}`,
-      profileHash: profileHash || "unknown",
-      added: added.map((c) => c.name),
-      deleted: removed.map((c) => c.name),
-      modifiedLevel: modified.map((c) => ({
-        name: c.name,
-        from: (aiProfileData.detected_capabilities || []).find((ac) => ac.name === c.name)?.level || "unknown",
-        to: c.level,
-      })),
-      unmappedCount: profile.unmapped_skills_high_confidence?.length || 0,
-      detectedCapabilitiesCount: capabilities.length,
-    });
-
-    await postCorrectionMetric(correctionEvent);
-    setSaving(false);
-    navigate("/dashboard");
+  if (parsing) {
+    return (
+      <PremiumAppShell eyebrow="Profil" title="Analyse en cours…" description="Nous structurons le profil de base avant enrichissement manuel.">
+        <div className="flex flex-col items-center gap-4 py-20 text-slate-500">
+          <Loader2 className="h-10 w-10 animate-spin text-slate-900" />
+          <span className="text-sm font-medium">Extraction de vos informations…</span>
+        </div>
+      </PremiumAppShell>
+    );
   }
 
   return (
     <PremiumAppShell
       eyebrow="Profil"
-      title="Validation du profil"
-      description="Ajustez les capacites detectees avant de lancer le matching. Les modifications sont tracees, mais le socle du matching reste visible."
+      title={identity.full_name || "Profil source de vérité"}
+      description="Ce profil alimente le matching, le cockpit, l'inbox, les candidatures et la génération de CV. Les informations enrichies ici servent ensuite à améliorer vos documents."
       actions={
         <>
           <button
-            onClick={() => {
-              clear();
-              navigate("/analyze", { replace: true });
-            }}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            type="button"
+            onClick={() => setShowReimport((value) => !value)}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            <RotateCcw className="h-4 w-4" />
-            Reset profil
+            <FileUp className="h-4 w-4" />
+            Mettre à jour mon CV
           </button>
           <button
-            onClick={handleSaveAndMatch}
+            type="button"
+            onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-wait disabled:opacity-70"
+            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
           >
-            <Save className="h-4 w-4" />
-            {saving ? "Enregistrement..." : "Valider et voir mes matchs"}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+            {saving ? "Enregistrement…" : saved ? "Enregistré" : "Enregistrer le profil"}
           </button>
         </>
       }
+      contentClassName="max-w-7xl"
     >
-      <div className="grid gap-6">
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[1.75rem] border border-white/80 bg-white/75 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Candidat</div>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-              {profile.candidate_info?.first_name} {profile.candidate_info?.last_name}
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              {profile.candidate_info?.email || "Email non renseigne"} · {profile.candidate_info?.years_of_experience || 0} ans d&apos;experience
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                {capabilities.length} capacites detectees
-              </span>
-              <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                {matchingProfile.matching_skills.length} skills retenues pour le matching
-              </span>
+      <div className="space-y-6 pb-12">
+        <section className={`${GLASS} p-5`}>
+          <SectionLabel text="Flux produit" />
+          <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="text-lg font-semibold text-slate-950">Ce profil alimente votre matching et vos documents.</div>
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+                Le parsing CV est seulement un point de départ. Cette page sert à contrôler les compétences, enrichir les expériences et préparer la génération de CV / lettre sans injecter de bruit.
+              </p>
             </div>
-          </div>
-
-          <div className="rounded-[1.75rem] border border-white/80 bg-white/75 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-              <Sparkles className="h-4 w-4 text-emerald-600" />
-              Synthese des modifications
+            <div className="flex flex-wrap gap-2">
+              <Link to="/cockpit" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Ouvrir le cockpit</Link>
+              <Link to="/inbox" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Voir mes offres</Link>
+              <Link to="/applications" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Ouvrir le suivi</Link>
             </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
-                <div className="text-xs font-medium text-slate-500">Ajouts</div>
-                <div className="mt-1 text-2xl font-semibold text-slate-950">{added.length}</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
-                <div className="text-xs font-medium text-slate-500">Suppressions</div>
-                <div className="mt-1 text-2xl font-semibold text-slate-950">{removed.length}</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
-                <div className="text-xs font-medium text-slate-500">Niveaux modifies</div>
-                <div className="mt-1 text-2xl font-semibold text-slate-950">{modified.length}</div>
-              </div>
-            </div>
-            <p className="mt-4 text-sm text-slate-600">
-              {hasChanges
-                ? "Les changements seront envoyes aux metriques de correction puis utilises pour le cockpit."
-                : "Aucune modification pour le moment. Vous pouvez quand meme verifier le profil avant matching."}
-            </p>
           </div>
         </section>
 
-        <section className="rounded-[1.75rem] border border-white/80 bg-white/75 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Capacites detectees</div>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-                Capacites detectees ({capabilities.length})
-              </h2>
+        <div className={`flex items-center justify-between rounded-2xl border px-5 py-3 text-sm font-semibold ${completenessColor}`}>
+          <span>Profil complété à {completePct}%</span>
+          {completePct < 80 && <span className="text-xs font-normal">Ajoutez des expériences, des compétences contrôlées et du signal chiffré.</span>}
+        </div>
+
+        {showReimport && (
+          <div className={GLASS}>
+            <div className="mb-3 flex items-center justify-between">
+              <SectionLabel text="Importer un nouveau CV" />
+              <button type="button" onClick={() => setShowReimport(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <p className="max-w-2xl text-sm text-slate-600">
-              Ces capacites restent un signal UX. Le bloc plus bas montre ce qui nourrit effectivement le matching.
-            </p>
+            <UploadZone onFile={handleFile} compact />
+            {parseError && (
+              <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                {parseError}
+              </div>
+            )}
           </div>
+        )}
 
-          <div className="mt-6 grid gap-4">
-            {capabilities.map((cap, idx) => {
-              const isAdded = added.some((a) => a.name === cap.name);
-              const isModified = modified.some((m) => m.name === cap.name);
-              return (
-                <div
-                  key={cap.name}
-                  className={`rounded-[1.5rem] border p-5 transition ${
-                    isAdded
-                      ? "border-emerald-200 bg-emerald-50/70"
-                      : isModified
-                        ? "border-amber-200 bg-amber-50/70"
-                        : "border-slate-200 bg-white"
-                  }`}
-                >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-semibold text-slate-950">{labelizeCapability(cap.name)}</h3>
-                        {isAdded && (
-                          <span className="rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-                            Ajoute
-                          </span>
-                        )}
-                        {isModified && (
-                          <span className="rounded-full border border-amber-200 bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
-                            Modifie
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${levelBadgeClass(cap.level)}`}>
-                          {cap.level}
-                        </span>
-                        <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                          Score {cap.score}
-                        </span>
-                      </div>
-                      <div className="mt-4 text-sm text-slate-600">
-                        Outils detectes: {cap.tools_detected.join(", ") || "—"}
-                      </div>
-                      {cap.proofs.length > 0 && (
-                        <div className="mt-2 text-sm text-slate-500">
-                          Preuves: {cap.proofs.join(" · ")}
-                        </div>
-                      )}
-                    </div>
+        <section className={GLASS}>
+          <SectionLabel text="Identité et positionnement de base" />
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-1">
+              <FieldLabel>Nom complet</FieldLabel>
+              <TextInput value={identity.full_name || ""} onChange={(value) => setIdentity((current) => ({ ...current, full_name: value }))} placeholder="Akim Guentas" />
+            </div>
+            <div className="grid gap-1">
+              <FieldLabel>Email</FieldLabel>
+              <TextInput value={identity.email || ""} onChange={(value) => setIdentity((current) => ({ ...current, email: value }))} placeholder="akim@example.com" />
+            </div>
+            <div className="grid gap-1">
+              <FieldLabel>Téléphone</FieldLabel>
+              <TextInput value={identity.phone || ""} onChange={(value) => setIdentity((current) => ({ ...current, phone: value }))} placeholder="+33 …" />
+            </div>
+            <div className="grid gap-1">
+              <FieldLabel>Localisation</FieldLabel>
+              <TextInput value={identity.location || ""} onChange={(value) => setIdentity((current) => ({ ...current, location: value }))} placeholder="Le Havre, France" />
+            </div>
+            <div className="grid gap-1">
+              <FieldLabel>LinkedIn</FieldLabel>
+              <TextInput value={identity.linkedin || ""} onChange={(value) => setIdentity((current) => ({ ...current, linkedin: value }))} placeholder="linkedin.com/in/..." />
+            </div>
+            <div className="grid gap-1">
+              <FieldLabel>GitHub</FieldLabel>
+              <TextInput value={identity.github || ""} onChange={(value) => setIdentity((current) => ({ ...current, github: value }))} placeholder="github.com/..." />
+            </div>
+            <div className="grid gap-1 sm:col-span-2">
+              <FieldLabel>Titre de base neutre</FieldLabel>
+              <TextInput value={baseTitle} onChange={setBaseTitle} placeholder="Analyste data, Chargé de communication, Contrôleur de gestion…" />
+              <p className="text-xs leading-5 text-slate-400">Ce champ décrit votre positionnement de base. Le titre du CV ciblé sera ensuite pris depuis l'offre.</p>
+            </div>
+            <div className="grid gap-1 sm:col-span-2">
+              <FieldLabel>Résumé maître</FieldLabel>
+              <TextArea value={summaryMaster} onChange={setSummaryMaster} placeholder="Positionnement de base, forces, environnements et logique de valeur." rows={4} />
+            </div>
+          </div>
+        </section>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                      <select
-                        value={cap.level}
-                        onChange={(e) => handleLevelChange(idx, e.target.value)}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                      >
-                        {CAPABILITY_LEVELS.map((lvl) => (
-                          <option key={lvl} value={lvl}>
-                            {lvl}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={() => handleRemove(idx)}
-                        className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
-                      >
-                        Supprimer
-                      </button>
+        <section className={GLASS}>
+          <SectionLabel text="Compétences contrôlées" />
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            Aucune compétence n&apos;entre librement dans le profil. Vous tapez, le système suggère, vous choisissez. Si rien n&apos;est proprement mappable, l&apos;entrée part en pending review.
+          </p>
+          <div className="mt-4 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+            <ControlledSkillSelector
+              label="Compétences du profil"
+              description="Ces compétences servent de base propre au profil enrichi."
+              placeholder="Data, prospection, paie, SAP…"
+              selected={selectedSkills}
+              onChange={setSelectedSkills}
+              onPendingCandidate={queuePendingSkill}
+            />
+            <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/70 p-4">
+              <div className="text-sm font-semibold text-slate-900">Pending review</div>
+              <p className="mt-1 text-xs leading-5 text-slate-500">Ces propositions ne sont pas injectées dans le profil tant qu&apos;elles ne sont pas reliées à un référentiel.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {pendingSkillCandidates.map((value) => (
+                  <span key={value} className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                    {value}
+                    <button type="button" onClick={() => setPendingSkillCandidates((current) => current.filter((item) => item !== value))} className="text-amber-500 hover:text-amber-700">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                {pendingSkillCandidates.length === 0 && <div className="text-xs text-slate-400">Aucune entrée en attente pour l&apos;instant.</div>}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className={GLASS}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <SectionLabel text="Expériences enrichies" />
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Ici vous ajoutez le signal qui manque souvent au parsing brut : outils réellement utilisés, compétences mobilisées, autonomie, contexte, données chiffrées et impact.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setExperiences((current) => [...current, normalizeExperience({})])}
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <Plus className="h-4 w-4" />
+              Ajouter
+            </button>
+          </div>
+          <div className="mt-4 space-y-4">
+            {experiences.map((experience, index) => (
+              <ExperienceEditor
+                key={`${experience.title || "experience"}-${index}`}
+                experience={experience}
+                onChange={(next) => setExperiences((current) => current.map((item, itemIndex) => (itemIndex === index ? next : item)))}
+                onRemove={() => setExperiences((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                onQueuePendingSkill={queuePendingSkill}
+              />
+            ))}
+            {experiences.length === 0 && <div className="text-sm text-slate-400">Aucune expérience pour l&apos;instant. Importez un CV ou ajoutez un bloc manuellement.</div>}
+          </div>
+        </section>
+
+        <section className={GLASS}>
+          <SectionLabel text="Parcours complémentaire" />
+          <div className="mt-4 grid gap-6 lg:grid-cols-3">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold text-slate-900">Formation</div>
+                <button type="button" onClick={() => setEducation((current) => [...current, { degree: "", field: "", institution: "" }])} className="text-xs font-semibold text-slate-500 hover:text-slate-900">Ajouter</button>
+              </div>
+              {education.map((item, index) => (
+                <div key={`edu-${index}`} className="rounded-[1rem] border border-slate-200 bg-white p-3">
+                  <div className="grid gap-2">
+                    <TextInput value={item.degree || ""} onChange={(value) => setEducation((current) => current.map((edu, eduIndex) => (eduIndex === index ? { ...edu, degree: value } : edu)))} placeholder="Diplôme" />
+                    <TextInput value={item.field || ""} onChange={(value) => setEducation((current) => current.map((edu, eduIndex) => (eduIndex === index ? { ...edu, field: value } : edu)))} placeholder="Domaine" />
+                    <TextInput value={item.institution || ""} onChange={(value) => setEducation((current) => current.map((edu, eduIndex) => (eduIndex === index ? { ...edu, institution: value } : edu)))} placeholder="Établissement" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <TextInput value={item.start_date || ""} onChange={(value) => setEducation((current) => current.map((edu, eduIndex) => (eduIndex === index ? { ...edu, start_date: value } : edu)))} placeholder="Début" />
+                      <TextInput value={item.end_date || ""} onChange={(value) => setEducation((current) => current.map((edu, eduIndex) => (eduIndex === index ? { ...edu, end_date: value } : edu)))} placeholder="Fin" />
                     </div>
+                    <button type="button" onClick={() => setEducation((current) => current.filter((_, eduIndex) => eduIndex !== index))} className="text-right text-xs font-semibold text-rose-500 hover:text-rose-700">Supprimer</button>
                   </div>
                 </div>
-              );
-            })}
+              ))}
+              {education.length === 0 && <div className="text-sm text-slate-400">Aucune formation renseignée.</div>}
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold text-slate-900">Langues</div>
+                <button type="button" onClick={() => setLanguages((current) => [...current, { language: "", level: "B2" }])} className="text-xs font-semibold text-slate-500 hover:text-slate-900">Ajouter</button>
+              </div>
+              {languages.map((item, index) => (
+                <div key={`lang-${index}`} className="flex items-center gap-2 rounded-[1rem] border border-slate-200 bg-white p-3">
+                  <input
+                    type="text"
+                    value={item.language || ""}
+                    onChange={(event) => setLanguages((current) => current.map((language, languageIndex) => (languageIndex === index ? { ...language, language: event.target.value } : language)))}
+                    placeholder="Français"
+                    className="flex-1 rounded-lg border border-slate-200 bg-transparent px-2 py-1 text-sm outline-none focus:border-slate-900"
+                  />
+                  <select
+                    value={item.level || "B2"}
+                    onChange={(event) => setLanguages((current) => current.map((language, languageIndex) => (languageIndex === index ? { ...language, level: event.target.value } : language)))}
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-slate-900"
+                  >
+                    {["A1", "A2", "B1", "B2", "C1", "C2", "natif", "fluent"].map((level) => <option key={level}>{level}</option>)}
+                  </select>
+                  <button type="button" onClick={() => setLanguages((current) => current.filter((_, languageIndex) => languageIndex !== index))} className="text-slate-300 hover:text-rose-500">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+              {languages.length === 0 && <div className="text-sm text-slate-400">Aucune langue renseignée.</div>}
+            </div>
+
+            <div className="space-y-3">
+              <StringChipEditor label="Certifications" values={certifications} onChange={setCertifications} placeholder="Google Analytics, TOEIC, SAP…" />
+            </div>
           </div>
         </section>
 
-        {availableToAdd.length > 0 && (
-          <section className="rounded-[1.75rem] border border-white/80 bg-white/75 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Ajout manuel</div>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Ajouter une capacite</h2>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {availableToAdd.map((name) => (
-                <button
-                  key={name}
-                  onClick={() => handleAdd(name)}
-                  className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100"
-                >
-                  <Plus className="h-4 w-4" /> {labelizeCapability(name)}
-                </button>
+        {projects.length > 0 ? (
+          <section className={GLASS}>
+            <div className="flex items-center justify-between">
+              <SectionLabel text={`Projets (${projects.length})`} />
+              <button type="button" onClick={() => setProjects((current) => [...current, { title: "", technologies: [], impact: "" }])} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                <Plus className="h-3.5 w-3.5" /> Ajouter
+              </button>
+            </div>
+            <div className="mt-4 space-y-3">
+              {projects.map((project, index) => (
+                <div key={`project-${index}`} className="grid gap-3 rounded-[1rem] border border-slate-200 bg-white p-4 sm:grid-cols-2">
+                  <TextInput value={project.title || ""} onChange={(value) => setProjects((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, title: value } : item)))} placeholder="Titre du projet" />
+                  <TextInput value={(project.technologies || []).join(", ")} onChange={(value) => setProjects((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, technologies: value.split(",").map((skill) => skill.trim()).filter(Boolean) } : item)))} placeholder="Technologies" />
+                  <TextInput value={project.impact || ""} onChange={(value) => setProjects((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, impact: value } : item)))} placeholder="Impact" />
+                  <TextInput value={project.url || ""} onChange={(value) => setProjects((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, url: value } : item)))} placeholder="URL" />
+                  <div className="sm:col-span-2 flex justify-end">
+                    <button type="button" onClick={() => setProjects((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="text-xs font-semibold text-rose-500 hover:text-rose-700">Supprimer</button>
+                  </div>
+                </div>
               ))}
             </div>
           </section>
+        ) : (
+          <button type="button" onClick={() => setProjects([{ title: "", technologies: [], impact: "" }])} className="w-full rounded-[1.5rem] border-2 border-dashed border-slate-200 py-4 text-sm font-semibold text-slate-400 transition hover:border-slate-300 hover:text-slate-700">
+            + Ajouter des projets personnels
+          </button>
         )}
-
-        {removed.length > 0 && (
-          <section className="rounded-[1.75rem] border border-rose-200 bg-rose-50/90 p-5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="mt-0.5 h-5 w-5 text-rose-600" />
-              <div className="text-sm text-rose-700">
-                <span className="font-semibold">Capacites supprimees:</span>{" "}
-                {removed.map((r) => labelizeCapability(r.name)).join(", ")}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {profile.unmapped_skills_high_confidence && profile.unmapped_skills_high_confidence.length > 0 && (
-          <section className="rounded-[1.75rem] border border-white/80 bg-white/75 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Hors referentiel</div>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-              Competences hors referentiel ({profile.unmapped_skills_high_confidence.length})
-            </h2>
-            <p className="mt-3 text-sm text-slate-600">
-              Ces competences restent visibles comme signal secondaire si elles existent dans le profil.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {profile.unmapped_skills_high_confidence.map((skill) => (
-                <span
-                  key={skill.raw_skill}
-                  className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
-                >
-                  {skill.raw_skill} ({Math.round(skill.confidence * 100)}%)
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="rounded-[1.75rem] border border-white/80 bg-white/75 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Source de verite matching</div>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Profil utilise pour le matching</h2>
-          <p className="mt-3 text-sm text-slate-600">
-            Ce bloc est la vue la plus utile pour verifier ce que le moteur consomme reellement.
-          </p>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Skills utilisees ({matchingProfile.matching_skills.length})
-              </div>
-              <div className="mt-3 text-sm leading-relaxed text-slate-700">
-                {matchingProfile.matching_skills.length > 0 ? matchingProfile.matching_skills.join(", ") : "—"}
-              </div>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Langues</div>
-              <div className="mt-3 text-sm leading-relaxed text-slate-700">
-                {Array.isArray(matchingProfile.languages) && matchingProfile.languages.length > 0
-                  ? matchingProfile.languages
-                      .map((lang) => (typeof lang === "string" ? lang : lang?.code || ""))
-                      .filter(Boolean)
-                      .join(", ")
-                  : "—"}
-              </div>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Niveau d&apos;etudes</div>
-              <div className="mt-3 text-sm leading-relaxed text-slate-700">
-                {matchingProfile.education || matchingProfile.education_summary?.level || "—"}
-              </div>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Pays preferes</div>
-              <div className="mt-3 text-sm leading-relaxed text-slate-700">
-                {matchingProfile.preferred_countries && matchingProfile.preferred_countries.length > 0
-                  ? matchingProfile.preferred_countries.join(", ")
-                  : "—"}
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 text-xs text-slate-500">
-            Profile hash: {profileHash?.slice(0, 16)}...
-          </div>
-        </section>
       </div>
     </PremiumAppShell>
   );

@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
-  Bug,
   ChevronDown,
   FileText,
   Filter,
@@ -12,28 +11,23 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { upsertApplication } from "../api/applications";
 import {
   fetchInbox,
   fetchOfferSemantic,
   fetchOfferContext,
   fetchProfileContext,
   fetchContextFit,
-  fetchProfileSummary,
   postDecision,
   type ApplyPackResponse,
-  type ExplainBlock,
-  type OfferExplanation,
-  type OfferIntelligence,
-  type ScoringV2,
-  type SemanticExplainability,
   type OfferSemanticResponse,
   type OfferContext,
   type ProfileContext,
   type ContextFit,
-  type ProfileSummaryV1,
   type InboxFilters,
 } from "../lib/api";
 import { buildMatchingProfile, type SkillsSource, type ProfileMatchingV1 } from "../lib/profileMatching";
+import { normalizeAndSortInboxItems, sortInboxItemsForDisplay, type NormalizedInboxItem } from "../lib/inboxItems";
 import { useProfileStore } from "../store/profileStore";
 import { SEED_PROFILE } from "../fixtures/seedProfile";
 import { OfferDetailModal, type OfferDetail } from "../components/OfferDetailModal";
@@ -80,14 +74,6 @@ const DEFAULT_FILTERS: FiltersState = {
 // Debug mode: localStorage.setItem("elevia_debug_inbox", "1")
 const DEBUG_INBOX = import.meta.env.DEV && localStorage.getItem("elevia_debug_inbox") === "1";
 
-// ── Domain signals (from AnalyzePage parse result, stored in localStorage) ──
-type DomainSignals = {
-  domain_skills_active: string[];
-  resolved_to_esco: Array<{ token_normalized: string; esco_uri: string; esco_label?: string; provenance?: string }>;
-  injected_esco_from_domain: number;
-  total_esco_count: number;
-};
-
 type InboxProfileSnapshot = {
   profile_id: string;
   matching_profile: ProfileMatchingV1;
@@ -105,88 +91,12 @@ function writeInboxProfileSnapshot(snapshot: InboxProfileSnapshot): void {
   }
 }
 
-function readDomainSignals(): DomainSignals | null {
-  try {
-    const raw = localStorage.getItem("elevia_domain_signals");
-    if (!raw) return null;
-    return JSON.parse(raw) as DomainSignals;
-  } catch {
-    return null;
-  }
-}
-
 type DecisionStatus = "SHORTLISTED" | "DISMISSED";
 
 type DecisionRecord = {
   status: DecisionStatus;
   score: number;
   updated_at: string;
-};
-
-type NormalizedInboxItem = {
-  offer_id: string;
-  id?: string;
-  source?: string;
-  title: string;
-  title_clean?: string | null;
-  company: string | null;
-  country: string | null;
-  city: string | null;
-  publication_date?: string | null;
-  score: number;
-  score_pct?: number;
-  score_raw?: number;
-  reasons: string[];
-  matched_skills: string[];
-  missing_skills: string[];
-  matched_skills_display: string[];
-  missing_skills_display: string[];
-  unmapped_tokens: string[];
-  offer_uri_count?: number;
-  profile_uri_count?: number;
-  intersection_count?: number;
-  scoring_unit?: string;
-  description?: string | null;
-  display_description?: string | null;
-  description_snippet?: string;
-  skills_display?: string[];
-  strategy_summary?: {
-    mission_summary?: string;
-    distance?: string;
-    action_guidance?: string;
-  } | null;
-  skills_uri_count?: number;
-  skills_uri_collapsed_dupes?: number;
-  skills_unmapped_count?: number;
-  rome: { rome_code: string; rome_label: string } | null;
-  is_vie?: boolean;
-  skills_source?: string;
-  explain: ExplainBlock | null;
-  explanation: OfferExplanation;
-  offer_intelligence?: OfferIntelligence | null;
-  semantic_explainability?: SemanticExplainability | null;
-  scoring_v2?: ScoringV2 | null;
-  offer_cluster?: string;
-  domain_bucket?: "strict" | "neighbor" | "out";
-  signal_score?: number;
-  coherence?: "ok" | "suspicious";
-  near_match_count?: number;
-  core_matched_count?: number;
-  core_total_count?: number;
-  dominant_reason?: string;
-};
-
-type LastApiCall = {
-  timestamp: string;
-  profile_id: string;
-  min_score: number;
-  limit: number;
-  page?: number;
-  page_size?: number;
-  total_estimate?: number | null;
-  response_items: number;
-  total_matched: number;
-  total_decided: number;
 };
 
 // ============================================================================
@@ -209,49 +119,6 @@ function readJson<T>(key: string, fallback: T): T {
 
 function writeJson<T>(key: string, value: T) {
   localStorage.setItem(key, JSON.stringify(value));
-}
-
-function normalizeScore(value: unknown): number {
-  if (typeof value !== "number" || Number.isNaN(value)) return 0;
-  const scaled = value > 0 && value < 1 ? value * 100 : value;
-  return Math.max(0, Math.min(100, Math.round(scaled)));
-}
-
-function explanationScore(item: Pick<NormalizedInboxItem, "score" | "explanation">): number {
-  return typeof item.explanation.score === "number" ? item.explanation.score : item.score;
-}
-
-function blockersCount(item: Pick<NormalizedInboxItem, "explanation">): number {
-  return Array.isArray(item.explanation.blockers) ? item.explanation.blockers.length : 0;
-}
-
-function strengthsCount(item: Pick<NormalizedInboxItem, "explanation">): number {
-  return Array.isArray(item.explanation.strengths) ? item.explanation.strengths.length : 0;
-}
-
-function recencyValue(publicationDate?: string | null): number {
-  if (!publicationDate) return 0;
-  const parsed = Date.parse(publicationDate);
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
-
-function sortInboxItemsForDisplay(items: NormalizedInboxItem[]): NormalizedInboxItem[] {
-  return [...items].sort((a, b) => {
-    return (
-      explanationScore(b) - explanationScore(a) ||
-      blockersCount(a) - blockersCount(b) ||
-      strengthsCount(b) - strengthsCount(a) ||
-      recencyValue(b.publication_date) - recencyValue(a.publication_date) ||
-      a.offer_id.localeCompare(b.offer_id)
-    );
-  });
-}
-
-function cleanDescriptionSnippet(value?: string | null, maxLen = 180): string {
-  if (!value) return "";
-  const stripped = value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-  if (stripped.length <= maxLen) return stripped;
-  return `${stripped.slice(0, maxLen).trim()}…`;
 }
 
 function formatLocation(city?: string | null, country?: string | null) {
@@ -283,140 +150,6 @@ function normalizeFiltersState(filters: FiltersState): FiltersState {
     city: filters.city.trim(),
     contract_type: filters.contract_type.trim(),
   };
-}
-
-/**
- * Strict mapping from API response to UI model.
- * Uses offer_id (not id), safe nulls for all fields.
- */
-function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
-  if (!Array.isArray(raw)) {
-    console.warn("[inbox] API items is not an array:", typeof raw);
-    return [];
-  }
-  const results: NormalizedInboxItem[] = [];
-  for (const item of raw) {
-    if (!item || typeof item !== "object") continue;
-    const rec = item as Record<string, unknown>;
-    // CRITICAL: use offer_id, fallback to id
-    const offerId = (rec.offer_id || rec.id) as string | undefined;
-    if (!offerId) {
-      console.warn("[inbox] Item missing offer_id:", rec);
-      continue;
-    }
-    const matchedDisplay = Array.isArray(rec.matched_skills_display)
-      ? (rec.matched_skills_display as string[])
-      : Array.isArray(rec.matched_skills)
-        ? (rec.matched_skills as string[])
-        : [];
-    const missingDisplay = Array.isArray(rec.missing_skills_display)
-      ? (rec.missing_skills_display as string[])
-      : Array.isArray(rec.missing_skills)
-        ? (rec.missing_skills as string[])
-        : [];
-    const explanation =
-      rec.explanation && typeof rec.explanation === "object"
-        ? (rec.explanation as OfferExplanation)
-        : null;
-    if (!explanation) {
-      console.warn("[inbox] Item missing explanation contract:", rec);
-      continue;
-    }
-
-    results.push({
-      offer_id: offerId,
-      id: typeof rec.id === "string" ? rec.id : undefined,
-      source: typeof rec.source === "string" ? rec.source : undefined,
-      title: typeof rec.title === "string" ? rec.title : "Offre",
-      title_clean: typeof rec.title_clean === "string" ? rec.title_clean : null,
-      company: typeof rec.company === "string" ? rec.company : null,
-      country: typeof rec.country === "string" ? rec.country : null,
-      city: typeof rec.city === "string" ? rec.city : null,
-      publication_date: typeof rec.publication_date === "string" ? rec.publication_date : null,
-      score: normalizeScore(
-        typeof explanation.score === "number"
-          ? explanation.score
-          : typeof rec.score_pct === "number"
-            ? rec.score_pct
-            : typeof rec.score === "number"
-              ? rec.score
-              : rec.match_score
-      ),
-      score_pct: typeof rec.score_pct === "number" ? rec.score_pct : undefined,
-      score_raw: typeof rec.score_raw === "number" ? rec.score_raw : undefined,
-      reasons: Array.isArray(rec.reasons) ? (rec.reasons as string[]) : [],
-      matched_skills: Array.isArray(rec.matched_skills) ? (rec.matched_skills as string[]) : [],
-      missing_skills: Array.isArray(rec.missing_skills) ? (rec.missing_skills as string[]) : [],
-      matched_skills_display: matchedDisplay,
-      missing_skills_display: missingDisplay,
-      unmapped_tokens: Array.isArray(rec.unmapped_tokens) ? (rec.unmapped_tokens as string[]) : [],
-      offer_uri_count:
-        typeof rec.offer_uri_count === "number"
-          ? rec.offer_uri_count
-          : typeof rec.skills_uri_count === "number"
-            ? rec.skills_uri_count
-            : undefined,
-      profile_uri_count: typeof rec.profile_uri_count === "number" ? rec.profile_uri_count : undefined,
-      intersection_count:
-        typeof rec.intersection_count === "number" ? rec.intersection_count : matchedDisplay.length,
-      scoring_unit: typeof rec.scoring_unit === "string" ? rec.scoring_unit : undefined,
-      description: typeof rec.description === "string" ? rec.description : null,
-      display_description: typeof rec.display_description === "string" ? rec.display_description : null,
-      description_snippet:
-        typeof rec.description_snippet === "string" && rec.description_snippet.trim()
-          ? rec.description_snippet
-          : cleanDescriptionSnippet(
-              typeof rec.display_description === "string"
-                ? rec.display_description
-                : typeof rec.description === "string"
-                  ? rec.description
-                  : null
-            ),
-      skills_display: Array.isArray(rec.skills_display) ? (rec.skills_display as string[]) : undefined,
-      strategy_summary:
-        rec.strategy_summary && typeof rec.strategy_summary === "object"
-          ? (rec.strategy_summary as {
-              mission_summary?: string;
-              distance?: string;
-              action_guidance?: string;
-            })
-          : null,
-      skills_uri_count: typeof rec.skills_uri_count === "number" ? rec.skills_uri_count : undefined,
-      skills_uri_collapsed_dupes:
-        typeof rec.skills_uri_collapsed_dupes === "number" ? rec.skills_uri_collapsed_dupes : undefined,
-      skills_unmapped_count:
-        typeof rec.skills_unmapped_count === "number" ? rec.skills_unmapped_count : undefined,
-      rome: rec.rome && typeof rec.rome === "object" ? (rec.rome as { rome_code: string; rome_label: string }) : null,
-      is_vie: typeof rec.is_vie === "boolean" ? rec.is_vie : undefined,
-      skills_source: typeof rec.skills_source === "string" ? rec.skills_source : undefined,
-      explain: rec.explain && typeof rec.explain === "object" ? (rec.explain as ExplainBlock) : null,
-      explanation,
-      offer_intelligence:
-        rec.offer_intelligence && typeof rec.offer_intelligence === "object"
-          ? (rec.offer_intelligence as OfferIntelligence)
-          : null,
-      semantic_explainability:
-        rec.semantic_explainability && typeof rec.semantic_explainability === "object"
-          ? (rec.semantic_explainability as SemanticExplainability)
-          : null,
-      scoring_v2:
-        rec.scoring_v2 && typeof rec.scoring_v2 === "object"
-          ? (rec.scoring_v2 as ScoringV2)
-          : null,
-      offer_cluster: typeof rec.offer_cluster === "string" ? rec.offer_cluster : undefined,
-      domain_bucket:
-        rec.domain_bucket === "strict" || rec.domain_bucket === "neighbor" || rec.domain_bucket === "out"
-          ? (rec.domain_bucket as "strict" | "neighbor" | "out")
-          : undefined,
-      signal_score: typeof rec.signal_score === "number" ? rec.signal_score : undefined,
-      coherence: rec.coherence === "ok" || rec.coherence === "suspicious" ? rec.coherence : undefined,
-      near_match_count: typeof rec.near_match_count === "number" ? rec.near_match_count : undefined,
-      core_matched_count: typeof rec.core_matched_count === "number" ? rec.core_matched_count : undefined,
-      core_total_count: typeof rec.core_total_count === "number" ? rec.core_total_count : undefined,
-      dominant_reason: typeof rec.dominant_reason === "string" ? rec.dominant_reason : undefined,
-    });
-  }
-  return results;
 }
 
 // ============================================================================
@@ -451,18 +184,20 @@ function OfferCard({
   offer,
   onOpen,
   onShortlist,
-  onPass,
 }: {
   offer: NormalizedInboxItem;
   onOpen: () => void;
   onShortlist: () => void;
-  onPass: () => void;
 }) {
   const relativeTitle = offer.title_clean || offer.title;
   const titleInfo = cleanOfferTitle(relativeTitle);
   const displayTitle = truncateOfferTitle(titleInfo.display, 90);
 
   const location = formatLocation(offer.city, offer.country) ?? undefined;
+  const primaryExplanation =
+    offer.scoring_v3 && typeof offer.scoring_v3.score_pct === "number"
+      ? { ...offer.explanation, score: offer.scoring_v3.score_pct }
+      : offer.explanation;
 
   return (
     <InboxCardV2
@@ -471,15 +206,13 @@ function OfferCard({
       title={displayTitle}
       location={location}
       score={offer.score}
-      explanation={offer.explanation}
+      explanation={primaryExplanation}
       offerIntelligence={offer.offer_intelligence}
       semanticExplainability={offer.semantic_explainability}
-      scoringV2={offer.scoring_v2}
-      domainBucket={offer.domain_bucket}
-      cluster={{ label: offer.offer_cluster ?? "" }}
+      scoringV3={offer.scoring_v3}
       onOpenDetails={() => onOpen()}
       onShortlist={() => onShortlist()}
-      onPass={() => onPass()}
+      secondaryActionLabel="Envoyer au suivi"
     />
   );
 }
@@ -719,257 +452,17 @@ function FiltersDrawer({
   );
 }
 
-function ProfileSummarySidebar({
-  summary,
-  loading,
-  missing,
-  error,
-  domainSignals,
-}: {
-  summary: ProfileSummaryV1 | null;
-  loading: boolean;
-  missing: boolean;
-  error: string | null;
-  domainSignals: DomainSignals | null;
-}) {
-  return (
-    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-4">
-      <div>
-        <div>
-          <div className="text-xs uppercase tracking-wide text-slate-400 font-semibold">Repères</div>
-          <div className="text-sm font-semibold text-slate-900">Qualité et signaux utiles</div>
-        </div>
-      </div>
-
-      {loading && (
-        <div className="space-y-3 animate-pulse">
-          <div className="h-4 bg-slate-100 rounded" />
-          <div className="h-3 bg-slate-100 rounded" />
-          <div className="h-3 bg-slate-100 rounded w-4/5" />
-        </div>
-      )}
-
-      {!loading && missing && (
-        <div className="text-sm text-slate-600">
-          Aucun repere disponible pour l&apos;instant.
-          <div className="mt-3">
-            <Link to="/analyze" className="inline-flex px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
-              Importer un CV
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {!loading && !missing && error && (
-        <div className="text-sm text-rose-600">
-          Résumé indisponible.
-        </div>
-      )}
-
-      {!loading && !missing && !error && summary && (
-        <div className="space-y-4 text-sm text-slate-700">
-          <div>
-            <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Qualité CV</div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                summary.cv_quality_level === "HIGH"
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  : summary.cv_quality_level === "MED"
-                    ? "bg-amber-50 text-amber-700 border-amber-200"
-                    : "bg-rose-50 text-rose-700 border-rose-200"
-              }`}>
-                {summary.cv_quality_level}
-              </span>
-            </div>
-            {summary.cv_quality_reasons.length > 0 && (
-              <div className="mt-2 text-xs text-slate-500">
-                {summary.cv_quality_reasons[0].replace(/_/g, " ").toLowerCase()}
-              </div>
-            )}
-          </div>
-
-          {summary.top_skills.length > 0 && (
-            <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Skills clés</div>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {summary.top_skills.slice(0, 5).map((skill) => (
-                  <span key={skill.label} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                    {skill.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {summary.tools.length > 0 && (
-            <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Outils</div>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {summary.tools.slice(0, 5).map((tool) => (
-                  <span key={tool} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    {tool}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {summary.education.length > 0 && (
-            <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Formation</div>
-              <div className="mt-2 text-xs text-slate-600">
-                {summary.education[0]}
-              </div>
-            </div>
-          )}
-
-          {summary.experiences.length > 0 && (
-            <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Expériences</div>
-              <div className="mt-2 space-y-3 text-xs text-slate-600">
-                {summary.experiences.slice(0, 2).map((exp, idx) => (
-                  <div key={`${exp.title}-${idx}`} className="space-y-1">
-                    <div className="font-semibold text-slate-700">
-                      {exp.title || "Expérience"} {exp.company ? `· ${exp.company}` : ""}
-                    </div>
-                    {exp.dates && <div className="text-[11px] text-slate-500">{exp.dates}</div>}
-                    {exp.impact_one_liner && (
-                      <div className="text-[11px] text-slate-500">“{exp.impact_one_liner}”</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {summary.cluster_hints.length > 0 && (
-            <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Cluster</div>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {summary.cluster_hints.slice(0, 2).map((hint) => (
-                  <span key={hint} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                    {hint}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Domain skills (from Compass E mapping — shown if available) */}
-      {domainSignals && domainSignals.domain_skills_active.length > 0 && (
-        <div className="border-t border-slate-100 pt-4 space-y-2">
-          <div className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Compétences métier</div>
-          <div className="flex flex-wrap gap-1.5">
-            {domainSignals.domain_skills_active.slice(0, 3).map((skill) => (
-              <span key={skill} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                {skill}
-              </span>
-            ))}
-          </div>
-          {domainSignals.injected_esco_from_domain > 0 && (
-            <div className="text-[10px] text-blue-600 font-medium">
-              ↗ +{domainSignals.injected_esco_from_domain} compétence{domainSignals.injected_esco_from_domain > 1 ? "s" : ""} via mapping ESCO
-              {domainSignals.resolved_to_esco[0] && (
-                <span className="text-blue-400 font-normal">
-                  {" "}· ex. {domainSignals.resolved_to_esco[0].token_normalized}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DebugDrawer({
-  isOpen,
-  onClose,
-  items,
-  displayedCount,
-  threshold,
-  lastApiCall,
-  skillsSource,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  items: NormalizedInboxItem[];
-  displayedCount: number;
-  threshold: number;
-  lastApiCall: LastApiCall | null;
-  skillsSource: SkillsSource;
-}) {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed bottom-4 right-4 w-80 bg-slate-900 text-slate-100 rounded-xl shadow-2xl p-4 text-xs font-mono z-50">
-      <div className="flex items-center justify-between mb-3">
-        <span className="font-semibold text-emerald-400">Debug Inbox</span>
-        <button onClick={onClose} className="text-slate-400 hover:text-white">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      <div className="space-y-2">
-        <div>
-          <span className="text-slate-400">items.length:</span>{" "}
-          <span className="text-white">{items.length}</span>
-        </div>
-        <div>
-          <span className="text-slate-400">displayed:</span>{" "}
-          <span className="text-white">{displayedCount}</span>
-        </div>
-        <div>
-          <span className="text-slate-400">threshold:</span>{" "}
-          <span className="text-white">{threshold}</span>
-        </div>
-        <div>
-          <span className="text-slate-400">skillsSource:</span>{" "}
-          <span className="text-white">{skillsSource}</span>
-        </div>
-
-        {lastApiCall && (
-          <div className="mt-3 pt-3 border-t border-slate-700">
-            <div className="text-slate-400 mb-1">Last API call:</div>
-            <div>profile_id: {lastApiCall.profile_id.slice(0, 12)}...</div>
-            <div>min_score: {lastApiCall.min_score}</div>
-            <div>limit: {lastApiCall.limit}</div>
-            {typeof lastApiCall.page === "number" && <div>page: {lastApiCall.page}</div>}
-            {typeof lastApiCall.page_size === "number" && <div>page_size: {lastApiCall.page_size}</div>}
-            {typeof lastApiCall.total_estimate === "number" && <div>total_estimate: {lastApiCall.total_estimate}</div>}
-            <div>response_items: {lastApiCall.response_items}</div>
-            <div>total_matched: {lastApiCall.total_matched}</div>
-            <div>total_decided: {lastApiCall.total_decided}</div>
-          </div>
-        )}
-
-        {items.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-slate-700">
-            <div className="text-slate-400 mb-1">First 3 items:</div>
-            {items.slice(0, 3).map((item) => (
-              <div key={item.offer_id} className="text-[10px] truncate">
-                {item.offer_id.slice(0, 8)}... | score={item.score}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ============================================================================
 // Main Component
 // ============================================================================
 
 export default function InboxPage() {
+  const navigate = useNavigate();
   const { userProfile, profileHash, setUserProfile } = useProfileStore();
   const [items, setItems] = useState<NormalizedInboxItem[]>([]);
+  const [rawResponseCount, setRawResponseCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [skillsSource, setSkillsSource] = useState<SkillsSource>("none");
   const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [filtersDraft, setFiltersDraft] = useState<FiltersState>(DEFAULT_FILTERS);
   const [filtersApplied, setFiltersApplied] = useState<FiltersState>(DEFAULT_FILTERS);
@@ -986,8 +479,6 @@ export default function InboxPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(24);
   const [decisions, setDecisions] = useState<Record<string, DecisionRecord>>({});
-  const [lastApiCall, setLastApiCall] = useState<LastApiCall | null>(null);
-  const [debugOpen, setDebugOpen] = useState(DEBUG_INBOX);
 
   // Apply Pack modal state
   const [applyPackOffer, setApplyPackOffer] = useState<NormalizedInboxItem | null>(null);
@@ -1001,18 +492,12 @@ export default function InboxPage() {
   const [offerContextById, setOfferContextById] = useState<Record<string, OfferContext>>({});
   const [profileContext, setProfileContext] = useState<ProfileContext | null>(null);
   const [profileContextLoading, setProfileContextLoading] = useState(false);
-  const [profileSummary, setProfileSummary] = useState<ProfileSummaryV1 | null>(null);
-  const [profileSummaryLoading, setProfileSummaryLoading] = useState(false);
-  const [profileSummaryMissing, setProfileSummaryMissing] = useState(false);
-  const [profileSummaryError, setProfileSummaryError] = useState<string | null>(null);
   const [contextFitByOfferId, setContextFitByOfferId] = useState<Record<string, ContextFit>>({});
   const [contextLoadingIds, setContextLoadingIds] = useState<Set<string>>(new Set());
   const [contextFitLoadingIds, setContextFitLoadingIds] = useState<Set<string>>(new Set());
   const [contextErrorByOfferId, setContextErrorByOfferId] = useState<Record<string, string>>({});
+  const [trackerNotice, setTrackerNotice] = useState<{ offerId: string; status: "saved" | "cv_ready" } | null>(null);
   const inboxLoadKeyRef = useRef<string | null>(null);
-
-  // Domain signals: read once from localStorage (written by AnalyzePage after parse)
-  const [domainSignals] = useState<DomainSignals | null>(() => readDomainSignals());
 
   const profileId = profileHash ?? "anonymous";
   const selectedOfferId = selectedOffer?.offer_id || selectedOffer?.id;
@@ -1083,30 +568,6 @@ export default function InboxPage() {
       });
     return () => controller.abort();
   }, [userProfile, profileId]);
-
-  useEffect(() => {
-    if (!profileId) return;
-    setProfileSummaryLoading(true);
-    setProfileSummaryMissing(false);
-    setProfileSummaryError(null);
-    fetchProfileSummary(profileId)
-      .then((data) => {
-        setProfileSummary(data);
-      })
-      .catch((err: unknown) => {
-        const status = (err as { status?: number }).status;
-        if (status === 404) {
-          setProfileSummary(null);
-          setProfileSummaryMissing(true);
-          return;
-        }
-        setProfileSummary(null);
-        setProfileSummaryError(err instanceof Error ? err.message : "summary_failed");
-      })
-      .finally(() => {
-        setProfileSummaryLoading(false);
-      });
-  }, [profileId]);
 
   useEffect(() => {
     if (!selectedOffer) return;
@@ -1227,7 +688,6 @@ export default function InboxPage() {
         profileId
       );
 
-      setSkillsSource(source);
       const snapshot: InboxProfileSnapshot = {
         profile_id: profileId,
         matching_profile: matchingProfile,
@@ -1285,8 +745,27 @@ export default function InboxPage() {
       inboxLoadKeyRef.current = requestKey;
 
       if (DEBUG_INBOX) {
+        console.info("[inbox] Profile payload:", {
+          profile_id: profileId,
+          skills_source: source,
+          skills_count: matchingProfile.matching_skills.length,
+          canonical_skills_count:
+            typeof matchingProfile.canonical_skills_count === "number"
+              ? matchingProfile.canonical_skills_count
+              : Array.isArray(matchingProfile.canonical_skills)
+                ? matchingProfile.canonical_skills.length
+                : 0,
+          enriched_signal_count: Array.isArray(matchingProfile.enriched_signals)
+            ? matchingProfile.enriched_signals.length
+            : 0,
+          concept_signal_count: Array.isArray(matchingProfile.concept_signals)
+            ? matchingProfile.concept_signals.length
+            : 0,
+          profile_intelligence: matchingProfile.profile_intelligence ?? null,
+        });
         console.info("[inbox] Calling API with:", {
           profile_id: profileId,
+          profile: matchingProfile,
           min_score: apiMinScore,
           limit: apiLimit,
           filters: apiFilters,
@@ -1294,19 +773,6 @@ export default function InboxPage() {
       }
 
       const data = await fetchInbox(matchingProfile, profileId, apiMinScore, apiLimit, true, "all", apiFilters);
-
-      setLastApiCall({
-        timestamp: new Date().toISOString(),
-        profile_id: profileId,
-        min_score: apiMinScore,
-        limit: apiLimit,
-        page,
-        page_size: pageSize,
-        total_estimate: data.total_estimate ?? null,
-        response_items: Array.isArray(data.items) ? data.items.length : 0,
-        total_matched: data.total_matched ?? 0,
-        total_decided: data.total_decided ?? 0,
-      });
 
       if (DEBUG_INBOX) {
         console.info("[inbox] API response:", {
@@ -1317,11 +783,13 @@ export default function InboxPage() {
         });
       }
 
-      const normalized = sortInboxItemsForDisplay(normalizeInboxItems(data.items));
+      const rawCount = Array.isArray(data.items) ? data.items.length : 0;
+      setRawResponseCount(rawCount);
+      const normalized = normalizeAndSortInboxItems(data.items);
       setItems(normalized);
 
       if (DEBUG_INBOX) {
-        console.info("[inbox] Normalized items:", normalized.length);
+        console.info("[inbox] Normalized items:", normalized.length, "from raw:", rawCount);
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Erreur inconnue";
@@ -1430,6 +898,14 @@ export default function InboxPage() {
     async (item: NormalizedInboxItem, status: DecisionStatus) => {
       try {
         await postDecision(item.offer_id, profileId, status);
+        if (status === "SHORTLISTED") {
+          await upsertApplication({
+            offer_id: item.offer_id,
+            status: "saved",
+            source: "assisted",
+          });
+          setTrackerNotice({ offerId: item.offer_id, status: "saved" });
+        }
       } catch (err) {
         console.warn("[inbox] decision API failed:", err);
       } finally {
@@ -1443,7 +919,7 @@ export default function InboxPage() {
         }));
       }
     },
-    [profileId]
+    [navigate, profileId]
   );
 
   const filtersDirty = useMemo(
@@ -1502,6 +978,8 @@ export default function InboxPage() {
     setApplyPackResult(null);
     setApplyPackError(null);
   };
+
+  const hasLoadedOffers = rawResponseCount > 0 || receivedCount > 0;
 
   // ============================================================================
   // Render States
@@ -1574,22 +1052,9 @@ export default function InboxPage() {
     <PremiumAppShell
       eyebrow="Inbox"
       title="Inbox de matching"
-      description="Les offres sont triees a partir du profil, puis relues avec filtres, contexte et decisions. Le but ici est la lisibilite."
+      description="Vos meilleures offres, déjà triées contre votre profil actif. Sélectionnez ici ce qui mérite un suivi ou une préparation de candidature."
       actions={
         <>
-          {DEBUG_INBOX && (
-            <button
-              onClick={() => setDebugOpen(!debugOpen)}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition ${
-                debugOpen
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              <Bug className="h-4 w-4" />
-              Debug
-            </button>
-          )}
           <Link
             to="/applications"
             className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
@@ -1597,24 +1062,90 @@ export default function InboxPage() {
             <Sparkles className="h-4 w-4" />
             Candidatures
           </Link>
+          <Link
+            to="/offers"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Voir tout le catalogue
+          </Link>
         </>
       }
       contentClassName="max-w-7xl"
     >
       <div className="py-2">
-        {DEBUG_INBOX && lastApiCall && (
-          <div className="mb-5 rounded-[1.25rem] border border-white/80 bg-white/70 px-4 py-3 text-[11px] text-slate-500 shadow-sm backdrop-blur">
-            <span className="mr-3">profile_id: {lastApiCall.profile_id.slice(0, 10)}…</span>
-            <span className="mr-3">total_matched: {lastApiCall.total_matched}</span>
-            <span className="mr-3">total_decided: {lastApiCall.total_decided}</span>
-            <span>first: {items[0]?.offer_id?.slice(0, 10) ?? "—"} / {items[0]?.score ?? "—"}</span>
-          </div>
-        )}
+        <main>
+          <section className="mb-5 border-b border-slate-200/80 pb-5">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Rôle de l'inbox</div>
+            <div className="mt-2 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <p className="max-w-3xl text-sm leading-6 text-slate-600">
+                Cette page sélectionne les offres à forte pertinence. Le bouton <span className="font-semibold text-slate-900">Envoyer au suivi</span> crée ou met à jour une candidature dans la page Candidatures.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  to="/profile"
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Voir le profil source
+                </Link>
+                <Link
+                  to="/cockpit"
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Retour cockpit
+                </Link>
+              </div>
+            </div>
+          </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
-          {/* Main content */}
-          <main>
-            <div className="sticky top-[88px] z-20 mb-5 rounded-[1.5rem] border border-white/80 bg-white/75 px-3 py-3 shadow-sm backdrop-blur-xl">
+          {trackerNotice && (
+            <section className="mb-5 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-5 py-4 shadow-sm">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">Suivi mis à jour</div>
+                  <div className="mt-1 text-base font-semibold text-emerald-900">
+                    L'offre {trackerNotice.offerId} a été envoyée vers Candidatures.
+                  </div>
+                  <p className="mt-1 text-sm text-emerald-800">
+                    Vous pouvez maintenant la suivre, préparer le CV et planifier la suite depuis la page Candidatures.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    to="/applications"
+                    className="rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                  >
+                    Ouvrir Candidatures
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setTrackerNotice(null)}
+                    className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                  >
+                    Fermer
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {hasLoadedOffers && (
+            <div className="mb-5 grid gap-4 md:grid-cols-3">
+              <div className="rounded-[1.25rem] border border-slate-200/80 bg-white/90 px-5 py-4 shadow-sm">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Offres visibles</div>
+                <div className="mt-2 text-3xl font-semibold text-slate-950">{displayedCount}</div>
+              </div>
+              <div className="rounded-[1.25rem] border border-slate-200/80 bg-white/90 px-5 py-4 shadow-sm">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Reçues</div>
+                <div className="mt-2 text-3xl font-semibold text-slate-950">{rawResponseCount}</div>
+              </div>
+              <div className="rounded-[1.25rem] border border-slate-200/80 bg-white/90 px-5 py-4 shadow-sm">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Déjà traitées</div>
+                <div className="mt-2 text-3xl font-semibold text-slate-950">{receivedCount - displayedCount}</div>
+              </div>
+            </div>
+          )}
+
+            <div className="sticky top-[88px] z-20 mb-5 rounded-[1.25rem] border border-slate-200/80 bg-white/90 px-3 py-3 shadow-sm backdrop-blur-xl">
               <div className="flex flex-wrap items-center gap-3">
                 <div className="relative flex-1 min-w-[220px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -1644,7 +1175,7 @@ export default function InboxPage() {
                   </button>
                 )}
                 <div className="ml-auto text-xs text-slate-500">
-                  Affichées: <strong className="text-slate-900">{displayedCount}</strong>
+                  Offres visibles: <strong className="text-slate-900">{displayedCount}</strong>
                 </div>
               </div>
               {activeFilterChips.length > 0 && (
@@ -1670,7 +1201,7 @@ export default function InboxPage() {
             {!loading && (
               <>
                 {/* State D: No offers from API */}
-                {receivedCount === 0 && (
+                {rawResponseCount === 0 && (
                   <EmptyState
                     icon={Inbox}
                     title="Aucune offre disponible"
@@ -1685,6 +1216,20 @@ export default function InboxPage() {
                 )}
 
                 {/* State E: Offers received but all filtered */}
+                {rawResponseCount > 0 && receivedCount === 0 && (
+                  <EmptyState
+                    icon={AlertCircle}
+                    title="Les offres reçues ne sont pas exploitables"
+                    description="Le backend a bien répondu, mais les données disponibles ne permettent pas encore d'afficher des cartes complètes."
+                    actions={
+                      <button onClick={load} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4" />
+                        Actualiser
+                      </button>
+                    }
+                  />
+                )}
+
                 {receivedCount > 0 && displayedCount === 0 && (
                   <EmptyState
                     icon={Filter}
@@ -1705,14 +1250,13 @@ export default function InboxPage() {
 
                 {/* Offers Grid */}
                 {displayedCount > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                     {displayedItems.map((offer) => (
                       <OfferCard
                         key={offer.offer_id}
                         offer={offer}
                         onOpen={() => setSelectedOffer(offer)}
                         onShortlist={() => handleDecision(offer, "SHORTLISTED")}
-                        onPass={() => handleDecision(offer, "DISMISSED")}
                       />
                     ))}
                   </div>
@@ -1749,33 +1293,8 @@ export default function InboxPage() {
                 )}
               </>
             )}
-          </main>
-
-          {/* Profile summary */}
-          <aside className="lg:sticky top-6 self-start">
-            <ProfileSummarySidebar
-              summary={profileSummary}
-              loading={profileSummaryLoading}
-              missing={profileSummaryMissing}
-              error={profileSummaryError}
-              domainSignals={domainSignals}
-            />
-          </aside>
-        </div>
+        </main>
       </div>
-
-      {/* Debug Drawer */}
-      {DEBUG_INBOX && (
-        <DebugDrawer
-          isOpen={debugOpen}
-          onClose={() => setDebugOpen(false)}
-          items={items}
-          displayedCount={displayedCount}
-          threshold={threshold}
-          lastApiCall={lastApiCall}
-          skillsSource={skillsSource}
-        />
-      )}
 
       <FiltersDrawer
         isOpen={filtersDrawerOpen}

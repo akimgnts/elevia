@@ -22,6 +22,10 @@ class ApplicationItem(BaseModel):
     id: str
     user_id: Optional[str] = None
     offer_id: str
+    offer_title: Optional[str] = None
+    offer_company: Optional[str] = None
+    offer_city: Optional[str] = None
+    offer_country: Optional[str] = None
     status: ApplicationStatus
     source: str = "manual"
     note: Optional[str] = None

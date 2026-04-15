@@ -23,7 +23,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
-from ..deps.auth import AuthenticatedUser, require_auth
+from ..deps.auth import AuthenticatedUser, get_optional_user
 from ..schemas.applications import (
     ApplicationCreate,
     ApplicationHistoryItem,
@@ -107,6 +107,10 @@ def _row_to_item(row) -> ApplicationItem:
         id=row["id"],
         user_id=row["user_id"],
         offer_id=row["offer_id"],
+        offer_title=row["offer_title"],
+        offer_company=row["offer_company"],
+        offer_city=row["offer_city"],
+        offer_country=row["offer_country"],
         status=row["status"],
         source=row["source"] or "manual",
         note=row["note"],
@@ -121,25 +125,58 @@ def _row_to_item(row) -> ApplicationItem:
     )
 
 
-_SELECT_COLS = (
+_APP_SELECT_COLS = (
+    "a.id, a.user_id, a.offer_id, a.status, a.source, a.note, a.next_follow_up_date, "
+    "a.current_cv_cache_key, a.current_letter_cache_key, "
+    "a.created_at, a.updated_at, a.applied_at, a.last_status_change_at, a.strategy_hint, "
+    "f.title AS offer_title, f.company AS offer_company, f.city AS offer_city, f.country AS offer_country"
+)
+_APP_SELECT_COLS_NO_JOIN = (
     "id, user_id, offer_id, status, source, note, next_follow_up_date, "
     "current_cv_cache_key, current_letter_cache_key, "
-    "created_at, updated_at, applied_at, last_status_change_at, strategy_hint"
+    "created_at, updated_at, applied_at, last_status_change_at, strategy_hint, "
+    "NULL AS offer_title, NULL AS offer_company, NULL AS offer_city, NULL AS offer_country"
 )
+
+
+def _viewer_user_id(current_user: Optional[AuthenticatedUser]) -> str:
+    return current_user.user_id if current_user is not None else "__anonymous__"
+
+
+def _select_applications(conn, where_clause: str, params: tuple, fetchone: bool = False):
+    joined_query = (
+        f"SELECT {_APP_SELECT_COLS} "
+        "FROM application_tracker a "
+        "LEFT JOIN fact_offers f ON f.id = a.offer_id "
+        f"{where_clause}"
+    )
+    fallback_query = (
+        f"SELECT {_APP_SELECT_COLS_NO_JOIN} "
+        "FROM application_tracker "
+        f"{where_clause.replace('a.', '')}"
+    )
+    try:
+        cursor = conn.execute(joined_query, params)
+    except Exception as exc:
+        if "no such table: fact_offers" not in str(exc):
+            raise
+        cursor = conn.execute(fallback_query, params)
+    return cursor.fetchone() if fetchone else cursor.fetchall()
 
 
 @router.get("/applications", response_model=ApplicationListResponse)
 async def list_applications(
-    current_user: AuthenticatedUser = Depends(require_auth),
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
 ) -> ApplicationListResponse:
     t0 = time.perf_counter()
+    viewer_user_id = _viewer_user_id(current_user)
     conn = get_connection()
     try:
-        rows = conn.execute(
-            f"SELECT {_SELECT_COLS} FROM application_tracker "
-            "WHERE user_id = ? ORDER BY updated_at DESC",
-            (current_user.user_id,),
-        ).fetchall()
+        rows = _select_applications(
+            conn,
+            "WHERE a.user_id = ? ORDER BY a.updated_at DESC",
+            (viewer_user_id,),
+        )
     finally:
         conn.close()
 
@@ -156,13 +193,14 @@ async def list_applications(
 @router.get("/applications/{offer_id}/history", response_model=ApplicationHistoryResponse)
 async def get_application_history(
     offer_id: str,
-    current_user: AuthenticatedUser = Depends(require_auth),
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
 ) -> ApplicationHistoryResponse:
+    viewer_user_id = _viewer_user_id(current_user)
     conn = get_connection()
     try:
         app_row = conn.execute(
             "SELECT id FROM application_tracker WHERE offer_id = ? AND user_id = ?",
-            (offer_id, current_user.user_id),
+            (offer_id, viewer_user_id),
         ).fetchone()
         if app_row is None:
             raise HTTPException(status_code=404, detail={"message": "Application not found"})
@@ -192,16 +230,18 @@ async def get_application_history(
 @router.get("/applications/{offer_id}", response_model=ApplicationItem)
 async def get_application(
     offer_id: str,
-    current_user: AuthenticatedUser = Depends(require_auth),
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
 ) -> ApplicationItem:
     t0 = time.perf_counter()
+    viewer_user_id = _viewer_user_id(current_user)
     conn = get_connection()
     try:
-        row = conn.execute(
-            f"SELECT {_SELECT_COLS} FROM application_tracker "
-            "WHERE offer_id = ? AND user_id = ?",
-            (offer_id, current_user.user_id),
-        ).fetchone()
+        row = _select_applications(
+            conn,
+            "WHERE a.offer_id = ? AND a.user_id = ?",
+            (offer_id, viewer_user_id),
+            fetchone=True,
+        )
     finally:
         conn.close()
 
@@ -220,13 +260,14 @@ async def get_application(
 @router.post("/applications", response_model=ApplicationItem)
 async def upsert_application(
     payload: ApplicationCreate,
-    current_user: AuthenticatedUser = Depends(require_auth),
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
 ) -> JSONResponse:
     t0 = time.perf_counter()
     status = _validate_status(payload.status)
     note = payload.note
     next_follow_up_date = _validate_date(payload.next_follow_up_date)
     source = payload.source or "manual"
+    viewer_user_id = _viewer_user_id(current_user)
 
     now = _utc_now()
     conn = get_connection()
@@ -234,7 +275,7 @@ async def upsert_application(
         row = conn.execute(
             "SELECT id, status, created_at FROM application_tracker "
             "WHERE offer_id = ? AND user_id = ?",
-            (payload.offer_id, current_user.user_id),
+            (payload.offer_id, viewer_user_id),
         ).fetchone()
 
         if row is None:
@@ -246,7 +287,7 @@ async def upsert_application(
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     app_id,
-                    current_user.user_id,
+                    viewer_user_id,
                     payload.offer_id,
                     status,
                     source,
@@ -283,7 +324,7 @@ async def upsert_application(
                     params.append(now)
 
             params.append(payload.offer_id)
-            params.append(current_user.user_id)
+            params.append(viewer_user_id)
 
             conn.execute(
                 f"UPDATE application_tracker SET {update_fields} "
@@ -299,11 +340,12 @@ async def upsert_application(
             )
             created = False
 
-        item_row = conn.execute(
-            f"SELECT {_SELECT_COLS} FROM application_tracker "
-            "WHERE offer_id = ? AND user_id = ?",
-            (payload.offer_id, current_user.user_id),
-        ).fetchone()
+        item_row = _select_applications(
+            conn,
+            "WHERE a.offer_id = ? AND a.user_id = ?",
+            (payload.offer_id, viewer_user_id),
+            fetchone=True,
+        )
     finally:
         conn.close()
 
@@ -328,9 +370,10 @@ async def upsert_application(
 async def patch_application(
     offer_id: str,
     payload: ApplicationUpdate,
-    current_user: AuthenticatedUser = Depends(require_auth),
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
 ) -> ApplicationItem:
     t0 = time.perf_counter()
+    viewer_user_id = _viewer_user_id(current_user)
     # Only fields explicitly present in the JSON body are updated.
     # This lets callers clear nullable fields (note, next_follow_up_date) by
     # sending null, while omitted fields are left untouched.
@@ -343,7 +386,7 @@ async def patch_application(
     try:
         row = conn.execute(
             "SELECT id, status FROM application_tracker WHERE offer_id = ? AND user_id = ?",
-            (offer_id, current_user.user_id),
+            (offer_id, viewer_user_id),
         ).fetchone()
         if row is None:
             raise HTTPException(status_code=404, detail={"message": "Application not found"})
@@ -382,7 +425,7 @@ async def patch_application(
                 set_parts.append("applied_at = COALESCE(applied_at, ?)")
                 params.append(now)
 
-        params += [offer_id, current_user.user_id]
+        params += [offer_id, viewer_user_id]
         conn.execute(
             "UPDATE application_tracker SET "
             + ", ".join(set_parts)
@@ -397,11 +440,12 @@ async def patch_application(
             extra={"offer_id": offer_id, "status": new_status},
         )
 
-        item_row = conn.execute(
-            f"SELECT {_SELECT_COLS} FROM application_tracker "
-            "WHERE offer_id = ? AND user_id = ?",
-            (offer_id, current_user.user_id),
-        ).fetchone()
+        item_row = _select_applications(
+            conn,
+            "WHERE a.offer_id = ? AND a.user_id = ?",
+            (offer_id, viewer_user_id),
+            fetchone=True,
+        )
     finally:
         conn.close()
 
@@ -420,20 +464,21 @@ async def patch_application(
 @router.delete("/applications/{offer_id}", status_code=204)
 async def delete_application(
     offer_id: str,
-    current_user: AuthenticatedUser = Depends(require_auth),
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
 ) -> None:
     t0 = time.perf_counter()
+    viewer_user_id = _viewer_user_id(current_user)
     conn = get_connection()
     try:
         row = conn.execute(
             "SELECT id FROM application_tracker WHERE offer_id = ? AND user_id = ?",
-            (offer_id, current_user.user_id),
+            (offer_id, viewer_user_id),
         ).fetchone()
         if row is None:
             raise HTTPException(status_code=404, detail={"message": "Application not found"})
         conn.execute(
             "DELETE FROM application_tracker WHERE offer_id = ? AND user_id = ?",
-            (offer_id, current_user.user_id),
+            (offer_id, viewer_user_id),
         )
         conn.commit()
         logger.info("application_delete", extra={"offer_id": offer_id})
@@ -451,7 +496,7 @@ async def delete_application(
 async def prepare_application(
     offer_id: str,
     payload: PrepareRequest,
-    current_user: AuthenticatedUser = Depends(require_auth),
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
 ) -> PrepareResponse:
     """
     Generate CV + cover letter for offer, write apply_pack_runs row, and
@@ -462,15 +507,17 @@ async def prepare_application(
     """
     warnings: List[str] = []
     now = _utc_now()
+    viewer_user_id = _viewer_user_id(current_user)
 
     # 1. Resolve or create the application
     conn = get_connection()
     try:
-        app_row = conn.execute(
-            f"SELECT {_SELECT_COLS} FROM application_tracker "
-            "WHERE offer_id = ? AND user_id = ?",
-            (offer_id, current_user.user_id),
-        ).fetchone()
+        app_row = _select_applications(
+            conn,
+            "WHERE a.offer_id = ? AND a.user_id = ?",
+            (offer_id, viewer_user_id),
+            fetchone=True,
+        )
 
         if app_row is None:
             app_id = str(uuid.uuid4())
@@ -478,7 +525,7 @@ async def prepare_application(
                 "INSERT INTO application_tracker "
                 "(id, user_id, offer_id, status, source, created_at, updated_at, last_status_change_at) "
                 "VALUES (?, ?, ?, 'saved', 'assisted', ?, ?, ?)",
-                (app_id, current_user.user_id, offer_id, now, now, now),
+                (app_id, viewer_user_id, offer_id, now, now, now),
             )
             _record_status_change(conn, app_id, None, "saved", now)
             conn.commit()
@@ -491,7 +538,7 @@ async def prepare_application(
 
     # 2. Resolve profile
     profile_dict = payload.profile
-    if profile_dict is None:
+    if profile_dict is None and current_user is not None:
         auth_profile = auth_db.get_profile(current_user.user_id)
         if auth_profile is not None:
             profile_dict = auth_profile.get("profile")
@@ -595,7 +642,7 @@ async def prepare_application(
             (
                 run_id,
                 app_id,
-                current_user.user_id,
+                viewer_user_id,
                 offer_id,
                 fingerprint,
                 cv_cache_key,

@@ -1772,69 +1772,68 @@ async def post_decision(
         conn.commit()
 
         # ── Compat layer: mirror decision into application_tracker ────────────
-        # Only runs when the request is authenticated.
         # offer_decisions remains the source of truth for inbox filtering.
         # application_tracker is the user-facing candidature tracker.
-        if current_user is not None:
-            _decision_status_map = {
-                "SHORTLISTED": "saved",
-                "DISMISSED": "archived",
-            }
-            tracker_status = _decision_status_map.get(req.status)
-            if tracker_status:
-                try:
-                    existing = conn.execute(
-                        "SELECT id, status FROM application_tracker "
-                        "WHERE offer_id = ? AND user_id = ?",
-                        (offer_id, current_user.user_id),
-                    ).fetchone()
+        tracker_user_id = current_user.user_id if current_user is not None else "__anonymous__"
+        _decision_status_map = {
+            "SHORTLISTED": "saved",
+            "DISMISSED": "archived",
+        }
+        tracker_status = _decision_status_map.get(req.status)
+        if tracker_status:
+            try:
+                existing = conn.execute(
+                    "SELECT id, status FROM application_tracker "
+                    "WHERE offer_id = ? AND user_id = ?",
+                    (offer_id, tracker_user_id),
+                ).fetchone()
 
-                    if existing is None:
-                        app_id = str(uuid.uuid4())
+                if existing is None:
+                    app_id = str(uuid.uuid4())
+                    conn.execute(
+                        "INSERT INTO application_tracker "
+                        "(id, user_id, offer_id, status, source, note, "
+                        "created_at, updated_at, last_status_change_at) "
+                        "VALUES (?, ?, ?, ?, 'assisted', ?, ?, ?, ?)",
+                        (
+                            app_id,
+                            tracker_user_id,
+                            offer_id,
+                            tracker_status,
+                            req.note,
+                            now, now, now,
+                        ),
+                    )
+                    conn.execute(
+                        "INSERT INTO application_status_history "
+                        "(id, application_id, from_status, to_status, changed_at) "
+                        "VALUES (?, ?, NULL, ?, ?)",
+                        (str(uuid.uuid4()), app_id, tracker_status, now),
+                    )
+                else:
+                    app_id = existing["id"]
+                    old_status = existing["status"]
+                    if old_status != tracker_status:
                         conn.execute(
-                            "INSERT INTO application_tracker "
-                            "(id, user_id, offer_id, status, source, note, "
-                            "created_at, updated_at, last_status_change_at) "
-                            "VALUES (?, ?, ?, ?, 'assisted', ?, ?, ?, ?)",
-                            (
-                                app_id,
-                                current_user.user_id,
-                                offer_id,
-                                tracker_status,
-                                req.note,
-                                now, now, now,
-                            ),
+                            "UPDATE application_tracker SET "
+                            "status = ?, source = 'assisted', note = COALESCE(?, note), "
+                            "updated_at = ?, last_status_change_at = ? "
+                            "WHERE id = ?",
+                            (tracker_status, req.note, now, now, app_id),
                         )
                         conn.execute(
                             "INSERT INTO application_status_history "
                             "(id, application_id, from_status, to_status, changed_at) "
-                            "VALUES (?, ?, NULL, ?, ?)",
-                            (str(uuid.uuid4()), app_id, tracker_status, now),
+                            "VALUES (?, ?, ?, ?, ?)",
+                            (str(uuid.uuid4()), app_id, old_status, tracker_status, now),
                         )
-                    else:
-                        app_id = existing["id"]
-                        old_status = existing["status"]
-                        if old_status != tracker_status:
-                            conn.execute(
-                                "UPDATE application_tracker SET "
-                                "status = ?, source = 'assisted', note = COALESCE(?, note), "
-                                "updated_at = ?, last_status_change_at = ? "
-                                "WHERE id = ?",
-                                (tracker_status, req.note, now, now, app_id),
-                            )
-                            conn.execute(
-                                "INSERT INTO application_status_history "
-                                "(id, application_id, from_status, to_status, changed_at) "
-                                "VALUES (?, ?, ?, ?, ?)",
-                                (str(uuid.uuid4()), app_id, old_status, tracker_status, now),
-                            )
-                    conn.commit()
-                except Exception as exc:
-                    logger.warning(
-                        "decision_compat_tracker_error offer_id=%s error=%s",
-                        offer_id,
-                        type(exc).__name__,
-                    )
+                conn.commit()
+            except Exception as exc:
+                logger.warning(
+                    "decision_compat_tracker_error offer_id=%s error=%s",
+                    offer_id,
+                    type(exc).__name__,
+                )
         # ── End compat layer ──────────────────────────────────────────────────
 
     finally:
