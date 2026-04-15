@@ -100,6 +100,7 @@ class ExperienceV1(BaseModel):
     start_date: Optional[str] = None    # "MM/YYYY" or "YYYY" or None
     end_date: Optional[str] = None      # "MM/YYYY" | "YYYY" | "présent" | None
     duration_months: Optional[int] = None
+    location: Optional[str] = None      # city or country extracted from experience header
     bullets: List[str] = []
     tools: List[str] = []
     skills: List[str] = []
@@ -139,6 +140,19 @@ class CVQualityCoverage(BaseModel):
     date_coverage_ratio: float          # fraction of experiences with ≥1 date
 
 
+class ProjectV1(BaseModel):
+    """
+    One personal/academic project extracted from a CV projects section.
+    Never influences score_core — document generation only.
+    """
+    title: str
+    description: Optional[str] = None
+    technologies: List[str] = []        # tools/languages mentioned in the block
+    url: Optional[str] = None           # GitHub, portfolio, demo link
+    date: Optional[str] = None          # "YYYY" or "MM/YYYY"
+    impact: Optional[str] = None        # quantified result if detected
+
+
 class CVQualityV1(BaseModel):
     """
     Heuristic CV quality assessment.
@@ -167,11 +181,14 @@ class ProfileStructuredV1(BaseModel):
     experiences: List[ExperienceV1] = []
     education: List[EducationV1] = []
     certifications: List[CertificationV1] = []
-    extracted_tools: List[str] = []         # aggregated across all experiences, capped at 50
+    projects: List[ProjectV1] = []           # personal/academic projects section
+    extracted_tools: List[str] = []          # aggregated across all experiences, capped at 50
     extracted_companies: List[str] = []
     extracted_titles: List[str] = []
-    inferred_cluster_hints: List[str] = []  # deduplicated hints from education + certs
+    inferred_cluster_hints: List[str] = []   # deduplicated hints from education + certs
     cv_quality: CVQualityV1
+    identity_hint: Optional[Dict[str, Any]] = None  # name, email, phone, linkedin, location from header
+    extracted_languages: List[str] = []            # e.g. ["Anglais — C1", "Espagnol — B2"] from LANGUES section
     extracted_sections: Optional[Dict[str, str]] = None  # debug only (ELEVIA_DEBUG_PROFILE_STRUCT=1)
 
 

@@ -121,6 +121,105 @@ _GENERIC_BLOCKLIST = {
     "gestion", "coordination", "pilotage",
 }
 
+# ── FR domain compound phrases (bypass blocklist) ─────────────────────────────
+# These are legitimate French multi-word skill phrases whose component words
+# appear in _GENERIC_BLOCKLIST (e.g. "gestion", "coordination", "pilotage").
+# Without this set they score ≤0 and get dropped even though they represent
+# real domain skills. They receive a +2 bonus and skip blocklist evaluation.
+
+_FR_SKILL_COMPOUNDS = {
+    # Supply chain / Logistique
+    "gestion des stocks",
+    "gestion de stock",
+    "gestion des approvisionnements",
+    "gestion des commandes",
+    "gestion de la logistique",
+    "coordination logistique",
+    "suivi des livraisons",
+    "gestion des transports",
+    "achats et approvisionnement",
+    "gestion des fournisseurs",
+    "gestion des expéditions",
+    "gestion des expeditions",
+    # RH / Paie
+    "gestion de la paie",
+    "gestion des paies",
+    "variables de paie",
+    "administration du personnel",
+    "gestion des ressources humaines",
+    "gestion rh",
+    "suivi des dossiers",
+    "gestion des contrats",
+    "gestion du personnel",
+    # Finance / Contrôle
+    "controle de gestion",
+    "contrôle de gestion",
+    "gestion budgetaire",
+    "gestion du budget",
+    "gestion de portefeuille",
+    "analyse financiere",
+    "analyse financière",
+    "suivi budgetaire",
+    "reporting financier",
+    "reporting commercial",
+    "tableau de bord",
+    "tableaux de bord",
+    # Commercial / Sales
+    "relation client",
+    "relation clients",
+    "gestion de la relation client",
+    "développement commercial",
+    "developpement commercial",
+    "gestion commerciale",
+    "prospection commerciale",
+    "portefeuille clients",
+    "suivi clients",
+    "suivi commercial",
+    # Data / Reporting (FR)
+    "nettoyage des données",
+    "nettoyage de données",
+    "nettoyage des donnees",
+    "nettoyage de donnees",
+    "qualite des donnees",
+    "qualité des données",
+    "analyse de données",
+    "analyse des données",
+    "analyse de donnees",
+    "visualisation de données",
+    "visualisation des données",
+    "visualisation de donnees",
+    # Legal / Compliance
+    "analyse reglementaire",
+    "analyse réglementaire",
+    "conformite reglementaire",
+    "conformité réglementaire",
+    "droit des societes",
+    "droit des sociétés",
+    "documentation juridique",
+    "secrétariat juridique",
+    "secretariat juridique",
+    # Marketing / Contenu
+    "création de contenu",
+    "creation de contenu",
+    "gestion des reseaux sociaux",
+    "gestion des réseaux sociaux",
+    "community management",
+    "gestion de campagne",
+    "gestion des campagnes",
+    # Gestion de projet / Coordination
+    "gestion de projet",
+    "gestion de projets",
+    "pilotage des projets",
+    "pilotage de projet",
+    "coordination de projet",
+    "coordination de projets",
+    "suivi de projet",
+    "suivi de projets",
+    "management de projet",
+    "gestion des risques",
+    "gestion du risque",
+}
+
 _CV_STRUCTURE_BLOCKLIST = {
     # CV headings / sections
     "experience", "experiences", "professional experience", "work experience",
@@ -228,6 +327,12 @@ def _score_phrase(phrase_lower: str, cluster_allowlist: set) -> Tuple[int, str]:
         score += 3
     elif phrase_lower in _GLOBAL_ALLOWLIST:
         score += 2
+    elif phrase_lower in _FR_SKILL_COMPOUNDS:
+        # Known FR domain compound — counts as multi-word tech phrase, skip blocklist
+        score += 2
+        if len(words) >= 2:
+            score += 1
+        return score, ""
 
     # Positive: has tech separator within a token (scikit-learn, vue.js, ci/cd)
     for w in words:

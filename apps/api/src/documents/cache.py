@@ -56,12 +56,27 @@ def make_cache_key(
     prompt_version: str,
 ) -> str:
     """
-    Deterministic cache key from (fingerprint, offer_id, prompt_version).
+    Deterministic cache key for CV documents.
 
     Uses SHA-256 truncated to 40 hex chars — collision-safe for our scale.
     Same inputs always → same key.
     """
     raw = f"cv:{profile_fingerprint}:{offer_id}:{prompt_version}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:40]
+
+
+def make_letter_cache_key(
+    profile_fingerprint: str,
+    offer_id: str,
+    template_version: str,
+) -> str:
+    """
+    Deterministic cache key for cover letter documents.
+
+    Uses "letter:" prefix to guarantee no collision with CV keys.
+    Same inputs always → same key.
+    """
+    raw = f"letter:{profile_fingerprint}:{offer_id}:{template_version}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:40]
 
 

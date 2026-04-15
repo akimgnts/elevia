@@ -144,6 +144,7 @@ class ForOfferRequest(BaseModel):
     profile_id: Optional[str] = None
     lang: Literal["fr", "en"] = "fr"
     context: Optional[InboxContext] = None  # Inbox match context for enrichment
+    template_version: Literal["cv_v1", "cv_v2"] = "cv_v1"
 
 
 class ForOfferResponse(BaseModel):

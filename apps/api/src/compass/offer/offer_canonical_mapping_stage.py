@@ -166,17 +166,9 @@ def run_offer_canonical_mapping_stage(
             continue
 
         unresolved.append(entry)
-        fuzzy = map_skill(item.raw, enable_fuzzy=True, fuzzy_threshold=0.96)
-        if fuzzy and fuzzy.get("method") == "fuzzy_strict":
-            near_matches.append(
-                {
-                    "raw": item.raw,
-                    "label": str(fuzzy.get("label") or ""),
-                    "esco_id": str(fuzzy.get("esco_id") or ""),
-                    "confidence": float(fuzzy.get("confidence") or 0.0),
-                    "method": str(fuzzy.get("method") or ""),
-                }
-            )
+        # Fuzzy scan disabled — O(13 933 × SequenceMatcher) per unresolved skill was
+        # causing 45 s per offer and making warm_inbox_runtime block the GIL for minutes.
+        # near_matches are display-only; exact + alias matching (enable_fuzzy=False) is enough.
 
     canonical_skills = _dedupe_canonical_skills(canonical_skills)
     canonical_labels = _dedupe_preserve([str(item.get("label") or "") for item in canonical_skills])

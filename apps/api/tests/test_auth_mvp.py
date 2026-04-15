@@ -30,10 +30,10 @@ def test_login_requires_seeded_admin(client):
     assert resp.status_code == 503
 
 
-def test_protected_route_bypasses_when_auth_not_bootstrapped(client):
+def test_applications_route_uses_anonymous_scope_when_auth_not_bootstrapped(client):
     resp = client.get("/applications")
-    assert resp.status_code == 401
-    assert resp.json()["detail"]["message"] == "Auth not initialized"
+    assert resp.status_code == 200
+    assert resp.json() == {"items": []}
 
 
 def test_login_me_logout_flow_and_route_protection(client):
@@ -43,8 +43,9 @@ def test_login_me_logout_flow_and_route_protection(client):
         role="admin",
     )
 
-    unauthorized = client.get("/applications")
-    assert unauthorized.status_code == 401
+    anonymous = client.get("/applications")
+    assert anonymous.status_code == 200
+    assert anonymous.json() == {"items": []}
 
     login_resp = client.post(
         "/auth/login",
@@ -75,4 +76,5 @@ def test_login_me_logout_flow_and_route_protection(client):
     assert logout_resp.status_code == 204
 
     revoked = client.get("/applications")
-    assert revoked.status_code == 401
+    assert revoked.status_code == 200
+    assert revoked.json() == {"items": []}

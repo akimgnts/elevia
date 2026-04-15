@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{full_name}} — CV</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 16mm 18mm 16mm;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #f3f3f3;
+    color: #111;
+    font-family: 'Manrope', sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    padding: 24px 0;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto 20px auto;
+    background: #fff;
+    padding: 16mm 16mm 18mm 16mm;
+  }
+
+  .cv {
+    max-width: 178mm;
+    margin: 0 auto;
+  }
+
+  .top-title {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .top-title h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    line-height: 1.25;
+  }
+
+  .top-subtitle {
+    text-align: center;
+    font-size: 10.8px;
+    line-height: 1.65;
+    color: #444;
+    margin-bottom: 16px;
+  }
+
+  .intro {
+    text-align: left;
+    font-size: 11px;
+    line-height: 1.58;
+    color: #222;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    border: 1px solid #e3e3e3;
+  }
+
+  .section {
+    margin-bottom: 18px;
+    page-break-inside: avoid;
+  }
+
+  .section.hidden {
+    display: none;
+  }
+
+  .section-title {
+    margin: 0 0 10px 0;
+    padding-bottom: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    border-bottom: 1px solid #cfcfcf;
+  }
+
+  .job {
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+  }
+
+  .job:last-child {
+    margin-bottom: 0;
+  }
+
+  .job-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+
+  .job-left {
+    min-width: 0;
+  }
+
+  .job-title {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .job-company {
+    font-size: 11px;
+    color: #444;
+    line-height: 1.45;
+  }
+
+  .job-date {
+    flex-shrink: 0;
+    font-size: 10.7px;
+    color: #555;
+    text-align: right;
+    white-space: nowrap;
+    padding-top: 1px;
+  }
+
+  ul {
+    margin: 6px 0 0 0;
+    padding-left: 18px;
+  }
+
+  li {
+    font-size: 11px;
+    line-height: 1.55;
+    margin-bottom: 3px;
+  }
+
+  .two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .skill-block {
+    margin-bottom: 10px;
+  }
+
+  .skill-block:last-child {
+    margin-bottom: 0;
+  }
+
+  .skill-label {
+    font-size: 10.8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+  }
+
+  .skill-text {
+    font-size: 11px;
+    line-height: 1.6;
+    color: #222;
+  }
+
+  .edu-item {
+    margin-bottom: 10px;
+  }
+
+  .edu-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .edu-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .edu-meta {
+    font-size: 11px;
+    color: #444;
+    line-height: 1.5;
+  }
+
+  .simple-text {
+    font-size: 11px;
+    line-height: 1.62;
+    color: #222;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 999px;
+    font-size: 10.5px;
+    line-height: 1.2;
+    color: #222;
+    background: #fafafa;
+  }
+
+  .project-item {
+    margin-bottom: 10px;
+  }
+
+  .project-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .project-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .project-meta {
+    font-size: 10.7px;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  .project-desc {
+    font-size: 11px;
+    color: #333;
+    line-height: 1.55;
+    margin-top: 2px;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  @media print {
+    body {
+      background: #fff;
+      padding: 0;
+    }
+
+    .page {
+      margin: 0;
+      box-shadow: none;
+      min-height: auto;
+      page-break-after: always;
+    }
+
+    .page:last-child {
+      page-break-after: auto;
+    }
+  }
+
+  @media screen {
+    .page {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- PAGE 1 -->
+  <div class="page">
+    <div class="cv">
+
+      <div class="top-title">
+        <h1>{{target_title}}</h1>
+      </div>
+
+      <div class="top-subtitle">
+        {{contact_line}}
+      </div>
+
+      <div class="intro">
+        {{cv_summary}}
+      </div>
+
+      <section class="section {{experience_section_class}}" id="experience-section">
+        <h2 class="section-title">Expériences professionnelles</h2>
+        {{experience_items}}
+      </section>
+
+      <section class="section {{projects_section_class}}" id="projects-section">
+        <h2 class="section-title">Projets</h2>
+        {{project_items}}
+      </section>
+
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page">
+    <div class="cv">
+
+      <section class="section" id="skills-section">
+        <h2 class="section-title">Compétences</h2>
+
+        <div class="two-cols">
+          <div>
+            <div class="skill-block">
+              <div class="skill-label">Compétences clés</div>
+              <div class="skill-text">{{core_skills}}</div>
+            </div>
+
+            <div class="skill-block">
+              <div class="skill-label">Compétences métier</div>
+              <div class="skill-text">{{business_skills}}</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="skill-block">
+              <div class="skill-label">Stack &amp; outils</div>
+              <div class="skill-text">{{tools_stack}}</div>
+            </div>
+
+            <div class="skill-block {{languages_block_class}}">
+              <div class="skill-label">Langues</div>
+              <div class="skill-text">{{languages_text}}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section {{education_section_class}}" id="education-section">
+        <h2 class="section-title">Formation</h2>
+        {{education_items}}
+      </section>
+
+      <section class="section {{certifications_section_class}}" id="certifications-section">
+        <h2 class="section-title">Certifications</h2>
+        <div class="simple-text">
+          {{certifications_text}}
+        </div>
+      </section>
+
+      <section class="section {{strengths_section_class}}" id="key-achievements-section">
+        <h2 class="section-title">Points forts à mettre en avant</h2>
+        <div class="tag-list">
+          {{key_strength_tags}}
+        </div>
+      </section>
+
+      <section class="section {{additional_section_class}}" id="additional-section">
+        <h2 class="section-title">Informations complémentaires</h2>
+        <div class="simple-text">
+          {{additional_info}}
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</body>
+</html>

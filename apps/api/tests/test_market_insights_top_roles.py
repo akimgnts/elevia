@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 from api.routes import market_insights
 
@@ -133,3 +134,46 @@ def test_top_roles_endpoint_returns_cached_subset(tmp_path, monkeypatch):
 
     assert response.status_code == 200
     assert b"top_roles" in response.body
+
+
+def test_market_insights_route_uses_disk_cache_before_recompute(tmp_path, monkeypatch):
+    cache_file = tmp_path / "vie_market_insights.json"
+    cache_file.write_text(
+        json.dumps(
+            {
+                "generated_at": 9999999999,
+                "payload": {
+                    "total_offers": 12,
+                    "top_countries": [],
+                    "sectors_distribution": [],
+                    "top_skills": [],
+                    "sector_skill_matrix": [],
+                    "sector_distinctive_skills": [],
+                    "sector_country_matrix": [],
+                    "sector_country_counts": [],
+                    "sector_companies": [],
+                    "sector_company_counts": [],
+                    "company_counts": [],
+                    "key_insights": [],
+                    "top_roles": [{"role": "Data Analysts", "count": 3, "skills": ["SQL"]}],
+                    "sector_top_roles": [],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(market_insights, "_CACHE", {})
+    monkeypatch.setattr(market_insights, "_CACHE_TS", 0.0)
+    monkeypatch.setattr(market_insights, "_CACHE_FILE", cache_file)
+    monkeypatch.setattr(
+        market_insights,
+        "_compute",
+        lambda: (_ for _ in ()).throw(AssertionError("route should serve disk cache first")),
+    )
+
+    response = market_insights.get_vie_market_insights()
+
+    assert response.status_code == 200
+    assert b'"total_offers":12' in response.body
+    assert b"Data Analysts" in response.body

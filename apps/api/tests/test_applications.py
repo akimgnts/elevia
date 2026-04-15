@@ -164,6 +164,60 @@ def test_invalid_date_returns_400(authenticated_client):
     assert resp.status_code == 400
 
 
+def test_anonymous_application_flow_and_offer_metadata(client):
+    conn = db_utils.get_connection()
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS fact_offers (
+            id TEXT PRIMARY KEY,
+            source TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            company TEXT,
+            city TEXT,
+            country TEXT,
+            publication_date TEXT,
+            contract_duration INTEGER,
+            start_date TEXT,
+            payload_json TEXT NOT NULL,
+            last_updated TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO fact_offers (
+            id, source, title, description, company, city, country,
+            publication_date, contract_duration, start_date, payload_json, last_updated
+        ) VALUES (?, 'business_france', ?, 'desc', ?, ?, ?, NULL, NULL, NULL, '{}', ?)
+        """,
+        (
+            "offer-meta-1",
+            "Charge de clientele",
+            "ACME",
+            "Paris",
+            "France",
+            "2026-01-30T10:00:00Z",
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    create_resp = client.post("/applications", json={"offer_id": "offer-meta-1", "status": "saved"})
+    assert create_resp.status_code == 201
+    data = create_resp.json()
+    assert data["offer_title"] == "Charge de clientele"
+    assert data["offer_company"] == "ACME"
+    assert data["offer_city"] == "Paris"
+    assert data["offer_country"] == "France"
+
+    list_resp = client.get("/applications")
+    assert list_resp.status_code == 200
+    items = list_resp.json()["items"]
+    assert len(items) == 1
+    assert items[0]["offer_id"] == "offer-meta-1"
+
+
 # ---------------------------------------------------------------------------
 # New V2 tests
 # ---------------------------------------------------------------------------
@@ -423,8 +477,8 @@ def test_decision_compat_dismissed_creates_archived(authenticated_client):
     assert row["source"] == "assisted"
 
 
-def test_decision_compat_unauthenticated_no_tracker_row(client):
-    """Unauthenticated decision must NOT write to application_tracker."""
+def test_decision_compat_unauthenticated_creates_anonymous_tracker_row(client):
+    """Unauthenticated decision must still create an anonymous tracker row."""
     resp = client.post(
         "/offers/offer-compat-3/decision",
         json={"profile_id": "anon-profile", "status": "SHORTLISTED"},
@@ -438,7 +492,9 @@ def test_decision_compat_unauthenticated_no_tracker_row(client):
     ).fetchone()
     conn.close()
 
-    assert row is None, "application_tracker row must NOT be created for unauthenticated decision"
+    assert row is not None
+    assert row["user_id"] == "__anonymous__"
+    assert row["status"] == "saved"
 
 
 # ---------------------------------------------------------------------------

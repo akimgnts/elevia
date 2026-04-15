@@ -41,10 +41,13 @@ def run_profile_cache_hooks(*, cv_text: str, profile: Dict[str, Any]) -> CacheHo
         #   profile["experiences"]     — enriched experience dicts (compatible with
         #                                apply_pack_cv_engine._normalize_experience)
         # NEVER touches: skills_uri, skills, languages, education_level (matching core)
+        # raw_languages: prefer profile["languages"] (set by ESCO pipeline),
+        # fall back to languages extracted directly from CV text by the structurer.
+        raw_languages = profile.get("languages") or structured.extracted_languages or []
         career_profile = from_profile_structured_v1(
             structured,
             raw_skills=profile.get("skills") or [],
-            raw_languages=profile.get("languages") or [],
+            raw_languages=raw_languages,
         )
         profile["career_profile"] = career_profile.model_dump()
         # Enrich experiences so the CV engine gets bullets/achievements/tools

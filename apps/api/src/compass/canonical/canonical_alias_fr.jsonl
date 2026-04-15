@@ -39,3 +39,263 @@ data mining -> skill:data_analysis
 # Data engineering variants
 data pipeline -> skill:data_engineering
 data pipelines -> skill:data_engineering
+
+# ── Python / Data ecosystem ───────────────────────────────────────────────────
+python -> skill:statistical_programming
+pandas -> skill:data_analysis
+numpy -> skill:data_analysis
+scikit-learn -> skill:machine_learning
+sklearn -> skill:machine_learning
+matplotlib -> skill:data_visualization
+seaborn -> skill:data_visualization
+jupyter -> skill:data_analysis
+jupyter notebook -> skill:data_analysis
+apache airflow -> skill:data_engineering
+airflow -> skill:data_engineering
+dbt -> skill:data_engineering
+snowflake -> skill:data_engineering
+google bigquery -> skill:data_engineering
+bigquery -> skill:data_engineering
+tableau -> skill:data_visualization
+tableau software -> skill:data_visualization
+google analytics -> skill:web_analytics
+ga4 -> skill:web_analytics
+google analytics 4 -> skill:web_analytics
+etl -> skill:data_engineering
+extract transform load -> skill:data_engineering
+data warehouse -> skill:data_engineering
+data lake -> skill:data_engineering
+data cleaning -> skill:data_cleaning
+nettoyage données -> skill:data_cleaning
+nettoyage de donnees -> skill:data_cleaning
+qualite des donnees -> skill:data_cleaning
+data quality -> skill:data_cleaning
+data governance -> skill:data_governance
+gouvernance des donnees -> skill:data_governance
+data storytelling -> skill:data_storytelling
+communication de la donnee -> skill:data_storytelling
+r programming -> skill:statistical_programming
+statistiques -> skill:statistical_analysis
+statistics -> skill:statistical_analysis
+
+# ── Software / Web / DevOps ───────────────────────────────────────────────────
+react -> skill:frontend_development
+react.js -> skill:frontend_development
+reactjs -> skill:frontend_development
+vue.js -> skill:frontend_development
+vuejs -> skill:frontend_development
+angular -> skill:frontend_development
+next.js -> skill:frontend_development
+node.js -> skill:backend_development
+nodejs -> skill:backend_development
+typescript -> skill:frontend_development
+java -> skill:backend_development
+spring -> skill:backend_development
+spring boot -> skill:backend_development
+fastapi -> skill:backend_development
+django -> skill:backend_development
+docker -> skill:containerization
+kubernetes -> skill:containerization
+k8s -> skill:containerization
+terraform -> skill:cloud_architecture
+git -> skill:version_control
+github -> skill:version_control
+gitlab -> skill:version_control
+pipeline ci/cd -> skill:devops
+ci cd -> skill:devops
+agile -> skill:agile_delivery
+scrum -> skill:agile_delivery
+kanban -> skill:agile_delivery
+algorithms -> skill:software_architecture
+data structures -> skill:software_architecture
+algorithms data structures -> skill:software_architecture
+web mobile development -> skill:frontend_development
+api rest -> skill:software_api
+rest api -> skill:software_api
+graphql -> skill:software_api
+microservices -> skill:microservices_architecture
+postgresql -> skill:database_design
+mysql -> skill:database_design
+mongodb -> skill:database_design
+
+# ── Marketing / Growth ───────────────────────────────────────────────────────
+google ads -> skill:sem
+facebook ads -> skill:social_media_marketing
+linkedin ads -> skill:social_media_marketing
+instagram -> skill:social_media_marketing
+tiktok -> skill:social_media_marketing
+réseaux sociaux -> skill:social_media_marketing
+reseaux sociaux -> skill:social_media_marketing
+social media management -> skill:social_media_marketing
+community management -> skill:social_media_marketing
+creation de contenu -> skill:content_marketing
+création de contenu -> skill:content_marketing
+contenu multimedia -> skill:content_marketing
+adobe suite -> skill:content_marketing
+photoshop -> skill:content_marketing
+indesign -> skill:content_marketing
+
+# ── Supply chain / Logistique ─────────────────────────────────────────────────
+logistique -> skill:logistics_coordination
+supply chain -> skill:supply_chain_management
+incoterms -> skill:supply_chain_management
+transport -> skill:transport_operations
+livraisons -> skill:logistics_coordination
+expeditions -> skill:logistics_coordination
+achats -> skill:procurement_basics
+procurement -> skill:procurement_basics
+
+# ── RH / Administration ───────────────────────────────────────────────────────
+paie -> skill:hr_administration
+gestion de la paie -> skill:hr_administration
+variables de paie -> skill:hr_administration
+gestion des paies -> skill:hr_administration
+administration du personnel -> skill:hr_administration
+suivi rh -> skill:hr_administration
+gestion des contrats -> skill:hr_administration
+
+# ── Finance / Contrôle ────────────────────────────────────────────────────────
+analyse financiere -> skill:financial_analysis
+analyse financière -> skill:financial_analysis
+modelisation financiere -> skill:financial_modeling
+modélisation financière -> skill:financial_modeling
+due diligence -> skill:risk_analysis
+gestion des risques -> skill:risk_analysis
+bilan financier -> skill:financial_analysis
+
+# ── Legal / Compliance ────────────────────────────────────────────────────────
+rgpd -> skill:compliance
+gdpr -> skill:compliance
+conformite reglementaire -> skill:compliance
+conformité réglementaire -> skill:compliance
+analyse reglementaire -> skill:legal_analysis
+analyse réglementaire -> skill:legal_analysis
+audit reglementaire -> skill:audit
+droit des societes -> skill:legal_analysis
+droit des sociétés -> skill:legal_analysis
+documentation juridique -> skill:process_documentation
+secrétariat juridique -> skill:process_documentation
+secretariat juridique -> skill:process_documentation
+
+# ── Sales / Commercial ────────────────────────────────────────────────────────
+b2b -> skill:b2b_sales
+closing -> skill:b2b_sales
+negociation -> skill:negotiation
+négociation -> skill:negotiation
+appels sortants -> skill:lead_generation
+phoning -> skill:lead_generation
+mailing -> skill:email_marketing
+setting mailing campaigns -> skill:email_marketing
+
+# ── Gestion de projet / Transversal ──────────────────────────────────────────
+gestion de projet -> skill:project_management
+gestion de projets -> skill:project_management
+pilotage de projet -> skill:project_management
+pilotage des projets -> skill:project_management
+coordination de projet -> skill:project_management
+management de projet -> skill:project_management
+problem solving -> skill:problem_solving
+management interns -> skill:leadership
+encadrement -> skill:leadership
+
+# ── SPRINT CANONICAL EXPANSION — unresolved concept/enriched signals ──────────
+
+# HR / Paie (extended)
+sirh -> skill:hr_administration
+bilan social -> skill:hr_administration
+bilans sociaux -> skill:hr_administration
+creation bilans sociaux -> skill:hr_administration
+elements variables paie -> skill:hr_administration
+
+# Logistique / Supply (extended)
+operations import export incoterms -> skill:supply_chain_management
+operations importex port incoterms -> skill:supply_chain_management
+import export -> skill:supply_chain_management
+
+# Juridique / Conformité (extended)
+reglementaire examen conformite cadre -> skill:compliance
+reglementaire examen conformite -> skill:compliance
+examen conformite -> skill:compliance
+examen de conformite -> skill:compliance
+cadre reglementaire -> skill:compliance
+droit concurrence -> skill:legal_analysis
+droit de la concurrence -> skill:legal_analysis
+droit famille -> skill:legal_analysis
+droit de la famille -> skill:legal_analysis
+
+# Data ops / nettoyage / gouvernance
+structuration nettoyage bases donnees -> skill:data_cleaning
+nettoyage bases donnees -> skill:data_cleaning
+amelioration fiabilite donnees -> skill:data_governance
+fiabilite donnees -> skill:data_governance
+donnees provenant differentes sources -> skill:data_engineering
+integration donnees sources -> skill:data_engineering
+donnees operationnelles commerciales -> skill:data_analysis
+donnees commerciales -> skill:business_intelligence
+tendances identification opportunites -> skill:data_analysis
+matching donnees -> skill:data_analysis
+algorithmes scoring matching -> skill:machine_learning
+financiere audit donnees -> skill:financial_analysis
+analyste oriente donnees -> skill:data_analysis
+data driven analyst -> skill:data_analysis
+analyste data -> skill:data_analysis
+structuration bases donnees -> skill:data_cleaning
+amelioration fiabilite donnees utilisees -> skill:data_governance
+
+# Looker / BI (extended)
+looker studio visualization -> skill:looker_studio
+designed looker studio dashboards -> skill:looker_studio
+looker studio dashboards -> skill:looker_studio
+providing error free insights -> skill:data_analysis
+through stronger data storytelling -> skill:data_storytelling
+business data into actionable -> skill:data_analysis
+consistency decision making -> skill:decision_making
+enhancing decision making -> skill:decision_making
+
+# Software dev (extended)
+restful apis -> skill:software_api
+restful api -> skill:software_api
+node js -> skill:backend_development
+vue js -> skill:frontend_development
+devops terraform git -> skill:devops
+devops terraform -> skill:devops
+fine tuning llms -> skill:machine_learning
+llm fine tuning -> skill:machine_learning
+devops terraform git action -> skill:devops
+
+# Sales / Commercial (extended)
+argumentaire vente -> skill:b2b_sales
+argumentaire commercial -> skill:b2b_sales
+accueil clients vente -> skill:b2b_sales
+portefeuille clients -> skill:account_management
+suivi portefeuille clients -> skill:account_management
+donnees marche international -> skill:market_research
+international trade shows -> skill:market_research
+site internet phoning prospect -> skill:lead_generation
+facultes vente -> skill:b2b_sales
+developpement facultes vente -> skill:b2b_sales
+developpement commercial b2b -> skill:b2b_sales
+
+# Customer service / Wealth management (FR profiles)
+relation client -> skill:account_management
+gestion relation client -> skill:account_management
+service client -> skill:account_management
+service clientele -> skill:account_management
+conseiller clientele -> skill:account_management
+conseillere clientele -> skill:account_management
+chargee de clientele -> skill:account_management
+gestion de patrimoine -> skill:financial_analysis
+patrimoine -> skill:financial_analysis
+banque assurance -> skill:financial_analysis
+banque de detail -> skill:financial_analysis
+epargne -> skill:financial_analysis
+placements financiers -> skill:financial_analysis
+animation equipe -> skill:leadership
+periscolaire -> skill:team_coordination
+
+# Content / Marketing (extended)
+creation contenu multimedia -> skill:content_marketing
+contenu multimedia -> skill:content_marketing
+events producing newsletters -> skill:newsletter_production
+created marketing content event -> skill:content_marketing
+metrics campaigns -> skill:campaign_reporting

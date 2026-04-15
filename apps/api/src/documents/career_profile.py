@@ -26,6 +26,29 @@ from pydantic import BaseModel, Field
 # Schema
 # ---------------------------------------------------------------------------
 
+class CareerIdentity(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    location: Optional[str] = None
+    linkedin: Optional[str] = None
+    github: Optional[str] = None
+
+
+class CareerSkillSelection(BaseModel):
+    uri: Optional[str] = None
+    label: str
+
+
+class CareerProject(BaseModel):
+    title: str
+    description: Optional[str] = None
+    technologies: List[str] = Field(default_factory=list)
+    url: Optional[str] = None
+    date: Optional[str] = None
+    impact: Optional[str] = None
+
+
 class CareerExperience(BaseModel):
     title: str
     company: str
@@ -38,6 +61,11 @@ class CareerExperience(BaseModel):
     tools: List[str] = Field(default_factory=list)               # from ExperienceV1.tools
     skills: List[str] = Field(default_factory=list)              # from ExperienceV1.skills
     autonomy: Literal["LEAD", "COPILOT", "CONTRIB"] = "COPILOT"
+    autonomy_level: Optional[Literal["execution", "partial", "autonomous", "ownership"]] = None
+    quantified_signals: List[str] = Field(default_factory=list)
+    impact_signals: List[str] = Field(default_factory=list)
+    context_tags: List[str] = Field(default_factory=list)
+    canonical_skills_used: List[CareerSkillSelection] = Field(default_factory=list)
 
 
 class CareerEducation(BaseModel):
@@ -55,13 +83,20 @@ class CareerLanguage(BaseModel):
 
 
 class CareerProfile(BaseModel):
+    schema_version: Literal["v2"] = "v2"
+    base_title: Optional[str] = None
+    summary_master: Optional[str] = None
     target_title: Optional[str] = None       # most recent experience title
     summary: Optional[str] = None            # generated on demand by LLM/template
+    identity: Optional[CareerIdentity] = None
     experiences: List[CareerExperience] = Field(default_factory=list)
+    projects: List[CareerProject] = Field(default_factory=list)
     education: List[CareerEducation] = Field(default_factory=list)
     certifications: List[str] = Field(default_factory=list)
     languages: List[CareerLanguage] = Field(default_factory=list)
     skills: List[str] = Field(default_factory=list)
+    selected_skills: List[CareerSkillSelection] = Field(default_factory=list)
+    pending_skill_candidates: List[str] = Field(default_factory=list)
     completeness: float = 0.0                # 0.0 – 1.0 heuristic
     source_version: str = "profile_structured_v1"
 
@@ -156,7 +191,7 @@ def _parse_language_entry(raw: Any) -> Optional[CareerLanguage]:
 def _compute_completeness(cp: CareerProfile) -> float:
     score = 0.0
     if cp.experiences:
-        score += 0.30
+        score += 0.20                    # reduced from 0.30 (identity+projects take 0.10)
     if any(e.responsibilities for e in cp.experiences):
         score += 0.20
     if any(e.achievements for e in cp.experiences):
@@ -168,6 +203,10 @@ def _compute_completeness(cp: CareerProfile) -> float:
     if cp.skills:
         score += 0.10
     if cp.languages:
+        score += 0.05
+    if cp.identity and cp.identity.full_name:
+        score += 0.05
+    if cp.projects:
         score += 0.05
     return round(min(1.0, score), 2)
 
@@ -230,6 +269,7 @@ def _extract(
         experiences.append(CareerExperience(
             title=title or "Expérience",
             company=company,
+            location=str(getattr(exp, "location", None) or "").strip() or None,
             start_date=str(getattr(exp, "start_date", None) or "").strip() or None,
             end_date=str(getattr(exp, "end_date", None) or "").strip() or None,
             duration_months=getattr(exp, "duration_months", None),
@@ -261,6 +301,37 @@ def _extract(
         if hasattr(cert, "name") and str(cert.name).strip()
     ]
 
+    # Projects
+    projects: List[CareerProject] = []
+    for proj in (getattr(structured, "projects", None) or []):
+        title = str(getattr(proj, "title", None) or "").strip()
+        if not title:
+            continue
+        projects.append(CareerProject(
+            title=title,
+            description=str(getattr(proj, "description", None) or "").strip() or None,
+            technologies=[
+                t for t in (getattr(proj, "technologies", None) or [])
+                if isinstance(t, str) and t.strip()
+            ][:10],
+            url=str(getattr(proj, "url", None) or "").strip() or None,
+            date=str(getattr(proj, "date", None) or "").strip() or None,
+            impact=str(getattr(proj, "impact", None) or "").strip() or None,
+        ))
+
+    # Identity
+    identity: Optional[CareerIdentity] = None
+    identity_hint = getattr(structured, "identity_hint", None)
+    if isinstance(identity_hint, dict) and identity_hint:
+        identity = CareerIdentity(
+            full_name=identity_hint.get("full_name"),
+            email=identity_hint.get("email"),
+            phone=identity_hint.get("phone"),
+            location=identity_hint.get("location"),
+            linkedin=identity_hint.get("linkedin"),
+            github=identity_hint.get("github"),
+        )
+
     languages: List[CareerLanguage] = []
     seen_langs: set = set()
     for raw_lang in raw_languages:
@@ -272,8 +343,11 @@ def _extract(
     target_title = experiences[0].title if experiences else None
 
     cp = CareerProfile(
+        base_title=target_title,
         target_title=target_title,
+        identity=identity,
         experiences=experiences,
+        projects=projects,
         education=education,
         certifications=certifications,
         languages=languages,
@@ -306,10 +380,17 @@ def to_experience_dicts(career_profile: CareerProfile) -> List[Dict[str, Any]]:
         result.append({
             "title": exp.title,
             "company": exp.company,
+            "location": exp.location,
             "dates": dates,
             "bullets": exp.responsibilities,           # mapped for engine compatibility
             "achievements": exp.achievements,
             "tools": exp.tools,
+            "skills": exp.skills,
+            "autonomy_level": exp.autonomy_level,
+            "quantified_signals": exp.quantified_signals,
+            "impact_signals": exp.impact_signals,
+            "context_tags": exp.context_tags,
+            "canonical_skills_used": [item.model_dump() for item in exp.canonical_skills_used],
             "duration_months": exp.duration_months,
             "autonomy": exp.autonomy,
         })

@@ -5,14 +5,12 @@ Pipeline per request:
   1. Resolve offer (DB direct query, no load_catalog_offers)
   2. Compute profile fingerprint (deterministic)
   3. Check cache → return immediately on hit
-  4. Extract ATS keywords (deterministic)
-  5. If LLM available → call LLM → validate Pydantic → anti-lie filter → cache
-  6. If LLM disabled/error → build deterministic fallback
-  7. Return CvDocumentPayload
+  4. Build deterministic targeted CV (build_targeted_cv)
+  5. Cache write → return CvDocumentPayload
 
 Constraints:
   - Zero modification to scoring core (apps/api/src/matching/*)
-  - 1 LLM call max per cache miss
+  - Fully deterministic — no LLM calls in this module
   - Logs: DOC_CV_* events (no payload dumps, no key values)
 """
 
@@ -24,17 +22,12 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import List, Optional, Tuple
-
-from pydantic import ValidationError
+from typing import List, Optional
 
 from .apply_pack_cv_engine import build_targeted_cv
-from .ats_keywords import extract_ats_keywords, keywords_overlap
 from .cache import cache_get, cache_set, make_cache_key
-from .llm_client import call_llm_json, is_llm_available
 from .schemas import (
     AtsNotes,
-    AutonomyEnum,
     CvDocumentPayload,
     CvMeta,
     CvRequest,
@@ -46,11 +39,6 @@ logger = logging.getLogger(__name__)
 
 # documents/ → src/ → apps/api/  (3 levels, shallower than api/utils/ which is 4)
 _DB_PATH = Path(__file__).parent.parent.parent / "data" / "db" / "offers.db"
-_PROMPT_PATH = Path(__file__).parent / "prompt_cv_v1.txt"
-
-_MAX_DESC_CHARS = 1200
-_MAX_EXPERIENCES = 3
-_MAX_KEYWORDS = 12
 
 
 # ── Structured logging ────────────────────────────────────────────────────────
@@ -95,6 +83,10 @@ def _load_offer(offer_id: str) -> Optional[dict]:
                 is_vie = payload.get("is_vie")
                 if isinstance(is_vie, bool):
                     offer["is_vie"] = is_vie
+                # Surface rich offer fields for CV generation (structured_v1, cv_strategy, skills)
+                for field in ("structured_v1", "cv_strategy", "skills"):
+                    if field in payload and offer.get(field) is None:
+                        offer[field] = payload[field]
             except Exception:
                 pass
         offer.pop("payload_json", None)
@@ -123,12 +115,15 @@ def _profile_fingerprint(profile: dict) -> str:
     experiences = profile.get("experiences") or []
     # Include career_profile completeness as a cache-busting signal
     career_completeness = (profile.get("career_profile") or {}).get("completeness", 0.0)
+    # Bust cache when identity becomes available (richer profile)
+    identity_present = bool((profile.get("career_profile") or {}).get("identity"))
     raw = json.dumps(
         {
             "skills": skills,
             "education": education,
             "experiences": experiences,
             "career_completeness": career_completeness,
+            "identity_present": identity_present,
         },
         ensure_ascii=False,
         sort_keys=True,
@@ -137,38 +132,7 @@ def _profile_fingerprint(profile: dict) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 
-# ── Anti-lie filter ───────────────────────────────────────────────────────────
-
-def _antilies(
-    payload: CvDocumentPayload,
-    profile: dict,
-    offer_keywords: List[str],
-) -> CvDocumentPayload:
-    """
-    Filter fabricated content:
-    - keywords_injected → only items from offer_keywords
-    - tools → only items from profile skills
-    Returns sanitized copy (no mutation).
-    """
-    profile_skills_norm = {s.lower().strip() for s in profile.get("skills", []) if s}
-    kw_set = {k.lower() for k in offer_keywords}
-
-    safe_keywords = [k for k in payload.keywords_injected if k.lower() in kw_set]
-
-    safe_blocks: List[ExperienceBlock] = []
-    for block in payload.experience_blocks:
-        safe_tools = [t for t in block.tools if t.lower() in profile_skills_norm]
-        safe_blocks.append(block.model_copy(update={"tools": safe_tools}))
-
-    return payload.model_copy(
-        update={
-            "keywords_injected": safe_keywords,
-            "experience_blocks": safe_blocks,
-        }
-    )
-
-
-# ── Fallback builder (deterministic, no LLM) ─────────────────────────────────
+# ── Deterministic CV builder ──────────────────────────────────────────────────
 
 def _build_fallback(
     profile: dict,
@@ -205,146 +169,6 @@ def _build_fallback(
             fallback_used=True,
         ),
     )
-
-
-# ── LLM prompt builder ────────────────────────────────────────────────────────
-
-def _build_experiences_text(profile: dict) -> Tuple[str, int]:
-    """
-    Build the experiences text block for the LLM prompt.
-
-    Priority:
-      1. career_profile.experiences — rich data with bullets, achievements, tools
-      2. profile.experiences        — basic dicts (title, company, duration)
-      3. Empty fallback
-
-    Returns (text, experience_count).
-    """
-    career_profile = profile.get("career_profile") or {}
-    career_exps = career_profile.get("experiences") or []
-
-    if career_exps:
-        # Rich mode — bullets and achievements from CareerProfile
-        lines: List[str] = []
-        for exp in career_exps[:_MAX_EXPERIENCES]:
-            if not isinstance(exp, dict):
-                continue
-            title = str(exp.get("title") or "").strip()
-            company = str(exp.get("company") or "").strip()
-            start = str(exp.get("start_date") or "").strip()
-            end = str(exp.get("end_date") or "").strip()
-            dates = f"{start} – {end}".strip(" –") if (start or end) else ""
-            autonomy = str(exp.get("autonomy") or "").strip()
-
-            header = f"--- {title}"
-            if company:
-                header += f" @ {company}"
-            if dates:
-                header += f" ({dates})"
-            if autonomy:
-                header += f" [{autonomy}]"
-            lines.append(header)
-
-            for resp in (exp.get("responsibilities") or [])[:4]:
-                lines.append(f"  • {resp}")
-            for ach in (exp.get("achievements") or [])[:2]:
-                lines.append(f"  → Impact: {ach}")
-            exp_tools = (exp.get("tools") or [])[:6]
-            if exp_tools:
-                lines.append(f"  Outils: {', '.join(exp_tools)}")
-
-        return ("\n".join(lines) if lines else "(aucune expérience fournie)", len(career_exps))
-
-    # Basic mode — legacy experience dicts
-    experiences = profile.get("experiences") or []
-    exp_lines: List[str] = []
-    for exp in experiences[:_MAX_EXPERIENCES]:
-        if not isinstance(exp, dict):
-            continue
-        t = str(exp.get("title") or exp.get("role") or "").strip()
-        c = str(exp.get("company") or "").strip()
-        d = str(exp.get("dates") or exp.get("duration") or exp.get("duree") or "").strip()
-        if t:
-            line = f"- {t}"
-            if c:
-                line += f" @ {c}"
-            if d:
-                line += f" ({d})"
-            exp_lines.append(line)
-    return ("\n".join(exp_lines) if exp_lines else "(aucune expérience fournie)", len(exp_lines))
-
-
-def _build_prompt(
-    offer: dict,
-    profile: dict,
-    keywords: List[str],
-) -> Tuple[str, str]:
-    """
-    Build (system_prompt, user_prompt) from prompt_cv_v1.txt template.
-    Truncates description to _MAX_DESC_CHARS. Allowlist of fields.
-
-    Uses career_profile.experiences when available for richer experience text
-    (includes responsibility bullets, achievements, and tools per experience).
-    Falls back to basic experience list for legacy profiles.
-    """
-    template = _PROMPT_PATH.read_text(encoding="utf-8")
-    if "USER:" in template:
-        sys_part, user_part = template.split("USER:", 1)
-        system_prompt = sys_part.replace("SYSTEM:", "").strip()
-        user_template = user_part.strip()
-    else:
-        system_prompt = "Réponds UNIQUEMENT en JSON valide. Aucun texte libre."
-        user_template = template
-
-    experiences_text, exp_count = _build_experiences_text(profile)
-
-    desc_trunc = (offer.get("description") or "")[:_MAX_DESC_CHARS]
-    user_prompt = (
-        user_template
-        .replace("{title}", offer.get("title") or "")
-        .replace("{company}", offer.get("company") or "")
-        .replace("{country}", offer.get("country") or "")
-        .replace("{description_truncated}", desc_trunc)
-        .replace("{keywords}", ", ".join(keywords))
-        .replace("{skills}", ", ".join(str(s) for s in profile.get("skills", [])[:15]))
-        .replace("{languages}", ", ".join(str(l) for l in profile.get("languages", [])))
-        .replace("{education}", str(profile.get("education") or ""))
-        .replace("{experiences_count}", str(exp_count))
-        .replace("{experiences_text}", experiences_text)
-    )
-
-    return system_prompt, user_prompt
-
-
-# ── LLM response → Pydantic ───────────────────────────────────────────────────
-
-def _parse_llm_response(
-    raw: dict,
-    offer_id: str,
-    fingerprint: str,
-    cache_hit: bool = False,
-) -> Optional[CvDocumentPayload]:
-    """
-    Validate LLM JSON against CvDocumentPayload schema.
-    Injects meta. Returns None on validation failure.
-    """
-    try:
-        # Inject meta (not sent to LLM)
-        raw["meta"] = {
-            "offer_id": offer_id,
-            "profile_fingerprint": fingerprint,
-            "prompt_version": PROMPT_VERSION,
-            "cache_hit": cache_hit,
-            "fallback_used": False,
-        }
-        return CvDocumentPayload.model_validate(raw)
-    except (ValidationError, Exception) as exc:
-        logger.warning(
-            '{"event":"DOC_CV_SCHEMA_FAIL","error_class":"%s","detail":"%s"}',
-            type(exc).__name__,
-            str(exc)[:120].replace('"', "'"),
-        )
-        return None
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────
@@ -398,7 +222,7 @@ def generate_cv(req: CvRequest) -> CvDocumentPayload:
         except Exception:
             pass  # cache corrupt → regenerate
 
-    # 5. Deterministic targeted engine
+    # 4. Build deterministic CV
     payload = _build_fallback(
         profile=profile,
         offer=offer,
@@ -408,7 +232,7 @@ def generate_cv(req: CvRequest) -> CvDocumentPayload:
         reason="deterministic_engine",
     )
 
-    # 7. Cache write (best-effort)
+    # 5. Cache write (best-effort)
     cache_set(
         key=cache_key,
         doc_type="cv_v1",
