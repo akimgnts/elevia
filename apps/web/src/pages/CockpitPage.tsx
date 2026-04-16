@@ -63,16 +63,16 @@ export default function CockpitPage() {
   const handleShortlist = async (offerId: string) => {
     if (trackerMap[offerId]) return;
     try {
-      await upsertApplication({
+      const application = await upsertApplication({
         offer_id: offerId,
-        status: "shortlisted",
+        status: "saved",
         note: null,
         next_follow_up_date: null,
       });
       await postDecision(offerId, profileId, "SHORTLISTED");
       setTrackerItems((prev) => [
-        { id: "", offer_id: offerId, status: "shortlisted", note: null, next_follow_up_date: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-        ...prev,
+        application,
+        ...prev.filter((item) => item.offer_id !== offerId),
       ]);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Erreur inconnue");
@@ -141,7 +141,7 @@ export default function CockpitPage() {
                     </span>
                     <span
                       className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        app.status === "shortlisted"
+                        app.status === "saved"
                           ? "bg-emerald-50 text-emerald-700"
                           : app.status === "applied"
                             ? "bg-blue-50 text-blue-700"

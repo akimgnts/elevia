@@ -65,11 +65,6 @@ export type OfferDetail = {
   explain_v1_full?: ExplainPayloadV1Full | null;
 };
 
-function cleanDescription(raw?: string | null): string {
-  if (!raw) return "";
-  return raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-}
-
 function scoreTone(score?: number | null): string {
   if ((score ?? 0) >= 75) return "border-emerald-200 bg-emerald-50 text-emerald-700";
   if ((score ?? 0) >= 55) return "border-amber-200 bg-amber-50 text-amber-700";
