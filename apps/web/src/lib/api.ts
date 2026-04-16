@@ -2138,7 +2138,7 @@ export interface JustifyFitRequest {
   enriched_signals?: string[];
   concept_signals?: string[];
   profile_intelligence?: Record<string, unknown>;
-  offer_intelligence?: Record<string, unknown>;
+  offer_intelligence?: OfferIntelligence;
   include_cv?: boolean;
 }
 

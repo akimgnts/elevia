@@ -428,7 +428,7 @@ export function OfferDetailModal({
                   ? ((profile as Record<string, unknown>).profile_intelligence as Record<string, unknown> | undefined)
                   : undefined
               }
-              offerIntelligence={(offerIntelligence as Record<string, unknown> | null | undefined) ?? undefined}
+              offerIntelligence={offerIntelligence ?? undefined}
             />
           </section>
 

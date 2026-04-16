@@ -26,6 +26,7 @@ import {
   justifyOffer,
   type JustificationPayload,
   type JustifyFitRequest,
+  type OfferIntelligence,
   type TrueGap,
 } from "../lib/api";
 
@@ -317,7 +318,7 @@ export interface JustificationCardProps {
   canonicalSkills?: string[];
   enrichedSignals?: string[];
   profileIntelligence?: Record<string, unknown> | null;
-  offerIntelligence?: Record<string, unknown> | null;
+  offerIntelligence?: OfferIntelligence | null;
 }
 
 export function JustificationCard({
