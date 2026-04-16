@@ -21,6 +21,7 @@ Anti-crash design:
 import hashlib
 import json
 import logging
+import os
 import sqlite3
 import time
 import uuid
@@ -311,6 +312,94 @@ def _load_from_sqlite(
         return [], 0, FallbackReason.DB_ERROR
 
 
+def _load_from_postgres(
+    limit: int,
+    source: CatalogSource = CatalogSource.all,
+) -> Tuple[List[Dict[str, Any]], int, Optional[FallbackReason]]:
+    """
+    Load offers from PostgreSQL clean_offers table via DATABASE_URL.
+
+    clean_offers schema differs from the old SQLite fact_offers:
+    - primary offer identifier is external_id (e.g. "BF-242343"), not id
+    - city column is named location
+    - no contract_duration column (has contract_type TEXT instead)
+    """
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if not database_url:
+        logger.info("[catalog] DATABASE_URL not set — skipping PostgreSQL")
+        return [], 0, FallbackReason.DB_MISSING
+
+    try:
+        import psycopg
+        conn = psycopg.connect(database_url, connect_timeout=5)
+        source_val = source.value
+
+        with conn.cursor() as cur:
+            if source == CatalogSource.all:
+                cur.execute("SELECT COUNT(*) FROM clean_offers")
+                total_count = cur.fetchone()[0]
+                cur.execute(
+                    """
+                    SELECT external_id, source, title, description, company,
+                           location, country, publication_date, start_date
+                    FROM clean_offers
+                    ORDER BY publication_date DESC NULLS LAST
+                    LIMIT %s
+                    """,
+                    (min(limit, 500),),
+                )
+            else:
+                cur.execute(
+                    "SELECT COUNT(*) FROM clean_offers WHERE source = %s",
+                    (source_val,),
+                )
+                total_count = cur.fetchone()[0]
+                cur.execute(
+                    """
+                    SELECT external_id, source, title, description, company,
+                           location, country, publication_date, start_date
+                    FROM clean_offers
+                    WHERE source = %s
+                    ORDER BY publication_date DESC NULLS LAST
+                    LIMIT %s
+                    """,
+                    (source_val, min(limit, 500)),
+                )
+            rows = cur.fetchall()
+
+        conn.close()
+
+        if not rows:
+            logger.info(f"[catalog] PostgreSQL clean_offers has 0 rows for source={source_val}")
+            return [], total_count, FallbackReason.EMPTY_DB
+
+        offers = []
+        for row in rows:
+            raw = {
+                "id": row[0],                                          # external_id → offer id
+                "source": row[1],
+                "title": row[2],
+                "description": row[3],
+                "company": row[4],
+                "city": row[5],                                        # location → city
+                "country": row[6],
+                "publication_date": str(row[7]) if row[7] else None,
+                "contract_duration": None,                             # not stored in clean_offers
+                "start_date": str(row[8]) if row[8] else None,
+            }
+            offers.append(_normalize_offer(raw))
+
+        logger.info(
+            f"[catalog] Loaded {len(offers)} offers from PostgreSQL "
+            f"(source={source_val}, total={total_count})"
+        )
+        return offers, total_count, None
+
+    except Exception as e:
+        logger.warning(f"[catalog] PostgreSQL error: {e}")
+        return [], 0, FallbackReason.DB_ERROR
+
+
 def _normalize_fallback_offers(
     raw_offers: List[Dict[str, Any]],
     source_filter: CatalogSource = CatalogSource.all
@@ -402,8 +491,8 @@ def get_catalog_offers(
     # Convert to enum for internal use
     source_enum = CatalogSource(source_clean)
 
-    # Try live database first
-    offers, total_count, fallback_reason = _load_from_sqlite(limit, source_enum)
+    # Try live database first (PostgreSQL clean_offers via DATABASE_URL)
+    offers, total_count, fallback_reason = _load_from_postgres(limit, source_enum)
 
     if fallback_reason is None and offers:
         # Success: live-db
