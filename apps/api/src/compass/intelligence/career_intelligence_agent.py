@@ -214,9 +214,9 @@ class CareerIntelligenceAgent:
         self.name = "career_intelligence_agent"
         self.version = "v1"
 
-    def run(self, payload: dict) -> dict:
+    def run(self, state: dict) -> dict:
         """
-        Input:
+        Input state:
         {
             "career_profile": {...},
             "structuring_report": {...},
@@ -224,15 +224,17 @@ class CareerIntelligenceAgent:
             "offers": [...],
         }
 
-        Output:
+        Output state (merged — all input keys preserved):
         {
-            "career_intelligence_report": {...}
+            **input_state,
+            "career_intelligence_report": {...},
+            "next_recommended_agents": [...],
         }
         """
-        career_profile = deepcopy(payload.get("career_profile") or {})
-        structuring_report = payload.get("structuring_report") or {}
-        enrichment_report = payload.get("enrichment_report") or {}
-        offers = list(payload.get("offers") or [])
+        career_profile = deepcopy(state.get("career_profile") or {})
+        structuring_report = state.get("structuring_report") or {}
+        enrichment_report = state.get("enrichment_report") or {}
+        offers = list(state.get("offers") or [])
 
         # ── 1. Extract profile signals ──────────────────────────────────────
         profile_skills = _extract_profile_skills(career_profile)
@@ -417,35 +419,41 @@ class CareerIntelligenceAgent:
                 "reason": reason,
             })
 
-        # ── 8. Assemble report ──────────────────────────────────────────────
-        report: dict[str, Any] = {
-            "career_intelligence_report": {
-                "profile_summary": {
-                    "dominant_domain": dominant_domain,
-                    "core_strengths": core_strengths,
-                    "secondary_strengths": secondary_strengths,
-                },
-                "market_fit": {
-                    "top_countries": top_countries,
-                    "top_roles": top_roles,
-                    "top_sectors": top_sectors,
-                },
-                "opportunity_clusters": opportunity_clusters,
-                "gap_analysis": {
-                    "critical_missing_skills": critical_missing[:10],
-                    "nice_to_have_skills": nice_to_have[:10],
-                    "blocking_gaps": blocking_gaps[:5],
-                },
-                "recommended_actions": recommended_actions,
-                "target_companies": target_companies,
-                "stats": {
-                    "offers_analyzed": len(offers),
-                    "scored_offers": len(scored_offers),
-                    "matching_clusters": len(opportunity_clusters),
-                    "profile_skills_count": len(profile_skill_keys),
-                    "critical_gaps_count": len(critical_missing),
-                },
-            }
-        }
+        # ── 8. Decision layer — next agents ────────────────────────
+        next_agents = _decide_next_agents(
+            opportunity_clusters=opportunity_clusters,
+            blocking_gaps=blocking_gaps[:5],
+            target_companies=target_companies,
+        )
 
-        return report
+        # ── 9. Assemble output state (merge, not replace) ───────────
+        output_state = dict(state)
+        output_state["career_intelligence_report"] = {
+            "profile_summary": {
+                "dominant_domain": dominant_domain,
+                "core_strengths": core_strengths,
+                "secondary_strengths": secondary_strengths,
+            },
+            "market_fit": {
+                "top_countries": top_countries,
+                "top_roles": top_roles,
+                "top_sectors": top_sectors,
+            },
+            "opportunity_clusters": opportunity_clusters,
+            "gap_analysis": {
+                "critical_missing_skills": critical_missing[:10],
+                "nice_to_have_skills": nice_to_have[:10],
+                "blocking_gaps": blocking_gaps[:5],
+            },
+            "recommended_actions": recommended_actions,
+            "target_companies": target_companies,
+            "stats": {
+                "offers_analyzed": len(offers),
+                "scored_offers": len(scored_offers),
+                "matching_clusters": len(opportunity_clusters),
+                "profile_skills_count": len(profile_skill_keys),
+                "critical_gaps_count": len(critical_missing),
+            },
+        }
+        output_state["next_recommended_agents"] = next_agents
+        return output_state
