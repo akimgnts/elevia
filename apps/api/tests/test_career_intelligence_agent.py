@@ -465,3 +465,77 @@ class TestAgentContract:
         result = CareerIntelligenceAgent().run(state)
         assert result["structuring_report"] == {"foo": "bar"}
         assert result["enrichment_report"] == {"baz": 42}
+
+
+# ---------------------------------------------------------------------------
+# 10. next_recommended_agents — routing decision layer
+# ---------------------------------------------------------------------------
+
+class TestNextAgents:
+    def test_output_contains_next_recommended_agents_key(self) -> None:
+        result = CareerIntelligenceAgent().run(
+            {"career_profile": _make_career_profile(), "offers": ANALYTICS_OFFERS}
+        )
+        assert "next_recommended_agents" in result
+
+    def test_next_agents_is_non_empty_list(self) -> None:
+        result = CareerIntelligenceAgent().run(
+            {"career_profile": _make_career_profile(), "offers": ANALYTICS_OFFERS}
+        )
+        agents = result["next_recommended_agents"]
+        assert isinstance(agents, list)
+        assert len(agents) >= 1
+
+    def test_next_agents_values_are_strings(self) -> None:
+        result = CareerIntelligenceAgent().run(
+            {"career_profile": _make_career_profile(), "offers": ANALYTICS_OFFERS}
+        )
+        for item in result["next_recommended_agents"]:
+            assert isinstance(item, str)
+
+    def test_empty_offers_routes_to_application_strategy(self) -> None:
+        """No signals → default to application_strategy_agent."""
+        result = CareerIntelligenceAgent().run(
+            {"career_profile": _make_career_profile(), "offers": []}
+        )
+        assert "application_strategy_agent" in result["next_recommended_agents"]
+
+    def test_blocking_gaps_route_to_skill_gap_remediation(self) -> None:
+        """Python missing from profile but required in 6 high-demand offers → blocking gap."""
+        profile = _make_career_profile(skills=["SQL"])
+        offers = [
+            _make_offer("Data Analyst", f"Co {i}", "France", ["SQL", "Python"])
+            for i in range(6)  # 6 offers → HIGH demand (≥5 threshold)
+        ]
+        result = CareerIntelligenceAgent().run({"career_profile": profile, "offers": offers})
+        assert "skill_gap_remediation_agent" in result["next_recommended_agents"]
+
+    def test_high_match_high_demand_routes_to_application_strategy(self) -> None:
+        """Profile matches ≥60% and cluster has ≥5 offers → high demand → application_strategy."""
+        profile = _make_career_profile(skills=["SQL", "Python", "Power BI"])
+        offers = [
+            _make_offer("Data Analyst", f"Co {i}", "France", ["SQL", "Python", "Power BI"])
+            for i in range(6)  # 6 offers → HIGH demand
+        ]
+        result = CareerIntelligenceAgent().run({"career_profile": profile, "offers": offers})
+        assert "application_strategy_agent" in result["next_recommended_agents"]
+
+    def test_many_target_companies_routes_to_opportunity_hunter(self) -> None:
+        """≥3 qualifying target companies → opportunity_hunter_agent."""
+        profile = _make_career_profile(skills=["SQL", "Python", "Power BI"])
+        # 4 companies, each appearing twice, each matching well → ≥3 qualify
+        offers = []
+        for company in ["Capgemini", "Sopra", "Thales", "Atos"]:
+            for _ in range(2):
+                offers.append(
+                    _make_offer("Data Analyst", company, "France", ["SQL", "Python", "Power BI"])
+                )
+        result = CareerIntelligenceAgent().run({"career_profile": profile, "offers": offers})
+        assert "opportunity_hunter_agent" in result["next_recommended_agents"]
+
+    def test_routing_is_deterministic(self) -> None:
+        from copy import deepcopy
+        payload = {"career_profile": _make_career_profile(), "offers": ANALYTICS_OFFERS}
+        r1 = CareerIntelligenceAgent().run(deepcopy(payload))
+        r2 = CareerIntelligenceAgent().run(deepcopy(payload))
+        assert r1["next_recommended_agents"] == r2["next_recommended_agents"]

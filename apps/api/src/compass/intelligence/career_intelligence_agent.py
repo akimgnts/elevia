@@ -163,6 +163,49 @@ def _cluster_key(offer: dict[str, Any]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Routing decision layer
+# ---------------------------------------------------------------------------
+
+def _decide_next_agents(
+    opportunity_clusters: list[dict[str, Any]],
+    blocking_gaps: list[str],
+    target_companies: list[dict[str, Any]],
+) -> list[str]:
+    """
+    Route to downstream agents based on career intelligence signals.
+
+    Rules (in priority order):
+    1. Blocking gaps present → skill remediation needed before applying
+    2. Strong match + high demand → ready to apply
+    3. Many qualifying companies → opportunity hunting is worth it
+    4. Fallback → always route somewhere
+    """
+    agents: list[str] = []
+
+    # Blocking skill gaps must be addressed before mass applications
+    if blocking_gaps:
+        agents.append("skill_gap_remediation_agent")
+
+    # Strong match in a high-demand cluster → go apply
+    has_strong_cluster = any(
+        c["match_score_avg"] >= HIGH_MATCH_THRESHOLD and c["demand_level"] == "high"
+        for c in opportunity_clusters
+    )
+    if has_strong_cluster:
+        agents.append("application_strategy_agent")
+
+    # Many companies hiring for this profile → targeted hunting
+    if len(target_companies) >= 3:
+        agents.append("opportunity_hunter_agent")
+
+    # Always route forward — minimum: application strategy
+    if not agents:
+        agents.append("application_strategy_agent")
+
+    return agents
+
+
+# ---------------------------------------------------------------------------
 # Public agent
 # ---------------------------------------------------------------------------
 
