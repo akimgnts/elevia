@@ -1,49 +1,78 @@
 # Backend Dev Quickstart
 
-## Setup
+## Canonical Python environment
+
+- Repo root venv: `./.venv`
+- Canonical Python: `./.venv/bin/python`
+- Canonical uvicorn path: `./.venv/bin/python -m uvicorn`
+- Dependency source of truth: `apps/api/requirements.txt`
+
+Do not use:
+- `apps/api/.venv`
+- bare `uvicorn`
+- global `python3 -m uvicorn`
+
+Those paths can import the code but miss backend dependencies such as `python-multipart`.
+
+## First-time setup
+
+From repo root:
 
 ```bash
-cd apps/api
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+make venv
+make install
+```
+
+## Canonical local startup
+
+Recommended:
+
+```bash
+make dev-up
+```
+
+Manual API only:
+
+```bash
+make api
+```
+
+Equivalent explicit command:
+
+```bash
+cd /Users/akimguentas/Dev/elevia-compass/apps/api
+ELEVIA_DEV_TOOLS=1 /Users/akimguentas/Dev/elevia-compass/.venv/bin/python -m uvicorn api.main:app \
+  --host 0.0.0.0 --port 8000 --reload
 ```
 
 ## Run tests
 
-```bash
-# From repo root:
-make test
+From repo root:
 
-# Or directly from apps/api:
-python3 -m pytest tests/ -v
+```bash
+make test
+```
+
+Or directly:
+
+```bash
+cd apps/api
+../../.venv/bin/python -m pytest tests/ -v
 ```
 
 ## Common errors
 
-| Error | Fix |
-|---|---|
-| `python: command not found` | Use `python3` explicitly. macOS does not ship `python`. |
-| `ModuleNotFoundError: No module named 'matching'` | Ensure `pytest.ini` has `pythonpath = src`. Run from `apps/api/`. |
-| `ModuleNotFoundError: No module named 'fastapi'` | Activate venv: `source .venv/bin/activate` then `pip install -r requirements.txt`. |
+| Error | Real cause | Fix |
+|---|---|---|
+| `python: command not found` | macOS has no `python` shim | Use `python3` or `./.venv/bin/python` |
+| `ModuleNotFoundError: api` | Wrong cwd / missing `PYTHONPATH` | Use `make api` or run from `apps/api` with repo-root `.venv` |
+| `ModuleNotFoundError: fastapi` | Wrong interpreter | Use repo-root `.venv` |
+| `Form data requires "python-multipart"` | Wrong interpreter / global uvicorn | Use `make api` or `./.venv/bin/python -m uvicorn ...` |
 
 ## Inbox fixtures (dev)
 
 ```bash
 export ELEVIA_INBOX_USE_VIE_FIXTURES=1
-uvicorn api.main:app --reload
-open http://localhost:5173/inbox
-```
-
-## Run API (canonical)
-
-```bash
-cd /Users/akimguentas/Documents/elevia-compass
-PYTHONPATH="$(pwd)/apps/api/src" uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-## Matching debug (dev)
-
-```bash
-export ELEVIA_DEBUG_MATCHING=1
+make api
+open http://localhost:3001/inbox
 ```

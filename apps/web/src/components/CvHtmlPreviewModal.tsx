@@ -15,7 +15,10 @@ export function CvHtmlPreviewModal({
   const { html, meta } = preview;
 
   function handleDownload() {
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    // TextEncoder always produces UTF-8 bytes; passing a raw string to Blob
+    // can silently downgrade to Latin-1 in some browsers, corrupting accented chars.
+    const bytes = new TextEncoder().encode(html);
+    const blob = new Blob([bytes], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     const slug = offerTitle

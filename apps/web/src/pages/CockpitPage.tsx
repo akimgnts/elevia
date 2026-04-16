@@ -65,13 +65,32 @@ export default function CockpitPage() {
     try {
       await upsertApplication({
         offer_id: offerId,
-        status: "shortlisted",
+        status: "saved",
         note: null,
         next_follow_up_date: null,
       });
       await postDecision(offerId, profileId, "SHORTLISTED");
       setTrackerItems((prev) => [
-        { id: "", offer_id: offerId, status: "shortlisted", note: null, next_follow_up_date: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        {
+          id: "",
+          user_id: null,
+          offer_id: offerId,
+          offer_title: null,
+          offer_company: null,
+          offer_city: null,
+          offer_country: null,
+          status: "saved",
+          source: "manual",
+          note: null,
+          next_follow_up_date: null,
+          current_cv_cache_key: null,
+          current_letter_cache_key: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          applied_at: null,
+          last_status_change_at: null,
+          strategy_hint: null,
+        },
         ...prev,
       ]);
     } catch (e: unknown) {
@@ -141,7 +160,7 @@ export default function CockpitPage() {
                     </span>
                     <span
                       className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        app.status === "shortlisted"
+                        app.status === "saved"
                           ? "bg-emerald-50 text-emerald-700"
                           : app.status === "applied"
                             ? "bg-blue-50 text-blue-700"

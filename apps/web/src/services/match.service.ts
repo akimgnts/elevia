@@ -9,6 +9,7 @@
 
 import type { MatchRequest, MatchResponse, MatchItem } from "../types/match";
 import MOCK from "./mocks/match_result.json";
+import { apiFetch } from "../lib/api";
 
 const IS_DEV = import.meta.env.DEV;
 const FORCE_MOCK = false;
@@ -123,7 +124,7 @@ export async function getMatchResultMock(): Promise<MatchResponse> {
  * Appel direct à l'API backend de matching.
  */
 export async function runMatchApi(payload: MatchRequest): Promise<MatchResponse> {
-  const res = await fetch("/v1/match", {
+  const res = await apiFetch("/v1/match", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -6,6 +6,7 @@ import {
   parseFile,
   parseFileEnriched,
   fetchKeySkills,
+  saveSavedProfile,
   type ParseFileResponse,
   type SkillGroupItem,
   type KeySkillItem,
@@ -62,6 +63,18 @@ type Tab = "file" | "text";
 
 function buildPersistedAnalyzeProfile(result: ParseFileResponse): Record<string, unknown> {
   const profile = { ...(result.profile || {}) } as Record<string, unknown>;
+  if (Array.isArray(result.canonical_skills)) {
+    profile.canonical_skills = result.canonical_skills;
+  }
+  if (typeof result.canonical_skills_count === "number") {
+    profile.canonical_skills_count = result.canonical_skills_count;
+  }
+  if (Array.isArray(result.enriched_signals)) {
+    profile.enriched_signals = result.enriched_signals;
+  }
+  if (Array.isArray(result.concept_signals)) {
+    profile.concept_signals = result.concept_signals;
+  }
   if (result.profile_intelligence && !profile.profile_intelligence) {
     profile.profile_intelligence = result.profile_intelligence;
   }
@@ -74,7 +87,6 @@ function buildPersistedAnalyzeProfile(result: ParseFileResponse): Record<string,
 export default function AnalyzePage() {
   const navigate = useNavigate();
   const { setIngestResult } = useProfileStore();
-
   // ── Tab ─────────────────────────────────────────────────────────────────────
   const [tab, setTab] = useState<Tab>("file");
 
@@ -132,6 +144,9 @@ export default function AnalyzePage() {
     try {
       const profile = await ingestCv(cvText);
       await setIngestResult(profile);
+      if (profile && typeof profile === "object") {
+        await saveSavedProfile(profile as Record<string, unknown>).catch(() => undefined);
+      }
       navigate("/profile");
     } catch (err) {
       setTextError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -192,7 +207,9 @@ export default function AnalyzePage() {
         ? await parseFileEnriched(selectedFile)
         : await parseFile(selectedFile);
       setParseResult(result);
-      await setIngestResult(buildPersistedAnalyzeProfile(result));
+      const persistedProfile = buildPersistedAnalyzeProfile(result);
+      await setIngestResult(persistedProfile);
+      await saveSavedProfile(persistedProfile).catch(() => undefined);
 
       // Bridge domain signals to InboxPage (profile-level, not per-offer)
       if ((result.injected_esco_from_domain ?? 0) > 0 || (result.domain_skills_active?.length ?? 0) > 0) {
@@ -222,12 +239,12 @@ export default function AnalyzePage() {
     }
   };
 
-  const handleRunMatching = async () => {
+  const handleOpenProfile = async () => {
     if (!parseResult) return;
     setMatchingLoading(true);
     try {
       await setIngestResult(buildPersistedAnalyzeProfile(parseResult));
-      navigate("/inbox");
+      navigate("/profile");
     } finally {
       setMatchingLoading(false);
     }
@@ -303,22 +320,22 @@ export default function AnalyzePage() {
     <PremiumAppShell
       eyebrow="Analyse"
       title="Transformer le CV en profil exploitable"
-      description="Le but ici n'est pas seulement d'extraire du texte. Elevia construit un profil lisible pour le matching, le profil, l'inbox et le cockpit."
+      description="Le but ici n'est pas seulement d'extraire du texte. Elevia construit d'abord un profil lisible, puis alimente le cockpit, l'inbox et les candidatures."
       actions={
         <>
           <Link
             to="/profile"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            Ouvrir le profil
+            Structurer mon profil
           </Link>
           <button
             type="button"
-            onClick={handleRunMatching}
+            onClick={handleOpenProfile}
             disabled={!parseResult || matchingLoading}
             className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            {matchingLoading ? "Chargement..." : "Voir l&apos;inbox"}
+            {matchingLoading ? "Chargement..." : "Voir mon profil"}
             <ArrowRight className="h-4 w-4" />
           </button>
         </>
@@ -327,51 +344,46 @@ export default function AnalyzePage() {
       <div className="pt-2 pb-16">
         <DevStatusCard />
 
-        <section className="mb-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <GlassCard className="border-white/80 bg-white/80 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-              <ScanSearch className="h-4 w-4" />
-              Point d&apos;entree du flux
+        <section className="mb-8 border-b border-slate-200/80 pb-6">
+          <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+            <div>
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <ScanSearch className="h-4 w-4" />
+                Point d&apos;entrée du flux
+              </div>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+                Déposez votre CV ou collez le texte.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
+                Cette page construit la base utilisée ensuite par le profil, le cockpit, l&apos;inbox et les documents.
+                L&apos;objectif ici est de rendre cette lecture utile avant toute décision.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                  Parsing déterministe
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                  Profil normalisé
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                  Base du matching
+                </span>
+              </div>
             </div>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
-              Deposez votre CV ou collez le texte.
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
-              Cette page alimente le profil, l&apos;inbox, le cockpit et les documents. L&apos;enjeu UX est donc simple:
-              rendre l&apos;analyse lisible avant toute decision.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                Parsing deterministe
-              </span>
-              <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                Profil normalise
-              </span>
-              <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
-                Base du matching
-              </span>
-            </div>
-          </GlassCard>
 
-          <GlassCard className="border-white/80 bg-white/80 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Ce que vous obtenez
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              {[
+                ["Un profil comparable", "Compétences, langues et signaux structurants transformés en base exploitable."],
+                ["Une lecture immédiate", "Top skills, cluster détecté et premières pistes d'action avant le cockpit."],
+                ["Une suite produit cohérente", "La même base alimente ensuite le profil, le cockpit, les offres et l'inbox."],
+              ].map(([label, copy]) => (
+                <div key={label} className="rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-4">
+                  <div className="text-sm font-semibold text-slate-900">{label}</div>
+                  <div className="mt-1 text-sm leading-6 text-slate-600">{copy}</div>
+                </div>
+              ))}
             </div>
-            <div className="mt-4 space-y-4 text-sm text-slate-600">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <div className="font-semibold text-slate-900">1. Un profil compar able</div>
-                <div className="mt-1">Competences, langues et signaux structurants transformes en base de matching.</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <div className="font-semibold text-slate-900">2. Une lecture immediate</div>
-                <div className="mt-1">Top skills, cluster detecte, et premieres pistes d&apos;action avant passage a l&apos;inbox.</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <div className="font-semibold text-slate-900">3. Une suite produit coherente</div>
-                <div className="mt-1">La meme base sert ensuite au profil, aux offres et au cockpit.</div>
-              </div>
-            </div>
-          </GlassCard>
+          </div>
         </section>
 
         {/* Tabs */}
@@ -529,8 +541,8 @@ export default function AnalyzePage() {
                       >
                         Voir toutes les competences
                       </button>
-                      <Button onClick={handleRunMatching} disabled={matchingLoading || validatedCount === 0}>
-                        {matchingLoading ? "Chargement..." : "Voir mes offres correspondantes"}
+                      <Button onClick={handleOpenProfile} disabled={matchingLoading || validatedCount === 0}>
+                        {matchingLoading ? "Chargement..." : "Structurer mon profil"}
                       </Button>
                     </div>
                   </div>
@@ -604,7 +616,7 @@ export default function AnalyzePage() {
                 Aucun fichier n&apos;est importe. Le texte reste sous votre controle.
               </span>
               <Button onClick={handleTextSubmit} disabled={textLoading}>
-                {textLoading ? "Analyse en cours..." : "Trouver mes offres"}
+                {textLoading ? "Analyse en cours..." : "Structurer mon profil"}
               </Button>
             </div>
           </GlassCard>

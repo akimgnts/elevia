@@ -34,6 +34,28 @@ now() {
     date '+%Y-%m-%dT%H:%M:%S'
 }
 
+assert_api_venv_ready() {
+    local root venv_py
+    root="$(repo_root)"
+    venv_py="$root/.venv/bin/python"
+
+    [[ -x "$venv_py" ]] || die ".venv python not found at $venv_py — run: make venv && make install"
+
+    "$venv_py" - <<'PY' || die "API venv is incomplete — run: make install"
+import importlib.util
+
+missing = [
+    name
+    for name in ("fastapi", "uvicorn", "multipart")
+    if importlib.util.find_spec(name) is None
+]
+if missing:
+    raise SystemExit(
+        "Missing packages in .venv: " + ", ".join(missing)
+    )
+PY
+}
+
 tail_logs() {
     local root
     root="$(repo_root)"

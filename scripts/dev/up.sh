@@ -20,7 +20,7 @@ VENV="$ROOT/.venv"
 RUN_DIR="$ROOT/.run"
 
 [[ -d "$VENV" ]] || die ".venv not found at $ROOT/.venv — run: make venv && make install"
-[[ -f "$VENV/bin/uvicorn" ]] || die "uvicorn not found in .venv — run: make install"
+assert_api_venv_ready
 
 # ── Clean slate: kill old processes + free ports ──────────────────────────────
 echo "[$(now)] dev-up: stopping any existing processes..."
@@ -58,7 +58,7 @@ fi
     cd "$ROOT/apps/api"
     export ELEVIA_DEV_TOOLS=1
     # shellcheck disable=SC2086
-    "$VENV/bin/uvicorn" api.main:app \
+    "$VENV/bin/python" -m uvicorn api.main:app \
         --host 0.0.0.0 --port 8000 \
         $RELOAD_FLAG \
         >> "$RUN_DIR/api.log" 2>&1 &

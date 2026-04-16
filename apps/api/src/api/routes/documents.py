@@ -234,7 +234,7 @@ async def create_cv_html_for_offer(req: ForOfferRequest) -> CvHtmlResponse:
     )
     enriched = enrich_payload(payload, matched_core)
 
-    html_output = render_cv_html(enriched, template_version="cv_v1", profile=profile, offer=offer)
+    html_output = render_cv_html(enriched, template_version=req.template_version, profile=profile, offer=offer)
     duration_ms = int((time.time() - t0) * 1000)
 
     logger.info(
@@ -242,7 +242,7 @@ async def create_cv_html_for_offer(req: ForOfferRequest) -> CvHtmlResponse:
         '"template_version":"%s","duration_ms":%d,"llm_used":%s}',
         req.offer_id,
         "true" if enriched.meta.cache_hit else "false",
-        "cv_v1",
+        req.template_version,
         duration_ms,
         "false",
     )
@@ -258,7 +258,7 @@ async def create_cv_html_for_offer(req: ForOfferRequest) -> CvHtmlResponse:
         prompt_version=enriched.meta.prompt_version,
         cache_hit=enriched.meta.cache_hit,
         fallback_used=enriched.meta.fallback_used,
-        template_version="cv_v1",
+        template_version=req.template_version,
     )
 
     return CvHtmlResponse(

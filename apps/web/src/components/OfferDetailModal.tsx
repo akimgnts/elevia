@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Building2, ChevronDown, FileText, Loader2, MapPin, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { AlertCircle, Building2, ChevronDown, FileText, Loader2, MapPin, Sparkles, X } from "lucide-react";
+import { prepareApplication, upsertApplication } from "../api/applications";
 import { JustificationCard } from "./JustificationCard";
 import { StructuredOfferSummaryCard } from "./StructuredOfferSummaryCard";
 import type {
@@ -20,7 +22,7 @@ import type {
   ScoringV3,
   SemanticExplainability,
 } from "../lib/api";
-import { fetchOfferDetail, generateCvForOffer, generateCvHtmlForOffer, generateLetterForOffer } from "../lib/api";
+import { fetchOfferDetail, generateCvForOffer, generateCvHtmlForOffer, generateCvV2ForOffer, generateLetterForOffer } from "../lib/api";
 import { CvHtmlPreviewModal } from "./CvHtmlPreviewModal";
 import { CvPreviewModal } from "./CvPreviewModal";
 import { LetterPreviewModal } from "./LetterPreviewModal";
@@ -64,11 +66,6 @@ export type OfferDetail = {
   description_structured_v1?: DescriptionStructuredV1 | null;
   explain_v1_full?: ExplainPayloadV1Full | null;
 };
-
-function cleanDescription(raw?: string | null): string {
-  if (!raw) return "";
-  return raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-}
 
 function scoreTone(score?: number | null): string {
   if ((score ?? 0) >= 75) return "border-emerald-200 bg-emerald-50 text-emerald-700";
@@ -132,9 +129,18 @@ export function OfferDetailModal({
   const [cvHtmlLoading, setCvHtmlLoading] = useState(false);
   const [cvHtmlPreview, setCvHtmlPreview] = useState<CvHtmlResponse | null>(null);
   const [cvHtmlError, setCvHtmlError] = useState<string | null>(null);
+  const [cvV2Loading, setCvV2Loading] = useState(false);
+  const [cvV2Preview, setCvV2Preview] = useState<CvHtmlResponse | null>(null);
+  const [cvV2Error, setCvV2Error] = useState<string | null>(null);
   const [letterLoading, setLetterLoading] = useState(false);
   const [letterPreview, setLetterPreview] = useState<ForOfferLetterResponse | null>(null);
   const [letterError, setLetterError] = useState<string | null>(null);
+  const [trackerLoading, setTrackerLoading] = useState(false);
+  const [trackerError, setTrackerError] = useState<string | null>(null);
+  const [trackerSaved, setTrackerSaved] = useState(false);
+  const [prepareFlowLoading, setPrepareFlowLoading] = useState(false);
+  const [prepareFlowError, setPrepareFlowError] = useState<string | null>(null);
+  const [prepareFlowStatus, setPrepareFlowStatus] = useState<string | null>(null);
   const detailFetchKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -233,6 +239,29 @@ export function OfferDetailModal({
     }
   }
 
+  const hasCareerProfile = Boolean((profile as Record<string, unknown> | null | undefined)?.career_profile);
+
+  async function handleGenerateCvV2() {
+    const offerId = offer.offer_id || offer.id;
+    if (!offerId) return;
+    setCvV2Loading(true);
+    setCvV2Error(null);
+    try {
+      const ctx: InboxContextPayload | undefined =
+        offer.matched_skills_display?.length || offer.matched_skills?.length
+          ? {
+              matched_skills: offer.matched_skills_display ?? offer.matched_skills ?? [],
+              missing_skills: offer.missing_skills_display ?? offer.missing_skills ?? [],
+            }
+          : undefined;
+      setCvV2Preview(await generateCvV2ForOffer(offerId, profile ?? {}, ctx));
+    } catch (error) {
+      setCvV2Error(error instanceof Error ? error.message : "Erreur inconnue");
+    } finally {
+      setCvV2Loading(false);
+    }
+  }
+
   async function handleGenerateLetter() {
     const offerId = offer.offer_id || offer.id;
     if (!offerId) return;
@@ -251,6 +280,51 @@ export function OfferDetailModal({
       setLetterError(error instanceof Error ? error.message : "Erreur inconnue");
     } finally {
       setLetterLoading(false);
+    }
+  }
+
+  async function handleSendToTracker() {
+    const offerId = offer.offer_id || offer.id;
+    if (!offerId) return;
+    setTrackerLoading(true);
+    setTrackerError(null);
+    try {
+      await upsertApplication({
+        offer_id: offerId,
+        status: "saved",
+        source: "assisted",
+      });
+      setTrackerSaved(true);
+    } catch (error) {
+      setTrackerError(error instanceof Error ? error.message : "Erreur inconnue");
+    } finally {
+      setTrackerLoading(false);
+    }
+  }
+
+  async function handlePrepareInTracker() {
+    const offerId = offer.offer_id || offer.id;
+    if (!offerId) return;
+    setPrepareFlowLoading(true);
+    setPrepareFlowError(null);
+    try {
+      await upsertApplication({
+        offer_id: offerId,
+        status: "saved",
+        source: "assisted",
+      });
+      const result = await prepareApplication(
+        offerId,
+        profile && typeof profile === "object"
+          ? { profile: profile as Record<string, unknown> }
+          : {},
+      );
+      setTrackerSaved(true);
+      setPrepareFlowStatus(result.status);
+    } catch (error) {
+      setPrepareFlowError(error instanceof Error ? error.message : "Erreur inconnue");
+    } finally {
+      setPrepareFlowLoading(false);
     }
   }
 
@@ -354,19 +428,73 @@ export function OfferDetailModal({
                   ? ((profile as Record<string, unknown>).profile_intelligence as Record<string, unknown> | undefined)
                   : undefined
               }
-              offerIntelligence={offerIntelligence ?? undefined}
+              offerIntelligence={(offerIntelligence as Record<string, unknown> | null | undefined) ?? undefined}
             />
           </section>
 
-          {(cvError || cvHtmlError || letterError) && (
+          {(cvError || cvHtmlError || cvV2Error || letterError || trackerError || prepareFlowError) && (
             <div className="mt-6 space-y-2 text-sm text-rose-700">
               {cvError && <div>{cvError}</div>}
               {cvHtmlError && <div>{cvHtmlError}</div>}
+              {cvV2Error && <div>{cvV2Error}</div>}
               {letterError && <div>{letterError}</div>}
+              {trackerError && <div>{trackerError}</div>}
+              {prepareFlowError && <div>{prepareFlowError}</div>}
+            </div>
+          )}
+
+          {(trackerSaved || prepareFlowStatus) && (
+            <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              <div className="font-semibold text-emerald-900">Offre envoyée dans Candidatures.</div>
+              <div className="mt-1">
+                {prepareFlowStatus
+                  ? `Statut actuel : ${prepareFlowStatus}. Vous pouvez maintenant suivre la candidature et ouvrir les documents préparés.`
+                  : "Le suivi est prêt. Vous pouvez maintenant préparer le CV et la lettre depuis la page Candidatures."}
+              </div>
+            </div>
+          )}
+
+          {!hasCareerProfile && (
+            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+              <span>Complétez votre profil CareerProfile pour générer un CV adapté à cette offre.</span>
             </div>
           )}
 
           <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleSendToTracker}
+              disabled={trackerLoading}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {trackerLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {trackerLoading ? "Ajout…" : trackerSaved ? "Déjà dans le suivi" : "Envoyer vers Candidatures"}
+            </button>
+            <button
+              type="button"
+              onClick={handlePrepareInTracker}
+              disabled={prepareFlowLoading}
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {prepareFlowLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+              {prepareFlowLoading ? "Préparation…" : "Préparer dans Candidatures"}
+            </button>
+            <Link
+              to="/applications"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Ouvrir le suivi
+            </Link>
+            <button
+              type="button"
+              onClick={handleGenerateCvV2}
+              disabled={cvV2Loading || !hasCareerProfile}
+              className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {cvV2Loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {cvV2Loading ? "Adaptation en cours…" : "Préparer mon CV pour cette offre"}
+            </button>
             <button
               type="button"
               onClick={handleGenerateCv}
@@ -452,6 +580,14 @@ export function OfferDetailModal({
           offerCompany={offer.company}
           preview={cvHtmlPreview}
           onClose={() => setCvHtmlPreview(null)}
+        />
+      )}
+      {cvV2Preview && (
+        <CvHtmlPreviewModal
+          offerTitle={titleInfo.display}
+          offerCompany={offer.company}
+          preview={cvV2Preview}
+          onClose={() => setCvV2Preview(null)}
         />
       )}
       {letterPreview && (

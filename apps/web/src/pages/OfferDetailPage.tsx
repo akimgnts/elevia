@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, MapPin, Calendar, Building2 } from "lucide-react";
+import { upsertApplication } from "../api/applications";
 import { PageContainer } from "../components/layout/PageContainer";
 import { Badge } from "../components/ui/badge";
 import { GlassCard } from "../components/ui/GlassCard";
 import { ErrorState } from "../components/ui/ErrorState";
 import { fetchCatalogOffers, fetchSampleOffers } from "../lib/api";
 import { cleanFullText, buildMissions, buildOfferPreview } from "../lib/text";
+import { useProfileStore } from "../store/profileStore";
 import { typography, spacing, layout } from "../styles/uiTokens";
 
 interface OfferData {
@@ -32,9 +34,13 @@ interface OfferData {
 
 export default function OfferDetailPage() {
   const { offerId } = useParams<{ offerId: string }>();
+  const { userProfile } = useProfileStore();
   const [offer, setOffer] = useState<OfferData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tracking, setTracking] = useState(false);
+  const [trackingError, setTrackingError] = useState<string | null>(null);
+  const [trackingSaved, setTrackingSaved] = useState(false);
 
   useEffect(() => {
     if (!offerId) return;
@@ -90,6 +96,24 @@ export default function OfferDetailPage() {
 
     loadOffer();
   }, [offerId]);
+
+  async function handleTrackOffer() {
+    if (!offerId) return;
+    setTracking(true);
+    setTrackingError(null);
+    try {
+      await upsertApplication({
+        offer_id: offerId,
+        status: "saved",
+        source: "manual",
+      });
+      setTrackingSaved(true);
+    } catch (err) {
+      setTrackingError(err instanceof Error ? err.message : "Impossible d'ajouter l'offre au suivi");
+    } finally {
+      setTracking(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -171,6 +195,50 @@ export default function OfferDetailPage() {
             )}
           </div>
         </header>
+
+        <GlassCard className="mb-6 p-5">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Rôle de cette page</div>
+          <div className="mt-2 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="text-lg font-semibold text-slate-950">Vous consultez l'offre brute du catalogue.</div>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Cette page sert à lire l'offre complète. L'inbox sert ensuite à savoir si cette offre mérite vraiment votre énergie à partir de votre profil.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                to={userProfile ? "/inbox" : "/analyze"}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                {userProfile ? "Comparer dans l'inbox" : "Créer mon profil"}
+              </Link>
+              <button
+                type="button"
+                onClick={handleTrackOffer}
+                disabled={tracking}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+              >
+                {tracking ? "Ajout…" : trackingSaved ? "Déjà dans le suivi" : "Ajouter au suivi"}
+              </button>
+              <Link
+                to="/applications"
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Ouvrir Candidatures
+              </Link>
+            </div>
+          </div>
+          {trackingError && (
+            <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              {trackingError}
+            </div>
+          )}
+          {trackingSaved && (
+            <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+              Offre ajoutée au suivi. Vous pouvez maintenant la retrouver dans Candidatures.
+            </div>
+          )}
+        </GlassCard>
 
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
           {/* Left column — content */}

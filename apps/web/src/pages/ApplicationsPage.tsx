@@ -18,6 +18,7 @@ import {
 } from "../api/applications";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
 import { EmptyState } from "../components/ui/EmptyState";
+import { useProfileStore } from "../store/profileStore";
 
 // ---------------------------------------------------------------------------
 // Status metadata
@@ -101,6 +102,7 @@ function followUpTone(value: string | null): { label: string; className: string 
 // ---------------------------------------------------------------------------
 
 export default function ApplicationsPage() {
+  const { userProfile } = useProfileStore();
   const [items, setItems] = useState<ApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +143,8 @@ export default function ApplicationsPage() {
       const matchesSearch =
         search.trim() === "" ||
         item.offer_id.toLowerCase().includes(search.trim().toLowerCase()) ||
+        (item.offer_title ?? "").toLowerCase().includes(search.trim().toLowerCase()) ||
+        (item.offer_company ?? "").toLowerCase().includes(search.trim().toLowerCase()) ||
         (item.note ?? "").toLowerCase().includes(search.trim().toLowerCase());
       return matchesStatus && matchesSearch;
     });
@@ -204,7 +208,12 @@ export default function ApplicationsPage() {
     setPreparingIds((prev) => new Set(prev).add(offerId));
     setPrepareErrors((prev) => { const n = { ...prev }; delete n[offerId]; return n; });
     try {
-      await prepareApplication(offerId, {});
+      await prepareApplication(
+        offerId,
+        userProfile && typeof userProfile === "object"
+          ? { profile: userProfile as Record<string, unknown> }
+          : {},
+      );
       await refresh();
     } catch (err) {
       setPrepareErrors((prev) => ({
@@ -227,6 +236,7 @@ export default function ApplicationsPage() {
     const saveError = saveErrors[item.offer_id];
     const canPrepare = item.status === "saved" || item.status === "cv_ready";
 
+    const location = [item.offer_city, item.offer_country].filter(Boolean).join(", ");
     return (
       <article
         key={item.id}
@@ -235,11 +245,17 @@ export default function ApplicationsPage() {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-              Offer ID
+              Candidature active
             </div>
-            <div className="mt-1 break-all text-sm font-semibold text-slate-950">
-              {item.offer_id}
+            <div className="mt-1 text-base font-semibold text-slate-950">
+              {item.offer_title || item.offer_id}
             </div>
+            {(item.offer_company || location) && (
+              <div className="mt-1 text-sm text-slate-500">
+                {[item.offer_company, location].filter(Boolean).join(" · ")}
+              </div>
+            )}
+            <div className="mt-1 break-all text-xs text-slate-400">{item.offer_id}</div>
           </div>
           <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${followUp.className}`}>
             {followUp.label}
@@ -346,6 +362,18 @@ export default function ApplicationsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to={`/offers/${encodeURIComponent(item.offer_id)}`}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Voir l'offre
+            </Link>
+            <Link
+              to="/inbox"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Retour inbox
+            </Link>
             {item.next_follow_up_date && (
               <div className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
                 Relance: {toDateLabel(item.next_follow_up_date)}
@@ -400,7 +428,7 @@ export default function ApplicationsPage() {
   const renderColumn = (status: ApplicationStatus) => (
     <section
       key={status}
-      className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur"
+      className="rounded-[1.5rem] border border-slate-200/80 bg-white/90 p-5 shadow-sm"
     >
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -432,7 +460,7 @@ export default function ApplicationsPage() {
     <PremiumAppShell
       eyebrow="Suivi"
       title="Suivi des candidatures"
-      description="Tes candidatures, leur statut, et l'historique de chaque etape. Utilise Preparer CV pour generer un CV cible depuis la colonne Sauvegardee."
+      description="Cette page reçoit les offres envoyées depuis l'inbox ou le catalogue, puis garde la mémoire des CV préparés, des relances et des statuts."
       actions={
         <>
           <Link
@@ -506,7 +534,7 @@ export default function ApplicationsPage() {
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-6">
             {/* Search + filter */}
-            <div className="rounded-[1.75rem] border border-white/80 bg-white/80 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
+            <div className="rounded-[1.5rem] border border-slate-200/80 bg-white/90 p-4 shadow-sm">
               <div className="flex flex-col gap-3 md:flex-row md:items-center">
                 <div className="relative min-w-0 flex-1">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -593,7 +621,7 @@ export default function ApplicationsPage() {
 
           {/* Sidebar */}
           <aside className="space-y-6">
-            <section className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
+            <section className="rounded-[1.5rem] border border-slate-200/80 bg-white/90 p-5 shadow-sm">
               <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
                 Rituels de suivi
               </div>

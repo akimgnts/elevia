@@ -10,7 +10,8 @@ API = Path("apps/web/src/lib/api.ts").read_text(encoding="utf-8")
 
 def test_parse_success_persists_profile_immediately():
     assert "function buildPersistedAnalyzeProfile(result: ParseFileResponse)" in ANALYZE
-    assert "await setIngestResult(buildPersistedAnalyzeProfile(result));" in ANALYZE
+    assert "const persistedProfile = buildPersistedAnalyzeProfile(result);" in ANALYZE
+    assert "await setIngestResult(persistedProfile);" in ANALYZE
 
 
 def test_run_matching_uses_same_persistence_path():
@@ -24,9 +25,15 @@ def test_broken_direct_link_to_inbox_is_removed():
 
 
 def test_profile_intelligence_is_not_silently_dropped_on_persist():
+    assert "profile.canonical_skills = result.canonical_skills;" in ANALYZE
+    assert "profile.enriched_signals = result.enriched_signals;" in ANALYZE
+    assert "profile.concept_signals = result.concept_signals;" in ANALYZE
     assert "profile.profile_intelligence = result.profile_intelligence;" in ANALYZE
     assert "profile.profile_intelligence_ai_assist = result.profile_intelligence_ai_assist;" in ANALYZE
     assert "profile_intelligence?: Record<string, unknown>;" in API
+    assert "canonical_skills?: Array<{" in API
+    assert "enriched_signals?: Array<{" in API
+    assert "concept_signals?: Array<{" in API
 
 
 def test_refresh_persistence_still_relies_on_profile_store_storage():

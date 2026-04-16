@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Building2, MapPin, Search, Sparkles } from "lucide-react";
+import { upsertApplication } from "../api/applications";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
@@ -30,6 +31,8 @@ export default function OffersPage() {
   const [query, setQuery] = useState("");
   const [country, setCountry] = useState<string>("all");
   const [source, setSource] = useState<SourceFilter>("all");
+  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const countries = useMemo(() => {
     const unique = new Set<string>();
@@ -67,7 +70,25 @@ export default function OffersPage() {
     });
   }, [offers, query, country, source]);
 
-  const featured = filtered.slice(0, 6);
+  async function handleTrackOffer(offerId: string) {
+    setSaveError(null);
+    setSavingIds((prev) => new Set(prev).add(offerId));
+    try {
+      await upsertApplication({
+        offer_id: offerId,
+        status: "saved",
+        source: "manual",
+      });
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Impossible d'ajouter l'offre au suivi");
+    } finally {
+      setSavingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(offerId);
+        return next;
+      });
+    }
+  }
 
   return (
     <PremiumAppShell
@@ -95,29 +116,38 @@ export default function OffersPage() {
       contentClassName="max-w-7xl"
     >
       <div className="grid gap-6">
-        <section className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-[1.5rem] border border-white/80 bg-white/80 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Offres chargees</div>
-            <div className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{offers.length}</div>
-            <div className="mt-2 text-sm text-slate-500">catalogue disponible actuellement</div>
-          </div>
-          <div className="rounded-[1.5rem] border border-white/80 bg-white/80 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Apres filtres</div>
-            <div className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{filtered.length}</div>
-            <div className="mt-2 text-sm text-slate-500">offre{filtered.length > 1 ? "s" : ""} visible{filtered.length > 1 ? "s" : ""}</div>
-          </div>
-          <div className="rounded-[1.5rem] border border-white/80 bg-white/80 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Usage recommande</div>
-            <div className="mt-2 text-base font-semibold text-slate-950">
-              Regarder d&apos;abord, qualifier ensuite.
+        <section className="border-b border-slate-200/80 pb-6">
+          <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Rôle de cette page</div>
+              <div className="mt-2 text-lg font-semibold text-slate-950">Le catalogue complet, avant le tri par pertinence.</div>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Ici vous parcourez tout le catalogue. L&apos;inbox sert ensuite à comparer ce catalogue à votre profil actif et à prioriser ce qui mérite votre énergie.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-5 text-sm text-slate-600">
+                <span><span className="font-semibold text-slate-950">{offers.length}</span> offres chargées</span>
+                <span><span className="font-semibold text-slate-950">{filtered.length}</span> offres visibles après filtres</span>
+                <span>Explorer d&apos;abord, qualifier ensuite</span>
+              </div>
             </div>
-            <div className="mt-2 text-sm text-slate-500">
-              La vitrine rassure. L&apos;analyse CV sert a prioriser, pas juste a decouvrir.
+            <div className="flex flex-wrap gap-2 lg:justify-end">
+              <Link
+                to={userProfile ? "/inbox" : "/analyze"}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                {userProfile ? "Comparer à mon profil" : "Créer mon profil"}
+              </Link>
+              <Link
+                to="/applications"
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Ouvrir le suivi
+              </Link>
             </div>
           </div>
         </section>
 
-        <section className="rounded-[1.75rem] border border-white/80 bg-white/80 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur">
+        <section className="rounded-[1.5rem] border border-slate-200/80 bg-white/90 p-4 shadow-sm">
           <div className="grid gap-3 md:grid-cols-[minmax(0,1.6fr)_220px_220px]">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -156,6 +186,7 @@ export default function OffersPage() {
         </section>
 
         {error && <ErrorState description={error} />}
+        {saveError && <ErrorState description={saveError} />}
         {loading && !error && (
           <div className="rounded-[1.75rem] border border-white/80 bg-white/80 px-6 py-8 text-sm text-slate-500 shadow-sm">
             Chargement des offres...
@@ -168,13 +199,13 @@ export default function OffersPage() {
 
         {!loading && !error && filtered.length > 0 && (
           <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {featured.map((offer) => {
+            {filtered.map((offer) => {
               const location = [offer.city, offer.country].filter(Boolean).join(", ");
               const preview = buildOfferPreview(offer.display_description, offer.description);
+              const isSaving = savingIds.has(offer.id);
               return (
-                <Link
+                <article
                   key={offer.id}
-                  to={`/offers/${encodeURIComponent(offer.id)}`}
                   className="group block rounded-[1.75rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:shadow-[0_24px_55px_rgba(15,23,42,0.12)]"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -184,9 +215,9 @@ export default function OffersPage() {
                           {sourceLabel(offer.source)}
                         </span>
                       </div>
-                      <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-slate-950">
+                      <Link to={`/offers/${encodeURIComponent(offer.id)}`} className="line-clamp-2 text-lg font-semibold leading-snug text-slate-950 hover:underline">
                         {offer.title || "Offre"}
-                      </h3>
+                      </Link>
                       <div className="mt-2 flex items-center gap-2 text-sm text-slate-600">
                         <Building2 className="h-4 w-4 text-slate-400" />
                         <span className="line-clamp-1">{offer.company || "Entreprise"}</span>
@@ -215,15 +246,23 @@ export default function OffersPage() {
                   </div>
 
                   <div className="mt-4 flex items-center justify-between gap-3">
-                    <div className="text-xs text-slate-500">
-                      Analyse le CV pour savoir si cette offre vaut vraiment ton temps.
-                    </div>
-                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-slate-900">
-                      Voir l&apos;offre
+                    <button
+                      type="button"
+                      onClick={() => handleTrackOffer(offer.id)}
+                      disabled={isSaving}
+                      className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+                    >
+                      {isSaving ? "Ajout…" : "Ajouter au suivi"}
+                    </button>
+                    <Link
+                      to={userProfile ? "/inbox" : "/analyze"}
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-slate-900"
+                    >
+                      {userProfile ? "Comparer à mon profil" : "Créer mon profil"}
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                    </span>
+                    </Link>
                   </div>
-                </Link>
+                </article>
               );
             })}
           </section>

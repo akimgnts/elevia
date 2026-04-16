@@ -7,7 +7,9 @@ Cached in-memory for 1 hour (TTL configurable via ELEVIA_INSIGHTS_TTL_S).
 from __future__ import annotations
 
 import os
+import json
 import sqlite3
+import threading
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -29,6 +31,9 @@ router = APIRouter(prefix="/insights", tags=["insights"])
 _CACHE: Dict[str, Any] = {}
 _CACHE_TS: float = 0.0
 _CACHE_TTL: float = float(os.getenv("ELEVIA_INSIGHTS_TTL_S", "3600"))
+_CACHE_LOCK = threading.Lock()
+_REFRESH_THREAD: threading.Thread | None = None
+_CACHE_FILE = DB_PATH.parent.parent / "cache" / "vie_market_insights.json"
 
 SECTOR_LABELS: Dict[str, str] = {
     "DATA_IT": "Data / IT",
@@ -215,6 +220,44 @@ def _aggregate_market_skills(
         resolver_skills_by_offer,
         display_skills_by_offer,
     )
+
+
+def _aggregate_market_skills_fast(
+    *,
+    conn: sqlite3.Connection,
+    offer_cluster_map: Dict[str, str],
+) -> tuple[
+    Dict[str, int],
+    Dict[str, str],
+    Dict[str, Dict[str, int]],
+    Dict[str, List[str]],
+]:
+    skill_freq: Dict[str, int] = defaultdict(int)
+    skill_labels: Dict[str, str] = {}
+    skill_sector_counts: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    display_skills_by_offer: Dict[str, List[str]] = defaultdict(list)
+    seen_by_offer: Dict[str, set[str]] = defaultdict(set)
+
+    for row in conn.execute("SELECT offer_id, skill FROM fact_offer_skills WHERE skill IS NOT NULL"):
+        offer_id = str(row["offer_id"])
+        cleaned = _clean_skill(str(row["skill"] or ""))
+        if not cleaned or cleaned in _SKILL_NOISE:
+            continue
+        skill_key = f"label:{cleaned}"
+        if skill_key in seen_by_offer[offer_id]:
+            continue
+        seen_by_offer[offer_id].add(skill_key)
+        display_label = display_skill_label(cleaned)
+        skill_freq[skill_key] += 1
+        skill_labels.setdefault(skill_key, display_label)
+        if offer_id in offer_cluster_map:
+            skill_sector_counts[skill_key][offer_cluster_map[offer_id]] += 1
+        display_skills_by_offer[offer_id].append(display_label)
+
+    for offer_id, labels in list(display_skills_by_offer.items()):
+        display_skills_by_offer[offer_id] = sorted(set(labels))
+
+    return skill_freq, skill_labels, skill_sector_counts, display_skills_by_offer
 
 
 def _count_role_supported_skills(
@@ -626,22 +669,293 @@ def _compute() -> Dict[str, Any]:
     }
 
 
+def _compute_lightweight() -> Dict[str, Any]:
+    conn = sqlite3.connect(str(DB_PATH), timeout=5)
+    conn.row_factory = sqlite3.Row
+    try:
+        total_offers: int = conn.execute("SELECT COUNT(*) FROM fact_offers").fetchone()[0]
+
+        country_rows = conn.execute(
+            """
+            SELECT country, COUNT(*) AS cnt
+            FROM fact_offers
+            WHERE country IS NOT NULL AND trim(country) != ''
+            GROUP BY country
+            ORDER BY cnt DESC
+            """
+        ).fetchall()
+        country_counts: List[Dict[str, Any]] = [{"country": r["country"], "count": r["cnt"]} for r in country_rows]
+        top_countries = country_counts[:12]
+        total_countries: int = conn.execute(
+            "SELECT COUNT(DISTINCT country) FROM fact_offers WHERE country IS NOT NULL"
+        ).fetchone()[0]
+
+        offer_rows = conn.execute("SELECT id, title, description FROM fact_offers").fetchall()
+
+        skill_by_offer: Dict[str, List[str]] = defaultdict(list)
+        for row in conn.execute("SELECT offer_id, skill FROM fact_offer_skills WHERE skill IS NOT NULL"):
+            label = str(row["skill"] or "").strip()
+            if label:
+                skill_by_offer[str(row["offer_id"])].append(label)
+
+        sector_counts: Dict[str, int] = defaultdict(int)
+        offer_cluster_map: Dict[str, str] = {}
+        for row in offer_rows:
+            cluster, _, _ = detect_offer_cluster(
+                row["title"],
+                row["description"],
+                skill_by_offer.get(row["id"], []),
+            )
+            sector_counts[cluster] += 1
+            offer_cluster_map[row["id"]] = cluster
+
+        sectors_distribution = sorted(
+            [{"sector": s, "label": SECTOR_LABELS.get(s, s), "count": c} for s, c in sector_counts.items()],
+            key=lambda x: -x["count"],
+        )
+
+        skill_freq, skill_labels, skill_sector_counts, _display_skills_by_offer = _aggregate_market_skills_fast(
+            conn=conn,
+            offer_cluster_map=offer_cluster_map,
+        )
+        total_skills = len(skill_freq)
+        total_skill_occurrences: int = sum(skill_freq.values()) or 1
+        clean_skills = sorted(skill_freq.items(), key=lambda x: (-x[1], skill_labels.get(x[0], x[0])))
+
+        sector_skill_totals: Dict[str, int] = defaultdict(int)
+        for _skill_key, sector_map in skill_sector_counts.items():
+            for sector, count in sector_map.items():
+                sector_skill_totals[sector] += count
+
+        top_skills: List[Dict[str, Any]] = []
+        for skill_key, count in clean_skills[:12]:
+            smap = skill_sector_counts.get(skill_key, {})
+            dominant = max(smap, key=smap.get) if smap else "OTHER"
+            label = skill_labels.get(skill_key, skill_key)
+            top_skills.append(
+                {
+                    "skill": label,
+                    "count": count,
+                    "dominant_sector": dominant,
+                    "display_label": label,
+                    "role_supported_count": 0,
+                }
+            )
+
+        country_by_offer: Dict[str, str] = {}
+        for row in conn.execute("SELECT id, country FROM fact_offers WHERE country IS NOT NULL AND trim(country) != ''"):
+            country_by_offer[row["id"]] = row["country"]
+
+        sector_country_raw: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        for offer_id, cluster in offer_cluster_map.items():
+            country = country_by_offer.get(offer_id)
+            if country:
+                sector_country_raw[cluster][country] += 1
+
+        sector_country_counts: List[Dict[str, Any]] = []
+        for sector, country_map in sector_country_raw.items():
+            for country, count in country_map.items():
+                sector_country_counts.append({"sector": sector, "country": country, "count": count})
+        sector_country_matrix = sorted(sector_country_counts, key=lambda x: (x["sector"], -x["count"]))[:160]
+
+        company_by_offer: Dict[str, str] = {}
+        for row in conn.execute("SELECT id, company FROM fact_offers WHERE company IS NOT NULL AND trim(company) != ''"):
+            company_by_offer[row["id"]] = row["company"]
+        company_normalized = _cluster_company_names(list(company_by_offer.values()))
+
+        sector_company_raw: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        for offer_id, cluster in offer_cluster_map.items():
+            company = company_by_offer.get(offer_id)
+            if company:
+                sector_company_raw[cluster][company_normalized.get(company, company)] += 1
+
+        sector_company_counts: List[Dict[str, Any]] = []
+        for sector, company_map in sector_company_raw.items():
+            for company, count in company_map.items():
+                sector_company_counts.append({"sector": sector, "company": company, "count": count})
+        sector_companies = sorted(sector_company_counts, key=lambda x: (x["sector"], -x["count"]))[:160]
+
+        company_counts_map: Dict[str, int] = defaultdict(int)
+        for company in company_by_offer.values():
+            company_counts_map[company_normalized.get(company, company)] += 1
+        company_counts = [
+            {"company": k, "count": v}
+            for k, v in sorted(company_counts_map.items(), key=lambda x: (-x[1], x[0]))
+        ]
+
+        top_skill_labels = {s["skill"] for s in top_skills}
+        matrix_raw: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        for skill_key, smap in skill_sector_counts.items():
+            display_label = skill_labels.get(skill_key, skill_key)
+            if display_label not in top_skill_labels:
+                continue
+            for sector, count in smap.items():
+                matrix_raw[sector][display_label] += count
+
+        sector_skill_matrix: List[Dict[str, Any]] = []
+        for sector, skill_map in matrix_raw.items():
+            total = max(sector_counts.get(sector, 1), 1)
+            for skill, count in skill_map.items():
+                sector_skill_matrix.append(
+                    {"sector": sector, "skill": skill, "count": count, "relative": round(count / total, 3)}
+                )
+
+        sector_distinctive_skills: List[Dict[str, Any]] = []
+        for skill_key, smap in skill_sector_counts.items():
+            display_label = skill_labels.get(skill_key, skill_key)
+            global_count = skill_freq.get(skill_key, 0)
+            if global_count <= 0:
+                continue
+            global_share = global_count / total_skill_occurrences
+            for sector, count in smap.items():
+                if count < _MIN_SECTOR_SKILL_COUNT:
+                    continue
+                sector_total = sector_skill_totals.get(sector, 0)
+                if sector_total <= 0:
+                    continue
+                sector_share = count / sector_total
+                distinctiveness = sector_share / global_share if global_share else 0.0
+                sector_distinctive_skills.append(
+                    {
+                        "sector": sector,
+                        "skill": display_label,
+                        "count": count,
+                        "sector_share": round(sector_share, 4),
+                        "global_share": round(global_share, 6),
+                        "distinctiveness": round(distinctiveness, 4),
+                        "display_label": display_label,
+                    }
+                )
+        sector_distinctive_skills.sort(key=lambda x: (x["sector"], -x["distinctiveness"], -x["count"], x["skill"]))
+
+        top3_names = ", ".join(c["country"] for c in top_countries[:3])
+        top3_count = sum(c["count"] for c in top_countries[:3])
+        pct_top3 = round(top3_count / total_offers * 100) if total_offers else 0
+        s0 = sectors_distribution[0]["label"] if sectors_distribution else ""
+        s1 = sectors_distribution[1]["label"] if len(sectors_distribution) > 1 else ""
+        pct_top2 = round(sum(s["count"] for s in sectors_distribution[:2]) / total_offers * 100) if total_offers else 0
+        top_skill_name = top_skills[0]["skill"] if top_skills else ""
+        key_insights = [
+            f"Les opportunités VIE se concentrent sur {top3_names} — {pct_top3}% du corpus.",
+            f"{s0} et {s1} dominent avec {pct_top2}% du volume total des offres.",
+            f"'{top_skill_name}' est la compétence la plus demandée, présente dans plusieurs secteurs.",
+        ]
+
+    finally:
+        conn.close()
+
+    return {
+        "total_offers": total_offers,
+        "total_countries": total_countries,
+        "total_sectors": len([s for s in sector_counts if s != "OTHER"]),
+        "total_skills": total_skills,
+        "country_counts": country_counts,
+        "top_countries": top_countries[:10],
+        "sectors_distribution": sectors_distribution,
+        "top_skills": top_skills,
+        "sector_skill_matrix": sector_skill_matrix,
+        "sector_distinctive_skills": sector_distinctive_skills,
+        "sector_country_matrix": sector_country_matrix,
+        "sector_country_counts": sector_country_counts,
+        "sector_companies": sector_companies,
+        "sector_company_counts": sector_company_counts,
+        "company_counts": company_counts,
+        "key_insights": key_insights,
+        "top_roles": [],
+        "sector_top_roles": [],
+    }
+
+
+def _write_disk_cache(payload: Dict[str, Any]) -> None:
+    _CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = _CACHE_FILE.with_suffix(".tmp")
+    tmp_path.write_text(
+        json.dumps(
+            {
+                "generated_at": time.time(),
+                "payload": payload,
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    tmp_path.replace(_CACHE_FILE)
+
+
+def _load_disk_cache() -> tuple[Dict[str, Any] | None, float | None]:
+    if not _CACHE_FILE.exists():
+        return None, None
+    try:
+        raw = json.loads(_CACHE_FILE.read_text(encoding="utf-8"))
+        payload = raw.get("payload") if isinstance(raw, dict) else None
+        generated_at = float(raw.get("generated_at") or _CACHE_FILE.stat().st_mtime) if isinstance(raw, dict) else _CACHE_FILE.stat().st_mtime
+        if not isinstance(payload, dict):
+            return None, None
+        return payload, max(0.0, time.time() - generated_at)
+    except Exception:
+        return None, None
+
+
+def _compute_and_store() -> Dict[str, Any]:
+    payload = _compute()
+    with _CACHE_LOCK:
+        global _CACHE, _CACHE_TS
+        _CACHE = payload
+        _CACHE_TS = time.monotonic()
+    _write_disk_cache(payload)
+    return payload
+
+
+def _refresh_cache_background() -> None:
+    global _REFRESH_THREAD
+    if _REFRESH_THREAD is not None and _REFRESH_THREAD.is_alive():
+        return
+
+    def _runner() -> None:
+        try:
+            _compute_and_store()
+        except Exception:
+            return
+
+    _REFRESH_THREAD = threading.Thread(target=_runner, name="market-insights-refresh", daemon=True)
+    _REFRESH_THREAD.start()
+
+
+def _get_cached_market_insights() -> Dict[str, Any]:
+    global _CACHE, _CACHE_TS
+    now = time.monotonic()
+    with _CACHE_LOCK:
+        if _CACHE and (now - _CACHE_TS) <= _CACHE_TTL:
+            return _CACHE
+
+    disk_payload, disk_age_s = _load_disk_cache()
+    if disk_payload:
+        with _CACHE_LOCK:
+            _CACHE = disk_payload
+            if disk_age_s is not None and disk_age_s <= _CACHE_TTL:
+                _CACHE_TS = now
+            else:
+                _CACHE_TS = 0.0
+        if disk_age_s is not None and disk_age_s > _CACHE_TTL:
+            _refresh_cache_background()
+        return disk_payload
+
+    payload = _compute_lightweight()
+    with _CACHE_LOCK:
+        _CACHE = payload
+        _CACHE_TS = now
+    _write_disk_cache(payload)
+    _refresh_cache_background()
+    return payload
+
+
 @router.get("/vie-market")
 def get_vie_market_insights() -> JSONResponse:
     """Aggregated VIE market insights — read-only, cached 1 h."""
-    global _CACHE, _CACHE_TS
-    now = time.monotonic()
-    if not _CACHE or (now - _CACHE_TS) > _CACHE_TTL:
-        _CACHE = _compute()
-        _CACHE_TS = now
-    return JSONResponse(_CACHE)
+    return JSONResponse(_get_cached_market_insights())
 
 
 @router.get("/top-roles")
 def get_market_insight_top_roles() -> JSONResponse:
-    global _CACHE, _CACHE_TS
-    now = time.monotonic()
-    if not _CACHE or (now - _CACHE_TS) > _CACHE_TTL:
-        _CACHE = _compute()
-        _CACHE_TS = now
-    return JSONResponse({"top_roles": _CACHE.get("top_roles", [])})
+    payload = _get_cached_market_insights()
+    return JSONResponse({"top_roles": payload.get("top_roles", [])})

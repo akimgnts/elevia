@@ -19,6 +19,7 @@ import re
 from datetime import date
 from typing import Any, Dict, List, Literal, Optional
 
+from compass.structuring import build_skill_links_for_experience
 from pydantic import BaseModel, Field
 
 
@@ -118,6 +119,7 @@ class CareerProfile(BaseModel):
     skills: List[str] = Field(default_factory=list)
     selected_skills: List[CareerSkillSelection] = Field(default_factory=list)
     pending_skill_candidates: List[str] = Field(default_factory=list)
+    enrichment_meta: Dict[str, Any] = Field(default_factory=dict)
     completeness: float = 0.0                # 0.0 – 1.0 heuristic
     source_version: str = "profile_structured_v1"
 
@@ -130,6 +132,12 @@ _AUTONOMY_MAP = {
     "HIGH": "LEAD",
     "MED": "COPILOT",
     "LOW": "CONTRIB",
+}
+
+_AUTONOMY_LEVEL_MAP = {
+    "HIGH": "ownership",
+    "MED": "autonomous",
+    "LOW": "execution",
 }
 
 
@@ -256,11 +264,21 @@ def from_profile_structured_v1(
         return CareerProfile()
 
 
+def load_career_profile(data: Dict[str, Any]) -> CareerProfile:
+    """Round-trip helper for persisted career_profile dicts."""
+    return CareerProfile.model_validate(data or {})
+
+
 def _extract(
     structured: Any,
     raw_skills: List[str],
     raw_languages: List[Any],
 ) -> CareerProfile:
+    raw_skill_lookup = {
+        re.sub(r"\s+", " ", str(skill or "").strip().lower()): str(skill).strip()
+        for skill in raw_skills
+        if str(skill or "").strip()
+    }
     experiences: List[CareerExperience] = []
     for exp in (getattr(structured, "experiences", None) or []):
         title = str(getattr(exp, "title", None) or "").strip()
@@ -284,10 +302,27 @@ def _extract(
             s for s in (getattr(exp, "skills", None) or [])
             if isinstance(s, str) and s.strip()
         ]
-        autonomy_raw = str(getattr(exp, "autonomy_level", "MED") or "MED").upper()
+        autonomy_raw = str(getattr(exp, "autonomy_level", "") or "").upper()
         autonomy = _AUTONOMY_MAP.get(autonomy_raw, "COPILOT")
+        canonical_skills_used = [
+            CareerSkillSelection(label=raw_skill_lookup[normalized])
+            for normalized in [
+                re.sub(r"\s+", " ", skill.strip().lower())
+                for skill in skills
+            ]
+            if normalized in raw_skill_lookup
+        ]
+        if not canonical_skills_used:
+            canonical_skills_used = [
+                CareerSkillSelection(label=label)
+                for normalized, label in raw_skill_lookup.items()
+                if normalized in {
+                    re.sub(r"\s+", " ", tool.strip().lower())
+                    for tool in tools
+                }
+            ][:8]
 
-        experiences.append(CareerExperience(
+        experience = CareerExperience(
             title=title or "Expérience",
             company=company,
             location=str(getattr(exp, "location", None) or "").strip() or None,
@@ -299,7 +334,11 @@ def _extract(
             tools=tools[:12],
             skills=skills[:8],
             autonomy=autonomy,
-        ))
+            autonomy_level=_AUTONOMY_LEVEL_MAP.get(autonomy_raw),
+            canonical_skills_used=canonical_skills_used,
+        )
+        experience.skill_links = build_skill_links_for_experience(experience)
+        experiences.append(experience)
 
     education: List[CareerEducation] = []
     for edu in (getattr(structured, "education", None) or []):

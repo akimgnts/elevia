@@ -14,6 +14,11 @@ export function Navbar() {
           <Link to="/#pricing">Tarifs</Link>
         </div>
         <div className="flex items-center gap-3">
+          <Link to="/login" className="inline-flex">
+            <Button variant="ghost" size="sm">
+              Connexion
+            </Button>
+          </Link>
           <Link to="/demo" className="hidden md:inline-flex">
             <Button variant="secondary" size="sm">
               Voir la démo

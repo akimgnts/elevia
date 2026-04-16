@@ -3,7 +3,17 @@
 > **Repo canonique unique :** `~/Dev/elevia-compass`
 > Ne jamais utiliser `~/Documents/elevia-compass` (iCloud, imports lents, hangs pytest).
 
-## Lancer en 3 commandes
+## Lancer proprement
+
+Canonique:
+
+```bash
+make dev-up
+```
+
+Ça démarre l’API avec le bon `.venv` et le frontend sur le bon port.
+
+## Lancer manuellement si nécessaire
 
 ```bash
 # Terminal 1 — API
@@ -12,7 +22,7 @@ make api
 
 # Terminal 2 — Frontend
 make web
-# → http://localhost:3001  (proxy /dev /v1 /inbox … → localhost:8000)
+# → http://localhost:3001
 
 # Page Dev Tools
 open http://localhost:3001/dev/cv-delta
@@ -46,6 +56,7 @@ make test
 | `POST /dev/cv-delta` → 404 | FE appelle le mauvais port | Proxy Vite configuré dans `vite.config.ts` — vérifier que `make web` est lancé |
 | pytest hang à l'import | Repo dans iCloud / Documents | Utiliser `~/Dev/elevia-compass` — voir [docs/infra/PYTEST_IMPORT_HANG_FIX.md](infra/PYTEST_IMPORT_HANG_FIX.md) |
 | `OPENAI_API_KEY` manquant | LLM désactivé silencieusement | Normal — mode A actif, `warning` dans la réponse |
+| `Form data requires "python-multipart"` au lancement API | mauvais `uvicorn` / mauvais Python | utiliser `make api` ou `make dev-up`, jamais `uvicorn api.main:app` en global |
 
 ## Architecture en 30 secondes
 

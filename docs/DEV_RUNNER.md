@@ -34,19 +34,19 @@ make dev-down      # stop cleanly
 ## Tests
 
 ```bash
-# Install dev deps (first time only)
-pip install -r apps/api/requirements-dev.txt
+# Install deps in repo-root venv (first time only)
+make install
 
 # Run full API test suite
-cd apps/api && python -m pytest -q
+cd apps/api && ../../.venv/bin/python -m pytest -q
 
 # Run context layer tests only (fast, no DB)
-cd apps/api && python -m pytest tests/test_context_fit_specificity.py tests/test_context_endpoints.py tests/test_context_profile_fallback.py -q
+cd apps/api && ../../.venv/bin/python -m pytest tests/test_context_fit_specificity.py tests/test_context_endpoints.py tests/test_context_profile_fallback.py -q
 
 # Run context smoke (deterministic, no API required)
-python apps/api/scripts/context_smoke.py
+./.venv/bin/python apps/api/scripts/context_smoke.py
 # With CV text override:
-python apps/api/scripts/context_smoke.py --cv-text "Expert SQL, Python, Power BI."
+./.venv/bin/python apps/api/scripts/context_smoke.py --cv-text "Expert SQL, Python, Power BI."
 ```
 
 ## Logs
@@ -94,6 +94,7 @@ curl http://localhost:8000/health/deps | jq '.deps.llm'
 | Ports still in use after `dev-down` | Run `make dev-down` again (idempotent) |
 | API never becomes healthy | Check `tail -n 80 .run/api.log` |
 | `ModuleNotFoundError: api` | Launch from `apps/api/` — `up.sh` handles this via `cd apps/api` |
+| `Form data requires "python-multipart"` | Wrong Python / global `uvicorn` | Use `make dev-up` or `make api` (repo-root `.venv` only) |
 | pytest hangs / `TimeoutError 60` | You're using the iCloud python — use `make test-cvdelta` which uses `.venv/bin/python3` |
 | VSCode PTY instability | Run `make dev-up` from Terminal.app or iTerm2 for long-lived processes |
 | `.venv not found` | Run `make venv && make install` first |

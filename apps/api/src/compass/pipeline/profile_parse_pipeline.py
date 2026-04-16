@@ -10,6 +10,7 @@ from compass.canonical_pipeline import get_extracted_profile_snapshot, is_trace_
 from compass.extraction.enriched_concept_builder import build_enriched_concepts
 from compass.extraction.enriched_signal_builder import build_enriched_signals
 from compass.extraction.precanonical_recovery import build_precanonical_recovery
+from compass.understanding import CVUnderstandingAgent
 from compass.profile.profile_intelligence import build_profile_intelligence
 from compass.profile.profile_intelligence_ai_assist import build_profile_intelligence_ai_assist
 
@@ -84,7 +85,14 @@ def _run_profile_text_pipeline(
     )
 
     profile = get_extracted_profile_snapshot(pipeline)
-    cache_result = run_profile_cache_hooks(cv_text=cv_text, profile=profile)
+    profile_understanding = CVUnderstandingAgent().run(
+        {
+            "cv_text": cv_text,
+            "source_name": filename,
+            "raw_profile": profile,
+        }
+    )
+    profile["document_understanding"] = profile_understanding["document_understanding"]
 
     profile_cluster = pipeline.profile_cluster or {}
     logger.info(json.dumps({
@@ -142,6 +150,18 @@ def _run_profile_text_pipeline(
         pipeline_resolved_to_esco=pipeline.resolved_to_esco,
         pipeline_rejected_tokens=pipeline.rejected_tokens,
         canonical_mapping=canonical_mapping,
+    )
+    unresolved = [
+        item
+        for item in canonical_mapping.canonical_skills_list
+        if isinstance(item, dict) and not item.get("canonical_id")
+    ]
+    cache_result = run_profile_cache_hooks(
+        cv_text=cv_text,
+        profile=profile,
+        canonical_skills=canonical_mapping.canonical_skills_list,
+        unresolved=unresolved,
+        removed=structured_extraction.generic_filter_removed,
     )
     matching_input = build_matching_input_trace(
         baseline_esco_count=enrichment.baseline_esco_count,

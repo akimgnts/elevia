@@ -9,12 +9,10 @@ API = Path("apps/web/src/lib/api.ts").read_text(encoding="utf-8")
 
 
 def test_offer_detail_uses_explanation_as_primary_contract():
-    assert "const explanation = offer.explanation;" in MODAL
-    assert "explanation.summary_reason" in MODAL
-    assert "explanation.fit_label" in MODAL
-    assert "uniqueVisible(explanation.strengths, 5)" in MODAL
-    assert "explanation.gaps.filter(" in MODAL
-    assert "uniqueVisible(explanation.next_actions, 3)" in MODAL
+    assert "const narrative = buildOfferNarrative({" in MODAL
+    assert "whyParagraph(narrative.summary, titleInfo.display)" in MODAL
+    assert "narrative.expectations.length > 0 ? narrative.expectations : fallbackExpectations" in MODAL
+    assert "narrative.gaps.length > 0" in MODAL
 
 
 def test_offer_detail_no_longer_uses_legacy_verdict_logic():
@@ -27,9 +25,9 @@ def test_offer_detail_no_longer_uses_legacy_verdict_logic():
 
 
 def test_offer_detail_keeps_raw_score_and_compass_signal_in_debug_only():
-    assert "{showDebug && (" in MODAL
-    assert 'h3 className="text-sm font-semibold text-neutral-200">Détail du score</h3>' in MODAL
-    assert 'h3 className="text-sm font-semibold text-neutral-200">Preuve du match</h3>' in MODAL
+    assert "{showDebug && explainV1Full && (" in MODAL
+    assert "Détail du diagnostic" in MODAL
+    assert "Mode debug" in MODAL
 
 
 def test_offer_api_contract_exposes_explanation():

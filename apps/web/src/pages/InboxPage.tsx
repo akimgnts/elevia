@@ -992,14 +992,14 @@ export default function InboxPage() {
         <EmptyState
           icon={FileText}
           title="Aucun profil chargé"
-          description="Importez votre CV ou créez un profil pour voir les offres."
+          description="Commencez par structurer votre profil. L'inbox devient utile après le parsing, la structuration et le cockpit."
           actions={
             <div className="flex gap-3">
-              <Link to="/analyze" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
-                Importer CV
+              <Link to="/profile" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
+                Ouvrir le profil
               </Link>
-              <Link to="/profile" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
-                Créer profil
+              <Link to="/cockpit" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
+                Voir le cockpit
               </Link>
             </div>
           }
@@ -1016,11 +1016,14 @@ export default function InboxPage() {
           <AlertCircle className="w-10 h-10 text-amber-600 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-amber-900 mb-2">Profil incomplet</h3>
           <p className="text-sm text-amber-700 mb-6">
-            Votre profil ne contient pas de compétences.
+            Votre profil n&apos;est pas encore assez structuré pour une inbox fiable.
           </p>
           <div className="flex gap-3 justify-center">
-            <Link to="/analyze" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-amber-600 text-white hover:bg-amber-700 transition">
-              Importer CV
+            <Link to="/profile" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-amber-600 text-white hover:bg-amber-700 transition">
+              Ouvrir le profil
+            </Link>
+            <Link to="/cockpit" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-amber-200 text-amber-800 hover:bg-amber-100 transition">
+              Voir le cockpit
             </Link>
           </div>
         </div>
@@ -1049,10 +1052,10 @@ export default function InboxPage() {
 
   // Main render
   return (
-    <PremiumAppShell
+      <PremiumAppShell
       eyebrow="Inbox"
-      title="Inbox de matching"
-      description="Vos meilleures offres, déjà triées contre votre profil actif. Sélectionnez ici ce qui mérite un suivi ou une préparation de candidature."
+      title="Inbox pilotée par le profil"
+      description="Après l'analyse, la structuration du profil et le cockpit, cette inbox concentre les offres à examiner puis à envoyer en candidatures."
       actions={
         <>
           <Link
@@ -1060,13 +1063,19 @@ export default function InboxPage() {
             className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
           >
             <Sparkles className="h-4 w-4" />
-            Candidatures
+            Ouvrir candidatures
+          </Link>
+          <Link
+            to="/cockpit"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Retour au cockpit
           </Link>
           <Link
             to="/offers"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            Voir tout le catalogue
+            Voir le catalogue complet
           </Link>
         </>
       }
@@ -1078,20 +1087,20 @@ export default function InboxPage() {
             <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Rôle de l'inbox</div>
             <div className="mt-2 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <p className="max-w-3xl text-sm leading-6 text-slate-600">
-                Cette page sélectionne les offres à forte pertinence. Le bouton <span className="font-semibold text-slate-900">Envoyer au suivi</span> crée ou met à jour une candidature dans la page Candidatures.
+                Cette page intervient après le profil et le cockpit. Elle sélectionne les offres à forte pertinence à partir d&apos;un profil déjà structuré, puis le bouton <span className="font-semibold text-slate-900">Envoyer au suivi</span> crée ou met à jour une candidature dans la page Candidatures.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Link
                   to="/profile"
                   className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
-                  Voir le profil source
+                  Retour au profil
                 </Link>
                 <Link
                   to="/cockpit"
                   className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
-                  Retour cockpit
+                  Retour au cockpit
                 </Link>
               </div>
             </div>

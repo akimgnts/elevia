@@ -49,6 +49,21 @@ def test_parse_pipeline_is_deterministic(monkeypatch):
     assert a["profile_intelligence_ai_assist"] == b["profile_intelligence_ai_assist"]
 
 
+def test_parse_pipeline_includes_document_understanding_in_profile(monkeypatch):
+    monkeypatch.setenv("ELEVIA_DEV_TOOLS", "1")
+    request = ParseFilePipelineRequest(
+        request_id="test-request",
+        raw_filename="cv.txt",
+        content_type="text/plain",
+        file_bytes=TECH_CV.encode("utf-8"),
+        enrich_llm=0,
+    )
+
+    body = build_parse_file_response_payload(request)
+
+    assert "document_understanding" in body["profile"]
+
+
 def test_parse_route_and_pipeline_share_same_contract(monkeypatch):
     monkeypatch.setenv("ELEVIA_DEV_TOOLS", "1")
     from api.main import app

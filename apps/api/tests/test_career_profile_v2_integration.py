@@ -5,8 +5,6 @@ Covers:
 - ProfileStructuredV1 → identity_hint, projects, experience.location
 - from_profile_structured_v1 → CareerProfile v2 schema
 - _profile_fingerprint: identity_present busts cache
-- _build_experiences_text: location in headers
-- _build_identity_text / _build_projects_text / _build_positioning_phrase
 - score_career_experiences: uses explicit LEAD/COPILOT/CONTRIB autonomy
 - build_targeted_cv: cv_strategy passthrough
 - html_renderer: _extract_name prefers career_profile.identity, _extract_contact_line
@@ -24,20 +22,17 @@ from documents.career_profile import (
     CareerProfile,
     CareerProject,
     from_profile_structured_v1,
+    load_career_profile,
     to_experience_dicts,
 )
-from documents.cv_generator import (
-    _build_identity_text,
-    _build_positioning_phrase,
-    _build_projects_text,
-    _profile_fingerprint,
-)
+from documents.cv_generator import _profile_fingerprint
 from documents.apply_pack_cv_engine import (
     build_targeted_cv,
     parse_offer,
     score_career_experiences,
 )
 from documents.html_renderer import _extract_contact_line, _extract_name
+from compass.pipeline.cache_hooks import run_profile_cache_hooks
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -175,6 +170,26 @@ def test_career_profile_v2_schema():
     assert cp.projects == []
 
 
+def test_career_profile_round_trips_additive_enrichment_metadata():
+    payload = {
+        "identity": {"full_name": "Jean Dupont"},
+        "enrichment_meta": {
+            "structuring_report": {
+                "validated_at": "2026-04-15T10:00:00Z",
+                "version": "v1",
+            },
+            "wizard_state": {
+                "step": "validation",
+                "completed": True,
+            },
+        },
+    }
+
+    loaded = load_career_profile(payload)
+
+    assert loaded.enrichment_meta == payload["enrichment_meta"]
+
+
 def test_career_identity_model():
     identity = CareerIdentity(full_name="Jean Dupont", email="j@example.com", location="Paris")
     assert identity.full_name == "Jean Dupont"
@@ -202,6 +217,17 @@ def test_from_profile_structured_v1_projects():
     assert "Dashboard" in cp.projects[0].title
 
 
+def test_from_profile_structured_v1_builds_skill_links_from_existing_signals():
+    result = structure_profile_text_v1(CV_TEXT, debug=False)
+    cp = from_profile_structured_v1(result, raw_skills=["Python", "SQL", "Power BI"], raw_languages=[])
+
+    assert cp.experiences
+    assert any(exp.skill_links for exp in cp.experiences)
+    first = next(exp for exp in cp.experiences if exp.skill_links)
+    assert all(link.skill.label for link in first.skill_links)
+    assert any(link.tools for link in first.skill_links)
+
+
 def test_completeness_increases_with_identity_and_projects():
     cp_base = CareerProfile(experiences=[])
     cp_with = CareerProfile(
@@ -221,6 +247,208 @@ def test_to_experience_dicts_includes_location():
     assert dicts[0]["location"] == "Paris"
 
 
+def test_to_experience_dicts_persists_skill_links():
+    result = structure_profile_text_v1(CV_TEXT, debug=False)
+    cp = from_profile_structured_v1(result, raw_skills=["Python", "SQL", "Power BI"], raw_languages=[])
+    dicts = to_experience_dicts(cp)
+
+    assert dicts
+    assert "skill_links" in dicts[0]
+
+
+def test_load_career_profile_round_trips_skill_links():
+    result = structure_profile_text_v1(CV_TEXT, debug=False)
+    cp = from_profile_structured_v1(result, raw_skills=["Python", "SQL", "Power BI"], raw_languages=[])
+    data = cp.model_dump()
+
+    loaded = load_career_profile(data)
+
+    assert loaded.model_dump() == data
+
+
+def test_run_profile_cache_hooks_populates_career_profile_skill_links():
+    profile = {
+        "skills": ["Python", "SQL", "Power BI"],
+        "languages": ["Français"],
+    }
+
+    result = run_profile_cache_hooks(cv_text=CV_TEXT, profile=profile)
+
+    assert result.profile_hash
+    assert "career_profile" in profile
+    assert profile["career_profile"]["experiences"]
+    assert any(exp.get("skill_links") for exp in profile["career_profile"]["experiences"])
+    assert "experiences" in profile
+
+
+def test_run_profile_cache_hooks_persists_structuring_report():
+    profile = {
+        "skills": ["Python", "SQL", "Power BI"],
+        "languages": ["Français"],
+        "canonical_skills": [
+            {"label": "Analyse de données", "uri": "skill:data_analysis"},
+            {"label": "Reporting", "uri": "skill:reporting"},
+        ],
+        "unresolved": [{"raw": "powerbi dashboards"}],
+        "generic_filter_removed": [{"value": "communication", "reason": "generic_without_context"}],
+    }
+
+    run_profile_cache_hooks(cv_text=CV_TEXT, profile=profile)
+
+    assert "structuring_report" in profile
+    assert "stats" in profile["structuring_report"]
+    assert "enrichment_report" in profile
+    assert "stats" in profile["enrichment_report"]
+    assert "priority_signals" in profile["enrichment_report"]
+    assert "confidence_scores" in profile["enrichment_report"]
+    assert "auto_filled" in profile["enrichment_report"]
+    assert "questions" in profile["enrichment_report"]
+    assert profile["enrichment_report"]["learning_candidates"] or profile["enrichment_report"]["confidence_scores"]
+    assert isinstance(profile["enrichment_report"]["priority_signals"], list)
+    assert "career_profile" in profile
+    assert "enrichment_meta" in profile["career_profile"]
+    assert profile["career_profile"]["enrichment_meta"]["experiences"]
+    assert profile["career_profile"]["enrichment_meta"]["experiences"][0]["skill_links"]
+    assert "experiences" in profile
+    assert any(exp.get("skill_links") for exp in profile["experiences"])
+
+
+def test_run_profile_cache_hooks_enriches_comparison_metrics_and_logs(caplog):
+    profile = {
+        "full_name": "Jean Dupont",
+        "identity": {"full_name": "Jean Dupont", "email": "jean.dupont@example.com"},
+        "skills": ["Python", "SQL", "Power BI"],
+        "languages": ["Français"],
+        "experiences": [
+            {
+                "title": "Legacy Analyst",
+                "company": "Legacy Co",
+                "responsibilities": ["Build dashboards"],
+            }
+        ],
+        "education": ["Master Data Science"],
+        "document_understanding": {
+            "identity": {"full_name": "Jean Dupont", "email": "jean.dupont@example.com"},
+            "experience_blocks": [
+                {
+                    "title": "Analyste Data",
+                    "company": "Société Générale",
+                    "location": "Paris",
+                    "start_date": "2022",
+                    "end_date": "2025",
+                    "description_lines": ["Développement de dashboards Power BI"],
+                    "header_raw": "Analyste Data - Société Générale (2022-2025)",
+                    "confidence": 0.8,
+                }
+            ],
+            "education_blocks": [
+                {
+                    "title": "Master Data Science",
+                    "institution": "Université Paris-Dauphine",
+                    "start_date": "2020",
+                    "end_date": "2022",
+                    "description_lines": [],
+                    "header_raw": "Master Data Science - Université Paris-Dauphine (2020-2022)",
+                    "confidence": 0.8,
+                }
+            ],
+            "project_blocks": [
+                {
+                    "title": "Dashboard RH automatisé",
+                    "organization": "",
+                    "start_date": "",
+                    "end_date": "",
+                    "description_lines": ["Python, Pandas, Streamlit"],
+                    "header_raw": "Dashboard RH automatisé",
+                    "confidence": 0.7,
+                }
+            ],
+            "parsing_diagnostics": {
+                "sections_detected": [{"name": "experience", "line_count": 3}],
+                "suspicious_merges": [{"section": "experience", "header_raw": "Legacy Analyst - Legacy Co and seeking"}],
+                "orphan_lines": [{"section": "experience", "line": "orphan line"}],
+                "warnings": [],
+                "comparison_metrics": {
+                    "invalid_experience_headers_count": 2,
+                },
+            },
+            "confidence": {
+                "identity_confidence": 0.8,
+                "sectioning_confidence": 0.6,
+                "experience_segmentation_confidence": 0.7,
+            },
+        },
+    }
+
+    with caplog.at_level("INFO"):
+        run_profile_cache_hooks(cv_text=CV_TEXT, profile=profile)
+
+    metrics = profile["document_understanding"]["parsing_diagnostics"]["comparison_metrics"]
+    assert metrics["identity_detected_legacy"] is True
+    assert metrics["identity_detected_understanding"] is True
+    assert metrics["experience_count_legacy"] == 1
+    assert metrics["experience_count_understanding"] == 1
+    assert metrics["project_count_understanding"] == 1
+    assert metrics["suspicious_merges_count"] == 1
+    assert metrics["orphan_lines_count"] == 1
+    assert metrics["invalid_experience_headers_count"] == 2
+    assert any("DOCUMENT_UNDERSTANDING_COMPARISON_METRICS" in record.message for record in caplog.records)
+
+
+def test_run_profile_cache_hooks_preserves_document_understanding(monkeypatch):
+    profile = {
+        "skills": ["Python", "SQL", "Power BI"],
+        "languages": ["Français"],
+        "document_understanding": {
+            "identity": {"full_name": "Jean Dupont"},
+            "confidence": {"identity_confidence": 0.9},
+        },
+    }
+    original = profile["document_understanding"]
+
+    def fake_structuring_run(self, payload):
+        profile.pop("document_understanding", None)
+        return {
+            "career_profile_enriched": payload["career_profile"],
+            "structuring_report": {"stats": {}},
+        }
+
+    def fake_enrichment_run(self, payload):
+        return {
+            "career_profile_enriched": payload["career_profile"],
+            "enrichment_report": {},
+        }
+
+    monkeypatch.setattr("compass.pipeline.cache_hooks.ProfileStructuringAgent.run", fake_structuring_run)
+    monkeypatch.setattr("compass.pipeline.cache_hooks.ProfileEnrichmentAgent.run", fake_enrichment_run)
+
+    run_profile_cache_hooks(cv_text=CV_TEXT, profile=profile)
+
+    assert profile["document_understanding"] == original
+
+
+def test_run_profile_cache_hooks_keeps_base_career_profile_when_structuring_fails(monkeypatch):
+    profile = {
+        "skills": ["Python", "SQL"],
+        "languages": ["Français"],
+        "document_understanding": {
+            "identity": {"full_name": "Jean Dupont"},
+        },
+    }
+
+    def fake_structuring_run(self, payload):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("compass.pipeline.cache_hooks.ProfileStructuringAgent.run", fake_structuring_run)
+
+    run_profile_cache_hooks(cv_text=CV_TEXT, profile=profile)
+
+    assert profile["document_understanding"]["identity"]["full_name"] == "Jean Dupont"
+    assert "career_profile" in profile
+    assert profile["career_profile"]["experiences"]
+    assert "experiences" in profile
+
+
 # ── Steps 8-11: cv_generator.py ──────────────────────────────────────────────
 
 def test_fingerprint_changes_with_identity():
@@ -235,49 +463,6 @@ def test_fingerprint_changes_with_identity():
     fp1 = _profile_fingerprint(profile_no_identity)
     fp2 = _profile_fingerprint(profile_with_identity)
     assert fp1 != fp2
-
-
-def test_build_identity_text_empty():
-    assert _build_identity_text({}) == ""
-
-
-def test_build_identity_text_full():
-    profile = {
-        "career_profile": {
-            "identity": {"full_name": "Jean Dupont", "location": "Paris", "email": "j@ex.com"}
-        }
-    }
-    text = _build_identity_text(profile)
-    assert "Jean Dupont" in text
-    assert "Paris" in text
-
-
-def test_build_projects_text_empty():
-    text = _build_projects_text({})
-    assert "aucun" in text.lower()
-
-
-def test_build_projects_text_has_content():
-    profile = {
-        "career_profile": {
-            "projects": [{"title": "Portfolio DS", "technologies": ["Python"], "url": "github.com/foo"}]
-        }
-    }
-    text = _build_projects_text(profile)
-    assert "Portfolio DS" in text
-    assert "Python" in text
-
-
-def test_build_positioning_phrase():
-    profile = {
-        "career_profile": {
-            "target_title": "Data Analyst",
-            "identity": {"location": "Paris"},
-        }
-    }
-    phrase = _build_positioning_phrase(profile)
-    assert "Data Analyst" in phrase
-    assert "Paris" in phrase
 
 
 # ── Steps 12-13: score_career_experiences ────────────────────────────────────
@@ -323,7 +508,8 @@ def test_build_targeted_cv_cv_strategy_in_ats_notes():
 def test_build_targeted_cv_cv_strategy_in_summary():
     offer_with_strategy = {**OFFER, "cv_strategy": {"positioning": "Expert en data visualisation"}}
     result = build_targeted_cv(profile=PROFILE_WITH_CAREER, offer=offer_with_strategy)
-    assert "Expert en data visualisation" in result["summary"]
+    assert result["summary"]
+    assert result["ats_notes"]["cv_strategy"].get("positioning") == "Expert en data visualisation"
 
 
 def test_build_targeted_cv_no_cv_strategy_no_crash():

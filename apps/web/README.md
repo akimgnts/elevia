@@ -8,7 +8,7 @@ Prerequisites:
 - Node.js + npm (use `.nvmrc` / Node >= 20.19.0)
 
 URLs (dev):
-- Web UI: http://localhost:3000
+- Web UI: http://localhost:3001
 - API: http://127.0.0.1:8000
 
 Routing rule:
@@ -26,11 +26,19 @@ Dev:
 npm run dev
 ```
 
-Run API (separately):
+Canonical full startup from repo root:
+
 ```bash
-cd apps/api
-PYTHONPATH="$(pwd)/src" uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+make dev-up
 ```
+
+Run API manually only if needed:
+```bash
+cd /Users/akimguentas/Dev/elevia-compass/apps/api
+/Users/akimguentas/Dev/elevia-compass/.venv/bin/python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Do not use global `uvicorn`. The backend depends on the repo-root `.venv`.
 
 Build:
 ```bash

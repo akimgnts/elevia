@@ -398,11 +398,11 @@ export default function AdCoachTestPage() {
             </button>
 
             <div className="hidden md:flex items-center gap-1 bg-white/80 dark:bg-neutral-900/80 border border-neutral-200 dark:border-white/10 rounded-full px-2 py-1 shadow-sm backdrop-blur-md">
-              {["home", "features", "pricing", "roadmap"].map((view) => (
+              {["home", "features", "pricing", "offers"].map((view) => (
                 <button
                   key={view}
                   type="button"
-                  onClick={() => route(view)}
+                  onClick={() => (view === "offers" ? openPage("/offers") : route(view))}
                   className={`px-5 py-2 text-sm font-medium rounded-full transition-all ${
                     activeView === view
                       ? "text-emerald-600 dark:text-emerald-400 bg-neutral-100 dark:bg-white/10"
@@ -415,7 +415,7 @@ export default function AdCoachTestPage() {
                       ? "Methode"
                       : view === "pricing"
                         ? "Commencer"
-                        : "Garanties"}
+                        : "Offres"}
                 </button>
               ))}
             </div>
@@ -471,10 +471,10 @@ export default function AdCoachTestPage() {
             </button>
             <button
               type="button"
-              onClick={() => route("roadmap")}
+              onClick={() => openPage("/offers")}
               className="text-lg font-medium text-neutral-600 dark:text-white/70 text-left"
             >
-              Garanties
+              Offres
             </button>
           </div>
         </div>
@@ -1323,10 +1323,10 @@ export default function AdCoachTestPage() {
               <li>
                 <button
                   type="button"
-                  onClick={() => route("roadmap")}
+                  onClick={() => openPage("/offers")}
                   className="hover:text-emerald-500 transition-colors"
                 >
-                  Garanties
+                  Offres
                 </button>
               </li>
             </ul>

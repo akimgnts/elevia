@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { ReactElement } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import AnalyzePage from "./pages/AnalyzePage";
@@ -16,28 +15,14 @@ import CvDeltaPage from "./pages/CvDeltaPage";
 import MarketInsightsPage from "./pages/MarketInsightsPage";
 import LoginPage from "./pages/LoginPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import { useAuth } from "./hooks/useAuth";
 
 function withProtection(element: ReactElement) {
   return <ProtectedRoute>{element}</ProtectedRoute>;
 }
 
-function AuthBootstrap() {
-  const { sessionChecked, isChecking, restoreSession } = useAuth();
-
-  useEffect(() => {
-    if (!sessionChecked && !isChecking) {
-      void restoreSession();
-    }
-  }, [isChecking, restoreSession, sessionChecked]);
-
-  return null;
-}
-
 export default function App() {
   return (
     <>
-      <AuthBootstrap />
       <Routes>
         <Route path="/" element={<AdCoachTestPage />} />
         <Route path="/landing" element={<AdCoachTestPage />} />

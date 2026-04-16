@@ -19,8 +19,7 @@ import {
   type MarketInsightsRole,
   type MarketInsightsResponse,
 } from "../lib/api";
-import { layout } from "../styles/uiTokens";
-import { Navbar } from "../components/layout/Navbar";
+import { PremiumAppShell } from "../components/layout/PremiumAppShell";
 import { TopRolesCard } from "../components/market-insights/TopRolesCard";
 
 const SECTOR_LABELS: Record<string, string> = {
@@ -355,7 +354,7 @@ function MarketInsightsFrame({
 }) {
   return (
     <div
-      className="mx-auto rounded-[30px] border border-white/80 bg-white/85 shadow-[0_22px_70px_-40px_rgba(15,23,42,0.4)] overflow-hidden"
+      className="mx-auto overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95 shadow-[0_18px_50px_-36px_rgba(15,23,42,0.28)]"
       style={
         strict
           ? {
@@ -382,7 +381,7 @@ function DashboardSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[22px] border border-slate-200 bg-white p-3 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.28)] h-full min-h-0 flex flex-col">
+    <div className="flex min-h-0 flex-col rounded-[22px] border border-slate-200 bg-white p-3 shadow-[0_16px_40px_-30px_rgba(15,23,42,0.28)] xl:h-full">
       <div className="mb-3 flex items-center gap-2">
         <span
           className={`flex h-7 w-7 items-center justify-center rounded-xl border ${ACCENTS[iconAccent].badge}`}
@@ -489,7 +488,7 @@ function SectorOpportunityMap({
           <span>Intensité des offres par pays</span>
           <span>{hovered ? `${hovered.name} · ${hovered.count}` : "Survol pour détail"}</span>
         </div>
-        <div className="relative min-h-0 flex-1 overflow-hidden rounded-[18px] border border-slate-200 bg-slate-50/80">
+        <div className="relative h-[320px] min-h-0 flex-1 overflow-hidden rounded-[18px] border border-slate-200 bg-slate-50/80 md:h-[380px] xl:h-full">
           <div className="absolute inset-0 p-1.5">
             <ComposableMap
               projection="geoMercator"
@@ -683,12 +682,12 @@ function MarketDashboardLayout({
   payload: DashboardPayload;
 }) {
   return (
-    <div className="grid h-full grid-cols-12 grid-rows-[auto_minmax(0,1fr)_minmax(0,0.82fr)] gap-2.5">
-      <div className="col-span-12">
+    <div className="grid grid-cols-1 gap-2.5 xl:grid-cols-12 xl:grid-rows-[auto_minmax(0,1fr)_minmax(0,0.82fr)]">
+      <div className="xl:col-span-12">
         <KpiGrid items={payload.kpis} />
       </div>
 
-      <div className="col-span-12 min-h-0 lg:col-span-5">
+      <div className="min-h-0 xl:col-span-12 2xl:col-span-5">
         <SectorOpportunityMap
           countryCounts={payload.countryCounts}
           topCountries={payload.topCountries}
@@ -696,7 +695,7 @@ function MarketDashboardLayout({
         />
       </div>
 
-      <div className="col-span-12 min-h-0 lg:col-span-4">
+      <div className="min-h-0 xl:col-span-6 2xl:col-span-4">
         <RankingPanel
           title={payload.destinationsTitle}
           icon={MapPin}
@@ -708,7 +707,7 @@ function MarketDashboardLayout({
         />
       </div>
 
-      <div className="col-span-12 min-h-0 lg:col-span-3">
+      <div className="min-h-0 xl:col-span-6 2xl:col-span-3">
         <RankingPanel
           title={payload.recruitersTitle}
           icon={Building2}
@@ -720,11 +719,11 @@ function MarketDashboardLayout({
         />
       </div>
 
-      <div className="col-span-12 min-h-0 lg:col-span-8">
+      <div className="min-h-0 xl:col-span-12 2xl:col-span-8">
         <SkillsPanel title={payload.skillsTitle} skills={payload.topSkills} />
       </div>
 
-      <div className="col-span-12 min-h-0 lg:col-span-4">
+      <div className="min-h-0 xl:col-span-12 2xl:col-span-4">
         {payload.topRoles ? (
           <TopRolesCard
             title={payload.topRolesTitle ?? "Top postes"}
@@ -1051,110 +1050,114 @@ export default function MarketInsightsPage() {
     [data],
   );
 
-  return (
-    <div className="relative h-screen overflow-hidden bg-slate-50">
-      {!screenshotMode && <Navbar />}
-
-      <div className="absolute -top-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-br from-teal-200/45 via-cyan-100/40 to-transparent blur-3xl" />
-      <div className="absolute top-40 -left-16 h-64 w-64 rounded-full bg-gradient-to-br from-amber-100/45 via-white/60 to-transparent blur-3xl" />
-
-      <div
-        className={
-          screenshotMode
-            ? "relative flex h-full w-full items-center justify-center p-4"
-            : `${layout.container} relative pb-20 pt-10`
-        }
-      >
-        <MarketInsightsFrame strict={screenshotMode}>
-          <div className="flex h-full w-full flex-col gap-2.5 rounded-[24px] border border-white/70 bg-slate-50/85 p-3">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-xl font-bold tracking-tight text-slate-900 md:text-[1.35rem]">
-                    <span className="text-teal-700">VIE</span> Market Intelligence
-                  </h1>
-                  <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 print:hidden">
-                    {(
-                      [
-                        { key: "overview", label: "Vue d'ensemble" },
-                        { key: "explorer", label: "Par secteur" },
-                      ] as { key: Tab; label: string }[]
-                    ).map((item) => (
-                      <button
-                        key={item.key}
-                        onClick={() => setTab(item.key)}
-                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                          tab === item.key
-                            ? "bg-teal-600 text-white shadow-sm"
-                            : "text-slate-500 hover:text-slate-700"
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                  {tab === "explorer" && sectorOptions.length > 0 && (
-                    <div className="relative min-w-[190px] print:hidden">
-                      <select
-                        value={selectedSector ?? sectorOptions[0]}
-                        onChange={(e) => setSelectedSector(e.target.value)}
-                        className="h-9 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-3 pr-9 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400"
-                      >
-                        {sectorOptions.map((sector) => (
-                          <option key={sector} value={sector}>
-                            {sectorLabel(sector)}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown
-                        size={16}
-                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                      />
-                    </div>
-                  )}
-                </div>
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Structure issue de la maquette validée, adaptée à la palette Elevia.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <span className="text-[11px] text-slate-500">
-                  Source: Elevia Compass
-                </span>
-                {!screenshotMode && (
+  const dashboardBody = (
+    <MarketInsightsFrame strict={screenshotMode}>
+      <div className="flex h-full w-full flex-col gap-3 rounded-[24px] border border-slate-200/80 bg-slate-50/75 p-3 md:p-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 md:text-[1.35rem]">
+                <span className="text-teal-700">V.I.E</span> Marché
+              </h1>
+              <div className="flex w-full flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-1 print:hidden xl:w-auto">
+                {(
+                  [
+                    { key: "overview", label: "Vue d'ensemble" },
+                    { key: "explorer", label: "Par secteur" },
+                  ] as { key: Tab; label: string }[]
+                ).map((item) => (
                   <button
-                    onClick={() => window.print()}
-                    className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 md:flex print:hidden"
+                    key={item.key}
+                    onClick={() => setTab(item.key)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      tab === item.key
+                        ? "bg-teal-600 text-white shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
                   >
-                    <Printer size={14} />
-                    Exporter PDF
+                    {item.label}
                   </button>
-                )}
+                ))}
               </div>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-hidden">
-              {loading && (
-                <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                  Chargement des données marché…
+              {tab === "explorer" && sectorOptions.length > 0 && (
+                <div className="relative min-w-0 flex-1 print:hidden xl:min-w-[220px] xl:flex-none">
+                  <select
+                    value={selectedSector ?? sectorOptions[0]}
+                    onChange={(e) => setSelectedSector(e.target.value)}
+                    className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-3 pr-9 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400"
+                  >
+                    {sectorOptions.map((sector) => (
+                      <option key={sector} value={sector}>
+                        {sectorLabel(sector)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={16}
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
                 </div>
               )}
-
-              {error && (
-                <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
-                  Erreur : {error}
-                </div>
-              )}
-
-              {!loading && !error && data && tab === "overview" && <OverviewView data={data} />}
-              {!loading && !error && data && tab === "explorer" && (
-                <SectorExplorerView data={data} selectedSector={selectedSector} />
-              )}
             </div>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Vue macro du marché V.I.E, alignée avec le reste du produit et lisible sur mobile.
+            </p>
           </div>
-        </MarketInsightsFrame>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-[11px] text-slate-500">
+              Source: Elevia Compass
+            </span>
+            {!screenshotMode && (
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 print:hidden"
+              >
+                <Printer size={14} />
+                Exporter PDF
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-visible xl:overflow-hidden">
+          {loading && (
+            <div className="flex h-full min-h-[240px] items-center justify-center text-sm text-slate-400">
+              Chargement des données marché…
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+              Erreur : {error}
+            </div>
+          )}
+
+          {!loading && !error && data && tab === "overview" && <OverviewView data={data} />}
+          {!loading && !error && data && tab === "explorer" && (
+            <SectorExplorerView data={data} selectedSector={selectedSector} />
+          )}
+        </div>
       </div>
+    </MarketInsightsFrame>
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {screenshotMode ? (
+        <div className="relative flex min-h-screen w-full items-center justify-center p-4">
+          {dashboardBody}
+        </div>
+      ) : (
+        <PremiumAppShell
+          eyebrow="Marché"
+          title="Lire le marché avant d'agir"
+          description="Cette page reste macro. Elle donne le contexte V.I.E global, avec le même framing produit que le cockpit, l'inbox et le catalogue."
+          contentClassName="max-w-7xl"
+        >
+          {dashboardBody}
+        </PremiumAppShell>
+      )}
 
       <style>{`
         @media print {

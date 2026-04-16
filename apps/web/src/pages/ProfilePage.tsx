@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   AlertCircle,
   CheckCircle2,
@@ -21,6 +20,22 @@ import {
 } from "../lib/api";
 import { useProfileStore } from "../store/profileStore";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
+import { AgentUnderstandingStep } from "../components/profile/AgentUnderstandingStep";
+import { ClarificationQuestionsStep } from "../components/profile/ClarificationQuestionsStep";
+import { ProfileValidationStep } from "../components/profile/ProfileValidationStep";
+import { ProfileWizardHeader } from "../components/profile/ProfileWizardHeader";
+import { StructuredExperiencesStep } from "../components/profile/StructuredExperiencesStep";
+import type {
+  EnrichmentAutoFilled,
+  EnrichmentQuestion,
+  EnrichmentReport,
+  EnrichmentTraceEntry,
+  ProfileWizardStep,
+  StructuringQuestion,
+  StructuringReport,
+  WizardQuestion,
+  WizardValidationMeta,
+} from "../components/profile/profileWizardTypes";
 
 type CanonicalSkillRef = {
   label: string;
@@ -110,10 +125,14 @@ type CareerProfileV2 = {
   pending_skill_candidates?: string[];
   completeness?: number;
   skills_highlights?: string[];
+  enrichment_meta?: Record<string, unknown>;
 };
 
 type FullProfile = {
   career_profile?: CareerProfileV2;
+  structuring_report?: StructuringReport;
+  enrichment_report?: EnrichmentReport;
+  profile_wizard_meta?: WizardValidationMeta;
   canonical_skills?: CanonicalSkillRef[];
   skills?: string[];
   matching_skills?: string[];
@@ -344,6 +363,161 @@ function normalizeCareerProfile(career: CareerProfileV2 | undefined, fullProfile
       ? dedupeStrings(current.pending_skill_candidates.map(String))
       : [],
   };
+}
+
+function normalizeStructuringQuestion(value: unknown): StructuringQuestion | null {
+  if (!value || typeof value !== "object") return null;
+  const rec = value as Record<string, unknown>;
+  const type =
+    rec.type === "autonomy" || rec.type === "tool" || rec.type === "skill" || rec.type === "context"
+      ? rec.type
+      : undefined;
+  const targetField =
+    rec.target_field === "autonomy_level" ||
+    rec.target_field === "tool" ||
+    rec.target_field === "tools" ||
+    rec.target_field === "skill" ||
+    rec.target_field === "skill_link" ||
+    rec.target_field === "context"
+      ? rec.target_field
+      : type === "autonomy"
+        ? "autonomy_level"
+        : type === "tool"
+          ? "tool"
+          : type === "skill"
+            ? "skill"
+            : type === "context"
+              ? "context"
+              : undefined;
+
+  return {
+    type,
+    experience_index: typeof rec.experience_index === "number" ? rec.experience_index : undefined,
+    skill_link_index: typeof rec.skill_link_index === "number" ? rec.skill_link_index : undefined,
+    target_field: targetField,
+    question: typeof rec.question === "string" ? rec.question.trim() || undefined : undefined,
+  };
+}
+
+function normalizeEnrichmentQuestion(value: unknown): EnrichmentQuestion | null {
+  if (!value || typeof value !== "object") return null;
+  const rec = value as Record<string, unknown>;
+  const type =
+    rec.type === "autonomy" || rec.type === "tool" || rec.type === "skill" || rec.type === "context"
+      ? rec.type
+      : undefined;
+  const targetField =
+    rec.target_field === "autonomy_level" ||
+    rec.target_field === "tools" ||
+    rec.target_field === "tool" ||
+    rec.target_field === "skill_link" ||
+    rec.target_field === "skill" ||
+    rec.target_field === "context"
+      ? rec.target_field
+      : undefined;
+
+  return {
+    type,
+    experience_index: typeof rec.experience_index === "number" ? rec.experience_index : undefined,
+    skill_link_index:
+      typeof rec.skill_link_index === "number" || rec.skill_link_index === null
+        ? (rec.skill_link_index as number | null)
+        : undefined,
+    target_field: targetField,
+    question: typeof rec.question === "string" ? rec.question.trim() || undefined : undefined,
+    confidence: typeof rec.confidence === "number" ? rec.confidence : undefined,
+  };
+}
+
+function normalizeStructuringReport(value: unknown): StructuringReport {
+  if (!value || typeof value !== "object") return {};
+  const rec = value as Record<string, unknown>;
+  return {
+    used_signals: Array.isArray(rec.used_signals) ? (rec.used_signals as Array<Record<string, unknown>>) : [],
+    uncertain_links: Array.isArray(rec.uncertain_links) ? (rec.uncertain_links as Array<Record<string, unknown>>) : [],
+    questions_for_user: Array.isArray(rec.questions_for_user)
+      ? (rec.questions_for_user.map(normalizeStructuringQuestion).filter(Boolean) as StructuringQuestion[])
+      : [],
+    canonical_candidates: Array.isArray(rec.canonical_candidates) ? (rec.canonical_candidates as Array<Record<string, unknown>>) : [],
+    rejected_noise: Array.isArray(rec.rejected_noise) ? (rec.rejected_noise as Array<Record<string, unknown>>) : [],
+    unresolved_candidates: Array.isArray(rec.unresolved_candidates) ? (rec.unresolved_candidates as Array<Record<string, unknown>>) : [],
+    stats: rec.stats && typeof rec.stats === "object" ? (rec.stats as StructuringReport["stats"]) : {},
+  };
+}
+
+function normalizeEnrichmentReport(value: unknown): EnrichmentReport {
+  if (!value || typeof value !== "object") return {};
+  const rec = value as Record<string, unknown>;
+  return {
+    auto_filled: Array.isArray(rec.auto_filled) ? (rec.auto_filled as EnrichmentAutoFilled[]) : [],
+    suggestions: Array.isArray(rec.suggestions) ? (rec.suggestions as Array<Record<string, unknown>>) : [],
+    questions: Array.isArray(rec.questions)
+      ? (rec.questions.map(normalizeEnrichmentQuestion).filter(Boolean) as EnrichmentQuestion[])
+      : [],
+    reused_rejected: Array.isArray(rec.reused_rejected) ? (rec.reused_rejected as Array<Record<string, unknown>>) : [],
+    confidence_scores: Array.isArray(rec.confidence_scores) ? (rec.confidence_scores as Array<Record<string, unknown>>) : [],
+    priority_signals: Array.isArray(rec.priority_signals) ? (rec.priority_signals as Array<Record<string, unknown>>) : [],
+    canonical_candidates: Array.isArray(rec.canonical_candidates) ? (rec.canonical_candidates as Array<Record<string, unknown>>) : [],
+    learning_candidates: Array.isArray(rec.learning_candidates) ? (rec.learning_candidates as Array<Record<string, unknown>>) : [],
+    stats: rec.stats && typeof rec.stats === "object" ? (rec.stats as Record<string, number>) : {},
+  };
+}
+
+function mergeWizardQuestions(
+  structuringQuestions: StructuringQuestion[],
+  enrichmentQuestions: EnrichmentQuestion[],
+  experiences: ExperienceV2[],
+): WizardQuestion[] {
+  const seen = new Set<string>();
+  const merged: WizardQuestion[] = [];
+
+  function isResolved(question: WizardQuestion): boolean {
+    if (question.experience_index == null) return false;
+    const experience = experiences[question.experience_index];
+    if (!experience) return false;
+    const links = experience.skill_links || [];
+    const linkIndex =
+      typeof question.skill_link_index === "number"
+        ? question.skill_link_index
+        : links.length === 1
+          ? 0
+          : -1;
+    const targetLink = links[linkIndex];
+
+    switch (question.target_field) {
+      case "context":
+        return Boolean(targetLink?.context?.trim());
+      case "autonomy_level":
+        return Boolean(targetLink?.autonomy_level || experience.autonomy_level);
+      case "tool":
+      case "tools":
+        return Boolean((targetLink?.tools || []).length > 0);
+      case "skill":
+      case "skill_link":
+        return Boolean(targetLink?.skill?.label || (experience.canonical_skills_used || []).length > 0);
+      default:
+        return false;
+    }
+  }
+
+  for (const question of [
+    ...structuringQuestions.map((item) => ({ ...item, source: "structuring" as const })),
+    ...enrichmentQuestions.map((item) => ({ ...item, source: "enrichment" as const })),
+  ]) {
+    const experienceIndex = question.experience_index ?? -1;
+    const targetField = question.target_field ?? "unknown";
+    const key = `${experienceIndex}:${targetField}`;
+    if (seen.has(key) || isResolved(question)) continue;
+    seen.add(key);
+    merged.push(question);
+  }
+
+  return merged;
+}
+
+function hasValidatedWizard(profile: FullProfile): boolean {
+  const meta = profile.profile_wizard_meta;
+  return Boolean(meta && typeof meta === "object" && meta.validated_at);
 }
 
 function computeCompleteness(profile: {
@@ -1168,6 +1342,8 @@ export default function ProfilePage() {
 
   const fullProfile = (userProfile || {}) as FullProfile;
   const currentCareer = normalizeCareerProfile(fullProfile.career_profile, fullProfile);
+  const structuringReport = normalizeStructuringReport(fullProfile.structuring_report);
+  const enrichmentReport = normalizeEnrichmentReport(fullProfile.enrichment_report);
 
   const [identity, setIdentity] = useState<IdentityV2>(currentCareer.identity || {});
   const [baseTitle, setBaseTitle] = useState(currentCareer.base_title || "");
@@ -1185,6 +1361,10 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showReimport, setShowReimport] = useState(false);
+  const [showAdvancedProfile, setShowAdvancedProfile] = useState(false);
+  const [selectedSkillLinkIndex, setSelectedSkillLinkIndex] = useState<Record<number, number>>({});
+  const [editedEnrichmentFields, setEditedEnrichmentFields] = useState<Record<string, "user_validated">>({});
+  const [wizardStep, setWizardStep] = useState<ProfileWizardStep>(hasValidatedWizard(fullProfile) ? "validation" : "understanding");
 
   const hasProfile = Boolean(
     identity.full_name ||
@@ -1204,12 +1384,90 @@ export default function ProfilePage() {
     languages,
   });
   const completePct = Math.round(completeness * 100);
-  const completenessColor =
-    completePct >= 80
-      ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-      : completePct >= 40
-        ? "text-amber-700 bg-amber-50 border-amber-200"
-        : "text-rose-700 bg-rose-50 border-rose-200";
+  const structuredExperienceCount = experiences.filter(hasPrimarySkillLinks).length;
+  const structuredLinkCount = experiences.reduce((sum, experience) => sum + (experience.skill_links?.length || 0), 0);
+  const mergedQuestions = mergeWizardQuestions(
+    structuringReport.questions_for_user || [],
+    enrichmentReport.questions || [],
+    experiences,
+  );
+  const autoFilledCount = enrichmentReport.auto_filled?.length || 0;
+  const remainingQuestionsCount = mergedQuestions.length;
+  const prioritySignalCount = enrichmentReport.priority_signals?.length || 0;
+  const unresolvedCount = remainingQuestionsCount;
+
+  function getSelectedSkillLinkIndex(experienceIndex: number, experience: ExperienceV2): number {
+    const current = selectedSkillLinkIndex[experienceIndex] ?? 0;
+    const total = experience.skill_links?.length || 0;
+    if (total === 0) return 0;
+    return current >= 0 && current < total ? current : 0;
+  }
+
+  function buildEditedFieldKey(experienceIndex: number, skillLinkIndex: number, field: "tools" | "context" | "autonomy_level") {
+    return `${experienceIndex}:${skillLinkIndex}:${field}`;
+  }
+
+  function markFieldUserValidated(experienceIndex: number, skillLinkIndex: number, field: "tools" | "context" | "autonomy_level") {
+    setEditedEnrichmentFields((current) => ({
+      ...current,
+      [buildEditedFieldKey(experienceIndex, skillLinkIndex, field)]: "user_validated",
+    }));
+  }
+
+  function isFieldUserValidated(experienceIndex: number, skillLinkIndex: number, field: "tools" | "context" | "autonomy_level"): boolean {
+    return editedEnrichmentFields[buildEditedFieldKey(experienceIndex, skillLinkIndex, field)] === "user_validated";
+  }
+
+  function getLinkTrace(
+    experienceIndex: number,
+    skillLinkIndex: number,
+    field: "tools" | "context" | "autonomy_level",
+  ): EnrichmentTraceEntry | undefined {
+    const enrichmentMeta = currentCareer.enrichment_meta;
+    if (!enrichmentMeta || typeof enrichmentMeta !== "object") return undefined;
+    const experiencesMeta = (enrichmentMeta as Record<string, unknown>).experiences;
+    if (!Array.isArray(experiencesMeta)) return undefined;
+    const experienceMeta = experiencesMeta[experienceIndex];
+    if (!experienceMeta || typeof experienceMeta !== "object") return undefined;
+    const skillLinksMeta = (experienceMeta as Record<string, unknown>).skill_links;
+    if (!Array.isArray(skillLinksMeta)) return undefined;
+    const linkMeta = skillLinksMeta[skillLinkIndex];
+    if (!linkMeta || typeof linkMeta !== "object") return undefined;
+    const fieldValue = (linkMeta as Record<string, unknown>)[field];
+
+    if (field === "tools" && Array.isArray(fieldValue)) {
+      const enrichmentTool = fieldValue.find(
+        (item) => item && typeof item === "object" && (item as Record<string, unknown>).source === "enrichment",
+      );
+      if (enrichmentTool && typeof enrichmentTool === "object") {
+        return {
+          source: typeof (enrichmentTool as Record<string, unknown>).source === "string" ? (enrichmentTool as Record<string, unknown>).source as string : undefined,
+          confidence: typeof (enrichmentTool as Record<string, unknown>).confidence === "number" ? (enrichmentTool as Record<string, unknown>).confidence as number : undefined,
+        };
+      }
+      return undefined;
+    }
+
+    if (fieldValue && typeof fieldValue === "object") {
+      return {
+        source: typeof (fieldValue as Record<string, unknown>).source === "string" ? (fieldValue as Record<string, unknown>).source as string : undefined,
+        confidence: typeof (fieldValue as Record<string, unknown>).confidence === "number" ? (fieldValue as Record<string, unknown>).confidence as number : undefined,
+      };
+    }
+    return undefined;
+  }
+
+  function goToPreviousWizardStep() {
+    setWizardStep((current) =>
+      current === "experiences"
+        ? "understanding"
+        : current === "questions"
+          ? "experiences"
+          : current === "validation"
+            ? "questions"
+            : "understanding",
+    );
+  }
 
   function queuePendingSkill(value: string) {
     setPendingSkillCandidates((current) => dedupeStrings([...current, value]));
@@ -1236,6 +1494,10 @@ export default function ProfilePage() {
       setSelectedSkills(nextCareer.selected_skills || []);
       setPendingSkillCandidates(nextCareer.pending_skill_candidates || []);
       setShowReimport(false);
+      setShowAdvancedProfile(false);
+      setSelectedSkillLinkIndex({});
+      setEditedEnrichmentFields({});
+      setWizardStep("understanding");
     } catch (err) {
       setParseError(err instanceof Error ? err.message : "Erreur lors de l'analyse");
     } finally {
@@ -1243,7 +1505,82 @@ export default function ProfilePage() {
     }
   }
 
-  async function handleSave() {
+  function applyClarificationAnswer(
+    question: WizardQuestion,
+    value: string | AutonomyLevel,
+  ) {
+    if (question.experience_index == null) return;
+
+    setExperiences((current) =>
+      current.map((experience, index) => {
+        if (index !== question.experience_index) return experience;
+
+        const nextLinks = [...(experience.skill_links || [])];
+        const linkIndex =
+          typeof question.skill_link_index === "number"
+            ? question.skill_link_index
+            : nextLinks.length === 1
+              ? 0
+              : -1;
+        const targetLink = nextLinks[linkIndex];
+
+        if (question.target_field === "autonomy_level" && typeof value === "string") {
+          if (value !== "execution" && value !== "partial" && value !== "autonomous" && value !== "ownership") {
+            return experience;
+          }
+          if (targetLink) {
+            markFieldUserValidated(index, linkIndex, "autonomy_level");
+            nextLinks[linkIndex] = {
+              ...targetLink,
+              autonomy_level: value,
+            };
+            return { ...experience, autonomy_level: value, skill_links: nextLinks };
+          }
+          return nextLinks.length <= 1 ? { ...experience, autonomy_level: value } : experience;
+        }
+
+        if (!targetLink || typeof value !== "string") return experience;
+
+        if (question.target_field === "context") {
+          markFieldUserValidated(index, linkIndex, "context");
+          nextLinks[linkIndex] = { ...targetLink, context: value.trim() || undefined };
+          return { ...experience, skill_links: nextLinks };
+        }
+
+        if (question.target_field === "tool") {
+          const label = value.trim();
+          if (!label) return experience;
+          markFieldUserValidated(index, linkIndex, "tools");
+          nextLinks[linkIndex] = {
+            ...targetLink,
+            tools: dedupeTools([...(targetLink.tools || []), { label }]),
+          };
+          return { ...experience, skill_links: nextLinks };
+        }
+
+        if (question.target_field === "skill") {
+          const label = value.trim();
+          if (!label) return experience;
+          nextLinks[linkIndex] = {
+            ...targetLink,
+            skill: {
+              ...targetLink.skill,
+              label,
+            },
+          };
+          return { ...experience, skill_links: nextLinks };
+        }
+
+        return experience;
+      }),
+    );
+  }
+
+  async function handleWizardValidation() {
+    await handleSave(true);
+  }
+
+  async function handleSave(markValidated = false) {
     setSaving(true);
     setSaved(false);
 
@@ -1315,6 +1652,12 @@ export default function ProfilePage() {
 
     const updatedProfile: FullProfile = {
       ...fullProfile,
+      profile_wizard_meta: markValidated
+        ? {
+            validated_at: new Date().toISOString(),
+            version: "v1",
+          }
+        : fullProfile.profile_wizard_meta,
       canonical_skills: selectedSkillItems,
       skills: dedupeStrings([...(Array.isArray(fullProfile.skills) ? fullProfile.skills.map(String) : []), ...selectedSkillLabels]),
       matching_skills: dedupeStrings([...(Array.isArray(fullProfile.matching_skills) ? fullProfile.matching_skills.map(String) : []), ...selectedSkillLabels]),
@@ -1344,6 +1687,9 @@ export default function ProfilePage() {
 
     setSaving(false);
     setSaved(true);
+    if (markValidated) {
+      setWizardStep("validation");
+    }
     window.setTimeout(() => setSaved(false), 3000);
   }
 
@@ -1352,7 +1698,7 @@ export default function ProfilePage() {
       <PremiumAppShell
         eyebrow="Profil"
         title="Construire la base de vérité du produit"
-        description="Importez votre CV pour démarrer. Le parsing est le point d'entrée, mais le profil enrichi sert ensuite au matching, aux documents et au suivi."
+        description="Importez votre CV pour démarrer. Le parsing ouvre le flux, puis ce profil devient la source de vérité pour le cockpit, l'inbox, les candidatures et les CV."
       >
         <div className="mx-auto max-w-2xl space-y-6">
           <div className={GLASS}>
@@ -1400,40 +1746,20 @@ export default function ProfilePage() {
           </button>
           <button
             type="button"
-            onClick={handleSave}
+            onClick={() => {
+              void handleSave();
+            }}
             disabled={saving}
             className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-            {saving ? "Enregistrement…" : saved ? "Enregistré" : "Enregistrer le profil"}
+            {saving ? "Enregistrement…" : saved ? "Enregistré" : "Enregistrer le brouillon"}
           </button>
         </>
       }
       contentClassName="max-w-7xl"
     >
       <div className="space-y-6 pb-12">
-        <section className={`${GLASS} p-5`}>
-          <SectionLabel text="Flux produit" />
-          <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="text-lg font-semibold text-slate-950">Ce profil alimente votre matching et vos documents.</div>
-              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-                Le parsing CV est seulement un point de départ. Cette page sert à contrôler les compétences, enrichir les expériences et préparer la génération de CV / lettre sans injecter de bruit.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link to="/cockpit" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Ouvrir le cockpit</Link>
-              <Link to="/inbox" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Voir mes offres</Link>
-              <Link to="/applications" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Ouvrir le suivi</Link>
-            </div>
-          </div>
-        </section>
-
-        <div className={`flex items-center justify-between rounded-2xl border px-5 py-3 text-sm font-semibold ${completenessColor}`}>
-          <span>Profil complété à {completePct}%</span>
-          {completePct < 80 && <span className="text-xs font-normal">Ajoutez des expériences, des compétences contrôlées et du signal chiffré.</span>}
-        </div>
-
         {showReimport && (
           <div className={GLASS}>
             <div className="mb-3 flex items-center justify-between">
@@ -1451,6 +1777,248 @@ export default function ProfilePage() {
             )}
           </div>
         )}
+
+        <ProfileWizardHeader
+          currentStep={wizardStep}
+          onBack={wizardStep === "understanding" ? undefined : goToPreviousWizardStep}
+        />
+
+        {hasValidatedWizard(fullProfile) && wizardStep === "validation" && (
+          <div className="rounded-[1.5rem] border border-slate-200/80 bg-white/90 p-5 shadow-sm">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Profil validé</div>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="text-lg font-semibold text-slate-950">Le profil a déjà été validé dans le wizard.</div>
+                <p className="mt-1 text-sm text-slate-600">Vous pouvez revoir le résumé actuel ou relancer la correction guidée.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWizardStep("understanding")}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Modifier mon profil
+              </button>
+            </div>
+          </div>
+        )}
+
+        {wizardStep === "understanding" && (
+          <>
+            <AgentUnderstandingStep
+              report={structuringReport}
+              autoFilledCount={autoFilledCount}
+              remainingQuestionsCount={remainingQuestionsCount}
+              prioritySignalCount={prioritySignalCount}
+              autoFilledItems={enrichmentReport.auto_filled || []}
+            />
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setWizardStep("experiences")}
+                className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Continuer vers mes expériences
+              </button>
+            </div>
+          </>
+        )}
+
+        {wizardStep === "experiences" && (
+          <StructuredExperiencesStep
+            experiences={experiences}
+            onNext={() => setWizardStep("questions")}
+            selectedSkillLinkIndex={selectedSkillLinkIndex}
+            onSelectSkillLink={(experienceIndex, skillLinkIndex) =>
+              setSelectedSkillLinkIndex((current) => ({
+                ...current,
+                [experienceIndex]: skillLinkIndex,
+              }))
+            }
+            getLinkTrace={getLinkTrace}
+            isFieldUserValidated={isFieldUserValidated}
+            renderCorrectionPanel={(index, skillLinkIndex) => {
+              const experience = experiences[index];
+              const activeLinkIndex = getSelectedSkillLinkIndex(index, experience);
+              const resolvedSkillLinkIndex = typeof skillLinkIndex === "number" ? skillLinkIndex : activeLinkIndex;
+              const existingLinks = experience.skill_links || [];
+              const fallbackLink = {
+                skill: experience.canonical_skills_used?.[0] || { label: "" },
+                tools: (experience.tools || []).map((tool) => ({ label: tool.label })),
+                context: experience.impact_signals?.[0] || "",
+                autonomy_level: experience.autonomy_level,
+              };
+              const firstLink = existingLinks[resolvedSkillLinkIndex] || existingLinks[0] || fallbackLink;
+
+              return (
+                <div className="grid gap-4">
+                  <ControlledSkillSelector
+                    label="Compétence principale"
+                    placeholder="Reporting, analyse de données…"
+                    selected={firstLink.skill.label ? [firstLink.skill] : []}
+                    onChange={(items) => {
+                      const skill = items[items.length - 1];
+                      if (!skill) return;
+                      setExperiences((current) =>
+                        current.map((item, itemIndex) =>
+                          itemIndex === index
+                            ? {
+                                ...item,
+                                skill_links: (() => {
+                                  const nextLinks = [...(item.skill_links || [])];
+                                  nextLinks[resolvedSkillLinkIndex] = {
+                                    ...firstLink,
+                                    skill,
+                                  };
+                                  return nextLinks;
+                                })(),
+                              }
+                            : item,
+                        ),
+                      );
+                    }}
+                    onPendingCandidate={queuePendingSkill}
+                  />
+
+                  <div className="grid gap-1">
+                    <FieldLabel>Outils associés</FieldLabel>
+                    <ToolChipSelector
+                      selected={firstLink.tools || []}
+                      onChange={(tools) =>
+                        {
+                          markFieldUserValidated(index, resolvedSkillLinkIndex, "tools");
+                          setExperiences((current) =>
+                            current.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? {
+                                    ...item,
+                                    skill_links: (() => {
+                                      const nextLinks = [...(item.skill_links || [])];
+                                      nextLinks[resolvedSkillLinkIndex] = {
+                                        ...firstLink,
+                                        tools,
+                                      };
+                                      return nextLinks;
+                                    })(),
+                                  }
+                                : item,
+                            ),
+                          );
+                        }
+                      }
+                    />
+                  </div>
+
+                  <div className="grid gap-1">
+                    <FieldLabel>Impact / contexte</FieldLabel>
+                    <TextInput
+                      value={firstLink.context || ""}
+                      onChange={(value) =>
+                        {
+                          markFieldUserValidated(index, resolvedSkillLinkIndex, "context");
+                          setExperiences((current) =>
+                            current.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? {
+                                    ...item,
+                                    skill_links: (() => {
+                                      const nextLinks = [...(item.skill_links || [])];
+                                      nextLinks[resolvedSkillLinkIndex] = {
+                                        ...firstLink,
+                                        context: value,
+                                      };
+                                      return nextLinks;
+                                    })(),
+                                  }
+                                : item,
+                            ),
+                          );
+                        }
+                      }
+                      placeholder="Analyse de performance, coordination projet…"
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <FieldLabel>Autonomie</FieldLabel>
+                    <div className="flex flex-wrap gap-2">
+                      {AUTONOMY_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            {
+                              markFieldUserValidated(index, resolvedSkillLinkIndex, "autonomy_level");
+                              setExperiences((current) =>
+                                current.map((item, itemIndex) =>
+                                  itemIndex === index
+                                    ? {
+                                        ...item,
+                                        autonomy_level: option.value,
+                                        skill_links: (() => {
+                                          const nextLinks = [...(item.skill_links || [])];
+                                          nextLinks[resolvedSkillLinkIndex] = {
+                                            ...firstLink,
+                                            autonomy_level: option.value,
+                                          };
+                                          return nextLinks;
+                                        })(),
+                                      }
+                                    : item,
+                                ),
+                              );
+                            }
+                          }
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                            (firstLink.autonomy_level || experience.autonomy_level) === option.value
+                              ? "border-slate-900 bg-slate-900 text-white"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            }}
+          />
+        )}
+
+        {wizardStep === "questions" && (
+          <ClarificationQuestionsStep
+            questions={mergedQuestions}
+            experiences={experiences}
+            onAnswer={applyClarificationAnswer}
+            onNext={() => setWizardStep("validation")}
+          />
+        )}
+
+        {wizardStep === "validation" && (
+          <ProfileValidationStep
+            completePct={completePct}
+            structuredExperienceCount={structuredExperienceCount}
+            structuredLinkCount={structuredLinkCount}
+            remainingAmbiguities={unresolvedCount}
+            estimatedMatches={undefined}
+            onValidate={handleWizardValidation}
+          />
+        )}
+
+        {wizardStep === "experiences" && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedProfile((value) => !value)}
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              {showAdvancedProfile ? "Masquer le mode avancé" : "Afficher le mode avancé"}
+            </button>
+          </div>
+        )}
+
+        {wizardStep === "experiences" && showAdvancedProfile && (
+          <>
 
         <section className={GLASS}>
           <SectionLabel text="Identité et positionnement de base" />
@@ -1526,7 +2094,7 @@ export default function ProfilePage() {
         <section className={GLASS}>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <SectionLabel text="Expériences enrichies" />
+              <SectionLabel text="Structure de vos expériences" />
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                 Ici vous ajoutez le signal qui manque souvent au parsing brut : outils réellement utilisés, compétences mobilisées, autonomie, contexte, données chiffrées et impact.
               </p>
@@ -1640,6 +2208,8 @@ export default function ProfilePage() {
           <button type="button" onClick={() => setProjects([{ title: "", technologies: [], impact: "" }])} className="w-full rounded-[1.5rem] border-2 border-dashed border-slate-200 py-4 text-sm font-semibold text-slate-400 transition hover:border-slate-300 hover:text-slate-700">
             + Ajouter des projets personnels
           </button>
+        )}
+          </>
         )}
       </div>
     </PremiumAppShell>
