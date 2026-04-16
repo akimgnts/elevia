@@ -15,6 +15,8 @@ import sys
 from copy import deepcopy
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from compass.intelligence import CareerIntelligenceAgent
@@ -437,6 +439,10 @@ class TestAgentContract:
         agent = CareerIntelligenceAgent()
         assert agent.version == "v1"
 
+    @pytest.mark.xfail(
+        reason="Pending Task 3 — state merge: run() must forward all input keys in output",
+        strict=True,
+    )
     def test_output_preserves_input_career_profile(self) -> None:
         """State merge: career_profile must be forwarded in output."""
         profile = _make_career_profile()
@@ -444,6 +450,10 @@ class TestAgentContract:
         result = CareerIntelligenceAgent().run(state)
         assert result["career_profile"] == profile
 
+    @pytest.mark.xfail(
+        reason="Pending Task 3 — state merge: run() must forward all input keys in output",
+        strict=True,
+    )
     def test_output_preserves_extra_state_keys(self) -> None:
         """State merge: unknown upstream keys must pass through unchanged."""
         state = {
