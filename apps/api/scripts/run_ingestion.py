@@ -67,6 +67,7 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from api.utils.offer_skills import ensure_offer_skills_table
+from api.utils.raw_offers_pg import persist_raw_offers
 from api.utils.rome_link import get_offer_rome_link, get_rome_competences_for_rome_codes
 from esco.extract import extract_raw_skills_from_offer
 from matching.extractors import normalize_skill_label
@@ -276,6 +277,23 @@ def ingest_france_travail(logger: StructuredLogger) -> int:
                 "payload": offer,
             }
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+    pg_result = persist_raw_offers("france_travail", offers, timestamp)
+    if pg_result.error:
+        logger.log(
+            "persist_raw_offers_pg",
+            "warning",
+            error=pg_result.error,
+            offers_processed=pg_result.persisted,
+            extra={"source": "france_travail"},
+        )
+    else:
+        logger.log(
+            "persist_raw_offers_pg",
+            "success",
+            offers_processed=pg_result.persisted,
+            extra={"source": "france_travail"},
+        )
 
     # Persist to SQLite
     count = persist_ft_offers(offers, timestamp)

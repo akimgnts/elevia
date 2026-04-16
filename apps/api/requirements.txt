@@ -1,6 +1,7 @@
 # Core dependencies
 requests>=2.31.0
 python-dotenv>=1.0.0
+psycopg[binary]>=3.2.1
 
 # Data analysis & processing
 pandas>=2.0.0

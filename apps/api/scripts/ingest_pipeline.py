@@ -27,6 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from api.utils.offer_skills import ensure_offer_skills_table
+from api.utils.raw_offers_pg import persist_raw_offers
 from compass.offer_canonicalization import normalize_offers_to_uris
 
 try:
@@ -146,6 +147,12 @@ def fetch_france_travail(limit: int = 150) -> int:
                     f.write(json.dumps(raw_record, ensure_ascii=False) + "\n")
 
             print(f"[FT] Raw data appended to: {raw_file}")
+
+            pg_result = persist_raw_offers("france_travail", offers, timestamp)
+            if pg_result.error:
+                print(f"[PG] WARNING: raw_offers persistence skipped/failed: {pg_result.error}")
+            else:
+                print(f"[PG] Upserted {pg_result.persisted} raw_offers rows")
 
             # UPSERT into SQLite
             ingested = upsert_offers(offers, "france_travail", timestamp)

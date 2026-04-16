@@ -53,6 +53,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
 try:
     import requests
 except ImportError:
@@ -60,6 +62,8 @@ except ImportError:
                       "error": "requests not installed — pip install requests"}),
           flush=True)
     sys.exit(1)
+
+from api.utils.raw_offers_pg import persist_raw_offers
 
 # ==============================================================================
 # PATHS (anchored to repo root — jamais relatif au CWD)
@@ -648,6 +652,7 @@ def test_endpoint_viability() -> bool:
 def write_raw_jsonl(
     offers: List[Dict[str, Any]],
     run_id: str,
+    fetched_at: str,
     logger: StructuredLogger,
 ) -> Path:
     """
@@ -672,8 +677,6 @@ def write_raw_jsonl(
                    error=f"Fichier déjà existant : {raw_file} — run_id collision",
                    extra={"catalog_source": "BF_AZURE"})
         sys.exit(1)
-
-    fetched_at = datetime.now(timezone.utc).isoformat()
 
     with open(raw_file, "w", encoding="utf-8") as fh:
         for offer in offers:
@@ -825,7 +828,25 @@ def main() -> None:
                           "note": "dry-run — aucun fichier écrit"})
         sys.exit(0)
 
-    raw_file = write_raw_jsonl(final_offers, run_id, logger)
+    scraped_at = datetime.now(timezone.utc).isoformat()
+    pg_result = persist_raw_offers("business_france", final_offers, scraped_at)
+    if pg_result.error:
+        logger.log(
+            "persist_raw_offers_pg",
+            "warning",
+            error=pg_result.error,
+            offers_processed=pg_result.persisted,
+            extra={"source": "business_france"},
+        )
+    else:
+        logger.log(
+            "persist_raw_offers_pg",
+            "success",
+            offers_processed=pg_result.persisted,
+            extra={"source": "business_france"},
+        )
+
+    raw_file = write_raw_jsonl(final_offers, run_id, scraped_at, logger)
 
     # ── Résumé final ───────────────────────────────────────────────────────────
     duration_ms = int((time.time() - start_time) * 1000)
