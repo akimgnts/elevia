@@ -113,6 +113,37 @@ app.include_router(market_insights_router)  # GET /insights/vie-market (read-onl
 app.include_router(ai_justify_router)      # POST /ai/justify (AI business-fit justification)
 app.include_router(ai_structure_router)    # POST /ai/structure-offer (structured offer rewrite)
 
+# Duplicate all routes under /api prefix so the backend responds whether or not
+# the reverse proxy (nginx/Caddy) strips the /api prefix before forwarding.
+# Local dev: Vite proxy strips /api (rewrite). Staging: Caddy handle_path strips /api.
+# Production (Coolify): nginx may NOT strip /api — these registrations cover that case.
+_P = "/api"
+app.include_router(health_router,              prefix=_P)
+app.include_router(auth_router,                prefix=_P)
+app.include_router(matching_router,            prefix=f"{_P}/v1")
+app.include_router(metrics_router,             prefix=f"{_P}/metrics")
+app.include_router(offers_router,              prefix=f"{_P}/offers")
+app.include_router(profile_router,             prefix=f"{_P}/profile")
+app.include_router(profile_baseline_router,    prefix=_P)
+app.include_router(profile_file_router,        prefix=_P)
+app.include_router(inbox_router,               prefix=_P)
+app.include_router(applications_router,        prefix=_P)
+app.include_router(apply_pack_router,          prefix=_P)
+app.include_router(debug_router,               prefix=_P)
+app.include_router(dev_tools_router,           prefix=_P)
+app.include_router(profile_key_skills_router,  prefix=_P)
+app.include_router(context_router,             prefix=_P)
+app.include_router(documents_router,           prefix=_P)
+app.include_router(profile_structured_router,  prefix=_P)
+app.include_router(profile_summary_router,     prefix=_P)
+app.include_router(profile_enrichment_router,  prefix=_P)
+app.include_router(cluster_library_router,     prefix=_P)
+app.include_router(analyze_recovery_router,    prefix=_P)
+app.include_router(analyze_ai_quality_router,  prefix=_P)
+app.include_router(market_insights_router,     prefix=_P)
+app.include_router(ai_justify_router,          prefix=_P)
+app.include_router(ai_structure_router,        prefix=_P)
+
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):

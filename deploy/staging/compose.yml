@@ -34,6 +34,7 @@ services:
       APP_SITE_ADDRESS: ${APP_SITE_ADDRESS}
       STAGING_BASIC_AUTH_USER: ${STAGING_BASIC_AUTH_USER}
       STAGING_BASIC_AUTH_HASH: ${STAGING_BASIC_AUTH_HASH}
+      API_UPSTREAM: ${API_UPSTREAM:-api:8000}
     depends_on:
       api:
         condition: service_healthy
