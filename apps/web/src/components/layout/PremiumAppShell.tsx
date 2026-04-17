@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Briefcase, Compass, Inbox, ScanSearch, Search, UserRound } from "lucide-react";
+import { BarChart3, Briefcase, Compass, Inbox, ScanSearch, UserRound } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { PageContainer } from "./PageContainer";
 
@@ -14,13 +14,12 @@ type PremiumAppShellProps = {
 };
 
 const NAV_ITEMS = [
-  { to: "/analyze", label: "Analyser", icon: ScanSearch },
-  { to: "/explorer", label: "Explorer", icon: Search },
-  { to: "/inbox", label: "Inbox", icon: Inbox },
-  { to: "/dashboard", label: "Cockpit", icon: Compass },
-  { to: "/applications", label: "Candidatures", icon: Briefcase },
-  { to: "/market-insights", label: "Marche", icon: BarChart3 },
+  { to: "/analyze", label: "Analyse", icon: ScanSearch },
   { to: "/profile", label: "Profil", icon: UserRound },
+  { to: "/cockpit", label: "Cockpit", icon: Compass },
+  { to: "/inbox", label: "Inbox", icon: Inbox },
+  { to: "/candidatures", label: "Candidatures", icon: Briefcase },
+  { to: "/market", label: "Marche", icon: BarChart3 },
 ] as const;
 
 function isActive(pathname: string, to: string): boolean {
@@ -55,17 +54,14 @@ export function PremiumAppShell({
 
       <header className="sticky top-0 z-40 border-b border-white/60 bg-white/65 backdrop-blur-xl">
         <PageContainer className="py-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center justify-center">
               <Link
                 to="/"
                 className="inline-flex h-11 items-center rounded-full border border-slate-200/80 bg-white/80 px-4 text-sm font-semibold tracking-tight text-slate-900 shadow-sm"
               >
                 Elevia
               </Link>
-              <div className="hidden text-xs font-medium text-slate-500 md:block">
-                Workspace inspire d&apos;AdCoach, adapte aux pages produit.
-              </div>
             </div>
 
             <nav className="no-scrollbar flex items-center gap-2 overflow-x-auto rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-sm">

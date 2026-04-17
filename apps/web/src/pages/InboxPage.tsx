@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   ChevronDown,
-  FileText,
   Filter,
   Inbox,
   RefreshCw,
@@ -987,25 +986,7 @@ export default function InboxPage() {
 
   // State A: No profile loaded
   if (!userProfile) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <EmptyState
-          icon={FileText}
-          title="Aucun profil chargé"
-          description="Importez votre CV ou créez un profil pour voir les offres."
-          actions={
-            <div className="flex gap-3">
-              <Link to="/analyze" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
-                Importer CV
-              </Link>
-              <Link to="/profile" className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
-                Créer profil
-              </Link>
-            </div>
-          }
-        />
-      </div>
-    );
+    return <Navigate to="/profile" replace />;
   }
 
   // State B: Profile incomplete (PROD only)
@@ -1051,8 +1032,8 @@ export default function InboxPage() {
   return (
     <PremiumAppShell
       eyebrow="Inbox"
-      title="Inbox de matching"
-      description="Vos meilleures offres, déjà triées contre votre profil actif. Sélectionnez ici ce qui mérite un suivi ou une préparation de candidature."
+      title="Inbox apres le cockpit"
+      description="Le cockpit a pose le cadre. Ici, vous ouvrez les offres pertinentes, comparez les signaux et poussez les bonnes opportunites vers le suivi d'execution."
       actions={
         <>
           <Link
@@ -1060,13 +1041,13 @@ export default function InboxPage() {
             className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
           >
             <Sparkles className="h-4 w-4" />
-            Candidatures
+            Passer au suivi
           </Link>
           <Link
-            to="/offers"
+            to="/dashboard"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            Voir tout le catalogue
+            Retour cockpit
           </Link>
         </>
       }
@@ -1078,7 +1059,7 @@ export default function InboxPage() {
             <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Rôle de l'inbox</div>
             <div className="mt-2 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <p className="max-w-3xl text-sm leading-6 text-slate-600">
-                Cette page sélectionne les offres à forte pertinence. Le bouton <span className="font-semibold text-slate-900">Envoyer au suivi</span> crée ou met à jour une candidature dans la page Candidatures.
+                Cette page intervient apres le cockpit: vous arbitrez les offres remontées par votre profil, puis le bouton <span className="font-semibold text-slate-900">Envoyer au suivi</span> cree ou met a jour une candidature dans la page Candidatures.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Link

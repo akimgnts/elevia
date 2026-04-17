@@ -440,14 +440,14 @@ function ExperiencePrimarySignals({ experience }: { experience: ExperienceV2 }) 
   const tools = experience.tools || [];
   const skills = experience.canonical_skills_used || [];
   if (tools.length === 0 && skills.length === 0) {
-    return <div className="text-xs text-slate-400">Ajoutez un premier lien compétence → outils pour rendre cette expérience lisible côté produit et CV.</div>;
+    return <div className="text-xs text-slate-400">Ajoutez un premier lien compétence → outils pour rendre cette expérience lisible côté produit et CV. Les champs legacy ne servent qu&apos;en secours.</div>;
   }
 
   return (
     <div className="grid gap-3 rounded-[1rem] border border-dashed border-slate-200 bg-slate-50/60 px-4 py-3">
       {skills.length > 0 && (
         <div className="grid gap-1">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Competences</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Competences legacy</div>
           <div className="flex flex-wrap gap-1.5">
             {skills.map((skill) => (
               <span key={skill.label} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
@@ -459,7 +459,7 @@ function ExperiencePrimarySignals({ experience }: { experience: ExperienceV2 }) 
       )}
       {tools.length > 0 && (
         <div className="grid gap-1">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Outils</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Outils legacy</div>
           <div className="flex flex-wrap gap-1.5">
             {tools.map((tool) => (
               <span key={tool.label} className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
@@ -1109,14 +1109,14 @@ function ExperienceEditor({
             <div className="rounded-[1rem] border border-slate-200 bg-slate-50/70 px-4 py-3">
               <div className="text-sm font-semibold text-slate-900">Champs legacy conservés en compatibilite</div>
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Les anciennes listes `tools` et `skills` restent stockees pour compatibilite, mais elles sont maintenant derivees des `skill_links` a la sauvegarde.
+                Les anciennes listes `tools` et `skills` restent stockees pour compatibilite, mais elles sont secondaires par rapport aux `skill_links` et derivees de ceux-ci a la sauvegarde.
               </p>
             </div>
           ) : (
             <>
               <ControlledSkillSelector
                 label="Outils reellement utilises"
-                description="Fallback legacy si vous n&apos;avez pas encore structure l&apos;experience avec des skill_links."
+                description="Fallback legacy uniquement si vous n&apos;avez pas encore structure l&apos;experience avec des skill_links."
                 placeholder="Power BI, Excel, SAP…"
                 selected={experience.tools || []}
                 onChange={(tools) => onChange({ ...experience, tools })}
@@ -1125,7 +1125,7 @@ function ExperienceEditor({
 
               <ControlledSkillSelector
                 label="Competences reellement mobilisees"
-                description="Fallback legacy relié aux referentiels existants."
+                description="Fallback legacy secondaire, relie aux referentiels existants."
                 placeholder="Reporting, paie, customer relationship management…"
                 selected={experience.canonical_skills_used || []}
                 onChange={(canonicalSkillsUsed) => onChange({ ...experience, canonical_skills_used: canonicalSkillsUsed })}
@@ -1184,6 +1184,7 @@ export default function ProfilePage() {
   const [parseError, setParseError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [showReimport, setShowReimport] = useState(false);
 
   const hasProfile = Boolean(
@@ -1246,6 +1247,7 @@ export default function ProfilePage() {
   async function handleSave() {
     setSaving(true);
     setSaved(false);
+    setSaveNotice(null);
 
     const normalizedExperiences = experiences.map((experience) => {
       const rawSkillLinks = experience.skill_links || [];
@@ -1340,11 +1342,15 @@ export default function ProfilePage() {
     };
 
     await setUserProfile(updatedProfile);
-    await saveSavedProfile(updatedProfile as Record<string, unknown>).catch(() => undefined);
+    try {
+      await saveSavedProfile(updatedProfile as Record<string, unknown>);
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 3000);
+    } catch {
+      setSaveNotice("Profil enregistré localement. Connectez-vous pour synchroniser avec le backend.");
+    }
 
     setSaving(false);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 3000);
   }
 
   if (!hasProfile && !parsing) {
@@ -1422,9 +1428,9 @@ export default function ProfilePage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link to="/cockpit" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Ouvrir le cockpit</Link>
+              <Link to="/cockpit" className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">Voir mon cockpit</Link>
               <Link to="/inbox" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Voir mes offres</Link>
-              <Link to="/applications" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Ouvrir le suivi</Link>
+              <Link to="/applications" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Ouvrir candidatures</Link>
             </div>
           </div>
         </section>
@@ -1433,6 +1439,12 @@ export default function ProfilePage() {
           <span>Profil complété à {completePct}%</span>
           {completePct < 80 && <span className="text-xs font-normal">Ajoutez des expériences, des compétences contrôlées et du signal chiffré.</span>}
         </div>
+
+        {saveNotice && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-800">
+            {saveNotice}
+          </div>
+        )}
 
         {showReimport && (
           <div className={GLASS}>
@@ -1520,6 +1532,43 @@ export default function ProfilePage() {
                 {pendingSkillCandidates.length === 0 && <div className="text-xs text-slate-400">Aucune entrée en attente pour l&apos;instant.</div>}
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className={GLASS}>
+          <SectionLabel text="Structure de vos experiences" />
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            Vue synthétique des signaux structurants déjà présents sur chaque expérience. Cette lecture est basée d&apos;abord sur `skill_links`, puis seulement sur les champs legacy.
+          </p>
+          <div className="mt-4 grid gap-4">
+            {experiences.length > 0 ? (
+              experiences.map((experience, index) => (
+                <div key={`${experience.title || "experience"}-${index}`} className="rounded-[1.25rem] border border-slate-200 bg-slate-50/60 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-950">{experience.title || "Nouvelle expérience"}</div>
+                      <div className="mt-1 text-xs text-slate-500">
+                        {[experience.company, experience.start_date && experience.end_date ? `${experience.start_date} — ${experience.end_date}` : experience.start_date || experience.end_date]
+                          .filter(Boolean)
+                          .join(" · ") || "À compléter"}
+                      </div>
+                    </div>
+                    {hasPrimarySkillLinks(experience) && (
+                      <div className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                        skill_links
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4">
+                    <ExperiencePrimarySignals experience={experience} />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-[1.25rem] border border-dashed border-slate-200 bg-slate-50/60 px-4 py-4 text-sm text-slate-500">
+                Ajoutez une expérience pour afficher ici sa structure de signaux avant édition.
+              </div>
+            )}
           </div>
         </section>
 

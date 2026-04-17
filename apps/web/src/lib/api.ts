@@ -1248,6 +1248,98 @@ export interface ProfileCluster {
   note: "TRANSVERSAL" | "LOW_SIGNAL" | null;
 }
 
+export interface ProfileUnderstandingQuestion {
+  id: string;
+  category: string;
+  prompt: string;
+  field_path?: string | null;
+  suggested_answer?: string | null;
+  confidence?: number | null;
+  rationale?: string | null;
+}
+
+export interface ProfileUnderstandingSessionRequest {
+  profile: Record<string, unknown>;
+  source_context?: Record<string, unknown>;
+}
+
+export interface ProfileUnderstandingEntity {
+  id: string;
+  entity_type: string;
+  label: string;
+  confidence?: number | null;
+  raw_value?: string | null;
+}
+
+export interface ProfileUnderstandingEvidence {
+  source_type: string;
+  source_value?: string | null;
+  confidence?: number | null;
+  mapping_status?: string | null;
+}
+
+export interface ProfileUnderstandingToolRef {
+  label: string;
+  uri?: string | null;
+}
+
+export interface ProfileUnderstandingSkillRef {
+  label: string;
+  uri?: string | null;
+  confidence?: number | null;
+  method?: string | null;
+  source?: string | null;
+}
+
+export interface ProfileUnderstandingSkillLink {
+  experience_ref?: string | null;
+  skill: ProfileUnderstandingSkillRef;
+  tools: ProfileUnderstandingToolRef[];
+  context?: string | null;
+  autonomy_level?: string | null;
+  evidence: ProfileUnderstandingEvidence[];
+}
+
+export interface ProfileUnderstandingDocumentBlock {
+  id: string;
+  block_type: string;
+  label: string;
+  source_text?: string | null;
+  confidence?: number | null;
+  metadata: Record<string, unknown>;
+}
+
+export interface ProfileUnderstandingMissionUnit {
+  id: string;
+  block_ref: string;
+  experience_ref?: string | null;
+  mission_text: string;
+  context?: string | null;
+  skill_candidates_open: string[];
+  tool_candidates_open: string[];
+  quantified_signals: string[];
+  autonomy_hypothesis?: string | null;
+  evidence: ProfileUnderstandingEvidence[];
+}
+
+export interface ProfileUnderstandingSessionResponse {
+  session_id: string;
+  status: "ready" | "pending" | "error";
+  provider: string;
+  trace_summary: Record<string, unknown>;
+  document_blocks: ProfileUnderstandingDocumentBlock[];
+  mission_units: ProfileUnderstandingMissionUnit[];
+  open_signal: Record<string, unknown>;
+  canonical_signal: Record<string, unknown>;
+  understanding_status: Record<string, unknown>;
+  entity_classification: Record<string, ProfileUnderstandingEntity[]>;
+  proposed_profile_patch: Record<string, unknown>;
+  skill_links: ProfileUnderstandingSkillLink[];
+  evidence_map: Record<string, ProfileUnderstandingEvidence[]>;
+  confidence_map: Record<string, number>;
+  questions: ProfileUnderstandingQuestion[];
+}
+
 /**
  * Upload a CV file (PDF or TXT) and run deterministic baseline skill extraction.
  * POST /profile/parse-file (multipart/form-data)
@@ -1265,6 +1357,21 @@ export async function parseFile(file: File): Promise<ParseFileResponse> {
     throw new Error(`API ${res.status}: ${text}`);
   }
   return res.json() as Promise<ParseFileResponse>;
+}
+
+export async function startProfileUnderstandingSession(
+  payload: ProfileUnderstandingSessionRequest,
+): Promise<ProfileUnderstandingSessionResponse> {
+  const res = await apiFetch(`${API_BASE}/profile-understanding/session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  return res.json() as Promise<ProfileUnderstandingSessionResponse>;
 }
 
 /**

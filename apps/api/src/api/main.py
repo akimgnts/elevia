@@ -52,6 +52,8 @@ from .routes.analyze_ai_quality import router as analyze_ai_quality_router
 from .routes.market_insights import router as market_insights_router
 from .routes.ai_justify import router as ai_justify_router
 from .routes.ai_structure import router as ai_structure_router
+from .routes.profile_understanding import router as profile_understanding_router
+from .routes.profile_understanding_resources import router as profile_understanding_resources_router
 from .routes.inbox import warm_inbox_runtime
 from documents.llm_client import is_llm_available
 
@@ -112,6 +114,8 @@ app.include_router(analyze_ai_quality_router)  # POST /analyze/audit-ai-quality 
 app.include_router(market_insights_router)  # GET /insights/vie-market (read-only, cached)
 app.include_router(ai_justify_router)      # POST /ai/justify (AI business-fit justification)
 app.include_router(ai_structure_router)    # POST /ai/structure-offer (structured offer rewrite)
+app.include_router(profile_understanding_router)  # POST /profile-understanding/session
+app.include_router(profile_understanding_resources_router)  # GET /profile-understanding/resources
 
 # Duplicate all routes under /api prefix so the backend responds whether or not
 # the reverse proxy (nginx/Caddy) strips the /api prefix before forwarding.
@@ -143,6 +147,8 @@ app.include_router(analyze_ai_quality_router,  prefix=_P)
 app.include_router(market_insights_router,     prefix=_P)
 app.include_router(ai_justify_router,          prefix=_P)
 app.include_router(ai_structure_router,        prefix=_P)
+app.include_router(profile_understanding_router, prefix=_P)
+app.include_router(profile_understanding_resources_router, prefix=_P)
 
 
 @app.exception_handler(RequestValidationError)

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { ArrowRight, Briefcase } from "lucide-react";
 import { KpiCard } from "../components/ui/KpiCard";
 import { OfferCard } from "../components/ui/OfferCard";
 import { BaseListingCard } from "../components/ui/BaseListingCard";
@@ -14,6 +14,38 @@ import { fetchInbox, type InboxItem } from "../lib/api";
 import { buildMatchingProfile } from "../lib/profileMatching";
 import { useProfileStore } from "../store/profileStore";
 import { typography, spacing } from "../styles/uiTokens";
+
+function formatTopBreakdown(
+  items: InboxItem[],
+  getLabel: (item: InboxItem) => string | null | undefined,
+  emptyLabel: string
+) {
+  const counts = new Map<string, number>();
+
+  items.forEach((item) => {
+    const label = getLabel(item)?.trim();
+    if (!label) return;
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  });
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([label, count]) => ({
+      title: label,
+      description: `${count} offre${count > 1 ? "s" : ""}`,
+    }))
+    .concat(
+      counts.size > 0
+        ? []
+        : [
+            {
+              title: emptyLabel,
+              description: "Les donnees remonteront des que l'inbox sera chargee.",
+            },
+          ]
+    );
+}
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -47,12 +79,25 @@ export default function DashboardPage() {
     }
 
     loadData();
-  }, [userProfile]);
+  }, [userProfile, profileHash]);
 
   const averageScore =
     items.length > 0
       ? Math.round(items.reduce((sum, r) => sum + r.score, 0) / items.length)
       : 0;
+  const totalOffers = items.length;
+  const matchedOffers = items.filter((item) => Math.round(item.score) >= 65).length;
+
+  const topSectors = formatTopBreakdown(
+    items,
+    (offer) => offer.offer_intelligence?.dominant_domains?.[0] ?? null,
+    "Aucun secteur dominant"
+  );
+  const topCountries = formatTopBreakdown(
+    items,
+    (offer) => offer.country,
+    "Aucun pays dominant"
+  );
 
   const topMatches = items.slice(0, 3).map((offer) => {
     const location = offer.country || offer.city || "Localisation à préciser";
@@ -72,34 +117,14 @@ export default function DashboardPage() {
   });
 
   if (!userProfile) {
-    return (
-      <PremiumAppShell
-        eyebrow="Cockpit"
-        title="Votre cockpit Elevia"
-        description="Synthese, priorites et prochains mouvements a partir de votre profil."
-      >
-        <div className={spacing.pageTop}>
-          <EmptyState
-            title="Aucun profil détecté"
-            description="Analysez votre CV pour activer le matching réel."
-            actionLabel="Analyser mon CV"
-            onAction={() => navigate("/analyze")}
-          />
-          <div className="mt-4 text-center">
-            <Link to="/analyze" className={`${typography.body} underline`}>
-              Aller à l'analyse
-            </Link>
-          </div>
-        </div>
-      </PremiumAppShell>
-    );
+    return <Navigate to="/profile" replace />;
   }
 
   return (
     <PremiumAppShell
       eyebrow="Cockpit"
-      title="Votre cockpit Elevia"
-      description="Vue d'ensemble de vos matches, signaux marche et prochaines actions. L'objectif est la clarte, pas le bruit."
+      title="Votre cockpit apres profil"
+      description="Votre profil est pret. Commencez ici pour cadrer le volume d'offres, les zones de traction et ouvrir ensuite l'inbox avec les bonnes priorites."
       actions={
         <>
           <Link
@@ -110,18 +135,16 @@ export default function DashboardPage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            to="/market-insights"
+            to="/candidatures"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            <Sparkles className="h-4 w-4" />
-            Voir le marche
+            <Briefcase className="h-4 w-4" />
+            Voir le suivi
           </Link>
         </>
       }
     >
       <div className={spacing.pageTop}>
-
-        {/* Error / Loading states */}
         {error && <ErrorState description={error} />}
         {loading && !error && (
           <div className="rounded-[1.5rem] border border-white/80 bg-white/70 px-5 py-4 text-sm text-slate-600 shadow-sm backdrop-blur">
@@ -129,103 +152,125 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Main grid: 2 columns on lg */}
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-          {/* Left column */}
-          <div className={`grid gap-5 md:grid-cols-2`}>
-            <KpiCard
-              label="Score moyen"
-              value={`${averageScore}%`}
-              delta={averageScore ? "+6%" : undefined}
-              className="border-white/80 bg-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.08)]"
-            />
-            <KpiCard
-              label="Offres actives"
-              value={`${items.length}`}
-              delta={items.length ? "+12" : undefined}
-              accent="lime"
-              className="border-white/80 bg-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.08)]"
-            />
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
+          <div className="space-y-5">
+            <div className="grid gap-5 md:grid-cols-3">
+              <KpiCard
+                label="Total offres"
+                value={`${totalOffers}`}
+                className="border-white/80 bg-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.08)]"
+              />
+              <KpiCard
+                label="Offres matchees"
+                value={`${matchedOffers}`}
+                accent="lime"
+                className="border-white/80 bg-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.08)]"
+              />
+              <KpiCard
+                label="Score moyen"
+                value={`${averageScore}%`}
+                className="border-white/80 bg-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.08)]"
+              />
+            </div>
 
-            {/* Radar card */}
-            <GlassCard className="col-span-full border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <GlassCard className="border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
               <div className="flex items-center justify-between">
-                <span className={typography.label}>Radar marché</span>
-                <Badge variant="info">Temps réel</Badge>
+                <span className={typography.label}>Vue d'ensemble avant inbox</span>
+                <Badge variant="info">Flux profil &rarr; inbox</Badge>
               </div>
-              <div className="mt-4 h-36 rounded-[1.5rem] border border-slate-100 bg-gradient-to-br from-white via-emerald-50/70 to-cyan-50/60" />
               <p className={`mt-4 ${typography.body}`}>
-                Les secteurs data & supply gagnent en traction sur 3 zones.
+                Le cockpit synthétise l'inbox issue de votre profil: volume exploitable, concentration sectorielle et zones geographiques avant de passer a la revue offre par offre.
               </p>
             </GlassCard>
 
-            {/* Insights card */}
-            <GlassCard className="col-span-full border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-              <span className={typography.label}>Insights</span>
-              <div className={`mt-4 ${spacing.stack}`}>
-                <BaseListingCard
-                  title="Compétences à renforcer"
-                  description="Data storytelling, stakeholder management."
-                />
-                <BaseListingCard
-                  title="Next actions"
-                  description="Cibler 5 entreprises en Allemagne cette semaine."
-                />
-              </div>
-            </GlassCard>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <GlassCard className="border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+                <span className={typography.label}>Top secteurs</span>
+                <div className={`mt-4 ${spacing.stack}`}>
+                  {topSectors.map((sector) => (
+                    <BaseListingCard
+                      key={sector.title}
+                      title={sector.title}
+                      description={sector.description}
+                    />
+                  ))}
+                </div>
+              </GlassCard>
+
+              <GlassCard className="border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+                <span className={typography.label}>Top pays</span>
+                <div className={`mt-4 ${spacing.stack}`}>
+                  {topCountries.map((country) => (
+                    <BaseListingCard
+                      key={country.title}
+                      title={country.title}
+                      description={country.description}
+                    />
+                  ))}
+                </div>
+              </GlassCard>
+            </div>
+
+            {import.meta.env.DEV && (
+              <section>
+                <p className={typography.overline}>Dev tools</p>
+                <Card className="mt-3 rounded-[1.5rem] border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">CV Delta A vs A+B</div>
+                      <div className="text-xs text-slate-500">
+                        Analyse comparative du parsing et enrichissement LLM.
+                      </div>
+                    </div>
+                    <Link to="/dev/cv-delta" className="text-sm font-semibold text-slate-700 underline">
+                      Ouvrir
+                    </Link>
+                  </div>
+                </Card>
+              </section>
+            )}
           </div>
 
-          {/* Right column */}
-          <div className="space-y-5">
-            {/* Top matches */}
+          <div className="space-y-5 xl:sticky xl:top-28 xl:self-start">
             <GlassCard className="border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
               <span className={typography.label}>Top matches</span>
-              <div className={`mt-4 ${spacing.stack}`}>
-                {topMatches.map((offer) => (
-                  <OfferCard
-                    key={offer.id}
-                    title={offer.title}
-                    company={offer.company}
-                    location={offer.location}
-                    preview={offer.preview}
-                    score={offer.score}
-                    tags={offer.tags}
-                    href={`/offers/${encodeURIComponent(offer.id)}`}
+              {topMatches.length > 0 ? (
+                <div className={`mt-4 ${spacing.stack}`}>
+                  {topMatches.map((offer) => (
+                    <OfferCard
+                      key={offer.id}
+                      title={offer.title}
+                      company={offer.company}
+                      location={offer.location}
+                      preview={offer.preview}
+                      score={offer.score}
+                      tags={offer.tags}
+                      href={`/offers/${encodeURIComponent(offer.id)}`}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <EmptyState
+                    title="Aucune offre analysee pour l'instant"
+                    description="Ouvrez l'inbox quand les premiers matches seront disponibles."
+                    actionLabel="Aller a l'inbox"
+                    onAction={() => navigate("/inbox")}
                   />
-                ))}
-              </div>
+                </div>
+              )}
             </GlassCard>
 
-            {/* Recent activity */}
             <GlassCard className="border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-              <span className={typography.label}>Activité récente</span>
+              <span className={typography.label}>Prochaine etape</span>
               <ul className={`mt-4 ${spacing.stack} ${typography.body}`}>
-                <li>• 3 nouvelles offres analysées (Canada, Allemagne).</li>
-                <li>• Profil enrichi avec 2 compétences validées.</li>
-                <li>• Relance de 2 candidatures en attente.</li>
+                <li>• Ouvrez l&apos;inbox pour lire les offres une par une.</li>
+                <li>• Envoyez les bonnes opportunites vers le suivi des candidatures.</li>
+                <li>• Revenez ici pour reprendre une vue synthese apres vos arbitrages.</li>
               </ul>
             </GlassCard>
           </div>
         </div>
-
-        {import.meta.env.DEV && (
-          <section className="mt-10">
-            <p className={typography.overline}>Dev tools</p>
-            <Card className="mt-3 rounded-[1.5rem] border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-sm font-semibold text-slate-900">CV Delta A vs A+B</div>
-                  <div className="text-xs text-slate-500">
-                    Analyse comparative du parsing et enrichissement LLM.
-                  </div>
-                </div>
-                <Link to="/dev/cv-delta" className="text-sm font-semibold text-slate-700 underline">
-                  Ouvrir
-                </Link>
-              </div>
-            </Card>
-          </section>
-        )}
       </div>
     </PremiumAppShell>
   );

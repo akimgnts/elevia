@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   AlarmClock,
   CalendarClock,
@@ -18,6 +18,7 @@ import {
 } from "../api/applications";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
 import { EmptyState } from "../components/ui/EmptyState";
+import { useProfileStore } from "../store/profileStore";
 
 // ---------------------------------------------------------------------------
 // Status metadata
@@ -101,6 +102,7 @@ function followUpTone(value: string | null): { label: string; className: string 
 // ---------------------------------------------------------------------------
 
 export default function ApplicationsPage() {
+  const { userProfile } = useProfileStore();
   const [items, setItems] = useState<ApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -428,18 +430,22 @@ export default function ApplicationsPage() {
   const hasActiveItems = ACTIVE_STATUSES.some((s) => grouped[s].length > 0);
   const hasClosedItems = CLOSED_STATUSES.some((s) => grouped[s].length > 0);
 
+  if (!userProfile) {
+    return <Navigate to="/profile" replace />;
+  }
+
   return (
     <PremiumAppShell
       eyebrow="Suivi"
-      title="Suivi des candidatures"
-      description="Tes candidatures, leur statut, et l'historique de chaque etape. Utilise Preparer CV pour generer un CV cible depuis la colonne Sauvegardee."
+      title="Execution des candidatures"
+      description="Cette page prend le relais apres l'inbox: vous transformez les offres shortlistées en actions, documents prets et relances suivies."
       actions={
         <>
           <Link
             to="/inbox"
             className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            Retour inbox
+            Revenir a l'inbox
           </Link>
           <Link
             to="/dashboard"
@@ -553,7 +559,7 @@ export default function ApplicationsPage() {
               <div className="space-y-4">
                 <EmptyState
                   title="Aucune candidature suivie"
-                  description="Sauvegarde une offre depuis l'inbox pour commencer ton suivi ici."
+                  description="Envoyez une offre depuis l'inbox pour lancer ici son execution, son CV cible et ses prochaines relances."
                 />
                 <div className="flex justify-center">
                   <Link

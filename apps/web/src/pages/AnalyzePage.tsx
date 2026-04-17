@@ -132,7 +132,7 @@ export default function AnalyzePage() {
     try {
       const profile = await ingestCv(cvText);
       await setIngestResult(profile);
-      navigate("/profile");
+      navigate("/profile-understanding");
     } catch (err) {
       setTextError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
@@ -192,7 +192,6 @@ export default function AnalyzePage() {
         ? await parseFileEnriched(selectedFile)
         : await parseFile(selectedFile);
       setParseResult(result);
-      await setIngestResult(buildPersistedAnalyzeProfile(result));
 
       // Bridge domain signals to InboxPage (profile-level, not per-offer)
       if ((result.injected_esco_from_domain ?? 0) > 0 || (result.domain_skills_active?.length ?? 0) > 0) {
@@ -222,12 +221,20 @@ export default function AnalyzePage() {
     }
   };
 
-  const handleRunMatching = async () => {
+  const handleContinueToProfile = async () => {
     if (!parseResult) return;
     setMatchingLoading(true);
     try {
       await setIngestResult(buildPersistedAnalyzeProfile(parseResult));
-      navigate("/inbox");
+      navigate("/profile-understanding", {
+        state: {
+          sourceContext: {
+            validated_labels: parseResult.validated_labels ?? [],
+            rejected_tokens: parseResult.rejected_tokens ?? [],
+            tight_candidates: parseResult.tight_candidates ?? [],
+          },
+        },
+      });
     } finally {
       setMatchingLoading(false);
     }
@@ -303,7 +310,7 @@ export default function AnalyzePage() {
     <PremiumAppShell
       eyebrow="Analyse"
       title="Transformer le CV en profil exploitable"
-      description="Le but ici n'est pas seulement d'extraire du texte. Elevia construit un profil lisible pour le matching, le profil, l'inbox et le cockpit."
+      description="Le but ici n'est pas seulement d'extraire du texte. Elevia construit un profil lisible pour le matching, le profil et le cockpit."
       actions={
         <>
           <Link
@@ -314,11 +321,11 @@ export default function AnalyzePage() {
           </Link>
           <button
             type="button"
-            onClick={handleRunMatching}
+            onClick={handleContinueToProfile}
             disabled={!parseResult || matchingLoading}
             className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            {matchingLoading ? "Chargement..." : "Voir l&apos;inbox"}
+            {matchingLoading ? "Chargement..." : "Structurer mon profil"}
             <ArrowRight className="h-4 w-4" />
           </button>
         </>
@@ -337,8 +344,8 @@ export default function AnalyzePage() {
               Deposez votre CV ou collez le texte.
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
-              Cette page alimente le profil, l&apos;inbox, le cockpit et les documents. L&apos;enjeu UX est donc simple:
-              rendre l&apos;analyse lisible avant toute decision.
+              Cette page ouvre le flux Analyse → Profil. L&apos;enjeu UX est donc simple: rendre l&apos;analyse lisible
+              avant de passer au cockpit, aux offres et aux candidatures.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -364,11 +371,11 @@ export default function AnalyzePage() {
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <div className="font-semibold text-slate-900">2. Une lecture immediate</div>
-                <div className="mt-1">Top skills, cluster detecte, et premieres pistes d&apos;action avant passage a l&apos;inbox.</div>
+                <div className="mt-1">Top skills, cluster detecte, et premieres pistes d&apos;action avant structuration du profil.</div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <div className="font-semibold text-slate-900">3. Une suite produit coherente</div>
-                <div className="mt-1">La meme base sert ensuite au profil, aux offres et au cockpit.</div>
+                <div className="mt-1">Analyse d&apos;abord, profil ensuite, puis cockpit, candidatures et marche.</div>
               </div>
             </div>
           </GlassCard>
@@ -529,8 +536,8 @@ export default function AnalyzePage() {
                       >
                         Voir toutes les competences
                       </button>
-                      <Button onClick={handleRunMatching} disabled={matchingLoading || validatedCount === 0}>
-                        {matchingLoading ? "Chargement..." : "Voir mes offres correspondantes"}
+                      <Button onClick={handleContinueToProfile} disabled={matchingLoading || validatedCount === 0}>
+                        {matchingLoading ? "Chargement..." : "Structurer mon profil"}
                       </Button>
                     </div>
                   </div>
@@ -604,7 +611,7 @@ export default function AnalyzePage() {
                 Aucun fichier n&apos;est importe. Le texte reste sous votre controle.
               </span>
               <Button onClick={handleTextSubmit} disabled={textLoading}>
-                {textLoading ? "Analyse en cours..." : "Trouver mes offres"}
+                {textLoading ? "Analyse en cours..." : "Analyser le texte"}
               </Button>
             </div>
           </GlassCard>
