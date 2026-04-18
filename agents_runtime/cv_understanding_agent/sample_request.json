@@ -1,0 +1,47 @@
+{
+  "profile": {
+    "career_profile": {
+      "base_title": "Data Analyst",
+      "experiences": [
+        {
+          "title": "Data Analyst",
+          "company": "Acme",
+          "responsibilities": [
+            "Produced weekly reporting for leadership",
+            "Built multi-source dashboards for anomaly detection"
+          ],
+          "tools": [
+            "SQL",
+            "Power BI"
+          ],
+          "canonical_skills_used": [
+            {
+              "label": "Data Analysis",
+              "uri": "skill:data_analysis"
+            }
+          ]
+        }
+      ],
+      "education": [],
+      "certifications": [],
+      "projects": []
+    }
+  },
+  "source_context": {
+    "cv_text": "Data Analyst with experience in SQL, Power BI and reporting automation.",
+    "validated_labels": [
+      "SQL",
+      "Power BI"
+    ],
+    "tight_candidates": [
+      "dashboarding",
+      "anomaly detection"
+    ],
+    "rejected_tokens": [
+      {
+        "label": "communication",
+        "reason": "generic"
+      }
+    ]
+  }
+}
