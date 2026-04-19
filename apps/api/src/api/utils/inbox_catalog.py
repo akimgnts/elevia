@@ -14,14 +14,13 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from .offer_skills import get_offer_skills_by_offer_ids
+from .generic_skills_filter import filter_skills_uri_for_scoring
 from compass.offer_canonicalization import normalize_offers_to_uris
 from offer.offer_cluster import detect_offer_cluster
 
 logger = logging.getLogger(__name__)
 
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
-VIE_FIXTURES_PATH = Path(__file__).parent.parent.parent.parent / "fixtures" / "offers" / "vie_catalog.json"
-VIE_FIXTURES_ENV = "ELEVIA_INBOX_USE_VIE_FIXTURES"
 MAX_DESCRIPTION_SNIPPET = 280
 _CATALOG_CACHE: Optional[List[Dict]] = None
 _CATALOG_CACHE_KEY: Optional[str] = None
@@ -57,18 +56,11 @@ def _description_snippet(text: str, limit: int = MAX_DESCRIPTION_SNIPPET) -> str
     return text[:limit].rstrip() + "…"
 
 
-def _use_vie_fixtures() -> bool:
-    value = os.getenv(VIE_FIXTURES_ENV, "").strip().lower()
-    return value in {"1", "true", "yes", "on"}
+def _database_url() -> str:
+    return os.getenv("DATABASE_URL", "").strip()
 
 
 def _catalog_cache_key() -> str:
-    if _use_vie_fixtures():
-        try:
-            stat = VIE_FIXTURES_PATH.stat()
-            return f"fixtures:{stat.st_mtime_ns}:{stat.st_size}"
-        except FileNotFoundError:
-            return "fixtures:missing"
     if not DB_PATH.exists():
         return "db:missing"
     stat = DB_PATH.stat()
@@ -92,20 +84,80 @@ def _set_cached_catalog(offers: List[Dict]) -> List[Dict]:
     return offers
 
 
-def _load_vie_fixtures() -> List[Dict]:
-    if not VIE_FIXTURES_PATH.exists():
-        logger.warning(f"[inbox] VIE fixtures missing at {VIE_FIXTURES_PATH}")
-        return []
+def _load_business_france_from_postgres() -> List[Dict]:
+    database_url = _database_url()
+    if not database_url:
+        logger.error("[inbox] DATABASE_URL not set — Business France catalog unavailable")
+        raise RuntimeError("DATABASE_URL not set")
+
     try:
-        raw = VIE_FIXTURES_PATH.read_text(encoding="utf-8")
-        offers = json.loads(raw)
-        if not isinstance(offers, list):
-            logger.warning(f"[inbox] VIE fixtures not a list: {type(offers)}")
-            return []
+        import psycopg
+
+        with psycopg.connect(database_url, connect_timeout=5) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT external_id, source, title, description, company,
+                           location, country, publication_date, start_date
+                    FROM clean_offers
+                    WHERE source = %s
+                    ORDER BY publication_date DESC NULLS LAST
+                    """,
+                    ("business_france",),
+                )
+                rows = cur.fetchall()
+        return [
+            {
+                "id": row[0],
+                "source": row[1],
+                "title": row[2],
+                "description": row[3],
+                "company": row[4],
+                "city": row[5],
+                "country": row[6],
+                "publication_date": str(row[7]) if row[7] else None,
+                "contract_duration": None,
+                "start_date": str(row[8]) if row[8] else None,
+            }
+            for row in rows
+        ]
+    except Exception as e:
+        logger.error(f"[inbox] Business France catalog load failed (PostgreSQL): {e}")
+        raise
+
+
+def _load_france_travail_from_sqlite() -> List[Dict]:
+    if not DB_PATH.exists():
+        logger.error(f"[inbox] SQLite DB missing at {DB_PATH} — France Travail catalog unavailable")
+        raise RuntimeError(f"SQLite DB missing at {DB_PATH}")
+    try:
+        conn = sqlite3.connect(str(DB_PATH), timeout=2)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=2000;")
+        rows = conn.execute(
+            "SELECT id, source, title, description, company, city, country, "
+            "publication_date, contract_duration, start_date, payload_json FROM fact_offers "
+            "WHERE source = 'france_travail'"
+        ).fetchall()
+        offers = [dict(r) for r in rows]
+        offer_ids = [str(o.get("id") or "") for o in offers]
+        skills_map = get_offer_skills_by_offer_ids(conn, offer_ids)
+        for offer in offers:
+            offer_id = str(offer.get("id") or "")
+            if offer_id in skills_map:
+                entry = skills_map[offer_id]
+                if entry.get("skills_uri"):
+                    offer["skills_uri"] = entry["skills_uri"]
+                if entry.get("skills"):
+                    offer["skills"] = entry["skills"]
+            _attach_payload_fields(offer)
+            offer.pop("payload_json", None)
+        conn.close()
         return offers
     except Exception as e:
-        logger.warning(f"[inbox] Failed to load VIE fixtures: {e}")
-        return []
+        logger.error(f"[inbox] France Travail catalog load failed (SQLite): {e}")
+        raise
 
 
 def _extract_skills_from_payload(payload: Dict) -> List[str]:
@@ -206,6 +258,31 @@ def _apply_esco_normalization(offers: List[Dict]) -> List[Dict]:
     if offers_needing_normalization:
         normalize_offers_to_uris(offers_needing_normalization)
 
+    # Filter generic URIs from scoring set (flag-gated: ELEVIA_FILTER_GENERIC_URIS=1).
+    # skills_display is NOT modified — user-visible labels are unaffected.
+    # Applied after full normalization (including domain URIs) so domain signals survive.
+    offers_touched = 0
+    total_removed = 0
+    removed_uri_counts: Dict[str, int] = {}
+    for offer in offers:
+        raw = offer.get("skills_uri") or []
+        filtered = filter_skills_uri_for_scoring(raw)
+        if filtered is not raw:
+            removed = [u for u in raw if u not in set(filtered)]
+            offer["skills_uri"] = filtered
+            offer["skills_uri_count"] = len(filtered)
+            offers_touched += 1
+            total_removed += len(removed)
+            for uri in removed:
+                removed_uri_counts[uri] = removed_uri_counts.get(uri, 0) + 1
+    if offers_touched:
+        logger.info(
+            "generic_skills_filter: offers_touched=%d total_uris_removed=%d breakdown=%s",
+            offers_touched,
+            total_removed,
+            removed_uri_counts,
+        )
+
     # Precompute offer_cluster once per catalog load — eliminates N+1 in inbox scoring loop
     for offer in offers:
         if not offer.get("offer_cluster"):
@@ -223,66 +300,42 @@ def _apply_esco_normalization(offers: List[Dict]) -> List[Dict]:
 
 
 def load_catalog_offers() -> List[Dict]:
-    """Load offers from fact_offers with payload mapping + fixture fallback.
+    """Load offers from PostgreSQL clean_offers (BF) and SQLite fact_offers (FT).
 
     Pipeline:
-    1. Load from DB or VIE fixtures
-    2. Extract skills from payload_json (if not already present)
+    1. Load each source independently; log errors explicitly
+    2. If both sources fail, raise — never return a silently empty catalog
     3. Normalize all skills via ESCO referential
     """
     cached = _get_cached_catalog()
     if cached is not None:
         return cached
 
-    if _use_vie_fixtures():
-        fixtures = _load_vie_fixtures()
-        if fixtures:
-            return _set_cached_catalog(_apply_esco_normalization(fixtures))
-
-    if not DB_PATH.exists():
-        fixtures = _load_vie_fixtures()
-        return _set_cached_catalog(_apply_esco_normalization(fixtures)) if fixtures else []
+    bf_offers: List[Dict] = []
+    ft_offers: List[Dict] = []
+    bf_error: Optional[Exception] = None
+    ft_error: Optional[Exception] = None
 
     try:
-        conn = sqlite3.connect(str(DB_PATH), timeout=2)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=2000;")
-        rows = conn.execute(
-            "SELECT id, source, title, description, company, city, country, "
-            "publication_date, contract_duration, start_date, payload_json FROM fact_offers"
-        ).fetchall()
-        offers = [dict(r) for r in rows]
-
-        offer_ids = [str(o.get("id") or "") for o in offers]
-        skills_map = get_offer_skills_by_offer_ids(conn, offer_ids)
-        for offer in offers:
-            offer_id = str(offer.get("id") or "")
-            if offer_id in skills_map:
-                entry = skills_map[offer_id]
-                if entry.get("skills_uri"):
-                    offer["skills_uri"] = entry["skills_uri"]
-                if entry.get("skills"):
-                    offer["skills"] = entry["skills"]
-            _attach_payload_fields(offer)
-            offer.pop("payload_json", None)
-
-        conn.close()
-
-        if not offers:
-            fixtures = _load_vie_fixtures()
-            return _set_cached_catalog(_apply_esco_normalization(fixtures)) if fixtures else []
-
-        if not any(offer.get("is_vie") is True for offer in offers):
-            fixtures = _load_vie_fixtures()
-            if fixtures:
-                return _set_cached_catalog(_apply_esco_normalization(fixtures))
-
-        return _set_cached_catalog(_apply_esco_normalization(offers))
+        bf_offers = _load_business_france_from_postgres()
     except Exception as e:
-        logger.warning(f"[inbox] Failed to load catalog: {e}")
-        fixtures = _load_vie_fixtures()
-        return _set_cached_catalog(_apply_esco_normalization(fixtures)) if fixtures else []
+        bf_error = e
+
+    try:
+        ft_offers = _load_france_travail_from_sqlite()
+    except Exception as e:
+        ft_error = e
+
+    if bf_error and ft_error:
+        raise RuntimeError(
+            f"[inbox] Both catalog sources unavailable — BF: {bf_error} | FT: {ft_error}"
+        )
+
+    combined = [*bf_offers, *ft_offers]
+    combined.sort(key=lambda offer: str(offer.get("id") or ""))
+    combined.sort(key=lambda offer: str(offer.get("publication_date") or ""), reverse=True)
+
+    return _set_cached_catalog(_apply_esco_normalization(combined))
 
 
 def _filter_offers_in_memory(
@@ -344,87 +397,18 @@ def load_catalog_offers_filtered(
     Falls back to fixtures or in-memory filtering when DB is missing.
     """
     catalog = load_catalog_offers()
-    if catalog:
-        filtered = _filter_offers_in_memory(
-            catalog,
-            q_company=q_company,
-            country=country,
-            city=city,
-            source=source,
-            published_from=published_from,
-            published_to=published_to,
-        )
-        # Sort by publication_date DESC, id ASC — matches SQL ORDER BY for stable pagination
-        filtered.sort(key=lambda o: str(o.get("id") or ""))
-        filtered.sort(key=lambda o: str(o.get("publication_date") or ""), reverse=True)
-        return filtered[offset : offset + limit] if limit else filtered[offset:]
-
-    try:
-        conn = sqlite3.connect(str(DB_PATH), timeout=2)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=2000;")
-
-        where_clauses: List[str] = []
-        params: List[object] = []
-
-        if q_company:
-            where_clauses.append("LOWER(company) LIKE ?")
-            params.append(f"%{q_company.strip().lower()}%")
-        if country:
-            where_clauses.append("LOWER(country) = ?")
-            params.append(country.strip().lower())
-        if city:
-            where_clauses.append("LOWER(city) = ?")
-            params.append(city.strip().lower())
-        if source:
-            where_clauses.append("source = ?")
-            params.append(source)
-        if published_from:
-            where_clauses.append("publication_date >= ?")
-            params.append(published_from)
-        if published_to:
-            where_clauses.append("publication_date < ?")
-            params.append(published_to)
-
-        where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
-        query = f"""
-            SELECT id, source, title, description, company, city, country,
-                   publication_date, contract_duration, start_date, payload_json
-            FROM fact_offers
-            {where_sql}
-            ORDER BY publication_date DESC, id ASC
-            LIMIT ? OFFSET ?
-        """
-        params.extend([limit, offset])
-
-        rows = conn.execute(query, params).fetchall()
-        offers = [dict(r) for r in rows]
-
-        offer_ids = [str(o.get("id") or "") for o in offers]
-        skills_map = get_offer_skills_by_offer_ids(conn, offer_ids)
-        for offer in offers:
-            offer_id = str(offer.get("id") or "")
-            if offer_id in skills_map:
-                entry = skills_map[offer_id]
-                if entry.get("skills_uri"):
-                    offer["skills_uri"] = entry["skills_uri"]
-                if entry.get("skills"):
-                    offer["skills"] = entry["skills"]
-            _attach_payload_fields(offer)
-            offer.pop("payload_json", None)
-
-        conn.close()
-
-        if not offers:
-            fixtures = _load_vie_fixtures()
-            return _apply_esco_normalization(fixtures) if fixtures else []
-
-        return _apply_esco_normalization(offers)
-    except Exception as e:
-        logger.warning(f"[inbox] Failed to load filtered catalog: {e}")
-        fixtures = _load_vie_fixtures()
-        return _apply_esco_normalization(fixtures) if fixtures else []
+    filtered = _filter_offers_in_memory(
+        catalog,
+        q_company=q_company,
+        country=country,
+        city=city,
+        source=source,
+        published_from=published_from,
+        published_to=published_to,
+    )
+    filtered.sort(key=lambda o: str(o.get("id") or ""))
+    filtered.sort(key=lambda o: str(o.get("publication_date") or ""), reverse=True)
+    return filtered[offset : offset + limit] if limit else filtered[offset:]
 
 
 def count_catalog_offers_filtered(

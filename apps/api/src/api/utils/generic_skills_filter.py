@@ -1,16 +1,24 @@
 """
 generic_skills_filter.py — Filter high-frequency generic ESCO URIs from skills_uri.
 
-Skills like "anglais", "communication", "utiliser un logiciel de tableur" appear in
-15–41 % of all BF offers with concentration ratios near 1.0 — they carry no
+Skills like "anglais", "communication", "gestion de projets" appear in 7–45 % of
+all BF offers uniformly across clusters (uniformity_ratio ≈ 1.0) — they carry no
 cluster-specific signal and cause false-positive matches across unrelated roles.
 
-This module removes them from skills_uri (used for scoring) while leaving
-skills_display untouched (user-visible labels are preserved).
+This module removes them from the offer-side skills_uri used for scoring while
+leaving skills_display untouched (user-visible labels are preserved). Profile-side
+skills_uri is never touched in V1 (see decision doc).
 
 Feature flag: ELEVIA_FILTER_GENERIC_URIS=1  (default: 0 — off during rollout)
 
-Calibration source: 500-offer BF corpus frequency analysis, 2026-04-18.
+V1 behaviour (2026-04-19 product decision):
+  - Only HARD_GENERIC_URIS are removed from offer scoring set.
+  - WEAKLY_GENERIC_URIS is kept as an informational tag; not applied in scoring.
+  - STRONG_DATA_URIS is retained for potential V2 conditional-WEAK logic.
+
+Calibration sources:
+  - 500-offer BF sample, 2026-04-18 (initial HARD seed).
+  - 839-offer BF corpus, 2026-04-19 → baseline/generic_skill_candidates/.
 """
 
 from __future__ import annotations
@@ -23,25 +31,33 @@ from typing import List
 # collapsing to [SQL] would match any SQL-carrying profile at 100 %).
 MIN_SCORING_URIS = 2
 
-# ── Hard generics: always removed from scoring ────────────────────────────────
-# Criterion: df > 6 % AND concentration < 1.6 in BF 500-offer sample.
+# ── Hard generics: always removed from scoring when flag=1 ────────────────────
+# Criterion: df >= 5% AND cluster_count == 6 AND 0.70 <= uniformity_ratio <= 1.25
+# AND label not in _DOMAIN_INTRINSIC_LABELS (see baseline/generic_skill_candidates/).
 HARD_GENERIC_URIS: frozenset = frozenset({
     # Language prerequisites — employer requirement, not a professional skill
-    "http://data.europa.eu/esco/skill/6d3edede-8951-4621-a835-e04323300fa0",  # anglais       41%
-    "http://data.europa.eu/esco/skill/14ee9f76-3524-43d5-8a1a-5ba8283f8bd7",  # espagnol       5.4%
-    "http://data.europa.eu/esco/skill/4812a4ea-dc55-4dc6-b9b0-4a59bba2c647",  # allemand       3.6%
-    "http://data.europa.eu/esco/skill/e747e77e-0ea1-4001-8b07-1d11946b5f1b",  # français  (low but same logic)
+    "http://data.europa.eu/esco/skill/6d3edede-8951-4621-a835-e04323300fa0",  # anglais        36.6%  ratio 0.94
+    "http://data.europa.eu/esco/skill/14ee9f76-3524-43d5-8a1a-5ba8283f8bd7",  # espagnol        5.4%  (500-sample seed)
+    "http://data.europa.eu/esco/skill/4812a4ea-dc55-4dc6-b9b0-4a59bba2c647",  # allemand        3.6%  (500-sample seed)
+    "http://data.europa.eu/esco/skill/e747e77e-0ea1-4001-8b07-1d11946b5f1b",  # français       (500-sample seed)
     # Generic soft / office skills — present in all role types
-    "http://data.europa.eu/esco/skill/15d76317-c71a-4fa2-aadc-2ecc34e627b7",  # communication  35%
-    "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",  # utiliser logiciel tableur  16%
-    "http://data.europa.eu/esco/skill/7b5cce4d-c7fe-4119-b48f-70aa05391787",  # informatique   7.8%
+    "http://data.europa.eu/esco/skill/15d76317-c71a-4fa2-aadc-2ecc34e627b7",  # communication  45.1%  ratio 0.95
+    "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",  # logiciel tableur / MS Excel  17.6%  ratio 1.01
+    "http://data.europa.eu/esco/skill/7b5cce4d-c7fe-4119-b48f-70aa05391787",  # informatique    7.8%  (500-sample seed)
+    # V1 additions (2026-04-19, 839-offer corpus)
+    "http://data.europa.eu/esco/skill/7111b95d-0ce3-441a-9d92-4c75d05c4388",  # gestion de projets       45.5%  ratio 0.84
+    "http://data.europa.eu/esco/skill/6a609f8f-1451-4102-ad2d-62c5270e1237",  # service administratif     7.5%  ratio 1.05
 })
 
-# ── Weakly generic: removed only when no strong data signal is present ────────
-# "analyse de données" (df=28.8 %, conc=0.83) is legitimate in a data-cluster offer
-# but fires as a false positive on engineering/finance offers via the "analyse" alias.
+# ── Weakly generic: INFORMATIONAL ONLY in V1, not used for scoring-side filtering. ────
+# Retained here so future V2 logic (e.g. conditional removal when no STRONG_DATA
+# anchor is present) can ship without re-deriving the list. Any change must go
+# through the 839-offer corpus analysis pipeline, not by hand.
 WEAKLY_GENERIC_URIS: frozenset = frozenset({
-    "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",  # analyse de données
+    "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",  # analyse de données           47.0%  ratio 1.46
+    "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",  # développement par itérations  8.3%  ratio 1.51
+    "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4",  # gestion de projets agile      8.3%  ratio 1.51
+    "http://data.europa.eu/esco/skill/045f71e6-0699-4169-8a54-9c6b96f3174d",  # conseiller d'autres personnes 6.1%  ratio 1.51
 })
 
 # ── Strong data URIs: anchors "analyse de données" as a legitimate signal ─────
@@ -65,18 +81,20 @@ def is_enabled() -> bool:
 
 
 def filter_skills_uri_for_scoring(skills_uri: List[str]) -> List[str]:
-    """Remove generic URIs from skills_uri used for scoring.
+    """Remove generic URIs from an offer's skills_uri used for scoring.
 
     skills_display is NOT touched — user-visible labels are unaffected.
+    Profile-side skills_uri is NOT touched here — this function is offer-only (V1).
 
-    Rules applied when ELEVIA_FILTER_GENERIC_URIS=1:
-      1. HARD_GENERIC_URIS are always removed.
-      2. WEAKLY_GENERIC_URIS ("analyse de données") are removed unless at least
-         one STRONG_DATA_URI is present after step 1.
-      3. Anti-inflation guard: if fewer than MIN_SCORING_URIS remain, return an
+    V1 rules applied when ELEVIA_FILTER_GENERIC_URIS=1:
+      1. HARD_GENERIC_URIS are removed.
+      2. Anti-inflation guard: if fewer than MIN_SCORING_URIS remain, return an
          empty list — the matching engine treats this as a non-scorable offer
          (skills_score = 0), preventing single-URI offers from producing
          artificial 100 % matches.
+
+    WEAKLY_GENERIC_URIS is NOT applied in V1 (informational only — see module
+    docstring). STRONG_DATA_URIS remains defined for V2.
 
     Original list order is preserved.
     Returns the input list unchanged when the flag is off or the list is empty.
@@ -86,10 +104,6 @@ def filter_skills_uri_for_scoring(skills_uri: List[str]) -> List[str]:
 
     all_uris = set(skills_uri)
     scoring_uris = all_uris - HARD_GENERIC_URIS
-
-    has_strong_data = bool(scoring_uris & STRONG_DATA_URIS)
-    if not has_strong_data:
-        scoring_uris -= WEAKLY_GENERIC_URIS
 
     if len(scoring_uris) < MIN_SCORING_URIS:
         return []
