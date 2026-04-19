@@ -50,7 +50,8 @@ SKILL_ALIASES: Dict[str, List[str]] = {
     "scrum": ["scrum"],
     "jira": ["gestion de projets par méthode agile", "gestion de projets", "développement par itérations"],
     # Project management - ESCO has "gestion de projets"
-    "project_management": ["gestion de projets", "gestion de projets par méthode agile", "développement par itérations"],
+    # Sprint4-C1: key aligned with BIGRAM_WHITELIST entry "project management" (space, not underscore)
+    "project management": ["gestion de projets", "gestion de projets par méthode agile", "développement par itérations"],
     "gestion de projet": ["gestion de projets"],
     # Marketing - ESCO has "optimisation des moteurs de recherche"
     "seo": ["optimisation des moteurs de recherche"],
@@ -62,7 +63,7 @@ SKILL_ALIASES: Dict[str, List[str]] = {
     "adobe_xd": ["concevoir une interface utilisateur", "créer un prototype de solution en matière dexpérience utilisateur"],
     "procurement": ["gérer un cycle dachat", "coordonner les activités dachat"],
     # Sales - ESCO has "argumentaire de vente", "gérer des équipes de vente"
-    "sales": ["argumentaire de vente"],
+    # Sprint4-N3: 'sales' removed — context-free trigger produced noise on CVs where 'sales' denotes the client team, not a skill
     "vente": ["argumentaire de vente"],
     "negotiation": ["négocier des conditions avec les fournisseurs", "négocier les prix"],
     "négociation": ["négocier des conditions avec les fournisseurs", "négocier les prix"],
@@ -102,26 +103,42 @@ SKILL_ALIASES: Dict[str, List[str]] = {
     "marketing": ["analyse marketing"],
     "marketing digital": ["techniques de marketing numérique"],
     "marketing_digital": ["techniques de marketing numérique"],
-    "digital": ["techniques de marketing numérique"],
-    "digital seo": ["techniques de marketing numérique", "optimisation des moteurs de recherche"],
     "google_analytics": ["utiliser un logiciel danalyse de données spécifique"],
     "google analytics": ["utiliser un logiciel danalyse de données spécifique"],
-    # Software development
-    "développement": ["cycle de développement logiciel"],
-    "developpement": ["cycle de développement logiciel"],
-    "développeur": ["développer un prototype de logiciel"],
-    "developpeur": ["développer un prototype de logiciel"],
-    # Project / management
-    "gestion": ["gestion de projets"],
-    "gestion de": ["gestion de projets"],
-    "manager": ["gestion de projets"],
-    "it": ["programmation informatique", "informatique décisionnelle"],
-    "informatique": ["programmation informatique", "informatique décisionnelle"],
-    "consultant": ["conseiller dautres personnes"],
     # ERP / SAP
     "erp": ["gérer le système normalisé de planification des ressources dune entreprise"],
     # Supply chain
     "supply_chain": ["gestion de la chaîne logistique"],
+    # ── Corpus BF — batch 1 (2026-04-18) ─────────────────────────────────────
+    # Data science / analytics
+    "data science": ["science des big data"],
+    "big data": ["science des big data", "analyser des mégadonnées"],
+    "machine learning": ["apprentissage automatique"],  # space variant of machine_learning
+    "statistics": ["statistiques"],
+    "statistiques": ["statistiques"],
+    "dashboards": ["logiciel de visualisation des données"],
+    # Marketing digital / content
+    "evenementiel": ["mener à bien la gestion d'événements"],
+    "relations presse": ["relations publiques"],
+    "social media": ["gestion des réseaux sociaux", "techniques de marketing des médias sociaux"],
+    "reseaux sociaux": ["gestion des réseaux sociaux", "techniques de marketing des médias sociaux"],
+    "medias sociaux": ["gestion des réseaux sociaux", "techniques de marketing des médias sociaux"],
+    # HR
+    "recrutement": ["recruter du personnel"],
+    "ressources humaines": ["gérer les ressources humaines"],
+    "gestion des talents": ["stratégies de gestion des talents"],
+    # Supply / logistics
+    "logistique": ["gérer la chaîne logistique"],
+    "gestion des stocks": ["règles de gestion des stocks"],
+    # Finance
+    "banque": ["activités bancaires"],
+    "banking": ["activités bancaires"],
+    "vba": ["Visual Basic"],
+    # Sales
+    "prospection": ["méthodes de prospection"],
+    # Engineering (high-signal, verified ESCO)
+    "mecanique": ["mécanique"],
+    "genie industriel": ["génie industriel"],
 }
 
 
@@ -154,6 +171,8 @@ STOPWORDS = {
     # Common filler words
     "requis", "required", "souhaité", "preferred", "etc", "niveau", "level",
     "ans", "years", "experience", "expérience", "minimum", "maximum",
+    # Sprint4-N1: geographic homonym with ESCO concept 'paris' (wager)
+    "paris",
 }
 
 # Minimum token length
@@ -175,10 +194,26 @@ WHITELIST_SKILLS = {
     "sap",
 }
 
-# Optional controlled bigrams
+# Controlled bigrams — normalized (accent-stripped, lowercase) forms only
 BIGRAM_WHITELIST = {
     "data analysis",
     "project management",
+    # Corpus BF batch 1 (2026-04-18)
+    "data science",
+    "big data",
+    "machine learning",
+    "social media",
+    "reseaux sociaux",
+    "medias sociaux",
+    "ressources humaines",
+    "genie industriel",
+    "relations presse",
+}
+
+# Controlled trigrams — same normalization rules as bigrams
+TRIGRAM_WHITELIST = {
+    "gestion des talents",
+    "gestion des stocks",
 }
 
 
@@ -221,11 +256,18 @@ def _split_text(text: str) -> List[str]:
             continue
         tokens.append(word)
 
-    # Controlled bigrams only
+    # Controlled bigrams
     if BIGRAM_WHITELIST and len(words) >= 2:
         for i in range(len(words) - 1):
             phrase = f"{words[i]} {words[i + 1]}"
             if phrase in BIGRAM_WHITELIST:
+                tokens.append(phrase)
+
+    # Controlled trigrams
+    if TRIGRAM_WHITELIST and len(words) >= 3:
+        for i in range(len(words) - 2):
+            phrase = f"{words[i]} {words[i + 1]} {words[i + 2]}"
+            if phrase in TRIGRAM_WHITELIST:
                 tokens.append(phrase)
 
     # Whitelist capture (if present in text)
