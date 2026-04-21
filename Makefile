@@ -26,9 +26,9 @@ help:
 	@echo "  make dev-status    - Show process/port/log status"
 	@echo ""
 	@echo "Dev UX (manual):"
-	@echo "  make venv          - Create .venv at repo root"
+	@echo "  make venv          - Create apps/api/.venv"
 	@echo "  make install       - Install Python deps"
-	@echo "  make api           - Start API (port 8000, ELEVIA_DEV_TOOLS=1)"
+	@echo "  make api           - Start API only (apps/api/.venv, port 8000, ELEVIA_DEV_TOOLS=1)"
 	@echo "  make web           - Start Vite (port 3001)"
 	@echo "  make devtools      - Print start-up instructions"
 	@echo "  make test-cvdelta  - Run /dev/cv-delta tests"
@@ -89,20 +89,21 @@ test-api: test
 # ── Dev UX ─────────────────────────────────────────────────────────────────
 
 venv:
-	python3 -m venv .venv
-	@echo "Run: source .venv/bin/activate"
+	python3 -m venv apps/api/.venv
+	@echo "Run: source apps/api/.venv/bin/activate"
 
 install:
-	.venv/bin/pip install -r apps/api/requirements.txt
-	@if [ -f apps/api/requirements-dev.txt ]; then .venv/bin/pip install -r apps/api/requirements-dev.txt; fi
-	@echo "Done. Activate with: source .venv/bin/activate"
+	apps/api/.venv/bin/pip install -r apps/api/requirements.txt
+	@if [ -f apps/api/requirements-dev.txt ]; then apps/api/.venv/bin/pip install -r apps/api/requirements-dev.txt; fi
+	@echo "Done. Activate with: source apps/api/.venv/bin/activate"
 
 api:
-	@echo "Starting API on http://0.0.0.0:8000 (ELEVIA_DEV_TOOLS=1)..."
-	@.venv/bin/python -c 'import importlib.util; missing=[name for name in ("fastapi","uvicorn","multipart") if importlib.util.find_spec(name) is None]; \
-		(_ for _ in ()).throw(SystemExit("Missing packages in .venv: " + ", ".join(missing) + " — run: make install")) if missing else None'
-	cd apps/api && ELEVIA_DEV_TOOLS=1 $(PWD)/.venv/bin/python -m uvicorn api.main:app \
-	  --host 0.0.0.0 --port 8000 --reload
+	@echo "Starting API on http://127.0.0.1:8000 (ELEVIA_DEV_TOOLS=1)..."
+	@apps/api/.venv/bin/python -c 'import importlib.util; missing=[name for name in ("fastapi","uvicorn","multipart") if importlib.util.find_spec(name) is None]; \
+		(_ for _ in ()).throw(SystemExit("Missing packages in apps/api/.venv: " + ", ".join(missing) + " — run: make install")) if missing else None'
+	@bash -lc 'source scripts/dev/ports.sh; kill_stale_uvicorn_port 8000; kill_listeners 8000'
+	cd apps/api && ELEVIA_DEV_TOOLS=1 ./.venv/bin/python -m uvicorn api.main:app \
+	  --host 127.0.0.1 --port 8000
 
 web:
 	@echo "Starting Vite on http://0.0.0.0:3001 (proxy -> http://localhost:8000)..."
@@ -111,7 +112,7 @@ web:
 test-cvdelta:
 	@echo "Running /dev/cv-delta tests..."
 	cd apps/api && ELEVIA_DEV_TOOLS=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
-	  $(PWD)/.venv/bin/python3 -m pytest tests/test_dev_cv_delta_endpoint.py tests/test_cv_parsing_delta_report.py \
+	  ./.venv/bin/python -m pytest tests/test_dev_cv_delta_endpoint.py tests/test_cv_parsing_delta_report.py \
 	  -v --tb=short
 
 # ── Dev Runner ──────────────────────────────────────────────────────────────

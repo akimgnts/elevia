@@ -37,6 +37,34 @@ kill_listeners() {
     done
 }
 
+kill_stale_uvicorn_port() {
+    local port="$1"
+    local pids
+    pids="$(pgrep -f "uvicorn .*--port ${port}" 2>/dev/null || true)"
+
+    if [[ -z "$pids" ]]; then
+        echo "  uvicorn port $port: no stale process"
+        return 0
+    fi
+
+    echo "  uvicorn port $port: killing stale PIDs $pids"
+
+    for pid in $pids; do
+        if [[ "$pid" != "$$" ]]; then
+            kill -TERM "$pid" 2>/dev/null || true
+        fi
+    done
+
+    sleep 0.5
+
+    for pid in $pids; do
+        if [[ "$pid" != "$$" ]] && kill -0 "$pid" 2>/dev/null; then
+            echo "  uvicorn port $port: PID $pid still alive, sending SIGKILL"
+            kill -9 "$pid" 2>/dev/null || true
+        fi
+    done
+}
+
 # ── Free both dev ports ───────────────────────────────────────────────────────
 
 free_ports() {

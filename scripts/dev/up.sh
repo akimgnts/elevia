@@ -16,11 +16,11 @@ assert_not_icloud
 ensure_dirs
 
 ROOT="$(repo_root)"
-VENV="$ROOT/.venv"
+VENV="$ROOT/apps/api/.venv"
 RUN_DIR="$ROOT/.run"
 
-[[ -d "$VENV" ]] || die ".venv not found at $ROOT/.venv — run: make venv && make install"
-[[ -f "$VENV/bin/uvicorn" ]] || die "uvicorn not found in .venv — run: make install"
+[[ -d "$VENV" ]] || die "API venv not found at $VENV — run: make venv && make install"
+[[ -f "$VENV/bin/python" ]] || die "python not found in $VENV — run: make venv && make install"
 
 # ── Clean slate: kill old processes + free ports ──────────────────────────────
 echo "[$(now)] dev-up: stopping any existing processes..."
@@ -40,6 +40,7 @@ for svc in api web; do
     fi
 done
 
+kill_stale_uvicorn_port 8000
 free_ports
 sleep 0.3
 
@@ -58,8 +59,8 @@ fi
     cd "$ROOT/apps/api"
     export ELEVIA_DEV_TOOLS=1
     # shellcheck disable=SC2086
-    "$VENV/bin/uvicorn" api.main:app \
-        --host 0.0.0.0 --port 8000 \
+    "$VENV/bin/python" -m uvicorn api.main:app \
+        --host 127.0.0.1 --port 8000 \
         $RELOAD_FLAG \
         >> "$RUN_DIR/api.log" 2>&1 &
     echo $! > "$RUN_DIR/api.pid"
@@ -80,7 +81,7 @@ echo "[$(now)] Starting WEB on :3001..."
 echo "[$(now)] Waiting for API health..."
 ok=0
 for i in $(seq 1 25); do
-    if curl -fsS http://localhost:8000/health > /dev/null 2>&1; then
+    if curl -fsS http://127.0.0.1:8000/health > /dev/null 2>&1; then
         ok=1
         break
     fi
@@ -97,7 +98,7 @@ fi
 echo ""
 echo "✓ Dev environment up at $(now)"
 echo ""
-echo "  API   → http://localhost:8000/health"
+echo "  API   → http://127.0.0.1:8000/health"
 echo "  WEB   → http://localhost:3001"
 echo "  Tool  → http://localhost:3001/dev/cv-delta"
 echo ""
