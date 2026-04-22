@@ -79,11 +79,30 @@ class ProfileUnderstandingSessionRequest(BaseModel):
     source_context: Dict[str, Any] = Field(default_factory=dict)
 
 
+class ProfileUnderstandingInputSignalBuckets(BaseModel):
+    accepted_signal: Dict[str, Any] = Field(default_factory=dict)
+    ambiguous_signal: Dict[str, Any] = Field(default_factory=dict)
+    rejected_signal: List[Dict[str, Any]] = Field(default_factory=list)
+    unmapped_but_promising_signal: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class ProfileUnderstandingInput(BaseModel):
+    document_context: Dict[str, Any] = Field(default_factory=dict)
+    deterministic_profile_seed: Dict[str, Any] = Field(default_factory=dict)
+    document_structure_seed: Dict[str, Any] = Field(default_factory=dict)
+    reference_context: Dict[str, Any] = Field(default_factory=dict)
+    signal_buckets: ProfileUnderstandingInputSignalBuckets = Field(
+        default_factory=ProfileUnderstandingInputSignalBuckets
+    )
+    agent_constraints: Dict[str, Any] = Field(default_factory=dict)
+
+
 class ProfileUnderstandingSessionResponse(BaseModel):
     session_id: str
     status: Literal["ready", "pending", "error"] = "ready"
     provider: str
     trace_summary: Dict[str, Any] = Field(default_factory=dict)
+    understanding_input: Dict[str, Any] = Field(default_factory=dict)
     document_blocks: List[ProfileUnderstandingDocumentBlock] = Field(default_factory=list)
     mission_units: List[ProfileUnderstandingMissionUnit] = Field(default_factory=list)
     open_signal: Dict[str, Any] = Field(default_factory=dict)

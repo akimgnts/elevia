@@ -28,6 +28,7 @@ import {
   mapLabelsToUris,
   normalizeProfileSkills,
 } from "../lib/skills/normalizeSkills";
+import { buildProfileReconstruction } from "../lib/profile/reconstruction";
 
 const PLACEHOLDER_CV = `Jean Dupont\nData Analyst - 3 ans d'expérience\n\nFORMATION\nMaster Data Science, École Polytechnique (2020)\n\nEXPÉRIENCE\n- Analyste BI chez Acme Corp (2020-2023)\n  Python, SQL, Power BI, Tableau\n- Stage Data Engineer chez StartupXYZ (2019)\n  ETL, dbt, Airflow\n\nCOMPÉTENCES\n- Python, SQL, R\n- Power BI, Tableau, Looker\n- Excel avancé, VBA\n- Jira, Confluence\n\nLANGUES\n- Français (natif)\n- Anglais (C1)\n- Espagnol (B2)`;
 
@@ -62,12 +63,52 @@ type Tab = "file" | "text";
 
 function buildPersistedAnalyzeProfile(result: ParseFileResponse): Record<string, unknown> {
   const profile = { ...(result.profile || {}) } as Record<string, unknown>;
+  const source = result as unknown as Record<string, unknown>;
+  const copyIfAbsent = (key: string) => {
+    if (key in profile) return;
+    const value = source[key];
+    if (value !== undefined) profile[key] = value;
+  };
+
+  [
+    "canonical_skills",
+    "canonical_skills_count",
+    "validated_items",
+    "validated_labels",
+    "enriched_signals",
+    "concept_signals",
+    "structured_signal_units",
+    "top_signal_units",
+    "profile_summary_skills",
+    "skill_proximity_links",
+  ].forEach(copyIfAbsent);
+
   if (result.profile_intelligence && !profile.profile_intelligence) {
     profile.profile_intelligence = result.profile_intelligence;
   }
   if (result.profile_intelligence_ai_assist && !profile.profile_intelligence_ai_assist) {
     profile.profile_intelligence_ai_assist = result.profile_intelligence_ai_assist;
   }
+
+  if (!profile.profile_reconstruction) {
+    const careerProfile = (profile.career_profile ?? null) as Record<string, unknown> | null;
+    const experiences = Array.isArray((careerProfile as Record<string, unknown> | null)?.experiences)
+      ? ((careerProfile as Record<string, unknown>).experiences as unknown[])
+      : [];
+    const cvText = typeof source.cv_text_cleaned === "string" ? source.cv_text_cleaned : undefined;
+    profile.profile_reconstruction = buildProfileReconstruction({
+      cv_text: cvText,
+      career_profile: careerProfile,
+      experiences,
+      selected_skills: Array.isArray(result.skills_canonical) ? result.skills_canonical : [],
+      structured_signal_units: Array.isArray(source.structured_signal_units)
+        ? (source.structured_signal_units as unknown[])
+        : [],
+      validated_items: Array.isArray(result.validated_items) ? result.validated_items : [],
+      canonical_skills: Array.isArray(result.canonical_skills) ? result.canonical_skills : [],
+    });
+  }
+
   return profile;
 }
 
@@ -225,13 +266,21 @@ export default function AnalyzePage() {
     if (!parseResult) return;
     setMatchingLoading(true);
     try {
-      await setIngestResult(buildPersistedAnalyzeProfile(parseResult));
+      const parseSource = parseResult as unknown as Record<string, unknown>;
+      const persistedProfile = buildPersistedAnalyzeProfile(parseResult);
+      await setIngestResult(persistedProfile);
       navigate("/profile-understanding", {
         state: {
           sourceContext: {
+            ...(parseSource.cv_text_cleaned !== undefined ? { cv_text_cleaned: parseSource.cv_text_cleaned } : {}),
             validated_labels: parseResult.validated_labels ?? [],
             rejected_tokens: parseResult.rejected_tokens ?? [],
             tight_candidates: parseResult.tight_candidates ?? [],
+            canonical_skills: parseResult.canonical_skills ?? [],
+            validated_items: parseResult.validated_items ?? [],
+            structured_signal_units: Array.isArray(parseSource.structured_signal_units) ? parseSource.structured_signal_units : [],
+            top_signal_units: Array.isArray(parseSource.top_signal_units) ? parseSource.top_signal_units : [],
+            profile_reconstruction: persistedProfile.profile_reconstruction,
           },
         },
       });

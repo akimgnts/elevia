@@ -3,9 +3,18 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from api.utils.analyze_recovery_cache import PIPELINE_VERSION
+from compass.ai_raw_cv_reconstruction import (
+    RawCvReconstructionV1,
+    build_raw_cv_reconstruction,
+    raw_cv_reconstruction_enabled,
+    skipped_raw_cv_reconstruction,
+)
+from compass.ai_profile_reconstruction import (
+    build_profile_reconstruction,
+)
 from compass.canonical_pipeline import get_extracted_profile_snapshot, is_trace_enabled, run_cv_pipeline
 from compass.extraction.enriched_concept_builder import build_enriched_concepts
 from compass.extraction.enriched_signal_builder import build_enriched_signals
@@ -38,15 +47,103 @@ from .text_extraction_stage import extract_profile_text
 logger = logging.getLogger(__name__)
 
 
+def _count_sequence(value: Any) -> int:
+    return len(value) if isinstance(value, list) else 0
+
+
+def _experience_count(career_profile: Any) -> int:
+    if isinstance(career_profile, dict):
+        return _count_sequence(career_profile.get("experiences"))
+    experiences = getattr(career_profile, "experiences", None)
+    return _count_sequence(experiences)
+
+
+def evaluate_ai_raw_cv_reconstruction_decision(context: Dict[str, Any]) -> Dict[str, object]:
+    career_profile = context.get("career_profile") or {}
+    metrics = {
+        "experiences": _experience_count(career_profile),
+        "structured_signal_units": _count_sequence(context.get("structured_signal_units")),
+        "validated_items": _count_sequence(context.get("validated_items")),
+        "canonical_skills": _count_sequence(context.get("canonical_skills")),
+    }
+
+    hard_blocks: list[str] = []
+    weak_reasons: list[str] = []
+    if metrics["structured_signal_units"] <= 3:
+        weak_reasons.append("low_structured_signal")
+    if metrics["validated_items"] <= 8:
+        weak_reasons.append("low_validated_items")
+    if metrics["canonical_skills"] <= 15:
+        weak_reasons.append("low_canonical_skills")
+
+    if metrics["experiences"] == 0 and weak_reasons:
+        return {
+            "enabled": True,
+            "reasons": ["no_experience", *weak_reasons],
+            "metrics": metrics,
+        }
+
+    if metrics["experiences"] >= 2 and metrics["structured_signal_units"] >= 5:
+        hard_blocks.append("good_profile_experiences_and_structured_signal")
+    if metrics["validated_items"] >= 10 and metrics["canonical_skills"] >= 20:
+        hard_blocks.append("good_skills_signal")
+
+    if hard_blocks:
+        return {
+            "enabled": False,
+            "reasons": hard_blocks,
+            "metrics": metrics,
+        }
+
+    return {
+        "enabled": False,
+        "reasons": ["insufficient_dirty_signals"],
+        "metrics": metrics,
+    }
+
+
+def should_use_ai_raw_cv_reconstruction(context: Dict[str, Any]) -> bool:
+    return bool(evaluate_ai_raw_cv_reconstruction_decision(context)["enabled"])
+
+
+def _log_ai_raw_cv_reconstruction_decision(decision: Dict[str, object]) -> None:
+    logger.info(
+        json.dumps(
+            {
+                "event": "AI1_DECISION",
+                "enabled": bool(decision.get("enabled")),
+                "reasons": decision.get("reasons") or [],
+                "metrics": decision.get("metrics") or {},
+            }
+        )
+    )
+
+
+def _ai_raw_cv_context_from_artifacts(artifacts: ParseFilePipelineArtifacts) -> Dict[str, object]:
+    profile = artifacts.enrichment.profile if artifacts.enrichment else {}
+    career_profile = profile.get("career_profile") if isinstance(profile, dict) else {}
+    return {
+        "career_profile": career_profile or {},
+        "structured_signal_units": artifacts.structured_extraction.structured_units,
+        "validated_items": artifacts.result.get("validated_items", []),
+        "canonical_skills": artifacts.canonical_mapping.canonical_skills_list,
+        "cv_text": artifacts.source_cv_text or artifacts.cv_text,
+    }
+
+
 def _run_profile_text_pipeline(
     *,
     cv_text: str,
+    source_cv_text: Optional[str] = None,
+    raw_cv_reconstruction: Optional[RawCvReconstructionV1] = None,
     request_id: str,
     profile_id: str,
     enrich_llm: int,
     filename: str,
     content_type: str,
 ) -> ParseFilePipelineArtifacts:
+    original_cv_text = source_cv_text if source_cv_text is not None else cv_text
+    reconstruction = raw_cv_reconstruction or skipped_raw_cv_reconstruction()
     pipeline = run_cv_pipeline(
         cv_text,
         profile_id=profile_id,
@@ -167,6 +264,17 @@ def _run_profile_text_pipeline(
             top_signal_units=structured_extraction.top_signal_units,
         )
     )
+    profile_reconstruction = build_profile_reconstruction(
+        {
+            "cv_text": cv_text,
+            "career_profile": enrichment.profile.get("career_profile") if isinstance(enrichment.profile, dict) else {},
+            "structured_signal_units": structured_extraction.structured_units,
+            "validated_items": result.get("validated_items", []),
+            "canonical_skills": canonical_mapping.canonical_skills_list,
+            "raw_cv_reconstruction": reconstruction.model_dump(),
+            "profile_intelligence": profile_intelligence.data,
+        }
+    )
 
     if is_trace_enabled():
         logger.info(
@@ -207,8 +315,11 @@ def _run_profile_text_pipeline(
         matching_input=matching_input,
         profile_intelligence=profile_intelligence,
         profile_intelligence_ai_assist=profile_intelligence_ai_assist,
+        raw_cv_reconstruction=reconstruction,
+        profile_reconstruction=profile_reconstruction,
         warnings=[],
         cv_text=cv_text,
+        source_cv_text=original_cv_text,
         filename=filename,
         content_type=content_type,
         domain_skills_active=pipeline.domain_skills_active,
@@ -222,8 +333,50 @@ def _run_profile_text_pipeline(
 def build_parse_file_response_payload(request: ParseFilePipelineRequest) -> Dict[str, object]:
     ingestion = ingest_profile_file(request)
     extraction = extract_profile_text(ingestion)
-    artifacts = _run_profile_text_pipeline(
+    initial_artifacts = _run_profile_text_pipeline(
         cv_text=extraction.cv_text,
+        source_cv_text=extraction.cv_text,
+        raw_cv_reconstruction=skipped_raw_cv_reconstruction(),
+        request_id=request.request_id,
+        profile_id=f"file-{extraction.filename}",
+        enrich_llm=request.enrich_llm,
+        filename=extraction.filename,
+        content_type=extraction.content_type,
+    )
+
+    context = _ai_raw_cv_context_from_artifacts(initial_artifacts)
+    if raw_cv_reconstruction_enabled():
+        decision = evaluate_ai_raw_cv_reconstruction_decision(context)
+    else:
+        base_metrics = evaluate_ai_raw_cv_reconstruction_decision(context)["metrics"]
+        decision = {
+            "enabled": False,
+            "reasons": ["feature_flag_off"],
+            "metrics": base_metrics,
+        }
+    _log_ai_raw_cv_reconstruction_decision(decision)
+
+    if not bool(decision["enabled"]):
+        response_payload = build_parse_file_response_payload_from_artifacts(initial_artifacts)
+        if dev_tools_enabled():
+            response_payload["analyze_dev"] = build_analyze_dev_payload(initial_artifacts)
+        return response_payload
+
+    raw_cv_reconstruction = build_raw_cv_reconstruction(
+        cv_text=extraction.cv_text,
+        request_id=request.request_id,
+        filename=extraction.filename,
+        content_type=extraction.content_type,
+    )
+    working_cv_text = (
+        raw_cv_reconstruction.rebuilt_profile_text
+        if raw_cv_reconstruction.status in {"ok", "partial"} and raw_cv_reconstruction.rebuilt_profile_text.strip()
+        else extraction.cv_text
+    )
+    artifacts = _run_profile_text_pipeline(
+        cv_text=working_cv_text,
+        source_cv_text=extraction.cv_text,
+        raw_cv_reconstruction=raw_cv_reconstruction,
         request_id=request.request_id,
         profile_id=f"file-{extraction.filename}",
         enrich_llm=request.enrich_llm,
@@ -241,6 +394,8 @@ def build_parse_baseline_response_payload(*, cv_text: str, request_id: str) -> D
     stripped = cv_text.strip()
     artifacts = _run_profile_text_pipeline(
         cv_text=stripped,
+        source_cv_text=stripped,
+        raw_cv_reconstruction=skipped_raw_cv_reconstruction(),
         request_id=request_id,
         profile_id="baseline",
         enrich_llm=0,

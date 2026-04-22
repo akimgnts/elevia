@@ -49,6 +49,7 @@ def ensure_clean_offers_table(conn: psycopg.Connection) -> None:
                 country          TEXT,
                 contract_type    TEXT,
                 description      TEXT,
+                mission_profile  TEXT,
                 publication_date TIMESTAMPTZ NULL,
                 start_date       DATE NULL,
                 salary           TEXT NULL,
@@ -58,6 +59,9 @@ def ensure_clean_offers_table(conn: psycopg.Connection) -> None:
                 UNIQUE (source, external_id)
             )
         """)
+        cur.execute(
+            "ALTER TABLE clean_offers ADD COLUMN IF NOT EXISTS mission_profile TEXT"
+        )
     conn.commit()
 
 
@@ -114,6 +118,7 @@ def transform_bf(payload: dict) -> dict:
     location = _clean_text(_first(payload, "city", "ville", "location", "lieu"))
     country = _clean_text(_first(payload, "country", "pays", "countryName"))
     description = _clean_text(_first(payload, "description", "descriptif", "content", "details"))
+    mission_profile = _clean_text(_first(payload, "missionProfile", "profil", "profile", "profileDescription"))
     url = _clean_text(_first(payload, "url", "applyUrl", "link", "jobUrl"))
     salary = _clean_text(_first(payload, "salary", "salaire", "remuneration", "compensation"))
 
@@ -133,6 +138,7 @@ def transform_bf(payload: dict) -> dict:
         "country": country,
         "contract_type": contract_type,
         "description": description,
+        "mission_profile": mission_profile,
         "publication_date": publication_date,
         "start_date": start_date,
         "salary": salary,
@@ -162,12 +168,12 @@ def upsert_clean_offers(conn: psycopg.Connection, rows: list[dict]) -> int:
                 INSERT INTO clean_offers (
                     source, external_id,
                     title, company, location, country, contract_type,
-                    description, publication_date, start_date, salary, url,
+                    description, mission_profile, publication_date, start_date, salary, url,
                     payload_json
                 ) VALUES (
                     'business_france', %s,
                     %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s,
                     %s
                 )
                 ON CONFLICT (source, external_id) DO UPDATE SET
@@ -177,6 +183,7 @@ def upsert_clean_offers(conn: psycopg.Connection, rows: list[dict]) -> int:
                     country          = EXCLUDED.country,
                     contract_type    = EXCLUDED.contract_type,
                     description      = EXCLUDED.description,
+                    mission_profile  = EXCLUDED.mission_profile,
                     publication_date = EXCLUDED.publication_date,
                     start_date       = EXCLUDED.start_date,
                     salary           = EXCLUDED.salary,
@@ -192,6 +199,7 @@ def upsert_clean_offers(conn: psycopg.Connection, rows: list[dict]) -> int:
                     fields["country"],
                     fields["contract_type"],
                     fields["description"],
+                    fields["mission_profile"],
                     fields["publication_date"],
                     fields["start_date"],
                     fields["salary"],

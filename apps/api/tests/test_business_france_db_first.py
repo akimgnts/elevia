@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -132,3 +133,71 @@ def test_inbox_catalog_does_not_fallback_to_fixtures_for_business_france(monkeyp
     bf_offers = [offer for offer in offers if offer.get("source") == "business_france"]
     assert bf_offers
     assert bf_offers[0]["id"] == "BF-123"
+
+
+def test_inbox_catalog_business_france_propagates_is_vie_from_payload(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgres://example")
+
+    class FakeCursor:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def execute(self, *_args, **_kwargs):
+            return None
+
+        def fetchall(self):
+            return [
+                (
+                    "BF-123",
+                    "business_france",
+                    "VIE Analyst",
+                    "Mission",
+                    "Acme",
+                    "Berlin",
+                    "Germany",
+                    "2026-04-17",
+                    "2026-06-01",
+                    json.dumps({"is_vie": True, "skills": ["python"]}),
+                    "VIE",
+                ),
+                (
+                    "BF-124",
+                    "business_france",
+                    "VIA Mission",
+                    "Mission",
+                    "Ministry",
+                    "Berlin",
+                    "Germany",
+                    "2026-04-17",
+                    "2026-06-01",
+                    json.dumps({"is_vie": False, "skills": ["administration"]}),
+                    "VIA",
+                ),
+            ]
+
+    class FakeConnection:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def cursor(self):
+            return FakeCursor()
+
+    class FakePsycopg:
+        @staticmethod
+        def connect(*_args, **_kwargs):
+            return FakeConnection()
+
+    monkeypatch.setitem(sys.modules, "psycopg", FakePsycopg)
+
+    offers = inbox_catalog._load_business_france_from_postgres()
+
+    assert offers[0]["is_vie"] is True
+    assert offers[0]["contract_type"] == "VIE"
+    assert offers[1]["is_vie"] is False
+    assert offers[1]["contract_type"] == "VIA"

@@ -1,0 +1,46 @@
+{
+  "sprint": "sprint4_validation",
+  "mission": "Validation élargie post-fix du batch Sprint 4 (N1/C1/N3/N2/O2) sur un panel réel de 7 CV issus du repo. Lecture seule, aucune modification de code produit.",
+  "date": "2026-04-19",
+  "commit_before_this_sprint": "dce8801 (apps/api/src files modified Sprint 4 batch1 restent uncommitted)",
+  "working_tree_state": "Les 5 fixes Sprint 4 batch1 sont présents dans le working tree (extract.py + 2 jsonl) mais non committés. Aucun nouveau changement applicatif ce sprint.",
+  "files_read_only": [
+    "apps/api/src/esco/extract.py",
+    "apps/api/data/esco_alias_fr_v0.jsonl",
+    "apps/api/data/aliases/esco_alias_fr_v0.jsonl",
+    "apps/api/src/profile/baseline_parser.py",
+    "apps/api/src/profile/skill_filter.py"
+  ],
+  "cvs_panel": [
+    "apps/api/fixtures/cv/cv_fixture_v0.txt (référence Sprint 4 batch1 — Marie Dupont Data Analyst)",
+    "apps/api/data/eval/synthetic_cv_dataset_v1/cv_01_lina_morel.txt (Commerciale B2B)",
+    "apps/api/data/eval/synthetic_cv_dataset_v1/cv_02_hugo_renaud.txt (Business Developer)",
+    "apps/api/data/eval/synthetic_cv_dataset_v1/cv_04_benoit_caron.txt (Coordinateur logistique)",
+    "apps/api/data/eval/synthetic_cv_dataset_v1/cv_05_camille_vasseur.txt (Communication interne Paris)",
+    "apps/api/data/eval/synthetic_cv_dataset_v1/cv_06_yasmine_haddad.txt (Marketing digital)",
+    "apps/api/data/eval/synthetic_cv_dataset_v1/cv_09_ines_barbier.txt (RH junior)"
+  ],
+  "runner_used": "profile.baseline_parser.run_baseline (import Python in-process, aucun HTTP / aucun TestClient / aucun serveur)",
+  "runner_script": "baseline/sprint4_validation/_run_validation.py (artefact script, non production code)",
+  "raw_results_file": "baseline/sprint4_validation/_raw_results.json",
+  "artefacts_generated": [
+    "baseline/sprint4_validation/README.md",
+    "baseline/sprint4_validation/manifest.json",
+    "baseline/sprint4_validation/panel.json",
+    "baseline/sprint4_validation/per_cv_results.json",
+    "baseline/sprint4_validation/per_fix_validation.json",
+    "baseline/sprint4_validation/summary_matrix.json",
+    "baseline/sprint4_validation/_run_validation.py (runner)",
+    "baseline/sprint4_validation/_raw_results.json (raw run_baseline outputs)"
+  ],
+  "non_goals": [
+    "Aucun code produit modifié",
+    "Aucun nouveau fix appliqué",
+    "Aucun alias ajouté/retiré",
+    "Aucun flag changé",
+    "Aucune activation fuzzy",
+    "Aucun fichier scoring touché",
+    "Aucun refactor"
+  ],
+  "final_recommendation": "batch prêt à être stabilisé"
+}

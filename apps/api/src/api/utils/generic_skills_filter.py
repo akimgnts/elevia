@@ -24,7 +24,7 @@ Calibration sources:
 from __future__ import annotations
 
 import os
-from typing import List
+from typing import Dict, List
 
 # Minimum scorable URIs required after filtering. Offers reduced below this
 # threshold carry too little signal to score reliably (e.g. [ANG COM TAB INF SQL]
@@ -75,9 +75,72 @@ STRONG_DATA_URIS: frozenset = frozenset({
     "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",  # logiciel de visualisation des données
 })
 
+TAG_GENERIC_HARD = "generic_hard"
+TAG_GENERIC_WEAK = "generic_weak"
+TAG_DOMAIN = "domain"
+
 
 def is_enabled() -> bool:
     return os.getenv("ELEVIA_FILTER_GENERIC_URIS", "0").strip() == "1"
+
+
+# Minimum non-HARD URIs a profile must have for the filter to apply.
+# Below this, filtering would leave too little domain signal to rank reliably
+# (see baseline/generic_filter_validation: cv_09 with 2 remaining → score collapse).
+MIN_PROFILE_DOMAIN_URIS = 3
+
+
+def should_apply_generic_filter(
+    profile_skills_uri: List[str],
+    hard_generic_uris: frozenset,
+) -> bool:
+    """Profile-side guard: skip filter when profile has too few non-HARD URIs.
+
+    A profile whose remaining (non-HARD) URIs drop below MIN_PROFILE_DOMAIN_URIS
+    carries insufficient domain signal — applying the filter to the offers it is
+    compared against would collapse rankings (empirical finding, cv_09 RH junior).
+    """
+    if not profile_skills_uri:
+        return False
+    total = len(profile_skills_uri)
+    hard_count = sum(1 for uri in profile_skills_uri if uri in hard_generic_uris)
+    return (total - hard_count) >= MIN_PROFILE_DOMAIN_URIS
+
+
+def tag_skill_uri(uri: str) -> str:
+    """Return the non-destructive V1 tag for one skill URI."""
+    if uri in HARD_GENERIC_URIS:
+        return TAG_GENERIC_HARD
+    if uri in WEAKLY_GENERIC_URIS:
+        return TAG_GENERIC_WEAK
+    return TAG_DOMAIN
+
+
+def tag_skills_uri(skills_uri: List[str]) -> Dict[str, str]:
+    """Tag skills without mutating or filtering them.
+
+    V1 exposes exactly three tags:
+      - generic_hard: URI is in HARD_GENERIC_URIS.
+      - generic_weak: URI is in WEAKLY_GENERIC_URIS.
+      - domain: all other URIs.
+
+    The returned map is informational only and is not used by scoring.
+    """
+    return {uri: tag_skill_uri(uri) for uri in skills_uri}
+
+
+def summarize_skill_tags(skills_uri: List[str]) -> Dict[str, int]:
+    """Count V1 skill tags for the unique URIs in skills_uri."""
+    tags_by_uri = tag_skills_uri(skills_uri)
+    return {
+        "generic_hard_count": sum(
+            1 for tag in tags_by_uri.values() if tag == TAG_GENERIC_HARD
+        ),
+        "generic_weak_count": sum(
+            1 for tag in tags_by_uri.values() if tag == TAG_GENERIC_WEAK
+        ),
+        "domain_count": sum(1 for tag in tags_by_uri.values() if tag == TAG_DOMAIN),
+    }
 
 
 def filter_skills_uri_for_scoring(skills_uri: List[str]) -> List[str]:

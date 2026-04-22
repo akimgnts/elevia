@@ -1,0 +1,43 @@
+{
+  "sprint": "sprint4_batch1_fix",
+  "mission": "Implémenter les 5 micro-fixes shortlistés Sprint 4 et mesurer l'effet cumulé sur cv_fixture_v0.txt.",
+  "date": "2026-04-19",
+  "commit_before_fix": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "commit_after_fix": "local working tree (not committed — diff stays unstaged until user decides)",
+  "files_modified": [
+    {
+      "path": "apps/api/src/esco/extract.py",
+      "cases_applied": ["N1", "C1", "N3", "O2"],
+      "lines_touched_approx": 5
+    },
+    {
+      "path": "apps/api/data/esco_alias_fr_v0.jsonl",
+      "cases_applied": ["N2"],
+      "lines_touched_approx": 1
+    },
+    {
+      "path": "apps/api/data/aliases/esco_alias_fr_v0.jsonl",
+      "cases_applied": ["N2 duplicate copy"],
+      "lines_touched_approx": 1
+    }
+  ],
+  "runner_used": "profile.baseline_parser.run_baseline (in-process Python call, no HTTP / no TestClient)",
+  "input_cv_path": "apps/api/fixtures/cv/cv_fixture_v0.txt",
+  "input_cv_sha": "sha256 not recomputed — fixture unchanged",
+  "artefacts_generated": [
+    "baseline/sprint4_batch1_fix/README.md",
+    "baseline/sprint4_batch1_fix/manifest.json",
+    "baseline/sprint4_batch1_fix/before_after.json",
+    "baseline/sprint4_batch1_fix/raw_output_after.json",
+    "baseline/sprint4_batch1_fix/changed_rules.json",
+    "baseline/sprint4_batch1_fix/_before_snapshot.json"
+  ],
+  "non_goals": [
+    "Aucun autre fix appliqué (shortlist strictement respectée)",
+    "Aucun fichier scoring touché (matching_v1, idf, weights_*)",
+    "Aucun fuzzy activé",
+    "Aucun flag changé",
+    "Aucun refactor",
+    "Aucun alias ajouté (seuls suppressions / renommage / réduction)"
+  ]
+}

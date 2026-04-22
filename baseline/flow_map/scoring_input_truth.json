@@ -1,0 +1,76 @@
+{
+  "question": "Quel champ exact est consommé par le moteur de matching en production locale actuelle ?",
+  "answer_short": "ExtractedProfile.skills_uri (frozenset[str]) — comparé par intersection avec offer.skills_uri (list[str] dans le dict offre).",
+  "scoring_function": {
+    "primary": "matching.matching_v1.MatchingEngine._score_skills",
+    "file": "apps/api/src/matching/matching_v1.py",
+    "line": 356,
+    "read_at_line": 398,
+    "read_expression": "profile_skills_set = getattr(profile, 'skills_uri', frozenset()) or frozenset()",
+    "companion_reads": {
+      "offer_skills_uri": "apps/api/src/matching/matching_v1.py:368 — raw_uris = offer.get('skills_uri'); fallback to _map_offer_skills_to_uris(offer['skills']) at line 377 when missing"
+    }
+  },
+  "scoring_engine_entrypoints": {
+    "score_offer": "apps/api/src/matching/matching_v1.py:762 — called from inbox._score_offers and matching.match_profile",
+    "match": "apps/api/src/matching/matching_v1.py:861 — not currently used by /inbox; used by legacy /v1/match threshold-gated path"
+  },
+  "profile_object_passed_to_scoring": {
+    "type": "ExtractedProfile (dataclass, frozen)",
+    "defined_at": "apps/api/src/matching/extractors.py:~40-65",
+    "built_by": "matching.extractors.extract_profile(raw_profile) at apps/api/src/matching/extractors.py:246"
+  },
+  "skills_uri_construction_truth_table": [
+    {
+      "case": "raw_profile['skills_uri'] is a non-empty list (typical case for CV-parsed profiles coming back from /profile/parse-*)",
+      "behavior": "extract_profile USES THIS LIST VERBATIM (dedup only). SKILL_ALIASES expansion + map_skill are NOT executed.",
+      "code_ref": "apps/api/src/matching/extractors.py:311-321"
+    },
+    {
+      "case": "raw_profile has no skills_uri or an empty list (plain JSON profiles, golden fixtures from Sprint 1/2)",
+      "behavior": "extract_profile runs _expand_profile_skills via SKILL_ALIASES then map_skill(label, enable_fuzzy=False) per expanded label, then collapse_to_uris.",
+      "code_ref": "apps/api/src/matching/extractors.py:322-343"
+    },
+    {
+      "case": "raw_profile['domain_uris'] non-empty",
+      "behavior": "URIs appended (dedup) to the URI list built above.",
+      "code_ref": "apps/api/src/matching/extractors.py:345-353"
+    },
+    {
+      "case": "final step (always)",
+      "behavior": "build_effective_skills_uri(base_list, raw_profile) returns the frozenset assigned to ExtractedProfile.skills_uri.",
+      "code_ref": "apps/api/src/matching/extractors.py:358-359 + apps/api/src/compass/profile/profile_effective_skills.py"
+    }
+  ],
+  "flags_that_modify_scoring_input": [
+    {
+      "flag": "ELEVIA_PROMOTE_ESCO",
+      "default": "0 / OFF",
+      "effect_off": "build_effective_skills_uri returns frozenset(base_list) — bit-for-bit identical to pre-Sprint-6 path.",
+      "effect_on": "raw_profile['skills_uri_promoted'] URIs are unioned into the effective frozenset.",
+      "code_ref": "apps/api/src/compass/profile/profile_effective_skills.py:60-64, 134-140, 198-207"
+    },
+    {
+      "flag": "ELEVIA_ENABLE_COMPASS_E",
+      "default": "ON in dev-auto (ENV=dev/local OR ELEVIA_DEV_TOOLS=1 OR DEBUG=1), otherwise explicit 0/1",
+      "effect": "Populates CVPipelineResult.domain_skills_active (display-only per module docstring). Does NOT inject into ExtractedProfile.skills_uri unless upstream also populates raw_profile['domain_uris'] (which the baseline path does NOT do today).",
+      "code_ref": "apps/api/src/compass/canonical_pipeline.py:4-29, 218-258"
+    },
+    {
+      "flag": "ELEVIA_FILTER_GENERIC_URIS",
+      "default": "0 / OFF",
+      "effect": "Applied to OFFER skills_uri (not profile). Removes high-frequency generic ESCO URIs before scoring.",
+      "code_ref": "apps/api/src/api/utils/generic_skills_filter.py:63-100"
+    }
+  ],
+  "which_cv_path_actually_feeds_scoring": {
+    "verdict": "The CV-brut pipeline (POST /profile/parse-file or POST /profile/parse-baseline) produces profile.skills_uri via profile.baseline_parser.run_baseline (i.e., strict_filter_skills + map_skill + collapse_to_uris on cv_text tokens). When the client round-trips that profile to /inbox or /v1/match, extract_profile SHORT-CIRCUITS the SKILL_ALIASES path and uses the pre-computed list verbatim (extractors.py:311-321).",
+    "implication": "The audit in baseline/sprint2 (which describes SKILL_ALIASES as the main coverage mechanism) captures the behavior of the plain-JSON path (golden fixtures with no skills_uri pre-populated). It does NOT reflect the production-local CV-upload path where skills_uri is already present and alias expansion is not even called.",
+    "uncertainty": "Whether real frontend calls to /inbox actually preserve skills_uri in the profile payload is a client-side contract that this cartography did NOT verify against the web app. It is possible that the frontend strips or rebuilds the profile before posting. Not traced here — flagged explicitly."
+  },
+  "non_scoring_paths_clearly_tagged": {
+    "/profile/ingest_cv": "DEV-only (ELEVIA_DEV_TOOLS=1). Legacy LLM CV extraction. Output shape is a different schema (CvExtractionResponse) — does not produce skills_uri. NOT on the scoring chain.",
+    "/apply-pack": "Does its own string-level matched/missing computation (apply_pack.generator_v0.compute_matched_missing). Does NOT call MatchingEngine. Documentation / pack generation only.",
+    "/profile-understanding/session": "ProfileUnderstandingService — parallel understanding product, not part of the matching scoring chain."
+  }
+}

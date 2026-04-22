@@ -1,0 +1,114 @@
+{
+  "description": "Important intermediate objects traversed along the real chain and which fields cross each boundary.",
+  "objects": [
+    {
+      "name": "cv_text (raw)",
+      "produced_by": "compass.pipeline.text_extraction_stage.extract_profile_text (from PDF/TXT bytes) OR direct string input (/profile/parse-baseline)",
+      "consumed_by": "compass.canonical_pipeline.run_cv_pipeline",
+      "shape": "str (<= 50_000 chars capped in run_baseline)",
+      "notes": "Single input to the whole CV chain."
+    },
+    {
+      "name": "baseline_result (dict)",
+      "produced_by": "profile.baseline_parser.run_baseline(cv_text) -> run_baseline_from_tokens",
+      "consumed_by": "compass.canonical_pipeline.run_cv_pipeline + compass.canonical_pipeline.get_extracted_profile_snapshot",
+      "key_fields": [
+        "source (str = 'baseline' or 'llm')",
+        "skills_raw (list[str]) — raw tokens detected from cv_text",
+        "skills_canonical (list[str]) — filtered canonical labels",
+        "validated_items (list[{label, uri, ...}]) — ESCO-validated items",
+        "validated_labels (list[str])",
+        "skills_uri_count (int)",
+        "profile (dict) — the payload handed to the HTTP response and later to matching"
+      ],
+      "shape_of_profile_subfield": {
+        "id": "str",
+        "skills": "list[str] (= skills_canonical)",
+        "skills_source": "'baseline'",
+        "skills_uri": "list[str] — already-collapsed ESCO URIs"
+      },
+      "notes": "Built by baseline_parser.py:152-157. skills_uri here is the canonical output of map_skill + collapse_to_uris applied to cv_text tokens."
+    },
+    {
+      "name": "CVPipelineResult (dataclass)",
+      "produced_by": "compass.canonical_pipeline.run_cv_pipeline",
+      "consumed_by": "compass.pipeline.profile_parse_pipeline._run_profile_text_pipeline",
+      "key_fields": [
+        "baseline_result (dict above)",
+        "profile_cluster (dict, detect_profile_cluster)",
+        "domain_skills_active (list[str]) — Compass E display-only",
+        "resolved_to_esco (list[dict]) — display-only",
+        "pipeline_used (str tag)"
+      ],
+      "notes": "compass.canonical_pipeline.py docstring states: 'score_core is NEVER read or written by this module. DOMAIN_SKILLS_ACTIVE are display/context only — NOT injected into matching weights.' So Compass E outputs do NOT reach scoring directly from here."
+    },
+    {
+      "name": "profile (dict) — HTTP response payload",
+      "produced_by": "get_extracted_profile_snapshot(result) = deepcopy(baseline_result['profile']) at compass/canonical_pipeline.py:99-107",
+      "consumed_by": "frontend -> (later) POST /inbox.profile or POST /v1/match.profile",
+      "key_fields": [
+        "id",
+        "skills (list[str])",
+        "skills_source",
+        "skills_uri (list[str])"
+      ],
+      "notes": "Shape is a PLAIN DICT, shipped in the HTTP response of /profile/parse-* endpoints. The caller is expected to round-trip it unchanged to /inbox or /v1/match."
+    },
+    {
+      "name": "ExtractedProfile (dataclass, frozen)",
+      "produced_by": "matching.extractors.extract_profile(raw_profile) at matching/extractors.py:246",
+      "consumed_by": "matching.matching_v1.MatchingEngine._score_skills / _score_languages / _score_education / _score_country (via score_offer / match)",
+      "key_fields": [
+        "profile_id (str)",
+        "skills (frozenset[str]) — normalized + alias-expanded string labels",
+        "skills_uri (frozenset[str]) — CANONICAL SCORING INPUT",
+        "languages (frozenset[str])",
+        "education_level (int)",
+        "preferred_countries (frozenset[str])",
+        "skill_source, matching_skills_count, capabilities_count",
+        "skills_uri_count, skills_uri_collapsed_dupes, skills_unmapped_count"
+      ],
+      "skills_uri_construction_rules": [
+        "at extractors.py:311-321 — if raw_profile['skills_uri'] is a non-empty list, that list is used VERBATIM (dedup only). Alias-expansion + map_skill path is SKIPPED.",
+        "at extractors.py:322-343 — else, alias-expand normalized labels via SKILL_ALIASES then map_skill(label, enable_fuzzy=False) per label, then collapse_to_uris.",
+        "at extractors.py:345-353 — if raw_profile['domain_uris'] non-empty, appended to skills_uri_list (dedup).",
+        "at extractors.py:358-359 — build_effective_skills_uri(skills_uri_list, raw_profile): when ELEVIA_PROMOTE_ESCO=0 (default), returns frozenset(skills_uri_list) — BIT-FOR-BIT identical to pre-Sprint-6 path."
+      ]
+    },
+    {
+      "name": "offer (dict) — scoring unit",
+      "produced_by": "api.utils.inbox_catalog.load_catalog_offers() OR MatchingRequest.offers (for /v1/match)",
+      "consumed_by": "MatchingEngine.score_offer(extracted, offer)",
+      "key_fields_used_in_scoring": [
+        "skills_uri (list[str]) — read at matching_v1.py:368, fallback to _map_offer_skills_to_uris(offer['skills']) if missing",
+        "skills (list[str]) — label fallback for URI mapping",
+        "skills_uri_collapsed_dupes, skills_unmapped_count",
+        "skills_display (list[dict]) — label map for reasons",
+        "offer_cluster, title, description — for contextual weighting",
+        "languages, education, country, is_vie, company (hard filter)"
+      ]
+    },
+    {
+      "name": "MatchResult (dataclass)",
+      "produced_by": "MatchingEngine.score_offer(...)",
+      "consumed_by": "inbox.py::_score_offers (builds InboxItem) / matching.py::match_profile (builds ResultItem)",
+      "key_fields": [
+        "offer_id",
+        "score (int 0-100)",
+        "breakdown {skills, languages, education, country} each 0.0-1.0",
+        "reasons (list[str])",
+        "match_debug (dict) — contains skills.matched / skills.missing / scoring_unit"
+      ]
+    }
+  ],
+  "tracked_fields": {
+    "skills": "Input label channel on raw_profile. ExtractedProfile.skills is the frozenset of normalized+alias-expanded labels. NOT directly consumed by _score_skills when URI scoring is active (default).",
+    "skills_uri": "Primary scoring channel. On raw_profile: list[str]. On ExtractedProfile: frozenset[str]. Read directly by _score_skills.",
+    "skills_uri_promoted": "Declared in compass/profile/profile_effective_skills.py — populated by promotion path (not traversed in default runs). Merged into effective only when ELEVIA_PROMOTE_ESCO=1.",
+    "effective_skills_uri": "NOT stored as a field on the profile dict; computed in-memory by build_effective_skills_uri at extract_profile time and assigned to ExtractedProfile.skills_uri.",
+    "domain_uris": "Optional field on raw_profile populated by Compass E layer. Appended to base URI list inside extract_profile (lines 345-353) before build_effective_skills_uri.",
+    "canonical_skills": "Response-only field on /profile/parse-* payloads (from canonical_mapping_stage). NOT read back by extract_profile at matching time.",
+    "profile.skills": "List of str labels expected on inbox/match requests. Used for alias expansion inside extract_profile when skills_uri is absent; used for cluster detection.",
+    "matching_skills": "Alternate field read first at extractors.py:262-263; falls back to 'skills' if None."
+  }
+}

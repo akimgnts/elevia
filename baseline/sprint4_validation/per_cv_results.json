@@ -1,0 +1,296 @@
+{
+  "description": "Résultats bruts run_baseline par CV, avec observation ciblée des 5 labels et tokens pertinents pour les fixes Sprint 4 (N1, C1, N3, N2, O2). Aucun code de production touché. Snapshot pris le 2026-04-19 sur working tree local (post Sprint 4 batch1 fix, uncommitted).",
+  "panel_size": 7,
+  "runner": "profile.baseline_parser.run_baseline (import Python direct, aucun HTTP / aucun TestClient)",
+  "target_labels_tracked": [
+    "paris",
+    "gérer une équipe",
+    "argumentaire de vente",
+    "techniques de présentation visuelle",
+    "gestion de projets"
+  ],
+  "target_uris_tracked": {
+    "paris_wager": "http://data.europa.eu/esco/skill/2cc75284-f385-42d6-9b70-8262bc6c603a",
+    "gerer_une_equipe": "http://data.europa.eu/esco/skill/cb668e89-6ef5-4ff3-ab4a-506010e7e70b",
+    "argumentaire_de_vente": "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909",
+    "techniques_presentation_visuelle": "http://data.europa.eu/esco/skill/348b74cd-49ce-4844-8bdf-ec188b497213",
+    "gestion_de_projets": "http://data.europa.eu/esco/skill/7111b95d-0ce3-441a-9d92-4c75d05c4388"
+  },
+  "results": [
+    {
+      "cv_id": "cv_ref_marie_dupont",
+      "role": "Data Analyst FR+EN (référence)",
+      "counts": {
+        "raw_detected": 118,
+        "filtered_out": 99,
+        "canonical_count": 19,
+        "skills_uri_count": 19,
+        "validated_skills": 19,
+        "skills_unmapped_count": 92,
+        "alias_hits_count": 1
+      },
+      "alias_hits": [{"alias": "reporting", "label": "analyse de données"}],
+      "validated_labels": [
+        "analyse de données", "apprentissage automatique", "devops",
+        "développement par itérations", "exploration de données",
+        "gestion de projets", "gestion de projets par méthode agile",
+        "logiciel de visualisation des données", "mysql", "nosql",
+        "outils de gestion de configuration logicielle",
+        "outils d'extraction de transformation et de chargement",
+        "postgresql", "programmation informatique",
+        "python (programmation informatique)", "science des big data",
+        "sql", "statistiques", "utiliser un logiciel de tableur"
+      ],
+      "token_presence_in_raw_text": {
+        "paris": true,
+        "sales": true,
+        "management": true,
+        "project_management": true,
+        "dashboards": true,
+        "vente": false,
+        "argumentaire": false
+      },
+      "paris_in_raw_tokens_after_stopwords": false,
+      "label_presence": {
+        "paris": false,
+        "gérer une équipe": false,
+        "argumentaire de vente": false,
+        "techniques de présentation visuelle": false,
+        "gestion de projets": true
+      },
+      "product_note": "amélioration (validée Sprint 4 batch1 : 22→19 URIs, -4 bruits, +1 signal légitime 'gestion de projets')"
+    },
+    {
+      "cv_id": "cv_01_lina_morel",
+      "role": "Commerciale sédentaire B2B",
+      "counts": {
+        "raw_detected": 102,
+        "filtered_out": 93,
+        "canonical_count": 9,
+        "skills_uri_count": 9,
+        "validated_skills": 9,
+        "skills_unmapped_count": 89,
+        "alias_hits_count": 4
+      },
+      "alias_hits": [
+        {"alias": "commercial", "label": "argumentaire de vente"},
+        {"alias": "négociation", "label": "négocier avec des parties prenantes"},
+        {"alias": "prospection", "label": "méthodes de prospection"},
+        {"alias": "reporting", "label": "analyse de données"}
+      ],
+      "validated_labels": [
+        "analyse de données", "anglais", "argumentaire de vente",
+        "gestion de la relation client", "gérer la chaîne logistique",
+        "logistique", "méthodes de prospection",
+        "négocier avec des parties prenantes", "utiliser un logiciel de tableur"
+      ],
+      "token_presence_in_raw_text": {
+        "paris": false,
+        "sales": true,
+        "management": false,
+        "project_management": false,
+        "dashboards": false,
+        "vente": true,
+        "argumentaire": false
+      },
+      "paris_in_raw_tokens_after_stopwords": false,
+      "label_presence": {
+        "paris": false,
+        "gérer une équipe": false,
+        "argumentaire de vente": true,
+        "techniques de présentation visuelle": false,
+        "gestion de projets": false
+      },
+      "product_note": "neutre post-fix : profil commercial sans régression. 'argumentaire de vente' reste capté via jsonl alias 'commercial' (canal alternatif) — le retrait de SKILL_ALIASES['sales'] ne casse pas le signal légitime sur ce profil."
+    },
+    {
+      "cv_id": "cv_02_hugo_renaud",
+      "role": "Business Developer Junior Export",
+      "counts": {
+        "raw_detected": 106,
+        "filtered_out": 98,
+        "canonical_count": 8,
+        "skills_uri_count": 8,
+        "validated_skills": 8,
+        "skills_unmapped_count": 92,
+        "alias_hits_count": 3
+      },
+      "alias_hits": [
+        {"alias": "commercial", "label": "argumentaire de vente"},
+        {"alias": "prospection", "label": "méthodes de prospection"},
+        {"alias": "veille", "label": "analyse de marché"}
+      ],
+      "validated_labels": [
+        "analyse de marché", "analyse marketing", "anglais",
+        "argumentaire de vente", "espagnol", "gestion de la relation client",
+        "méthodes de prospection", "utiliser un logiciel de tableur"
+      ],
+      "token_presence_in_raw_text": {
+        "paris": false,
+        "sales": false,
+        "management": false,
+        "project_management": false,
+        "dashboards": false,
+        "vente": true,
+        "argumentaire": true
+      },
+      "paris_in_raw_tokens_after_stopwords": false,
+      "label_presence": {
+        "paris": false,
+        "gérer une équipe": false,
+        "argumentaire de vente": true,
+        "techniques de présentation visuelle": false,
+        "gestion de projets": false
+      },
+      "product_note": "neutre post-fix : business developer avec 'argumentaire de vente' préservé via alias jsonl 'commercial' et 'business development'. Aucune perte de signal."
+    },
+    {
+      "cv_id": "cv_04_benoit_caron",
+      "role": "Coordinateur logistique / ops",
+      "counts": {
+        "raw_detected": 108,
+        "filtered_out": 102,
+        "canonical_count": 6,
+        "skills_uri_count": 6,
+        "validated_skills": 6,
+        "skills_unmapped_count": 99,
+        "alias_hits_count": 0
+      },
+      "alias_hits": [],
+      "validated_labels": [
+        "anglais", "communication", "gérer la chaîne logistique",
+        "logistique", "saisie", "utiliser un logiciel de tableur"
+      ],
+      "token_presence_in_raw_text": {
+        "paris": false,
+        "sales": false,
+        "management": false,
+        "project_management": false,
+        "dashboards": false,
+        "vente": false,
+        "argumentaire": false
+      },
+      "paris_in_raw_tokens_after_stopwords": false,
+      "label_presence": {
+        "paris": false,
+        "gérer une équipe": false,
+        "argumentaire de vente": false,
+        "techniques de présentation visuelle": false,
+        "gestion de projets": false
+      },
+      "product_note": "neutre : CV sans aucun des 5 tokens cible — contrôle confirmant qu'aucun fix n'a d'effet cascade sur un profil ops non concerné."
+    },
+    {
+      "cv_id": "cv_05_camille_vasseur",
+      "role": "Chargée de communication interne (Paris)",
+      "counts": {
+        "raw_detected": 66,
+        "filtered_out": 62,
+        "canonical_count": 4,
+        "skills_uri_count": 4,
+        "validated_skills": 4,
+        "skills_unmapped_count": 61,
+        "alias_hits_count": 0
+      },
+      "alias_hits": [],
+      "validated_labels": [
+        "anglais", "outils bureautiques", "suite office", "wordpress"
+      ],
+      "token_presence_in_raw_text": {
+        "paris": true,
+        "sales": false,
+        "management": true,
+        "project_management": false,
+        "dashboards": false,
+        "vente": false,
+        "argumentaire": false
+      },
+      "paris_in_raw_tokens_after_stopwords": false,
+      "label_presence": {
+        "paris": false,
+        "gérer une équipe": false,
+        "argumentaire de vente": false,
+        "techniques de présentation visuelle": false,
+        "gestion de projets": false
+      },
+      "product_note": "amélioration : le texte contient 'Paris' (ligne 3) ET 'community management' (token 'management'). Post-fix, ni 'paris' ni 'gérer une équipe' ne sont extraits — les deux signaux sont des bruits pour ce profil de communication interne. N1 ET N2 correctement exercés sur ce CV, tous deux validés."
+    },
+    {
+      "cv_id": "cv_06_yasmine_haddad",
+      "role": "Assistante marketing digital",
+      "counts": {
+        "raw_detected": 79,
+        "filtered_out": 70,
+        "canonical_count": 9,
+        "skills_uri_count": 9,
+        "validated_skills": 9,
+        "skills_unmapped_count": 66,
+        "alias_hits_count": 2
+      },
+      "alias_hits": [
+        {"alias": "reporting", "label": "analyse de données"},
+        {"alias": "strategie", "label": "planning stratégique"}
+      ],
+      "validated_labels": [
+        "analyse de données", "analyse marketing", "anglais",
+        "gestion des réseaux sociaux", "optimisation des moteurs de recherche",
+        "planning stratégique", "techniques de marketing des médias sociaux",
+        "utiliser un logiciel de tableur", "wordpress"
+      ],
+      "token_presence_in_raw_text": {
+        "paris": false,
+        "sales": false,
+        "management": false,
+        "project_management": false,
+        "dashboards": false,
+        "vente": false,
+        "argumentaire": false
+      },
+      "paris_in_raw_tokens_after_stopwords": false,
+      "label_presence": {
+        "paris": false,
+        "gérer une équipe": false,
+        "argumentaire de vente": false,
+        "techniques de présentation visuelle": false,
+        "gestion de projets": false
+      },
+      "product_note": "neutre : profil marketing/reporting sans token cible littéral. Signal reporting capté via jsonl 'reporting'→'analyse de données' (inchangé par les fixes)."
+    },
+    {
+      "cv_id": "cv_09_ines_barbier",
+      "role": "Chargée RH généraliste junior",
+      "counts": {
+        "raw_detected": 68,
+        "filtered_out": 63,
+        "canonical_count": 5,
+        "skills_uri_count": 5,
+        "validated_skills": 5,
+        "skills_unmapped_count": 59,
+        "alias_hits_count": 1
+      },
+      "alias_hits": [{"alias": "recrutement", "label": "recruter des employés"}],
+      "validated_labels": [
+        "anglais", "recruter des employés", "recruter du personnel",
+        "service administratif", "utiliser un logiciel de tableur"
+      ],
+      "token_presence_in_raw_text": {
+        "paris": false,
+        "sales": false,
+        "management": false,
+        "project_management": false,
+        "dashboards": false,
+        "vente": false,
+        "argumentaire": false
+      },
+      "paris_in_raw_tokens_after_stopwords": false,
+      "label_presence": {
+        "paris": false,
+        "gérer une équipe": false,
+        "argumentaire de vente": false,
+        "techniques de présentation visuelle": false,
+        "gestion de projets": false
+      },
+      "product_note": "neutre : profil RH junior orienté recrutement (pas management d'équipe). Signal 'recruter des employés' préservé via jsonl 'recrutement'. Absence de 'gérer une équipe' cohérente avec le profil (recrute, ne manage pas)."
+    }
+  ]
+}

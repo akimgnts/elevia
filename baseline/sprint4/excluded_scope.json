@@ -1,0 +1,101 @@
+{
+  "description": "Exclusions explicites du Sprint 4 — périmètre strictement limité aux 3 familles ciblées. Ce document existe pour empêcher la dérive future.",
+  "excluded": [
+    {
+      "topic": "refonte_parser",
+      "examples": [
+        "remplacer _split_text par un parseur NLP",
+        "ajouter une couche POS-tagging pour distinguer skills vs contexte",
+        "introduire un pipeline de phrase-structure (Spacy / stanza)"
+      ],
+      "reason": "Impact colossal, effet borderline sur les 3 familles ciblées. Change la définition même de raw_tokens. Hors périmètre sprint chirurgical."
+    },
+    {
+      "topic": "activation_fuzzy",
+      "examples": [
+        "map_skill(enable_fuzzy=True) dans strict_filter_skills ou run_baseline_from_tokens",
+        "abaisser le seuil FUZZY_THRESHOLD (0.92)"
+      ],
+      "reason": "Le fuzzy augmente la couverture mais multiplie par 3-5 les faux positifs. Gagner 2-3 URIs légitimes au prix d'introduire 10+ nouveaux cas de bruit. Inversement corrélé à l'objectif sprint (baisser le bruit strict)."
+    },
+    {
+      "topic": "modification_scoring_core",
+      "examples": [
+        "matching_v1.py",
+        "idf.py",
+        "weights_*.py",
+        "changer le calcul de score",
+        "ajouter un nouveau facteur de pondération"
+      ],
+      "reason": "Invariant critique rappelé par CLAUDE.md : ces fichiers ne doivent jamais être modifiés. Le sprint est upstream du scoring."
+    },
+    {
+      "topic": "nouvelle_couche_canonicalisation",
+      "examples": [
+        "introduire une table de synonymes post-validated_items",
+        "ajouter une étape de re-ranking par proximité graphe ESCO",
+        "intégrer ESCO skill groups comme canonical target"
+      ],
+      "reason": "Change l'architecture — hors périmètre sprint. Les skills_uri doivent rester verbatim (invariant)."
+    },
+    {
+      "topic": "audits_larges_nouveaux",
+      "examples": [
+        "auditer la pipeline offre (market_insights, France Travail)",
+        "auditer le chemin LLM enrich",
+        "auditer la persistance PostgreSQL des profils"
+      ],
+      "reason": "Sprint 3 + 4 se concentrent sur le CV-brute path. Les autres paths ne sont pas dans la zone de triage."
+    },
+    {
+      "topic": "elargissement_massif_skill_aliases",
+      "examples": [
+        "ajouter 50 nouveaux aliases pour Docker, Linux, Pandas, NumPy",
+        "étendre esco_alias_fr_v0.jsonl avec un corpus de 100+ entrées",
+        "générer des aliases automatiquement via LLM"
+      ],
+      "reason": "Augmente la couverture mais multiplie le risque de nouveau bruit / d'inflation / de collisions. Doit passer par un processus dédié (dataset de validation, benchmark, golden set). Hors périmètre sprint chirurgical."
+    },
+    {
+      "topic": "modifications_frontend",
+      "examples": [
+        "ProfilePage.tsx",
+        "ProfileUnderstandingPage.tsx"
+      ],
+      "reason": "Sprint 4 est purement upstream. Aucune implication visuelle."
+    },
+    {
+      "topic": "modifications_tests",
+      "examples": [
+        "mise à jour des golden fixtures",
+        "ajout de tests unitaires pour les fixes sprint4"
+      ],
+      "reason": "Sprint 4 produit uniquement des artefacts de triage — pas d'implémentation, donc pas de tests à toucher. L'implémentation future inclura ses propres mises à jour de tests."
+    },
+    {
+      "topic": "debug_instrumentation_proposee_dans_sprint3_next_step",
+      "examples": [
+        "instrumenter strict_filter_skills pour émettre par-token la raison de rejet",
+        "ajouter des hooks de trace en dev mode"
+      ],
+      "reason": "Proposé en Next Safe Step Sprint 3. Non-retenu ici : les 5 cas de la shortlist sont identifiables sans instrumentation supplémentaire. Peut rester pour un sprint ultérieur."
+    },
+    {
+      "topic": "correction_duplication_jsonl",
+      "examples": [
+        "fusionner apps/api/data/esco_alias_fr_v0.jsonl et apps/api/data/aliases/esco_alias_fr_v0.jsonl",
+        "supprimer l'une des deux copies et rediriger le loader"
+      ],
+      "reason": "Dette technique distincte (même fichier en 2 emplacements, le loader essaie les deux). Mérite un sprint refactor séparé. Pour N2, le fix exige la modification des 2 copies simultanément — accepté comme contrainte, non corrigé ici."
+    },
+    {
+      "topic": "fixes_sur_cas_non_declenches_sur_cv_fixture",
+      "examples": [
+        "C2 adobe_xd / ux_design / supply_chain",
+        "O4 jira (3-value)",
+        "tout alias dont la clé n'apparaît pas dans cv_fixture_v0.txt"
+      ],
+      "reason": "Non-validable sur la baseline existante. Traitement nécessiterait des fixtures additionnelles — hors périmètre sprint triage."
+    }
+  ]
+}

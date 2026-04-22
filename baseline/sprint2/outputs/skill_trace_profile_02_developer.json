@@ -1,0 +1,164 @@
+{
+  "profile_id": "golden_02",
+  "skills_input_count": 6,
+  "skills_after_extraction_count": 8,
+  "labels_attempted_mapping_count": 9,
+  "skills_mapped_count": 6,
+  "skills_unmapped_count": 0,
+  "skills_dropped_count": 0,
+  "coverage_ratio": 1.0,
+  "skills_uri_count_frozenset": 5,
+  "skills_unmapped_count_extractor": 3,
+  "per_skill_trace": [
+    {
+      "input_skill": "python",
+      "normalized_input": "python",
+      "alias_labels": [
+        "python programmation informatique"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "python",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "python programmation informatique",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+          "esco_label": "Python (programmation informatique)",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "javascript",
+      "normalized_input": "javascript",
+      "alias_labels": [],
+      "mapping_attempts": [
+        {
+          "label": "javascript",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7",
+          "esco_label": "JavaScript",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7"
+      ],
+      "status": "mapped",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "react",
+      "normalized_input": "react",
+      "alias_labels": [
+        "javascript framework"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "react",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "javascript framework",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/9b9de2a4-d8af-4a7b-933a-a8334ae60067",
+          "esco_label": "JavaScript Framework",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/9b9de2a4-d8af-4a7b-933a-a8334ae60067"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "nodejs",
+      "normalized_input": "nodejs",
+      "alias_labels": [
+        "javascript"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "nodejs",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "javascript",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7",
+          "esco_label": "JavaScript",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "sql",
+      "normalized_input": "sql",
+      "alias_labels": [],
+      "mapping_attempts": [
+        {
+          "label": "sql",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+          "esco_label": "SQL",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742"
+      ],
+      "status": "mapped",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "git",
+      "normalized_input": "git",
+      "alias_labels": [],
+      "mapping_attempts": [
+        {
+          "label": "git",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f",
+          "esco_label": "outils de gestion de configuration logicielle",
+          "method": "dictionary_alt_label",
+          "confidence": 0.95
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f"
+      ],
+      "status": "mapped",
+      "failure_type": "n_a_mapped"
+    }
+  ]
+}

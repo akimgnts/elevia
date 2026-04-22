@@ -1,0 +1,53 @@
+{
+  "sprint": "sprint3",
+  "purpose": "Strict audit of skills_uri fabrication in the CV-brut pipeline (/profile/parse-file). Locate signal loss, noise entry, abstraction mismatches. No fix. Read-only.",
+  "generated_at_utc": "2026-04-19T00:00:00Z",
+  "git_commit": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "git_branch": "main",
+  "cv_fixture": {
+    "path": "apps/api/fixtures/cv/cv_fixture_v0.txt",
+    "bytes": 1242,
+    "description": "Marie Dupont — Data Analyst & BI Engineer, French+English CV (baseline smoke fixture)"
+  },
+  "captured_run": {
+    "source": "audit/runtime_smoke_results.json",
+    "method": "scripts/runtime_smoke.py via fastapi.testclient.TestClient",
+    "endpoint": "POST /profile/parse-file?enrich_llm=0",
+    "content_type": "text/plain",
+    "extracted_text_length": 1242
+  },
+  "env_flags": {
+    "ELEVIA_PROMOTE_ESCO": "0 (default, untouched)",
+    "ELEVIA_FILTER_GENERIC_URIS": "0 (default, untouched, offer-side only)",
+    "ELEVIA_ENABLE_COMPASS_E": "dev-auto ON (display-only, does NOT inject into matching)",
+    "ELEVIA_DEV_TOOLS": "unchanged"
+  },
+  "audited_chain": [
+    "POST /profile/parse-file  -> apps/api/src/api/routes/profile_file.py::parse_file",
+    "-> compass.pipeline.profile_parse_pipeline._run_profile_text_pipeline",
+    "-> compass.canonical_pipeline.run_cv_pipeline",
+    "-> profile.baseline_parser.run_baseline",
+    "-> esco.extract.extract_raw_skills_from_profile  (raw token extraction + SKILL_ALIASES expansion)",
+    "-> profile.baseline_parser.run_baseline_from_tokens",
+    "-> profile.skill_filter.strict_filter_skills  (noise removal + alias pre-pass + map_skill)",
+    "-> profile.esco_aliases.load_alias_map  (esco_alias_fr_v0.jsonl)",
+    "-> esco.mapper.map_skill(enable_fuzzy=False)",
+    "-> profile['skills_uri'] = [item['uri'] for item in validated_items]  (baseline_parser.py:86)"
+  ],
+  "generated_files": [
+    "baseline/sprint3/README.md",
+    "baseline/sprint3/manifest.json",
+    "baseline/sprint3/step_trace.json",
+    "baseline/sprint3/signal_loss_report.json",
+    "baseline/sprint3/noise_report.json",
+    "baseline/sprint3/metrics.json"
+  ],
+  "non_goals_respected": [
+    "no product code modified",
+    "no alias added",
+    "no flag changed",
+    "no fix proposed",
+    "no refactor",
+    "no fuzzy activated"
+  ]
+}

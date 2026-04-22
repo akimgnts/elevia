@@ -1,0 +1,128 @@
+{
+  "cv_fixture": "apps/api/fixtures/cv/cv_fixture_v0.txt",
+  "runner": "profile.baseline_parser.run_baseline (in-process, no HTTP)",
+  "commit_before_fix": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "fixes_applied": [
+    "N1 paris STOPWORD",
+    "C1 project_management key rename",
+    "N3 sales alias removal",
+    "N2 management jsonl removal",
+    "O2 dashboards mono-value"
+  ],
+  "counts": {
+    "skills_uri_count": {
+      "before": 22,
+      "after": 19,
+      "delta": -3
+    },
+    "canonical_count": {
+      "before": 22,
+      "after": 19,
+      "delta": -3
+    },
+    "validated_skills": {
+      "before": 22,
+      "after": 19,
+      "delta": -3
+    },
+    "raw_detected": {
+      "before": 120,
+      "after": 118,
+      "delta": -2
+    },
+    "filtered_out": {
+      "before": 98,
+      "after": 99,
+      "delta": 1
+    },
+    "alias_hits_count": {
+      "before": 2,
+      "after": 1,
+      "delta": -1
+    },
+    "skills_unmapped_count": {
+      "before": 91,
+      "after": 92,
+      "delta": 1
+    }
+  },
+  "removed_uris": [
+    "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909",
+    "http://data.europa.eu/esco/skill/2cc75284-f385-42d6-9b70-8262bc6c603a",
+    "http://data.europa.eu/esco/skill/348b74cd-49ce-4844-8bdf-ec188b497213",
+    "http://data.europa.eu/esco/skill/cb668e89-6ef5-4ff3-ab4a-506010e7e70b"
+  ],
+  "added_uris": [
+    "http://data.europa.eu/esco/skill/7111b95d-0ce3-441a-9d92-4c75d05c4388"
+  ],
+  "removed_labels": [
+    "argumentaire de vente",
+    "gérer une équipe",
+    "paris",
+    "techniques de présentation visuelle"
+  ],
+  "added_labels": [
+    "gestion de projets"
+  ],
+  "raw_tokens_delta": {
+    "removed": [
+      "argumentaire de vente",
+      "paris",
+      "techniques de présentation visuelle"
+    ],
+    "added": [
+      "gestion de projets"
+    ]
+  },
+  "alias_hits_before": [
+    {
+      "alias": "management",
+      "label": "gérer une équipe"
+    },
+    {
+      "alias": "reporting",
+      "label": "analyse de données"
+    }
+  ],
+  "alias_hits_after": [
+    {
+      "alias": "reporting",
+      "label": "analyse de données"
+    }
+  ],
+  "targeted_cases_status": {
+    "N1_paris_removed": {
+      "label": "paris",
+      "was_in_before": true,
+      "is_in_after": false,
+      "validated": true
+    },
+    "C1_gestion_de_projets_added": {
+      "label": "gestion de projets",
+      "was_in_before": false,
+      "is_in_after": true,
+      "validated": true
+    },
+    "N3_argumentaire_de_vente_removed": {
+      "label": "argumentaire de vente",
+      "was_in_before": true,
+      "is_in_after": false,
+      "validated": true
+    },
+    "N2_gerer_une_equipe_removed": {
+      "label": "gérer une équipe",
+      "was_in_before": true,
+      "is_in_after": false,
+      "alias_hits_before": 2,
+      "alias_hits_after": 1,
+      "validated": true
+    },
+    "O2_techniques_presentation_visuelle_removed": {
+      "label": "techniques de présentation visuelle",
+      "was_in_before": true,
+      "is_in_after": false,
+      "validated": true
+    }
+  },
+  "all_targeted_cases_validated": true
+}

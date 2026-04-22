@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from pydantic import BaseModel, Field
+
+from compass.ai_raw_cv_reconstruction import RawCvReconstructionV1
+
 
 @dataclass(frozen=True)
 class PipelineHTTPError(Exception):
@@ -133,6 +137,20 @@ class ProfileIntelligenceAiAssistStageResult:
     data: Dict[str, Any] = field(default_factory=dict)
 
 
+class ProfileReconstructionV2(BaseModel):
+    version: str = "v2"
+    source: str = "ai2_stub"
+    status: str = "skipped"
+    suggested_summary: Dict[str, Any] = Field(default_factory=dict)
+    suggested_experiences: List[Dict[str, Any]] = Field(default_factory=list)
+    suggested_skills: List[Dict[str, Any]] = Field(default_factory=list)
+    suggested_projects: List[Dict[str, Any]] = Field(default_factory=list)
+    suggested_certifications: List[Dict[str, Any]] = Field(default_factory=list)
+    suggested_languages: List[Dict[str, Any]] = Field(default_factory=list)
+    link_suggestions: List[Dict[str, Any]] = Field(default_factory=list)
+    warnings: List[Dict[str, Any]] = Field(default_factory=list)
+
+
 @dataclass(frozen=True)
 class CacheHookResult:
     profile_hash: str
@@ -161,8 +179,11 @@ class ParseFilePipelineArtifacts:
     matching_input: MatchingInputStageResult
     profile_intelligence: ProfileIntelligenceStageResult
     profile_intelligence_ai_assist: ProfileIntelligenceAiAssistStageResult
+    raw_cv_reconstruction: RawCvReconstructionV1
+    profile_reconstruction: ProfileReconstructionV2
     warnings: List[str]
     cv_text: str
+    source_cv_text: str
     filename: str
     content_type: str
     domain_skills_active: List[str] = field(default_factory=list)

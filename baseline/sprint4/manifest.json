@@ -1,0 +1,49 @@
+{
+  "sprint": "sprint4",
+  "mission": "Triage micro-fixes skills_uri : config mismatch, over-injection, strict noise. Aucune implémentation.",
+  "date": "2026-04-19",
+  "commit": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "branch": "main",
+  "scope_families": ["config_mismatch", "over_injection", "strict_noise"],
+  "inputs_reread": [
+    "baseline/sprint3/README.md",
+    "baseline/sprint3/addendum_stale_snapshot.md",
+    "baseline/sprint3/metrics_head.json",
+    "baseline/sprint3/signal_loss_report_head.json",
+    "baseline/sprint3/noise_report_head.json",
+    "baseline/sprint3/fresh_baseline_run_head.json",
+    "apps/api/src/esco/extract.py",
+    "apps/api/src/esco/mapper.py",
+    "apps/api/src/profile/skill_filter.py",
+    "apps/api/src/profile/esco_aliases.py",
+    "apps/api/src/profile/baseline_parser.py",
+    "apps/api/data/esco_alias_fr_v0.jsonl",
+    "apps/api/fixtures/cv/cv_fixture_v0.txt"
+  ],
+  "empirical_check_executed": "direct in-process call to profile.baseline_parser.run_baseline(cv_text) at HEAD — no HTTP / no TestClient",
+  "baseline_reference_numbers_at_head": {
+    "raw_detected": 120,
+    "validated_skills": 22,
+    "skills_uri_count": 22,
+    "alias_hits_count": 2,
+    "strict_noise_count": 3,
+    "borderline_noise_count": 4
+  },
+  "artefacts_generated": [
+    "baseline/sprint4/README.md",
+    "baseline/sprint4/manifest.json",
+    "baseline/sprint4/candidate_cases.json",
+    "baseline/sprint4/shortlist.json",
+    "baseline/sprint4/execution_order.json",
+    "baseline/sprint4/excluded_scope.json"
+  ],
+  "non_goals": [
+    "Aucun code produit modifié",
+    "Aucun alias ajouté",
+    "Aucun flag changé",
+    "Aucun fuzzy activé",
+    "Aucun scoring touché",
+    "Aucun refactor",
+    "Aucun audit large hors périmètre"
+  ]
+}

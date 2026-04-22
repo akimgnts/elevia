@@ -1,0 +1,14 @@
+{
+  "profile_id": "golden_02",
+  "skills": ["python", "javascript", "react", "nodejs", "sql", "git"],
+  "languages": [
+    {"code": "fr", "level": "C2"},
+    {"code": "en", "level": "C1"},
+    {"code": "de", "level": "B1"}
+  ],
+  "education_level": "BAC+5",
+  "nationality": "DE",
+  "age": 24,
+  "years_of_experience": 2,
+  "cv_text": "Développeur Full Stack, 2 ans d'expérience. React, Node.js, Python. École d'ingénieur informatique. Trilingue français-anglais-allemand."
+}

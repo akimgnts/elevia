@@ -1,0 +1,85 @@
+{
+  "description": "Fresh attrition and noise metrics for cv_fixture_v0.txt at commit 10ddabf (2026-04-19). Supersedes metrics.json which was based on audit/runtime_smoke_results.json captured on 2026-03-03 — before the SKILL_ALIASES + BIGRAM_WHITELIST batch-1 additions dated 2026-04-18.",
+  "commit": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "run_timestamp": "2026-04-19",
+  "source_of_truth": "direct in-process call to profile.baseline_parser.run_baseline (no TestClient / no HTTP)",
+  "cv_input": {
+    "extracted_text_length_chars": 1242,
+    "explicit_skills_declared_in_cv_count_approx": 26
+  },
+  "stage_counts": {
+    "raw_detected": 120,
+    "alias_prepass_hits_via_jsonl": 2,
+    "map_skill_positive_estimated": 20,
+    "map_skill_negative_filtered_tokens": 91,
+    "validated_items_after_uri_dedup": 22,
+    "validated_items_after_truncation_max_40": 22,
+    "skills_uri_final_count": 22,
+    "skills_uri_collapsed_dupes_debug_only": 1,
+    "skills_unmapped_count": 91,
+    "alias_hits_count": 2
+  },
+  "attrition_ratios": {
+    "mapping_rate_overall": "22 / 120 = 18.33%",
+    "attrition_rate_overall": "98 / 120 = 81.67%",
+    "coverage_of_explicit_cv_skills_approx": "12 / 26 = 46.2%  (direct hits on declared tool names: Python, SQL, MySQL, PostgreSQL, NoSQL, DevOps, ETL, Git, Excel, Agile, Machine learning, Statistics, dashboards)",
+    "alias_layer_share_of_final_validated": "2 / 22 = 9.1%",
+    "esco_direct_map_share_of_final_validated": "20 / 22 = 90.9%"
+  },
+  "delta_vs_stale_snapshot_20260303": {
+    "raw_detected_delta": "+7  (113 -> 120)",
+    "validated_skills_delta": "+5  (17 -> 22)",
+    "filtered_out_delta": "+2  (96 -> 98)",
+    "new_uris_captured": [
+      {
+        "label": "apprentissage automatique",
+        "source": "machine learning bigram (BIGRAM_WHITELIST batch-1 2026-04-18) -> SKILL_ALIASES['machine learning']"
+      },
+      {
+        "label": "statistiques",
+        "source": "statistics token -> SKILL_ALIASES['statistics'] (batch-1)"
+      },
+      {
+        "label": "logiciel de visualisation des données",
+        "source": "dashboards token -> SKILL_ALIASES['dashboards'] (batch-1)"
+      },
+      {
+        "label": "techniques de présentation visuelle",
+        "source": "dashboards token -> SKILL_ALIASES['dashboards'] (batch-1)"
+      },
+      {
+        "label": "science des big data",
+        "source": "'data science' bigram (BIGRAM_WHITELIST batch-1) -> SKILL_ALIASES['data science']"
+      }
+    ]
+  },
+  "noise_metrics_head": {
+    "strict_noise_uris": 3,
+    "borderline_noise_uris": 3,
+    "strict_noise_items": ["paris", "gérer une équipe", "argumentaire de vente"],
+    "borderline_noise_items": [
+      "développement par itérations (double-count from 'agile')",
+      "techniques de présentation visuelle (double-count from 'dashboards')",
+      "science des big data (abstraction inflate: CV says 'Master Data Science', not 'big data')"
+    ],
+    "noise_rate_strict": "3 / 22 = 13.6%",
+    "noise_rate_strict_plus_borderline": "6 / 22 = 27.3%"
+  },
+  "fuzzy_matching_contribution": {
+    "enabled": false,
+    "fuzzy_threshold_constant": 0.92,
+    "note": "map_skill called with enable_fuzzy=False throughout. Fuzzy fallback never executes. Unchanged from stale snapshot."
+  },
+  "root_cause_of_prior_anomalies": {
+    "machine_learning_bigram_silent_failure": "FALSE POSITIVE in prior audit. Root cause: stale smoke input. At HEAD, 'machine learning' IS captured (2 occurrences in raw_tokens, 'apprentissage automatique' IS expanded).",
+    "statistics_alias_missing_expansion": "FALSE POSITIVE in prior audit. Root cause: stale smoke input. At HEAD, 'statistiques' IS expanded from SKILL_ALIASES['statistics'].",
+    "dashboards_alias_missing_expansion": "FALSE POSITIVE in prior audit. Root cause: stale smoke input. At HEAD, both expansions ('logiciel de visualisation des données', 'techniques de présentation visuelle') ARE in raw_tokens."
+  },
+  "critical_code_observations_unchanged": {
+    "uri_collapse_not_on_production_path": "Still true: apps/api/src/profile/baseline_parser.py:86 constructs skills_uri from validated_items directly. collapse_to_uris at lines 92-121 remains debug-only.",
+    "whitelist_regex_bug": "Still true: apps/api/src/esco/extract.py:272 uses rf'\\\\b...\\\\b' producing literal backslash-b, not word boundary. WHITELIST_SKILLS capture remains dead code.",
+    "double_expansion_injection": "Still true: SKILL_ALIASES['agile'] and ['dashboards'] each inject 2 URIs with no selection heuristic.",
+    "no_context_gate": "Still true: alias layers operate on token equality only.",
+    "no_geographic_guard": "Still true: 'paris' (city) still produces ESCO URI for 'paris' (wager)."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "sprint": "flow_map",
+  "purpose": "Strict reverse-mapping of the real execution flow CV -> profile -> matching -> scoring. Read-only cartography.",
+  "generated_at_utc": "2026-04-19T00:00:00Z",
+  "git_commit": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "git_branch": "main",
+  "env_flags_relevant": {
+    "ELEVIA_PROMOTE_ESCO": "OFF by default — if OFF, build_effective_skills_uri() returns frozenset(base_list) bit-for-bit identical to pre-Sprint-6 path",
+    "ELEVIA_FILTER_GENERIC_URIS": "OFF by default — used by generic_skills_filter.py for offers, not profile",
+    "ELEVIA_ENABLE_COMPASS_E": "dev-auto-on — triggers cv_enricher / domain URIs as display-only; NOT injected into matching weights",
+    "ELEVIA_DEBUG_MATCHING": "OFF by default — enables MATCH_INPUT/match_debug logs",
+    "ELEVIA_INBOX_PROFILE_FIXTURES": "OFF by default — dev override that swaps request profile with a fixture file"
+  },
+  "entrypoints_analyzed": {
+    "POST /profile/parse-file": "apps/api/src/api/routes/profile_file.py::parse_file",
+    "POST /profile/parse-baseline": "apps/api/src/api/routes/profile_baseline.py::parse_baseline",
+    "POST /profile/ingest_cv": "apps/api/src/api/routes/profile.py::ingest_cv (DEV-only, legacy LLM)",
+    "POST /inbox": "apps/api/src/api/routes/inbox.py::get_inbox",
+    "POST /v1/match": "apps/api/src/api/routes/matching.py::match_profile",
+    "POST /apply-pack": "apps/api/src/api/routes/apply_pack.py::apply_pack (does NOT call MatchingEngine)"
+  },
+  "scoring_engine": "apps/api/src/matching/matching_v1.py::MatchingEngine (score_offer, match)",
+  "scoring_input_field": "ExtractedProfile.skills_uri (frozenset)",
+  "scoring_input_producer": "apps/api/src/matching/extractors.py::extract_profile",
+  "generated_files": [
+    "baseline/flow_map/README.md",
+    "baseline/flow_map/manifest.json",
+    "baseline/flow_map/call_chains.json",
+    "baseline/flow_map/objects_map.json",
+    "baseline/flow_map/scoring_input_truth.json"
+  ],
+  "non_goals_respected": [
+    "no product code modified",
+    "no refactor",
+    "no alias added",
+    "no flag toggled",
+    "no fix proposed",
+    "no quality audit"
+  ]
+}

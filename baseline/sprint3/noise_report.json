@@ -1,0 +1,59 @@
+{
+  "description": "URIs present in profile.skills_uri that do NOT reflect an actual skill of the CV author. Each entry traces the surface token that introduced the noise.",
+  "noise_items": [
+    {
+      "uri": "http://data.europa.eu/esco/skill/2cc75284-f385-42d6-9b70-8262bc6c603a",
+      "label_in_output": "paris",
+      "source_token": "paris",
+      "origin_in_cv": "2022–2024 | Data Analyst — Analytics Corp, Paris  AND  Master Data Science — Université Paris-Saclay",
+      "why_its_noise": "'Paris' in the CV refers to the city (employer location + university location). The ESCO URI cb668e89... maps to the concept 'paris' in the gambling/betting sense (French: 'paris' = wagers/bets). Cross-domain semantic collision: geographic proper noun matched against an unrelated ESCO label.",
+      "category": "geographie_homonyme_avec_skill"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/cb668e89-6ef5-4ff3-ab4a-506010e7e70b",
+      "label_in_output": "gérer une équipe",
+      "source_token": "management (via esco_alias_fr_v0.jsonl)",
+      "origin_in_cv": "- Methods: Agile, Project management, KPI dashboards, Reporting",
+      "why_its_noise": "CV says 'Project management' (methodology/process). The alias layer maps the isolated token 'management' to 'gérer une équipe' (= manage a team, i.e., people management). The candidate's CV shows no line management / direct reports — title is 'Data Analyst' and 'Junior BI Developer'. The alias collapses a project-management methodology signal onto a people-management URI.",
+      "category": "abstraction_incorrecte_cross_domain"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909",
+      "label_in_output": "argumentaire de vente",
+      "source_token": "sales (via SKILL_ALIASES expansion)",
+      "origin_in_cv": "Created Excel reports and Power BI dashboards for sales and finance teams",
+      "why_its_noise": "The word 'sales' appears as the business unit the Data Analyst reported FOR, not a skill the candidate has. SKILL_ALIASES['sales']=['argumentaire de vente'] triggers indiscriminately on the surface token 'sales' without context awareness. The output implies the candidate does sales pitches, which the CV does not support.",
+      "category": "leakage_contexte_mot_seul"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+      "label_in_output": "développement par itérations",
+      "source_token": "agile (via SKILL_ALIASES expansion)",
+      "origin_in_cv": "- Methods: Agile, Project management",
+      "why_its_noise": "Borderline. SKILL_ALIASES['agile']=['gestion de projets par méthode agile', 'développement par itérations']. The second expansion ('iterative development') is injected even though the CV only declares 'Agile' as a method — not specifically iterative development practice. Double-counts the same source signal as TWO ESCO URIs.",
+      "category": "double_comptage_alias_multi_expansion"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",
+      "label_in_output": "analyse de données",
+      "source_tokens": ["data (SKILL_ALIASES)", "data analysis (SKILL_ALIASES)", "analyst (SKILL_ALIASES)", "reporting (esco_alias_fr_v0.jsonl)"],
+      "origin_in_cv": "Data Analyst + 'data analysis' bigram + 'Reporting' line",
+      "why_its_noise": "Not noise per se (the candidate IS a Data Analyst), but four distinct surface tokens collapse onto ONE URI — the URI has no signal about the SPECIFIC aspects of data analysis the candidate does (SQL querying, dashboard creation, ML modeling). Dilution of specificity.",
+      "category": "dilution_par_convergence_alias"
+    }
+  ],
+  "noise_overview": {
+    "strict_noise_count": 3,
+    "strict_noise_items": ["paris", "gérer une équipe", "argumentaire de vente"],
+    "borderline_noise_count": 2,
+    "borderline_noise_items": ["développement par itérations (double-counting from 'agile')", "analyse de données (dilution)"],
+    "noise_ratio_strict": "3 / 17 ≈ 17.6% of final skills_uri are clearly unsupported by the CV",
+    "noise_ratio_strict_plus_borderline": "5 / 17 ≈ 29.4% when including abstraction / double-count issues"
+  },
+  "root_causes_summary": [
+    "Alias expansion in SKILL_ALIASES is context-free: single-word tokens ('sales', 'management', 'data', 'power') trigger on any mention, without regard to whether the surrounding sentence attributes the skill to the candidate.",
+    "Alias map (esco_alias_fr_v0.jsonl) at the skill_filter.py layer compounds with SKILL_ALIASES: two independent alias layers, both triggering on single tokens, both mapping to ESCO URIs without semantic gate.",
+    "No proper-noun / geographic guard: ESCO index contains labels ('paris' = wager) that collide with city names. No filter rejects geographic tokens before map_skill.",
+    "No counter-alias: once a token is expanded into multiple ESCO URIs (e.g. 'agile' -> 2 URIs), all are admitted — no policy chooses 'most specific' vs 'most general'."
+  ]
+}

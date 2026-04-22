@@ -41,10 +41,14 @@ type ProfileInput = {
   detected_capabilities?: Capability[];
   unmapped_skills_high_confidence?: UnmappedSkill[];
   skills_uri?: string[];
+  domain_uris?: string[];
   canonical_skills?: Array<Record<string, unknown>>;
   canonical_skills_count?: number;
   enriched_signals?: Array<Record<string, unknown>>;
   concept_signals?: Array<Record<string, unknown>>;
+  career_profile?: {
+    selected_skills?: Array<Record<string, unknown> | string>;
+  };
   profile_intelligence?: Record<string, unknown>;
   profile_intelligence_ai_assist?: Record<string, unknown>;
 };
@@ -67,6 +71,25 @@ function uniqueStrings(values: string[]) {
   return result;
 }
 
+function skillLabel(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (!value || typeof value !== "object") return "";
+  const item = value as Record<string, unknown>;
+  return typeof item.label === "string"
+    ? item.label
+    : typeof item.name === "string"
+      ? item.name
+      : typeof item.raw === "string"
+        ? item.raw
+        : "";
+}
+
+function skillUri(value: unknown): string {
+  if (!value || typeof value !== "object") return "";
+  const item = value as Record<string, unknown>;
+  return typeof item.uri === "string" ? item.uri : "";
+}
+
 /**
  * Build matching profile with stable skills hydration rules:
  * 1. If userProfile.skills or userProfile.matching_skills exists → use (source: "user")
@@ -83,6 +106,14 @@ export function buildMatchingProfile(profile: ProfileInput, profileId: string): 
     : Array.isArray(profile.skills)
       ? profile.skills
       : [];
+  const canonicalSkillLabels = Array.isArray(profile.canonical_skills)
+    ? profile.canonical_skills.map(skillLabel).filter(Boolean)
+    : [];
+  const careerSelectedSkills = Array.isArray(profile.career_profile?.selected_skills)
+    ? profile.career_profile.selected_skills
+    : [];
+  const careerSelectedSkillLabels = careerSelectedSkills.map(skillLabel).filter(Boolean);
+  const careerSelectedSkillUris = careerSelectedSkills.map(skillUri).filter(Boolean);
 
   const unmapped = Array.isArray(profile.unmapped_skills_high_confidence)
     ? profile.unmapped_skills_high_confidence.map((skill) => skill?.raw_skill || "")
@@ -94,6 +125,8 @@ export function buildMatchingProfile(profile: ProfileInput, profileId: string): 
 
   let matchingSkills = uniqueStrings([
     ...explicitSkills,
+    ...canonicalSkillLabels,
+    ...careerSelectedSkillLabels,
     ...unmapped,
     ...detectedTools,
   ])
@@ -125,10 +158,16 @@ export function buildMatchingProfile(profile: ProfileInput, profileId: string): 
     needsSeedHydration = true;
   }
 
+  const mergedSkillsUri = uniqueStrings([
+    ...(Array.isArray(profile.skills_uri) ? profile.skills_uri : []),
+    ...careerSelectedSkillUris,
+    ...(Array.isArray(profile.domain_uris) ? profile.domain_uris : []),
+  ]);
+
   const resultProfile: ProfileMatchingV1 = {
     id: profileId,
     matching_skills: matchingSkills,
-    skills_uri: Array.isArray(profile.skills_uri) ? profile.skills_uri : undefined,
+    skills_uri: mergedSkillsUri.length > 0 ? mergedSkillsUri : undefined,
     capabilities: uniqueStrings(capabilities).map((cap) => cap.toLowerCase()),
     languages: profile.languages || SEED_PROFILE.languages || [],
     education: profile.education || SEED_PROFILE.education,

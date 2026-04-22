@@ -1,31 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import {
-  ArrowRight,
-  CheckCircle2,
-  HelpCircle,
-  Link2,
-  Layers3,
-  ScanSearch,
-  SearchCheck,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2, HelpCircle } from "lucide-react";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
-import {
-  type ProfileUnderstandingDocumentBlock,
-  startProfileUnderstandingSession,
-  type ProfileUnderstandingEvidence,
-  type ProfileUnderstandingMissionUnit,
-  type ProfileUnderstandingQuestion,
-  type ProfileUnderstandingSessionResponse,
-  type ProfileUnderstandingSkillLink,
-} from "../lib/api";
+import { startProfileUnderstandingSession } from "../lib/api";
+import type {
+  ProfileReconstructionOutput,
+  SuggestedExperience,
+} from "../lib/profile/reconstruction";
 import { useProfileStore } from "../store/profileStore";
 
 type WizardLocationState = {
   sourceContext?: Record<string, unknown>;
 };
-
-type AutonomyLevel = "execution" | "partial" | "autonomous" | "ownership";
 
 type CanonicalSkillRef = {
   label: string;
@@ -39,323 +25,392 @@ type ToolRef = {
   label: string;
 };
 
-type SkillLinkItem = {
-  skill: CanonicalSkillRef;
-  tools: ToolRef[];
-  context?: string;
-  autonomy_level?: AutonomyLevel;
-};
-
 type CareerExperience = {
   title?: string;
   company?: string;
+  organization?: string;
+  start_date?: string;
+  end_date?: string;
+  dates?: string;
+  description?: string;
+  responsibilities?: unknown[];
+  achievements?: unknown[];
+  tools?: unknown[];
+  canonical_skills_used?: unknown[];
+  skills?: unknown[];
   autonomy_level?: string;
-  canonical_skills_used?: CanonicalSkillRef[];
-  tools?: Array<CanonicalSkillRef | ToolRef | string>;
-  skill_links?: SkillLinkItem[];
+  autonomy?: string;
+  skill_links?: Array<{
+    skill?: CanonicalSkillRef;
+    tools?: ToolRef[];
+    context?: string;
+    autonomy_level?: string;
+  }>;
   [key: string]: unknown;
 };
 
 type CareerProfile = {
+  base_title?: string;
+  target_title?: string;
+  summary_master?: string;
+  selected_skills?: unknown[];
   experiences?: CareerExperience[];
-  education?: unknown[];
+  languages?: unknown[];
   certifications?: unknown[];
+  projects?: unknown[];
+  pending_skill_candidates?: string[];
   [key: string]: unknown;
 };
 
-const AUTONOMY_LABELS: Record<AutonomyLevel, string> = {
-  execution: "Execution",
-  partial: "Partiel",
-  autonomous: "Autonome",
-  ownership: "Ownership",
+type ProfileWithReconstruction = Record<string, unknown> & {
+  career_profile?: CareerProfile;
+  canonical_skills?: unknown[];
+  profile_reconstruction?: ProfileReconstructionOutput;
 };
 
-const AUTONOMY_BADGES: Record<AutonomyLevel, string> = {
-  execution: "border-slate-200 bg-slate-100 text-slate-700",
-  partial: "border-amber-200 bg-amber-50 text-amber-700",
-  autonomous: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  ownership: "border-indigo-200 bg-indigo-50 text-indigo-700",
+type ConfirmationQuestion = {
+  id: string;
+  type: "autonomy" | "tools" | "language";
+  label: string;
+  helper: string;
+  placeholder: string;
+  experienceIndex?: number;
 };
+
+type DisplayExperience = {
+  title: string;
+  company: string;
+  period: string;
+  missions: string[];
+  skillsAndTools: string[];
+  source: "profile" | "suggestion";
+};
+
+const MAX_ITEMS = 5;
+
+const SHORT_ALLOWLIST = new Set(["c", "r", "b2", "c1", "c2"]);
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
-function splitCommaValues(value: string): string[] {
+function cleanDisplayValue(value: unknown): string {
+  if (typeof value !== "string") return "";
   return value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
+    .split(/[|,]/)
+    .map((part) => part.trim())
+    .filter(Boolean)[0] ?? "";
 }
 
-function dedupeByLabel<T extends { label: string }>(items: T[]): T[] {
+function cleanDisplayList(values: unknown[], limit = MAX_ITEMS): string[] {
   const seen = new Set<string>();
-  return items.filter((item) => {
-    const key = item.label.trim().toLowerCase();
-    if (!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  const out: string[] = [];
+
+  for (const value of values) {
+    const parts = typeof value === "string" ? value.split(/[|,]/) : [value];
+    for (const part of parts) {
+      const raw = cleanDisplayValue(part).replace(/\s+/g, " ").trim();
+      if (!raw) continue;
+      const normalized = raw.toLowerCase();
+      if (normalized.length < 2 && !SHORT_ALLOWLIST.has(normalized)) continue;
+      if (seen.has(normalized)) continue;
+      seen.add(normalized);
+      out.push(normalized);
+      if (out.length >= limit) break;
+    }
+    if (out.length >= limit) break;
+  }
+
+  return out;
 }
 
-function normalizeAutonomy(value: unknown): AutonomyLevel | undefined {
-  return value === "execution" || value === "partial" || value === "autonomous" || value === "ownership"
-    ? value
-    : undefined;
+function labelsFromUnknown(values: unknown[], limit = MAX_ITEMS): string[] {
+  return cleanDisplayList(
+    values.flatMap((value) => {
+      if (typeof value === "string") return [value];
+      const record = asRecord(value);
+      return [
+        record.label,
+        record.name,
+        record.title,
+        record.language,
+        record.level,
+      ].filter(Boolean);
+    }),
+    limit,
+  );
 }
 
-function normalizeSkillLink(link: ProfileUnderstandingSkillLink): SkillLinkItem | null {
-  const skillLabel = link.skill?.label?.trim();
-  if (!skillLabel) return null;
+function getCareerProfile(profile: unknown): CareerProfile {
+  return asRecord(profile).career_profile && typeof asRecord(profile).career_profile === "object"
+    ? (asRecord(profile).career_profile as CareerProfile)
+    : {};
+}
 
+function getProfileReconstruction(profile: unknown): ProfileReconstructionOutput | null {
+  const reconstruction = asRecord(profile).profile_reconstruction;
+  if (!reconstruction || typeof reconstruction !== "object") return null;
+  const record = reconstruction as Partial<ProfileReconstructionOutput>;
+  if (!record.suggested_summary || !Array.isArray(record.suggested_skills)) return null;
+  return reconstruction as ProfileReconstructionOutput;
+}
+
+function skillLabelsFromProfile(profile: ProfileWithReconstruction, careerProfile: CareerProfile): string[] {
+  const selected = labelsFromUnknown(Array.isArray(careerProfile.selected_skills) ? careerProfile.selected_skills : []);
+  if (selected.length > 0) return selected.slice(0, MAX_ITEMS);
+  return labelsFromUnknown(Array.isArray(profile.canonical_skills) ? profile.canonical_skills : []).slice(0, MAX_ITEMS);
+}
+
+function toolsFromExperience(experience: CareerExperience): string[] {
+  const directTools = labelsFromUnknown(Array.isArray(experience.tools) ? experience.tools : []);
+  const linkTools = labelsFromUnknown(
+    Array.isArray(experience.skill_links)
+      ? experience.skill_links.flatMap((link) => (Array.isArray(link.tools) ? link.tools : []))
+      : [],
+  );
+  return cleanDisplayList([...directTools, ...linkTools], 4);
+}
+
+function skillsFromExperience(experience: CareerExperience): string[] {
+  const directSkills = labelsFromUnknown(Array.isArray(experience.canonical_skills_used) ? experience.canonical_skills_used : []);
+  const legacySkills = labelsFromUnknown(Array.isArray(experience.skills) ? experience.skills : []);
+  const linkSkills = labelsFromUnknown(
+    Array.isArray(experience.skill_links)
+      ? experience.skill_links.map((link) => link.skill).filter(Boolean)
+      : [],
+  );
+  return cleanDisplayList([...directSkills, ...legacySkills, ...linkSkills], 3);
+}
+
+function missionsFromExperience(experience: CareerExperience): string[] {
+  return cleanDisplayList(
+    [
+      ...(Array.isArray(experience.responsibilities) ? experience.responsibilities : []),
+      experience.description,
+      ...(Array.isArray(experience.achievements) ? experience.achievements : []),
+    ],
+    3,
+  );
+}
+
+function displayExperienceFromProfile(experience: CareerExperience): DisplayExperience {
+  const company = cleanDisplayValue(experience.company || experience.organization);
+  const start = cleanDisplayValue(experience.start_date);
+  const end = cleanDisplayValue(experience.end_date || experience.dates);
+  const period = [start, end].filter(Boolean).join(" - ");
+  const tools = toolsFromExperience(experience);
+  const skills = skillsFromExperience(experience);
   return {
-    skill: {
-      label: skillLabel,
-      uri: link.skill.uri ?? undefined,
-      confidence: typeof link.skill.confidence === "number" ? link.skill.confidence : undefined,
-      method: link.skill.method ?? undefined,
-      source: link.skill.source ?? undefined,
-    },
-    tools: dedupeByLabel(
-      (Array.isArray(link.tools) ? link.tools : [])
-        .map((tool) => {
-          const label = typeof tool?.label === "string" ? tool.label.trim() : "";
-          return label ? { label } : null;
-        })
-        .filter((tool): tool is ToolRef => tool !== null),
-    ),
-    context: typeof link.context === "string" && link.context.trim() ? link.context.trim() : undefined,
-    autonomy_level: normalizeAutonomy(link.autonomy_level),
+    title: cleanDisplayValue(experience.title) || "experience reconnue",
+    company,
+    period,
+    missions: missionsFromExperience(experience),
+    skillsAndTools: cleanDisplayList([...skills, ...tools], 3),
+    source: "profile",
   };
 }
 
-function mergeSkillLinks(existing: SkillLinkItem[], incoming: SkillLinkItem[]): SkillLinkItem[] {
-  const merged = new Map<string, SkillLinkItem>();
+function displayExperienceFromSuggestion(experience: SuggestedExperience): DisplayExperience {
+  return {
+    title: cleanDisplayValue(experience.title) || "experience suggeree",
+    company: cleanDisplayValue(experience.organization),
+    period: [cleanDisplayValue(experience.start_date), cleanDisplayValue(experience.end_date)].filter(Boolean).join(" - "),
+    missions: cleanDisplayList(experience.missions, 3),
+    skillsAndTools: cleanDisplayList([...experience.skills, ...experience.tools], 3),
+    source: "suggestion",
+  };
+}
 
-  for (const link of [...existing, ...incoming]) {
-    const key = [
-      link.skill.label.trim().toLowerCase(),
-      link.tools.map((tool) => tool.label.trim().toLowerCase()).sort().join("|"),
-      link.context?.trim().toLowerCase() ?? "",
-      link.autonomy_level ?? "",
-    ].join("::");
+function buildDisplayExperiences(
+  careerProfile: CareerProfile,
+  reconstruction: ProfileReconstructionOutput | null,
+): DisplayExperience[] {
+  const profileExperiences = Array.isArray(careerProfile.experiences) ? careerProfile.experiences : [];
+  if (profileExperiences.length > 0) {
+    return profileExperiences.map(displayExperienceFromProfile).slice(0, MAX_ITEMS);
+  }
+  return (reconstruction?.suggested_experiences ?? []).map(displayExperienceFromSuggestion).slice(0, MAX_ITEMS);
+}
 
-    if (!merged.has(key)) {
-      merged.set(key, {
-        skill: { ...link.skill },
-        tools: [...link.tools],
-        context: link.context,
-        autonomy_level: link.autonomy_level,
-      });
-    }
+function getSuggestedSummary(careerProfile: CareerProfile, reconstruction: ProfileReconstructionOutput | null): string {
+  const profileSummary = cleanDisplayList([careerProfile.summary_master], 3).join(", ");
+  if (profileSummary) return profileSummary;
+  return cleanDisplayList([reconstruction?.suggested_summary.text], 3).join(", ");
+}
+
+function getSuggestedSkills(reconstruction: ProfileReconstructionOutput | null, existingSkills: string[]): string[] {
+  const existing = new Set(existingSkills.map((skill) => skill.toLowerCase()));
+  return cleanDisplayList(
+    (reconstruction?.suggested_skills ?? [])
+      .map((skill) => skill.label)
+      .filter((label) => !existing.has(label.toLowerCase())),
+  );
+}
+
+function hasArrayItems(value: unknown): boolean {
+  return Array.isArray(value) && value.length > 0;
+}
+
+function buildConfirmationQuestions(careerProfile: CareerProfile, experiences: DisplayExperience[]): ConfirmationQuestion[] {
+  const rawExperiences = Array.isArray(careerProfile.experiences) ? careerProfile.experiences : [];
+  const questions: ConfirmationQuestion[] = [];
+
+  const autonomyIndex = rawExperiences.findIndex((experience) => {
+    const autonomy = cleanDisplayValue(experience.autonomy_level || experience.autonomy);
+    return !autonomy;
+  });
+  if (autonomyIndex >= 0) {
+    const experience = experiences[autonomyIndex];
+    questions.push({
+      id: "autonomy",
+      type: "autonomy",
+      label: `Quel niveau d'autonomie pour ${experience?.title || "cette experience"} ?`,
+      helper: "Exemples: execution, autonome, pilotage.",
+      placeholder: "Autonomie sur cette experience",
+      experienceIndex: autonomyIndex,
+    });
   }
 
-  return Array.from(merged.values());
-}
-
-function getExperienceIndex(reference: string | null | undefined): number | null {
-  if (!reference) return null;
-  const match = reference.match(/exp-(\d+)/i);
-  if (!match) return null;
-  const value = Number(match[1]);
-  return Number.isInteger(value) ? value : null;
-}
-
-function groupSkillLinksByExperience(skillLinks: ProfileUnderstandingSkillLink[]): Map<number, SkillLinkItem[]> {
-  const grouped = new Map<number, SkillLinkItem[]>();
-
-  for (const rawLink of skillLinks) {
-    const experienceIndex = getExperienceIndex(rawLink.experience_ref);
-    if (experienceIndex === null) continue;
-    const normalized = normalizeSkillLink(rawLink);
-    if (!normalized) continue;
-    grouped.set(experienceIndex, [...(grouped.get(experienceIndex) ?? []), normalized]);
+  const toolsIndex = rawExperiences.findIndex((experience) => toolsFromExperience(experience).length === 0);
+  if (toolsIndex >= 0 && questions.length < MAX_ITEMS) {
+    const experience = experiences[toolsIndex];
+    questions.push({
+      id: "tools",
+      type: "tools",
+      label: `Quels outils associer a ${experience?.title || "cette experience"} ?`,
+      helper: "Ajoutez seulement les outils importants pour votre profil.",
+      placeholder: "Ex: power bi, excel, salesforce",
+      experienceIndex: toolsIndex,
+    });
   }
 
-  return grouped;
+  if (!hasArrayItems(careerProfile.languages) && questions.length < MAX_ITEMS) {
+    questions.push({
+      id: "language",
+      type: "language",
+      label: "Quel niveau de langue voulez-vous afficher ?",
+      helper: "Utile pour les offres internationales. Exemple: anglais c1.",
+      placeholder: "Ex: anglais c1",
+    });
+  }
+
+  return questions.slice(0, MAX_ITEMS);
 }
 
-function applyAnswerToCareerProfile(
+function mergeStringValues(existing: unknown, incoming: string[]): string[] {
+  const values = Array.isArray(existing) ? existing.map(String) : [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of [...values, ...incoming]) {
+    const cleaned = cleanDisplayValue(value);
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(cleaned);
+  }
+  return out;
+}
+
+function projectReconstructionIntoCareerProfile(
   careerProfile: Record<string, unknown>,
-  question: ProfileUnderstandingQuestion,
-  answer: string,
+  reconstruction: ProfileReconstructionOutput | null,
 ): Record<string, unknown> {
-  const fieldPath = question.field_path ?? "";
-  if (!fieldPath) return careerProfile;
-
+  if (!reconstruction) return careerProfile;
   const next = structuredClone(careerProfile);
-  const experienceMatch = fieldPath.match(/^career_profile\.experiences\[(\d+)\]\.(.+)$/);
 
-  if (experienceMatch) {
-    const index = Number(experienceMatch[1]);
-    const field = experienceMatch[2];
-    const experiences = Array.isArray(next.experiences) ? [...(next.experiences as unknown[])] : [];
-    const current = experiences[index];
-    const experience =
-      current && typeof current === "object"
-        ? { ...(current as Record<string, unknown>) }
-        : {};
-
-    if (field === "autonomy_level") {
-      experience.autonomy_level = answer.trim();
-    } else if (field === "tools") {
-      experience.tools = splitCommaValues(answer).map((label) => ({ label }));
-    }
-
-    experiences[index] = experience;
-    next.experiences = experiences;
-    return next;
+  if (typeof next.summary_master !== "string" || !next.summary_master.trim()) {
+    const summary = reconstruction.suggested_summary.text.trim();
+    if (summary) next.summary_master = summary;
   }
 
-  if (fieldPath === "career_profile.education") {
-    const current = Array.isArray(next.education) ? [...(next.education as unknown[])] : [];
-    const entry = { degree: answer.trim() };
-    next.education = answer.trim() ? [entry, ...current.filter(Boolean)] : current;
-    return next;
+  next.pending_skill_candidates = mergeStringValues(
+    next.pending_skill_candidates,
+    reconstruction.suggested_skills.map((skill) => skill.label),
+  );
+
+  if (!hasArrayItems(next.languages)) {
+    const languages = reconstruction.suggested_languages
+      .filter((language) => language.language.trim())
+      .map((language) => ({
+        language: language.language,
+        level: language.level,
+      }));
+    if (languages.length > 0) next.languages = languages;
   }
 
-  if (fieldPath === "career_profile.certifications") {
-    next.certifications = splitCommaValues(answer);
-    return next;
+  if (!hasArrayItems(next.certifications)) {
+    const certifications = reconstruction.suggested_certifications
+      .map((certification) => [certification.name, certification.issuer].filter(Boolean).join(" - "))
+      .filter(Boolean);
+    if (certifications.length > 0) next.certifications = certifications;
   }
 
-  if (fieldPath === "career_profile.experiences") {
-    next.experiences = answer.trim()
-      ? [{ title: answer.trim(), company: "", responsibilities: [], tools: [], skill_links: [] }]
-      : next.experiences;
-    return next;
+  if (!hasArrayItems(next.projects)) {
+    const projects = reconstruction.suggested_projects
+      .filter((project) => project.name.trim() || project.description.trim())
+      .map((project) => ({
+        title: project.name,
+        impact: project.description,
+        technologies: project.tools,
+      }));
+    if (projects.length > 0) next.projects = projects;
   }
 
   return next;
 }
 
-function mergeSessionSkillLinksIntoCareerProfile(
-  baseCareerProfile: CareerProfile,
-  session: ProfileUnderstandingSessionResponse | null,
-): CareerProfile {
-  const nextCareer = structuredClone(baseCareerProfile);
-  const experiences = Array.isArray(nextCareer.experiences) ? [...nextCareer.experiences] : [];
-  const groupedLinks = groupSkillLinksByExperience(session?.skill_links ?? []);
+function applyAnswersToCareerProfile(
+  careerProfile: Record<string, unknown>,
+  questions: ConfirmationQuestion[],
+  answers: Record<string, string>,
+): Record<string, unknown> {
+  const next = structuredClone(careerProfile);
+  const experiences = Array.isArray(next.experiences) ? [...(next.experiences as unknown[])] : [];
 
-  groupedLinks.forEach((incomingLinks, experienceIndex) => {
-    const currentExperience = asRecord(experiences[experienceIndex]) as CareerExperience;
-    const currentSkillLinks = Array.isArray(currentExperience.skill_links) ? currentExperience.skill_links : [];
-    const mergedLinks = mergeSkillLinks(currentSkillLinks, incomingLinks);
-    const mergedSkills = dedupeByLabel(
-      [
-        ...(Array.isArray(currentExperience.canonical_skills_used) ? currentExperience.canonical_skills_used : []),
-        ...mergedLinks.map((link) => link.skill),
-      ].map((skill) => ({
-        label: skill.label,
-        uri: skill.uri ?? undefined,
-        confidence: skill.confidence,
-        method: skill.method,
-        source: skill.source,
-      })),
-    );
-    const mergedTools = dedupeByLabel(
-      [
-        ...(Array.isArray(currentExperience.tools) ? currentExperience.tools : []).map((tool) => {
-          if (typeof tool === "string") return { label: tool };
-          const record = asRecord(tool);
-          return { label: typeof record.label === "string" ? record.label : "" };
-        }),
-        ...mergedLinks.flatMap((link) => link.tools),
-      ].filter((tool) => tool.label.trim()),
-    );
-    const autonomyFromLinks = mergedLinks.find((link) => link.autonomy_level)?.autonomy_level;
+  for (const question of questions) {
+    const answer = answers[question.id]?.trim();
+    if (!answer) continue;
 
-    experiences[experienceIndex] = {
-      ...currentExperience,
-      skill_links: mergedLinks,
-      canonical_skills_used: mergedSkills,
-      tools: mergedTools,
-      autonomy_level: currentExperience.autonomy_level ?? autonomyFromLinks,
-    };
-  });
+    if ((question.type === "autonomy" || question.type === "tools") && typeof question.experienceIndex === "number") {
+      const current = asRecord(experiences[question.experienceIndex]);
+      if (question.type === "autonomy") current.autonomy_level = answer;
+      if (question.type === "tools") current.tools = cleanDisplayList([answer]).map((label) => ({ label }));
+      experiences[question.experienceIndex] = current;
+    }
 
-  nextCareer.experiences = experiences;
-  return nextCareer;
-}
-
-function formatPercent(value: number | null | undefined): string {
-  if (typeof value !== "number" || Number.isNaN(value)) return "n/a";
-  return `${Math.round(value * 100)}%`;
-}
-
-function confidenceTone(value: number | undefined): string {
-  if (typeof value !== "number") return "border-slate-200 bg-slate-50 text-slate-500";
-  if (value >= 0.75) return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (value >= 0.5) return "border-amber-200 bg-amber-50 text-amber-700";
-  return "border-rose-200 bg-rose-50 text-rose-700";
-}
-
-function summarizeEvidence(evidence: ProfileUnderstandingEvidence[]): string[] {
-  return evidence
-    .map((item) => item.source_value || item.source_type)
-    .filter((value): value is string => Boolean(value))
-    .slice(0, 3);
-}
-
-function extractSignalEntries(signal: Record<string, unknown> | null | undefined): Array<[string, string[]]> {
-  if (!signal) return [];
-  return Object.entries(signal)
-    .map(([key, value]) => {
-      if (!Array.isArray(value)) return [key, []] as [string, string[]];
-      const entries = value
-        .map((item) => {
-          if (typeof item === "string") return item.trim();
-          if (item && typeof item === "object") {
-            const record = item as Record<string, unknown>;
-            const label = typeof record.label === "string" ? record.label.trim() : "";
-            const raw = typeof record.raw_value === "string" ? record.raw_value.trim() : "";
-            return label || raw;
-          }
-          return "";
-        })
-        .filter(Boolean);
-      return [key, entries] as [string, string[]];
-    })
-    .filter(([, entries]) => entries.length > 0);
-}
-
-function groupMissionUnits(
-  missionUnits: ProfileUnderstandingMissionUnit[],
-): Array<{ key: string; label: string; units: ProfileUnderstandingMissionUnit[] }> {
-  const groups = new Map<string, ProfileUnderstandingMissionUnit[]>();
-
-  for (const unit of missionUnits) {
-    const key = unit.experience_ref || unit.block_ref || "general";
-    groups.set(key, [...(groups.get(key) ?? []), unit]);
+    if (question.type === "language" && !hasArrayItems(next.languages)) {
+      const [language, ...levelParts] = cleanDisplayList([answer], 2);
+      if (language) {
+        next.languages = [{ language, level: levelParts.join(" ") }];
+      }
+    }
   }
 
-  return Array.from(groups.entries()).map(([key, units]) => ({
-    key,
-    label: key.replace(/^exp-/i, "Experience ").replace(/^block-/i, "").replace(/-/g, " "),
-    units,
-  }));
+  if (experiences.length > 0) next.experiences = experiences;
+  return next;
 }
 
-function getBlockBadgeTone(blockType: string): string {
-  switch (blockType) {
-    case "experience":
-      return "border-blue-200 bg-blue-50 text-blue-700";
-    case "project":
-      return "border-violet-200 bg-violet-50 text-violet-700";
-    case "education":
-      return "border-amber-200 bg-amber-50 text-amber-700";
-    case "certification":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700";
-    default:
-      return "border-slate-200 bg-slate-50 text-slate-700";
-  }
+function SuggestionChips({ items }: { items: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <span
+          key={item}
+          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700"
+        >
+          {item}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 export default function ProfileUnderstandingPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { userProfile, setIngestResult } = useProfileStore();
-  const [session, setSession] = useState<ProfileUnderstandingSessionResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -364,6 +419,37 @@ export default function ProfileUnderstandingPage() {
     () => ((location.state as WizardLocationState | null)?.sourceContext ?? {}),
     [location.state],
   );
+  const profile = (userProfile ?? {}) as ProfileWithReconstruction;
+  const careerProfile = useMemo(() => getCareerProfile(userProfile), [userProfile]);
+  const profileReconstruction = useMemo(() => getProfileReconstruction(userProfile), [userProfile]);
+  const profileSkills = useMemo(() => skillLabelsFromProfile(profile, careerProfile), [careerProfile, profile]);
+  const profileExperiences = useMemo(
+    () => buildDisplayExperiences(careerProfile, profileReconstruction),
+    [careerProfile, profileReconstruction],
+  );
+  const profileTools = useMemo(
+    () => cleanDisplayList(profileExperiences.flatMap((experience) => experience.skillsAndTools), 4),
+    [profileExperiences],
+  );
+  const suggestedSkills = useMemo(
+    () => getSuggestedSkills(profileReconstruction, profileSkills),
+    [profileReconstruction, profileSkills],
+  );
+  const questions = useMemo(
+    () => buildConfirmationQuestions(careerProfile, profileExperiences),
+    [careerProfile, profileExperiences],
+  );
+  const summary = getSuggestedSummary(careerProfile, profileReconstruction);
+  const title = cleanDisplayValue(careerProfile.base_title || careerProfile.target_title) || "profil reconstruit";
+  const missingLanguages = !hasArrayItems(careerProfile.languages)
+    ? cleanDisplayList((profileReconstruction?.suggested_languages ?? []).map((language) => [language.language, language.level].filter(Boolean).join(" ")))
+    : [];
+  const missingCertifications = !hasArrayItems(careerProfile.certifications)
+    ? cleanDisplayList((profileReconstruction?.suggested_certifications ?? []).map((certification) => certification.name))
+    : [];
+  const missingProjects = !hasArrayItems(careerProfile.projects)
+    ? cleanDisplayList((profileReconstruction?.suggested_projects ?? []).map((project) => project.name || project.description))
+    : [];
 
   useEffect(() => {
     if (!userProfile) return;
@@ -375,26 +461,16 @@ export default function ProfileUnderstandingPage() {
       setError(null);
 
       try {
-        const response = await startProfileUnderstandingSession({
+        await startProfileUnderstandingSession({
           profile: userProfile as Record<string, unknown>,
           source_context: sourceContext,
         });
-
-        if (cancelled) return;
-
-        setSession(response);
-        setAnswers(
-          Object.fromEntries(
-            response.questions.map((question) => [question.id, question.suggested_answer ?? ""]),
-          ),
-        );
       } catch (err) {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Erreur lors du chargement du wizard.");
-      } finally {
         if (!cancelled) {
-          setLoading(false);
+          setError(err instanceof Error ? err.message : "Erreur lors du chargement du profil.");
         }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
 
@@ -405,54 +481,15 @@ export default function ProfileUnderstandingPage() {
     };
   }, [sourceContext, userProfile]);
 
-  const relationSummary = useMemo(() => {
-    const skillLinks = session?.skill_links ?? [];
-    const entityClassification = session?.entity_classification ?? {};
-    const evidenceMap = session?.evidence_map ?? {};
-    const documentBlocks = session?.document_blocks ?? [];
-    const missionUnits = session?.mission_units ?? [];
-    const openSignalEntries = extractSignalEntries(session?.open_signal);
-    const canonicalSignalEntries = extractSignalEntries(session?.canonical_signal);
-    const understoodCount =
-      typeof session?.understanding_status?.understood_count === "number"
-        ? session.understanding_status.understood_count
-        : documentBlocks.length + skillLinks.length;
-    const pendingCount =
-      typeof session?.understanding_status?.needs_confirmation_count === "number"
-        ? session.understanding_status.needs_confirmation_count
-        : (session?.questions ?? []).length;
-
-    return {
-      documentBlocks,
-      missionUnits,
-      skillLinks,
-      openSignalEntries,
-      canonicalSignalEntries,
-      understoodCount,
-      pendingCount,
-      entityEntries: Object.entries(entityClassification).filter(([, values]) => Array.isArray(values) && values.length > 0),
-      evidenceEntries: Object.entries(evidenceMap).filter(([, values]) => Array.isArray(values) && values.length > 0),
-    };
-  }, [session]);
-
   if (!userProfile) {
     return <Navigate to="/analyze" replace />;
   }
 
   async function handleContinue() {
-    const baseProfile = structuredClone(userProfile as Record<string, unknown>);
-    const currentCareer =
-      session?.proposed_profile_patch?.career_profile && typeof session.proposed_profile_patch.career_profile === "object"
-        ? structuredClone(session.proposed_profile_patch.career_profile as Record<string, unknown>)
-        : structuredClone(asRecord(baseProfile.career_profile));
-
-    const answeredCareer = (session?.questions ?? []).reduce((careerProfile, question) => {
-      const answer = answers[question.id]?.trim();
-      if (!answer) return careerProfile;
-      return applyAnswerToCareerProfile(careerProfile, question, answer);
-    }, currentCareer);
-
-    baseProfile.career_profile = mergeSessionSkillLinksIntoCareerProfile(answeredCareer as CareerProfile, session);
+    const baseProfile = structuredClone(userProfile as ProfileWithReconstruction);
+    const currentCareer = structuredClone(getCareerProfile(baseProfile));
+    const answeredCareer = applyAnswersToCareerProfile(currentCareer, questions, answers);
+    baseProfile.career_profile = projectReconstructionIntoCareerProfile(answeredCareer, profileReconstruction) as CareerProfile;
     await setIngestResult(baseProfile);
     navigate("/profile");
   }
@@ -460,33 +497,22 @@ export default function ProfileUnderstandingPage() {
   return (
     <PremiumAppShell
       eyebrow="Profil"
-      title="Verifier les elements cles avant edition finale"
-      description="Nous avons deja structure votre parcours. Verifiez les points compris, corrigez uniquement les zones utiles, puis poursuivez vers le profil complet."
+      title="Valider le profil reconstruit"
+      description="Elevia a prepare un brouillon de profil. Verifiez les points essentiels, puis genere le profil editable."
       actions={
-        <>
-          <Link
-            to="/analyze"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-          >
-            Revenir a l'analyse
-          </Link>
-          <button
-            type="button"
-            onClick={() => void handleContinue()}
-            disabled={loading || Boolean(error)}
-            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-          >
-            Injecter dans le profil
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </>
+        <Link
+          to="/analyze"
+          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+        >
+          Revenir a l'analyse
+        </Link>
       }
     >
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.9fr)]">
-        <section className="space-y-4">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]">
+        <section className="space-y-5">
           {loading && (
             <div className="rounded-[1.5rem] border border-white/80 bg-white/80 px-5 py-4 text-sm text-slate-600 shadow-sm">
-              Preparation de la structure du profil...
+              Preparation du brouillon de profil...
             </div>
           )}
 
@@ -496,396 +522,185 @@ export default function ProfileUnderstandingPage() {
             </div>
           )}
 
-          {!loading && !error && session && (
-            <article className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600">
-                    Parcours structure
-                  </div>
-                  <h2 className="mt-3 text-lg font-semibold text-slate-950">
-                    Ce que nous avons deja compris de votre CV
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Les blocs detectes, les missions comprises et les liens competence {"->"} outils sont precharges. Les
-                    questions servent seulement a confirmer les zones encore ambiguës.
-                  </p>
+          <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  Résumé du profil
                 </div>
-                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-400">
-                  {session.provider}
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+                  {title}
+                </h2>
+                {summary && <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{summary}</p>}
+              </div>
+              <div className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                Brouillon prêt
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  Compétences principales
+                </div>
+                <div className="mt-3">
+                  <SuggestionChips items={profileSkills} />
                 </div>
               </div>
-
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
-                <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Elements compris
-                  </div>
-                  <div className="mt-2 text-2xl font-semibold text-slate-950">{relationSummary.understoodCount}</div>
+              <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  Outils détectés
                 </div>
-                <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Missions extraites
-                  </div>
-                  <div className="mt-2 text-2xl font-semibold text-slate-950">{relationSummary.missionUnits.length}</div>
-                </div>
-                <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Confirmations utiles
-                  </div>
-                  <div className="mt-2 text-2xl font-semibold text-slate-950">{relationSummary.pendingCount}</div>
-                </div>
-              </div>
-
-              {relationSummary.documentBlocks.length > 0 && (
-                <div className="mt-5 grid gap-3 md:grid-cols-2">
-                  {relationSummary.documentBlocks.map((block: ProfileUnderstandingDocumentBlock) => (
-                    <div key={block.id} className="rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-sm font-semibold text-slate-900">
-                          {block.label}
-                        </div>
-                        <span
-                          className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getBlockBadgeTone(
-                            block.block_type,
-                          )}`}
-                        >
-                          {block.block_type}
-                        </span>
-                      </div>
-                      {block.source_text && <p className="mt-3 text-sm leading-6 text-slate-600">{block.source_text}</p>}
-                      <div className="mt-3 flex items-center justify-between gap-2">
-                        <span className="text-xs font-medium text-slate-500">
-                          {typeof block.metadata?.organization === "string"
-                            ? block.metadata.organization
-                            : typeof block.metadata?.company === "string"
-                              ? block.metadata.company
-                              : "Bloc structure"}
-                        </span>
-                        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${confidenceTone(block.confidence ?? undefined)}`}>
-                          {formatPercent(block.confidence)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </article>
-          )}
-
-          {!loading &&
-            !error &&
-            relationSummary.missionUnits.length > 0 && (
-              <article className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <Layers3 className="h-4 w-4 text-slate-700" />
-                  Missions deja interpretees
-                </div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Chaque mission est lue comme une unite distincte pour rattacher des competences, des outils, du
-                  contexte et des signaux chiffres.
-                </p>
-                <div className="mt-4 space-y-4">
-                  {groupMissionUnits(relationSummary.missionUnits).map((group) => (
-                    <div key={group.key} className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                      <div className="text-sm font-semibold text-slate-900">{group.label}</div>
-                      <div className="mt-3 space-y-3">
-                        {group.units.map((unit) => (
-                          <div key={unit.id} className="rounded-[1rem] border border-slate-200 bg-white p-3">
-                            <p className="text-sm leading-6 text-slate-700">{unit.mission_text}</p>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {unit.skill_candidates_open.map((item) => (
-                                <span key={`${unit.id}-skill-${item}`} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700">
-                                  {item}
-                                </span>
-                              ))}
-                              {unit.tool_candidates_open.map((item) => (
-                                <span key={`${unit.id}-tool-${item}`} className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
-                                  {item}
-                                </span>
-                              ))}
-                              {unit.quantified_signals.map((item) => (
-                                <span key={`${unit.id}-signal-${item}`} className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                                  {item}
-                                </span>
-                              ))}
-                            </div>
-                            {(unit.context || unit.autonomy_hypothesis) && (
-                              <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
-                                {unit.context && <span>Contexte: {unit.context}</span>}
-                                {unit.autonomy_hypothesis && <span>Autonomie: {unit.autonomy_hypothesis}</span>}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </article>
-            )}
-
-          {!loading &&
-            !error &&
-            (session?.skill_links ?? []).map((link, index) => {
-              const autonomy = normalizeAutonomy(link.autonomy_level);
-              const evidencePreview = summarizeEvidence(link.evidence);
-              return (
-                <article
-                  key={`${link.experience_ref ?? "exp"}-${link.skill.label}-${index}`}
-                  className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-700">
-                        <Link2 className="h-3.5 w-3.5" />
-                        {link.experience_ref ?? "experience"}
-                      </div>
-                      <h2 className="mt-3 text-lg font-semibold text-slate-950">{link.skill.label}</h2>
-                      {link.context && (
-                        <p className="mt-2 text-sm leading-6 text-slate-600">{link.context}</p>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2">
-                      {autonomy && (
-                        <span
-                          className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${AUTONOMY_BADGES[autonomy]}`}
-                        >
-                          {AUTONOMY_LABELS[autonomy]}
-                        </span>
-                      )}
-                      <span
-                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${confidenceTone(
-                          session?.confidence_map?.[`${link.experience_ref ?? "career_profile"}.skill_links`],
-                        )}`}
-                      >
-                        {formatPercent(session?.confidence_map?.[`${link.experience_ref ?? "career_profile"}.skill_links`])}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
-                    <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                        Outils relies a cette competence
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {link.tools.length > 0 ? (
-                          link.tools.map((tool) => (
-                            <span
-                              key={tool.label}
-                              className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700"
-                            >
-                              {tool.label}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-sm text-slate-500">Aucun outil confirme pour l&apos;instant.</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                        Preuves disponibles
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {evidencePreview.length > 0 ? (
-                          evidencePreview.map((evidence) => (
-                            <span
-                              key={evidence}
-                              className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700"
-                            >
-                              {evidence}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-sm text-slate-500">Pas encore de preuve exposee.</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-
-          {!loading &&
-            !error &&
-            (relationSummary.canonicalSignalEntries.length > 0 || relationSummary.openSignalEntries.length > 0) && (
-              <article className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <ScanSearch className="h-4 w-4 text-slate-700" />
-                  Signaux recuperes
-                </div>
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      Signal canonique
-                    </div>
-                    <div className="mt-3 space-y-3">
-                      {relationSummary.canonicalSignalEntries.length > 0 ? (
-                        relationSummary.canonicalSignalEntries.map(([key, values]) => (
-                          <div key={key}>
-                            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-                              {key.replace(/_/g, " ")}
-                            </div>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {values.slice(0, 8).map((value) => (
-                                <span key={`${key}-${value}`} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
-                                  {value}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-sm text-slate-500">Aucun signal canonique expose.</div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      Signal ouvert
-                    </div>
-                    <div className="mt-3 space-y-3">
-                      {relationSummary.openSignalEntries.length > 0 ? (
-                        relationSummary.openSignalEntries.map(([key, values]) => (
-                          <div key={key}>
-                            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-                              {key.replace(/_/g, " ")}
-                            </div>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {values.slice(0, 8).map((value) => (
-                                <span key={`${key}-${value}`} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
-                                  {value}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-sm text-slate-500">Aucun signal libre expose.</div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </article>
-            )}
-
-          {!loading &&
-            !error &&
-            (session?.questions ?? []).map((question, index) => (
-              <article
-                key={question.id}
-                className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
-                      <HelpCircle className="h-3.5 w-3.5" />
-                      Question {index + 1}
-                    </div>
-                    <h2 className="mt-3 text-lg font-semibold text-slate-950">{question.prompt}</h2>
-                    {question.rationale && (
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{question.rationale}</p>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
-                      {question.category}
-                    </div>
-                    <div
-                      className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${confidenceTone(
-                        typeof question.confidence === "number" ? question.confidence : undefined,
-                      )}`}
-                    >
-                      {formatPercent(question.confidence)}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  <textarea
-                    value={answers[question.id] ?? ""}
-                    onChange={(event) =>
-                      setAnswers((current) => ({ ...current, [question.id]: event.target.value }))
-                    }
-                    rows={question.category === "experience_tools" ? 2 : 3}
-                    className="min-h-[88px] w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-                    placeholder="Confirmer, corriger ou completer la reponse proposee"
-                  />
-
-                  {question.suggested_answer && (
-                    <div className="rounded-[1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                      Proposition prechargee: <span className="font-medium text-slate-900">{question.suggested_answer}</span>
-                    </div>
+                <div className="mt-3">
+                  <SuggestionChips items={profileTools} />
+                  {profileTools.length === 0 && (
+                    <p className="text-sm text-slate-500">Aucun outil principal détecté avec assez de clarté.</p>
                   )}
                 </div>
-              </article>
-            ))}
+              </div>
+            </div>
+          </article>
+
+          <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Expériences
+            </div>
+            <h2 className="mt-3 text-lg font-semibold text-slate-950">
+              Parcours reconnu
+            </h2>
+            <div className="mt-5 grid gap-3">
+              {profileExperiences.length > 0 ? (
+                profileExperiences.map((experience, index) => (
+                  <div key={`${experience.title}-${experience.company}-${index}`} className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="text-base font-semibold text-slate-950">{experience.title}</div>
+                        {(experience.company || experience.period) && (
+                          <div className="mt-1 text-sm text-slate-500">
+                            {[experience.company, experience.period].filter(Boolean).join(" · ")}
+                          </div>
+                        )}
+                      </div>
+                      {experience.source === "suggestion" && (
+                        <span className="rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700">
+                          suggestion
+                        </span>
+                      )}
+                    </div>
+                    {experience.missions.length > 0 && (
+                      <ul className="mt-3 space-y-1.5 text-sm leading-6 text-slate-600">
+                        {experience.missions.map((mission) => (
+                          <li key={mission}>• {mission}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {experience.skillsAndTools.length > 0 && (
+                      <div className="mt-3">
+                        <SuggestionChips items={experience.skillsAndTools} />
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                  Aucune expérience suffisamment structurée n'a été reconnue.
+                </p>
+              )}
+            </div>
+          </article>
+
+          <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Suggestions
+            </div>
+            <h2 className="mt-3 text-lg font-semibold text-slate-950">
+              Éléments proposés, non imposés
+            </h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="text-sm font-semibold text-slate-900">Compétences suggérées</div>
+                <div className="mt-3">
+                  <SuggestionChips items={suggestedSkills} />
+                  {suggestedSkills.length === 0 && <p className="text-sm text-slate-500">Aucune compétence candidate claire.</p>}
+                </div>
+              </div>
+              <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+                <div className="text-sm font-semibold text-slate-900">Compléments possibles</div>
+                <div className="mt-3 space-y-3">
+                  <SuggestionChips items={missingLanguages} />
+                  <SuggestionChips items={missingCertifications} />
+                  <SuggestionChips items={missingProjects} />
+                  {missingLanguages.length === 0 && missingCertifications.length === 0 && missingProjects.length === 0 && (
+                    <p className="text-sm text-slate-500">Aucun complément prioritaire à proposer.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <HelpCircle className="h-4 w-4" />
+              Points à confirmer
+            </div>
+            <h2 className="mt-3 text-lg font-semibold text-slate-950">
+              {questions.length > 0 ? "Quelques précisions utiles" : "Aucune précision critique"}
+            </h2>
+            <div className="mt-5 grid gap-3">
+              {questions.length > 0 ? (
+                questions.map((question) => (
+                  <div key={question.id} className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+                    <label className="text-sm font-semibold text-slate-900" htmlFor={`question-${question.id}`}>
+                      {question.label}
+                    </label>
+                    <p className="mt-1 text-sm text-slate-500">{question.helper}</p>
+                    <input
+                      id={`question-${question.id}`}
+                      value={answers[question.id] ?? ""}
+                      onChange={(event) => setAnswers((current) => ({ ...current, [question.id]: event.target.value }))}
+                      placeholder={question.placeholder}
+                      className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+                  Le brouillon est suffisamment clair pour générer le profil.
+                </div>
+              )}
+            </div>
+          </article>
         </section>
 
         <aside className="space-y-4">
-          <div className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <div className="flex items-center gap-3">
-              <div>
-                <div className="text-sm font-semibold text-slate-950">Lecture du profil</div>
-                <div className="text-[11px] text-slate-400">
-                  {session ? `Provider technique: ${session.provider}` : "Initialisation du provider..."}
-                </div>
-              </div>
+          <div className="rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              Action principale
             </div>
-            <div className="mt-4 space-y-3 text-sm text-slate-600">
-              <p>
-                Cette etape pre-remplit le profil a partir de ce qui a deja ete compris et vous laisse seulement
-                confirmer les points qui meritent une verification.
-              </p>
-              <p>
-                Au submit, les elements compris sont injectes automatiquement dans `career_profile` sans vous bloquer
-                sur chaque question.
-              </p>
-            </div>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              La validation crée votre profil éditable à partir des éléments déjà compris. Les suggestions restent
+              traçables et seules les zones vides sont complétées.
+            </p>
+            <button
+              type="button"
+              onClick={() => void handleContinue()}
+              disabled={loading || Boolean(error)}
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              Valider et générer mon profil
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
 
-          <div className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <SearchCheck className="h-4 w-4 text-emerald-600" />
-              Points controles avant injection
-            </div>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-              <li>distinction entre entites metier, projet, education et certification</li>
-              <li>liens competence → outils → contexte → autonomie</li>
-              <li>questions posees uniquement sur les zones incertaines</li>
-              <li>preuves conservees dans `evidence_map` pour garder la tracabilite</li>
+          <div className="rounded-[1.75rem] border border-white/80 bg-white/90 p-5 text-sm leading-6 text-slate-600 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="font-semibold text-slate-900">Ce qui ne change pas</div>
+            <ul className="mt-3 space-y-2">
+              <li>• aucune modification du scoring</li>
+              <li>• aucun changement du signal de matching</li>
+              <li>• aucune donnée remplacée silencieusement</li>
             </ul>
           </div>
-
-          {relationSummary.evidenceEntries.length > 0 && (
-            <div className="rounded-[1.75rem] border border-white/80 bg-white/80 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                Evidence map
-              </div>
-              <div className="mt-4 space-y-3">
-                {relationSummary.evidenceEntries.slice(0, 5).map(([field, items]) => (
-                  <div key={field} className="rounded-[1rem] border border-slate-200 bg-slate-50 px-4 py-3">
-                    <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{field}</div>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {items.slice(0, 4).map((item, index) => (
-                        <span
-                          key={`${field}-${item.source_type}-${index}`}
-                          className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700"
-                        >
-                          {item.source_value || item.source_type}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </aside>
       </div>
     </PremiumAppShell>

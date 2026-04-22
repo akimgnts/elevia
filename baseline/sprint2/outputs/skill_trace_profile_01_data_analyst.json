@@ -1,0 +1,183 @@
+{
+  "profile_id": "golden_01",
+  "skills_input_count": 5,
+  "skills_after_extraction_count": 10,
+  "labels_attempted_mapping_count": 12,
+  "skills_mapped_count": 5,
+  "skills_unmapped_count": 0,
+  "skills_dropped_count": 0,
+  "coverage_ratio": 1.0,
+  "skills_uri_count_frozenset": 5,
+  "skills_unmapped_count_extractor": 4,
+  "per_skill_trace": [
+    {
+      "input_skill": "python",
+      "normalized_input": "python",
+      "alias_labels": [
+        "python programmation informatique"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "python",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "python programmation informatique",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+          "esco_label": "Python (programmation informatique)",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "sql",
+      "normalized_input": "sql",
+      "alias_labels": [],
+      "mapping_attempts": [
+        {
+          "label": "sql",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742",
+          "esco_label": "SQL",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742"
+      ],
+      "status": "mapped",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "data_visualization",
+      "normalized_input": "data_visualization",
+      "alias_labels": [
+        "logiciel de visualisation des données",
+        "utiliser un logiciel danalyse de données spécifique"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "data_visualization",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "logiciel de visualisation des données",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+          "esco_label": "logiciel de visualisation des données",
+          "method": "preferred_label",
+          "confidence": 1.0
+        },
+        {
+          "label": "utiliser un logiciel danalyse de données spécifique",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3",
+          "esco_label": "utiliser un logiciel d’analyse de données spécifique",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+        "http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "excel",
+      "normalized_input": "excel",
+      "alias_labels": [
+        "utiliser un logiciel de tableur",
+        "microsoft office excel"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "excel",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "utiliser un logiciel de tableur",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+          "esco_label": "utiliser un logiciel de tableur",
+          "method": "preferred_label",
+          "confidence": 1.0
+        },
+        {
+          "label": "microsoft office excel",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+          "esco_label": "utiliser un logiciel de tableur",
+          "method": "dictionary_alt_label",
+          "confidence": 0.95
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "powerbi",
+      "normalized_input": "powerbi",
+      "alias_labels": [
+        "logiciel de visualisation des données",
+        "utiliser un logiciel danalyse de données spécifique"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "powerbi",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "logiciel de visualisation des données",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+          "esco_label": "logiciel de visualisation des données",
+          "method": "preferred_label",
+          "confidence": 1.0
+        },
+        {
+          "label": "utiliser un logiciel danalyse de données spécifique",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3",
+          "esco_label": "utiliser un logiciel d’analyse de données spécifique",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+        "http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    }
+  ]
+}

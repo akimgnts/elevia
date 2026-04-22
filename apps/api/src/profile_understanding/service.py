@@ -11,6 +11,7 @@ from typing import Any, Dict, Iterable, List, Sequence
 
 from compass.canonical.canonical_store import get_canonical_store
 
+from .input_builder import build_understanding_input
 from .schemas import (
     ProfileUnderstandingDocumentBlock,
     ProfileUnderstandingEntity,
@@ -42,6 +43,20 @@ _KNOWN_TOOL_LABELS: Sequence[str] = (
     "Metabase",
 )
 
+_GENERIC_NOISE_LABELS: Sequence[str] = (
+    "communication",
+    "marketing",
+    "audience",
+    "content",
+    "content creation",
+    "analysis",
+    "support",
+    "activation",
+    "understanding",
+    "campaigns",
+    "analyse",
+)
+
 _AUTONOMY_KEYWORDS: Dict[str, Sequence[str]] = {
     "ownership": ("led", "owned", "managed", "defined", "spearheaded", "built"),
     "autonomous": ("created", "designed", "implemented", "delivered", "developed", "analyzed"),
@@ -64,6 +79,28 @@ def _dedupe_strings(values: Iterable[Any]) -> List[str]:
     return result
 
 
+def _normalize_label(value: str) -> str:
+    return re.sub(r"\s+", " ", value.strip().lower())
+
+
+def _is_noise_label(label: str) -> bool:
+    normalized = _normalize_label(label)
+    if len(normalized) < 2:
+        return True
+    if len(normalized) == 1:
+        return True
+    return normalized in {_normalize_label(item) for item in _GENERIC_NOISE_LABELS}
+
+
+def _label_present_in_text(label: str, text: str) -> bool:
+    normalized_label = _normalize_label(label)
+    normalized_text = _normalize_label(text)
+    if not normalized_label or not normalized_text:
+        return False
+    pattern = r"(?<!\w)" + re.escape(normalized_label) + r"(?!\w)"
+    return re.search(pattern, normalized_text) is not None
+
+
 def _string_list(value: Any) -> List[str]:
     if not isinstance(value, list):
         return []
@@ -74,12 +111,12 @@ def _extract_candidate_labels(source_context: Dict[str, Any]) -> List[str]:
     labels: List[str] = []
     labels.extend(str(item).strip() for item in source_context.get("validated_labels", []) if str(item).strip())
     labels.extend(str(item).strip() for item in source_context.get("tight_candidates", []) if str(item).strip())
-    for token in source_context.get("rejected_tokens", []) or []:
-        if isinstance(token, dict):
-            value = str(token.get("label") or token.get("token") or "").strip()
-            if value:
-                labels.append(value)
-    return _dedupe_strings(labels)
+    cleaned = []
+    for label in _dedupe_strings(labels):
+        if _is_noise_label(label):
+            continue
+        cleaned.append(label)
+    return cleaned
 
 
 def _career_profile_from_request(payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -180,33 +217,37 @@ def _infer_autonomy(text: str, fallback: str | None = None) -> str | None:
 
 
 def _find_tools_in_text(text: str, baseline_tools: Sequence[str], source_context: Dict[str, Any]) -> List[str]:
-    lowered = text.lower()
-    candidates = [*baseline_tools, *_extract_candidate_labels(source_context), *_KNOWN_TOOL_LABELS]
+    candidates = [*baseline_tools, *_KNOWN_TOOL_LABELS]
     tools: List[str] = []
     for label in _dedupe_strings(candidates):
-        if label.lower() in lowered:
+        if _is_noise_label(label):
+            continue
+        if _label_present_in_text(label, text):
             tools.append(label)
     return _dedupe_strings([*baseline_tools, *tools])[:6]
 
 
 def _find_skills_for_mission(text: str, experience: Dict[str, Any], source_context: Dict[str, Any]) -> List[str]:
-    lowered = text.lower()
     canonical_labels: List[str] = []
     for skill in experience.get("canonical_skills_used", []) or []:
         if not isinstance(skill, dict):
             continue
         label = str(skill.get("label") or "").strip()
-        if label:
+        if label and not _is_noise_label(label):
             canonical_labels.append(label)
 
-    matched = [label for label in canonical_labels if label.lower() in lowered]
+    matched = [label for label in canonical_labels if _label_present_in_text(label, text)]
     if matched:
         return _dedupe_strings(matched)
 
     candidate_labels = _extract_candidate_labels(source_context)
-    open_labels = [label for label in candidate_labels if label.lower() in lowered and label not in _KNOWN_TOOL_LABELS]
-    if canonical_labels:
-        return _dedupe_strings([*canonical_labels[:2], *open_labels[:2]])
+    open_labels = [
+        label
+        for label in candidate_labels
+        if label not in _KNOWN_TOOL_LABELS and _label_present_in_text(label, text)
+    ]
+    if open_labels:
+        return _dedupe_strings(open_labels[:2])
     return _dedupe_strings(open_labels[:3])
 
 
@@ -505,12 +546,32 @@ def _build_skill_links_from_missions(
             for item in canonical_entries
             if isinstance(item, dict) and str(item.get("label") or "").strip()
         }
-        skill_labels = mission.skill_candidates_open or list(canonical_by_label.keys())[:1]
+        skill_labels = mission.skill_candidates_open
         if not skill_labels:
             continue
         for skill_label in skill_labels:
             canonical = canonical_by_label.get(skill_label.lower())
             link_tools = mission.tool_candidates_open or _experience_tools_label(experience)
+            if not canonical and not link_tools:
+                continue
+            evidence = [
+                _build_evidence(
+                    "mission_unit",
+                    source_value=mission.mission_text,
+                    confidence=0.74 if canonical else 0.48,
+                    mapping_status="mapped" if canonical else "open",
+                    target_path=f"career_profile.experiences[{experience_index}].skill_links",
+                ),
+                *mission.evidence,
+            ]
+            deduped_evidence: List[ProfileUnderstandingEvidence] = []
+            seen_evidence: set[tuple[str, str | None, str | None]] = set()
+            for item in evidence:
+                key = (item.source_type, item.source_value, item.target_path)
+                if key in seen_evidence:
+                    continue
+                seen_evidence.add(key)
+                deduped_evidence.append(item)
             skill_links.append(
                 ProfileUnderstandingSkillLink(
                     experience_ref=mission.experience_ref,
@@ -522,16 +583,7 @@ def _build_skill_links_from_missions(
                     tools=[{"label": tool, "source": "mission_unit"} for tool in link_tools[:5]],
                     context=mission.mission_text,
                     autonomy_level=mission.autonomy_hypothesis,
-                    evidence=[
-                        _build_evidence(
-                            "mission_unit",
-                            source_value=mission.mission_text,
-                            confidence=0.74 if canonical else 0.48,
-                            mapping_status="mapped" if canonical else "open",
-                            target_path=f"career_profile.experiences[{experience_index}].skill_links",
-                        ),
-                        *mission.evidence,
-                    ],
+                    evidence=deduped_evidence,
                 )
             )
 
@@ -836,7 +888,7 @@ def _build_stub_patch(
 ) -> Dict[str, Any]:
     proposed = dict(career_profile)
     pending = proposed.get("pending_skill_candidates", []) or []
-    proposed["pending_skill_candidates"] = _dedupe_strings([*pending, *_extract_candidate_labels(source_context), *(open_signal.get("skills") or [])])
+    proposed["pending_skill_candidates"] = _dedupe_strings(pending)
     proposed.setdefault("education", [])
     proposed.setdefault("certifications", [])
     proposed.setdefault("experiences", [])
@@ -848,6 +900,13 @@ def _build_stub_patch(
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[4]
+
+
+def _env_flag(name: str, default: bool) -> bool:
+    raw = os.getenv(name, "").strip().lower()
+    if not raw:
+        return default
+    return raw in {"1", "true", "yes", "on"}
 
 
 def get_profile_understanding_resources() -> Dict[str, Any]:
@@ -940,6 +999,10 @@ class ProfileUnderstandingService:
     def __init__(self) -> None:
         self.provider = os.getenv("ELEVIA_PROFILE_UNDERSTANDING_PROVIDER", "stub").strip().lower() or "stub"
         self.remote_url = os.getenv("ELEVIA_PROFILE_UNDERSTANDING_URL", "").strip()
+        self.allow_stub_fallback = _env_flag("ELEVIA_PROFILE_UNDERSTANDING_ALLOW_STUB_FALLBACK", True)
+        self.remote_timeout_seconds = float(
+            os.getenv("ELEVIA_PROFILE_UNDERSTANDING_HTTP_TIMEOUT_SECONDS", "20").strip() or "20"
+        )
 
     def create_session(
         self,
@@ -948,9 +1011,15 @@ class ProfileUnderstandingService:
         if self.provider == "http" and self.remote_url:
             try:
                 return self._create_remote_session(payload)
-            except Exception:
-                pass
-        return self._create_stub_session(payload)
+            except Exception as exc:
+                if not self.allow_stub_fallback:
+                    raise RuntimeError("remote_provider_unavailable") from exc
+                return self._create_stub_session(
+                    payload,
+                    fallback_reason="remote_provider_unavailable",
+                    requested_provider="http",
+                )
+        return self._create_stub_session(payload, requested_provider=self.provider)
 
     def _create_remote_session(
         self,
@@ -963,7 +1032,7 @@ class ProfileUnderstandingService:
             method="POST",
         )
         try:
-            with urllib.request.urlopen(request, timeout=20) as response:
+            with urllib.request.urlopen(request, timeout=self.remote_timeout_seconds) as response:
                 body = json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="ignore")
@@ -978,8 +1047,36 @@ class ProfileUnderstandingService:
     def _create_stub_session(
         self,
         payload: ProfileUnderstandingSessionRequest,
+        *,
+        fallback_reason: str | None = None,
+        requested_provider: str | None = None,
     ) -> ProfileUnderstandingSessionResponse:
         career_profile = _career_profile_from_request(payload.profile)
+        understanding_input = build_understanding_input(
+            cv_text=str(payload.source_context.get("cv_text") or ""),
+            parse_payload={
+                "profile": payload.profile,
+                "filename": payload.source_context.get("filename"),
+                "text_quality": payload.source_context.get("text_quality"),
+                "extracted_text_length": payload.source_context.get("extracted_text_length"),
+                "profile_fingerprint": payload.source_context.get("profile_fingerprint"),
+                "language_hint": payload.source_context.get("language_hint"),
+                "profile_summary": payload.source_context.get("profile_summary"),
+                "profile_summary_skills": payload.source_context.get("profile_summary_skills"),
+                "profile_intelligence": payload.source_context.get("profile_intelligence"),
+                "structured_profile_version": payload.source_context.get("structured_profile_version"),
+                "document_blocks_seed": payload.source_context.get("document_blocks_seed"),
+                "structured_signal_units": payload.source_context.get("structured_signal_units"),
+                "top_signal_units": payload.source_context.get("top_signal_units"),
+                "secondary_signal_units": payload.source_context.get("secondary_signal_units"),
+                "skill_proximity_links": payload.source_context.get("skill_proximity_links"),
+                "canonical_skills": payload.source_context.get("canonical_skills"),
+                "certifications": payload.source_context.get("certifications"),
+                "validated_labels": payload.source_context.get("validated_labels") or [],
+                "tight_candidates": payload.source_context.get("tight_candidates") or [],
+                "rejected_tokens": payload.source_context.get("rejected_tokens") or [],
+            },
+        )
         document_blocks = _build_document_blocks(career_profile)
         mission_units = _build_mission_units(career_profile, payload.source_context, document_blocks)
         entity_classification = _build_entity_classification(career_profile, payload.source_context, document_blocks)
@@ -1005,6 +1102,8 @@ class ProfileUnderstandingService:
             trace_summary={
                 "mode": "repo_stub_adapter",
                 "external_runtime_expected": True,
+                "requested_provider": requested_provider or self.provider,
+                "fallback_reason": fallback_reason,
                 "block_count": len(document_blocks),
                 "mission_count": len(mission_units),
                 "question_count": len(questions),
@@ -1012,6 +1111,7 @@ class ProfileUnderstandingService:
                 "entity_count": sum(len(items) for items in entity_classification.values()),
                 "skill_link_count": len(skill_links),
             },
+            understanding_input=understanding_input,
             document_blocks=document_blocks,
             mission_units=mission_units,
             open_signal=open_signal,

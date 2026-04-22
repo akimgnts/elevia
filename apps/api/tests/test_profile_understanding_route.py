@@ -65,6 +65,7 @@ class ProfileUnderstandingRouteTests(unittest.TestCase):
         self.assertIn("confidence_map", data)
         self.assertIn("document_blocks", data)
         self.assertIn("mission_units", data)
+        self.assertIn("understanding_input", data)
         self.assertIn("open_signal", data)
         self.assertIn("canonical_signal", data)
         self.assertIn("understanding_status", data)
@@ -74,9 +75,18 @@ class ProfileUnderstandingRouteTests(unittest.TestCase):
         self.assertIsInstance(data["confidence_map"], dict)
         self.assertIsInstance(data["document_blocks"], list)
         self.assertIsInstance(data["mission_units"], list)
+        self.assertIsInstance(data["understanding_input"], dict)
         self.assertIsInstance(data["open_signal"], dict)
         self.assertIsInstance(data["canonical_signal"], dict)
         self.assertIsInstance(data["understanding_status"], dict)
+        self.assertIn("signal_buckets", data["understanding_input"])
+        self.assertIn("agent_constraints", data["understanding_input"])
+        self.assertIn("deterministic_profile_seed", data["understanding_input"])
+        self.assertIn("document_structure_seed", data["understanding_input"])
+        self.assertEqual(
+            data["understanding_input"]["signal_buckets"]["accepted_signal"]["validated_labels"],
+            ["SQL", "Python"],
+        )
         self.assertIn("experiences", data["entity_classification"])
         self.assertIn("projects", data["entity_classification"])
         self.assertIn("skills", data["entity_classification"])

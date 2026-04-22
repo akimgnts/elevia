@@ -1,0 +1,99 @@
+{
+  "description": "Updated noise analysis at commit 10ddabf (2026-04-19). Supersedes noise_report.json. Recomputed over the 22 URIs now returned by run_baseline.",
+  "commit": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "noise_items": [
+    {
+      "uri": "http://data.europa.eu/esco/skill/2cc75284-f385-42d6-9b70-8262bc6c603a",
+      "label_in_output": "paris",
+      "source_token": "paris",
+      "origin_in_cv": "Analytics Corp, Paris  AND  Université Paris-Saclay",
+      "why_its_noise": "Geographic proper noun (city) collides with ESCO concept 'paris' (FR: wager). No stoplist for city names. UNCHANGED.",
+      "category": "geographie_homonyme_avec_skill",
+      "severity": "strict"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/cb668e89-6ef5-4ff3-ab4a-506010e7e70b",
+      "label_in_output": "gérer une équipe",
+      "source_token": "management (via esco_alias_fr_v0.jsonl)",
+      "origin_in_cv": "- Methods: Agile, Project management, KPI dashboards, Reporting",
+      "why_its_noise": "'Project management' = methodology. jsonl alias maps isolated 'management' token to 'gérer une équipe' (people management). Data Analyst / Junior BI Developer roles — no line-management signal in CV. UNCHANGED.",
+      "category": "abstraction_incorrecte_cross_domain",
+      "severity": "strict"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909",
+      "label_in_output": "argumentaire de vente",
+      "source_token": "sales (via SKILL_ALIASES expansion)",
+      "origin_in_cv": "Power BI dashboards for sales and finance teams",
+      "why_its_noise": "'sales' denotes the client team the Data Analyst reported TO, not a skill. SKILL_ALIASES['sales']=['argumentaire de vente'] fires without context gate. UNCHANGED.",
+      "category": "leakage_contexte_mot_seul",
+      "severity": "strict"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+      "label_in_output": "développement par itérations",
+      "source_token": "agile (via SKILL_ALIASES multi-value)",
+      "origin_in_cv": "- Methods: Agile, Project management",
+      "why_its_noise": "SKILL_ALIASES['agile'] injects TWO URIs ('gestion de projets par méthode agile' + 'développement par itérations'). CV declares 'Agile' method only — not specifically iterative-development practice. Double-count. UNCHANGED.",
+      "category": "double_comptage_alias_multi_expansion",
+      "severity": "borderline"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/348b74cd-49ce-4844-8bdf-ec188b497213",
+      "label_in_output": "techniques de présentation visuelle",
+      "source_token": "dashboards (via SKILL_ALIASES multi-value, batch-1 2026-04-18)",
+      "origin_in_cv": "- Methods: ..., KPI dashboards, Reporting",
+      "why_its_noise": "NEW at HEAD. SKILL_ALIASES['dashboards'] injects TWO URIs ('logiciel de visualisation des données' + 'techniques de présentation visuelle'). CV says 'KPI dashboards' — a BI-tool output. Injecting 'visual presentation techniques' conflates data viz with generic presentation skills. Second URI is borderline noise (double-count).",
+      "category": "double_comptage_alias_multi_expansion",
+      "severity": "borderline"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/edebd83d-35f6-4ed5-a940-6c203d178c01",
+      "label_in_output": "science des big data",
+      "source_token": "data science (bigram, BIGRAM_WHITELIST batch-1 2026-04-18) -> SKILL_ALIASES['data science']",
+      "origin_in_cv": "Master Data Science — Université Paris-Saclay",
+      "why_its_noise": "NEW at HEAD. The alias maps 'data science' to 'science des big data'. CV mentions 'Data Science' as the degree name — makes no claim about 'big data' specifically. Abstraction inflation: tooling scale (big data) is asserted from a generic academic label. Borderline noise.",
+      "category": "abstraction_inflate_par_alias",
+      "severity": "borderline"
+    },
+    {
+      "uri": "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",
+      "label_in_output": "analyse de données",
+      "source_tokens": ["data (SKILL_ALIASES)", "data analysis (BIGRAM)", "analyst (SKILL_ALIASES)", "reporting (jsonl)"],
+      "origin_in_cv": "Data Analyst role + 'Data analysis' bigram + 'Reporting' line",
+      "why_its_noise": "Not noise per se — the candidate IS a Data Analyst. Four surface tokens collapse onto ONE URI with no trace of which specific analysis modality (SQL queries, dashboarding, ML modeling). Dilution. UNCHANGED.",
+      "category": "dilution_par_convergence_alias",
+      "severity": "borderline"
+    }
+  ],
+  "noise_overview_head": {
+    "strict_noise_count": 3,
+    "strict_noise_items": ["paris", "gérer une équipe", "argumentaire de vente"],
+    "borderline_noise_count": 4,
+    "borderline_noise_items": [
+      "développement par itérations (double-count from 'agile')",
+      "techniques de présentation visuelle (double-count from 'dashboards', NEW at HEAD)",
+      "science des big data (abstraction inflate from 'data science', NEW at HEAD)",
+      "analyse de données (4-token convergence dilution)"
+    ],
+    "noise_ratio_strict": "3 / 22 ≈ 13.6%",
+    "noise_ratio_strict_plus_borderline": "7 / 22 ≈ 31.8%"
+  },
+  "delta_vs_prior_report": {
+    "strict_noise_count_delta": 0,
+    "borderline_noise_count_delta": 2,
+    "new_borderline_noise": [
+      "techniques de présentation visuelle — introduced by batch-1 'dashboards' alias multi-expansion",
+      "science des big data — introduced by batch-1 'data science' bigram + alias"
+    ],
+    "noise_rate_strict_delta": "-4.0pt (17.6% -> 13.6%, denominator grew from 17 to 22)",
+    "noise_rate_strict_plus_borderline_delta": "+2.4pt (29.4% -> 31.8%)"
+  },
+  "root_causes_summary": [
+    "Alias multi-expansion without selection heuristic: 'agile' and 'dashboards' each inject 2 URIs. No 'most specific' vs 'most general' policy.",
+    "Alias abstraction inflation: 'data science' -> 'science des big data' climbs the specificity ladder unjustifiably.",
+    "Context-free token triggering: 'sales', 'management', 'paris' fire on surface occurrence regardless of attribution to the candidate.",
+    "No proper-noun / geographic guard in ESCO extract or skill_filter.",
+    "No counter-alias mechanism to reject inflated expansions once added to raw_tokens."
+  ]
+}

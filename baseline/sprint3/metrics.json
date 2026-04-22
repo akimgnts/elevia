@@ -1,0 +1,69 @@
+{
+  "description": "Attrition and noise metrics for the skills_uri fabrication on apps/api/fixtures/cv/cv_fixture_v0.txt.",
+  "cv_input": {
+    "extracted_text_length_chars": 1242,
+    "explicit_skills_declared_in_cv_count_approx": 26
+  },
+  "stage_counts": {
+    "raw_detected": 113,
+    "after__has_noise_removal_estimated": 106,
+    "alias_prepass_hits_via_jsonl": 2,
+    "remaining_sent_to_map_skill_estimated": 104,
+    "map_skill_positive_estimated": 15,
+    "map_skill_negative_filtered_tokens": 89,
+    "validated_items_after_uri_dedup": 17,
+    "validated_items_after_truncation_max_40": 17,
+    "skills_uri_final_count": 17,
+    "skills_uri_collapsed_dupes_debug_only": 1,
+    "skills_unmapped_count": 89
+  },
+  "attrition_ratios": {
+    "mapping_rate_overall": "17 / 113 = 15.04%",
+    "attrition_rate_overall": "96 / 113 = 84.96%",
+    "coverage_of_explicit_cv_skills_approx": "9 / 26 = 34.6%  (direct hits on declared tool names: Python, SQL, MySQL, PostgreSQL, NoSQL, DevOps, ETL, Excel->tableur, Agile)",
+    "alias_layer_share_of_final_validated": "2 / 17 = 11.8%  (from esco_alias_fr_v0.jsonl)",
+    "esco_direct_map_share_of_final_validated": "15 / 17 = 88.2%"
+  },
+  "noise_metrics": {
+    "strict_noise_uris": 3,
+    "borderline_noise_uris": 2,
+    "noise_rate_strict": "3 / 17 = 17.6%",
+    "noise_rate_strict_plus_borderline": "5 / 17 = 29.4%"
+  },
+  "fuzzy_matching_contribution": {
+    "enabled": false,
+    "fuzzy_threshold_constant": 0.92,
+    "note": "map_skill called with enable_fuzzy=False from both baseline_parser.run_baseline_from_tokens and skill_filter.strict_filter_skills. Fuzzy fallback never executes in this pipeline."
+  },
+  "two_layer_alias_layering": {
+    "layer_1_SKILL_ALIASES_in_esco_extract_py": {
+      "role": "expands tokens in the set BEFORE noise filter and map_skill",
+      "examples_captured_in_raw_tokens": [
+        "python -> python (programmation informatique)",
+        "excel -> utiliser un logiciel de tableur",
+        "agile -> gestion de projets par méthode agile + développement par itérations",
+        "sales -> argumentaire de vente",
+        "data -> analyse de données + exploration de données"
+      ],
+      "examples_silently_not_expanded": [
+        "dashboards -> logiciel de visualisation des données (expected, absent)",
+        "statistics -> statistiques (expected, absent)",
+        "machine learning -> apprentissage automatique (bigram itself not captured)"
+      ]
+    },
+    "layer_2_esco_alias_fr_v0_jsonl_in_skill_filter_py": {
+      "role": "direct URI lookup BEFORE map_skill, for FR CV vocabulary",
+      "examples_captured": [
+        "management -> gérer une équipe",
+        "reporting -> analyse de données (dedup with existing URI)"
+      ]
+    }
+  },
+  "critical_code_observations": {
+    "uri_collapse_not_on_production_path": "apps/api/src/profile/baseline_parser.py:86 assigns profile.skills_uri from strict_filter_skills.validated_items. The collapse_to_uris call at lines 92-121 runs as a debug shadow and only populates skills_uri_collapsed_dupes / skills_dupes. collapse_to_uris is OFF the production scoring path.",
+    "whitelist_regex_bug": "apps/api/src/esco/extract.py:272: re.search(rf'\\\\b{re.escape(skill)}\\\\b', normalized). The rf'...' raw f-string yields '\\\\b' (literal backslash-b) not '\\b' (word boundary). WHITELIST_SKILLS capture is effectively dead code. Tokens in WHITELIST_SKILLS still appear because they are captured by the standard per-word loop.",
+    "double_expansion_injection": "SKILL_ALIASES entries with multi-value lists (e.g., agile -> [2 ESCO labels]) inject BOTH as separate raw tokens, each producing its own ESCO URI — no selection heuristic.",
+    "no_context_gate": "Alias layers operate on token equality only. No context window, no per-occurrence attribution ('sales TEAMS' vs 'sales SKILL') — see 'sales' -> 'argumentaire de vente' false positive.",
+    "no_geographic_guard": "ESCO lookup admits 'paris' (city -> ESCO concept for 'wager'). No stoplist for proper nouns / city names, despite extract.py treating 'STOPWORDS' as the only filter."
+  }
+}

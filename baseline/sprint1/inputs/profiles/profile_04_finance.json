@@ -1,0 +1,13 @@
+{
+  "profile_id": "golden_04",
+  "skills": ["excel", "financial_modeling", "accounting", "sap", "bloomberg"],
+  "languages": [
+    {"code": "fr", "level": "C2"},
+    {"code": "en", "level": "C1"}
+  ],
+  "education_level": "BAC+5",
+  "nationality": "BE",
+  "age": 27,
+  "years_of_experience": 5,
+  "cv_text": "Analyste financier senior, 5 ans d'expérience en modélisation financière. Excel avancé, SAP, Bloomberg. Master Finance HEC. Bilingue français-anglais."
+}

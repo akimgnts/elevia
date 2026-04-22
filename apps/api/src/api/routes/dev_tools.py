@@ -30,6 +30,13 @@ if str(SCRIPTS_DIR) not in sys.path:
 import cv_parsing_delta_report as delta_report  # noqa: E402
 from api.utils.pdf_text import PdfTextError, extract_text_from_pdf  # noqa: E402
 from api.utils.inbox_catalog import load_catalog_offers  # noqa: E402
+from api.utils.career_intelligence import build_career_intelligence  # noqa: E402
+from api.utils.generic_skills_filter import (  # noqa: E402
+    HARD_GENERIC_URIS,
+    filter_skills_uri_for_scoring,
+    should_apply_generic_filter,
+    summarize_skill_tags,
+)
 from semantic.semantic_service import compute_semantic_for_offer  # noqa: E402
 
 from matching import MatchingEngine  # noqa: E402
@@ -284,6 +291,18 @@ def _pearson(x: List[float], y: List[float]) -> Optional[float]:
     return num / (den_x * den_y)
 
 
+def _empty_career_intelligence() -> Dict[str, Any]:
+    return {
+        "strengths": [],
+        "gaps": [],
+        "generic_ignored": {
+            "profile": [],
+            "offer": [],
+        },
+        "positioning": "",
+    }
+
+
 @router.post("/dev/metrics", summary="DEV-only matching + semantic metrics")
 async def dev_metrics(req: MetricsRequest) -> Dict[str, Any]:
     request_id = uuid.uuid4().hex
@@ -298,6 +317,10 @@ async def dev_metrics(req: MetricsRequest) -> Dict[str, Any]:
             request_id,
         )
 
+    extracted = extract_profile(req.profile)
+    profile_skills_uri = list(getattr(extracted, "skills_uri", []) or [])
+    profile_skill_tag_summary = summarize_skill_tags(profile_skills_uri)
+
     catalog = load_catalog_offers()
     if not catalog:
         return {
@@ -306,18 +329,46 @@ async def dev_metrics(req: MetricsRequest) -> Dict[str, Any]:
             "distribution_score_A": [],
             "correlation_score_A_vs_score_B": None,
             "semantic_sample_size": 0,
+            "skill_tag_observability": {
+                "profile": profile_skill_tag_summary,
+                "offers_sample": {
+                    "generic_hard_count": 0,
+                    "generic_weak_count": 0,
+                    "domain_count": 0,
+                },
+                "offers_sample_size": 0,
+            },
+            "career_intelligence": _empty_career_intelligence(),
         }
 
     engine = MatchingEngine(offers=catalog)
-    extracted = extract_profile(req.profile)
+    apply_generic_filter = should_apply_generic_filter(profile_skills_uri, HARD_GENERIC_URIS)
 
     scores: List[int] = []
     unmapped_counts: List[int] = []
     unmapped_freq: Dict[str, int] = {}
     scored_offers: List[tuple[Dict[str, Any], int]] = []
+    career_intelligence = _empty_career_intelligence()
+    offers_skill_tag_summary = {
+        "generic_hard_count": 0,
+        "generic_weak_count": 0,
+        "domain_count": 0,
+    }
 
     for offer in catalog[: req.limit]:
-        result = engine.score_offer(extracted, offer)
+        offer_tag_summary = summarize_skill_tags(offer.get("skills_uri") or [])
+        for key in offers_skill_tag_summary:
+            offers_skill_tag_summary[key] += offer_tag_summary[key]
+        if apply_generic_filter:
+            offer_view = {**offer, "skills_uri": filter_skills_uri_for_scoring(offer.get("skills_uri") or [])}
+        else:
+            offer_view = offer
+        if not scored_offers:
+            career_intelligence = build_career_intelligence(
+                profile_skills_uri,
+                offer.get("skills_uri") or [],
+            )
+        result = engine.score_offer(extracted, offer_view)
         score_value = int(result.score)
         scores.append(score_value)
         scored_offers.append((offer, score_value))
@@ -363,4 +414,10 @@ async def dev_metrics(req: MetricsRequest) -> Dict[str, Any]:
         "distribution_score_A": dist,
         "correlation_score_A_vs_score_B": None if corr is None else round(corr, 3),
         "semantic_sample_size": len(score_b),
+        "skill_tag_observability": {
+            "profile": profile_skill_tag_summary,
+            "offers_sample": offers_skill_tag_summary,
+            "offers_sample_size": len(scored_offers),
+        },
+        "career_intelligence": career_intelligence,
     }

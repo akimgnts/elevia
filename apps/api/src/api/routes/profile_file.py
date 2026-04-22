@@ -92,6 +92,8 @@ class ParseFileResponse(BaseModel):
     skill_proximity_summary: dict = {}
     profile_intelligence: dict = {}
     profile_intelligence_ai_assist: dict = {}
+    raw_cv_reconstruction: dict = {}
+    profile_reconstruction: dict = {}
     analyze_dev: Optional[dict] = None
 
 

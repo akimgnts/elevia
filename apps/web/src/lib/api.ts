@@ -412,6 +412,16 @@ export interface OfferExplanation {
   next_actions: string[];
 }
 
+export interface CareerIntelligence {
+  strengths: string[];
+  gaps: string[];
+  generic_ignored?: {
+    profile: string[];
+    offer: string[];
+  };
+  positioning: string;
+}
+
 export interface OfferRoleHypothesis {
   label: string;
   confidence: number;
@@ -539,6 +549,7 @@ export interface InboxItem {
   semantic_explainability?: SemanticExplainability | null;
   scoring_v2?: ScoringV2 | null;
   scoring_v3?: ScoringV3 | null;
+  career_intelligence?: CareerIntelligence | null;
   /** @deprecated Inbox UI no longer uses this. Safe backend cleanup candidate. */
   explain_v1?: CompassExplainCompact | null;
 }

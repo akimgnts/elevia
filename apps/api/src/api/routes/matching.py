@@ -17,6 +17,12 @@ from typing import Dict, Any, List
 from ..utils.obs_logger import obs_log
 from ..utils.db import get_connection
 from ..utils.offer_skills import get_offer_skills_by_offer_ids
+from ..utils.career_intelligence import build_career_intelligence
+from ..utils.generic_skills_filter import (
+    HARD_GENERIC_URIS,
+    filter_skills_uri_for_scoring,
+    should_apply_generic_filter,
+)
 
 from ..schemas.matching import (
     MatchingRequest,
@@ -68,6 +74,15 @@ def _attach_offer_skills(offers: List[Dict[str, Any]]) -> None:
                 offer["skills_uri"] = entry["skills_uri"]
             if entry.get("skills"):
                 offer["skills"] = entry["skills"]
+
+
+def _build_career_intelligence_payload(
+    profile_skills_uri: List[str],
+    offer_skills_uri: List[str],
+) -> Dict[str, Any] | None:
+    if not profile_skills_uri or not offer_skills_uri:
+        return None
+    return build_career_intelligence(profile_skills_uri, offer_skills_uri)
 
 
 # ============================================================================
@@ -196,6 +211,11 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
         # Extraire le profil une seule fois
         extracted_profile = extract_profile(request.profile)
 
+        apply_generic_filter = should_apply_generic_filter(
+            list(getattr(extracted_profile, "skills_uri", []) or []), HARD_GENERIC_URIS
+        )
+        profile_skills_uri = list(getattr(extracted_profile, "skills_uri", []) or [])
+
         # Sprint 21: Separate accessible and inaccessible offers
         results: List[ResultItem] = []
         inaccessible_offers: List[InaccessibleOffer] = []
@@ -232,7 +252,11 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
                 continue  # Don't score KO offers (Sprint 21 requirement)
 
             # 3. Score only accessible offers
-            match_result = engine.score_offer(extracted_profile, offer)
+            if apply_generic_filter:
+                offer_view = {**offer, "skills_uri": filter_skills_uri_for_scoring(offer.get("skills_uri") or [])}
+            else:
+                offer_view = offer
+            match_result = engine.score_offer(extracted_profile, offer_view)
 
             # 4. Convertir diagnostic en schema
             diagnostic_result = DiagnosticResult(
@@ -271,6 +295,10 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
                 breakdown=match_result.breakdown,
                 reasons=match_result.reasons,
                 match_debug=match_result.match_debug,
+                career_intelligence=_build_career_intelligence_payload(
+                    profile_skills_uri,
+                    offer.get("skills_uri") or [],
+                ),
                 score_is_partial=match_result.score_is_partial,
                 diagnostic=diagnostic_result,
             ))

@@ -1,0 +1,74 @@
+{
+  "description": "Shortlist finale Sprint 4 — 5 cas retenus. Tous sont validables empiriquement sur cv_fixture_v0.txt via un re-run de run_baseline. Exclus : cas non déclenchés sur la baseline (C2, O4), cas sans effet observable (C3), cas de sur-injection dont l'impact est strictement borderline sur ce CV (O1, O3 — gardés hors shortlist pour ne pas dilater).",
+  "selection_criteria": [
+    "validable_sur_baseline_existante: le cas produit un delta observable sur skills_uri via run_baseline(cv_fixture_v0.txt)",
+    "petite_surface_de_fix: ≤ 2 lignes à modifier dans 1 ou 2 fichiers",
+    "pas_de_dependance_scoring: le fix n'affecte ni matching_v1 ni idf ni weights",
+    "risque_borne: aucun chemin de code hors pipeline CV brute n'est touché"
+  ],
+  "shortlist": [
+    {
+      "rank": 1,
+      "case_id": "N1",
+      "family": "strict_noise",
+      "title": "paris (ville) → URI ESCO 'paris' (wager)",
+      "priority": "P0",
+      "fix_surface": "Ajouter 'paris' dans STOPWORDS (apps/api/src/esco/extract.py)",
+      "loc_changed": 1,
+      "expected_delta": "strict_noise_count: 3→2 ; skills_uri_count: 22→21",
+      "justification_inclusion": "Impact maximal : tout CV basé à Paris déclenche ce bruit. Fix minimal : 1 entrée stopword. Aucun risque sur scoring core. Validation triviale via baseline existante."
+    },
+    {
+      "rank": 2,
+      "case_id": "C1",
+      "family": "config_mismatch",
+      "title": "SKILL_ALIASES['project_management'] inatteignable depuis bigram 'project management'",
+      "priority": "P0",
+      "fix_surface": "Renommer la clé 'project_management' en 'project management' dans apps/api/src/esco/extract.py",
+      "loc_changed": 1,
+      "expected_delta": "validated_skills: 22→23 (ajout URI 'gestion de projets') ; catégorie loss 'transforme_en_abstraction_trop_large' diminue de 1",
+      "justification_inclusion": "Seul cas de la shortlist qui AJOUTE du signal plutôt que de retirer du bruit. Corrige un bug de config actif et documenté Sprint 3 addendum. Validation triviale."
+    },
+    {
+      "rank": 3,
+      "case_id": "N3",
+      "family": "strict_noise",
+      "title": "SKILL_ALIASES['sales'] → 'argumentaire de vente' (bruit cross-domain)",
+      "priority": "P1",
+      "fix_surface": "Supprimer la clé 'sales' dans SKILL_ALIASES (apps/api/src/esco/extract.py)",
+      "loc_changed": 1,
+      "expected_delta": "strict_noise_count: 2→1 (après fix N1) ; skills_uri_count: -1",
+      "justification_inclusion": "Bruit strict confirmé Sprint 3, touche fréquemment les CV tech mentionnant des équipes sales comme clients internes. Alias français 'vente' reste en place."
+    },
+    {
+      "rank": 4,
+      "case_id": "N2",
+      "family": "strict_noise",
+      "title": "jsonl alias 'management' → 'gérer une équipe' (abstraction cross-domain)",
+      "priority": "P1",
+      "fix_surface": "Supprimer la ligne jsonl 'management' dans apps/api/data/esco_alias_fr_v0.jsonl ET apps/api/data/aliases/esco_alias_fr_v0.jsonl (duplication à nettoyer simultanément)",
+      "loc_changed": 2,
+      "expected_delta": "strict_noise_count: 1→0 (après fixes N1+N3) ; skills_uri_count: -1",
+      "justification_inclusion": "Complète l'élimination du bruit strict sur cv_fixture_v0.txt. L'alias précis 'management d equipe' reste en place pour les cas légitimes."
+    },
+    {
+      "rank": 5,
+      "case_id": "O2",
+      "family": "over_injection",
+      "title": "SKILL_ALIASES['dashboards'] multi-value injection borderline",
+      "priority": "P2",
+      "fix_surface": "Réduire SKILL_ALIASES['dashboards'] à ['logiciel de visualisation des données'] (retirer 'techniques de présentation visuelle')",
+      "loc_changed": 1,
+      "expected_delta": "borderline_noise_count: 4→3 ; skills_uri_count: -1",
+      "justification_inclusion": "Cas représentatif du pattern multi-value sans sélection. Le traiter d'abord établit la convention ; les cas O1 (agile) et O3 (data science) suivront le même pattern et pourront être fixés en série.",
+      "note_de_priorite": "Placé rank 5 délibérément. O1 (agile) a un effet équivalent mais un risque légèrement plus haut (itérations est un concept ESCO valide pour Scrum). Commencer par O2 (dashboards) est plus sûr."
+    }
+  ],
+  "excluded_from_shortlist": [
+    {"case_id": "C2", "reason": "dead config non déclenchée sur cv_fixture_v0.txt — non-validable sur la baseline actuelle"},
+    {"case_id": "C3", "reason": "bug regex dead code, aucun effet observable — prioritaire uniquement si on ajoute de nouveaux skills à WHITELIST_SKILLS"},
+    {"case_id": "O1", "reason": "équivalent fonctionnel à O2 ; O2 suffit à établir le pattern. O1 peut être traité en série après validation de O2, même rank potentiel mais tenu hors shortlist pour respecter la limite 5"},
+    {"case_id": "O3", "reason": "impact équivalent à O2 mais risque plus flou (faut-il supprimer ou rediriger ? décision non triviale). Traité post-shortlist"},
+    {"case_id": "O4", "reason": "clé 'jira' non déclenchée sur cv_fixture_v0.txt — non-validable sur la baseline actuelle"}
+  ]
+}

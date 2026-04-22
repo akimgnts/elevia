@@ -1,27 +1,15 @@
-# DATASET SOURCE: Realistic Beta Catalog (Not real production extraction)
 """
 offers.py - Routes FastAPI pour les offres VIE
-Sprint 14 - VERROU #3 (Stabilization)
-Sprint: Live Data Switch - Added /offers/catalog with SQLite + fallback
-Sprint 15.1 - Data Quality + Hardened Contract
-Sprint 21 - Observability logging
 
 Endpoints:
-- GET /offers/sample - Static sample offers (legacy)
-- GET /offers/catalog - Live DB offers with static fallback
-
-Anti-crash design:
-- Lazy loading (file read on first request, not at import)
-- Graceful degradation if file missing (returns empty list + warning header)
-- MD5-based version header for cache validation
-- SQLite timeout + fallback for catalog endpoint
-- Explicit fallback_reason in meta for debugging
+- GET /offers/catalog - Live DB offers (BF: PostgreSQL clean_offers, FT: SQLite fact_offers)
+- GET /offers/{offer_id}/detail - Single offer detail
 """
 
-import hashlib
 import json
 import logging
 import os
+import socket
 import sqlite3
 import time
 import uuid
@@ -52,100 +40,28 @@ class FallbackReason(str, Enum):
     DB_LOCKED = "DB_LOCKED"
     DB_MISSING = "DB_MISSING"
     DB_ERROR = "DB_ERROR"
+    NOT_FOUND = "NOT_FOUND"
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["offers"])
 
-# Path to sample offers file
-SAMPLE_OFFERS_PATH = Path(__file__).parent.parent.parent.parent / "data" / "sample_vie_offers.json"
-
-# Cache: (offers_list, version_hash)
-_cache: Optional[Tuple[List[Dict[str, Any]], str]] = None
-
-
-def _compute_version_hash(data: bytes) -> str:
-    """Compute MD5 hash (first 8 chars) for versioning."""
-    return hashlib.md5(data).hexdigest()[:8]
-
-
-def _load_offers_lazy() -> Tuple[List[Dict[str, Any]], str]:
-    """
-    Lazy load offers from JSON file.
-    Returns (offers_list, version_hash).
-    Graceful fallback if file missing.
-    """
-    global _cache
-
-    # Return cached if available
-    if _cache is not None:
-        return _cache
-
-    # Try to load file
-    if not SAMPLE_OFFERS_PATH.exists():
-        logger.warning(f"WARNING: Sample offers file missing at {SAMPLE_OFFERS_PATH}")
-        _cache = ([], "missing")
-        return _cache
-
-    try:
-        raw_data = SAMPLE_OFFERS_PATH.read_bytes()
-        offers = json.loads(raw_data.decode("utf-8"))
-        version_hash = _compute_version_hash(raw_data)
-
-        if not isinstance(offers, list):
-            logger.warning(f"WARNING: Sample offers file is not a list, got {type(offers)}")
-            _cache = ([], "invalid")
-            return _cache
-
-        logger.info(f"Loaded {len(offers)} offers from {SAMPLE_OFFERS_PATH} (v:{version_hash})")
-        _cache = (offers, version_hash)
-        return _cache
-
-    except json.JSONDecodeError as e:
-        logger.warning(f"WARNING: Invalid JSON in sample offers file: {e}")
-        _cache = ([], "invalid")
-        return _cache
-    except Exception as e:
-        logger.warning(f"WARNING: Failed to load sample offers: {e}")
-        _cache = ([], "error")
-        return _cache
-
-
-@router.get(
-    "/sample",
-    summary="Get sample VIE offers",
-    description="Returns a list of sample VIE offers for testing. Max 500 offers.",
-)
-def get_sample_offers(
-    limit: int = Query(default=200, ge=1, le=500, description="Number of offers to return (max 500)")
-) -> JSONResponse:
-    """
-    Get sample VIE offers for beta testing.
-
-    Returns up to `limit` offers from the sample dataset.
-    Graceful fallback: returns empty list if file missing (does not crash).
-
-    Headers:
-    - X-Sample-Version: MD5 hash (8 chars) or "missing"/"invalid"/"error"
-    """
-    offers, version_hash = _load_offers_lazy()
-
-    # Cap at requested limit
-    result_offers = offers[:limit]
-
-    response_data = {
-        "total_available": len(offers),
-        "returned": len(result_offers),
-        "offers": result_offers,
-    }
-
-    return JSONResponse(
-        content=response_data,
-        headers={"X-Sample-Version": version_hash},
-    )
+def _classify_postgres_exception(exc: Exception) -> str:
+    message = str(exc).lower()
+    if isinstance(exc, ModuleNotFoundError) and getattr(exc, "name", "") == "psycopg":
+        return "MISSING_DRIVER"
+    if isinstance(exc, socket.gaierror) or "nodename nor servname provided" in message or "failed to resolve host" in message:
+        return "DB_DNS_ERROR"
+    if "connection refused" in message:
+        return "DB_CONNECTION_REFUSED"
+    if "timeout expired" in message or "timed out" in message:
+        return "DB_TIMEOUT"
+    if "password authentication failed" in message:
+        return "DB_AUTH_ERROR"
+    return "DB_ERROR"
 
 
 # ============================================================================
-# CATALOG ENDPOINT (Live Data Switch + Sprint 15 Data Quality)
+# CATALOG ENDPOINT
 # ============================================================================
 
 from ..utils.text_cleaning import clean_text, make_display_text
@@ -238,6 +154,11 @@ def _load_from_sqlite(
         - fallback_reason is None if success (live-db)
         - fallback_reason is set if fallback needed
     """
+    if source == CatalogSource.business_france:
+        raise ValueError(
+            "_load_from_sqlite must never be called for business_france — use _load_from_postgres"
+        )
+
     if not DB_PATH.exists():
         logger.info(f"[catalog] DB not found at {DB_PATH}")
         return [], 0, FallbackReason.DB_MISSING
@@ -326,7 +247,7 @@ def _load_from_postgres(
     """
     database_url = os.getenv("DATABASE_URL", "").strip()
     if not database_url:
-        logger.info("[catalog] DATABASE_URL not set — skipping PostgreSQL")
+        logger.error("[catalog] DATABASE_URL not set — Business France (clean_offers) unavailable")
         return [], 0, FallbackReason.DB_MISSING
 
     try:
@@ -396,44 +317,138 @@ def _load_from_postgres(
         return offers, total_count, None
 
     except Exception as e:
-        logger.warning(f"[catalog] PostgreSQL error: {e}")
+        logger.error(f"[catalog] PostgreSQL error ({_classify_postgres_exception(e)}): {e}")
         return [], 0, FallbackReason.DB_ERROR
 
 
-def _normalize_fallback_offers(
-    raw_offers: List[Dict[str, Any]],
-    source_filter: CatalogSource = CatalogSource.all
-) -> List[Dict[str, Any]]:
+def _load_catalog_db_first(
+    limit: int,
+    source: CatalogSource,
+) -> Tuple[List[Dict[str, Any]], int, str, Optional[FallbackReason]]:
     """
-    Normalize fallback offers and apply source filtering.
+    Database-only catalog loading.
 
-    Static sample offers are treated as "business_france" (VIE-like).
-    ALWAYS applies _normalize_offer (clean_text/make_display_text).
+    Rules:
+    - business_france: PostgreSQL clean_offers only
+    - france_travail: SQLite fact_offers only
+    - all: merge business_france from PostgreSQL + france_travail from SQLite
     """
-    normalized = []
-    for raw in raw_offers:
-        # Determine source for filtering
-        offer_source = raw.get("source", "business_france")
-        if offer_source not in ("france_travail", "business_france"):
-            offer_source = "business_france"  # VIE-like static data
+    if source == CatalogSource.business_france:
+        offers, total_count, failure = _load_from_postgres(limit, CatalogSource.business_france)
+        if failure is not None:
+            return [], total_count, "error", failure
+        return offers, total_count, "live-db", None
 
-        # Apply source filter
-        if source_filter != CatalogSource.all and offer_source != source_filter.value:
-            continue
+    if source == CatalogSource.france_travail:
+        offers, total_count, failure = _load_from_sqlite(limit, CatalogSource.france_travail)
+        if failure is not None:
+            return [], total_count, "error", failure
+        return offers, total_count, "live-db", None
 
-        # Normalize with source hint (ALWAYS applies cleaning)
-        norm = _normalize_offer(raw, source_hint=offer_source)
-        normalized.append(norm)
+    bf_offers, bf_total, bf_failure = _load_from_postgres(limit, CatalogSource.business_france)
+    ft_offers, ft_total, ft_failure = _load_from_sqlite(limit, CatalogSource.france_travail)
 
-    return normalized
+    if bf_failure is not None:
+        return [], bf_total + ft_total, "error", bf_failure
+    if ft_failure is not None and bf_offers:
+        logger.warning(f"[catalog] France Travail unavailable ({ft_failure.value}), serving Business France only")
+        combined = list(bf_offers)
+        combined.sort(key=lambda offer: (str(offer.get("publication_date") or ""), str(offer.get("id") or "")), reverse=True)
+        return combined[: min(limit, 500)], bf_total, "live-db-partial", None
+    if ft_failure is not None:
+        return [], bf_total + ft_total, "error", ft_failure
+
+    combined = [*bf_offers, *ft_offers]
+    combined.sort(key=lambda offer: (str(offer.get("publication_date") or ""), str(offer.get("id") or "")), reverse=True)
+    return combined[: min(limit, 500)], bf_total + ft_total, "live-db", None
+
+
+def _load_offer_detail_from_postgres(offer_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[FallbackReason]]:
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if not database_url:
+        logger.error(f"[offer_detail] DATABASE_URL not set — Business France offer {offer_id} unavailable")
+        return None, FallbackReason.DB_MISSING
+
+    try:
+        import psycopg
+
+        with psycopg.connect(database_url, connect_timeout=5) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT external_id, source, title, description, company,
+                           location, country, publication_date, start_date
+                    FROM clean_offers
+                    WHERE source = %s AND external_id = %s
+                    LIMIT 1
+                    """,
+                    ("business_france", offer_id),
+                )
+                row = cur.fetchone()
+        if row is None:
+            return None, FallbackReason.NOT_FOUND
+        return (
+            {
+                "id": row[0],
+                "source": row[1],
+                "title": row[2],
+                "description": row[3],
+                "company": row[4],
+                "city": row[5],
+                "country": row[6],
+                "publication_date": str(row[7]) if row[7] else None,
+                "contract_duration": None,
+                "start_date": str(row[8]) if row[8] else None,
+            },
+            None,
+        )
+    except Exception as exc:
+        logger.error(
+            f"[offer_detail] PostgreSQL error for offer_id={offer_id} "
+            f"({_classify_postgres_exception(exc)}): {exc}"
+        )
+        return None, FallbackReason.DB_ERROR
+
+
+def _get_bf_skills_from_postgres(offer_id: str, limit: int = 12) -> List[str]:
+    """
+    Read ESCO-mapped skill labels for a Business France offer from PostgreSQL offer_skills.
+    Returns empty list on any failure — skills are non-critical enrichment.
+    """
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if not database_url:
+        return []
+    try:
+        import psycopg
+
+        with psycopg.connect(database_url, connect_timeout=5) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT skill FROM offer_skills
+                    WHERE offer_id = %s AND source = %s AND skill_uri IS NOT NULL
+                    ORDER BY skill ASC
+                    LIMIT %s
+                    """,
+                    (offer_id, "business_france", limit),
+                )
+                rows = cur.fetchall()
+        return [row[0] for row in rows]
+    except Exception as exc:
+        logger.warning(f"[offer_detail] BF skills fetch failed for {offer_id}: {exc}")
+        return []
 
 
 @router.get(
     "/catalog",
     summary="Get live offers catalog",
     description="""
-Returns offers from the live database (France Travail + Business France).
-Falls back to static sample data if database is unavailable.
+Returns offers from the live databases only.
+
+Business France is strict database-first:
+- `source=business_france` reads only from PostgreSQL `clean_offers`
+- `source=france_travail` reads from SQLite `fact_offers`
+- `source=all` merges the two database-backed sources
 
 **Query params:**
 - `limit`: Max offers (1-500, default 200)
@@ -446,14 +461,14 @@ Falls back to static sample data if database is unavailable.
   "meta": {
     "total_available": int,
     "returned": int,
-    "data_source": "live-db" | "static-fallback",
-    "fallback_reason": null | "EMPTY_DB" | "DB_LOCKED" | "DB_MISSING" | "DB_ERROR"
+    "data_source": "live-db",
+    "fallback_reason": null
   }
 }
 ```
 
 **Headers:**
-- `X-Data-Source`: 'live-db' or 'static-fallback' (mirrors meta.data_source)
+- `X-Data-Source`: 'live-db'
 
 **Contract:** Returns OfferNormalized objects (see docs/contracts/offer_normalized.md)
 """,
@@ -463,13 +478,9 @@ def get_catalog_offers(
     source: str = Query(default="all", description="Filter by source: all, france_travail, business_france"),
 ) -> JSONResponse:
     """
-    Get offers from live database with static fallback.
+    Get offers from the live databases only.
 
-    Priority:
-    1. SQLite database (live data from France Travail / Business France)
-    2. Static sample_vie_offers.json (fallback)
-
-    Returns { offers, meta } with OfferNormalized contract. NEVER crashes.
+    Business France is PostgreSQL-only; France Travail remains SQLite-backed.
     """
     run_id = str(uuid.uuid4())[:8]
     start_time = time.time()
@@ -491,55 +502,50 @@ def get_catalog_offers(
     # Convert to enum for internal use
     source_enum = CatalogSource(source_clean)
 
-    # Try live database first (PostgreSQL clean_offers via DATABASE_URL)
-    offers, total_count, fallback_reason = _load_from_postgres(limit, source_enum)
+    offers, total_count, data_source, failure_reason = _load_catalog_db_first(limit, source_enum)
 
-    if fallback_reason is None and offers:
-        # Success: live-db
+    if failure_reason is None:
         duration_ms = int((time.time() - start_time) * 1000)
         obs_log("catalog_fetch", run_id=run_id, status="success", duration_ms=duration_ms,
-                extra={"data_source": "live-db", "returned": len(offers), "source_filter": source_clean})
+                extra={"data_source": data_source, "returned": len(offers), "source_filter": source_clean})
         return JSONResponse(
             content={
                 "offers": offers,
                 "meta": {
                     "total_available": total_count,
                     "returned": len(offers),
-                    "data_source": "live-db",
+                    "data_source": data_source,
                     "fallback_reason": None,
                 },
             },
-            headers={"X-Data-Source": "live-db"},
+            headers={"X-Data-Source": data_source},
         )
 
-    # Fallback to static JSON
-    logger.info(f"[catalog] Falling back to static sample data (source={source_clean}, reason={fallback_reason})")
-    static_offers, version_hash = _load_offers_lazy()
-
-    # Normalize and filter fallback offers (ALWAYS applies _normalize_offer)
-    normalized = _normalize_fallback_offers(static_offers, source_enum)
-    result_offers = normalized[:limit]
-
     duration_ms = int((time.time() - start_time) * 1000)
-    obs_log("catalog_fetch", run_id=run_id, status="success", duration_ms=duration_ms,
-            extra={"data_source": "static-fallback", "returned": len(result_offers),
-                   "source_filter": source_clean,
-                   "fallback_reason": fallback_reason.value if fallback_reason else None})
+    error_code = failure_reason.value if failure_reason else "DB_ERROR"
+    detail = None
+    if source_enum in (CatalogSource.business_france, CatalogSource.all):
+        database_url = os.getenv("DATABASE_URL", "").strip()
+        if not database_url:
+            detail = "DATABASE_URL_MISSING"
+        else:
+            try:
+                import psycopg  # noqa: F401
+            except ModuleNotFoundError:
+                detail = "MISSING_DRIVER"
+    obs_log(
+        "catalog_fetch",
+        run_id=run_id,
+        status="error",
+        error_code=error_code,
+        duration_ms=duration_ms,
+        extra={"source_filter": source_clean, "detail": detail},
+    )
 
     return JSONResponse(
-        content={
-            "offers": result_offers,
-            "meta": {
-                "total_available": len(normalized),
-                "returned": len(result_offers),
-                "data_source": "static-fallback",
-                "fallback_reason": fallback_reason.value if fallback_reason else None,
-            },
-        },
-        headers={
-            "X-Data-Source": "static-fallback",
-            "X-Sample-Version": version_hash,
-        },
+        status_code=503,
+        content={"error": "CATALOG_UNAVAILABLE", "reason": error_code, "source": source_clean, "detail": detail},
+        headers={"X-Data-Source": "unavailable"},
     )
 
 
@@ -582,48 +588,62 @@ def get_offer_detail(
     """
     start_time = time.time()
 
-    if not DB_PATH.exists():
-        obs_log("offer_detail_fetch", status="error", error_code="DB_MISSING",
-                extra={"offer_id": offer_id})
-        return JSONResponse(status_code=404, content={"error": "NOT_FOUND", "offer_id": offer_id})
+    raw: Dict[str, Any]
+    esco_skills: List[str] = []
+    is_business_france = offer_id.upper().startswith("BF-")
 
-    try:
-        conn = sqlite3.connect(str(DB_PATH), timeout=2)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            SELECT id, source, title, description, company, city, country,
-                   publication_date, contract_duration, start_date
-            FROM fact_offers
-            WHERE id = ?
-        """, (offer_id,))
-        row = cursor.fetchone()
-
-        if row is None:
-            conn.close()
+    if is_business_france:
+        raw, failure = _load_offer_detail_from_postgres(offer_id)
+        if failure == FallbackReason.NOT_FOUND:
+            return JSONResponse(status_code=404, content={"error": "NOT_FOUND", "offer_id": offer_id})
+        if failure is not None or raw is None:
+            obs_log("offer_detail_fetch", status="error", error_code=(failure.value if failure else "DB_ERROR"),
+                    extra={"offer_id": offer_id, "source": "business_france"})
+            return JSONResponse(status_code=503, content={"error": "DB_ERROR", "offer_id": offer_id})
+        esco_skills = _get_bf_skills_from_postgres(offer_id)
+    else:
+        if not DB_PATH.exists():
+            obs_log("offer_detail_fetch", status="error", error_code="DB_MISSING",
+                    extra={"offer_id": offer_id})
             return JSONResponse(status_code=404, content={"error": "NOT_FOUND", "offer_id": offer_id})
 
-        raw = {
-            "id": row["id"],
-            "source": row["source"],
-            "title": row["title"],
-            "description": row["description"],
-            "company": row["company"],
-            "city": row["city"],
-            "country": row["country"],
-            "publication_date": row["publication_date"],
-            "contract_duration": row["contract_duration"],
-            "start_date": row["start_date"],
-        }
+        try:
+            conn = sqlite3.connect(str(DB_PATH), timeout=2)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
 
-        # Fetch ESCO skills for this offer
-        esco_skills = get_esco_skills_for_offer(conn, offer_id, limit=12)
-        conn.close()
+            cursor.execute("""
+                SELECT id, source, title, description, company, city, country,
+                       publication_date, contract_duration, start_date
+                FROM fact_offers
+                WHERE id = ?
+            """, (offer_id,))
+            row = cursor.fetchone()
 
-    except sqlite3.OperationalError as e:
-        logger.warning(f"[offer_detail] SQLite error for offer_id={offer_id}: {e}")
-        return JSONResponse(status_code=503, content={"error": "DB_ERROR"})
+            if row is None:
+                conn.close()
+                return JSONResponse(status_code=404, content={"error": "NOT_FOUND", "offer_id": offer_id})
+
+            raw = {
+                "id": row["id"],
+                "source": row["source"],
+                "title": row["title"],
+                "description": row["description"],
+                "company": row["company"],
+                "city": row["city"],
+                "country": row["country"],
+                "publication_date": row["publication_date"],
+                "contract_duration": row["contract_duration"],
+                "start_date": row["start_date"],
+            }
+
+            # Fetch ESCO skills for this offer
+            esco_skills = get_esco_skills_for_offer(conn, offer_id, limit=12)
+            conn.close()
+
+        except sqlite3.OperationalError as e:
+            logger.warning(f"[offer_detail] SQLite error for offer_id={offer_id}: {e}")
+            return JSONResponse(status_code=503, content={"error": "DB_ERROR"})
 
     # Normalize offer fields
     normalized = _normalize_offer(raw)

@@ -27,7 +27,7 @@ def build_parse_file_response_payload_from_artifacts(artifacts: ParseFilePipelin
         ai_error=artifacts.ai_error,
         filename=artifacts.filename,
         content_type=artifacts.content_type,
-        extracted_text_length=len(artifacts.cv_text),
+        extracted_text_length=len(artifacts.source_cv_text),
         extracted_text_hash=artifacts.extracted_text_hash,
         profile_fingerprint=artifacts.profile_fingerprint,
         recovery_pipeline_version=PIPELINE_VERSION,
@@ -81,6 +81,8 @@ def build_parse_file_response_payload_from_artifacts(artifacts: ParseFilePipelin
         skill_proximity_summary=artifacts.canonical_mapping.skill_proximity_summary,
         profile_intelligence=artifacts.profile_intelligence.data,
         profile_intelligence_ai_assist=artifacts.profile_intelligence_ai_assist.data,
+        raw_cv_reconstruction=artifacts.raw_cv_reconstruction.model_dump(),
+        profile_reconstruction=artifacts.profile_reconstruction.model_dump(),
     )
 
 
@@ -131,4 +133,6 @@ def build_parse_baseline_response_payload_from_artifacts(
         "priority_stats": artifacts.canonical_mapping.priority_stats,
         "profile_intelligence": artifacts.profile_intelligence.data,
         "profile_intelligence_ai_assist": artifacts.profile_intelligence_ai_assist.data,
+        "raw_cv_reconstruction": artifacts.raw_cv_reconstruction.model_dump(),
+        "profile_reconstruction": artifacts.profile_reconstruction.model_dump(),
     }

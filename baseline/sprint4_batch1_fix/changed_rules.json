@@ -1,0 +1,82 @@
+{
+  "description": "Résumé machine-readable des 5 modifications minimales appliquées. Aucune modification hors shortlist Sprint 4.",
+  "commit_before_fix": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "files_touched": [
+    "apps/api/src/esco/extract.py",
+    "apps/api/data/esco_alias_fr_v0.jsonl",
+    "apps/api/data/aliases/esco_alias_fr_v0.jsonl"
+  ],
+  "changes": [
+    {
+      "case_id": "N1",
+      "family": "strict_noise",
+      "file": "apps/api/src/esco/extract.py",
+      "anchor": "STOPWORDS set (Common filler words section)",
+      "change_type": "addition_single_entry",
+      "diff_summary": "Ajout de l'entrée \"paris\" au set STOPWORDS + 1 commentaire inline 'Sprint4-N1'.",
+      "old_fragment": "    \"ans\", \"years\", \"experience\", \"expérience\", \"minimum\", \"maximum\",\n}",
+      "new_fragment": "    \"ans\", \"years\", \"experience\", \"expérience\", \"minimum\", \"maximum\",\n    # Sprint4-N1: geographic homonym with ESCO concept 'paris' (wager)\n    \"paris\",\n}",
+      "rationale": "Coupe le token 'paris' en amont (avant noise-filter, avant alias pre-pass, avant map_skill). Supprime le match ESCO preferred_label vers le concept 'paris' (pari/mise)."
+    },
+    {
+      "case_id": "C1",
+      "family": "config_mismatch",
+      "file": "apps/api/src/esco/extract.py",
+      "anchor": "SKILL_ALIASES dict, entrée project_management",
+      "change_type": "key_rename",
+      "diff_summary": "Renommage clé 'project_management' -> 'project management' (underscore -> espace).",
+      "old_fragment": "    \"project_management\": [\"gestion de projets\", \"gestion de projets par méthode agile\", \"développement par itérations\"],",
+      "new_fragment": "    # Sprint4-C1: key aligned with BIGRAM_WHITELIST entry \"project management\" (space, not underscore)\n    \"project management\": [\"gestion de projets\", \"gestion de projets par méthode agile\", \"développement par itérations\"],",
+      "rationale": "Le bigramme capturé par _split_text est 'project management' (espace). L'ancienne clé underscore était inatteignable. L'URI générique 'gestion de projets' entre désormais dans raw_tokens et validated_items."
+    },
+    {
+      "case_id": "N3",
+      "family": "strict_noise",
+      "file": "apps/api/src/esco/extract.py",
+      "anchor": "SKILL_ALIASES dict, section Sales",
+      "change_type": "entry_removal",
+      "diff_summary": "Suppression de l'entrée \"sales\": [\"argumentaire de vente\"]. L'entrée 'vente' reste intacte.",
+      "old_fragment": "    # Sales - ESCO has \"argumentaire de vente\", \"gérer des équipes de vente\"\n    \"sales\": [\"argumentaire de vente\"],\n    \"vente\": [\"argumentaire de vente\"],",
+      "new_fragment": "    # Sales - ESCO has \"argumentaire de vente\", \"gérer des équipes de vente\"\n    # Sprint4-N3: 'sales' removed — context-free trigger produced noise on CVs where 'sales' denotes the client team, not a skill\n    \"vente\": [\"argumentaire de vente\"],",
+      "rationale": "Le token 'sales' dans un CV anglophone désigne souvent l'équipe cliente, pas une compétence. L'alias français 'vente' suffit pour les vrais cas de compétence vente."
+    },
+    {
+      "case_id": "N2",
+      "family": "strict_noise",
+      "file": "apps/api/data/esco_alias_fr_v0.jsonl (+ copie dupliquée apps/api/data/aliases/esco_alias_fr_v0.jsonl)",
+      "anchor": "ligne 1 (même contenu dans les 2 fichiers)",
+      "change_type": "jsonl_line_removal",
+      "diff_summary": "Suppression de la ligne {\"alias\": \"management\", ...} dans les deux fichiers jsonl dupliqués.",
+      "old_fragment": "{\"alias\": \"management\", \"esco_label\": \"gérer une équipe\", \"esco_uri\": \"http://data.europa.eu/esco/skill/cb668e89-6ef5-4ff3-ab4a-506010e7e70b\", \"lang\": \"fr\", \"source\": \"manual\", \"confidence\": 1.0}",
+      "new_fragment": "(ligne supprimée ; 'management d equipe' ligne suivante reste en place)",
+      "rationale": "Le token isolé 'management' mappait vers 'gérer une équipe' (people management) sans garde contextuelle. L'alias précis 'management d equipe' couvre les cas légitimes. Le double fichier reflète la duplication observée — les deux copies modifiées à l'identique."
+    },
+    {
+      "case_id": "O2",
+      "family": "over_injection",
+      "file": "apps/api/src/esco/extract.py",
+      "anchor": "SKILL_ALIASES dict, entrée dashboards",
+      "change_type": "value_list_shrink",
+      "diff_summary": "Retrait de 'techniques de présentation visuelle' de la liste de valeurs pour la clé 'dashboards'. Liste passe de 2 à 1 valeur.",
+      "old_fragment": "    \"dashboards\": [\"logiciel de visualisation des données\", \"techniques de présentation visuelle\"],",
+      "new_fragment": "    \"dashboards\": [\"logiciel de visualisation des données\"],",
+      "rationale": "Le CV mentionne des dashboards BI (Power BI, KPI). La seconde URI 'techniques de présentation visuelle' relève de la présentation générique et constituait une borderline-noise confirmée Sprint 3."
+    }
+  ],
+  "changes_count": 5,
+  "non_changes_confirmed": [
+    "matching_v1.py — non touché",
+    "idf.py — non touché",
+    "weights_* — non touchés",
+    "baseline_parser.py — non touché",
+    "skill_filter.py — non touché",
+    "mapper.py — non touché",
+    "esco_aliases.py — non touché",
+    "run_cv_pipeline / canonical_pipeline.py — non touchés",
+    "ELEVIA_PROMOTE_ESCO flag inchangé (défaut 0)",
+    "enable_fuzzy inchangé (False partout)",
+    "aucun autre alias ajouté",
+    "aucune autre entrée SKILL_ALIASES / BIGRAM_WHITELIST / TRIGRAM_WHITELIST / WHITELIST_SKILLS modifiée",
+    "aucun autre record jsonl modifié"
+  ]
+}

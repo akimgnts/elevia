@@ -1,0 +1,129 @@
+{
+  "description": "Updated signal-loss analysis at commit 10ddabf (2026-04-19). Supersedes signal_loss_report.json by correcting 3 false-positive losses caused by using a stale smoke input from 2026-03-03.",
+  "commit": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "corrections_vs_prior_report": [
+    {
+      "cv_term": "Machine learning",
+      "prior_verdict": "ignore_par_parser (bigram capture silently failed, cause non root-causée)",
+      "head_verdict": "CAPTURED. 'machine learning' bigram is in BIGRAM_WHITELIST (batch-1 2026-04-18). raw_tokens contains both 'machine learning' and 'apprentissage automatique'. validated_items contains ESCO URI 3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43 (apprentissage automatique). Prior report was wrong because it used the 2026-03-03 smoke snapshot which predates the batch-1 commit.",
+      "root_cause_of_prior_misdiagnosis": "stale_input_used_in_audit"
+    },
+    {
+      "cv_term": "Statistics / Statistiques",
+      "prior_verdict": "ignore_par_parser (SKILL_ALIASES expansion silently missing, cause non vérifiée)",
+      "head_verdict": "CAPTURED. SKILL_ALIASES['statistics'] = ['statistiques'] (batch-1 2026-04-18). raw_tokens contains both 'statistics' and 'statistiques'. validated_items contains ESCO URI 7ee4c2ea-b349-4bd2-81a3-ec31475d4833 (statistiques). Prior report used stale smoke.",
+      "root_cause_of_prior_misdiagnosis": "stale_input_used_in_audit"
+    },
+    {
+      "cv_term": "KPI dashboards",
+      "prior_verdict": "transforme_en_abstraction_trop_large (expansion absent, cause non vérifiée)",
+      "head_verdict": "CAPTURED. SKILL_ALIASES['dashboards'] = ['logiciel de visualisation des données', 'techniques de présentation visuelle'] (batch-1 2026-04-18). Both expansions present in raw_tokens. validated_items contains URIs 65e58886... (logiciel de visualisation des données) and 348b74cd... (techniques de présentation visuelle). Prior report used stale smoke. Note: 'KPI' itself still drops (no alias, no ESCO) — the qualifier signal is lost.",
+      "root_cause_of_prior_misdiagnosis": "stale_input_used_in_audit"
+    }
+  ],
+  "losses_still_valid_at_head": [
+    {
+      "cv_term": "R (programming language)",
+      "category": "rejet_trop_tot",
+      "cause": "MIN_TOKEN_LENGTH=2. 'R' = 1 char, dropped in _split_text. UNCHANGED."
+    },
+    {
+      "cv_term": "Power BI",
+      "category": "rejet_trop_tot",
+      "cause": "'power bi' NOT in BIGRAM_WHITELIST. Split into 'power' and 'bi'. 'bi' (len=2) survives raw but drops at _has_noise (skill_filter.py:51: len<3 rule). 'power' does not map. UNCHANGED."
+    },
+    {
+      "cv_term": "Tableau (BI tool)",
+      "category": "non_mappe_esco",
+      "cause": "'tableau' not in SKILL_ALIASES / not in esco_alias_fr_v0.jsonl. map_skill returns None. UNCHANGED."
+    },
+    {
+      "cv_term": "Docker",
+      "category": "non_mappe_esco",
+      "cause": "SKILL_ALIASES['docker']=['docker'] self-maps. map_skill('docker')=None. UNCHANGED."
+    },
+    {
+      "cv_term": "Linux",
+      "category": "non_mappe_esco",
+      "cause": "No alias. map_skill('linux')=None. UNCHANGED."
+    },
+    {
+      "cv_term": "APIs / FastAPI",
+      "category": "non_mappe_esco",
+      "cause": "No alias. map_skill returns None. UNCHANGED."
+    },
+    {
+      "cv_term": "Pandas",
+      "category": "non_mappe_esco",
+      "cause": "No alias. map_skill returns None. UNCHANGED."
+    },
+    {
+      "cv_term": "Scikit-learn",
+      "category": "fragmentation_puis_non_mappe",
+      "cause": "Normalization replaces '-' with space. Not in BIGRAM_WHITELIST. Split into 'scikit', 'learn'. Neither has alias or ESCO match. UNCHANGED."
+    },
+    {
+      "cv_term": "NumPy",
+      "category": "non_mappe_esco",
+      "cause": "No alias. map_skill returns None. UNCHANGED."
+    },
+    {
+      "cv_term": "SQLite",
+      "category": "non_mappe_esco",
+      "cause": "No alias. map_skill returns None. UNCHANGED."
+    },
+    {
+      "cv_term": "Bash scripting",
+      "category": "non_mappe_esco",
+      "cause": "No alias for 'bash' or 'scripting'. map_skill returns None. UNCHANGED."
+    },
+    {
+      "cv_term": "KPI (qualifier part of 'KPI dashboards')",
+      "category": "perte_de_qualificateur",
+      "cause": "'kpi' survives raw but has no alias/ESCO match. The 'dashboards' part IS now captured (batch-1) — but 'KPI' qualifier itself is dropped. Partial recovery compared to prior report."
+    },
+    {
+      "cv_term": "Reporting (distinct sense)",
+      "category": "transforme_en_abstraction_trop_large",
+      "cause": "Only rescued by esco_alias_fr_v0.jsonl which maps 'reporting' to 'analyse de données' — not to a reporting-specific ESCO concept. Conflation unchanged."
+    },
+    {
+      "cv_term": "Project management (methodology sense)",
+      "category": "transforme_en_abstraction_trop_large",
+      "cause": "'project management' IS in BIGRAM_WHITELIST. But SKILL_ALIASES key is 'project_management' (underscore) not 'project management' (space) — so the bigram token does NOT trigger alias expansion. 'gestion de projets par méthode agile' appears only via 'agile' alias. 'gestion de projets' (generic) is NEVER present in raw_tokens. BUG: key/token format mismatch. UNCHANGED from prior report, but now with confirmed root cause."
+    },
+    {
+      "cv_term": "Customer churn prediction",
+      "category": "fragmentation_puis_non_mappe",
+      "cause": "'churn', 'customer', 'predict' survive as separate tokens. No alias, no ESCO match. Business signal lost. UNCHANGED."
+    },
+    {
+      "cv_term": "Excel (advanced)",
+      "category": "perte_de_qualificateur",
+      "cause": "'(advanced)' qualifier dropped by PUNCT_PATTERN + no proficiency-level carry-through. Only 'utiliser un logiciel de tableur' URI ends up in skills_uri. UNCHANGED."
+    },
+    {
+      "cv_term": "ETL pipelines (verb sense)",
+      "category": "perte_de_contexte",
+      "cause": "'etl' captures tool-class URI. 'pipelines' drops. Verb sense (built/automated ETL IN PYTHON) lost. UNCHANGED."
+    }
+  ],
+  "categories_count_head": {
+    "rejet_trop_tot": 2,
+    "non_mappe_esco": 7,
+    "transforme_en_abstraction_trop_large": 2,
+    "ignore_par_parser": 0,
+    "fragmentation_puis_non_mappe": 2,
+    "perte_de_qualificateur": 2,
+    "perte_de_contexte": 1
+  },
+  "category_count_delta_vs_prior": {
+    "ignore_par_parser": "-2 (both Machine learning and Statistics resolved by batch-1 aliases)",
+    "transforme_en_abstraction_trop_large": "-0 (KPI dashboards resolved by batch-1; but Project management bigram-vs-alias-key mismatch still valid)",
+    "perte_de_qualificateur": "+1 (KPI qualifier part of 'KPI dashboards' is the new entry)"
+  },
+  "summary_losses_count_head": 14,
+  "summary_recovered_vs_prior": 3,
+  "explicit_cv_skills_total_approx": 26,
+  "hit_ratio_on_explicit_skills_approx": "12/26 ≈ 46.2% (was 35% in stale report)"
+}

@@ -1,0 +1,1845 @@
+[
+  {
+    "profile_id": "cv_fixture_v0",
+    "profile_domain_hint": "data_analyst_bilingual",
+    "profile_skills_uri_count": 19,
+    "profile_hard_generic_count": 2,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-231204",
+        "score": 100.0,
+        "title": "INGENIEUR QUALITE ( H/F) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-231210",
+        "score": 100.0,
+        "title": "KYC ANALYST M/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-231969",
+        "score": 100.0,
+        "title": "BUSINESS MANAGER (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-236329",
+        "score": 100.0,
+        "title": "Ingénieur Procédés (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237256",
+        "score": 100.0,
+        "title": "INGÉNIEUR AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237399",
+        "score": 100.0,
+        "title": "Enzyme Processing Technologies (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237400",
+        "score": 100.0,
+        "title": "RESEARCH – ENZYMES DISCOVERY & GENETIC ENGINEERING (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237493",
+        "score": 100.0,
+        "title": "Technology training support (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237501",
+        "score": 100.0,
+        "title": "Technology training support (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237741",
+        "score": 100.0,
+        "title": "VIE-GBS Global HR & Talent PMO (M/F/D) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-232729",
+        "score": 100.0,
+        "title": "CHARGE.E DE PROJET (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-236315",
+        "score": 100.0,
+        "title": "Business Analyst (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236449",
+        "score": 100.0,
+        "title": "Chargé(e) de Projet - Sénégal (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-237400",
+        "score": 100.0,
+        "title": "RESEARCH – ENZYMES DISCOVERY & GENETIC ENGINEERING (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237493",
+        "score": 100.0,
+        "title": "Technology training support (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237501",
+        "score": 100.0,
+        "title": "Technology training support (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237651",
+        "score": 100.0,
+        "title": "Junior Infrastructure Engineer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237656",
+        "score": 100.0,
+        "title": "Junior Industrialisation Engineer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237741",
+        "score": 100.0,
+        "title": "VIE-GBS Global HR & Talent PMO (M/F/D) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237881",
+        "score": 100.0,
+        "title": "Asset & Reliability Analyst (Mechanical) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "overlap_count": 4,
+    "score_diff_avg": 0.0,
+    "ranking_moves_on_overlap": {
+      "BF-237741": 1,
+      "BF-237501": 3,
+      "BF-237493": 3,
+      "BF-237400": 3
+    },
+    "newly_in_top_on": [
+      "BF-232729",
+      "BF-236315",
+      "BF-236449",
+      "BF-237651",
+      "BF-237656",
+      "BF-237881"
+    ],
+    "dropped_from_top_on": [
+      "BF-231204",
+      "BF-231210",
+      "BF-231969",
+      "BF-236329",
+      "BF-237256",
+      "BF-237399"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_01_lina_morel",
+    "profile_domain_hint": "sales_b2b",
+    "profile_skills_uri_count": 9,
+    "profile_hard_generic_count": 2,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-231210",
+        "score": 100.0,
+        "title": "KYC ANALYST M/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237256",
+        "score": 100.0,
+        "title": "INGÉNIEUR AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237774",
+        "score": 100.0,
+        "title": "Ingénieur assurance qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238099",
+        "score": 100.0,
+        "title": "ANALYSTE CREDIT - F/H (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238297",
+        "score": 100.0,
+        "title": "Chef de projet - planning (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238329",
+        "score": 100.0,
+        "title": "Technicien Opérations & Maintenance (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238383",
+        "score": 100.0,
+        "title": "MANUFACTURING ENGINEE M/W (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238414",
+        "score": 100.0,
+        "title": "Environment Policy analyst - (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238440",
+        "score": 100.0,
+        "title": "Credit Officer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-231590",
+        "score": 100.0,
+        "title": "INGENIEUR LEAN LOGISTIQUE CHANTIER D'AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-242092",
+        "score": 100.0,
+        "title": "Ingénieur Approvisionnement / Ordonnancement (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-232103",
+        "score": 77.0,
+        "title": "BARLEY PLANNING COORDINATOR (M/F) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-237374",
+        "score": 77.0,
+        "title": "Spécialiste support aux appels d’offres (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238007",
+        "score": 77.0,
+        "title": "FINANCIAL & BUSINESS STRATEGY (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238197",
+        "score": 77.0,
+        "title": "Business Developer - VIE - Barcelone (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238308",
+        "score": 77.0,
+        "title": "Sales and Marketing Assistant (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-240142",
+        "score": 77.0,
+        "title": "VIE – Supply Chain / Logistique (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-242350",
+        "score": 77.0,
+        "title": "VIE - Meeting Planner contrat H_F_X - BRUXELLES - 6 MONTHS (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238266",
+        "score": 72.0,
+        "title": "Adjoint au Responsable des Opérations (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 5
+      }
+    ],
+    "overlap_count": 0,
+    "score_diff_avg": 0.0,
+    "ranking_moves_on_overlap": {},
+    "newly_in_top_on": [
+      "BF-231590",
+      "BF-242092",
+      "BF-232103",
+      "BF-237374",
+      "BF-238007",
+      "BF-238197",
+      "BF-238308",
+      "BF-240142",
+      "BF-242350",
+      "BF-238266"
+    ],
+    "dropped_from_top_on": [
+      "BF-227499",
+      "BF-231210",
+      "BF-237256",
+      "BF-237774",
+      "BF-238099",
+      "BF-238297",
+      "BF-238329",
+      "BF-238383",
+      "BF-238414",
+      "BF-238440"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_02_hugo_renaud",
+    "profile_domain_hint": "business_dev_export",
+    "profile_skills_uri_count": 8,
+    "profile_hard_generic_count": 3,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237774",
+        "score": 100.0,
+        "title": "Ingénieur assurance qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238189",
+        "score": 100.0,
+        "title": "Junior Medical Advisor (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238308",
+        "score": 100.0,
+        "title": "Sales and Marketing Assistant (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238383",
+        "score": 100.0,
+        "title": "MANUFACTURING ENGINEE M/W (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238104",
+        "score": 82.0,
+        "title": "V.I.E. Ingénieur(e) Commercial Junior (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 4
+      },
+      {
+        "offer_id": "BF-232930",
+        "score": 77.0,
+        "title": "INGÉNIEUR TECHNICO COMMERCIAL (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-237413",
+        "score": 77.0,
+        "title": "BUSINESS DEVELOPER (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 6
+      },
+      {
+        "offer_id": "BF-237981",
+        "score": 77.0,
+        "title": "Technico-Commercial H/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 6
+      },
+      {
+        "offer_id": "BF-238102",
+        "score": 77.0,
+        "title": "Sales engineer (H/F) - Parlant Chinois",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-237981",
+        "score": 100.0,
+        "title": "Technico-Commercial H/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238060",
+        "score": 100.0,
+        "title": "Marketing Project Coordinator Events (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238189",
+        "score": 100.0,
+        "title": "Junior Medical Advisor (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238308",
+        "score": 100.0,
+        "title": "Sales and Marketing Assistant (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-237941",
+        "score": 77.0,
+        "title": "ETF Sales (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-237946",
+        "score": 77.0,
+        "title": "Responsable Commercial (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-237949",
+        "score": 77.0,
+        "title": "Responsable Commercial (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238096",
+        "score": 77.0,
+        "title": "Junior Product Manager (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238102",
+        "score": 77.0,
+        "title": "Sales engineer (H/F) - Parlant Chinois",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-241002",
+        "score": 77.0,
+        "title": "Business Developer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      }
+    ],
+    "overlap_count": 4,
+    "score_diff_avg": 5.75,
+    "ranking_moves_on_overlap": {
+      "BF-238189": 0,
+      "BF-237981": 8,
+      "BF-238308": 0,
+      "BF-238102": 1
+    },
+    "newly_in_top_on": [
+      "BF-238060",
+      "BF-237941",
+      "BF-237946",
+      "BF-237949",
+      "BF-238096",
+      "BF-241002"
+    ],
+    "dropped_from_top_on": [
+      "BF-227499",
+      "BF-237774",
+      "BF-238383",
+      "BF-238104",
+      "BF-232930",
+      "BF-237413"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_03_sarah_el_mansouri",
+    "profile_domain_hint": "finance_or_admin_unknown",
+    "profile_skills_uri_count": 10,
+    "profile_hard_generic_count": 3,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-224085",
+        "score": 100.0,
+        "title": "INGÉNIEUR MECANIQUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-231157",
+        "score": 100.0,
+        "title": "INGÉNIEUR MÉTHODES/INDUSTRIALISATION (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231204",
+        "score": 100.0,
+        "title": "INGENIEUR QUALITE ( H/F) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-231210",
+        "score": 100.0,
+        "title": "KYC ANALYST M/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-231969",
+        "score": 100.0,
+        "title": "BUSINESS MANAGER (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-232251",
+        "score": 100.0,
+        "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-235721",
+        "score": 100.0,
+        "title": "CONTROLEUR DE GESTION PROJETS (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236329",
+        "score": 100.0,
+        "title": "Ingénieur Procédés (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237256",
+        "score": 100.0,
+        "title": "INGÉNIEUR AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-231590",
+        "score": 100.0,
+        "title": "INGENIEUR LEAN LOGISTIQUE CHANTIER D'AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231829",
+        "score": 100.0,
+        "title": "INGÉNIEUR INDUSTRIEL (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-232103",
+        "score": 100.0,
+        "title": "BARLEY PLANNING COORDINATOR (M/F) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-242092",
+        "score": 100.0,
+        "title": "Ingénieur Approvisionnement / Ordonnancement (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-242102",
+        "score": 100.0,
+        "title": "Préparateur Méthodes (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237419",
+        "score": 82.0,
+        "title": "Ingénieur Qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 4
+      },
+      {
+        "offer_id": "BF-238249",
+        "score": 82.0,
+        "title": "Acheteur (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 4
+      },
+      {
+        "offer_id": "BF-237886",
+        "score": 77.0,
+        "title": "Contrôleur de Gestion Industriel (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238268",
+        "score": 77.0,
+        "title": "Strategic Partnership Analyst (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238340",
+        "score": 77.0,
+        "title": "VIE - Retrofit Program Controller (m/f) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      }
+    ],
+    "overlap_count": 0,
+    "score_diff_avg": 0.0,
+    "ranking_moves_on_overlap": {},
+    "newly_in_top_on": [
+      "BF-231590",
+      "BF-231829",
+      "BF-232103",
+      "BF-242092",
+      "BF-242102",
+      "BF-237419",
+      "BF-238249",
+      "BF-237886",
+      "BF-238268",
+      "BF-238340"
+    ],
+    "dropped_from_top_on": [
+      "BF-224085",
+      "BF-227499",
+      "BF-231157",
+      "BF-231204",
+      "BF-231210",
+      "BF-231969",
+      "BF-232251",
+      "BF-235721",
+      "BF-236329",
+      "BF-237256"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_04_benoit_caron",
+    "profile_domain_hint": "supply_ops_logistics",
+    "profile_skills_uri_count": 6,
+    "profile_hard_generic_count": 3,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-235980",
+        "score": 100.0,
+        "title": "Railway & Energy Project Engineer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237405",
+        "score": 100.0,
+        "title": "Industrial Injection Engineer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237740",
+        "score": 100.0,
+        "title": "Reliability/Maintenance Engineer |Nuclear (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237774",
+        "score": 100.0,
+        "title": "Ingénieur assurance qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237791",
+        "score": 100.0,
+        "title": "Materials Engineer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238066",
+        "score": 100.0,
+        "title": "Recruiter (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238075",
+        "score": 100.0,
+        "title": "Automation Engineer _Energy Technology (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238077",
+        "score": 100.0,
+        "title": "Technical Project Specialist in Energy Technology (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238329",
+        "score": 100.0,
+        "title": "Technicien Opérations & Maintenance (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-230383",
+        "score": 65.0,
+        "title": "OPERATIONS MANAGER (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231018",
+        "score": 65.0,
+        "title": "BUSINESS DEVELOPER ALLEMAGNE - MUNICH H/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231590",
+        "score": 65.0,
+        "title": "INGENIEUR LEAN LOGISTIQUE CHANTIER D'AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236134",
+        "score": 65.0,
+        "title": "LOGISTICIEN CHANTIER (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236183",
+        "score": 65.0,
+        "title": "INGENIEUR PROJETS INDUSTRIELS H/F (VIE) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236854",
+        "score": 65.0,
+        "title": "Ingénieur HSE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237892",
+        "score": 65.0,
+        "title": "Chargé.e de mission : Renforcer la gouvernance des zones côtières et marines (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238164",
+        "score": 65.0,
+        "title": "Analyste crédits professionnels de l'Immobilier (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238429",
+        "score": 65.0,
+        "title": "Hydro(géo)logue de terrain et recherches pluridisciplinaires sur l'eau F/H (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-240150",
+        "score": 65.0,
+        "title": "Business Developer Allemagne – Photovoltaïque F/H (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "overlap_count": 0,
+    "score_diff_avg": 0.0,
+    "ranking_moves_on_overlap": {},
+    "newly_in_top_on": [
+      "BF-230383",
+      "BF-231018",
+      "BF-231590",
+      "BF-236134",
+      "BF-236183",
+      "BF-236854",
+      "BF-237892",
+      "BF-238164",
+      "BF-238429",
+      "BF-240150"
+    ],
+    "dropped_from_top_on": [
+      "BF-227499",
+      "BF-235980",
+      "BF-237405",
+      "BF-237740",
+      "BF-237774",
+      "BF-237791",
+      "BF-238066",
+      "BF-238075",
+      "BF-238077",
+      "BF-238329"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_05_camille_vasseur",
+    "profile_domain_hint": "communication_paris",
+    "profile_skills_uri_count": 4,
+    "profile_hard_generic_count": 2,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-235980",
+        "score": 100.0,
+        "title": "Railway & Energy Project Engineer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237405",
+        "score": 100.0,
+        "title": "Industrial Injection Engineer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237740",
+        "score": 100.0,
+        "title": "Reliability/Maintenance Engineer |Nuclear (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237774",
+        "score": 100.0,
+        "title": "Ingénieur assurance qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237791",
+        "score": 100.0,
+        "title": "Materials Engineer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238066",
+        "score": 100.0,
+        "title": "Recruiter (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238075",
+        "score": 100.0,
+        "title": "Automation Engineer _Energy Technology (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238077",
+        "score": 100.0,
+        "title": "Technical Project Specialist in Energy Technology (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238329",
+        "score": 100.0,
+        "title": "Technicien Opérations & Maintenance (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-230383",
+        "score": 65.0,
+        "title": "OPERATIONS MANAGER (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231018",
+        "score": 65.0,
+        "title": "BUSINESS DEVELOPER ALLEMAGNE - MUNICH H/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231590",
+        "score": 65.0,
+        "title": "INGENIEUR LEAN LOGISTIQUE CHANTIER D'AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236134",
+        "score": 65.0,
+        "title": "LOGISTICIEN CHANTIER (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236183",
+        "score": 65.0,
+        "title": "INGENIEUR PROJETS INDUSTRIELS H/F (VIE) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236854",
+        "score": 65.0,
+        "title": "Ingénieur HSE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237892",
+        "score": 65.0,
+        "title": "Chargé.e de mission : Renforcer la gouvernance des zones côtières et marines (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238429",
+        "score": 65.0,
+        "title": "Hydro(géo)logue de terrain et recherches pluridisciplinaires sur l'eau F/H (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-240150",
+        "score": 65.0,
+        "title": "Business Developer Allemagne – Photovoltaïque F/H (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-242092",
+        "score": 65.0,
+        "title": "Ingénieur Approvisionnement / Ordonnancement (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "overlap_count": 0,
+    "score_diff_avg": 0.0,
+    "ranking_moves_on_overlap": {},
+    "newly_in_top_on": [
+      "BF-230383",
+      "BF-231018",
+      "BF-231590",
+      "BF-236134",
+      "BF-236183",
+      "BF-236854",
+      "BF-237892",
+      "BF-238429",
+      "BF-240150",
+      "BF-242092"
+    ],
+    "dropped_from_top_on": [
+      "BF-227499",
+      "BF-235980",
+      "BF-237405",
+      "BF-237740",
+      "BF-237774",
+      "BF-237791",
+      "BF-238066",
+      "BF-238075",
+      "BF-238077",
+      "BF-238329"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_06_yasmine_haddad",
+    "profile_domain_hint": "marketing_digital",
+    "profile_skills_uri_count": 9,
+    "profile_hard_generic_count": 2,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-231210",
+        "score": 100.0,
+        "title": "KYC ANALYST M/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237256",
+        "score": 100.0,
+        "title": "INGÉNIEUR AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237774",
+        "score": 100.0,
+        "title": "Ingénieur assurance qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238099",
+        "score": 100.0,
+        "title": "ANALYSTE CREDIT - F/H (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238297",
+        "score": 100.0,
+        "title": "Chef de projet - planning (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238370",
+        "score": 100.0,
+        "title": "V.I.E - Research Engineer - Steel/Refractory Interaction (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238383",
+        "score": 100.0,
+        "title": "MANUFACTURING ENGINEE M/W (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238414",
+        "score": 100.0,
+        "title": "Environment Policy analyst - (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238440",
+        "score": 100.0,
+        "title": "Credit Officer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-238056",
+        "score": 77.0,
+        "title": "Account Manager (pôle E-Commerce) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238137",
+        "score": 77.0,
+        "title": "Community Manager (e-reputation & GMB) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-230179",
+        "score": 65.0,
+        "title": "BUSINESS MANAGER H/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231372",
+        "score": 65.0,
+        "title": "INGÉNIEUR HVAC H/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231590",
+        "score": 65.0,
+        "title": "INGENIEUR LEAN LOGISTIQUE CHANTIER D'AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231829",
+        "score": 65.0,
+        "title": "INGÉNIEUR INDUSTRIEL (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231967",
+        "score": 65.0,
+        "title": "COMPLIANCE ANALYST M/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236315",
+        "score": 65.0,
+        "title": "Business Analyst (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236569",
+        "score": 65.0,
+        "title": "TECHNICAL SERVICE ENGINEER TRAINEE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 4
+      },
+      {
+        "offer_id": "BF-236639",
+        "score": 65.0,
+        "title": "Architecte Micro-Mobilité – Avant-Projet Propulsion (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "overlap_count": 0,
+    "score_diff_avg": 0.0,
+    "ranking_moves_on_overlap": {},
+    "newly_in_top_on": [
+      "BF-238056",
+      "BF-238137",
+      "BF-230179",
+      "BF-231372",
+      "BF-231590",
+      "BF-231829",
+      "BF-231967",
+      "BF-236315",
+      "BF-236569",
+      "BF-236639"
+    ],
+    "dropped_from_top_on": [
+      "BF-227499",
+      "BF-231210",
+      "BF-237256",
+      "BF-237774",
+      "BF-238099",
+      "BF-238297",
+      "BF-238370",
+      "BF-238383",
+      "BF-238414",
+      "BF-238440"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_07_pierre_lemaire",
+    "profile_domain_hint": "finance_or_admin_unknown",
+    "profile_skills_uri_count": 5,
+    "profile_hard_generic_count": 2,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-231210",
+        "score": 100.0,
+        "title": "KYC ANALYST M/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237256",
+        "score": 100.0,
+        "title": "INGÉNIEUR AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237647",
+        "score": 100.0,
+        "title": "Ingénieur qualité 4.0 (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237774",
+        "score": 100.0,
+        "title": "Ingénieur assurance qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238099",
+        "score": 100.0,
+        "title": "ANALYSTE CREDIT - F/H (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238297",
+        "score": 100.0,
+        "title": "Chef de projet - planning (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238383",
+        "score": 100.0,
+        "title": "MANUFACTURING ENGINEE M/W (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238414",
+        "score": 100.0,
+        "title": "Environment Policy analyst - (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238440",
+        "score": 100.0,
+        "title": "Credit Officer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-231829",
+        "score": 100.0,
+        "title": "INGÉNIEUR INDUSTRIEL (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-242102",
+        "score": 100.0,
+        "title": "Préparateur Méthodes (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-232103",
+        "score": 77.0,
+        "title": "BARLEY PLANNING COORDINATOR (M/F) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-237886",
+        "score": 77.0,
+        "title": "Contrôleur de Gestion Industriel (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238340",
+        "score": 77.0,
+        "title": "VIE - Retrofit Program Controller (m/f) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-230179",
+        "score": 65.0,
+        "title": "BUSINESS MANAGER H/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231372",
+        "score": 65.0,
+        "title": "INGÉNIEUR HVAC H/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231590",
+        "score": 65.0,
+        "title": "INGENIEUR LEAN LOGISTIQUE CHANTIER D'AMELIORATION CONTINUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231967",
+        "score": 65.0,
+        "title": "COMPLIANCE ANALYST M/F (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236315",
+        "score": 65.0,
+        "title": "Business Analyst (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "overlap_count": 0,
+    "score_diff_avg": 0.0,
+    "ranking_moves_on_overlap": {},
+    "newly_in_top_on": [
+      "BF-231829",
+      "BF-242102",
+      "BF-232103",
+      "BF-237886",
+      "BF-238340",
+      "BF-230179",
+      "BF-231372",
+      "BF-231590",
+      "BF-231967",
+      "BF-236315"
+    ],
+    "dropped_from_top_on": [
+      "BF-227499",
+      "BF-231210",
+      "BF-237256",
+      "BF-237647",
+      "BF-237774",
+      "BF-238099",
+      "BF-238297",
+      "BF-238383",
+      "BF-238414",
+      "BF-238440"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_08_amel_dufour",
+    "profile_domain_hint": "finance_or_admin_unknown",
+    "profile_skills_uri_count": 5,
+    "profile_hard_generic_count": 2,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237647",
+        "score": 100.0,
+        "title": "Ingénieur qualité 4.0 (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237774",
+        "score": 100.0,
+        "title": "Ingénieur assurance qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238383",
+        "score": 100.0,
+        "title": "MANUFACTURING ENGINEE M/W (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238442",
+        "score": 77.0,
+        "title": "Géophysicien (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238449",
+        "score": 77.0,
+        "title": "Géologue (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238254",
+        "score": 70.0,
+        "title": "Contrôleur de gestion (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 7
+      },
+      {
+        "offer_id": "BF-224085",
+        "score": 65.0,
+        "title": "INGÉNIEUR MECANIQUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-231157",
+        "score": 65.0,
+        "title": "INGÉNIEUR MÉTHODES/INDUSTRIALISATION (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-232251",
+        "score": 65.0,
+        "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-231829",
+        "score": 65.0,
+        "title": "INGÉNIEUR INDUSTRIEL (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237905",
+        "score": 65.0,
+        "title": "VIE Project Buyer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237963",
+        "score": 65.0,
+        "title": "Indirect Buyer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 4
+      },
+      {
+        "offer_id": "BF-238001",
+        "score": 65.0,
+        "title": "INGÉNIEUR(E) MAINTENANCE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238164",
+        "score": 65.0,
+        "title": "Analyste crédits professionnels de l'Immobilier (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-238254",
+        "score": 65.0,
+        "title": "Contrôleur de gestion (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 4
+      },
+      {
+        "offer_id": "BF-238374",
+        "score": 65.0,
+        "title": "Cash Management & Treasury Operations Officer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-242102",
+        "score": 65.0,
+        "title": "Préparateur Méthodes (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-235881",
+        "score": 58.0,
+        "title": "Buyer Junior Chemicals (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 5
+      },
+      {
+        "offer_id": "BF-238138",
+        "score": 58.0,
+        "title": "Commodity Lead Buyer (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 5
+      }
+    ],
+    "overlap_count": 1,
+    "score_diff_avg": -5.0,
+    "ranking_moves_on_overlap": {
+      "BF-238254": 1
+    },
+    "newly_in_top_on": [
+      "BF-231829",
+      "BF-237905",
+      "BF-237963",
+      "BF-238001",
+      "BF-238164",
+      "BF-238374",
+      "BF-242102",
+      "BF-235881",
+      "BF-238138"
+    ],
+    "dropped_from_top_on": [
+      "BF-227499",
+      "BF-237647",
+      "BF-237774",
+      "BF-238383",
+      "BF-238442",
+      "BF-238449",
+      "BF-224085",
+      "BF-231157",
+      "BF-232251"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  },
+  {
+    "profile_id": "cv_09_ines_barbier",
+    "profile_domain_hint": "rh_junior",
+    "profile_skills_uri_count": 5,
+    "profile_hard_generic_count": 3,
+    "profile_becomes_empty_on_filter": false,
+    "top10_off": [
+      {
+        "offer_id": "BF-227499",
+        "score": 100.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-237774",
+        "score": 100.0,
+        "title": "Ingénieur assurance qualité (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238383",
+        "score": 100.0,
+        "title": "MANUFACTURING ENGINEE M/W (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 1
+      },
+      {
+        "offer_id": "BF-238442",
+        "score": 77.0,
+        "title": "Géophysicien (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-238449",
+        "score": 77.0,
+        "title": "Géologue (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-224085",
+        "score": 65.0,
+        "title": "INGÉNIEUR MECANIQUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-232251",
+        "score": 65.0,
+        "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-235721",
+        "score": 65.0,
+        "title": "CONTROLEUR DE GESTION PROJETS (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-236329",
+        "score": 65.0,
+        "title": "Ingénieur Procédés (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-237854",
+        "score": 65.0,
+        "title": "VIE Human Resources Business Partner (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "top10_on": [
+      {
+        "offer_id": "BF-191960",
+        "score": 30.0,
+        "title": "FIELD SALES ENGINEER H/F (VIE NORDIC - STOCKHOLM) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 6
+      },
+      {
+        "offer_id": "BF-224085",
+        "score": 30.0,
+        "title": "INGÉNIEUR MECANIQUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 0
+      },
+      {
+        "offer_id": "BF-227195",
+        "score": 30.0,
+        "title": "V.I.E JUNIOR ACCOUNTANT (M/W) (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 4
+      },
+      {
+        "offer_id": "BF-227499",
+        "score": 30.0,
+        "title": "INGÉNIEUR QUALITÉ FOURNISSEUR SPECIALISE FONDERIE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 0
+      },
+      {
+        "offer_id": "BF-227513",
+        "score": 30.0,
+        "title": "TECHNICIEN MECATRONIQUE (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-227716",
+        "score": 30.0,
+        "title": "JUNIOR WAGON ENGINEER (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      },
+      {
+        "offer_id": "BF-228215",
+        "score": 30.0,
+        "title": "BUSINESS DEVELOPPER USA (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 6
+      },
+      {
+        "offer_id": "BF-228347",
+        "score": 30.0,
+        "title": "DEVELOPPEUR SYSTEMES ET RESEAUX (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 3
+      },
+      {
+        "offer_id": "BF-228470",
+        "score": 30.0,
+        "title": "INGENIEUR TECHNICO COMMERCIAL DIGITAL (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 4
+      },
+      {
+        "offer_id": "BF-228714",
+        "score": 30.0,
+        "title": "TECHNICIEN SERVICE CLIENT (H/F)",
+        "matched_skills": [],
+        "skills_uri_used": 2
+      }
+    ],
+    "overlap_count": 2,
+    "score_diff_avg": -52.5,
+    "ranking_moves_on_overlap": {
+      "BF-227499": -3,
+      "BF-224085": 4
+    },
+    "newly_in_top_on": [
+      "BF-191960",
+      "BF-227195",
+      "BF-227513",
+      "BF-227716",
+      "BF-228215",
+      "BF-228347",
+      "BF-228470",
+      "BF-228714"
+    ],
+    "dropped_from_top_on": [
+      "BF-237774",
+      "BF-238383",
+      "BF-238442",
+      "BF-238449",
+      "BF-232251",
+      "BF-235721",
+      "BF-236329",
+      "BF-237854"
+    ],
+    "removed_skills_count": 1497,
+    "analysis": {
+      "better": false,
+      "lost_good_matches": true,
+      "less_noise": true,
+      "too_empty_after_filter": false
+    }
+  }
+]

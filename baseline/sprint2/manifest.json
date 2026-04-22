@@ -1,0 +1,39 @@
+{
+  "sprint": "sprint2_audit_parsing_mapping",
+  "generated_at_utc": "2026-04-18T17:59:04.537017Z",
+  "git_commit": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "python_version": "3.14.0",
+  "env_flags": {
+    "ELEVIA_FILTER_GENERIC_URIS": "unset",
+    "ELEVIA_PROMOTE_ESCO": "unset",
+    "ELEVIA_DEBUG_MATCHING": "unset"
+  },
+  "inputs": {
+    "profiles_dir": "baseline/sprint1/inputs/profiles",
+    "profiles": [
+      "profile_01_data_analyst.json",
+      "profile_02_developer.json",
+      "profile_03_marketing.json",
+      "profile_04_finance.json",
+      "profile_05_commercial.json"
+    ],
+    "offers_file": "baseline/sprint1/inputs/offers.json"
+  },
+  "entrypoints_audited": {
+    "normalize_skill": "apps/api/src/matching/extractors.py",
+    "_expand_profile_skills": "apps/api/src/matching/extractors.py",
+    "SKILL_ALIASES": "apps/api/src/esco/extract.py",
+    "map_skill": "apps/api/src/esco/mapper.py",
+    "extract_profile": "apps/api/src/matching/extractors.py"
+  },
+  "generated_files": [
+    "outputs/global_findings.json",
+    "outputs/profile_summary.json",
+    "outputs/scoring_inputs_appendix.json",
+    "outputs/skill_trace_profile_01_data_analyst.json",
+    "outputs/skill_trace_profile_02_developer.json",
+    "outputs/skill_trace_profile_03_marketing.json",
+    "outputs/skill_trace_profile_04_finance.json",
+    "outputs/skill_trace_profile_05_commercial.json"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "kept_previous_gains": true,
+  "rh_case_fixed": true,
+  "new_regression_detected": false,
+  "recommendation": "validated — ship ELEVIA_FILTER_GENERIC_URIS=1 with guard active",
+  "details": {
+    "prior_validation": "4 clear + 3 mild + 2 neutral + 1 degradation (cv_09 RH junior)",
+    "current_validation": "4 clear + 3 mild + 1 neutral + 2 neutral_guard_skipped + 0 degradation",
+    "guard_triggered_on": ["cv_05_camille_vasseur", "cv_09_ines_barbier"],
+    "guard_threshold": "non_hard_uris < 3",
+    "guard_effect_cv09": "score collapse (100→30) suppressed; ranking identical to OFF",
+    "guard_effect_cv05": "no behavioral change vs prior run (was neutral, stays neutral)",
+    "profiles_with_gains_preserved": [
+      "cv_fixture_v0 (data) — clear",
+      "cv_02_hugo_renaud (biz dev) — clear",
+      "cv_04_benoit_caron (ops) — clear",
+      "cv_06_yasmine_haddad (marketing) — clear",
+      "cv_01_lina_morel (sales B2B) — mild",
+      "cv_07_pierre_lemaire (finance/admin) — mild",
+      "cv_08_amel_dufour (finance/admin) — mild"
+    ]
+  }
+}

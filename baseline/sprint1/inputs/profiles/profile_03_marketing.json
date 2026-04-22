@@ -1,0 +1,14 @@
+{
+  "profile_id": "golden_03",
+  "skills": ["marketing_digital", "seo", "google_analytics", "crm", "excel"],
+  "languages": [
+    {"code": "fr", "level": "C2"},
+    {"code": "en", "level": "B2"},
+    {"code": "es", "level": "B1"}
+  ],
+  "education_level": "BAC+5",
+  "nationality": "FR",
+  "age": 26,
+  "years_of_experience": 4,
+  "cv_text": "Chef de projet marketing digital, 4 ans d'expérience. SEO, Google Analytics, Salesforce CRM. Master Marketing. Français natif, anglais et espagnol courants."
+}

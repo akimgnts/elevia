@@ -1,0 +1,143 @@
+{
+  "description": "Skills explicitly mentioned in apps/api/fixtures/cv/cv_fixture_v0.txt that do NOT appear as URIs in profile.skills_uri. Classified by root cause. No fix proposed.",
+  "losses": [
+    {
+      "cv_term": "R (programming language)",
+      "cv_context": "- Programming: Python, SQL, R, Bash scripting",
+      "loss_stage": "raw_extraction",
+      "cause": "MIN_TOKEN_LENGTH=2 in esco/extract.py. 'R' = 1 char, dropped in _split_text loop before it reaches the token set.",
+      "category": "rejet_trop_tot"
+    },
+    {
+      "cv_term": "Power BI",
+      "cv_context": "- Data & BI: Power BI, Tableau, Excel (advanced), ETL pipelines",
+      "loss_stage": "raw_extraction",
+      "cause": "'power bi' IS declared in SKILL_ALIASES AND IS NOT in BIGRAM_WHITELIST. _split_text only reconstructs bigrams listed in BIGRAM_WHITELIST. After normalization, 'power' and 'bi' are individual words. 'power' is kept as a single token but 'bi' has len<3 after noise filter (actually already len=2 which is >= MIN_TOKEN_LENGTH=2 so survives raw, but then _has_noise at skill_filter.py:51 drops len<3). 'power bi' bigram is never assembled.",
+      "category": "rejet_trop_tot"
+    },
+    {
+      "cv_term": "Tableau (BI tool)",
+      "cv_context": "- Data & BI: Power BI, Tableau, Excel (advanced)",
+      "loss_stage": "esco_mapping",
+      "cause": "'tableau' survives raw extraction and noise filter. It is NOT in esco_alias_fr_v0.jsonl (no alias entry). map_skill('tableau', enable_fuzzy=False) finds no exact preferred_label or alt_label match for the BI tool (ESCO 'tableau' does not exist as a canonical label; the French word refers to 'table/board', not the Tableau software). Returns None. Added to filtered_tokens.",
+      "category": "non_mappe_esco"
+    },
+    {
+      "cv_term": "Docker",
+      "cv_context": "- Cloud & DevOps: Docker, Git, Linux, APIs, FastAPI",
+      "loss_stage": "esco_mapping",
+      "cause": "'docker' IS in SKILL_ALIASES but self-maps to 'docker'. No esco_alias_fr_v0.jsonl entry. map_skill('docker', enable_fuzzy=False) returns None — 'docker' is not an ESCO preferred/alt label. In filtered_tokens.",
+      "category": "non_mappe_esco"
+    },
+    {
+      "cv_term": "Linux",
+      "cv_context": "- Cloud & DevOps: Docker, Git, Linux, APIs, FastAPI",
+      "loss_stage": "esco_mapping",
+      "cause": "Not in SKILL_ALIASES, not in esco_alias_fr_v0.jsonl. map_skill('linux') returns None. In filtered_tokens.",
+      "category": "non_mappe_esco"
+    },
+    {
+      "cv_term": "APIs / FastAPI",
+      "cv_context": "- Cloud & DevOps: Docker, Git, Linux, APIs, FastAPI",
+      "loss_stage": "esco_mapping",
+      "cause": "Neither 'apis' nor 'fastapi' is in SKILL_ALIASES or esco_alias_fr_v0.jsonl. map_skill returns None for both. In filtered_tokens.",
+      "category": "non_mappe_esco"
+    },
+    {
+      "cv_term": "Pandas",
+      "cv_context": "- ML & Stats: Pandas, Scikit-learn, Machine learning, Statistics, NumPy",
+      "loss_stage": "esco_mapping",
+      "cause": "Not in SKILL_ALIASES, not in esco_alias_fr_v0.jsonl. map_skill('pandas') returns None. In filtered_tokens.",
+      "category": "non_mappe_esco"
+    },
+    {
+      "cv_term": "Scikit-learn",
+      "cv_context": "- ML & Stats: Pandas, Scikit-learn, Machine learning, Statistics, NumPy",
+      "loss_stage": "raw_extraction",
+      "cause": "Normalization replaces '-' with space, yielding 'scikit learn'. Not a BIGRAM_WHITELIST entry — not reassembled. 'scikit' and 'learn' survive as separate single tokens. Neither is in SKILL_ALIASES or esco_alias_fr_v0.jsonl. map_skill returns None. In filtered_tokens.",
+      "category": "fragmentation_puis_non_mappe"
+    },
+    {
+      "cv_term": "Machine learning",
+      "cv_context": "- ML & Stats: Pandas, Scikit-learn, Machine learning, Statistics, NumPy  AND  Delivered machine learning model to predict customer churn",
+      "loss_stage": "raw_extraction",
+      "cause": "'machine learning' IS in BIGRAM_WHITELIST (extract.py:201) AND SKILL_ALIASES['machine learning'] = ['apprentissage automatique']. Empirically, 'machine learning' is NOT present in raw_tokens and 'apprentissage automatique' is NOT present either. Cause not root-caused — observed fact: bigram capture silently failed for this token despite appearing twice in the CV body. WHITELIST_SKILLS capture loop (extract.py:272) uses rf'\\\\b{skill}\\\\b' with double-backslash in a raw f-string, producing literal '\\b' not word boundaries — making that loop effectively dead code, but 'machine learning' is not in WHITELIST_SKILLS anyway.",
+      "category": "ignore_par_parser"
+    },
+    {
+      "cv_term": "Statistics / Statistiques",
+      "cv_context": "- ML & Stats: ... Statistics, NumPy",
+      "loss_stage": "esco_mapping",
+      "cause": "'statistics' IS in SKILL_ALIASES ('statistics' -> ['statistiques']), so 'statistiques' should be added by _expand_aliases. 'statistiques' is NOT present in raw_tokens observed — expansion silently missing (same category as 'dashboards' below). map_skill('statistics') returns None. In filtered_tokens. Root cause of inconsistent SKILL_ALIASES application not verified.",
+      "category": "ignore_par_parser"
+    },
+    {
+      "cv_term": "NumPy",
+      "cv_context": "- ML & Stats: ... NumPy",
+      "loss_stage": "esco_mapping",
+      "cause": "Not in SKILL_ALIASES, not in esco_alias_fr_v0.jsonl. map_skill returns None. In filtered_tokens.",
+      "category": "non_mappe_esco"
+    },
+    {
+      "cv_term": "SQLite",
+      "cv_context": "- Databases: PostgreSQL, MySQL, SQLite, NoSQL",
+      "loss_stage": "esco_mapping",
+      "cause": "Not in SKILL_ALIASES, not in esco_alias_fr_v0.jsonl. map_skill('sqlite') returns None. In filtered_tokens. Note that PostgreSQL, MySQL, NoSQL are captured — SQLite is a silent gap.",
+      "category": "non_mappe_esco"
+    },
+    {
+      "cv_term": "Bash scripting",
+      "cv_context": "- Programming: Python, SQL, R, Bash scripting",
+      "loss_stage": "esco_mapping",
+      "cause": "'bash' survives raw extraction. Not in SKILL_ALIASES, not in esco_alias_fr_v0.jsonl. map_skill('bash') returns None. In filtered_tokens. 'scripting' also dropped as not-mapped.",
+      "category": "non_mappe_esco"
+    },
+    {
+      "cv_term": "KPI dashboards / Reporting",
+      "cv_context": "- Methods: Agile, Project management, KPI dashboards, Reporting",
+      "loss_stage": "esco_mapping + abstraction_remapping",
+      "cause": "'dashboards' IS in SKILL_ALIASES ('dashboards' -> ['logiciel de visualisation des données', 'techniques de présentation visuelle']). Expansions are NOT present in raw_tokens (observed, cause unverified). 'kpi' survives raw but has no alias/ESCO match. 'reporting' is ONLY rescued by esco_alias_fr_v0.jsonl which maps it to 'analyse de données' — NOT to a reporting-specific ESCO concept.",
+      "category": "transforme_en_abstraction_trop_large"
+    },
+    {
+      "cv_term": "Excel (advanced)",
+      "cv_context": "- Data & BI: ... Excel (advanced)",
+      "loss_stage": "none_direct_loss_but_nuance",
+      "cause": "'excel' itself maps to filtered_tokens (map_skill('excel')=None). But SKILL_ALIASES expansion added 'utiliser un logiciel de tableur' and 'microsoft office excel' to raw_tokens. Both match ESCO — 'utiliser un logiciel de tableur' ends up in skills_uri. '(advanced)' qualifier lost — pipeline has no proficiency-level carry-through.",
+      "category": "perte_de_qualificateur"
+    },
+    {
+      "cv_term": "Project management (specific sense: methodology)",
+      "cv_context": "- Methods: Agile, Project management, KPI dashboards, Reporting",
+      "loss_stage": "abstraction_remapping",
+      "cause": "'project management' IS in BIGRAM_WHITELIST (extract.py:197) and IS in raw_tokens. Then 'project_management' (underscore variant) is in SKILL_ALIASES -> ['gestion de projets', 'gestion de projets par méthode agile', 'développement par itérations']. The 'gestion de projets' preferred label does NOT appear in raw_tokens (expansion inconsistency). But 'gestion de projets par méthode agile' and 'développement par itérations' DO appear (added by 'agile' alias expansion, collision). Net effect: 'project management' is conflated with 'agile project management' — the generic project management concept is lost.",
+      "category": "transforme_en_abstraction_trop_large"
+    },
+    {
+      "cv_term": "customer churn prediction",
+      "cv_context": "Delivered machine learning model to predict customer churn",
+      "loss_stage": "raw_extraction + esco_mapping",
+      "cause": "'churn' and 'customer' and 'predict' survive raw as separate tokens. No alias, no ESCO match for any. All in filtered_tokens. Business signal completely lost.",
+      "category": "fragmentation_puis_non_mappe"
+    },
+    {
+      "cv_term": "ETL pipelines (plural)",
+      "cv_context": "- Data & BI: ... ETL pipelines",
+      "loss_stage": "none_direct_loss_but_partial",
+      "cause": "'etl' maps via ESCO alt_label to 'outils d’extraction de transformation et de chargement' — captured. 'pipelines' and 'pipeline' drop as filtered_tokens (no alias, no ESCO). The verb sense ('built automated ETL pipelines IN PYTHON') is lost; only the tool-class URI remains.",
+      "category": "perte_de_contexte"
+    }
+  ],
+  "categories_count": {
+    "rejet_trop_tot": 2,
+    "non_mappe_esco": 7,
+    "transforme_en_abstraction_trop_large": 2,
+    "ignore_par_parser": 2,
+    "fragmentation_puis_non_mappe": 2,
+    "perte_de_qualificateur": 1,
+    "perte_de_contexte": 1
+  },
+  "summary_losses_count": 17,
+  "explicit_cv_skills_total_approx": 26,
+  "hit_ratio_on_explicit_skills_approx": "9/26 ≈ 35% (Python, SQL, MySQL, PostgreSQL, NoSQL, DevOps, ETL, Excel-as-tableur, Agile)"
+}

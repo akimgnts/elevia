@@ -1,0 +1,88 @@
+{
+  "description": "Classification par fix Sprint 4 sur le panel de 7 CV. Statuts possibles : validated_on_exercised_cases / not_exercised / potential_regression / inconclusive.",
+  "panel_size": 7,
+  "fixes": [
+    {
+      "case_id": "N1",
+      "family": "strict_noise",
+      "description": "Ajout 'paris' à STOPWORDS (extract.py) pour couper le homonyme géographique du concept ESCO 'paris' (pari/mise).",
+      "exercised_on": ["cv_ref_marie_dupont", "cv_05_camille_vasseur"],
+      "exercise_detail": {
+        "cv_ref_marie_dupont": "Texte contient 'Paris' (2 occurrences : 'Analytics Corp, Paris' ligne 13, 'Université Paris-Saclay' ligne 25). Après fix : label 'paris' absent, token 'paris' absent des raw_tokens. ✅",
+        "cv_05_camille_vasseur": "Texte contient 'Paris' (ligne 3, ville du candidat). Après fix : label 'paris' absent, token 'paris' absent des raw_tokens. ✅"
+      },
+      "not_exercised_on": ["cv_01_lina_morel", "cv_02_hugo_renaud", "cv_04_benoit_caron", "cv_06_yasmine_haddad", "cv_09_ines_barbier"],
+      "regression_check": "Aucun CV ne produit de label 'paris' comme skill. Aucune URI ESCO légitime ne dépend du token 'paris'. Pas de régression observable.",
+      "status": "validated_on_exercised_cases",
+      "confidence": "élevée",
+      "notes": "N1 exercé sur 2 CV dont 1 synthétique. Comportement identique à Sprint 4 batch1 : le token 'paris' est coupé avant alias pre-pass et avant map_skill."
+    },
+    {
+      "case_id": "C1",
+      "family": "config_mismatch",
+      "description": "Renommage clé SKILL_ALIASES 'project_management' → 'project management' pour s'aligner sur le bigramme 'project management' produit par _split_text.",
+      "exercised_on": ["cv_ref_marie_dupont"],
+      "exercise_detail": {
+        "cv_ref_marie_dupont": "Texte contient 'Project management' (ligne 10, section Methods). Après fix : label 'gestion de projets' présent dans validated_items (URI gestion_de_projets). ✅"
+      },
+      "not_exercised_on": ["cv_01_lina_morel", "cv_02_hugo_renaud", "cv_04_benoit_caron", "cv_05_camille_vasseur", "cv_06_yasmine_haddad", "cv_09_ines_barbier"],
+      "regression_check": "Aucun CV synthétique ne mentionne explicitement 'project management' (anglicisme). Le signal 'gestion de projets' n'est pas introduit en trop sur ces CV (label absent partout hors cv_ref). Pas de régression.",
+      "status": "validated_on_exercised_cases",
+      "confidence": "moyenne",
+      "notes": "C1 n'est exercé que sur cv_ref — les CV synthétiques francophones n'utilisent pas le bigramme anglophone 'project management'. Le fix reste conservateur : aucune sur-injection observée. Un panel avec CV bilingues/anglophones consoliderait cette validation."
+    },
+    {
+      "case_id": "N3",
+      "family": "strict_noise",
+      "description": "Suppression de l'entrée SKILL_ALIASES['sales'] = ['argumentaire de vente']. L'entrée 'vente' reste intacte.",
+      "exercised_on": ["cv_ref_marie_dupont", "cv_01_lina_morel", "cv_02_hugo_renaud"],
+      "exercise_detail": {
+        "cv_ref_marie_dupont": "Texte contient 'sales' (ligne 20 : 'for sales and finance teams'). Après fix : label 'argumentaire de vente' absent, token 'sales' passe en filtered_out. ✅ Signal légitimement supprimé (contexte : équipes internes, pas compétence vente).",
+        "cv_01_lina_morel": "Texte contient 'sales' (CRM Salesforce) ET 'vente' (plusieurs occurrences). Après fix : label 'argumentaire de vente' PRÉSENT via jsonl 'commercial' (canal alternatif actif) → ✅ Aucune perte de signal légitime.",
+        "cv_02_hugo_renaud": "Texte contient 'vente', 'argumentaire', 'business development', 'commercial'. Après fix : label 'argumentaire de vente' PRÉSENT via jsonl 'commercial' et/ou 'business development'. ✅ Aucune perte de signal légitime."
+      },
+      "not_exercised_on": ["cv_04_benoit_caron", "cv_05_camille_vasseur", "cv_06_yasmine_haddad", "cv_09_ines_barbier"],
+      "regression_check": "Profils commerciaux légitimes (cv_01, cv_02) conservent 'argumentaire de vente' via alias jsonl ('commercial', 'business development', 'developpement commercial'). Aucune régression observée sur les profils sales. Le fix retire bien le bruit (cv_ref où 'sales' = équipe interne) sans casser le signal quand un candidat est réellement commercial.",
+      "status": "validated_on_exercised_cases",
+      "confidence": "élevée",
+      "notes": "N3 est le fix le plus risqué sur le papier (risque de perdre du signal sales). Le panel montre que la redondance via jsonl 'commercial'/'business development' protège les profils légitimes. Validation robuste."
+    },
+    {
+      "case_id": "N2",
+      "family": "strict_noise",
+      "description": "Suppression de la ligne jsonl {alias: 'management', label: 'gérer une équipe'} dans les 2 copies de esco_alias_fr_v0.jsonl. Les aliases 'management d equipe', 'animation d equipe', 'encadrement' restent intacts.",
+      "exercised_on": ["cv_ref_marie_dupont", "cv_05_camille_vasseur"],
+      "exercise_detail": {
+        "cv_ref_marie_dupont": "Texte contient 'management' (ligne 10 : 'Project management', ligne 15 : '50+ managers'). Après fix : label 'gérer une équipe' absent. ✅ Signal correctement supprimé (contexte : méthodologie + audience, pas compétence people management).",
+        "cv_05_camille_vasseur": "Texte contient 'community management' (ligne 36). Post-fix : 'gérer une équipe' absent. ✅ Correct : community management ≠ people management, ce profil communication n'encadre pas d'équipe."
+      },
+      "not_exercised_on": ["cv_01_lina_morel", "cv_02_hugo_renaud", "cv_04_benoit_caron", "cv_06_yasmine_haddad", "cv_09_ines_barbier"],
+      "regression_check": "Aucun CV du panel ne revendique explicitement du management d'équipe via 'encadrement', 'management d equipe' ou 'animation d equipe' (les aliases préservés). Profil RH (cv_09) n'est pas un test pertinent (Ines recrute mais ne manage pas). Pas de régression observée. Attention : un CV de manager senior avec uniquement le mot 'management' isolé ne produirait plus 'gérer une équipe' — c'est le comportement visé mais il faudrait un profil manager confirmé pour valider qu'il y a bien un autre chemin (ex: 'encadrement', 'gérer une équipe' direct).",
+      "status": "validated_on_exercised_cases",
+      "confidence": "moyenne",
+      "notes": "N2 exercé sur 2 CV, aucune régression visible. Un profil manager/dir senior qui n'utilise QUE le mot 'management' isolé et pas 'encadrement'/'management d equipe' n'est pas présent dans le panel. Risque résiduel faible mais non éliminé."
+    },
+    {
+      "case_id": "O2",
+      "family": "over_injection",
+      "description": "Retrait de 'techniques de présentation visuelle' de la liste SKILL_ALIASES['dashboards']. Ne garde que 'logiciel de visualisation des données'.",
+      "exercised_on": ["cv_ref_marie_dupont"],
+      "exercise_detail": {
+        "cv_ref_marie_dupont": "Texte contient 'dashboards' (lignes 10, 15, 20 : 'KPI dashboards', 'Power BI dashboards'). Après fix : label 'techniques de présentation visuelle' absent, label 'logiciel de visualisation des données' présent. ✅"
+      },
+      "not_exercised_on": ["cv_01_lina_morel", "cv_02_hugo_renaud", "cv_04_benoit_caron", "cv_05_camille_vasseur", "cv_06_yasmine_haddad", "cv_09_ines_barbier"],
+      "regression_check": "cv_06 (marketing digital) mentionne 'Looker Studio' et 'reporting mensuel' mais pas le token 'dashboards' littéral. Le fix O2 ne peut donc pas être exercé sur ce profil. Pas de régression observable. Panel limité sur O2.",
+      "status": "validated_on_exercised_cases",
+      "confidence": "moyenne",
+      "notes": "O2 n'est exercé que sur cv_ref. Les CV synthétiques francophones utilisent 'Power BI'/'Looker Studio'/'tableaux de suivi' plutôt que le mot 'dashboards' littéral. Fix conservateur et ciblé : pas de sur-injection sur les autres profils."
+    }
+  ],
+  "global_status": {
+    "all_fixes_validated_on_at_least_one_cv": true,
+    "any_regression_observed": false,
+    "inconclusive_fixes": [],
+    "potential_regression_fixes": [],
+    "fixes_lightly_exercised_on_synthetic_panel": ["C1", "O2"],
+    "fixes_well_exercised_on_synthetic_panel": ["N1", "N3", "N2"]
+  }
+}

@@ -1,4 +1,5 @@
 import type {
+  CareerIntelligence,
   ExplainBlock,
   InboxItem,
   OfferExplanation,
@@ -52,6 +53,7 @@ export type NormalizedInboxItem = {
   semantic_explainability?: SemanticExplainability | null;
   scoring_v2?: ScoringV2 | null;
   scoring_v3?: ScoringV3 | null;
+  career_intelligence?: CareerIntelligence | null;
   offer_cluster?: string;
   domain_bucket?: "strict" | "neighbor" | "out";
   signal_score?: number;
@@ -271,6 +273,10 @@ export function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       scoring_v3:
         rec.scoring_v3 && typeof rec.scoring_v3 === "object"
           ? (rec.scoring_v3 as ScoringV3)
+          : null,
+      career_intelligence:
+        rec.career_intelligence && typeof rec.career_intelligence === "object"
+          ? (rec.career_intelligence as CareerIntelligence)
           : null,
       offer_cluster: typeof rec.offer_cluster === "string" ? rec.offer_cluster : undefined,
       domain_bucket:

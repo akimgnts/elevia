@@ -1,0 +1,634 @@
+{
+  "product": "elevia-compass",
+  "product_summary": "CV ↔ offers matching engine",
+  "current_sprint": "profile_quality_v1",
+  "status": "business_france_is_vie_payload_propagation_fixed",
+  "validated": true,
+  "last_completed_step": "business_france_is_vie_contract_loader_fix",
+  "next_step": "rerun_ia1_matching_validation_after_business_france_is_vie_fix",
+  "next_step_mode": "matching_observability_no_ia2_no_scoring_change",
+  "last_business_france_is_vie_fix": {
+    "date": "2026-04-23",
+    "contract_check": {
+      "clean_offers_source": "business_france",
+      "business_france_rows_checked": 10,
+      "contract_types": {
+        "VIE": 9,
+        "VIA": 1
+      },
+      "payload_json_is_vie_present": true
+    },
+    "changed_file": "apps/api/src/api/utils/inbox_catalog.py",
+    "test_file": "apps/api/tests/test_business_france_db_first.py",
+    "effect": "Business France loader now propagates payload_json.is_vie and contract_type to catalog offers before matching.",
+    "validation": [
+      "BF-242362 is_vie True, no longer rejected by hard filter",
+      "BF-242346 and BF-242348 is_vie True, no longer rejected by hard filter",
+      "BF-242353 remains is_vie False because payload_json.is_vie=false and contract_type=VIA",
+      "match_debug present for VIE offers after fix"
+    ]
+  },
+  "last_observability_run": {
+    "route": "/dev/metrics",
+    "mode": "direct_handler_call",
+    "real_catalog_available": false,
+    "blocker": "DATABASE_URL not set",
+    "synthetic_catalog_smoke_test": {
+      "profile": {
+        "generic_hard_count": 1,
+        "generic_weak_count": 1,
+        "domain_count": 1
+      },
+      "offers_sample": {
+        "generic_hard_count": 1,
+        "generic_weak_count": 1,
+        "domain_count": 2
+      },
+      "offers_sample_size": 2
+    }
+  },
+  "last_validation_run": "baseline/generic_filter_validation_guard/",
+  "validation_counts": {
+    "profiles_tested": 10,
+    "clear_improvement": 4,
+    "mild_improvement": 3,
+    "neutral": 1,
+    "neutral_guard_skipped": 2,
+    "degradation": 0
+  },
+  "feature_flag": {
+    "name": "ELEVIA_FILTER_GENERIC_URIS",
+    "default": "0",
+    "on_value": "1"
+  },
+  "key_constants": {
+    "MIN_PROFILE_DOMAIN_URIS": 3,
+    "MIN_SCORING_URIS": 2,
+    "HARD_GENERIC_URIS_COUNT": 9
+  },
+  "integration_points": [
+    "apps/api/src/api/routes/inbox.py",
+    "apps/api/src/api/routes/matching.py",
+    "apps/api/src/api/routes/dev_tools.py",
+    "apps/api/src/api/routes/debug_match.py"
+  ],
+  "filter_module": "apps/api/src/api/utils/generic_skills_filter.py",
+  "catalog_loader_no_filter": "apps/api/src/api/utils/inbox_catalog.py",
+  "relevant_files": [
+    "apps/api/src/api/utils/generic_skills_filter.py",
+    "apps/api/src/api/utils/career_intelligence.py",
+    "apps/api/src/api/schemas/inbox.py",
+    "apps/api/src/api/routes/dev_tools.py",
+    "apps/api/src/api/routes/inbox.py",
+    "apps/api/src/api/routes/matching.py",
+    "apps/api/src/api/schemas/matching.py",
+    "apps/web/src/components/OfferDetailModal.tsx",
+    "apps/web/src/pages/ProfilePage.tsx",
+    "apps/web/src/pages/ProfileUnderstandingPage.tsx",
+    "apps/web/src/pages/AnalyzePage.tsx",
+    "apps/web/src/lib/profileMatching.ts",
+    "apps/web/src/lib/profile/normalizers.ts",
+    "docs/ai/PROFILE_RECONSTRUCTION_V1.md",
+    "apps/web/src/lib/api.ts",
+    "apps/web/src/lib/inboxItems.ts",
+    "apps/api/tests/test_career_intelligence.py",
+    "apps/api/tests/test_matching_career_intelligence.py",
+    "apps/web/tests/test_offer_detail_career_intelligence.py",
+    "docs/ai/STATE.json",
+    "docs/ai/WORKLOG.md",
+    "docs/ai/HANDOFF.md",
+    "docs/ai/DECISIONS.md",
+    "apps/web/src/lib/profile/reconstruction.ts",
+    "apps/api/src/compass/ai_raw_cv_reconstruction.py",
+    "apps/api/src/compass/pipeline/contracts.py",
+    "apps/api/src/compass/pipeline/profile_parse_pipeline.py",
+    "apps/api/src/compass/pipeline/response_builder.py",
+    "apps/api/src/api/routes/profile_file.py",
+    "apps/api/src/api/routes/profile_baseline.py",
+    "apps/api/tests/test_profile_parse_pipeline.py",
+    "apps/api/src/compass/ai_profile_reconstruction.py",
+    "apps/api/tests/test_ai_raw_cv_reconstruction.py"
+  ],
+  "constraints": {
+    "do_not_touch_scoring_core": true,
+    "do_not_filter_profile_side_v1": true,
+    "always_flag_gated": true,
+    "no_complex_logic_yet": true,
+    "one_improvement_at_a_time": true
+  },
+  "frozen_files": [
+    "apps/api/src/matching/matching_v1.py",
+    "apps/api/src/matching/idf.py",
+    "apps/api/src/matching/weights_*"
+  ],
+  "last_profile_reconstruction_v1": {
+    "module": "apps/web/src/lib/profile/reconstruction.ts",
+    "function": "buildProfileReconstruction(input)",
+    "mode": "pure_deterministic_front_helper",
+    "inputs": [
+      "cv_text",
+      "career_profile",
+      "experiences",
+      "selected_skills",
+      "structured_signal_units",
+      "validated_items",
+      "canonical_skills"
+    ],
+    "output": [
+      "suggested_summary",
+      "suggested_experiences",
+      "suggested_skills",
+      "suggested_projects",
+      "suggested_certifications",
+      "suggested_languages"
+    ],
+    "validation": [
+      "esbuild bundle + node behavior check OK",
+      "npm -C apps/web run build OK"
+    ]
+  },
+  "last_profile_reconstruction_v1_ui": {
+    "generation_surface": "apps/web/src/pages/AnalyzePage.tsx",
+    "display_surface": "apps/web/src/pages/ProfileUnderstandingPage.tsx",
+    "storage_key": "profile_reconstruction",
+    "projection_policy": {
+      "summary_master": "fill_only_if_empty",
+      "suggested_skills": "append_to_pending_skill_candidates_only",
+      "languages": "fill_only_if_empty",
+      "certifications": "fill_only_if_empty",
+      "projects": "fill_only_if_empty",
+      "experiences": "not_auto_projected_v1"
+    },
+    "non_regression": [
+      "no backend changes",
+      "no scoring changes",
+      "skills_uri unchanged by UI projection",
+      "matching_skills unchanged by UI projection",
+      "canonical_skills unchanged by UI projection"
+    ],
+    "validation": [
+      "static source assertions OK",
+      "npm -C apps/web run build OK",
+      "Playwright mocked ProfileUnderstanding flow OK"
+    ]
+  },
+  "last_profile_understanding_clean_ui_v1": {
+    "file": "apps/web/src/pages/ProfileUnderstandingPage.tsx",
+    "scope": "frontend_display_only",
+    "changes": [
+      "display-only cleaner for pipe artifacts, duplicates, short fragments",
+      "max 5 visible items per block",
+      "removed visible confidence percentages",
+      "simplified understood blocks and secondary signals"
+    ],
+    "validation": [
+      "static source assertions OK",
+      "npm -C apps/web run build OK",
+      "Playwright dirty-data visual smoke test OK"
+    ]
+  },
+  "last_profile_reconstruction_v1_ui_revalidation": {
+    "date": "2026-04-22",
+    "scope": "verification_only",
+    "code_changes": false,
+    "validation": [
+      "source assertions OK",
+      "npm -C apps/web run build OK",
+      "Playwright mocked ProfileUnderstanding continue flow OK"
+    ],
+    "verified_non_regression": [
+      "summary projected only when empty",
+      "suggested skills projected to pending_skill_candidates only",
+      "suggested experiences not auto-replaced",
+      "profile_reconstruction preserved",
+      "skills_uri unchanged",
+      "matching_skills unchanged",
+      "canonical_skills unchanged"
+    ]
+  },
+  "last_profile_page_product_editor_v1": {
+    "date": "2026-04-22",
+    "file": "apps/web/src/pages/ProfilePage.tsx",
+    "scope": "frontend_product_ui_only",
+    "visible_source_of_truth": "career_profile.selected_skills",
+    "structure": [
+      "Résumé profil",
+      "Expériences",
+      "Compétences contrôlées",
+      "Suggestions secondaires",
+      "Parcours complémentaire"
+    ],
+    "hidden_from_main_ui": [
+      "skills_uri",
+      "matching_skills",
+      "canonical_skills",
+      "skill_links plumbing",
+      "legacy fallback labels",
+      "pending technical wording"
+    ],
+    "validation": [
+      "static source assertions OK",
+      "npm -C apps/web run build OK",
+      "Playwright mocked /profile add skill + save + reload OK"
+    ],
+    "verified_non_regression": [
+      "selected skill added through career_profile.selected_skills",
+      "matching_skills preserved and enriched on save",
+      "existing skills_uri preserved",
+      "no backend, route, scoring, matching or canonicalization changes"
+    ]
+  },
+  "last_profile_structurer_mission_fix_v1": {
+    "date": "2026-04-22",
+    "file": "apps/api/src/compass/profile_structurer.py",
+    "scope": "backend_profile_structuring_only",
+    "bug": "mission/action sentences containing broad terms such as data or business were promoted to ExperienceV1.title",
+    "fix": [
+      "broad domain terms are no longer standalone title markers",
+      "experience title detection now rejects action/mission lines",
+      "_split_experience_blocks and _parse_experience_block share the stricter title gate"
+    ],
+    "validation": [
+      "PYTHONPATH=apps/api/src apps/api/.venv/bin/python -m pytest apps/api/tests/test_compass_profile_structurer.py -q OK",
+      "Akim Guentas – CV Data.pdf runtime parse: 2 experiences, false mission titles absent, Sidel 2023-2025 retained",
+      "3 other CV AKIM PDFs parsed without regression on expected experience titles"
+    ],
+    "non_regression": [
+      "scoring unchanged",
+      "matching unchanged",
+      "canonicalization unchanged",
+      "frontend unchanged"
+    ]
+  },
+  "last_ai1_raw_cv_reconstruction_v1": {
+    "date": "2026-04-22",
+    "module": "apps/api/src/compass/ai_raw_cv_reconstruction.py",
+    "function": "build_raw_cv_reconstruction(...)",
+    "flag": "ELEVIA_ENABLE_AI_RAW_CV_RECONSTRUCTION",
+    "default": "off",
+    "mode": "stub_no_provider_no_external_call",
+    "artifact": "raw_cv_reconstruction",
+    "pipeline_position": "after extract_profile_text, before _run_profile_text_pipeline",
+    "transport": [
+      "ParseFilePipelineArtifacts.raw_cv_reconstruction",
+      "parse-file top-level raw_cv_reconstruction",
+      "parse-baseline top-level raw_cv_reconstruction"
+    ],
+    "working_text_policy": "use rebuilt_profile_text only when flag ON and artifact status is ok/partial with non-empty text; otherwise original cv_text",
+    "validation": [
+      "targeted IA1 OFF/ON tests OK",
+      "test_profile_parse_pipeline.py + test_compass_profile_structurer.py OK",
+      "test_parse_file_txt.py + test_parse_file_enriched.py OK"
+    ],
+    "non_regression": [
+      "no provider call",
+      "no scoring change",
+      "no matching change",
+      "no skills_uri write",
+      "career_profile remains deterministic output"
+    ]
+  },
+  "last_ai2_profile_reconstruction_v1": {
+    "date": "2026-04-22",
+    "module": "apps/api/src/compass/ai_profile_reconstruction.py",
+    "function": "build_profile_reconstruction(input_data)",
+    "flag": "ELEVIA_ENABLE_AI_PROFILE_RECONSTRUCTION",
+    "default": "off",
+    "mode": "stub_no_provider_no_external_call",
+    "artifact": "profile_reconstruction",
+    "pipeline_position": "after career_profile, structured_signal_units, validated_items, canonical_skills, profile_intelligence; before ParseFilePipelineArtifacts response transport",
+    "inputs": [
+      "cv_text",
+      "career_profile",
+      "structured_signal_units",
+      "validated_items",
+      "canonical_skills",
+      "raw_cv_reconstruction",
+      "profile_intelligence"
+    ],
+    "transport": [
+      "ParseFilePipelineArtifacts.profile_reconstruction",
+      "parse-file top-level profile_reconstruction",
+      "parse-baseline top-level profile_reconstruction"
+    ],
+    "validation": [
+      "targeted IA2 OFF/ON tests OK",
+      "IA1/IA2 coexistence matrix OK",
+      "test_profile_parse_pipeline.py + test_parse_file_txt.py + test_parse_file_enriched.py + test_compass_profile_structurer.py OK"
+    ],
+    "non_regression": [
+      "no provider call",
+      "no scoring change",
+      "no matching change",
+      "no skills_uri write",
+      "no matching_skills write",
+      "career_profile unchanged by IA2 stub"
+    ]
+  },
+  "last_ai1_raw_cv_reconstruction_provider_v1": {
+    "date": "2026-04-22",
+    "file": "apps/api/src/compass/ai_raw_cv_reconstruction.py",
+    "provider": "OpenAI via openai python client",
+    "model_env": "ELEVIA_AI_RAW_CV_MODEL",
+    "default_model": "gpt-4o-mini",
+    "timeout_env": "ELEVIA_AI_RAW_CV_TIMEOUT",
+    "feature_flag": "ELEVIA_ENABLE_AI_RAW_CV_RECONSTRUCTION",
+    "default": "OFF",
+    "behavior": {
+      "off": "status skipped, no provider call",
+      "on": "call provider, map JSON to RawCvReconstructionV1",
+      "fallback": "provider/API/JSON/validation errors return original extracted text with provider_fallback warning"
+    },
+    "invariants": [
+      "no scoring change",
+      "no matching change",
+      "no frontend change",
+      "no skills_uri write",
+      "no career_profile write",
+      "no raw_experiences injection into profile"
+    ],
+    "validation": [
+      "apps/api/tests/test_ai_raw_cv_reconstruction.py: 5 passed",
+      "apps/api/tests/test_profile_parse_pipeline.py: 10 passed",
+      "combined targeted suite: 15 passed",
+      "real provider smoke with ELEVIA_ENABLE_AI_RAW_CV_RECONSTRUCTION=1: status ok, sections 1, raw_experiences 1, warnings []"
+    ]
+  },
+  "last_ai1_prompt_preserve_content_v1": {
+    "date": "2026-04-22",
+    "file": "apps/api/src/compass/ai_raw_cv_reconstruction.py",
+    "goal": "prevent IA1 rebuilt_profile_text from compressing or summarizing CV content before deterministic parsing",
+    "rules_added": [
+      "do not freely rewrite, compress, summarize, or elegantly paraphrase",
+      "preserve maximum source content",
+      "keep original order when possible",
+      "light normalization only",
+      "line-by-line or block-by-block reconstruction when useful",
+      "do not convert detailed missions into short abstract summary",
+      "do not remove repeated-looking content unless exact extraction artifact"
+    ],
+    "validation": [
+      "apps/api/tests/test_ai_raw_cv_reconstruction.py + test_profile_parse_pipeline.py: 15 passed"
+    ]
+  },
+  "last_ai1_off_on_comparison_rerun": {
+    "date": "2026-04-22",
+    "cv_count": 3,
+    "provider_result": "provider_fallback_for_all_on_runs",
+    "blocker": "OPENAI_API_KEY not visible to OpenAI client in test process",
+    "observed_effect": "ON runs matched OFF deterministic outputs because fallback passed through original text",
+    "files_tested": [
+      "Akim Guentas – Data Analyst Natixis.pdf",
+      "CV - Akim Guentas .pdf",
+      "Akim Guentas – CVn.pdf"
+    ],
+    "metrics": [
+      {
+        "file": "Akim Guentas – Data Analyst Natixis.pdf",
+        "off_experiences": 3,
+        "on_experiences": 3,
+        "off_skills": 47,
+        "on_skills": 47,
+        "on_warning": "provider_fallback"
+      },
+      {
+        "file": "CV - Akim Guentas .pdf",
+        "off_experiences": 0,
+        "on_experiences": 0,
+        "off_skills": 41,
+        "on_skills": 41,
+        "on_warning": "provider_fallback"
+      },
+      {
+        "file": "Akim Guentas – CVn.pdf",
+        "off_experiences": 1,
+        "on_experiences": 1,
+        "off_skills": 38,
+        "on_skills": 38,
+        "on_warning": "provider_fallback"
+      }
+    ]
+  },
+  "last_ai1_off_on_real_provider_comparison": {
+    "date": "2026-04-22",
+    "env_check": {
+      "OPENAI_API_KEY_present": true,
+      "OPENAI_API_KEY_prefix": "sk-pr"
+    },
+    "cv_count": 3,
+    "provider_result": "real_provider_ok_no_fallback",
+    "metrics": [
+      {
+        "file": "Akim Guentas – Data Analyst Natixis.pdf",
+        "off_experiences": 3,
+        "on_experiences": 1,
+        "off_skills": 47,
+        "on_skills": 35,
+        "off_validated_items": 12,
+        "on_validated_items": 2,
+        "off_structured_units": 5,
+        "on_structured_units": 0,
+        "verdict": "degradation"
+      },
+      {
+        "file": "CV - Akim Guentas .pdf",
+        "off_experiences": 0,
+        "on_experiences": 3,
+        "off_skills": 41,
+        "on_skills": 47,
+        "off_validated_items": 15,
+        "on_validated_items": 11,
+        "off_structured_units": 2,
+        "on_structured_units": 16,
+        "verdict": "clear_improvement"
+      },
+      {
+        "file": "Akim Guentas – CVn.pdf",
+        "off_experiences": 1,
+        "on_experiences": 1,
+        "off_skills": 38,
+        "on_skills": 38,
+        "off_validated_items": 15,
+        "on_validated_items": 15,
+        "off_structured_units": 9,
+        "on_structured_units": 9,
+        "verdict": "mostly_neutral_with_experience_org_loss"
+      }
+    ],
+    "global_observation": "IA1 helps noisy long CV but degrades a clean CV when rebuilt_profile_text replaces deterministic input directly."
+  },
+  "last_ai1_cvtest_comparison": {
+    "date": "2026-04-22",
+    "folder": "/Users/akimguentas/Downloads/cvtest",
+    "cv_count": 11,
+    "provider_result": "real_provider_ok_no_fallback",
+    "summary_counts": {
+      "clear_improvement": 1,
+      "neutral_or_light_gain": 4,
+      "mixed": 4,
+      "degradation": 2
+    },
+    "global_observation": "IA1 improves some poorly segmented CVs but is not safe as unconditional working_cv_text replacement; best next decision is dirty-CV-only activation or merge policy.",
+    "tested_files": [
+      "Akim Guentas – Audit & Data Analyst.pdf",
+      "Akim_Guentas_Resume.pdf",
+      "CV - Nawel KADI 2026.pdf",
+      "CV CDI MOUSTAPHA LO DATA.pdf",
+      "CV LISE MAITRE.pdf",
+      "CV Mathilde CEVAK.pdf",
+      "CV WECKER.pdf",
+      "CV_2026-02-17_Ania_Benabbas (1).pdf",
+      "CV_MouisseTheo.pdf",
+      "Dia Madina-CV alternance en gestion de patrimoine.pdf",
+      "data-analyst-resume-example.pdf"
+    ]
+  },
+  "last_ai1_dirty_cv_policy_v1": {
+    "date": "2026-04-22",
+    "file": "apps/api/src/compass/pipeline/profile_parse_pipeline.py",
+    "function": "should_use_ai_raw_cv_reconstruction(context)",
+    "hard_blocks": [
+      "experiences >= 2 and structured_signal_units >= 5",
+      "validated_items >= 10 and canonical_skills >= 20 when no zero-experience weak-signal activation applies"
+    ],
+    "activation_conditions": [
+      "experiences == 0",
+      "structured_signal_units <= 2",
+      "validated_items <= 5",
+      "canonical_skills <= 10"
+    ],
+    "activation_rule": "activate if experiences == 0 and at least one weak signal is true",
+    "integration": "deterministic original parse first, AI1 provider only after dirty policy decision, rerun pipeline only when enabled",
+    "logging": "AI1_DECISION with enabled, reasons, metrics",
+    "validation": [
+      "apps/api/tests/test_profile_parse_pipeline.py + test_ai_raw_cv_reconstruction.py: 24 passed",
+      "py_compile profile_parse_pipeline.py and test_profile_parse_pipeline.py: OK"
+    ],
+    "invariants": [
+      "no scoring change",
+      "no matching change",
+      "no frontend change",
+      "no skills_uri write",
+      "no career_profile write"
+    ],
+    "dry_run_cvtest": {
+      "date": "2026-04-22",
+      "folder": "/Users/akimguentas/Downloads/cvtest",
+      "cv_count": 11,
+      "enabled_count": 1,
+      "enabled_files": [
+        "Dia Madina-CV alternance en gestion de patrimoine.pdf"
+      ],
+      "blocked_examples": [
+        "Akim Guentas – Audit & Data Analyst.pdf hard-blocked by profile experiences + structured signal",
+        "Akim_Guentas_Resume.pdf hard-blocked by good skills signal",
+        "CV - Nawel KADI 2026.pdf blocked by insufficient dirty signals under requested thresholds"
+      ]
+    },
+    "weak_signals": [
+      "structured_signal_units <= 3",
+      "validated_items <= 8",
+      "canonical_skills <= 15"
+    ],
+    "dry_run_cvtest_updated": {
+      "cv_count": 11,
+      "enabled_count": 2,
+      "enabled_files": [
+        "CV - Nawel KADI 2026.pdf",
+        "CV CDI MOUSTAPHA LO DATA.pdf"
+      ],
+      "protected_examples": [
+        "Akim Guentas – Audit & Data Analyst.pdf",
+        "Akim_Guentas_Resume.pdf",
+        "CV LISE MAITRE.pdf",
+        "CV Mathilde CEVAK.pdf",
+        "CV_MouisseTheo.pdf"
+      ]
+    }
+  },
+  "last_ai1_dirty_policy_triggered_subset_run": {
+    "date": "2026-04-22",
+    "cv_count": 2,
+    "provider_result": "real_provider_ok_no_fallback",
+    "results": [
+      {
+        "file": "CV - Nawel KADI 2026.pdf",
+        "off_experiences": 0,
+        "on_experiences": 4,
+        "off_skills": 35,
+        "on_skills": 36,
+        "off_signal_units": 3,
+        "on_signal_units": 1,
+        "verdict": "useful_for_experiences_with_signal_units_loss"
+      },
+      {
+        "file": "CV CDI MOUSTAPHA LO DATA.pdf",
+        "off_experiences": 0,
+        "on_experiences": 0,
+        "off_skills": 22,
+        "on_skills": 23,
+        "off_signal_units": 0,
+        "on_signal_units": 0,
+        "verdict": "neutral_low_gain"
+      }
+    ],
+    "global_observation": "Current policy triggers useful IA1 on Nawel, neutral on Moustapha; no clean CV tested in ON path under this subset."
+  },
+  "last_ai1_matching_validation": {
+    "date": "2026-04-22",
+    "scope": [
+      "CV - Nawel KADI 2026.pdf",
+      "CV CDI MOUSTAPHA LO DATA.pdf"
+    ],
+    "route": "/inbox",
+    "settings": {
+      "explain": true,
+      "limit": 10,
+      "min_score": 0,
+      "ia2": "off"
+    },
+    "provider_result": "ok_no_fallback",
+    "results": [
+      {
+        "cv": "Nawel",
+        "off_total_matched": 4,
+        "on_total_matched": 4,
+        "top_scores_off": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "top_scores_on": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "matched_core_change": "none_all_zero",
+        "missing_core_change": "none_all_zero",
+        "ranking_change": "none",
+        "verdict": "REMOVE"
+      },
+      {
+        "cv": "Moustapha",
+        "off_total_matched": 2,
+        "on_total_matched": 2,
+        "top_scores_off": [
+          0,
+          0
+        ],
+        "top_scores_on": [
+          0,
+          0
+        ],
+        "matched_core_change": "none_all_zero",
+        "missing_core_change": "none_all_zero",
+        "ranking_change": "none",
+        "verdict": "REMOVE"
+      }
+    ],
+    "global_decision": "NOT_VALIDATED_FOR_MATCHING_VALUE",
+    "observation": "IA1 improved parsing for Nawel but did not improve /inbox matching scores, matched_core, missing_core, or ranking in this validation."
+  }
+}

@@ -1,0 +1,376 @@
+{
+  "profile_id": "golden_05",
+  "total_candidate_offers": 35,
+  "results_above_threshold": 0,
+  "threshold": 80,
+  "message": "Aucune offre n'atteint 80% avec les données actuelles (compétences/langues/études/pays).",
+  "profile_input": {
+    "skills_input": [
+      "sales",
+      "negotiation",
+      "crm",
+      "prospection",
+      "presentation"
+    ],
+    "languages": [
+      {
+        "code": "fr",
+        "level": "C2"
+      },
+      {
+        "code": "en",
+        "level": "B2"
+      },
+      {
+        "code": "zh",
+        "level": "A2"
+      }
+    ],
+    "education_level": "BAC+3",
+    "nationality": "FR",
+    "age": 23,
+    "years_of_experience": 1
+  },
+  "profile_extracted": {
+    "skills_count": 10,
+    "skills": [
+      "négocier des conditions avec les fournisseurs",
+      "négocier les prix",
+      "sales",
+      "argumentaire de vente",
+      "méthodes de prospection",
+      "gestion de la relation client",
+      "crm",
+      "prospection",
+      "negotiation",
+      "presentation"
+    ],
+    "skills_uri_count": 5,
+    "matching_skills_count": 10,
+    "capabilities_count": 0,
+    "skill_source": "skills",
+    "languages_count": 3,
+    "education_level": 0
+  },
+  "top10_strict_threshold_80": [],
+  "top10_unthresholded_ranked": [
+    {
+      "offer_id": "vie_fixture_007",
+      "offer_title": "Data Reporting Analyst VIE - CRM",
+      "offer_country": "Ireland",
+      "offer_source": "business_france",
+      "score": 26,
+      "breakdown": {
+        "skills": 0.3,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Compétences clés alignées : gestion de la relation client",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [
+        "gestion de la relation client"
+      ],
+      "missing_skills": [
+        "logiciel de visualisation des données",
+        "utiliser un logiciel d’analyse de données spécifique",
+        "utiliser un logiciel de tableur"
+      ],
+      "offer_skills_raw": [
+        "reporting",
+        "data visualization",
+        "crm",
+        "excel"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_001",
+      "offer_title": "Data Analyst VIE - KPI & Reporting",
+      "offer_country": "Canada",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "analyse de données",
+        "exploration de données",
+        "SQL",
+        "logiciel de visualisation des données",
+        "utiliser un logiciel d’analyse de données spécifique",
+        "utiliser un logiciel de tableur"
+      ],
+      "offer_skills_raw": [
+        "data analysis",
+        "kpi",
+        "reporting",
+        "sql",
+        "power bi",
+        "excel",
+        "api",
+        "json"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_002",
+      "offer_title": "Business Intelligence Analyst VIE - Tableau",
+      "offer_country": "Sweden",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "SQL",
+        "logiciel de visualisation des données",
+        "utiliser un logiciel d’analyse de données spécifique"
+      ],
+      "offer_skills_raw": [
+        "business intelligence",
+        "tableau",
+        "sql",
+        "data visualization",
+        "reporting",
+        "kpi"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_003",
+      "offer_title": "Data Ops Analyst VIE - Normalisation",
+      "offer_country": "Belgium",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "Python (programmation informatique)",
+        "SQL"
+      ],
+      "offer_skills_raw": [
+        "normalisation",
+        "data quality",
+        "csv",
+        "python",
+        "sql",
+        "automatisation",
+        "reporting"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_004",
+      "offer_title": "Analytics Engineer VIE - API & BI",
+      "offer_country": "Germany",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "Python (programmation informatique)",
+        "SQL",
+        "analyse de données",
+        "exploration de données"
+      ],
+      "offer_skills_raw": [
+        "api",
+        "json",
+        "python",
+        "sql",
+        "data analysis",
+        "kpi",
+        "reporting"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_005",
+      "offer_title": "Reporting Analyst VIE - Power BI",
+      "offer_country": "Spain",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "logiciel de visualisation des données",
+        "utiliser un logiciel d’analyse de données spécifique",
+        "utiliser un logiciel de tableur",
+        "analyse de données",
+        "exploration de données"
+      ],
+      "offer_skills_raw": [
+        "power bi",
+        "excel",
+        "reporting",
+        "kpi",
+        "data analysis",
+        "tableur"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_006",
+      "offer_title": "Business Analyst VIE - Operations",
+      "offer_country": "Portugal",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "utiliser un logiciel de tableur"
+      ],
+      "offer_skills_raw": [
+        "reporting",
+        "excel",
+        "project management",
+        "process improvement",
+        "stakeholder management"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_008",
+      "offer_title": "Data Ops VIE - Inventory",
+      "offer_country": "Singapore",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "SQL"
+      ],
+      "offer_skills_raw": [
+        "data ops",
+        "sql",
+        "data quality",
+        "documentation",
+        "process"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_009",
+      "offer_title": "Product Ops Analyst VIE - Metrics",
+      "offer_country": "Denmark",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "analyse de données",
+        "exploration de données"
+      ],
+      "offer_skills_raw": [
+        "kpi",
+        "data analysis",
+        "user research",
+        "project management"
+      ],
+      "score_is_partial": false
+    },
+    {
+      "offer_id": "vie_fixture_010",
+      "offer_title": "Supply Analyst VIE - Forecasting",
+      "offer_country": "Italy",
+      "offer_source": "business_france",
+      "score": 5,
+      "breakdown": {
+        "skills": 0.0,
+        "languages": 0.0,
+        "education": 0.0,
+        "country": 1.0
+      },
+      "reasons": [
+        "Aucune compétence détectée en commun",
+        "Pays dans les préférences"
+      ],
+      "matched_skills": [],
+      "missing_skills": [
+        "utiliser un logiciel de tableur",
+        "analyse de données",
+        "exploration de données"
+      ],
+      "offer_skills_raw": [
+        "forecasting",
+        "excel",
+        "reporting",
+        "data analysis"
+      ],
+      "score_is_partial": false
+    }
+  ]
+}

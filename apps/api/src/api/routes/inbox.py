@@ -38,6 +38,12 @@ from ..schemas.inbox import (
 from ..deps.auth import AuthenticatedUser, get_optional_user
 from ..utils.db import get_connection
 from ..utils.inbox_catalog import load_catalog_offers, load_catalog_offers_filtered, count_catalog_offers_filtered
+from ..utils.generic_skills_filter import (
+    HARD_GENERIC_URIS,
+    filter_skills_uri_for_scoring,
+    should_apply_generic_filter,
+)
+from ..utils.career_intelligence import build_career_intelligence
 from ..utils.rome_link import get_offer_rome_links, get_rome_competences_for_rome_codes
 from ..utils.rome_inferred import infer_rome_for_offers
 from semantic.semantic_service import compute_semantic_for_offer
@@ -208,6 +214,51 @@ def _extract_skill_labels(raw_skills) -> List[str]:
     if isinstance(raw_skills, str):
         return [s.strip() for s in raw_skills.split(",") if s.strip()]
     return []
+
+
+def _build_uri_label_map(raw_skills) -> Dict[str, str]:
+    if not isinstance(raw_skills, list):
+        return {}
+    labels: Dict[str, str] = {}
+    for item in raw_skills:
+        if not isinstance(item, dict):
+            continue
+        uri = item.get("uri")
+        label = item.get("label")
+        if uri and label:
+            labels[str(uri)] = str(label)
+    return labels
+
+
+def _career_intelligence_for_display(profile_skills_uri: List[str], offer: Dict) -> Optional[Dict]:
+    offer_skills_uri = list(offer.get("skills_uri") or [])
+    if not profile_skills_uri or not offer_skills_uri:
+        return None
+
+    payload = build_career_intelligence(profile_skills_uri, offer_skills_uri)
+    label_map = _build_uri_label_map(offer.get("skills_display") or [])
+
+    def _display_values(values: List[str]) -> List[str]:
+        result: List[str] = []
+        seen: Set[str] = set()
+        for value in values:
+            label = label_map.get(value)
+            if not label:
+                if str(value).startswith("http"):
+                    continue
+                label = str(value)
+            key = label.strip().lower()
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            result.append(label.strip())
+        return result
+
+    return {
+        **payload,
+        "strengths": _display_values(list(payload.get("strengths") or [])),
+        "gaps": _display_values(list(payload.get("gaps") or [])),
+    }
 
 
 def _load_profile_fixture(profile_id: str, payload: Dict) -> tuple[Dict, str]:
@@ -558,6 +609,10 @@ def _score_offers(
     offer_intelligence_map: Dict[str, Dict] = {}
     gate_rejections: List[Dict] = []
 
+    apply_generic_filter = should_apply_generic_filter(
+        list(getattr(extracted, "skills_uri", []) or []), HARD_GENERIC_URIS
+    )
+
     for offer in offers:
         oid = str(offer.get("id") or "")
         if oid in decided_ids:
@@ -599,8 +654,12 @@ def _score_offers(
                 continue
             offer_intelligence_map[oid] = offer_intelligence_payload
 
+        if apply_generic_filter:
+            offer_view = {**offer, "skills_uri": filter_skills_uri_for_scoring(offer.get("skills_uri") or [])}
+        else:
+            offer_view = offer
         try:
-            result = engine.score_offer(extracted, offer)
+            result = engine.score_offer(extracted, offer_view)
         except Exception as _score_exc:
             logger.warning("[inbox] score_offer failed for offer %s: %s", oid, _score_exc)
             continue
@@ -701,6 +760,10 @@ def _score_offers(
                 skills_uri_count=offer.get("skills_uri_count"),
                 skills_uri_collapsed_dupes=offer.get("skills_uri_collapsed_dupes"),
                 skills_unmapped_count=offer.get("skills_unmapped_count"),
+                career_intelligence=_career_intelligence_for_display(
+                    list(getattr(extracted, "skills_uri", []) or []),
+                    offer,
+                ),
             )
         if near_matches:
             item.near_match_count = len(near_matches)

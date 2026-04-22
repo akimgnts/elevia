@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from .offer_skills import get_offer_skills_by_offer_ids
-from .generic_skills_filter import filter_skills_uri_for_scoring
 from compass.offer_canonicalization import normalize_offers_to_uris
 from offer.offer_cluster import detect_offer_cluster
 
@@ -98,7 +97,8 @@ def _load_business_france_from_postgres() -> List[Dict]:
                 cur.execute(
                     """
                     SELECT external_id, source, title, description, company,
-                           location, country, publication_date, start_date
+                           location, country, publication_date, start_date,
+                           payload_json, contract_type
                     FROM clean_offers
                     WHERE source = %s
                     ORDER BY publication_date DESC NULLS LAST
@@ -106,7 +106,7 @@ def _load_business_france_from_postgres() -> List[Dict]:
                     ("business_france",),
                 )
                 rows = cur.fetchall()
-        return [
+        offers = [
             {
                 "id": row[0],
                 "source": row[1],
@@ -118,9 +118,15 @@ def _load_business_france_from_postgres() -> List[Dict]:
                 "publication_date": str(row[7]) if row[7] else None,
                 "contract_duration": None,
                 "start_date": str(row[8]) if row[8] else None,
+                "payload_json": json.dumps(row[9], ensure_ascii=False) if isinstance(row[9], dict) else row[9],
+                "contract_type": row[10],
             }
             for row in rows
         ]
+        for offer in offers:
+            _attach_payload_fields(offer)
+            offer.pop("payload_json", None)
+        return offers
     except Exception as e:
         logger.error(f"[inbox] Business France catalog load failed (PostgreSQL): {e}")
         raise
@@ -257,31 +263,6 @@ def _apply_esco_normalization(offers: List[Dict]) -> List[Dict]:
 
     if offers_needing_normalization:
         normalize_offers_to_uris(offers_needing_normalization)
-
-    # Filter generic URIs from scoring set (flag-gated: ELEVIA_FILTER_GENERIC_URIS=1).
-    # skills_display is NOT modified — user-visible labels are unaffected.
-    # Applied after full normalization (including domain URIs) so domain signals survive.
-    offers_touched = 0
-    total_removed = 0
-    removed_uri_counts: Dict[str, int] = {}
-    for offer in offers:
-        raw = offer.get("skills_uri") or []
-        filtered = filter_skills_uri_for_scoring(raw)
-        if filtered is not raw:
-            removed = [u for u in raw if u not in set(filtered)]
-            offer["skills_uri"] = filtered
-            offer["skills_uri_count"] = len(filtered)
-            offers_touched += 1
-            total_removed += len(removed)
-            for uri in removed:
-                removed_uri_counts[uri] = removed_uri_counts.get(uri, 0) + 1
-    if offers_touched:
-        logger.info(
-            "generic_skills_filter: offers_touched=%d total_uris_removed=%d breakdown=%s",
-            offers_touched,
-            total_removed,
-            removed_uri_counts,
-        )
 
     # Precompute offer_cluster once per catalog load — eliminates N+1 in inbox scoring loop
     for offer in offers:

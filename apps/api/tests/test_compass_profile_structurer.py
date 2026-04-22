@@ -394,6 +394,47 @@ def test_crash_safety_empty_text():
         )
 
 
+def test_mission_lines_are_not_promoted_to_experiences():
+    """
+    Mission/action lines inside a real experience must remain bullets.
+    They must not become autonomous experiences just because they contain broad
+    terms such as "data" or "business".
+    """
+    cv = """\
+Professional Experience
+
+Data & Business Analyst
+Sidel — International environment
+2023 – 2025
+Built and structured datasets to support business analysis and operational reporting
+Worked in a cloud-based data environment to prepare and organize data sources
+Designed and implemented data pipelines to improve reporting reliability
+Performed data cleaning, validation and anomaly detection to improve data quality
+Automated data workflows and reporting using Python, Excel and Power Query
+Developed Power BI dashboards to track operational and commercial KPIs
+Collaborated with business and technical teams to structure data solutions
+Explored AI workflows and LLM-assisted approaches to improve data analysis processes
+
+Business Developer (Data-driven)
+Vassard OMB
+2022 – 2023
+Structured customer and sales data to support commercial decisions
+Analyzed business performance using Excel and CRM exports
+"""
+    result = structure_profile_text_v1(cv)
+    titles = [e.title or "" for e in result.experiences]
+
+    assert "Data & Business Analyst" in titles
+    assert "Business Developer (Data-driven)" in titles
+    assert not any("Performed data cleaning" in title for title in titles), titles
+    assert not any("Collaborated with business" in title for title in titles), titles
+
+    data_exp = next(e for e in result.experiences if e.title == "Data & Business Analyst")
+    bullets = " ".join(data_exp.bullets)
+    assert "Performed data cleaning" in bullets
+    assert "Collaborated with business" in bullets
+
+
 # ── Test 9 — Score invariance ─────────────────────────────────────────────────
 
 def test_score_invariance_global_suite():

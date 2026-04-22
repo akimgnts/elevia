@@ -238,6 +238,7 @@ class InboxItem(BaseModel):
     semantic_explainability: Optional[SemanticExplainability] = None
     scoring_v2: Optional[ScoringV2] = None
     scoring_v3: Optional[ScoringV3] = None
+    career_intelligence: Optional[Dict[str, Any]] = None
     explain_v1: Optional[CompassExplainCompact] = None  # compass signal (always computed)
     near_match_count: Optional[int] = None  # compact, display-only (list view)
     match_strength: Optional[str] = Field(default=None, pattern="^(STRONG|MEDIUM|WEAK)$")

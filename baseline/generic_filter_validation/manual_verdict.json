@@ -1,0 +1,92 @@
+{
+  "method": "Classification qualitative manuelle basée sur la cohérence métier du top 5 ON vs OFF. L'heuristique automatique dans per_profile_comparison.json.analysis.better est intentionnellement conservative (échoue dès qu'une offre OFF top3 quitte top10 ON). Puisque les top OFF sont saturés par les HARD generics, presque toutes ces offres sortent quand le filtre est ON. L'heuristique automatique déclenche lost_good_matches sur 100% des profils, ce qui masque les vraies améliorations.",
+  "note_on_automated_heuristic": "per_profile_comparison.json.analysis.better = false pour tous les profils. C'est un artefact de l'heuristique, pas un verdict.",
+  "per_profile": [
+    {
+      "profile_id": "cv_fixture_v0",
+      "domain": "data_analyst_bilingual",
+      "verdict": "clear_improvement",
+      "off_top5_relevance": "none (industrial, KYC, business manager)",
+      "on_top5_relevance": "high (Chargé de projet x2, Business Analyst, Research, Tech training)",
+      "comment": "OFF retournait des offres industrielles/KYC saturées à 100 via anglais+gestion de projets. ON sort Business Analyst en top2 — alignement data_analyst bilingual."
+    },
+    {
+      "profile_id": "cv_01_lina_morel",
+      "domain": "sales_b2b",
+      "verdict": "mild_improvement",
+      "off_top5_relevance": "none (industrial quality, KYC, credit)",
+      "on_top5_relevance": "partial (lean logistics + approvisionnement + appels d'offres + financial strategy)",
+      "comment": "ON reste industriel dominé mais 'Spécialiste appels d'offres' et 'Business Strategy' émergent. Pas de rôle sales B2B pur en top5."
+    },
+    {
+      "profile_id": "cv_02_hugo_renaud",
+      "domain": "business_dev_export",
+      "verdict": "clear_improvement",
+      "off_top5_relevance": "low (industrial quality + médical + sales&marketing + manufacturing)",
+      "on_top5_relevance": "high (Technico-Commercial top1, Marketing Coordinator, Medical Advisor, Sales&Marketing, ETF Sales)",
+      "comment": "Top5 ON est essentiellement business dev / sales — gros nettoyage des faux positifs industriels."
+    },
+    {
+      "profile_id": "cv_03_sarah_el_mansouri",
+      "domain": "finance_or_admin_unknown",
+      "verdict": "neutral",
+      "off_top5_relevance": "low (5x industrial engineer)",
+      "on_top5_relevance": "low (lean logistics + industrial + barley + approvisionnement)",
+      "comment": "Profil ambigu. OFF et ON restent dominés par l'industrie. Pas d'offres finance/admin qui remontent. Profil probablement mal caractérisé à la parsing."
+    },
+    {
+      "profile_id": "cv_04_benoit_caron",
+      "domain": "supply_ops_logistics",
+      "verdict": "clear_improvement",
+      "off_top5_relevance": "low (industrial quality, railway engineer, injection, nuclear)",
+      "on_top5_relevance": "high (Operations Manager, Business Developer, Lean Logistics, Logisticien Chantier, Projets Industriels)",
+      "comment": "Alignement parfait du top5 ON avec le profil supply/ops. Top 3 = ops manager + business dev + lean logistics."
+    },
+    {
+      "profile_id": "cv_05_camille_vasseur",
+      "domain": "communication_paris",
+      "verdict": "neutral",
+      "off_top5_relevance": "none (industrial quality, railway, injection, nuclear)",
+      "on_top5_relevance": "low (ops manager + biz dev + lean logistics + logisticien + projets industriels)",
+      "comment": "Top ON n'a aucune offre comm/interne/marketing. Profil Camille n'a que 4 URIs dont 2 HARD — après filtrage offre, il reste trop peu de signal domaine pour faire émerger comm."
+    },
+    {
+      "profile_id": "cv_06_yasmine_haddad",
+      "domain": "marketing_digital",
+      "verdict": "clear_improvement",
+      "off_top5_relevance": "none (industrial quality, KYC, credit)",
+      "on_top5_relevance": "high (Account Manager e-commerce, Community Manager e-reputation, Business Manager)",
+      "comment": "Top 2 ON = marketing digital pertinent. Gros nettoyage des faux positifs industriels."
+    },
+    {
+      "profile_id": "cv_07_pierre_lemaire",
+      "domain": "finance_or_admin_unknown",
+      "verdict": "mild_improvement",
+      "off_top5_relevance": "low (industrial quality + KYC)",
+      "on_top5_relevance": "partial (industrial + Contrôleur de Gestion Industriel + Retrofit Program Controller)",
+      "comment": "Contrôleur de gestion et program controller émergent en top5 ON — signal finance/controlling qui n'était pas visible OFF."
+    },
+    {
+      "profile_id": "cv_08_amel_dufour",
+      "domain": "finance_or_admin_unknown",
+      "verdict": "mild_improvement",
+      "off_top5_relevance": "low (industrial)",
+      "on_top5_relevance": "partial (industrial + Project Buyer + Indirect Buyer + Analyste crédits)",
+      "comment": "Diversification vers buyer + credit analyst. Utile si le profil est effectivement finance/admin."
+    },
+    {
+      "profile_id": "cv_09_ines_barbier",
+      "domain": "rh_junior",
+      "verdict": "degradation",
+      "off_top5_relevance": "none (industrial, geophysicien, geologue)",
+      "on_top5_relevance": "none (sales engineer, industrial, junior accountant)",
+      "comment": "Scores chutent de 100 à 30. Aucune offre RH ne remonte. Profil a 3 HARD sur 5 URIs (60%) — après filtrage, il ne reste que 2 URIs domain pour matcher, trop peu pour produire un ranking cohérent. Cas limite du filtre."
+    }
+  ],
+  "counts": {
+    "clear_improvement": 4,
+    "mild_improvement": 3,
+    "neutral": 2,
+    "degradation": 1
+  }
+}

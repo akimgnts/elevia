@@ -15,6 +15,7 @@ import ApplicationsPage from "./pages/ApplicationsPage";
 import CvDeltaPage from "./pages/CvDeltaPage";
 import MarketInsightsPage from "./pages/MarketInsightsPage";
 import LoginPage from "./pages/LoginPage";
+import MatchingShowcasePage from "./pages/MatchingShowcasePage";
 import { useAuth } from "./hooks/useAuth";
 
 function AuthBootstrap() {
@@ -56,6 +57,7 @@ export default function App() {
         <Route path="/dev/cv-delta" element={<CvDeltaPage />} />
         <Route path="/market-insights" element={<MarketInsightsPage />} />
         <Route path="/market" element={<MarketInsightsPage />} />
+        <Route path="/matching-showcase" element={<MatchingShowcasePage />} />
         <Route path="/offers/:offerId" element={<OfferDetailPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

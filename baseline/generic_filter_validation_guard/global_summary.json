@@ -1,0 +1,13 @@
+{
+  "profiles_tested": 10,
+  "clear_improvement_count": 4,
+  "mild_improvement_count": 3,
+  "neutral_count": 1,
+  "neutral_guard_skipped_count": 2,
+  "degradation_count": 0,
+  "rh_guard_fixed": true,
+  "min_profile_domain_uris": 3,
+  "total_uris_removed_from_corpus_on": 1497,
+  "hard_generic_urls_count": 9,
+  "final_verdict": "validated"
+}

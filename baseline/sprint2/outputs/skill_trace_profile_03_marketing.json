@@ -1,0 +1,173 @@
+{
+  "profile_id": "golden_03",
+  "skills_input_count": 5,
+  "skills_after_extraction_count": 11,
+  "labels_attempted_mapping_count": 11,
+  "skills_mapped_count": 5,
+  "skills_unmapped_count": 0,
+  "skills_dropped_count": 0,
+  "coverage_ratio": 1.0,
+  "skills_uri_count_frozenset": 5,
+  "skills_unmapped_count_extractor": 4,
+  "per_skill_trace": [
+    {
+      "input_skill": "marketing_digital",
+      "normalized_input": "marketing_digital",
+      "alias_labels": [
+        "techniques de marketing numérique"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "marketing_digital",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "techniques de marketing numérique",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/43dfbe7f-9e10-4871-b171-e5076737b4cf",
+          "esco_label": "techniques de marketing numérique",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/43dfbe7f-9e10-4871-b171-e5076737b4cf"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "seo",
+      "normalized_input": "seo",
+      "alias_labels": [
+        "optimisation des moteurs de recherche"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "seo",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/eda4d727-4374-49af-ace4-118c7c906835",
+          "esco_label": "optimisation des moteurs de recherche",
+          "method": "dictionary_alt_label",
+          "confidence": 0.95
+        },
+        {
+          "label": "optimisation des moteurs de recherche",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/eda4d727-4374-49af-ace4-118c7c906835",
+          "esco_label": "optimisation des moteurs de recherche",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/eda4d727-4374-49af-ace4-118c7c906835"
+      ],
+      "status": "mapped",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "google_analytics",
+      "normalized_input": "google_analytics",
+      "alias_labels": [
+        "utiliser un logiciel danalyse de données spécifique"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "google_analytics",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "utiliser un logiciel danalyse de données spécifique",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3",
+          "esco_label": "utiliser un logiciel d’analyse de données spécifique",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "crm",
+      "normalized_input": "crm",
+      "alias_labels": [
+        "gestion de la relation client"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "crm",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "gestion de la relation client",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/dc9a236c-c640-43c3-812f-269403591edb",
+          "esco_label": "gestion de la relation client",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/dc9a236c-c640-43c3-812f-269403591edb"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "excel",
+      "normalized_input": "excel",
+      "alias_labels": [
+        "utiliser un logiciel de tableur",
+        "microsoft office excel"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "excel",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "utiliser un logiciel de tableur",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+          "esco_label": "utiliser un logiciel de tableur",
+          "method": "preferred_label",
+          "confidence": 1.0
+        },
+        {
+          "label": "microsoft office excel",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+          "esco_label": "utiliser un logiciel de tableur",
+          "method": "dictionary_alt_label",
+          "confidence": 0.95
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    }
+  ]
+}

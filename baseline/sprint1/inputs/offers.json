@@ -1,0 +1,736 @@
+[
+  {
+    "id": "VIE-001",
+    "title": "Data Analyst - Singapore",
+    "description": "Analyse de données pour notre filiale à Singapour. Python, SQL, PowerBI requis.",
+    "country": "SG",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "python",
+      "sql",
+      "data_visualization",
+      "powerbi"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      }
+    ]
+  },
+  {
+    "id": "VIE-002",
+    "title": "Développeur Full Stack - New York",
+    "description": "Développement d'applications web. React, Node.js, Python.",
+    "country": "US",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "python",
+      "javascript",
+      "react",
+      "nodejs"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "C1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-003",
+    "title": "Marketing Manager - Londres",
+    "description": "Gestion de campagnes marketing digital. SEO, Google Analytics.",
+    "country": "GB",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "marketing_digital",
+      "seo",
+      "google_analytics"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "C1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-004",
+    "title": "Analyste Financier - Hong Kong",
+    "description": "Modélisation financière et reporting. Excel, SAP requis.",
+    "country": "HK",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "excel",
+      "financial_modeling",
+      "sap"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "C1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-005",
+    "title": "Commercial Export - Shanghai",
+    "description": "Développement commercial B2B en Chine. Prospection et négociation.",
+    "country": "CN",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "sales",
+      "negotiation",
+      "crm"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      },
+      {
+        "code": "zh",
+        "level": "A2"
+      }
+    ]
+  },
+  {
+    "id": "VIE-006",
+    "title": "Data Scientist - Berlin",
+    "description": "Machine learning et analyse prédictive. Python, TensorFlow.",
+    "country": "DE",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "python",
+      "machine_learning",
+      "tensorflow",
+      "sql"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      },
+      {
+        "code": "de",
+        "level": "B1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-007",
+    "title": "Chef de Projet IT - Tokyo",
+    "description": "Gestion de projets informatiques. Agile, Jira.",
+    "country": "JP",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "project_management",
+      "agile",
+      "jira"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "C1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-008",
+    "title": "Business Analyst - Dubai",
+    "description": "Analyse des processus métier. Excel, SQL, PowerBI.",
+    "country": "AE",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "excel",
+      "sql",
+      "data_visualization",
+      "powerbi"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      }
+    ]
+  },
+  {
+    "id": "VIE-009",
+    "title": "Développeur Backend - Amsterdam",
+    "description": "Développement d'APIs RESTful. Python, Django, PostgreSQL.",
+    "country": "NL",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "python",
+      "django",
+      "sql",
+      "git"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      }
+    ]
+  },
+  {
+    "id": "VIE-010",
+    "title": "Growth Marketing - San Francisco",
+    "description": "Growth hacking et marketing digital. SEO, Google Ads.",
+    "country": "US",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "marketing_digital",
+      "seo",
+      "google_analytics"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "C1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-011",
+    "title": "Contrôleur de Gestion - Milan",
+    "description": "Contrôle de gestion et reporting financier. SAP, Excel.",
+    "country": "IT",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "excel",
+      "financial_modeling",
+      "sap",
+      "accounting"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      },
+      {
+        "code": "it",
+        "level": "A2"
+      }
+    ]
+  },
+  {
+    "id": "VIE-012",
+    "title": "Ingénieur DevOps - Stockholm",
+    "description": "Infrastructure cloud et CI/CD. AWS, Docker, Kubernetes.",
+    "country": "SE",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "aws",
+      "docker",
+      "kubernetes",
+      "git"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      }
+    ]
+  },
+  {
+    "id": "VIE-013",
+    "title": "Product Manager - Boston",
+    "description": "Gestion de produit digital. Agile, Jira, UX.",
+    "country": "US",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "project_management",
+      "agile",
+      "jira"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "C1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-014",
+    "title": "Consultant CRM - Madrid",
+    "description": "Implémentation Salesforce et formation. CRM, Excel.",
+    "country": "ES",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "crm",
+      "salesforce",
+      "excel"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      },
+      {
+        "code": "es",
+        "level": "B1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-015",
+    "title": "Data Engineer - Sydney",
+    "description": "Construction de pipelines de données. Python, Spark, AWS.",
+    "country": "AU",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "python",
+      "sql",
+      "aws",
+      "spark"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      }
+    ]
+  },
+  {
+    "id": "VIE-016",
+    "title": "UX Designer - Lisbonne",
+    "description": "Design d'interfaces utilisateur. Figma, Adobe XD.",
+    "country": "PT",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "ux_design",
+      "figma",
+      "adobe_xd"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      }
+    ]
+  },
+  {
+    "id": "VIE-017",
+    "title": "Acheteur International - Munich",
+    "description": "Négociation et gestion fournisseurs. Procurement, Excel.",
+    "country": "DE",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "negotiation",
+      "excel",
+      "procurement"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      },
+      {
+        "code": "de",
+        "level": "B1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-018",
+    "title": "Content Manager - Dublin",
+    "description": "Création de contenu et SEO. Rédaction, WordPress.",
+    "country": "IE",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "content_writing",
+      "seo",
+      "wordpress"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "C1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-019",
+    "title": "Supply Chain Analyst - Bruxelles",
+    "description": "Optimisation de la chaîne logistique. Excel, SAP.",
+    "country": "BE",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "excel",
+      "sap",
+      "supply_chain"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      },
+      {
+        "code": "fr",
+        "level": "C1"
+      }
+    ]
+  },
+  {
+    "id": "VIE-020",
+    "title": "Développeur Mobile - Tel Aviv",
+    "description": "Développement iOS et Android. Swift, Kotlin, React Native.",
+    "country": "IL",
+    "is_vie": true,
+    "source": "business_france",
+    "skills": [
+      "mobile_development",
+      "swift",
+      "kotlin",
+      "react_native"
+    ],
+    "languages": [
+      {
+        "code": "en",
+        "level": "B2"
+      }
+    ]
+  },
+  {
+    "id": "vie_fixture_001",
+    "title": "Data Analyst VIE - KPI & Reporting",
+    "company": "Elevia Labs",
+    "city": "Montreal",
+    "country": "Canada",
+    "description": "Mission VIE data analyst: KPI dashboarding, reporting hebdo, automation des extractions API.",
+    "skills": [
+      "data analysis",
+      "kpi",
+      "reporting",
+      "sql",
+      "power bi",
+      "excel",
+      "api",
+      "json"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+3",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_002",
+    "title": "Business Intelligence Analyst VIE - Tableau",
+    "company": "Nordic Retail",
+    "city": "Stockholm",
+    "country": "Sweden",
+    "description": "BI analyst role: dashboards Tableau, SQL reporting, KPI governance.",
+    "skills": [
+      "business intelligence",
+      "tableau",
+      "sql",
+      "data visualization",
+      "reporting",
+      "kpi"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+5",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_003",
+    "title": "Data Ops Analyst VIE - Normalisation",
+    "company": "Helios Pharma",
+    "city": "Brussels",
+    "country": "Belgium",
+    "description": "Data ops: normalisation des sources, qualite data, SQL + Python.",
+    "skills": [
+      "normalisation",
+      "data quality",
+      "csv",
+      "python",
+      "sql",
+      "automatisation",
+      "reporting"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+4",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_004",
+    "title": "Analytics Engineer VIE - API & BI",
+    "company": "Orbit Mobility",
+    "city": "Berlin",
+    "country": "Germany",
+    "description": "Analytics engineer: APIs, data marts, KPI definitions, reporting BI.",
+    "skills": [
+      "api",
+      "json",
+      "python",
+      "sql",
+      "data analysis",
+      "kpi",
+      "reporting"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+5",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_005",
+    "title": "Reporting Analyst VIE - Power BI",
+    "company": "Atlas Energy",
+    "city": "Madrid",
+    "country": "Spain",
+    "description": "Reporting analyst: Power BI, Excel, tableaux de bord, suivi KPI.",
+    "skills": [
+      "power bi",
+      "excel",
+      "reporting",
+      "kpi",
+      "data analysis",
+      "tableur"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+3",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_006",
+    "title": "Business Analyst VIE - Operations",
+    "company": "BlueMarlin",
+    "city": "Lisbon",
+    "country": "Portugal",
+    "description": "Ops analyst: reporting, process mapping, coordination metiers.",
+    "skills": [
+      "reporting",
+      "excel",
+      "project management",
+      "process improvement",
+      "stakeholder management"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+3",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_007",
+    "title": "Data Reporting Analyst VIE - CRM",
+    "company": "Mercury Telecom",
+    "city": "Dublin",
+    "country": "Ireland",
+    "description": "Reporting CRM: dashboards, KPIs commerciaux, extraction SQL light.",
+    "skills": [
+      "reporting",
+      "data visualization",
+      "crm",
+      "excel"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+3",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_008",
+    "title": "Data Ops VIE - Inventory",
+    "company": "Pacific Logistics",
+    "city": "Singapore",
+    "country": "Singapore",
+    "description": "Data ops: qualite data, SQL basique, documentation et routine BI.",
+    "skills": [
+      "data ops",
+      "sql",
+      "data quality",
+      "documentation",
+      "process"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+4",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_009",
+    "title": "Product Ops Analyst VIE - Metrics",
+    "company": "SignalSea",
+    "city": "Copenhagen",
+    "country": "Denmark",
+    "description": "Product ops: suivi KPI, analyse usage, reporting equipe produit.",
+    "skills": [
+      "kpi",
+      "data analysis",
+      "user research",
+      "project management"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+4",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_010",
+    "title": "Supply Analyst VIE - Forecasting",
+    "company": "Nova Foods",
+    "city": "Milan",
+    "country": "Italy",
+    "description": "Supply analyst: prevision, reporting, analyses de stock.",
+    "skills": [
+      "forecasting",
+      "excel",
+      "reporting",
+      "data analysis"
+    ],
+    "languages": [
+      "anglais"
+    ],
+    "education": "bac+3",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_011",
+    "title": "ML Engineer VIE - Deep Learning",
+    "company": "Axiom AI",
+    "city": "Tokyo",
+    "country": "Japan",
+    "description": "ML engineer: deep learning, MLOps, training pipelines.",
+    "skills": [
+      "deep learning",
+      "pytorch",
+      "tensorflow",
+      "mlops",
+      "kubernetes"
+    ],
+    "languages": [
+      "japanese"
+    ],
+    "education": "phd",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_012",
+    "title": "Backend Engineer VIE - Golang",
+    "company": "RapidPay",
+    "city": "Zurich",
+    "country": "Switzerland",
+    "description": "Backend engineer: microservices, Golang, gRPC, Kubernetes.",
+    "skills": [
+      "golang",
+      "microservices",
+      "kubernetes",
+      "docker",
+      "grpc"
+    ],
+    "languages": [
+      "german"
+    ],
+    "education": "phd",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_013",
+    "title": "DevOps Engineer VIE - Cloud",
+    "company": "CloudForge",
+    "city": "Austin",
+    "country": "United States",
+    "description": "DevOps: CI/CD, terraform, AWS, observability.",
+    "skills": [
+      "aws",
+      "terraform",
+      "kubernetes",
+      "ci cd",
+      "linux"
+    ],
+    "languages": [
+      "english"
+    ],
+    "education": "phd",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_014",
+    "title": "Quant Researcher VIE - Finance",
+    "company": "Sigma Capital",
+    "city": "London",
+    "country": "United Kingdom",
+    "description": "Quant research: modele stochastique, C++, pricing derivees.",
+    "skills": [
+      "stochastic calculus",
+      "c++",
+      "quant",
+      "derivatives",
+      "risk model"
+    ],
+    "languages": [
+      "english"
+    ],
+    "education": "phd",
+    "is_vie": true,
+    "source": "business_france"
+  },
+  {
+    "id": "vie_fixture_015",
+    "title": "Fullstack Engineer VIE - React/Node",
+    "company": "PixelWorks",
+    "city": "Helsinki",
+    "country": "Finland",
+    "description": "Fullstack: React, Node.js, TypeScript, GraphQL, CSS.",
+    "skills": [
+      "react",
+      "node.js",
+      "typescript",
+      "graphql",
+      "css"
+    ],
+    "languages": [
+      "english"
+    ],
+    "education": "bac+5",
+    "is_vie": true,
+    "source": "business_france"
+  }
+]

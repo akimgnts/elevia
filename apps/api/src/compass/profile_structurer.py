@@ -450,6 +450,9 @@ def _detect_section(line: str) -> Optional[str]:
 # ── Experience block parser ───────────────────────────────────────────────────
 
 _TITLE_MARKERS = re.compile(
+    # Keep role/title anchors here. Broad domain words such as "data" or
+    # "business" are intentionally not standalone title markers: mission lines
+    # often contain them and must not be promoted to ExperienceV1.title.
     r"\b(?:chef|directeur|directrice|responsable|manager|analyst|analyste|"
     r"consultant|ingénieur|ingenieur|développeur|developpeur|chargé|charge|chargée|chargee|chargés|"
     r"lead|expert|specialist|specialiste|associate|senior|junior|"
@@ -460,7 +463,7 @@ _TITLE_MARKERS = re.compile(
     r"conseiller|conseillere|conseillère|conseillers|"
     r"animateur|animatrice|employé|employe|employée|employee|polyvalent|polyvalente|"
     r"comptable|auditeur|auditrice|controleur|contrôleur|"
-    r"data|software|business|product|marketing|sales|finance)\b",
+    r"analysis\s+support|performance\s+support)\b",
     re.IGNORECASE,
 )
 
@@ -468,6 +471,41 @@ _COMPANY_MARKERS = re.compile(
     r"\b(?:chez|at|pour|groupe|group|sa\b|sas\b|sarl\b|srl\b|bv\b|ltd\b|llc\b|inc\b|gmbh\b|ag\b)\b",
     re.IGNORECASE,
 )
+
+_BULLET_RE = re.compile(r"^\s*[-•*·→▪○–]\s")
+_MISSION_ACTION_START_RE = re.compile(
+    r"^\s*(?:"
+    r"performed|collaborated|built|worked|designed|automated|developed|explored|"
+    r"analyzed|analysed|structured|implemented|managed|created|improved|supported|"
+    r"produced|contributed|identified|translated|interpreted|communicated|prepared|"
+    r"réalisé|realise|réalise|collaboré|collabore|développé|developpe|développe|"
+    r"analysé|analyse|structuré|structure|automatisé|automatise|conçu|concu|"
+    r"préparé|prepare|produit|contribué|contribue|amélioré|ameliore"
+    r")\b",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_mission_line(line: str) -> bool:
+    """Return true for action/result sentences that belong in bullets, not titles."""
+    stripped = line.strip()
+    if not stripped:
+        return False
+    return bool(_MISSION_ACTION_START_RE.search(stripped))
+
+
+def _looks_like_experience_title_line(line: str) -> bool:
+    """Conservative title gate shared by block splitting and block parsing."""
+    stripped = line.strip()
+    if not stripped or _BULLET_RE.match(stripped):
+        return False
+    if _looks_like_mission_line(stripped):
+        return False
+    if len(stripped.split()) > 12:
+        return False
+    if stripped.endswith(".") or stripped.endswith(","):
+        return False
+    return bool(_TITLE_MARKERS.search(stripped))
 
 
 def _parse_experience_block(lines: List[str]) -> ExperienceV1:
@@ -533,7 +571,7 @@ def _parse_experience_block(lines: List[str]) -> ExperienceV1:
         # A line is ONLY treated as a pure date line if it has ≤ 5 words
         # OR it has no title keyword. Otherwise it's a combined header.
         is_pure_date = is_date_line and (
-            len(stripped.split()) <= 5 or not _TITLE_MARKERS.search(stripped)
+            len(stripped.split()) <= 5 or not _looks_like_experience_title_line(stripped)
         )
         if is_date_line:
             s, e = _find_dates_in_line(stripped)
@@ -546,7 +584,7 @@ def _parse_experience_block(lines: List[str]) -> ExperienceV1:
             # Fall through to title/company detection for combined header lines
 
         # Title line detection (short, has title keyword, no bullet)
-        if title is None and len(stripped.split()) <= 12 and _TITLE_MARKERS.search(stripped):
+        if title is None and _looks_like_experience_title_line(stripped):
             # Try to split "Title - Company" or "Title chez Company"
             sep = re.split(r"\s+[-–—]\s+|\s+chez\s+|\s+at\s+", stripped, maxsplit=1, flags=re.IGNORECASE)
             title = sep[0].strip()
@@ -1134,12 +1172,12 @@ def _global_title_date_scan(lines: List[str]) -> List[ExperienceV1]:
         # Skip section headings and education lines
         if _detect_section(stripped) or _EDU_HEADINGS.search(stripped):
             continue
-        # Title marker must appear in the FIRST 3 tokens (not buried in a bullet sentence)
+        # Title marker must describe the line itself (not a mission sentence with
+        # a broad domain term buried in it).
         words = stripped.split()
         if len(words) < 2:
             continue
-        first_three = " ".join(words[:3])
-        if not _TITLE_MARKERS.search(first_three):
+        if not _looks_like_experience_title_line(stripped):
             continue
         # Word count ceiling (letter-spaced PDFs can inflate counts); total must be ≤ 20
         if len(words) > 20:
@@ -1174,7 +1212,7 @@ def _global_title_date_scan(lines: List[str]) -> List[ExperienceV1]:
             neighbor = lines[j].strip()
             if not neighbor:
                 break
-            if _detect_section(neighbor) or _TITLE_MARKERS.search(" ".join(neighbor.split()[:3])):
+            if _detect_section(neighbor) or _looks_like_experience_title_line(neighbor):
                 break
             block.append(neighbor)
 
@@ -1471,7 +1509,6 @@ def _split_experience_blocks(lines: List[str]) -> List[List[str]]:
 
     This handles PDFs where experience entries have no blank line separator between them.
     """
-    _BULLET_RE = re.compile(r"^\s*[-•*·→▪○–]\s")
     blocks: List[List[str]] = [[]]
     for line in lines:
         stripped = line.strip()
@@ -1480,14 +1517,9 @@ def _split_experience_blocks(lines: List[str]) -> List[List[str]]:
                 blocks.append([])
         else:
             current_nonempty = sum(1 for l in blocks[-1] if l.strip())
-            first_three = " ".join(stripped.split()[:3])
             is_new_exp_header = (
                 current_nonempty >= 2
-                and _TITLE_MARKERS.search(first_three)
-                and len(stripped.split()) <= 12
-                and not _BULLET_RE.match(line)
-                and not stripped.endswith(".")
-                and not stripped.endswith(",")
+                and _looks_like_experience_title_line(stripped)
             )
             if is_new_exp_header:
                 blocks.append([])

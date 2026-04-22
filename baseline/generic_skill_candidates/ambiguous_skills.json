@@ -1,0 +1,148 @@
+{
+  "AMBIGUOUS_SKILLS_TO_REVIEW": [
+    {
+      "skill_uri": "http://data.europa.eu/esco/skill/09f2f811-a3fb-4de3-a70f-6420a6935575",
+      "label": "cycle de développement logiciel",
+      "is_uri_backed": true,
+      "count": 267,
+      "frequency_ratio": 0.31824,
+      "cluster_count": 6,
+      "dominant_cluster": "DATA_IT",
+      "dominant_cluster_share": 0.502,
+      "max_concentration": 1.364,
+      "uniformity_ratio": 1.103,
+      "is_domain_intrinsic_label": true,
+      "cluster_distribution": {
+        "FINANCE_LEGAL": 12,
+        "MARKETING_SALES": 38,
+        "DATA_IT": 134,
+        "ADMIN_HR": 23,
+        "ENGINEERING_INDUSTRY": 39,
+        "SUPPLY_OPS": 21
+      },
+      "rationale": "Statistically spread (df=31.8%, 6 clusters, ratio=1.10) but label is intrinsically domain (DATA_IT). Apparent genericness likely comes from alias over-injection upstream, not true transversality.",
+      "risk_if_misclassified": "Tagging as generic would drop a legitimate DATA_IT / MKT / FIN signal on genuinely-domain candidates. Product review required.",
+      "verdict_family": "ambiguous"
+    },
+    {
+      "skill_uri": "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97",
+      "label": "programmation informatique",
+      "is_uri_backed": true,
+      "count": 255,
+      "frequency_ratio": 0.30393,
+      "cluster_count": 6,
+      "dominant_cluster": "DATA_IT",
+      "dominant_cluster_share": 0.859,
+      "max_concentration": 1.886,
+      "uniformity_ratio": 1.887,
+      "is_domain_intrinsic_label": true,
+      "cluster_distribution": {
+        "SUPPLY_OPS": 4,
+        "MARKETING_SALES": 13,
+        "DATA_IT": 219,
+        "ENGINEERING_INDUSTRY": 14,
+        "ADMIN_HR": 2,
+        "FINANCE_LEGAL": 3
+      },
+      "rationale": "df=30.4%, but 86% concentrated in DATA_IT (ratio=1.89) → behaves as domain within its cluster; not generic. Listed as ambiguous only because high df makes naive filters flag it.",
+      "risk_if_misclassified": "Removing it would destroy the scoring signal within its native cluster (e.g. programmation informatique for DATA_IT candidates).",
+      "verdict_family": "ambiguous"
+    },
+    {
+      "skill_uri": "http://data.europa.eu/esco/skill/143769cb-b61e-47d8-a61e-eedfbec1016c",
+      "label": "informatique décisionnelle",
+      "is_uri_backed": true,
+      "count": 251,
+      "frequency_ratio": 0.29917,
+      "cluster_count": 6,
+      "dominant_cluster": "DATA_IT",
+      "dominant_cluster_share": 0.869,
+      "max_concentration": 1.908,
+      "uniformity_ratio": 1.909,
+      "is_domain_intrinsic_label": true,
+      "cluster_distribution": {
+        "SUPPLY_OPS": 4,
+        "MARKETING_SALES": 12,
+        "DATA_IT": 218,
+        "ENGINEERING_INDUSTRY": 13,
+        "FINANCE_LEGAL": 3,
+        "ADMIN_HR": 1
+      },
+      "rationale": "df=29.9%, but 87% concentrated in DATA_IT (ratio=1.91) → behaves as domain within its cluster; not generic. Listed as ambiguous only because high df makes naive filters flag it.",
+      "risk_if_misclassified": "Removing it would destroy the scoring signal within its native cluster (e.g. programmation informatique for DATA_IT candidates).",
+      "verdict_family": "ambiguous"
+    },
+    {
+      "skill_uri": "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180",
+      "label": "exploration de données",
+      "is_uri_backed": true,
+      "count": 221,
+      "frequency_ratio": 0.26341,
+      "cluster_count": 6,
+      "dominant_cluster": "DATA_IT",
+      "dominant_cluster_share": 0.792,
+      "max_concentration": 1.739,
+      "uniformity_ratio": 1.739,
+      "is_domain_intrinsic_label": true,
+      "cluster_distribution": {
+        "DATA_IT": 175,
+        "ENGINEERING_INDUSTRY": 9,
+        "ADMIN_HR": 2,
+        "MARKETING_SALES": 17,
+        "SUPPLY_OPS": 14,
+        "FINANCE_LEGAL": 4
+      },
+      "rationale": "df=26.3%, but 79% concentrated in DATA_IT (ratio=1.74) → behaves as domain within its cluster; not generic. Listed as ambiguous only because high df makes naive filters flag it.",
+      "risk_if_misclassified": "Removing it would destroy the scoring signal within its native cluster (e.g. programmation informatique for DATA_IT candidates).",
+      "verdict_family": "ambiguous"
+    },
+    {
+      "skill_uri": "http://data.europa.eu/esco/skill/1019423b-3368-4f83-b24f-19e5fa23e816",
+      "label": "schéma de conception dinterface utilisateur",
+      "is_uri_backed": true,
+      "count": 142,
+      "frequency_ratio": 0.16925,
+      "cluster_count": 6,
+      "dominant_cluster": "DATA_IT",
+      "dominant_cluster_share": 0.606,
+      "max_concentration": 1.33,
+      "uniformity_ratio": 1.331,
+      "is_domain_intrinsic_label": true,
+      "cluster_distribution": {
+        "DATA_IT": 86,
+        "FINANCE_LEGAL": 4,
+        "MARKETING_SALES": 18,
+        "ENGINEERING_INDUSTRY": 26,
+        "SUPPLY_OPS": 6,
+        "ADMIN_HR": 2
+      },
+      "rationale": "Statistically spread (df=16.9%, 6 clusters, ratio=1.33) but label is intrinsically domain (DATA_IT). Apparent genericness likely comes from alias over-injection upstream, not true transversality.",
+      "risk_if_misclassified": "Tagging as generic would drop a legitimate DATA_IT / MKT / FIN signal on genuinely-domain candidates. Product review required.",
+      "verdict_family": "ambiguous"
+    },
+    {
+      "skill_uri": "http://data.europa.eu/esco/skill/c4b1f326-224a-420a-b8b3-814a8f13b6cb",
+      "label": "mettre en œuvre le design front end dun site web",
+      "is_uri_backed": true,
+      "count": 141,
+      "frequency_ratio": 0.16806,
+      "cluster_count": 6,
+      "dominant_cluster": "DATA_IT",
+      "dominant_cluster_share": 0.603,
+      "max_concentration": 1.324,
+      "uniformity_ratio": 1.324,
+      "is_domain_intrinsic_label": true,
+      "cluster_distribution": {
+        "DATA_IT": 85,
+        "FINANCE_LEGAL": 4,
+        "MARKETING_SALES": 18,
+        "ENGINEERING_INDUSTRY": 26,
+        "SUPPLY_OPS": 6,
+        "ADMIN_HR": 2
+      },
+      "rationale": "Statistically spread (df=16.8%, 6 clusters, ratio=1.32) but label is intrinsically domain (DATA_IT). Apparent genericness likely comes from alias over-injection upstream, not true transversality.",
+      "risk_if_misclassified": "Tagging as generic would drop a legitimate DATA_IT / MKT / FIN signal on genuinely-domain candidates. Product review required.",
+      "verdict_family": "ambiguous"
+    }
+  ]
+}

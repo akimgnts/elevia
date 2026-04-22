@@ -1,0 +1,94 @@
+{
+  "description": "Matrice synthèse CV × Fix. Statuts : EXERCISED+VALIDATED / NOT_EXERCISED / POTENTIAL_REGRESSION.",
+  "matrix": [
+    {
+      "cv_id": "cv_ref_marie_dupont",
+      "category": "data_analytics",
+      "N1_paris": "EXERCISED+VALIDATED",
+      "C1_project_management": "EXERCISED+VALIDATED",
+      "N3_sales": "EXERCISED+VALIDATED",
+      "N2_management": "EXERCISED+VALIDATED",
+      "O2_dashboards": "EXERCISED+VALIDATED",
+      "product_outcome": "amélioration",
+      "net_uri_delta_vs_pre_sprint4": "22 → 19 (-3 URIs dont -4 bruits, +1 signal légitime)"
+    },
+    {
+      "cv_id": "cv_01_lina_morel",
+      "category": "sales_commercial",
+      "N1_paris": "NOT_EXERCISED",
+      "C1_project_management": "NOT_EXERCISED",
+      "N3_sales": "EXERCISED+VALIDATED (argumentaire préservé via alias 'commercial')",
+      "N2_management": "NOT_EXERCISED",
+      "O2_dashboards": "NOT_EXERCISED",
+      "product_outcome": "neutre",
+      "net_uri_delta_vs_pre_sprint4": "non mesuré (pas de snapshot before)"
+    },
+    {
+      "cv_id": "cv_02_hugo_renaud",
+      "category": "business_dev_export",
+      "N1_paris": "NOT_EXERCISED",
+      "C1_project_management": "NOT_EXERCISED",
+      "N3_sales": "EXERCISED+VALIDATED (argumentaire préservé via alias 'commercial'/'business development')",
+      "N2_management": "NOT_EXERCISED",
+      "O2_dashboards": "NOT_EXERCISED",
+      "product_outcome": "neutre",
+      "net_uri_delta_vs_pre_sprint4": "non mesuré"
+    },
+    {
+      "cv_id": "cv_04_benoit_caron",
+      "category": "operations_logistics",
+      "N1_paris": "NOT_EXERCISED",
+      "C1_project_management": "NOT_EXERCISED",
+      "N3_sales": "NOT_EXERCISED",
+      "N2_management": "NOT_EXERCISED",
+      "O2_dashboards": "NOT_EXERCISED",
+      "product_outcome": "neutre",
+      "net_uri_delta_vs_pre_sprint4": "non mesuré (aucun token cible dans le texte)"
+    },
+    {
+      "cv_id": "cv_05_camille_vasseur",
+      "category": "communication_paris",
+      "N1_paris": "EXERCISED+VALIDATED",
+      "C1_project_management": "NOT_EXERCISED",
+      "N3_sales": "NOT_EXERCISED",
+      "N2_management": "EXERCISED+VALIDATED (community management ne produit plus gérer une équipe)",
+      "O2_dashboards": "NOT_EXERCISED",
+      "product_outcome": "amélioration",
+      "net_uri_delta_vs_pre_sprint4": "non mesuré mais 2 bruits potentiels évités (paris + gérer une équipe)"
+    },
+    {
+      "cv_id": "cv_06_yasmine_haddad",
+      "category": "marketing_reporting",
+      "N1_paris": "NOT_EXERCISED",
+      "C1_project_management": "NOT_EXERCISED",
+      "N3_sales": "NOT_EXERCISED",
+      "N2_management": "NOT_EXERCISED",
+      "O2_dashboards": "NOT_EXERCISED",
+      "product_outcome": "neutre",
+      "net_uri_delta_vs_pre_sprint4": "non mesuré"
+    },
+    {
+      "cv_id": "cv_09_ines_barbier",
+      "category": "hr_management",
+      "N1_paris": "NOT_EXERCISED",
+      "C1_project_management": "NOT_EXERCISED",
+      "N3_sales": "NOT_EXERCISED",
+      "N2_management": "NOT_EXERCISED",
+      "O2_dashboards": "NOT_EXERCISED",
+      "product_outcome": "neutre",
+      "net_uri_delta_vs_pre_sprint4": "non mesuré"
+    }
+  ],
+  "fix_summary": {
+    "N1": {"exercised_count": 2, "validated_count": 2, "regression_count": 0, "inconclusive_count": 0},
+    "C1": {"exercised_count": 1, "validated_count": 1, "regression_count": 0, "inconclusive_count": 0},
+    "N3": {"exercised_count": 3, "validated_count": 3, "regression_count": 0, "inconclusive_count": 0},
+    "N2": {"exercised_count": 2, "validated_count": 2, "regression_count": 0, "inconclusive_count": 0},
+    "O2": {"exercised_count": 1, "validated_count": 1, "regression_count": 0, "inconclusive_count": 0}
+  },
+  "product_outcome_summary": {
+    "amélioration": 2,
+    "neutre": 5,
+    "régression": 0
+  }
+}

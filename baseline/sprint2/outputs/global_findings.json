@@ -1,0 +1,276 @@
+{
+  "status_distribution": {
+    "mapped_via_fallback": 19,
+    "mapped": 5,
+    "unmapped": 2
+  },
+  "failure_type_distribution": {
+    "n_a_mapped": 24,
+    "alias_expansion_issue": 2
+  },
+  "top_unmapped_terms": [
+    [
+      "bloomberg",
+      1
+    ],
+    [
+      "presentation",
+      1
+    ]
+  ],
+  "target_term_trace": {
+    "python": [
+      {
+        "profile_id": "golden_01",
+        "normalized_input": "python",
+        "alias_labels": [
+          "python programmation informatique"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      },
+      {
+        "profile_id": "golden_02",
+        "normalized_input": "python",
+        "alias_labels": [
+          "python programmation informatique"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "excel": [
+      {
+        "profile_id": "golden_01",
+        "normalized_input": "excel",
+        "alias_labels": [
+          "utiliser un logiciel de tableur",
+          "microsoft office excel"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      },
+      {
+        "profile_id": "golden_03",
+        "normalized_input": "excel",
+        "alias_labels": [
+          "utiliser un logiciel de tableur",
+          "microsoft office excel"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      },
+      {
+        "profile_id": "golden_04",
+        "normalized_input": "excel",
+        "alias_labels": [
+          "utiliser un logiciel de tableur",
+          "microsoft office excel"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "sql": [
+      {
+        "profile_id": "golden_01",
+        "normalized_input": "sql",
+        "alias_labels": [],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742"
+        ],
+        "status": "mapped",
+        "failure_type": "n_a_mapped"
+      },
+      {
+        "profile_id": "golden_02",
+        "normalized_input": "sql",
+        "alias_labels": [],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/598de5b0-5b58-4ea7-8058-a4bc4d18c742"
+        ],
+        "status": "mapped",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "powerbi": [
+      {
+        "profile_id": "golden_01",
+        "normalized_input": "powerbi",
+        "alias_labels": [
+          "logiciel de visualisation des données",
+          "utiliser un logiciel danalyse de données spécifique"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+          "http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "sap": [
+      {
+        "profile_id": "golden_04",
+        "normalized_input": "sap",
+        "alias_labels": [
+          "gérer le système normalisé de planification des ressources dune entreprise"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/f0393af3-bcd9-41af-a36e-0cfb83b60081"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "crm": [
+      {
+        "profile_id": "golden_03",
+        "normalized_input": "crm",
+        "alias_labels": [
+          "gestion de la relation client"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/dc9a236c-c640-43c3-812f-269403591edb"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      },
+      {
+        "profile_id": "golden_05",
+        "normalized_input": "crm",
+        "alias_labels": [
+          "gestion de la relation client"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/dc9a236c-c640-43c3-812f-269403591edb"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "sales": [
+      {
+        "profile_id": "golden_05",
+        "normalized_input": "sales",
+        "alias_labels": [
+          "argumentaire de vente"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "negotiation": [
+      {
+        "profile_id": "golden_05",
+        "normalized_input": "negotiation",
+        "alias_labels": [
+          "négocier des conditions avec les fournisseurs",
+          "négocier les prix"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/5f2efbdf-08a2-49cd-9c06-bd284e4f0fbf",
+          "http://data.europa.eu/esco/skill/7ee9fb56-91b1-4363-b51f-ea54ae1b5761"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "prospection": [
+      {
+        "profile_id": "golden_05",
+        "normalized_input": "prospection",
+        "alias_labels": [
+          "méthodes de prospection"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/0af93aed-bb3e-4ce7-ad77-a41139c7e7c5"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "presentation": [
+      {
+        "profile_id": "golden_05",
+        "normalized_input": "presentation",
+        "alias_labels": [],
+        "mapped_uris": [],
+        "status": "unmapped",
+        "failure_type": "alias_expansion_issue"
+      }
+    ],
+    "marketing_digital": [
+      {
+        "profile_id": "golden_03",
+        "normalized_input": "marketing_digital",
+        "alias_labels": [
+          "techniques de marketing numérique"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/43dfbe7f-9e10-4871-b171-e5076737b4cf"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ],
+    "google_analytics": [
+      {
+        "profile_id": "golden_03",
+        "normalized_input": "google_analytics",
+        "alias_labels": [
+          "utiliser un logiciel danalyse de données spécifique"
+        ],
+        "mapped_uris": [
+          "http://data.europa.eu/esco/skill/c95c29fe-3971-46b7-80e9-1f7e75ba99b3"
+        ],
+        "status": "mapped_via_fallback",
+        "failure_type": "n_a_mapped"
+      }
+    ]
+  },
+  "profile_coverage_ranking": [
+    {
+      "profile_id": "golden_01",
+      "coverage_ratio": 1.0
+    },
+    {
+      "profile_id": "golden_02",
+      "coverage_ratio": 1.0
+    },
+    {
+      "profile_id": "golden_03",
+      "coverage_ratio": 1.0
+    },
+    {
+      "profile_id": "golden_04",
+      "coverage_ratio": 0.8
+    },
+    {
+      "profile_id": "golden_05",
+      "coverage_ratio": 0.8
+    }
+  ],
+  "notes": [
+    "status 'mapped_via_fallback' means the input term did NOT map directly but one of its SKILL_ALIASES entries did — signal reaches skills_uri.",
+    "skills_unmapped_count_extractor (from extract_profile) counts only direct-mapping failures among normalized inputs; items rescued by alias expansion are still counted as unmapped by that internal metric."
+  ]
+}

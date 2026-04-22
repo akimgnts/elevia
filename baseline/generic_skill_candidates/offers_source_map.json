@@ -1,0 +1,48 @@
+{
+  "description": "Chemin réel des offres utilisées pour l'analyse. Source choisie = SQLite local apps/api/data/db/offers.db (table fact_offers + fact_offer_skills).",
+  "runtime_loading_path": {
+    "business_france": {
+      "runtime_source": "PostgreSQL clean_offers (via DATABASE_URL) — voir _load_business_france_from_postgres dans apps/api/src/api/utils/inbox_catalog.py",
+      "comment": "clean_offers ne contient pas de skills précomputées ; les skills sont extraits à la volée via normalize_offers_to_uris au chargement du catalogue."
+    },
+    "france_travail": {
+      "runtime_source": "SQLite apps/api/data/db/offers.db, table fact_offers — voir _load_france_travail_from_sqlite",
+      "comment": "Contient payload_json + fact_offer_skills (skills + skill_uri déjà calculés à l'ingestion)."
+    }
+  },
+  "analysis_source_chosen": "apps/api/data/db/offers.db",
+  "why_this_source": [
+    "Contient 839 offres business_france + skills ESCO pré-calculés (URI + label) dans fact_offer_skills — permet d'analyser directement la distribution sans re-normaliser.",
+    "Données locales : aucun risque de coupure réseau, temps d'exécution reproductible.",
+    "La table fact_offer_skills expose exactement les URIs sur lesquelles le matching s'appuie (cohérent avec le runtime).",
+    "Étendue temporelle suffisante (publication_date 2024-06-26 → 2026-04-16, dernière 3 jours avant la date du sprint)."
+  ],
+  "tables_read": [
+    "fact_offers: 839 rows (source='business_france')",
+    "fact_offer_skills: 144714 rows total (filtered par offer_id pour BF uniquement)"
+  ],
+  "columns_used": {
+    "fact_offers": ["id", "source", "title", "description", "country", "city", "publication_date"],
+    "fact_offer_skills": ["offer_id", "skill (label)", "skill_uri"]
+  },
+  "postgres_not_used": true,
+  "postgres_rationale": "Le SQLite local suffit : il contient déjà les skills ESCO pré-calculés, alors que clean_offers nécessiterait une re-normalisation ESCO en mémoire de 800+ offres via normalize_offers_to_uris, sans gain analytique par rapport au snapshot local. DATABASE_URL non sollicité pendant cette analyse — pas de dépendance réseau.",
+  "refresh_decision": {
+    "refreshed": false,
+    "reason": "La base actuelle est suffisante : 839 offres réelles, 144k skill-rows (dont 5088 URI-backed), 173 URIs uniques couvrant 6 clusters macro, fenêtre temporelle 22 mois dont la plus récente = -3j. Rescrape BF ou rebuild clean_offers non justifié."
+  },
+  "cluster_detection": {
+    "method": "profile.offer_cluster.detect_offer_cluster(title, description, skills) — appelé en mémoire sur chaque offre, même fonction que la production utilise dans _apply_esco_normalization",
+    "taxonomy": ["FINANCE_LEGAL", "MARKETING_SALES", "SUPPLY_OPS", "ENGINEERING_INDUSTRY", "DATA_IT", "ADMIN_HR", "OTHER"],
+    "cluster_sizes_on_corpus": {
+      "DATA_IT": 382,
+      "ENGINEERING_INDUSTRY": 155,
+      "MARKETING_SALES": 102,
+      "SUPPLY_OPS": 84,
+      "FINANCE_LEGAL": 62,
+      "ADMIN_HR": 53,
+      "OTHER": 1
+    },
+    "corpus_bias_note": "45% des offres BF tombent dans DATA_IT. Le ratio uniformity_ratio = dom_share / cluster_prop corrige ce biais : une compétence uniformément distribuée a ratio ≈ 1, indépendamment de la taille des clusters."
+  }
+}

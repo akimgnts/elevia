@@ -1,0 +1,65 @@
+{
+  "sprint": "generic_skill_candidates",
+  "mission": "Produire une base de décision empirique (generic_hard / generic_weak / ambiguous) à partir du corpus réel d'offres, sans modifier le code produit ni partir d'une liste inventée.",
+  "date": "2026-04-19",
+  "commit": "0c666a84da4bc7dfda9c89f8ffaf2c2af0ced7a0",
+  "offers_source": {
+    "primary": "apps/api/data/db/offers.db (SQLite local, source='business_france', 839 offres)",
+    "why": "Contient les skills ESCO déjà calculés en fact_offer_skills (label + URI), cohérent avec le runtime France Travail loader. Pas de dépendance réseau PostgreSQL."
+  },
+  "corpus_stats": {
+    "total_offers": 839,
+    "publication_date_range": "2024-06-26 → 2026-04-16",
+    "total_skill_rows_uri_backed": 5088,
+    "unique_skill_uris": 173,
+    "unique_skill_labels_with_count_ge_10": 200,
+    "cluster_distribution": {
+      "DATA_IT": 382,
+      "ENGINEERING_INDUSTRY": 155,
+      "MARKETING_SALES": 102,
+      "SUPPLY_OPS": 84,
+      "FINANCE_LEGAL": 62,
+      "ADMIN_HR": 53,
+      "OTHER": 1
+    }
+  },
+  "refresh_executed": false,
+  "refresh_rationale": "Corpus suffisant en volume (839 offres, 22 mois, dernière publication il y a 3 jours) et en diversité (6 clusters réels). Refresh non justifié pour une V1 de candidats.",
+  "classification_method": {
+    "metrics": ["frequency_ratio (df)", "cluster_count", "dominant_cluster_share", "uniformity_ratio = dom_share / cluster_prop", "max_concentration"],
+    "semantic_layer": "_DOMAIN_INTRINSIC_LABELS — petite liste (30 labels) de skills dont le nom est sémantiquement lié à un domaine, utilisée uniquement pour BASCULER vers AMBIGUOUS (jamais pour classer en HARD/WEAK)",
+    "thresholds": {
+      "HARD_GENERIC": "df >= 5% AND cluster_count == 6 AND 0.70 <= ratio <= 1.25 AND label NOT in _DOMAIN_INTRINSIC_LABELS",
+      "WEAK_GENERIC": "df >= 3% AND cluster_count >= 5 AND 1.25 < ratio <= 2.0 AND label NOT in _DOMAIN_INTRINSIC_LABELS",
+      "AMBIGUOUS_A": "df >= 5% AND label IN _DOMAIN_INTRINSIC_LABELS AND 0.7 <= ratio <= 1.5 (statistique suggère générique mais nom suggère domaine — arbitrage produit)",
+      "AMBIGUOUS_B": "df >= 10% AND dom_share > 60% AND ratio > 1.6 (fréquent mais concentré dans un cluster — domaine intra-cluster, pas générique)",
+      "DOMAIN_implicit": "reste non listé comme candidat"
+    }
+  },
+  "results_summary": {
+    "GENERIC_HARD_CANDIDATES": 9,
+    "GENERIC_WEAK_CANDIDATES": 4,
+    "AMBIGUOUS_SKILLS_TO_REVIEW": 6
+  },
+  "artefacts_generated": [
+    "baseline/generic_skill_candidates/README.md",
+    "baseline/generic_skill_candidates/manifest.json",
+    "baseline/generic_skill_candidates/offers_source_map.json",
+    "baseline/generic_skill_candidates/skill_frequency.csv",
+    "baseline/generic_skill_candidates/skill_dispersion.csv",
+    "baseline/generic_skill_candidates/generic_skill_candidates.json",
+    "baseline/generic_skill_candidates/ambiguous_skills.json",
+    "baseline/generic_skill_candidates/sample_offer_evidence.json",
+    "baseline/generic_skill_candidates/_run_analysis.py (script d'analyse, read-only, hors code produit)",
+    "baseline/generic_skill_candidates/_raw_offers.json (snapshot léger 839 offres)"
+  ],
+  "non_goals": [
+    "Aucun code produit modifié",
+    "Aucun filtre implémenté dans le matching",
+    "Aucun scoring modifié",
+    "Aucun alias ajouté",
+    "Aucun flag changé (ELEVIA_FILTER_GENERIC_URIS reste à 0)",
+    "Aucun refactor",
+    "Aucune liste générée par un LLM ni import externe — tout vient de fact_offer_skills"
+  ]
+}

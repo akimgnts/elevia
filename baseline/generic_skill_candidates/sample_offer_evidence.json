@@ -1,0 +1,610 @@
+{
+  "http://data.europa.eu/esco/skill/7111b95d-0ce3-441a-9d92-4c75d05c4388": {
+    "label": "gestion de projets",
+    "uri": "http://data.europa.eu/esco/skill/7111b95d-0ce3-441a-9d92-4c75d05c4388",
+    "frequency_ratio": 0.4553,
+    "sample_offers": [
+      {
+        "id": "BF-242179",
+        "title": "PROJECT MANAGER HEAVY LIFT (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-242176",
+        "title": "Project Manager Oil & Gas (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-242164",
+        "title": "Business Development Manager Junior (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242162",
+        "title": "Business Manager (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242159",
+        "title": "Java Developer (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/15d76317-c71a-4fa2-aadc-2ecc34e627b7": {
+    "label": "communication",
+    "uri": "http://data.europa.eu/esco/skill/15d76317-c71a-4fa2-aadc-2ecc34e627b7",
+    "frequency_ratio": 0.45054,
+    "sample_offers": [
+      {
+        "id": "BF-242179",
+        "title": "PROJECT MANAGER HEAVY LIFT (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-242176",
+        "title": "Project Manager Oil & Gas (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-242170",
+        "title": "VIE Site Production System Engineer (H/F)",
+        "cluster": "ENGINEERING_INDUSTRY"
+      },
+      {
+        "id": "BF-242161",
+        "title": "VIE – Method Engineer - Zalaegerszeg (Hungary) (H/F)",
+        "cluster": "ENGINEERING_INDUSTRY"
+      },
+      {
+        "id": "BF-242160",
+        "title": ".NET Developer (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/6d3edede-8951-4621-a835-e04323300fa0": {
+    "label": "anglais",
+    "uri": "http://data.europa.eu/esco/skill/6d3edede-8951-4621-a835-e04323300fa0",
+    "frequency_ratio": 0.36591,
+    "sample_offers": [
+      {
+        "id": "BF-237800",
+        "title": "VIE – JURISTE H/F (H/F)",
+        "cluster": "FINANCE_LEGAL"
+      },
+      {
+        "id": "BF-242162",
+        "title": "Business Manager (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242151",
+        "title": "Chargé de communication (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242150",
+        "title": "Acheteur commodité et projet (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-242147",
+        "title": "BUSINESS MANAGER PAYS-BAS (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be": {
+    "label": "microsoft office excel",
+    "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+    "frequency_ratio": 0.1764,
+    "sample_offers": [
+      {
+        "id": "BF-242156",
+        "title": "Contrôleur de Gestion (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242153",
+        "title": "SALES MANAGER H/F (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242152",
+        "title": "SUPPORT TO THE CHIEF OPERATING OFFICER (COO OFFICE) HF (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242151",
+        "title": "Chargé de communication (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242140",
+        "title": "Contrôle De Gestion / Contrôle Interne (H/F)",
+        "cluster": "FINANCE_LEGAL"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/43dfbe7f-9e10-4871-b171-e5076737b4cf": {
+    "label": "techniques de marketing numérique",
+    "uri": "http://data.europa.eu/esco/skill/43dfbe7f-9e10-4871-b171-e5076737b4cf",
+    "frequency_ratio": 0.14064,
+    "sample_offers": [
+      {
+        "id": "BF-242170",
+        "title": "VIE Site Production System Engineer (H/F)",
+        "cluster": "ENGINEERING_INDUSTRY"
+      },
+      {
+        "id": "BF-242162",
+        "title": "Business Manager (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242158",
+        "title": "VIE – Finance Transformation Administrator - Barcelona (H/F)",
+        "cluster": "FINANCE_LEGAL"
+      },
+      {
+        "id": "BF-242157",
+        "title": "Ingénieur en Recherche, évaluation numérique des formations et modélisation du sous-sol (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242142",
+        "title": "Improvement Coordinator VIE (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/f0393af3-bcd9-41af-a36e-0cfb83b60081": {
+    "label": "gérer le système normalisé de planification des ressources dune entreprise",
+    "uri": "http://data.europa.eu/esco/skill/f0393af3-bcd9-41af-a36e-0cfb83b60081",
+    "frequency_ratio": 0.12396,
+    "sample_offers": [
+      {
+        "id": "BF-242158",
+        "title": "VIE – Finance Transformation Administrator - Barcelona (H/F)",
+        "cluster": "FINANCE_LEGAL"
+      },
+      {
+        "id": "BF-242142",
+        "title": "Improvement Coordinator VIE (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242099",
+        "title": "Program Controller (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-240142",
+        "title": "VIE – Supply Chain / Logistique (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-236438",
+        "title": "VMS Tool Officer (H/F)",
+        "cluster": "ADMIN_HR"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/6a609f8f-1451-4102-ad2d-62c5270e1237": {
+    "label": "service administratif",
+    "uri": "http://data.europa.eu/esco/skill/6a609f8f-1451-4102-ad2d-62c5270e1237",
+    "frequency_ratio": 0.07509,
+    "sample_offers": [
+      {
+        "id": "BF-242176",
+        "title": "Project Manager Oil & Gas (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-240142",
+        "title": "VIE – Supply Chain / Logistique (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-240138",
+        "title": "Chief of staff to the CEO - French African Start up (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242181",
+        "title": "Chargé(e) de mission numérique au SER de Londres (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242129",
+        "title": "HRBP & Global Mobility Specialist (H/F)",
+        "cluster": "ADMIN_HR"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/5f2efbdf-08a2-49cd-9c06-bd284e4f0fbf": {
+    "label": "négocier des conditions avec les fournisseurs",
+    "uri": "http://data.europa.eu/esco/skill/5f2efbdf-08a2-49cd-9c06-bd284e4f0fbf",
+    "frequency_ratio": 0.05483,
+    "sample_offers": [
+      {
+        "id": "BF-242164",
+        "title": "Business Development Manager Junior (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242153",
+        "title": "SALES MANAGER H/F (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242142",
+        "title": "Improvement Coordinator VIE (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-191960",
+        "title": "FIELD SALES ENGINEER H/F (VIE NORDIC - STOCKHOLM) (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242131",
+        "title": "GROUP PROCURMENT SPECIALIST - PROCESS / METHODS / SUSTAINABILITY (F/M) (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/7ee9fb56-91b1-4363-b51f-ea54ae1b5761": {
+    "label": "négocier les prix",
+    "uri": "http://data.europa.eu/esco/skill/7ee9fb56-91b1-4363-b51f-ea54ae1b5761",
+    "frequency_ratio": 0.05483,
+    "sample_offers": [
+      {
+        "id": "BF-242164",
+        "title": "Business Development Manager Junior (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242153",
+        "title": "SALES MANAGER H/F (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242142",
+        "title": "Improvement Coordinator VIE (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-191960",
+        "title": "FIELD SALES ENGINEER H/F (VIE NORDIC - STOCKHOLM) (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242131",
+        "title": "GROUP PROCURMENT SPECIALIST - PROCESS / METHODS / SUSTAINABILITY (F/M) (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378": {
+    "label": "analyse de données",
+    "uri": "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",
+    "frequency_ratio": 0.46961,
+    "sample_offers": [
+      {
+        "id": "BF-237800",
+        "title": "VIE – JURISTE H/F (H/F)",
+        "cluster": "FINANCE_LEGAL"
+      },
+      {
+        "id": "BF-242157",
+        "title": "Ingénieur en Recherche, évaluation numérique des formations et modélisation du sous-sol (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242156",
+        "title": "Contrôleur de Gestion (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242155",
+        "title": "VIE - Quality Assurance Engineer - Horgen (Switzerland) (H/F)",
+        "cluster": "ENGINEERING_INDUSTRY"
+      },
+      {
+        "id": "BF-242152",
+        "title": "SUPPORT TO THE CHIEF OPERATING OFFICER (COO OFFICE) HF (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb": {
+    "label": "développement par itérations",
+    "uri": "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+    "frequency_ratio": 0.08343,
+    "sample_offers": [
+      {
+        "id": "BF-242160",
+        "title": ".NET Developer (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242159",
+        "title": "Java Developer (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242155",
+        "title": "VIE - Quality Assurance Engineer - Horgen (Switzerland) (H/F)",
+        "cluster": "ENGINEERING_INDUSTRY"
+      },
+      {
+        "id": "BF-242132",
+        "title": "Scrum Master (Systèmes Embarqués IoT) (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242126",
+        "title": "Digital Product Manager (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4": {
+    "label": "gestion de projets par méthode agile",
+    "uri": "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4",
+    "frequency_ratio": 0.08343,
+    "sample_offers": [
+      {
+        "id": "BF-242160",
+        "title": ".NET Developer (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242159",
+        "title": "Java Developer (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242155",
+        "title": "VIE - Quality Assurance Engineer - Horgen (Switzerland) (H/F)",
+        "cluster": "ENGINEERING_INDUSTRY"
+      },
+      {
+        "id": "BF-242132",
+        "title": "Scrum Master (Systèmes Embarqués IoT) (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242126",
+        "title": "Digital Product Manager (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/045f71e6-0699-4169-8a54-9c6b96f3174d": {
+    "label": "conseiller dautres personnes",
+    "uri": "http://data.europa.eu/esco/skill/045f71e6-0699-4169-8a54-9c6b96f3174d",
+    "frequency_ratio": 0.06079,
+    "sample_offers": [
+      {
+        "id": "BF-242147",
+        "title": "BUSINESS MANAGER PAYS-BAS (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-238307",
+        "title": "BUSINESS MANAGER PAYS-BAS (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-236566",
+        "title": "CONSULTANT(E) (M/F) (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-236375",
+        "title": "CONSULTANT(E) (M/F) (H/F) - Philadelphia, PA",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-236374",
+        "title": "CONSULTANT(E) (M/F) (H/F) - Denver, CO",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/09f2f811-a3fb-4de3-a70f-6420a6935575": {
+    "label": "cycle de développement logiciel",
+    "uri": "http://data.europa.eu/esco/skill/09f2f811-a3fb-4de3-a70f-6420a6935575",
+    "frequency_ratio": 0.31824,
+    "sample_offers": [
+      {
+        "id": "BF-237800",
+        "title": "VIE – JURISTE H/F (H/F)",
+        "cluster": "FINANCE_LEGAL"
+      },
+      {
+        "id": "BF-237974",
+        "title": "Business Developer (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242162",
+        "title": "Business Manager (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242157",
+        "title": "Ingénieur en Recherche, évaluation numérique des formations et modélisation du sous-sol (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242151",
+        "title": "Chargé de communication (H/F)",
+        "cluster": "MARKETING_SALES"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97": {
+    "label": "programmation informatique",
+    "uri": "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97",
+    "frequency_ratio": 0.30393,
+    "sample_offers": [
+      {
+        "id": "BF-242179",
+        "title": "PROJECT MANAGER HEAVY LIFT (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-242162",
+        "title": "Business Manager (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242153",
+        "title": "SALES MANAGER H/F (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242152",
+        "title": "SUPPORT TO THE CHIEF OPERATING OFFICER (COO OFFICE) HF (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242142",
+        "title": "Improvement Coordinator VIE (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/143769cb-b61e-47d8-a61e-eedfbec1016c": {
+    "label": "informatique décisionnelle",
+    "uri": "http://data.europa.eu/esco/skill/143769cb-b61e-47d8-a61e-eedfbec1016c",
+    "frequency_ratio": 0.29917,
+    "sample_offers": [
+      {
+        "id": "BF-242179",
+        "title": "PROJECT MANAGER HEAVY LIFT (H/F)",
+        "cluster": "SUPPLY_OPS"
+      },
+      {
+        "id": "BF-242162",
+        "title": "Business Manager (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242153",
+        "title": "SALES MANAGER H/F (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242152",
+        "title": "SUPPORT TO THE CHIEF OPERATING OFFICER (COO OFFICE) HF (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242142",
+        "title": "Improvement Coordinator VIE (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180": {
+    "label": "exploration de données",
+    "uri": "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180",
+    "frequency_ratio": 0.26341,
+    "sample_offers": [
+      {
+        "id": "BF-242157",
+        "title": "Ingénieur en Recherche, évaluation numérique des formations et modélisation du sous-sol (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242156",
+        "title": "Contrôleur de Gestion (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242155",
+        "title": "VIE - Quality Assurance Engineer - Horgen (Switzerland) (H/F)",
+        "cluster": "ENGINEERING_INDUSTRY"
+      },
+      {
+        "id": "BF-242142",
+        "title": "Improvement Coordinator VIE (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242126",
+        "title": "Digital Product Manager (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/1019423b-3368-4f83-b24f-19e5fa23e816": {
+    "label": "schéma de conception dinterface utilisateur",
+    "uri": "http://data.europa.eu/esco/skill/1019423b-3368-4f83-b24f-19e5fa23e816",
+    "frequency_ratio": 0.16925,
+    "sample_offers": [
+      {
+        "id": "BF-242159",
+        "title": "Java Developer (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242158",
+        "title": "VIE – Finance Transformation Administrator - Barcelona (H/F)",
+        "cluster": "FINANCE_LEGAL"
+      },
+      {
+        "id": "BF-242157",
+        "title": "Ingénieur en Recherche, évaluation numérique des formations et modélisation du sous-sol (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242151",
+        "title": "Chargé de communication (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242126",
+        "title": "Digital Product Manager (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  },
+  "http://data.europa.eu/esco/skill/c4b1f326-224a-420a-b8b3-814a8f13b6cb": {
+    "label": "mettre en œuvre le design front end dun site web",
+    "uri": "http://data.europa.eu/esco/skill/c4b1f326-224a-420a-b8b3-814a8f13b6cb",
+    "frequency_ratio": 0.16806,
+    "sample_offers": [
+      {
+        "id": "BF-242159",
+        "title": "Java Developer (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242158",
+        "title": "VIE – Finance Transformation Administrator - Barcelona (H/F)",
+        "cluster": "FINANCE_LEGAL"
+      },
+      {
+        "id": "BF-242157",
+        "title": "Ingénieur en Recherche, évaluation numérique des formations et modélisation du sous-sol (H/F)",
+        "cluster": "DATA_IT"
+      },
+      {
+        "id": "BF-242151",
+        "title": "Chargé de communication (H/F)",
+        "cluster": "MARKETING_SALES"
+      },
+      {
+        "id": "BF-242126",
+        "title": "Digital Product Manager (H/F)",
+        "cluster": "DATA_IT"
+      }
+    ]
+  }
+}

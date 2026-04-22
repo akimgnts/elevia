@@ -1,0 +1,59 @@
+{
+  "profiles": [
+    {
+      "profile_id": "golden_01",
+      "skills_input_count": 5,
+      "skills_after_extraction_count": 10,
+      "labels_attempted_mapping_count": 12,
+      "skills_mapped_count": 5,
+      "skills_unmapped_count": 0,
+      "skills_dropped_count": 0,
+      "coverage_ratio": 1.0,
+      "skills_uri_count_frozenset": 5
+    },
+    {
+      "profile_id": "golden_02",
+      "skills_input_count": 6,
+      "skills_after_extraction_count": 8,
+      "labels_attempted_mapping_count": 9,
+      "skills_mapped_count": 6,
+      "skills_unmapped_count": 0,
+      "skills_dropped_count": 0,
+      "coverage_ratio": 1.0,
+      "skills_uri_count_frozenset": 5
+    },
+    {
+      "profile_id": "golden_03",
+      "skills_input_count": 5,
+      "skills_after_extraction_count": 11,
+      "labels_attempted_mapping_count": 11,
+      "skills_mapped_count": 5,
+      "skills_unmapped_count": 0,
+      "skills_dropped_count": 0,
+      "coverage_ratio": 1.0,
+      "skills_uri_count_frozenset": 5
+    },
+    {
+      "profile_id": "golden_04",
+      "skills_input_count": 5,
+      "skills_after_extraction_count": 11,
+      "labels_attempted_mapping_count": 11,
+      "skills_mapped_count": 4,
+      "skills_unmapped_count": 1,
+      "skills_dropped_count": 0,
+      "coverage_ratio": 0.8,
+      "skills_uri_count_frozenset": 5
+    },
+    {
+      "profile_id": "golden_05",
+      "skills_input_count": 5,
+      "skills_after_extraction_count": 10,
+      "labels_attempted_mapping_count": 10,
+      "skills_mapped_count": 4,
+      "skills_unmapped_count": 1,
+      "skills_dropped_count": 0,
+      "coverage_ratio": 0.8,
+      "skills_uri_count_frozenset": 5
+    }
+  ]
+}

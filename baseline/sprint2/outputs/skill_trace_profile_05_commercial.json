@@ -1,0 +1,162 @@
+{
+  "profile_id": "golden_05",
+  "skills_input_count": 5,
+  "skills_after_extraction_count": 10,
+  "labels_attempted_mapping_count": 10,
+  "skills_mapped_count": 4,
+  "skills_unmapped_count": 1,
+  "skills_dropped_count": 0,
+  "coverage_ratio": 0.8,
+  "skills_uri_count_frozenset": 5,
+  "skills_unmapped_count_extractor": 5,
+  "per_skill_trace": [
+    {
+      "input_skill": "sales",
+      "normalized_input": "sales",
+      "alias_labels": [
+        "argumentaire de vente"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "sales",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "argumentaire de vente",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909",
+          "esco_label": "argumentaire de vente",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "negotiation",
+      "normalized_input": "negotiation",
+      "alias_labels": [
+        "négocier des conditions avec les fournisseurs",
+        "négocier les prix"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "negotiation",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "négocier des conditions avec les fournisseurs",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/5f2efbdf-08a2-49cd-9c06-bd284e4f0fbf",
+          "esco_label": "négocier des conditions avec les fournisseurs",
+          "method": "preferred_label",
+          "confidence": 1.0
+        },
+        {
+          "label": "négocier les prix",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/7ee9fb56-91b1-4363-b51f-ea54ae1b5761",
+          "esco_label": "négocier les prix",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/5f2efbdf-08a2-49cd-9c06-bd284e4f0fbf",
+        "http://data.europa.eu/esco/skill/7ee9fb56-91b1-4363-b51f-ea54ae1b5761"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "crm",
+      "normalized_input": "crm",
+      "alias_labels": [
+        "gestion de la relation client"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "crm",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "gestion de la relation client",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/dc9a236c-c640-43c3-812f-269403591edb",
+          "esco_label": "gestion de la relation client",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/dc9a236c-c640-43c3-812f-269403591edb"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "prospection",
+      "normalized_input": "prospection",
+      "alias_labels": [
+        "méthodes de prospection"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "prospection",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "méthodes de prospection",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/0af93aed-bb3e-4ce7-ad77-a41139c7e7c5",
+          "esco_label": "méthodes de prospection",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/0af93aed-bb3e-4ce7-ad77-a41139c7e7c5"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "presentation",
+      "normalized_input": "presentation",
+      "alias_labels": [],
+      "mapping_attempts": [
+        {
+          "label": "presentation",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        }
+      ],
+      "mapped_uris": [],
+      "status": "unmapped",
+      "failure_type": "alias_expansion_issue"
+    }
+  ]
+}

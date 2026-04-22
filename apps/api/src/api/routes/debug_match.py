@@ -28,6 +28,11 @@ from matching.extractors import extract_profile
 from matching.match_trace import trace_matching_batch
 
 from ..utils.inbox_catalog import load_catalog_offers
+from ..utils.generic_skills_filter import (
+    HARD_GENERIC_URIS,
+    filter_skills_uri_for_scoring,
+    should_apply_generic_filter,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +99,20 @@ async def debug_match(req: DebugMatchRequest) -> DebugMatchResponse:
     # Create engine
     engine = MatchingEngine(offers=offers)
 
+    # Apply generic skills filter at scoring boundary (flag + profile-side guard).
+    extracted_for_guard = extract_profile(req.profile)
+    if should_apply_generic_filter(
+        list(getattr(extracted_for_guard, "skills_uri", []) or []), HARD_GENERIC_URIS
+    ):
+        scoring_offers = [
+            {**o, "skills_uri": filter_skills_uri_for_scoring(o.get("skills_uri") or [])}
+            for o in offers
+        ]
+    else:
+        scoring_offers = offers
+
     # Trace matching
-    result = trace_matching_batch(req.profile, offers, engine, max_traces=req.limit)
+    result = trace_matching_batch(req.profile, scoring_offers, engine, max_traces=req.limit)
 
     # Convert traces to dicts
     traces_dicts = []

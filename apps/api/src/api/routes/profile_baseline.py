@@ -68,6 +68,8 @@ class ParseBaselineResponse(BaseModel):
     priority_trace: List[dict] = []
     priority_stats: dict = {}
     profile_intelligence: dict = {}
+    raw_cv_reconstruction: dict = {}
+    profile_reconstruction: dict = {}
     profile_intelligence_ai_assist: dict = {}
 
 

@@ -1,0 +1,76 @@
+{
+  "sprint": "sprint1_baseline",
+  "generated_at_utc": "2026-04-18T17:52:11.128353Z",
+  "git_commit": "10ddabf5816f7122ed746c339fa241c28ad89fde",
+  "python_version": "3.14.0",
+  "env_flags": {
+    "ELEVIA_FILTER_GENERIC_URIS": "unset",
+    "ELEVIA_PROMOTE_ESCO": "unset",
+    "ELEVIA_DEBUG_MATCHING": "unset"
+  },
+  "entrypoints": {
+    "profile_extraction": "apps/api/src/matching/extractors.py::extract_profile",
+    "scoring_engine": "apps/api/src/matching/matching_v1.py::MatchingEngine.match",
+    "catalog_loader_prod_path": "apps/api/src/api/utils/inbox_catalog.py::load_catalog_offers (unused locally: DB unreachable)"
+  },
+  "inputs": {
+    "profiles_dir": "inputs/profiles/",
+    "profiles": [
+      "profile_01_data_analyst.json",
+      "profile_02_developer.json",
+      "profile_03_marketing.json",
+      "profile_04_finance.json",
+      "profile_05_commercial.json"
+    ],
+    "offers_file": "inputs/offers.json",
+    "offer_count": 35,
+    "offer_sources": {
+      "golden_synthetic_VIE_001_to_020": 20,
+      "vie_catalog_fixtures": 15
+    }
+  },
+  "summaries": [
+    {
+      "profile_file": "profile_01_data_analyst.json",
+      "profile_id": "golden_01",
+      "results_above_threshold": 0,
+      "best_unthresholded_score": 75,
+      "worst_unthresholded_top10_score": 5
+    },
+    {
+      "profile_file": "profile_02_developer.json",
+      "profile_id": "golden_02",
+      "results_above_threshold": 0,
+      "best_unthresholded_score": 75,
+      "worst_unthresholded_top10_score": 5
+    },
+    {
+      "profile_file": "profile_03_marketing.json",
+      "profile_id": "golden_03",
+      "results_above_threshold": 0,
+      "best_unthresholded_score": 75,
+      "worst_unthresholded_top10_score": 5
+    },
+    {
+      "profile_file": "profile_04_finance.json",
+      "profile_id": "golden_04",
+      "results_above_threshold": 0,
+      "best_unthresholded_score": 75,
+      "worst_unthresholded_top10_score": 5
+    },
+    {
+      "profile_file": "profile_05_commercial.json",
+      "profile_id": "golden_05",
+      "results_above_threshold": 0,
+      "best_unthresholded_score": 26,
+      "worst_unthresholded_top10_score": 5
+    }
+  ],
+  "hypotheses_and_limits": [
+    "DATABASE_URL in apps/api/.env is malformed (double '@' produces unresolvable host) — real Business France corpus not reachable from this local environment. Baseline uses the two largest local fixture files flowing through the same MatchingEngine path.",
+    "Golden offers originally exposed 'skills_required' / 'languages_required' (not 'skills' / 'languages' that the engine expects); keys were renamed losslessly in the frozen input file — no value was altered.",
+    "Profile panel missing one HR/ops profile and one explicit business+data hybrid; 5/7 archetypes covered with existing assets.",
+    "ESCO normalization pass (normalize_offers_to_uris) NOT applied on fixtures; the engine derives URIs on-the-fly via _map_offer_skills_to_uris (same fallback path used when precomputed URIs are absent).",
+    "Threshold = 80 enforced by product code — offers below this bar are correctly excluded; 'results_above_threshold' reflects actual product behavior."
+  ]
+}

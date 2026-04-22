@@ -1,0 +1,65 @@
+{
+  "description": "Ordre d'exécution recommandé pour implémentation future. Chaque rang ajoute un delta mesurable sur baseline(cv_fixture_v0.txt). Le choix d'ordre maximise la valeur marginale et minimise le risque de régression.",
+  "order": [
+    {
+      "step": 1,
+      "case_id": "N1",
+      "what_to_change": "Ajouter l'entrée 'paris' au set STOPWORDS dans apps/api/src/esco/extract.py:155-173",
+      "why_first": "(a) Impact produit le plus large : touche toute CV basée à Paris, cas dominant sur marché FR. (b) Plus petit fix possible : 1 entrée dans un set. (c) Zéro dépendance : STOPWORDS est déjà lu par _split_text en amont de toute couche alias/ESCO — le token 'paris' disparaît avant même d'atteindre map_skill. (d) Validation binaire : URI 2cc75284... absent de skills_uri.",
+      "validation_method": "cd apps/api && python3 -c \"import sys; sys.path.insert(0,'src'); from profile.baseline_parser import run_baseline; r=run_baseline(open('fixtures/cv/cv_fixture_v0.txt').read()); print('paris URI present:', any('2cc75284' in u for u in r['profile']['skills_uri']))\"",
+      "expected_baseline_signal": "skills_uri_count: 22 → 21 ; alias_hits_count inchangé ; raw_detected: 120 → 119 (paris est exclu en amont)",
+      "dependency_on_previous": "aucune"
+    },
+    {
+      "step": 2,
+      "case_id": "C1",
+      "what_to_change": "Renommer la clé 'project_management' en 'project management' dans SKILL_ALIASES (apps/api/src/esco/extract.py:53)",
+      "why_second": "(a) Unique cas qui AJOUTE du signal (ajoute l'URI 'gestion de projets' générique). (b) Indépendant du fix N1. (c) Le fix N1 étant déjà en place, le delta est isolé et attribuable. (d) Fait disparaître le pattern de conflation 'project management'↔'agile' documenté Sprint 3.",
+      "validation_method": "Vérifier que raw_tokens contient 'project management' ET 'gestion de projets'. Vérifier que validated_items contient l'URI ESCO de 'gestion de projets'.",
+      "expected_baseline_signal": "skills_uri_count: 21 → 22 (net = 22 après fix N1+C1, identique au baseline initial mais avec composition différente : -paris, +gestion de projets). alias_hits_count inchangé. raw_detected augmente d'environ +3 (expansions injectées).",
+      "dependency_on_previous": "aucune — mais recommandé après N1 pour que le delta soit attribué proprement"
+    },
+    {
+      "step": 3,
+      "case_id": "N3",
+      "what_to_change": "Supprimer la ligne 'sales': ['argumentaire de vente'] dans SKILL_ALIASES (apps/api/src/esco/extract.py:65)",
+      "why_third": "(a) Second cas de bruit strict. (b) Fix minimal : suppression d'une ligne de dict. (c) Aucune dépendance sur N1/C1. (d) Préserve l'alias 'vente' qui lui est contextuellement approprié.",
+      "validation_method": "Vérifier que raw_tokens ne contient plus 'argumentaire de vente' (l'expansion disparaît en amont). Vérifier que skills_uri ne contient plus 0c0488b3...",
+      "expected_baseline_signal": "skills_uri_count: 22 → 21 ; raw_detected: 120 → 119 (expansion supprimée)",
+      "dependency_on_previous": "aucune"
+    },
+    {
+      "step": 4,
+      "case_id": "N2",
+      "what_to_change": "Supprimer la ligne {\"alias\": \"management\", ...} dans les deux fichiers jsonl (data/esco_alias_fr_v0.jsonl ET data/aliases/esco_alias_fr_v0.jsonl)",
+      "why_fourth": "(a) Ferme le tableau des bruits stricts sur cv_fixture_v0.txt. (b) Requiert modification de 2 fichiers identiques (duplication à documenter comme dette technique — non traitée ici, non-goal refactor). (c) L'alias précis 'management d equipe' suffit pour les vrais cas.",
+      "validation_method": "alias_hits ne contient plus {alias: 'management', label: 'gérer une équipe'}. skills_uri ne contient plus cb668e89...",
+      "expected_baseline_signal": "skills_uri_count: 21 → 20 ; alias_hits_count: 2 → 1",
+      "dependency_on_previous": "aucune technique ; logique : exécuter après N1 et N3 permet d'obtenir strict_noise_count = 0 sur cv_fixture_v0.txt"
+    },
+    {
+      "step": 5,
+      "case_id": "O2",
+      "what_to_change": "Réduire SKILL_ALIASES['dashboards'] à ['logiciel de visualisation des données'] dans extract.py:118",
+      "why_fifth": "(a) Établit la convention mono-valeur pour la classe des over-injections. (b) Risque le plus bas parmi O1/O2/O3. (c) Après N1+C1+N3+N2, on est à skills_uri_count=21 avec 0 bruit strict — ce fix ouvre la passe pour appliquer O1 (agile) et O3 (data science) en série future avec la même méthode.",
+      "validation_method": "skills_uri ne contient plus 348b74cd...",
+      "expected_baseline_signal": "skills_uri_count: 21 → 20 ; borderline_noise_count: -1",
+      "dependency_on_previous": "aucune — mais placer en dernier permet d'observer clairement le gain borderline après que le bruit strict a été purgé"
+    }
+  ],
+  "summary_final_baseline_after_all_5": {
+    "skills_uri_count_projected": 20,
+    "strict_noise_count_projected": 0,
+    "borderline_noise_count_projected": 3,
+    "newly_captured_signal": ["gestion de projets"],
+    "removed_signal": [
+      "paris (wager)",
+      "argumentaire de vente",
+      "gérer une équipe",
+      "techniques de présentation visuelle"
+    ],
+    "notes": "22 → 20 nombre brut, mais composition nette : +1 signal légitime (gestion de projets), -4 signaux corrompus. Qualité effective largement améliorée même si le compteur descend."
+  },
+  "rollback_strategy_per_step": "Chaque fix est une seule édition dans un seul fichier. Rollback = git revert de la modification individuelle. Aucun effet domino attendu car les 5 cas sont indépendants techniquement.",
+  "validation_fixture": "apps/api/fixtures/cv/cv_fixture_v0.txt (unique référence). Re-run complet via profile.baseline_parser.run_baseline en process Python, sans HTTP."
+}

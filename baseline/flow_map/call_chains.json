@@ -1,0 +1,104 @@
+{
+  "description": "Real (traversed-at-runtime) call chains per user entrypoint. Each chain is linear: only steps actually executed are listed.",
+  "chains": {
+    "POST /profile/parse-file": {
+      "method": "POST",
+      "route_file": "apps/api/src/api/routes/profile_file.py",
+      "handler": "parse_file (line 103)",
+      "input": "multipart/form-data field `file` (PDF or TXT) + optional ?enrich_llm=0|1",
+      "steps": [
+        "parse_file -> compass.pipeline.build_parse_file_response_payload",
+        "build_parse_file_response_payload -> compass.pipeline.ingestion_stage.ingest_profile_file",
+        "-> compass.pipeline.text_extraction_stage.extract_profile_text (bytes -> cv_text)",
+        "-> _run_profile_text_pipeline(cv_text, ...)",
+        "_run_profile_text_pipeline -> compass.canonical_pipeline.run_cv_pipeline",
+        "run_cv_pipeline -> profile.baseline_parser.run_baseline",
+        "run_baseline -> esco.extract.extract_raw_skills_from_profile ({cv_text: text})",
+        "-> profile.skill_filter.strict_filter_skills(raw_tokens) [builds validated_items w/ uri]",
+        "-> esco.mapper.map_skill(token, enable_fuzzy=False) per raw token",
+        "-> esco.uri_collapse.collapse_to_uris(mapped_items) [dedup URIs]",
+        "run_baseline returns dict with profile = { id, skills: skills_canonical, skills_source: 'baseline', skills_uri: [ESCO_URI, ...] }",
+        "run_cv_pipeline -> profile.profile_cluster.detect_profile_cluster",
+        "run_cv_pipeline -> (optional, ELEVIA_ENABLE_COMPASS_E) compass.cv_enricher.enrich_cv (display-only, NOT injected into scoring)",
+        "_run_profile_text_pipeline -> compass.canonical_pipeline.get_extracted_profile_snapshot(result) -> profile dict",
+        "_run_profile_text_pipeline -> run_skill_candidate_stage / structured_extraction_stage / canonical_mapping_stage / enrichment_stage / matching_input_stage / profile_intelligence (all augment the response payload; NONE modifies the `profile` dict used by matching downstream)",
+        "response_builder.build_parse_file_response_payload_from_artifacts(artifacts) -> HTTP response JSON containing `profile` dict"
+      ],
+      "end_of_chain": "HTTP response JSON — the client (frontend) holds the returned `profile` dict and later posts it to /inbox or /v1/match.",
+      "scoring_call": false
+    },
+    "POST /profile/parse-baseline": {
+      "method": "POST",
+      "route_file": "apps/api/src/api/routes/profile_baseline.py",
+      "handler": "parse_baseline (line 75)",
+      "input": "JSON {cv_text: str}",
+      "steps": [
+        "parse_baseline -> compass.pipeline.build_parse_baseline_response_payload(cv_text=, request_id=)",
+        "build_parse_baseline_response_payload -> _run_profile_text_pipeline (same as parse-file, enrich_llm=0, filename='baseline.txt')",
+        "(same chain as parse-file from _run_profile_text_pipeline onward)",
+        "response_builder.build_parse_baseline_response_payload_from_artifacts(artifacts) -> HTTP response JSON containing `profile` dict"
+      ],
+      "end_of_chain": "HTTP response JSON — identical scheme as parse-file.",
+      "scoring_call": false
+    },
+    "POST /profile/ingest_cv": {
+      "method": "POST",
+      "route_file": "apps/api/src/api/routes/profile.py",
+      "handler": "ingest_cv (line 123)",
+      "input": "JSON {cv_text: str}",
+      "guard": "DEV-only: 404 unless ELEVIA_DEV_TOOLS=1 or ELEVIA_DEV=1",
+      "steps": [
+        "ingest_cv -> profile.extract_profile_from_cv (LLM-driven extraction)",
+        "-> CvExtractionResponse Pydantic validation (V0.1 capabilities only)",
+        "-> semantic.profile_cache.cache_profile_text + compute_profile_hash",
+        "-> compass.profile_structurer.structure_profile_text_v1 (experiences/education structuring)",
+        "-> api.utils.profile_summary_builder.build_profile_summary + store_profile_summary"
+      ],
+      "end_of_chain": "Returns CvExtractionResponse (LLM-structured profile) — output shape: candidate_info + detected_capabilities + languages + education_summary. Does NOT produce skills_uri. Not on the matching path for production local.",
+      "scoring_call": false
+    },
+    "POST /inbox": {
+      "method": "POST",
+      "route_file": "apps/api/src/api/routes/inbox.py",
+      "handler": "get_inbox (line 854)",
+      "input": "JSON InboxRequest {profile_id, profile: dict, limit, min_score, explain}",
+      "steps": [
+        "get_inbox -> _load_profile_fixture(profile_id, req.profile) [DEV override; default: returns req.profile]",
+        "get_inbox -> _extract_profile_intelligence_payload(profile_payload) [reads profile.profile_intelligence if present]",
+        "get_inbox -> _load_catalog_offers() -> api.utils.inbox_catalog.load_catalog_offers [Postgres OR sqlite OR fixture JSON]",
+        "get_inbox -> _build_or_get_engine(catalog) -> matching.MatchingEngine(offers=catalog) [cached]",
+        "get_inbox -> matching.extractors.extract_profile(profile_payload) -> ExtractedProfile",
+        "    (key bifurcation here: see objects_map.json) ",
+        "get_inbox -> profile.profile_cluster.detect_profile_cluster(list(extracted.skills))",
+        "get_inbox -> _score_offers(offers, engine=engine, extracted=extracted, ...)",
+        "_score_offers -> (per offer) compass.offer.offer_intelligence.build_offer_intelligence",
+        "_score_offers -> (per offer, if profile_intelligence) evaluate_role_domain_gate [role-domain gate]",
+        "_score_offers -> engine.score_offer(extracted, offer)  [matching_v1.py:762]",
+        "score_offer -> _hard_filter(offer)",
+        "score_offer -> _score_skills(profile, offer)  [matching_v1.py:356]",
+        "  _score_skills reads profile.skills_uri (frozenset) at matching_v1.py:398",
+        "  and offer.skills_uri at matching_v1.py:368 (falls back to _map_offer_skills_to_uris if missing)",
+        "score_offer -> _score_languages / _score_education / _score_country",
+        "score_offer -> _compute_final_score (weights: skills 0.70, languages 0.15, education 0.10, country 0.05)"
+      ],
+      "end_of_chain": "InboxResponse with items sorted by score — the FINAL score input was ExtractedProfile.skills_uri vs offer.skills_uri (URI-set intersection).",
+      "scoring_call": true
+    },
+    "POST /v1/match": {
+      "method": "POST",
+      "route_file": "apps/api/src/api/routes/matching.py",
+      "handler": "match_profile (line 173)",
+      "input": "JSON MatchingRequest {profile: dict, offers: [dict], context_coeffs?}",
+      "steps": [
+        "match_profile -> _attach_offer_skills(request.offers) [batch DB lookup to fill offer.skills / skills_uri]",
+        "match_profile -> MatchingEngine(offers=request.offers, context_coeffs=...)",
+        "match_profile -> matching.extractors.extract_profile(request.profile) -> ExtractedProfile",
+        "match_profile -> (per offer) matching.compute_diagnostic(request.profile, offer) [VIE eligibility]",
+        "match_profile -> (per offer, if diag.vie_eligibility != KO) engine.score_offer(extracted_profile, offer)",
+        "  score_offer path identical to /inbox"
+      ],
+      "end_of_chain": "MatchingResponse with results sorted by score — the FINAL score input was ExtractedProfile.skills_uri vs offer.skills_uri.",
+      "scoring_call": true
+    }
+  }
+}

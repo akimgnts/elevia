@@ -1,0 +1,171 @@
+{
+  "profile_id": "golden_04",
+  "skills_input_count": 5,
+  "skills_after_extraction_count": 11,
+  "labels_attempted_mapping_count": 11,
+  "skills_mapped_count": 4,
+  "skills_unmapped_count": 1,
+  "skills_dropped_count": 0,
+  "coverage_ratio": 0.8,
+  "skills_uri_count_frozenset": 5,
+  "skills_unmapped_count_extractor": 5,
+  "per_skill_trace": [
+    {
+      "input_skill": "excel",
+      "normalized_input": "excel",
+      "alias_labels": [
+        "utiliser un logiciel de tableur",
+        "microsoft office excel"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "excel",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "utiliser un logiciel de tableur",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+          "esco_label": "utiliser un logiciel de tableur",
+          "method": "preferred_label",
+          "confidence": 1.0
+        },
+        {
+          "label": "microsoft office excel",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+          "esco_label": "utiliser un logiciel de tableur",
+          "method": "dictionary_alt_label",
+          "confidence": 0.95
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "financial_modeling",
+      "normalized_input": "financial_modeling",
+      "alias_labels": [
+        "analyse financière",
+        "effectuer une analyse financière de stratégies de prix"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "financial_modeling",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "analyse financière",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1",
+          "esco_label": "analyse financière",
+          "method": "preferred_label",
+          "confidence": 1.0
+        },
+        {
+          "label": "effectuer une analyse financière de stratégies de prix",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/3ad4d492-6fae-47b3-b72a-9a7c1c17da6e",
+          "esco_label": "effectuer une analyse financière de stratégies de prix",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/99571e68-801f-49af-a897-5f75996642e1",
+        "http://data.europa.eu/esco/skill/3ad4d492-6fae-47b3-b72a-9a7c1c17da6e"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "accounting",
+      "normalized_input": "accounting",
+      "alias_labels": [
+        "comptabilité"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "accounting",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "comptabilité",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b",
+          "esco_label": "comptabilité",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "sap",
+      "normalized_input": "sap",
+      "alias_labels": [
+        "gérer le système normalisé de planification des ressources dune entreprise"
+      ],
+      "mapping_attempts": [
+        {
+          "label": "sap",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        },
+        {
+          "label": "gérer le système normalisé de planification des ressources dune entreprise",
+          "mapped": true,
+          "uri": "http://data.europa.eu/esco/skill/f0393af3-bcd9-41af-a36e-0cfb83b60081",
+          "esco_label": "gérer le système normalisé de planification des ressources d'une entreprise",
+          "method": "preferred_label",
+          "confidence": 1.0
+        }
+      ],
+      "mapped_uris": [
+        "http://data.europa.eu/esco/skill/f0393af3-bcd9-41af-a36e-0cfb83b60081"
+      ],
+      "status": "mapped_via_fallback",
+      "failure_type": "n_a_mapped"
+    },
+    {
+      "input_skill": "bloomberg",
+      "normalized_input": "bloomberg",
+      "alias_labels": [],
+      "mapping_attempts": [
+        {
+          "label": "bloomberg",
+          "mapped": false,
+          "uri": null,
+          "esco_label": null,
+          "method": null,
+          "confidence": null
+        }
+      ],
+      "mapped_uris": [],
+      "status": "unmapped",
+      "failure_type": "alias_expansion_issue"
+    }
+  ]
+}

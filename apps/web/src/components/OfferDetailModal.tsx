@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Building2, ChevronDown, FileText, Loader2, MapPin, X } from "lucide-react";
+import { Building2, FileText, Loader2, MapPin, Target, X } from "lucide-react";
 import { JustificationCard } from "./JustificationCard";
 import { StructuredOfferSummaryCard } from "./StructuredOfferSummaryCard";
 import type {
+  CareerIntelligence,
   ContextFit,
   CvHtmlResponse,
   DescriptionStructuredV1,
@@ -61,6 +62,7 @@ export type OfferDetail = {
   semantic_explainability?: SemanticExplainability | null;
   scoring_v2?: ScoringV2 | null;
   scoring_v3?: ScoringV3 | null;
+  career_intelligence?: CareerIntelligence | null;
   description_structured_v1?: DescriptionStructuredV1 | null;
   explain_v1_full?: ExplainPayloadV1Full | null;
 };
@@ -84,6 +86,89 @@ function uniqueValues(values: string[], limit: number): string[] {
     if (result.length >= limit) break;
   }
   return result;
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+      {children}
+    </div>
+  );
+}
+
+function FitList({
+  title,
+  items,
+  tone,
+  empty,
+}: {
+  title: string;
+  items: string[];
+  tone: "strength" | "gap";
+  empty: string;
+}) {
+  const color = tone === "strength" ? "text-emerald-700" : "text-amber-700";
+  const bullet = tone === "strength" ? "bg-emerald-400" : "bg-amber-400";
+
+  return (
+    <div className="rounded-2xl border border-white/80 bg-white/90 p-4">
+      <div className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${color}`}>
+        {title}
+      </div>
+      {items.length > 0 ? (
+        <ul className="mt-3 space-y-2">
+          {items.slice(0, 3).map((item) => (
+            <li key={`${title}-${item}`} className="flex items-start gap-2 text-sm leading-6 text-slate-700">
+              <span className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${bullet}`} />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-3 text-sm leading-6 text-slate-500">{empty}</p>
+      )}
+    </div>
+  );
+}
+
+function CareerFitSection({ careerIntelligence }: { careerIntelligence?: CareerIntelligence | null }) {
+  if (!careerIntelligence) {
+    return (
+      <div className="rounded-[1.5rem] border border-white/80 bg-white/85 p-5 text-sm leading-6 text-slate-500 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+        Lecture métier indisponible pour cette offre.
+      </div>
+    );
+  }
+
+  const strengths = uniqueValues(careerIntelligence.strengths ?? [], 3);
+  const gaps = uniqueValues(careerIntelligence.gaps ?? [], 3);
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-[1.5rem] border border-sky-100 bg-sky-50/80 p-5">
+        <div className="flex items-start gap-3">
+          <Target className="mt-0.5 h-4 w-4 shrink-0 text-sky-700" />
+          <p className="text-sm font-semibold leading-6 text-sky-950">
+            {careerIntelligence.positioning || "Lecture métier en cours de consolidation."}
+          </p>
+        </div>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-2">
+        <FitList
+          title="Forces metier"
+          items={strengths}
+          tone="strength"
+          empty="Aucune force métier explicite détectée."
+        />
+        <FitList
+          title="Ecarts metier"
+          items={gaps}
+          tone="gap"
+          empty="Aucun écart métier prioritaire détecté."
+        />
+      </div>
+    </div>
+  );
 }
 
 
@@ -117,8 +202,6 @@ export function OfferDetailModal({
   const [structuredV1, setStructuredV1] = useState<DescriptionStructuredV1 | null>(offer.description_structured_v1 ?? null);
   const [explainV1Full, setExplainV1Full] = useState<ExplainPayloadV1Full | null>(offer.explain_v1_full ?? null);
   const [offerIntelligence, setOfferIntelligence] = useState<OfferIntelligence | null>(offer.offer_intelligence ?? null);
-  const [semanticExplainability, setSemanticExplainability] = useState<SemanticExplainability | null>(offer.semantic_explainability ?? null);
-  const [scoringV2, setScoringV2] = useState<ScoringV2 | null>(offer.scoring_v2 ?? null);
   const [scoringV3, setScoringV3] = useState<ScoringV3 | null>(offer.scoring_v3 ?? null);
   const [structuredLoading, setStructuredLoading] = useState(false);
   const [cvLoading, setCvLoading] = useState(false);
@@ -173,8 +256,6 @@ export function OfferDetailModal({
         if (detail.description_structured_v1) setStructuredV1(detail.description_structured_v1);
         if (detail.explain_v1_full) setExplainV1Full(detail.explain_v1_full);
         if (detail.offer_intelligence) setOfferIntelligence(detail.offer_intelligence);
-        if (detail.semantic_explainability) setSemanticExplainability(detail.semantic_explainability);
-        if (detail.scoring_v2) setScoringV2(detail.scoring_v2);
         if (detail.scoring_v3) setScoringV3(detail.scoring_v3);
       })
       .catch((error: unknown) => {
@@ -249,9 +330,6 @@ export function OfferDetailModal({
     }
   }
 
-  const intelligence = offerIntelligence ?? offer.offer_intelligence ?? null;
-  const semantic = semanticExplainability ?? offer.semantic_explainability ?? null;
-  const scoreV2 = scoringV2 ?? offer.scoring_v2 ?? null;
   const scoreV3 = scoringV3 ?? offer.scoring_v3 ?? null;
 
   // SINGLE SOURCE OF TRUTH: inbox score only.
@@ -270,14 +348,6 @@ export function OfferDetailModal({
   const titleInfo = useMemo(() => cleanOfferTitle(offer.title), [offer.title]);
   const location = [offer.company ? null : null, offer.city, offer.country].filter(Boolean).join(", ");
   const relativeDate = offer.publication_date ? formatRelativeDate(offer.publication_date) : null;
-  const detailSignals = uniqueValues(
-    [
-      ...(intelligence?.top_offer_signals ?? []),
-      ...(intelligence?.required_skills ?? []),
-      ...(semantic?.signal_alignment?.matched_signals ?? []),
-    ],
-    6,
-  );
 
   return (
     <>
@@ -305,6 +375,7 @@ export function OfferDetailModal({
           </button>
 
           <section className="rounded-[1.75rem] border border-white/80 bg-white/85 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <SectionLabel>Score</SectionLabel>
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <h2 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">{titleInfo.display}</h2>
@@ -313,6 +384,9 @@ export function OfferDetailModal({
                   <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-slate-400" />{location || offer.country || "Localisation à préciser"}</span>
                   {relativeDate && <span className="text-slate-500">{relativeDate.label}</span>}
                 </div>
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
+                  Score principal issu de l'inbox. Il sert à prioriser l'offre sans afficher d'overlay concurrent.
+                </p>
               </div>
               <div className={`shrink-0 rounded-[1.5rem] border px-5 py-4 text-center ${scoreTone(primaryScore)}`}>
                 <div className="text-[11px] font-semibold uppercase tracking-[0.18em]">Score</div>
@@ -321,22 +395,21 @@ export function OfferDetailModal({
             </div>
           </section>
 
-          {/* ── Fiche structurée : comprendre le poste ──────────────────── */}
           <section className="mt-6">
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Fiche de poste structurée
-            </div>
+            <SectionLabel>Comprendre l'offre</SectionLabel>
             <StructuredOfferSummaryCard
               offerId={offer.offer_id || offer.id || ""}
               structuredV1={structuredV1}
             />
           </section>
 
-          {/* ── Diagnostic IA : suis-je compatible ? ────────────────────── */}
           <section className="mt-6">
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Diagnostic de candidature
-            </div>
+            <SectionLabel>Comprendre ton fit</SectionLabel>
+            <CareerFitSection careerIntelligence={offer.career_intelligence} />
+          </section>
+
+          <section className="mt-6">
+            <SectionLabel>Que faire concretement</SectionLabel>
             <JustificationCard
               offerId={offer.offer_id || offer.id || ""}
               profile={profile ?? null}
@@ -391,45 +464,16 @@ export function OfferDetailModal({
             </button>
           </div>
 
-          <details className="mt-6 rounded-[1.5rem] border border-slate-200 bg-white/85 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
-            <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-slate-900">
-              <span>Détail du diagnostic</span>
-              <ChevronDown className="h-4 w-4 text-slate-400" />
-            </summary>
-            <div className="mt-4 grid gap-5 lg:grid-cols-2">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Score (source : inbox)</div>
-                <div className="mt-2 text-sm text-slate-700">{primaryScore ?? "—"}%</div>
-                {scoreV3?.summary && <p className="mt-2 text-sm leading-6 text-slate-600">{scoreV3.summary}</p>}
-                {scoreV3 && typeof scoreV3.score_pct === "number" && (
-                  <div className="mt-2 text-xs text-slate-400">Overlay analytique v3 : {scoreV3.score_pct}%</div>
-                )}
-                {scoreV2 && typeof scoreV2.score_pct === "number" && (
-                  <div className="mt-1 text-xs text-slate-400">Overlay analytique v2 : {scoreV2.score_pct}%</div>
-                )}
-              </div>
-              {detailSignals.length > 0 && (
-                <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Signaux visibles</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {detailSignals.map((item) => (
-                      <span key={item} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-700">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {showDebug && explainV1Full && (
-                <div className="lg:col-span-2 rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-xs text-slate-700">
-                  <div className="font-semibold text-amber-900">Mode debug</div>
-                  <div className="mt-2">Confiance : {explainV1Full.confidence}</div>
-                  <div>Signal rare : {explainV1Full.rare_signal_level}</div>
-                </div>
-              )}
-              {structuredLoading && <div className="text-sm text-slate-500">Chargement du détail…</div>}
-            </div>
-          </details>
+          {showDebug && explainV1Full && (
+            <section className="mt-6 rounded-[1.5rem] border border-amber-200 bg-amber-50/70 p-5 text-xs text-slate-700">
+              <div className="font-semibold text-amber-900">Mode debug</div>
+              <div className="mt-2">Score inbox : {primaryScore ?? "—"}%</div>
+              {scoreV3?.summary && <div className="mt-1">{scoreV3.summary}</div>}
+              <div className="mt-1">Confiance : {explainV1Full.confidence}</div>
+              <div>Signal rare : {explainV1Full.rare_signal_level}</div>
+            </section>
+          )}
+          {structuredLoading && <div className="mt-4 text-sm text-slate-500">Chargement du détail…</div>}
         </div>
       </div>
 

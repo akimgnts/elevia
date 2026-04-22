@@ -1,0 +1,74 @@
+{
+  "description": "Panel de 7 CV retenu pour la validation élargie Sprint 4. 1 CV de référence (déjà utilisé Sprint 4 batch1) + 6 CV synthétiques variés issus de apps/api/data/eval/synthetic_cv_dataset_v1/ sélectionnés pour couvrir les 4 profils ciblés par le brief : data/analytics, business/sales, management/ops, marketing/dashboard/reporting, plus 1 HR et 1 Paris-based pour stresser N1 et N2.",
+  "sources": [
+    "apps/api/fixtures/cv/cv_fixture_v0.txt",
+    "apps/api/data/eval/synthetic_cv_dataset_v1/"
+  ],
+  "selection_criteria": [
+    "Au moins 1 profil data/analytics (cv_ref_marie_dupont)",
+    "Au moins 2 profils business/sales/commercial (cv_01, cv_02) pour stress-test N3",
+    "Au moins 1 profil management/ops (cv_04) pour contexte N2",
+    "Au moins 1 profil marketing/reporting (cv_06) pour contexte O2",
+    "1 profil Paris-based (cv_05) pour exercer N1 sur un synthetic",
+    "1 profil RH (cv_09) profil secondaire management/people"
+  ],
+  "panel_size": 7,
+  "cvs": [
+    {
+      "cv_id": "cv_ref_marie_dupont",
+      "role": "Data Analyst — 3 ans expérience FR+EN",
+      "category": "data_analytics",
+      "path": "apps/api/fixtures/cv/cv_fixture_v0.txt",
+      "char_count": 1243,
+      "why_selected": "CV de référence Sprint 4 batch1. Contient simultanément : 'Paris' (N1), 'project management' + 'Project management' (C1), 'sales' (N3), 'management' (N2 texte, non-isolated), 'dashboards' (O2). Seul CV du panel à exercer simultanément N1, C1, O2 et partiellement N3/N2 sur leurs tokens source."
+    },
+    {
+      "cv_id": "cv_01_lina_morel",
+      "role": "Commerciale sédentaire B2B — 3 ans",
+      "category": "sales_commercial",
+      "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_01_lina_morel.txt",
+      "char_count": 1399,
+      "why_selected": "Profil commercial clair avec 'vente sedentaire', 'Reporting commercial', mention 'sales' via CRM Salesforce et contexte B2B. Test direct : est-ce que la suppression de l'alias SKILL_ALIASES['sales'] casse le signal 'argumentaire de vente' légitime sur un vrai commercial ?"
+    },
+    {
+      "cv_id": "cv_02_hugo_renaud",
+      "role": "Business Developer Junior Export",
+      "category": "business_dev_export",
+      "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_02_hugo_renaud.txt",
+      "char_count": 1376,
+      "why_selected": "Profil 'developpement commercial', 'business development', 'argumentaire commercial', 'prospection'. Test complémentaire à cv_01 : profil anglicisme/export où le token 'business development' via jsonl reste actif."
+    },
+    {
+      "cv_id": "cv_04_benoit_caron",
+      "role": "Coordinateur logistique / ops",
+      "category": "operations_logistics",
+      "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_04_benoit_caron.txt",
+      "char_count": 1265,
+      "why_selected": "Profil ops avec coordination équipes et priorités mais sans 'management' isolé. Sert de contrôle neutre — aucun fix ne devrait modifier ce profil."
+    },
+    {
+      "cv_id": "cv_05_camille_vasseur",
+      "role": "Chargée de communication interne (Paris)",
+      "category": "communication_paris",
+      "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_05_camille_vasseur.txt",
+      "char_count": 991,
+      "why_selected": "Seul CV synthetic Paris-based (ligne 3 du CV). Exerce directement N1. Contient aussi 'community management' (bi-terme contenant token 'management') — test de N2 sur un profil où le signal 'gérer une équipe' serait clairement faux (communication, non people management)."
+    },
+    {
+      "cv_id": "cv_06_yasmine_haddad",
+      "role": "Assistante marketing digital — Toulouse",
+      "category": "marketing_reporting",
+      "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_06_yasmine_haddad.txt",
+      "char_count": 1006,
+      "why_selected": "Profil marketing avec 'reporting mensuel', 'Looker Studio', 'Canva', 'mise a jour de pages'. Pas de token 'dashboards' littéral (O2 non exercé mais proche). Teste la propagation des fixes sur un profil reporting/presentation visuelle sans être hit direct."
+    },
+    {
+      "cv_id": "cv_09_ines_barbier",
+      "role": "Chargée RH généraliste junior — Bordeaux",
+      "category": "hr_management",
+      "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_09_ines_barbier.txt",
+      "char_count": 1018,
+      "why_selected": "Profil RH avec 'recrutement', 'administration du personnel', 'coordination avec managers'. Test secondaire N2 : même si le token 'management' n'est pas isolé, profil où 'gérer une équipe' aurait pu être attendu. Vérifie que N2 ne crée pas d'effet cascade sur profils RH légitimes."
+    }
+  ]
+}

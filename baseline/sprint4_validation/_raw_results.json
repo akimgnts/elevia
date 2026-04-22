@@ -1,0 +1,419 @@
+[
+  {
+    "cv_id": "cv_ref_marie_dupont",
+    "role": "Data Analyst (référence Sprint 4 batch1)",
+    "category": "data_analytics",
+    "path": "apps/api/fixtures/cv/cv_fixture_v0.txt",
+    "char_count": 1243,
+    "counts": {
+      "raw_detected": 118,
+      "filtered_out": 99,
+      "canonical_count": 19,
+      "skills_uri_count": 19,
+      "validated_skills": 19,
+      "skills_unmapped_count": 92,
+      "alias_hits_count": 1
+    },
+    "alias_hits": [
+      {
+        "alias": "reporting",
+        "label": "analyse de données"
+      }
+    ],
+    "validated_labels_sorted": [
+      "analyse de données",
+      "apprentissage automatique",
+      "devops",
+      "développement par itérations",
+      "exploration de données",
+      "gestion de projets",
+      "gestion de projets par méthode agile",
+      "logiciel de visualisation des données",
+      "mysql",
+      "nosql",
+      "outils de gestion de configuration logicielle",
+      "outils d’extraction de transformation et de chargement",
+      "postgresql",
+      "programmation informatique",
+      "python (programmation informatique)",
+      "science des big data",
+      "sql",
+      "statistiques",
+      "utiliser un logiciel de tableur"
+    ],
+    "validated_uris_count": 19,
+    "token_presence": {
+      "paris_in_raw_tokens": false,
+      "paris_in_filtered_tokens": false,
+      "sales_in_raw_text": true,
+      "management_in_raw_text": true,
+      "project_management_in_raw_text": true,
+      "dashboards_in_raw_text": true,
+      "vente_in_raw_text": false,
+      "argumentaire_in_raw_text": false
+    },
+    "label_presence": {
+      "paris": false,
+      "gerer_equipe": false,
+      "argumentaire": false,
+      "techniques_visuelles": false,
+      "gestion_projets": true
+    },
+    "uri_presence": {
+      "paris_wager": false,
+      "gerer_une_equipe": false,
+      "argumentaire_de_vente": false,
+      "techniques_presentation_visuelle": false,
+      "gestion_de_projets": true
+    }
+  },
+  {
+    "cv_id": "cv_01_lina_morel",
+    "role": "Commerciale sédentaire B2B",
+    "category": "sales_commercial",
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_01_lina_morel.txt",
+    "char_count": 1399,
+    "counts": {
+      "raw_detected": 102,
+      "filtered_out": 93,
+      "canonical_count": 9,
+      "skills_uri_count": 9,
+      "validated_skills": 9,
+      "skills_unmapped_count": 89,
+      "alias_hits_count": 4
+    },
+    "alias_hits": [
+      {
+        "alias": "commercial",
+        "label": "argumentaire de vente"
+      },
+      {
+        "alias": "négociation",
+        "label": "négocier avec des parties prenantes"
+      },
+      {
+        "alias": "prospection",
+        "label": "méthodes de prospection"
+      },
+      {
+        "alias": "reporting",
+        "label": "analyse de données"
+      }
+    ],
+    "validated_labels_sorted": [
+      "analyse de données",
+      "anglais",
+      "argumentaire de vente",
+      "gestion de la relation client",
+      "gérer la chaîne logistique",
+      "logistique",
+      "méthodes de prospection",
+      "négocier avec des parties prenantes",
+      "utiliser un logiciel de tableur"
+    ],
+    "validated_uris_count": 9,
+    "token_presence": {
+      "paris_in_raw_tokens": false,
+      "paris_in_filtered_tokens": false,
+      "sales_in_raw_text": true,
+      "management_in_raw_text": false,
+      "project_management_in_raw_text": false,
+      "dashboards_in_raw_text": false,
+      "vente_in_raw_text": true,
+      "argumentaire_in_raw_text": false
+    },
+    "label_presence": {
+      "paris": false,
+      "gerer_equipe": false,
+      "argumentaire": true,
+      "techniques_visuelles": false,
+      "gestion_projets": false
+    },
+    "uri_presence": {
+      "paris_wager": false,
+      "gerer_une_equipe": false,
+      "argumentaire_de_vente": true,
+      "techniques_presentation_visuelle": false,
+      "gestion_de_projets": false
+    }
+  },
+  {
+    "cv_id": "cv_02_hugo_renaud",
+    "role": "Business Developer Junior Export",
+    "category": "business_dev_export",
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_02_hugo_renaud.txt",
+    "char_count": 1376,
+    "counts": {
+      "raw_detected": 106,
+      "filtered_out": 98,
+      "canonical_count": 8,
+      "skills_uri_count": 8,
+      "validated_skills": 8,
+      "skills_unmapped_count": 92,
+      "alias_hits_count": 3
+    },
+    "alias_hits": [
+      {
+        "alias": "commercial",
+        "label": "argumentaire de vente"
+      },
+      {
+        "alias": "prospection",
+        "label": "méthodes de prospection"
+      },
+      {
+        "alias": "veille",
+        "label": "analyse de marché"
+      }
+    ],
+    "validated_labels_sorted": [
+      "analyse de marché",
+      "analyse marketing",
+      "anglais",
+      "argumentaire de vente",
+      "espagnol",
+      "gestion de la relation client",
+      "méthodes de prospection",
+      "utiliser un logiciel de tableur"
+    ],
+    "validated_uris_count": 8,
+    "token_presence": {
+      "paris_in_raw_tokens": false,
+      "paris_in_filtered_tokens": false,
+      "sales_in_raw_text": false,
+      "management_in_raw_text": false,
+      "project_management_in_raw_text": false,
+      "dashboards_in_raw_text": false,
+      "vente_in_raw_text": true,
+      "argumentaire_in_raw_text": true
+    },
+    "label_presence": {
+      "paris": false,
+      "gerer_equipe": false,
+      "argumentaire": true,
+      "techniques_visuelles": false,
+      "gestion_projets": false
+    },
+    "uri_presence": {
+      "paris_wager": false,
+      "gerer_une_equipe": false,
+      "argumentaire_de_vente": true,
+      "techniques_presentation_visuelle": false,
+      "gestion_de_projets": false
+    }
+  },
+  {
+    "cv_id": "cv_04_benoit_caron",
+    "role": "Coordinateur logistique / ops",
+    "category": "operations_logistics",
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_04_benoit_caron.txt",
+    "char_count": 1265,
+    "counts": {
+      "raw_detected": 108,
+      "filtered_out": 102,
+      "canonical_count": 6,
+      "skills_uri_count": 6,
+      "validated_skills": 6,
+      "skills_unmapped_count": 99,
+      "alias_hits_count": 0
+    },
+    "alias_hits": [],
+    "validated_labels_sorted": [
+      "anglais",
+      "communication",
+      "gérer la chaîne logistique",
+      "logistique",
+      "saisie",
+      "utiliser un logiciel de tableur"
+    ],
+    "validated_uris_count": 6,
+    "token_presence": {
+      "paris_in_raw_tokens": false,
+      "paris_in_filtered_tokens": false,
+      "sales_in_raw_text": false,
+      "management_in_raw_text": false,
+      "project_management_in_raw_text": false,
+      "dashboards_in_raw_text": false,
+      "vente_in_raw_text": false,
+      "argumentaire_in_raw_text": false
+    },
+    "label_presence": {
+      "paris": false,
+      "gerer_equipe": false,
+      "argumentaire": false,
+      "techniques_visuelles": false,
+      "gestion_projets": false
+    },
+    "uri_presence": {
+      "paris_wager": false,
+      "gerer_une_equipe": false,
+      "argumentaire_de_vente": false,
+      "techniques_presentation_visuelle": false,
+      "gestion_de_projets": false
+    }
+  },
+  {
+    "cv_id": "cv_05_camille_vasseur",
+    "role": "Chargée de communication interne (Paris)",
+    "category": "communication_paris",
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_05_camille_vasseur.txt",
+    "char_count": 1059,
+    "counts": {
+      "raw_detected": 66,
+      "filtered_out": 62,
+      "canonical_count": 4,
+      "skills_uri_count": 4,
+      "validated_skills": 4,
+      "skills_unmapped_count": 61,
+      "alias_hits_count": 0
+    },
+    "alias_hits": [],
+    "validated_labels_sorted": [
+      "anglais",
+      "communication",
+      "gérer la chaîne logistique",
+      "logistique"
+    ],
+    "validated_uris_count": 4,
+    "token_presence": {
+      "paris_in_raw_tokens": false,
+      "paris_in_filtered_tokens": false,
+      "sales_in_raw_text": false,
+      "management_in_raw_text": true,
+      "project_management_in_raw_text": false,
+      "dashboards_in_raw_text": false,
+      "vente_in_raw_text": false,
+      "argumentaire_in_raw_text": false
+    },
+    "label_presence": {
+      "paris": false,
+      "gerer_equipe": false,
+      "argumentaire": false,
+      "techniques_visuelles": false,
+      "gestion_projets": false
+    },
+    "uri_presence": {
+      "paris_wager": false,
+      "gerer_une_equipe": false,
+      "argumentaire_de_vente": false,
+      "techniques_presentation_visuelle": false,
+      "gestion_de_projets": false
+    }
+  },
+  {
+    "cv_id": "cv_06_yasmine_haddad",
+    "role": "Assistante marketing digital",
+    "category": "marketing_reporting",
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_06_yasmine_haddad.txt",
+    "char_count": 1006,
+    "counts": {
+      "raw_detected": 79,
+      "filtered_out": 70,
+      "canonical_count": 9,
+      "skills_uri_count": 9,
+      "validated_skills": 9,
+      "skills_unmapped_count": 66,
+      "alias_hits_count": 2
+    },
+    "alias_hits": [
+      {
+        "alias": "reporting",
+        "label": "analyse de données"
+      },
+      {
+        "alias": "strategie",
+        "label": "planning stratégique"
+      }
+    ],
+    "validated_labels_sorted": [
+      "analyse de données",
+      "analyse marketing",
+      "anglais",
+      "gestion des réseaux sociaux",
+      "optimisation des moteurs de recherche",
+      "planning stratégique",
+      "techniques de marketing des médias sociaux",
+      "utiliser un logiciel de tableur",
+      "wordpress"
+    ],
+    "validated_uris_count": 9,
+    "token_presence": {
+      "paris_in_raw_tokens": false,
+      "paris_in_filtered_tokens": false,
+      "sales_in_raw_text": false,
+      "management_in_raw_text": false,
+      "project_management_in_raw_text": false,
+      "dashboards_in_raw_text": false,
+      "vente_in_raw_text": false,
+      "argumentaire_in_raw_text": false
+    },
+    "label_presence": {
+      "paris": false,
+      "gerer_equipe": false,
+      "argumentaire": false,
+      "techniques_visuelles": false,
+      "gestion_projets": false
+    },
+    "uri_presence": {
+      "paris_wager": false,
+      "gerer_une_equipe": false,
+      "argumentaire_de_vente": false,
+      "techniques_presentation_visuelle": false,
+      "gestion_de_projets": false
+    }
+  },
+  {
+    "cv_id": "cv_09_ines_barbier",
+    "role": "Chargée RH généraliste",
+    "category": "hr_management",
+    "path": "apps/api/data/eval/synthetic_cv_dataset_v1/cv_09_ines_barbier.txt",
+    "char_count": 1018,
+    "counts": {
+      "raw_detected": 68,
+      "filtered_out": 63,
+      "canonical_count": 5,
+      "skills_uri_count": 5,
+      "validated_skills": 5,
+      "skills_unmapped_count": 59,
+      "alias_hits_count": 1
+    },
+    "alias_hits": [
+      {
+        "alias": "recrutement",
+        "label": "recruter des employés"
+      }
+    ],
+    "validated_labels_sorted": [
+      "anglais",
+      "recruter des employés",
+      "recruter du personnel",
+      "service administratif",
+      "utiliser un logiciel de tableur"
+    ],
+    "validated_uris_count": 5,
+    "token_presence": {
+      "paris_in_raw_tokens": false,
+      "paris_in_filtered_tokens": false,
+      "sales_in_raw_text": false,
+      "management_in_raw_text": false,
+      "project_management_in_raw_text": false,
+      "dashboards_in_raw_text": false,
+      "vente_in_raw_text": false,
+      "argumentaire_in_raw_text": false
+    },
+    "label_presence": {
+      "paris": false,
+      "gerer_equipe": false,
+      "argumentaire": false,
+      "techniques_visuelles": false,
+      "gestion_projets": false
+    },
+    "uri_presence": {
+      "paris_wager": false,
+      "gerer_une_equipe": false,
+      "argumentaire_de_vente": false,
+      "techniques_presentation_visuelle": false,
+      "gestion_de_projets": false
+    }
+  }
+]
