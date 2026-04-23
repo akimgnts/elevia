@@ -55,6 +55,336 @@
       "match_debug present for VIE offers after fix"
     ]
   },
+  "last_business_france_raw_to_clean_loader": {
+    "date": "2026-04-23",
+    "module": "apps/api/src/api/utils/clean_offers_pg.py",
+    "script": "scripts/load_business_france_clean_offers.py",
+    "source": "raw_offers",
+    "target": "clean_offers",
+    "source_filter": "business_france",
+    "upsert_key": [
+      "source",
+      "external_id"
+    ],
+    "mapped_fields": [
+      "title",
+      "company",
+      "location",
+      "country",
+      "contract_type",
+      "description",
+      "publication_date",
+      "start_date",
+      "salary",
+      "url",
+      "payload_json",
+      "cleaned_at"
+    ],
+    "preserves": [
+      "payload_json",
+      "contract_type",
+      "payload_json.is_vie"
+    ],
+    "validation": [
+      "apps/api/tests/test_clean_offers_loader.py OK",
+      "rerun idempotent without duplicate rows",
+      "updated raw payload updates clean row",
+      "manual script run OK: attempted 10, persisted 10"
+    ],
+    "runtime_note": "inbox_catalog PostgreSQL freshness still requires API restart or future explicit cache invalidation"
+  },
+  "last_business_france_raw_scraper": {
+    "date": "2026-04-23",
+    "module": "apps/api/src/api/utils/business_france_raw_scraper.py",
+    "script": "scripts/scrape_business_france_raw_offers.py",
+    "api_base": "https://civiweb-api-prd.azurewebsites.net",
+    "api_path": "/api/Offers/search",
+    "live_total_count": 888,
+    "source": "business_france",
+    "writes_to": "raw_offers",
+    "normalization": [
+      "title <- missionTitle",
+      "company <- organizationName",
+      "city <- cityName",
+      "country <- countryName",
+      "publicationDate <- creationDate || startBroadcastDate",
+      "startDate <- missionStartDate",
+      "offerUrl <- mon-vie-via/offres/{id}",
+      "is_vie <- missionType == VIE"
+    ],
+    "runtime_validation": {
+      "dry_run_limit_15": {
+        "fetched": 15,
+        "persisted": 0,
+        "total_count": 888
+      },
+      "live_run_limit_25": {
+        "fetched": 25,
+        "persisted": 25,
+        "raw_business_france_count_after": 35
+      }
+    },
+    "raw_offers_pg_compat_fix": {
+      "file": "apps/api/src/api/utils/raw_offers_pg.py",
+      "reason": "live raw_offers table was missing updated_at and blocked ON CONFLICT update path",
+      "change": [
+        "ALTER TABLE ADD COLUMN IF NOT EXISTS created_at",
+        "ALTER TABLE ADD COLUMN IF NOT EXISTS updated_at"
+      ]
+    }
+  },
+  "last_business_france_full_runtime_refresh": {
+    "date": "2026-04-23",
+    "initial_counts": {
+      "raw_business_france": 35,
+      "clean_business_france": 10
+    },
+    "scrape_command": "apps/api/.venv/bin/python scripts/scrape_business_france_raw_offers.py --batch-size 200",
+    "scrape_result": {
+      "fetched": 888,
+      "persisted": 888,
+      "total_count": 888
+    },
+    "loader_command": "apps/api/.venv/bin/python scripts/load_business_france_clean_offers.py",
+    "loader_result": {
+      "attempted": 898,
+      "persisted": 898
+    },
+    "final_counts": {
+      "raw_business_france": 898,
+      "clean_business_france": 898
+    },
+    "runtime": {
+      "offers_catalog_business_france_limit_500": 500,
+      "panel_pre_restart_default_page_size": 10,
+      "panel_post_restart_default_page_size": 24,
+      "panel_post_restart_page_size_100": 100
+    },
+    "blocking_point_confirmed": "inbox_catalog cache required API restart to expose new PostgreSQL Business France rows in /inbox"
+  },
+  "last_business_france_automation": {
+    "date": "2026-04-23",
+    "script": "scripts/run_business_france_ingestion.py",
+    "cron_file": "scripts/business_france_ingestion.cron",
+    "schedule": [
+      "0 10 * * *",
+      "0 18 * * *"
+    ],
+    "sequence": [
+      "scrape_business_france_raw_offers.py --batch-size 200",
+      "load_business_france_clean_offers.py",
+      "restart uvicorn api.main:app",
+      "verify /health"
+    ],
+    "logging": {
+      "path": "logs/business_france_ingestion.log",
+      "format": "jsonl",
+      "fields": [
+        "timestamp",
+        "fetched_count",
+        "persisted_count_raw",
+        "attempted_count_clean",
+        "persisted_count_clean",
+        "restart_pid",
+        "api_healthy",
+        "status"
+      ]
+    },
+    "validation": {
+      "before_counts": {
+        "raw_business_france": 898,
+        "clean_business_france": 898
+      },
+      "automation_run": {
+        "fetched": 887,
+        "persisted_raw": 887,
+        "attempted_clean": 898,
+        "persisted_clean": 898,
+        "api_healthy": true,
+        "status": "success"
+      },
+      "after_counts": {
+        "raw_business_france": 898,
+        "clean_business_france": 898
+      },
+      "runtime": {
+        "offers_catalog_business_france_limit_500": 500,
+        "panel_page_size_100": 100,
+        "panel_offers_per_cv": [
+          100,
+          100,
+          100,
+          100,
+          100
+        ]
+      },
+      "tests": "7 passed"
+    }
+  },
+  "last_business_france_run_tracking": {
+    "date": "2026-04-23",
+    "wrapper": "scripts/run_business_france_ingestion.py",
+    "tracking_storage": {
+      "runs_table": "ingestion_runs",
+      "presence_fields": [
+        "clean_offers.first_seen_at",
+        "clean_offers.last_seen_at",
+        "clean_offers.is_active"
+      ]
+    },
+    "identity_key": [
+      "source",
+      "external_id"
+    ],
+    "latest_run": {
+      "source": "business_france",
+      "status": "success",
+      "fetched_count": 887,
+      "persisted_count_raw": 887,
+      "attempted_count_clean": 898,
+      "persisted_count_clean": 898,
+      "new_count": 0,
+      "existing_count": 887,
+      "missing_count": 11,
+      "active_total": 887
+    },
+    "validation": {
+      "raw_business_france": 898,
+      "clean_business_france": 898,
+      "inactive_business_france": 11,
+      "offers_catalog_business_france_limit_500": 500,
+      "panel_page_size_100": 100,
+      "tests": "8 passed"
+    }
+  },
+  "last_business_france_domain_enrichment": {
+    "date": "2026-04-24",
+    "module": "apps/api/src/api/utils/offer_domain_enrichment.py",
+    "script": "scripts/enrich_business_france_offer_domains.py",
+    "storage": {
+      "table": "offer_domain_enrichment",
+      "unique_key": [
+        "source",
+        "external_id"
+      ],
+      "content_hash_field": "content_hash"
+    },
+    "taxonomy": [
+      "data",
+      "finance",
+      "hr",
+      "marketing",
+      "sales",
+      "supply",
+      "engineering",
+      "operations",
+      "admin",
+      "legal",
+      "other"
+    ],
+    "ai_fallback": {
+      "flag": "ELEVIA_DOMAIN_AI_FALLBACK",
+      "default": "0",
+      "model_env": "ELEVIA_DOMAIN_AI_MODEL",
+      "timeout_env": "ELEVIA_DOMAIN_AI_TIMEOUT",
+      "candidate_rule": "needs_ai_review = true and (method != 'ai_fallback' or content_hash changed)",
+      "input": [
+        "title",
+        "description"
+      ],
+      "runtime_validation": {
+        "before_needs_review": 142,
+        "before_ai_fallback": 0,
+        "run_on": {
+          "processed_count": 898,
+          "classified_count": 142,
+          "skipped_count": 756,
+          "reclassified_count": 0,
+          "ai_processed_count": 142,
+          "ai_success_count": 142,
+          "ai_failed_count": 0,
+          "ai_fallback_count": 142,
+          "needs_review_count": 0,
+          "remaining_needs_review": 0
+        },
+        "rerun_same_hash": {
+          "processed_count": 898,
+          "classified_count": 0,
+          "skipped_count": 898,
+          "reclassified_count": 0,
+          "ai_processed_count": 0,
+          "ai_success_count": 0,
+          "ai_failed_count": 0,
+          "ai_fallback_count": 0,
+          "needs_review_count": 0,
+          "remaining_needs_review": 0
+        },
+        "sample_classifications": [
+          {
+            "external_id": "229545",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "230224",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "231210",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "231440",
+            "domain_tag": "engineering"
+          }
+        ]
+      }
+    },
+    "latest_manual_run": {
+      "processed_count": 898,
+      "ai_fallback_count": 0,
+      "needs_review_count": 142
+    },
+    "latest_wrapper_run": {
+      "processed_count": 898,
+      "ai_fallback_count": 0,
+      "needs_review_count": 142,
+      "status": "success"
+    },
+    "distribution": {
+      "engineering": 231,
+      "sales": 152,
+      "finance": 113,
+      "supply": 113,
+      "data": 88,
+      "operations": 62,
+      "hr": 46,
+      "admin": 33,
+      "marketing": 31,
+      "other": 18,
+      "legal": 11
+    },
+    "review_reduction": {
+      "before": 606,
+      "after": 142
+    },
+    "rerun_behavior": {
+      "first_run": {
+        "processed_count": 898,
+        "classified_count": 898,
+        "skipped_count": 0,
+        "reclassified_count": 0,
+        "needs_review_count": 142
+      },
+      "second_identical_run": {
+        "processed_count": 898,
+        "classified_count": 0,
+        "skipped_count": 898,
+        "reclassified_count": 0,
+        "needs_review_count": 0
+      }
+    },
+    "tests": "19 passed"
+  },
   "last_observability_run": {
     "route": "/dev/metrics",
     "mode": "direct_handler_call",

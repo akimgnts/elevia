@@ -1,0 +1,650 @@
+{
+  "api_base": "http://127.0.0.1:8000",
+  "cv_dir": "/Users/akimguentas/Downloads/cvtest",
+  "domain_mode": "all",
+  "top_k": 3,
+  "page_size": 100,
+  "missing_files": [],
+  "results": [
+    {
+      "cv_file": "CV CDI MOUSTAPHA LO DATA.pdf",
+      "parse_summary": {
+        "canonical_skills_count": 11,
+        "validated_items_count": 15,
+        "skills_uri_count": 41,
+        "experiences_count": 0,
+        "canonical_skills_sample": [
+          "Statistical Programming",
+          "SQL Querying",
+          "Excel",
+          "Power BI",
+          "English",
+          "CRM Management",
+          "Data Analysis",
+          "Business Intelligence",
+          "Data Visualization",
+          "conomie-Gestion"
+        ],
+        "validated_items_sample": [
+          "argumentaire de vente",
+          "conseiller d'autres personnes",
+          "gérer une équipe",
+          "analyse de données",
+          "analyse marketing",
+          "anglais",
+          "espagnol",
+          "exploration de données",
+          "football",
+          "gestion de la relation client"
+        ],
+        "skills_uri_sample": [
+          "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909",
+          "http://data.europa.eu/esco/skill/045f71e6-0699-4169-8a54-9c6b96f3174d",
+          "http://data.europa.eu/esco/skill/cb668e89-6ef5-4ff3-ab4a-506010e7e70b",
+          "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",
+          "http://data.europa.eu/esco/skill/11c56452-fcec-4b00-9695-cca4728e5048",
+          "http://data.europa.eu/esco/skill/6d3edede-8951-4621-a835-e04323300fa0",
+          "http://data.europa.eu/esco/skill/14ee9f76-3524-43d5-8a1a-5ba8283f8bd7",
+          "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180",
+          "http://data.europa.eu/esco/skill/4868410e-6245-4aa7-96f6-ee1ec52382a5",
+          "http://data.europa.eu/esco/skill/dc9a236c-c640-43c3-812f-269403591edb"
+        ]
+      },
+      "offers_count": 100,
+      "top_offers": [
+        {
+          "offer_id": "242468",
+          "title": "Responsable Reporting & data - VIE Madrid (H/F)",
+          "score": 73,
+          "matched_core_count": 3,
+          "missing_core_count": 0,
+          "matched_full_count": 5,
+          "missing_full_count": 3,
+          "matched_core": [
+            "analyse de données",
+            "gestion de la relation client",
+            "crm"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "exploration de données",
+            "gestion de la relation client",
+            "crm",
+            "production"
+          ],
+          "missing_full": [
+            "clients",
+            "central",
+            "forte"
+          ],
+          "rank": 1
+        },
+        {
+          "offer_id": "242547",
+          "title": "Key Account Manager Junior (H/F)",
+          "score": 57,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 3,
+          "missing_full_count": 5,
+          "matched_core": [
+            "gestion de la relation client"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse marketing",
+            "argumentaire de vente",
+            "gestion de la relation client"
+          ],
+          "missing_full": [
+            "groupe",
+            "kpi",
+            "gestion",
+            "relations",
+            "junior"
+          ],
+          "rank": 2
+        },
+        {
+          "offer_id": "242424",
+          "title": "Junior Process Analyst (H/F)",
+          "score": 57,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 3,
+          "missing_full_count": 5,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "exploration de données",
+            "logiciel de visualisation des données"
+          ],
+          "missing_full": [
+            "application",
+            "functional",
+            "level",
+            "senior",
+            "solution"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "cv_file": "CV - Nawel KADI 2026.pdf",
+      "parse_summary": {
+        "canonical_skills_count": 5,
+        "validated_items_count": 6,
+        "skills_uri_count": 21,
+        "experiences_count": 0,
+        "canonical_skills_sample": [
+          "English",
+          "Recruitment",
+          "Training Coordination",
+          "expeditions courrier entre site",
+          "preparation variables paie",
+          "variables paie",
+          "Statistical Programming",
+          "HR Administration",
+          "1 a",
+          "1 FORMATIONS"
+        ],
+        "validated_items_sample": [
+          "recruter des employés",
+          "gestion des ressources humaines",
+          "anglais",
+          "football",
+          "gérer les ressources humaines",
+          "recruter du personnel"
+        ],
+        "skills_uri_sample": [
+          "http://data.europa.eu/esco/skill/496932f1-0b6b-4f73-9432-d95c7ddcd43b",
+          "http://data.europa.eu/esco/skill/e437eba1-3e22-41f2-8703-741e94785cba",
+          "http://data.europa.eu/esco/skill/6d3edede-8951-4621-a835-e04323300fa0",
+          "http://data.europa.eu/esco/skill/4868410e-6245-4aa7-96f6-ee1ec52382a5",
+          "http://data.europa.eu/esco/skill/279a4b1d-21df-4d78-9f4d-324c73fd7536",
+          "http://data.europa.eu/esco/skill/65715f7a-c791-416b-b88a-2933a1c81647",
+          "compass:skill:ADMIN_HR:ressources",
+          "compass:skill:ADMIN_HR:humaines",
+          "compass:skill:ADMIN_HR:recrutement",
+          "compass:skill:ADMIN_HR:rh"
+        ]
+      },
+      "offers_count": 100,
+      "top_offers": [
+        {
+          "offer_id": "242485",
+          "title": "HR PROJECT MANAGER (H/F)",
+          "score": 61,
+          "matched_core_count": 0,
+          "missing_core_count": 0,
+          "matched_full_count": 3,
+          "missing_full_count": 4,
+          "matched_core": [],
+          "missing_core": [],
+          "matched_full": [
+            "recruter du personnel",
+            "recrutement",
+            "gestion"
+          ],
+          "missing_full": [
+            "communication",
+            "excellentes",
+            "collaborer",
+            "votre"
+          ],
+          "rank": 1
+        },
+        {
+          "offer_id": "242536",
+          "title": "CHEF DE PROJET CONSTRUCTION LOGEMENTS (H/F)",
+          "score": 57,
+          "matched_core_count": 0,
+          "missing_core_count": 1,
+          "matched_full_count": 3,
+          "missing_full_count": 5,
+          "matched_core": [],
+          "missing_core": [
+            "analyse de données"
+          ],
+          "matched_full": [
+            "participation",
+            "suivi",
+            "gestion"
+          ],
+          "missing_full": [
+            "analyse de données",
+            "montage",
+            "méthodes de prospection",
+            "analyse",
+            "missions"
+          ],
+          "rank": 2
+        },
+        {
+          "offer_id": "242520",
+          "title": "VIE - Assistant Chef de projet F/H (H/F)",
+          "score": 51,
+          "matched_core_count": 0,
+          "missing_core_count": 1,
+          "matched_full_count": 2,
+          "missing_full_count": 5,
+          "matched_core": [],
+          "missing_core": [
+            "analyse financière"
+          ],
+          "matched_full": [
+            "participation",
+            "suivi"
+          ],
+          "missing_full": [
+            "analyse financière",
+            "communication",
+            "excellentes",
+            "assistant",
+            "vos"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "cv_file": "Akim_Guentas_Resume.pdf",
+      "parse_summary": {
+        "canonical_skills_count": 21,
+        "validated_items_count": 14,
+        "skills_uri_count": 48,
+        "experiences_count": 2,
+        "canonical_skills_sample": [
+          "Statistical Programming",
+          "SQL Querying",
+          "Excel",
+          "Power BI",
+          "Database Design",
+          "English",
+          "CRM Management",
+          "Digital Marketing",
+          "Data Analysis",
+          "Machine Learning"
+        ],
+        "validated_items_sample": [
+          "analyse de données",
+          "analyse marketing",
+          "apprentissage automatique",
+          "communication",
+          "développement par itérations",
+          "exploration de données",
+          "gestion de la relation client",
+          "gestion de projets par méthode Agile",
+          "outils de gestion de configuration logicielle",
+          "logiciel de visualisation des données"
+        ],
+        "skills_uri_sample": [
+          "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",
+          "http://data.europa.eu/esco/skill/11c56452-fcec-4b00-9695-cca4728e5048",
+          "http://data.europa.eu/esco/skill/3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43",
+          "http://data.europa.eu/esco/skill/15d76317-c71a-4fa2-aadc-2ecc34e627b7",
+          "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+          "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180",
+          "http://data.europa.eu/esco/skill/dc9a236c-c640-43c3-812f-269403591edb",
+          "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4",
+          "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f",
+          "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1"
+        ]
+      },
+      "offers_count": 100,
+      "top_offers": [
+        {
+          "offer_id": "242509",
+          "title": "VIE - Data Project Leader (H/F)",
+          "score": 70,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 5,
+          "missing_full_count": 4,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "développement par itérations",
+            "exploration de données",
+            "gestion de projets par méthode Agile",
+            "analytics"
+          ],
+          "missing_full": [
+            "insights",
+            "leader",
+            "solutions",
+            "chain"
+          ],
+          "rank": 1
+        },
+        {
+          "offer_id": "242505",
+          "title": "Methods & Tools Quality Engineer (H/F)",
+          "score": 69,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 5,
+          "missing_full_count": 3,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "apprentissage automatique",
+            "exploration de données",
+            "logiciel de visualisation des données",
+            "machine"
+          ],
+          "missing_full": [
+            "automate",
+            "animation",
+            "creating"
+          ],
+          "rank": 2
+        },
+        {
+          "offer_id": "242468",
+          "title": "Responsable Reporting & data - VIE Madrid (H/F)",
+          "score": 64,
+          "matched_core_count": 3,
+          "missing_core_count": 0,
+          "matched_full_count": 4,
+          "missing_full_count": 4,
+          "matched_core": [
+            "analyse de données",
+            "gestion de la relation client",
+            "crm"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "exploration de données",
+            "gestion de la relation client",
+            "crm"
+          ],
+          "missing_full": [
+            "clients",
+            "central",
+            "forte",
+            "production"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "cv_file": "CV Mathilde CEVAK.pdf",
+      "parse_summary": {
+        "canonical_skills_count": 9,
+        "validated_items_count": 9,
+        "skills_uri_count": 22,
+        "experiences_count": 5,
+        "canonical_skills_sample": [
+          "English",
+          "CRM Management",
+          "Supply Chain Management",
+          "Data Analysis",
+          "Lead Generation",
+          "B2B Sales",
+          "relation client prospect ionsuivi",
+          "demandes offres fourniss eurs",
+          "argumentaire vente solide adapte",
+          "organisation portefeuille clients"
+        ],
+        "validated_items_sample": [
+          "argumentaire de vente",
+          "méthodes de prospection",
+          "planning stratégique",
+          "analyse de marché",
+          "analyse de données",
+          "analyse marketing",
+          "anglais",
+          "communication",
+          "espagnol"
+        ],
+        "skills_uri_sample": [
+          "http://data.europa.eu/esco/skill/0c0488b3-fca5-4deb-865b-8dc605c3d909",
+          "http://data.europa.eu/esco/skill/0af93aed-bb3e-4ce7-ad77-a41139c7e7c5",
+          "http://data.europa.eu/esco/skill/949ced5f-7536-4614-ac60-563ffc91a2f2",
+          "http://data.europa.eu/esco/skill/b011c8b4-76e1-4bbc-8bb9-1d205e7b618a",
+          "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",
+          "http://data.europa.eu/esco/skill/11c56452-fcec-4b00-9695-cca4728e5048",
+          "http://data.europa.eu/esco/skill/6d3edede-8951-4621-a835-e04323300fa0",
+          "http://data.europa.eu/esco/skill/15d76317-c71a-4fa2-aadc-2ecc34e627b7",
+          "http://data.europa.eu/esco/skill/14ee9f76-3524-43d5-8a1a-5ba8283f8bd7",
+          "compass:skill:MARKETING_SALES:organisation"
+        ]
+      },
+      "offers_count": 100,
+      "top_offers": [
+        {
+          "offer_id": "242502",
+          "title": "Responsable Développement Marché - Asie du Sud-Est (Business Development) M/F (H/F)",
+          "score": 73,
+          "matched_core_count": 1,
+          "missing_core_count": 1,
+          "matched_full_count": 7,
+          "missing_full_count": 4,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [
+            "gestion de la relation client"
+          ],
+          "matched_full": [
+            "analyse de données",
+            "analyse marketing",
+            "argumentaire de vente",
+            "communication",
+            "veille",
+            "analyse",
+            "organisation"
+          ],
+          "missing_full": [
+            "cartographie",
+            "gestion de la relation client",
+            "coordination",
+            "impact"
+          ],
+          "rank": 1
+        },
+        {
+          "offer_id": "242460",
+          "title": "Airline Marketing Analyst (H/F)",
+          "score": 73,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 5,
+          "missing_full_count": 3,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "analyse marketing",
+            "argumentaire de vente",
+            "analyse",
+            "organisation"
+          ],
+          "missing_full": [
+            "all",
+            "director",
+            "proactive"
+          ],
+          "rank": 2
+        },
+        {
+          "offer_id": "242449",
+          "title": "Junior Buyer (H/F)",
+          "score": 64,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 5,
+          "missing_full_count": 5,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "analyse marketing",
+            "communication",
+            "analyse",
+            "gestion"
+          ],
+          "missing_full": [
+            "informatique",
+            "modélisation orientée services",
+            "responsable",
+            "relations",
+            "avant"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "cv_file": "CV WECKER.pdf",
+      "parse_summary": {
+        "canonical_skills_count": 16,
+        "validated_items_count": 24,
+        "skills_uri_count": 62,
+        "experiences_count": 0,
+        "canonical_skills_sample": [
+          "Statistical Programming",
+          "Database Design",
+          "Containerization",
+          "Cloud Architecture",
+          "Backend Development",
+          "Frontend Development",
+          "Machine Learning",
+          "English",
+          "Data Analysis",
+          "Software API"
+        ],
+        "validated_items_sample": [
+          "recruter des employés",
+          "algorithmes",
+          "analyse de données",
+          "anglais",
+          "apprentissage automatique",
+          "DevOps",
+          "développement par itérations",
+          "espagnol",
+          "exploration de données",
+          "gestion de projets par méthode Agile"
+        ],
+        "skills_uri_sample": [
+          "http://data.europa.eu/esco/skill/496932f1-0b6b-4f73-9432-d95c7ddcd43b",
+          "http://data.europa.eu/esco/skill/54924a2c-daca-40d3-9716-4b38ceb04f38",
+          "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",
+          "http://data.europa.eu/esco/skill/6d3edede-8951-4621-a835-e04323300fa0",
+          "http://data.europa.eu/esco/skill/3a2d5b45-56e4-4f5a-a55a-4a4a65afdc43",
+          "http://data.europa.eu/esco/skill/f0de4973-0a70-4644-8fd4-3a97080476f4",
+          "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+          "http://data.europa.eu/esco/skill/14ee9f76-3524-43d5-8a1a-5ba8283f8bd7",
+          "http://data.europa.eu/esco/skill/25f0ea33-b4a2-4f31-b7b4-7d20e827b180",
+          "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4"
+        ]
+      },
+      "offers_count": 100,
+      "top_offers": [
+        {
+          "offer_id": "242529",
+          "title": "INGÉNIEUR SYSTÈMES EMBARQUÉS (H/F)",
+          "score": 64,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 7,
+          "missing_full_count": 7,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "anglais",
+            "DevOps",
+            "développement par itérations",
+            "exploration de données",
+            "gestion de projets par méthode Agile",
+            "outils de gestion de configuration logicielle"
+          ],
+          "missing_full": [
+            "communication",
+            "gestion de projets",
+            "expertise",
+            "software",
+            "description",
+            "industrie",
+            "defense"
+          ],
+          "rank": 1
+        },
+        {
+          "offer_id": "242509",
+          "title": "VIE - Data Project Leader (H/F)",
+          "score": 62,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 4,
+          "missing_full_count": 5,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "développement par itérations",
+            "exploration de données",
+            "gestion de projets par méthode Agile"
+          ],
+          "missing_full": [
+            "insights",
+            "leader",
+            "solutions",
+            "analytics",
+            "chain"
+          ],
+          "rank": 2
+        },
+        {
+          "offer_id": "242505",
+          "title": "Methods & Tools Quality Engineer (H/F)",
+          "score": 61,
+          "matched_core_count": 1,
+          "missing_core_count": 0,
+          "matched_full_count": 4,
+          "missing_full_count": 4,
+          "matched_core": [
+            "analyse de données"
+          ],
+          "missing_core": [],
+          "matched_full": [
+            "analyse de données",
+            "apprentissage automatique",
+            "exploration de données",
+            "machine"
+          ],
+          "missing_full": [
+            "logiciel de visualisation des données",
+            "automate",
+            "animation",
+            "creating"
+          ],
+          "rank": 3
+        }
+      ]
+    }
+  ]
+}

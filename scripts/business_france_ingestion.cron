@@ -1,0 +1,2 @@
+0 10 * * * cd /Users/akimguentas/Dev/elevia-compass && /usr/bin/env python3 /Users/akimguentas/Dev/elevia-compass/scripts/run_business_france_ingestion.py >> /Users/akimguentas/Dev/elevia-compass/logs/business_france_ingestion.cron.log 2>&1
+0 18 * * * cd /Users/akimguentas/Dev/elevia-compass && /usr/bin/env python3 /Users/akimguentas/Dev/elevia-compass/scripts/run_business_france_ingestion.py >> /Users/akimguentas/Dev/elevia-compass/logs/business_france_ingestion.cron.log 2>&1

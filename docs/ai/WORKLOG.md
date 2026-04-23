@@ -44,6 +44,448 @@
 
 ---
 
+## 2026-04-23 — Loader minimal raw_offers -> clean_offers (Business France)
+
+### 1. Objectif
+- Ajouter le maillon manquant entre `raw_offers` et `clean_offers`.
+- Rester strictement déterministe, idempotent et hors scoring.
+
+### 2. Fichiers touchés
+- `apps/api/src/api/utils/clean_offers_pg.py`
+- `scripts/load_business_france_clean_offers.py`
+- `apps/api/tests/test_clean_offers_loader.py`
+
+### 3. Implémentation
+- Nouveau loader PostgreSQL `load_business_france_raw_into_clean_with_connection(...)`.
+- Source unique : `raw_offers WHERE source='business_france'`.
+- Cible unique : `clean_offers`.
+- Upsert : `ON CONFLICT (source, external_id) DO UPDATE`.
+- Mapping minimal :
+  - `title`
+  - `company`
+  - `location`
+  - `country`
+  - `contract_type`
+  - `description`
+  - `publication_date`
+  - `start_date`
+  - `salary`
+  - `url`
+  - `payload_json`
+  - `cleaned_at`
+- `payload_json` conservé.
+- `contract_type` mappé depuis `missionType`, fallback `is_vie`.
+
+### 4. Validation
+- Test unitaire mapping minimal BF : OK.
+- Test PostgreSQL réel :
+  - premier run insère 1 row ;
+  - second run n'ajoute aucun doublon ;
+  - mise à jour du raw payload met à jour la row clean correspondante.
+- Script manuel :
+  - `apps/api/.venv/bin/python scripts/load_business_france_clean_offers.py`
+  - résultat observé : `{"attempted": 10, "persisted": 10, "error": null}`
+- Compatibilité runtime :
+  - `_load_business_france_from_postgres()` relit bien les rows chargées.
+
+### 5. Limites
+- Le repo audité ne contient toujours pas de scraper BF ni de pipeline complet `scrape -> raw -> clean`.
+- Le loader ne suffit à scaler >10 offres que si `raw_offers` grandit d'abord.
+- Après chargement massif, le chemin sûr reste un restart API à cause du cache `inbox_catalog`.
+
+## 2026-04-23 — Business France raw scraper minimal (Azure search -> raw_offers)
+
+### 1. Objectif
+- Retrouver un chemin exécutable pour faire croître `raw_offers` au-delà des 10 rows actuelles.
+- Rester strictement sur l'ingestion brute Business France.
+
+### 2. Résultat
+- Aucun scraper BF actif n'existait dans le repo courant.
+- Un chemin exécutable minimal a été ajouté :
+  - `apps/api/src/api/utils/business_france_raw_scraper.py`
+  - `scripts/scrape_business_france_raw_offers.py`
+
+### 3. Source BF prouvée
+- Swagger public : `https://civiweb-api-prd.azurewebsites.net/swagger/v1/swagger.json`
+- Endpoint listing utilisé : `POST /api/Offers/search`
+- Count live observé : `888`
+
+### 4. Implémentation
+- Pagination déterministe `skip/limit`.
+- Normalisation minimale vers le shape raw déjà attendu :
+  - `title <- missionTitle`
+  - `company <- organizationName`
+  - `city <- cityName`
+  - `country <- countryName`
+  - `publicationDate <- creationDate || startBroadcastDate`
+  - `startDate <- missionStartDate`
+  - `offerUrl <- https://mon-vie-via.businessfrance.fr/offres/{id}`
+  - `is_vie <- missionType == "VIE"`
+- Écriture via `persist_raw_offers(...)`, source `business_france`.
+
+### 5. Blocage réel corrigé
+- Le write live échouait car la table PostgreSQL `raw_offers` existante ne contenait pas `updated_at`.
+- Correction minimale dans `apps/api/src/api/utils/raw_offers_pg.py` :
+  - ajout auto `created_at` / `updated_at` si absents ;
+  - support `table_name=` pour tests de compatibilité legacy.
+
+### 6. Validation
+- Tests :
+  - `apps/api/tests/test_business_france_raw_scraper.py`
+  - `apps/api/tests/test_raw_offers_pg.py`
+  - `apps/api/tests/test_clean_offers_loader.py`
+  - résultat : `5 passed`
+- Dry-run script :
+  - `{"fetched": 15, "persisted": 0, "total_count": 888, "error": null, "dry_run": true}`
+- Run réel limité :
+  - `apps/api/.venv/bin/python scripts/scrape_business_france_raw_offers.py --limit 25`
+  - résultat : `{"fetched": 25, "persisted": 25, "total_count": 888, "error": null, "dry_run": false}`
+- Count DB après run :
+  - `raw_offers WHERE source='business_france' = 35`
+
+### 7. Limite restante
+- `clean_offers` ne grandira toujours qu'après relance du loader `scripts/load_business_france_clean_offers.py`.
+
+## 2026-04-23 — Exécution complète BF : raw -> clean -> runtime -> panel
+
+### 1. État initial
+- `raw_offers WHERE source='business_france' = 35`
+- `clean_offers WHERE source='business_france' = 10`
+
+### 2. Actions exécutées
+- Scraper complet :
+  - `apps/api/.venv/bin/python scripts/scrape_business_france_raw_offers.py --batch-size 200`
+  - résultat : `{"fetched": 888, "persisted": 888, "total_count": 888, "error": null, "dry_run": false}`
+- Loader complet :
+  - `apps/api/.venv/bin/python scripts/load_business_france_clean_offers.py`
+  - résultat : `{"attempted": 898, "persisted": 898, "error": null}`
+
+### 3. État DB après exécution
+- `raw_offers WHERE source='business_france' = 898`
+- `clean_offers WHERE source='business_france' = 898`
+
+### 4. Runtime
+- `/offers/catalog?source=business_france&limit=500` retourne `500` offres.
+- Avant restart API, le panel restait bloqué à `10` offres par CV via `/inbox` → cache `inbox_catalog` confirmé.
+- Restart API manuel effectué avec :
+  - `cd apps/api && source .env && PYTHONPATH=... .venv/bin/python -m uvicorn api.main:app --host 127.0.0.1 --port 8000`
+
+### 5. Panel après restart
+- Script default (`page_size=24`) :
+  - tous les CV du panel voient `offers=24`
+- Script avec `--page-size 100` :
+  - tous les CV du panel voient `offers=100`
+
+### 6. Conclusion runtime
+- La chaîne BF complète fonctionne maintenant au-delà de `35`.
+- Le vrai blocage observé était :
+  - d'abord absence de scraper actif ;
+  - puis schéma legacy `raw_offers` sans `updated_at` ;
+  - puis cache `inbox_catalog` nécessitant un restart API.
+
+## 2026-04-23 — Sprint 2 automation BF : scrape -> load -> restart
+
+### 1. Objectif
+- Automatiser la chaîne Business France existante sans toucher au scoring, au matching ni à `skills_uri`.
+- Utiliser uniquement les scripts déjà présents : scraper BF, loader raw->clean, restart API.
+
+### 2. Fichiers touchés
+- `scripts/run_business_france_ingestion.py`
+- `scripts/business_france_ingestion.cron`
+- `apps/api/tests/test_business_france_ingestion_automation.py`
+
+### 3. Implémentation
+- Script unique `run_business_france_ingestion.py` :
+  - charge `.env` ;
+  - fixe `PYTHONPATH=apps/api/src` ;
+  - lance `scripts/scrape_business_france_raw_offers.py --batch-size 200` ;
+  - lance `scripts/load_business_france_clean_offers.py` ;
+  - redémarre `uvicorn api.main:app` ;
+  - vérifie `GET /health` ;
+  - écrit une ligne JSON dans `logs/business_france_ingestion.log`.
+- Fichier cron :
+  - `0 10 * * *`
+  - `0 18 * * *`
+
+### 4. Validation
+- Tests ciblés :
+  - `apps/api/tests/test_business_france_ingestion_automation.py` OK ;
+  - suite BF élargie OK : `7 passed`.
+- Run réel :
+  - avant : `raw=898`, `clean=898`
+  - wrapper :
+    - `fetched_count=887`
+    - `persisted_count_raw=887`
+    - `attempted_count_clean=898`
+    - `persisted_count_clean=898`
+    - `api_healthy=true`
+    - `status=success`
+  - après : `raw=898`, `clean=898`
+- Runtime après automation :
+  - `/offers/catalog?source=business_france&limit=500` → `500`
+  - panel `--page-size 100` → `100` offres pour chaque CV du panel.
+
+### 5. Point technique corrigé pendant validation
+- Le premier wrapper pouvait rester bloqué au restart car le lancement uvicorn passait par un shell `nohup`.
+- Correction minimale :
+  - remplacement par `subprocess.Popen(..., start_new_session=True)` ;
+  - même commande uvicorn, sans refactor du pipeline.
+
+## 2026-04-23 — Sprint 3 tracking BF : runs + active/inactive
+
+### 1. Objectif
+- Ajouter un suivi déterministe des runs Business France sans toucher au scoring, au matching ni à `skills_uri`.
+- Calculer `new_count`, `existing_count`, `missing_count`, `active_total`.
+
+### 2. Fichiers touchés
+- `apps/api/src/api/utils/clean_offers_pg.py`
+- `scripts/run_business_france_ingestion.py`
+- `apps/api/tests/test_business_france_ingestion_tracking.py`
+- `apps/api/tests/test_business_france_ingestion_automation.py`
+
+### 3. Implémentation
+- `clean_offers` reçoit des colonnes additives :
+  - `first_seen_at`
+  - `last_seen_at`
+  - `is_active`
+- nouvelle table additive :
+  - `ingestion_runs`
+- identité BF figée :
+  - `(source, external_id)`
+- logique du wrapper :
+  - lit les `previous_active_ids` avant scrape/load ;
+  - récupère les `current_ids` du dernier `scraped_at` dans `raw_offers` après scrape ;
+  - charge `clean_offers` ;
+  - marque les offres courantes actives, les disparues inactives ;
+  - insère un run record dans `ingestion_runs`.
+
+### 4. Validation
+- test tracking Postgres :
+  - 1er run : tous `new`
+  - 2e run identique : tous `existing`
+  - 3e run avec disparition d'un ID : `missing_count > 0`, row marquée inactive
+- tests automation BF mis à jour : OK
+- suite BF :
+  - `apps/api/tests/test_clean_offers_loader.py`
+  - `apps/api/tests/test_raw_offers_pg.py`
+  - `apps/api/tests/test_business_france_raw_scraper.py`
+  - `apps/api/tests/test_business_france_ingestion_automation.py`
+  - `apps/api/tests/test_business_france_ingestion_tracking.py`
+  - résultat : `8 passed`
+
+### 5. Run réel
+- commande :
+  - `python3 scripts/run_business_france_ingestion.py`
+- résultat :
+  - `fetched_count=887`
+  - `persisted_count_raw=887`
+  - `attempted_count_clean=898`
+  - `persisted_count_clean=898`
+  - `new_count=0`
+  - `existing_count=887`
+  - `missing_count=11`
+  - `active_total=887`
+  - `status=success`
+- état DB après run :
+  - `raw_offers.business_france = 898`
+  - `clean_offers.business_france = 898`
+  - `clean_offers.business_france active = 887`
+  - `clean_offers.business_france inactive = 11`
+- runtime :
+  - `/offers/catalog?source=business_france&limit=500` → `500`
+  - panel `--page-size 100` → `100` offres par CV du panel
+
+### 6. Point technique corrigé pendant validation
+- `python3 scripts/run_business_france_ingestion.py` échouait car l'interpréteur système ne voyait pas `psycopg`.
+- Correction minimale :
+  - bootstrap du `site-packages` du venv API dans `scripts/run_business_france_ingestion.py`.
+
+## 2026-04-24 — Domain enrichment BF : rules-first + AI fallback optional
+
+### 1. Objectif
+- Ajouter une classification de domaine additive pour les offres Business France.
+- Aucune modification du scoring, du matching, de `skills_uri` ou du runtime `/inbox`.
+
+### 2. Fichiers touchés
+- `apps/api/src/api/utils/offer_domain_enrichment.py`
+- `scripts/enrich_business_france_offer_domains.py`
+- `scripts/run_business_france_ingestion.py`
+- `apps/api/tests/test_offer_domain_enrichment.py`
+- `apps/api/tests/test_business_france_ingestion_automation.py`
+
+### 3. Implémentation
+- Nouvelle table additive `offer_domain_enrichment` :
+  - `source`
+  - `external_id`
+  - `domain_tag`
+  - `confidence`
+  - `method`
+  - `evidence`
+  - `needs_ai_review`
+  - `created_at`
+  - `updated_at`
+- Taxonomie fermée :
+  - `data`, `finance`, `hr`, `marketing`, `sales`, `supply`, `engineering`, `operations`, `admin`, `legal`, `other`
+- Règles déterministes :
+  - score par mots-clés sur `title + description`
+  - `score=0` → `other`, `needs_ai_review=true`
+  - tie ou score faible (`<2`) → `needs_ai_review=true`
+- Fallback IA optionnel :
+  - flag `ELEVIA_DOMAIN_AI_FALLBACK=0` par défaut
+  - si ON, appelle OpenAI uniquement pour les rows `needs_ai_review=true`
+  - sortie bornée à la taxonomie fermée
+- Script manuel :
+  - `python3 scripts/enrich_business_france_offer_domains.py`
+- Intégration wrapper :
+  - `scripts/run_business_france_ingestion.py` lance l'enrichment après le load ;
+  - best-effort uniquement, sans bloquer l'ingestion si l'enrichment échoue.
+
+### 4. Validation
+- Tests :
+  - offre data connue → classée `data`
+  - offre ambiguë → `needs_ai_review=true`
+  - fallback AI mocké → domaine valide, méthode `ai_fallback`
+  - rerun → aucun doublon
+- Suite BF complète :
+  - `11 passed`
+- Run réel script :
+  - `{"processed_count": 898, "ai_fallback_count": 0, "needs_review_count": 606, "error": null}`
+- Run réel wrapper :
+  - `domain_processed_count=898`
+  - `domain_ai_fallback_count=0`
+  - `domain_needs_review_count=606`
+  - `status=success`
+
+### 5. Distribution observée
+- `data = 231`
+- `other = 139`
+- `admin = 101`
+- `engineering = 101`
+- `sales = 90`
+- `finance = 69`
+- `hr = 47`
+- `operations = 41`
+- `supply = 38`
+- `marketing = 31`
+- `legal = 10`
+
+### 6. Limitations constatées
+- Certaines règles restent bruitées :
+  - `Field Service Business Operations & Digital Transformation...` classée `admin`
+  - `INGÉNIEUR(E) CSV` classée `finance`
+  - `Business Development Analyst` classée `data` mais `needs_ai_review=true`
+- Le fallback IA est OFF par défaut ; les cas ambigus restent stockés avec `needs_ai_review=true`.
+
+## 2026-04-24 — Domain enrichment BF rules tuning : phrase-first + overrides
+
+### 1. Objectif
+- Réduire `needs_ai_review` sans utiliser l'IA.
+- Garder la taxonomie fermée et la structure pipeline inchangée.
+
+### 2. Changements de règles
+- Phrase-first ajouté avant tout scoring :
+  - `business development`, `account manager`, `key account`, `sales manager`, `client relationship`
+  - `contrôle de gestion`, `controle de gestion`, `contrôleur de gestion`, `controleur de gestion`, `financial controller`, `business controller`, `comptabilité`, `accounting`
+  - `data analyst`, `data scientist`, `business intelligence`, `data engineer`, `machine learning`
+  - `ressources humaines`, `human resources`, `talent acquisition`, `chargé de recrutement`, `recruitment specialist`
+  - `supply chain`, `logistique`, `procurement`, `approvisionnement`
+  - `software engineer`, `backend developer`, `frontend developer`, `full stack`, `devops`
+  - `digital marketing`, `marketing manager`, `content marketing`, `seo specialist`
+  - `project manager`, `chef de projet`, `operations manager`
+  - `office manager`, `assistant administratif`, `administrative assistant`
+  - `legal counsel`, `compliance officer`, `juriste`
+- Pondération simple du titre :
+  - mot-clé trouvé dans le titre = `+2`
+  - mot-clé trouvé dans la description = `+1`
+- Extensions FR/EN observées dans le corpus BF :
+  - ex. `ingénieur`, `ingenieur`, `développeur`, `acheteur`, `fournisseur`, `contrôleur`, `controleur`, `analyste`, `recrutement`
+- Overrides :
+  - `business development` force `sales`
+  - `controller` / `controle` force `finance`
+  - `data` seul ne classe plus `data`
+  - `operations` est ignoré si `finance`, `data` ou `sales` ont déjà du signal
+  - `business/client/account` seuls côté `sales` sont abaissés
+
+### 3. Validation
+- avant tuning : `needs_review_count = 606`
+- après tuning : `needs_review_count = 142`
+- cible atteinte : `<25%`
+- distribution finale :
+  - `engineering=231`
+  - `sales=152`
+  - `finance=113`
+  - `supply=113`
+  - `data=88`
+  - `operations=62`
+  - `hr=46`
+  - `admin=33`
+  - `marketing=31`
+  - `other=18`
+  - `legal=11`
+- suite tests BF complète :
+  - `15 passed`
+
+### 4. Exemples corrigés
+- `242525 | Contrôleur de gestion` → `finance`, evidence `controleur de gestion`, plus de review
+- `242530 | INGÉNIEUR CONCEPTION MÉCANIQUE` → `engineering`, plus de review
+- `242538 | INGENIEUR.E INFRASTRUCTURES` → `engineering`, plus de review
+- `242539 | Sales Coordinator` → `sales`, plus de review
+- `242449 | Junior Buyer` → `supply`, plus de review
+
+## 2026-04-24 — Domain enrichment BF skip unchanged via content_hash
+
+### 1. Objectif
+- Éviter de reclassifier inutilement les offres BF entre deux runs identiques.
+- Préparer un fallback IA futur sans coût inutile.
+
+### 2. Implémentation
+- `offer_domain_enrichment` reçoit une colonne additive `content_hash`.
+- Hash déterministe calculé à partir de :
+  - `title`
+  - `description`
+- Règle :
+  - si `(source, external_id)` existe déjà
+  - et `content_hash` inchangé
+  - et `domain_tag` existant valide
+  - alors skip total de la classification.
+- Reclassification seulement si :
+  - row absente
+  - `content_hash` changé
+  - ou domaine existant invalide
+- `created_at` n'est jamais réécrit sur update.
+
+### 3. Nouvelles métriques de run
+- `processed_count`
+- `classified_count`
+- `skipped_count`
+- `reclassified_count`
+- `ai_fallback_count`
+- `needs_review_count`
+
+### 4. Validation
+- test dédié :
+  - 1er run → classification
+  - 2e run identique → skip
+  - changement de titre → reclassification
+  - `created_at` préservé, `updated_at` mis à jour
+  - pas de doublon
+- run manuel 1 :
+  - `processed=898`
+  - `classified=898`
+  - `skipped=0`
+  - `reclassified=0`
+  - `needs_review=142`
+- run manuel 2 identique :
+  - `processed=898`
+  - `classified=0`
+  - `skipped=898`
+  - `reclassified=0`
+  - `needs_review=0`
+- suite BF complète :
+  - `16 passed`
+
+---
+
 ## 2026-04-21 — Clean UI Profile Understanding V1
 
 ### 1. Objectif
@@ -1134,3 +1576,67 @@ Double validation OFF vs ON sur 10 profils réels contre 839 offres BF :
 - IA1 n'est pas validée comme amélioration globale.
 - IA1 apporte un gain matching mesurable uniquement sur Moustapha / `BF-242343` dans ce protocole post-fix.
 - Ne pas passer à une activation large sans politique conditionnelle plus stricte.
+
+---
+
+## 2026-04-24 — Business France domain enrichment AI fallback
+
+### Implémentation
+- Fichier modifié : `apps/api/src/api/utils/offer_domain_enrichment.py`.
+- Le fallback IA ne traite que les lignes `needs_ai_review = true`.
+- Skip strict si :
+  - `content_hash` inchangé
+  - et `method = ai_fallback`
+  - ou `method = rules` avec `needs_ai_review = false`
+- Prompt IA limité à :
+  - `title`
+  - `description`
+- Validation stricte du JSON IA :
+  - `domain_tag` dans la taxonomie fermée
+  - `confidence` présent
+  - `evidence` présent, liste non vide
+- En cas de sortie IA invalide :
+  - on garde le résultat rules
+  - `needs_ai_review` reste `true`
+
+### Stats exposées
+- `ai_processed_count`
+- `ai_success_count`
+- `ai_failed_count`
+- `remaining_needs_review`
+
+### Validation tests
+- `apps/api/tests/test_offer_domain_enrichment.py` :
+  - traitement des seuls cas ambigus
+  - rerun identique non retraité
+  - reclassification si `content_hash` change
+  - sortie IA invalide rejetée proprement
+- Suite ciblée BF :
+  - `19 passed`
+
+### Validation runtime
+- Avant fallback IA :
+  - `needs_ai_review = 142`
+  - `method = ai_fallback = 0`
+- Run :
+  - `ELEVIA_DOMAIN_AI_FALLBACK=1 python3 scripts/enrich_business_france_offer_domains.py`
+  - résultat :
+    - `processed_count = 898`
+    - `classified_count = 142`
+    - `skipped_count = 756`
+    - `ai_processed_count = 142`
+    - `ai_success_count = 142`
+    - `ai_failed_count = 0`
+    - `remaining_needs_review = 0`
+- Rerun identique :
+  - `processed_count = 898`
+  - `classified_count = 0`
+  - `skipped_count = 898`
+  - `ai_processed_count = 0`
+  - `remaining_needs_review = 0`
+
+### Exemples IA
+- `229545` → `engineering`
+- `230224` → `operations`
+- `231210` → `finance`
+- `231440` → `engineering`

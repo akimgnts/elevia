@@ -177,6 +177,69 @@
 - Décision : IA1 reste `CONDITIONAL`, pas `KEEP` global.
 - Toute activation large IA1 reste interdite sans critères conditionnels fondés sur gain matching mesurable.
 
+### R24 — Business France automation V1 = scripts existants + restart explicite
+- L'automatisation Business France V1 utilise uniquement les scripts existants :
+  - `scripts/scrape_business_france_raw_offers.py`
+  - `scripts/load_business_france_clean_offers.py`
+  - `scripts/run_business_france_ingestion.py`
+- La séquence est figée :
+  - scrape `raw_offers`
+  - load `clean_offers`
+  - restart API
+  - vérification `/health`
+- Le logging est strictement additif dans `logs/business_france_ingestion.log` au format JSONL.
+- Aucune partie de cette automation ne doit modifier scoring, matching, ranking, `skills_uri` ou `clean_offers` hors upsert minimal déjà validé.
+- Tant que `inbox_catalog` ne possède pas d'invalidation PostgreSQL explicite, le restart API reste obligatoire après load massif pour garantir la fraîcheur runtime.
+
+### R25 — Business France run tracking V1 = additif, identitaire, sans delete
+- Le tracking Business France V1 utilise comme identité unique `(source, external_id)`.
+- Les disparitions d'offres BF ne provoquent aucun delete ; elles sont marquées `is_active=false` dans `clean_offers`.
+- Les colonnes additives autorisées sur `clean_offers` sont :
+  - `first_seen_at`
+  - `last_seen_at`
+  - `is_active`
+- Les runs sont historisés dans une table additive `ingestion_runs`.
+- Les métriques de run autorisées sont :
+  - `fetched_count`
+  - `persisted_count_raw`
+  - `attempted_count_clean`
+  - `persisted_count_clean`
+  - `new_count`
+  - `existing_count`
+  - `missing_count`
+  - `active_total`
+- Ce tracking ne doit pas modifier scoring, matching, ranking, `skills_uri` ni frontend.
+
+### R26 — Business France domain enrichment V1 = table additive, rules-first, AI fallback flag-gated
+- Le domain enrichment BF V1 vit dans une table additive `offer_domain_enrichment`.
+- La clé unique est `(source, external_id)`.
+- La taxonomie est fermée et figée :
+  - `data`, `finance`, `hr`, `marketing`, `sales`, `supply`, `engineering`, `operations`, `admin`, `legal`, `other`
+- La classification déterministe par règles s'exécute toujours.
+- Le fallback IA ne s'exécute que si `ELEVIA_DOMAIN_AI_FALLBACK=1`.
+- Le fallback IA ne doit produire qu'un `domain_tag` appartenant à la taxonomie fermée.
+- L'enrichment domaine ne doit pas modifier scoring, matching, ranking, `skills_uri`, `clean_offers` source ou frontend.
+- En V1, aucune jointure runtime dans `/inbox` n'est autorisée ; l'enrichment sert à l'analyse et aux tests uniquement.
+
+### R27 — Domain enrichment BF rules tuning = phrase-first obligatoire, IA OFF par défaut
+- La détection par expression forte passe avant tout scoring par mots-clés.
+- Si une phrase forte matche, la classification est immédiate :
+  - `method = rules`
+  - `confidence = 0.9`
+  - `needs_ai_review = false`
+- Le scoring fallback reste déterministe seulement.
+- `ELEVIA_DOMAIN_AI_FALLBACK = 0` reste le défaut.
+- La réduction de `needs_ai_review` doit venir d'abord de la qualité des règles, pas de l'activation de l'IA.
+
+### R28 — Domain enrichment BF skip unchanged = content_hash obligatoire
+- `offer_domain_enrichment` doit stocker un `content_hash` déterministe basé uniquement sur `title + description`.
+- Si `(source, external_id)` existe déjà et que `content_hash` est inchangé, la classification doit être totalement skippée.
+- Reclassification autorisée seulement si :
+  - row absente
+  - `content_hash` changé
+  - ou ancienne row invalide
+- `created_at` doit être préservé ; seul `updated_at` bouge lors d'une vraie reclassification.
+
 ---
 
 ## Paramétrage figé du filtre V1
@@ -264,3 +327,4 @@ Ces items ne sont pas interdits de façon permanente — ils sont **hors scope V
 | 2026-04-22 | IA 1 Provider V1 est OpenAI flag-gated avec fallback pass-through | Activé seulement par flag, JSON strict mappé vers `RawCvReconstructionV1`, aucun impact scoring/matching/`skills_uri`/`career_profile` |
 | 2026-04-22 | IA 1 Prompt Preserve Content V1 | `rebuilt_profile_text` doit conserver le contenu, pas le compresser ni le synthétiser avant déterministe |
 | 2026-04-22 | IA 1 Dirty CV Policy V1 | IA1 s'active seulement sur CV mal exploitable, après évaluation déterministe et avec hard-blocks conservateurs |
+| 2026-04-24 | Domain enrichment AI fallback V1 | Fallback IA autorisé uniquement pour les offres BF encore `needs_ai_review=true`, flag-gated via `ELEVIA_DOMAIN_AI_FALLBACK`, taxonomie fermée, validation stricte du JSON, skip par `content_hash` inchangé |

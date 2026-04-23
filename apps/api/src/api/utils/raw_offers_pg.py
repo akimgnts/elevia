@@ -66,10 +66,24 @@ def _connect(database_url: str):
     return psycopg.connect(database_url)
 
 
-def ensure_raw_offers_table(conn) -> None:
+def _upsert_sql(table_name: str) -> str:
+    return f"""
+INSERT INTO {table_name} (source, external_id, payload_json, scraped_at)
+VALUES (%s, %s, %s::jsonb, %s)
+ON CONFLICT (source, external_id)
+DO UPDATE SET
+    payload_json = EXCLUDED.payload_json,
+    scraped_at = EXCLUDED.scraped_at,
+    updated_at = NOW();
+"""
+
+
+def ensure_raw_offers_table(conn, *, table_name: str = "raw_offers") -> None:
     with conn.cursor() as cursor:
-        cursor.execute(CREATE_RAW_OFFERS_SQL)
-        cursor.execute(CREATE_RAW_OFFERS_INDEX_SQL)
+        cursor.execute(CREATE_RAW_OFFERS_SQL.replace("raw_offers", table_name))
+        cursor.execute(CREATE_RAW_OFFERS_INDEX_SQL.replace("raw_offers", table_name))
+        cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()")
+        cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()")
 
 
 def _stable_payload_hash(source: str, payload: Mapping[str, Any]) -> str:
@@ -107,11 +121,13 @@ def persist_raw_offers_with_connection(
     source: str,
     offers: Iterable[Mapping[str, Any]],
     scraped_at: str,
+    *,
+    table_name: str = "raw_offers",
 ) -> PersistResult:
     attempted = 0
     persisted = 0
 
-    ensure_raw_offers_table(conn)
+    ensure_raw_offers_table(conn, table_name=table_name)
 
     with conn.cursor() as cursor:
         for offer in offers:
@@ -120,7 +136,7 @@ def persist_raw_offers_with_connection(
             external_id = build_external_id(source, payload)
             payload_json = json.dumps(payload, ensure_ascii=False, default=str)
             cursor.execute(
-                UPSERT_RAW_OFFER_SQL,
+                _upsert_sql(table_name),
                 (source, external_id, payload_json, scraped_at),
             )
             persisted += 1
@@ -134,11 +150,13 @@ def persist_raw_offer_records_with_connection(
     source: str,
     records: Iterable[Mapping[str, Any]],
     default_scraped_at: str | None = None,
+    *,
+    table_name: str = "raw_offers",
 ) -> PersistResult:
     attempted = 0
     persisted = 0
 
-    ensure_raw_offers_table(conn)
+    ensure_raw_offers_table(conn, table_name=table_name)
 
     with conn.cursor() as cursor:
         for record in records:
@@ -155,7 +173,7 @@ def persist_raw_offer_records_with_connection(
             external_id = record.get("external_id") or build_external_id(source, payload)
             payload_json = json.dumps(payload, ensure_ascii=False, default=str)
             cursor.execute(
-                UPSERT_RAW_OFFER_SQL,
+                _upsert_sql(table_name),
                 (source, external_id, payload_json, scraped_at),
             )
             persisted += 1
