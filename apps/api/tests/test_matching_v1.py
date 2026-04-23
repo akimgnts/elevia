@@ -298,6 +298,37 @@ def test_is_vie_true_accepted():
     print(f"✅ TEST 9: is_vie=True → {len(result.results)} résultat(s)")
 
 
+def test_explain_dedupes_missing_when_canonical_concept_already_matched():
+    """A matched canonical concept must not reappear as missing under another URI."""
+    esco_data_analysis_uri = "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378"
+    domain_data_analysis_uri = "compass:skill:DATA_IT:data analysis"
+    profile = extract_profile({
+        "id": "concept-dedupe-profile",
+        "skills_uri": [esco_data_analysis_uri],
+    })
+    offer = {
+        "id": "concept-dedupe-offer",
+        "is_vie": True,
+        "country": "france",
+        "title": "Business Development Analyst",
+        "company": "TechCorp",
+        "offer_cluster": "DATA_IT",
+        "skills_uri": [esco_data_analysis_uri, domain_data_analysis_uri],
+        "skills_display": [
+            {"uri": esco_data_analysis_uri, "label": "analyse de données"},
+            {"uri": domain_data_analysis_uri, "label": "data analysis"},
+        ],
+    }
+
+    result = MatchingEngine([offer]).score_offer(profile, offer)
+    skills_debug = result.match_debug["skills"]
+
+    assert result.score == 65
+    assert skills_debug["matched_core"] == ["analyse de données"]
+    assert "data analysis" not in skills_debug["missing_core"]
+    assert "data analysis" not in skills_debug["missing"]
+
+
 # ============================================================================
 # TEST 10: Hard filter - pays manquant
 # ============================================================================

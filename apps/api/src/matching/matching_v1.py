@@ -218,6 +218,49 @@ def _normalize_skill_list(raw_skills) -> List[str]:
         return [normalize_skill(s) for s in raw_skills if isinstance(s, str) and s.strip()]
     return []
 
+
+def _canonical_id_for_explain_label(label: str, offer_cluster: Optional[str]) -> Optional[str]:
+    if not label:
+        return None
+    store = get_weighted_store()
+    if not store.is_loaded():
+        return None
+    weighted_cluster = map_offer_cluster_to_weighted(str(offer_cluster)) if offer_cluster else None
+    resolved = resolve_weighted_skill(
+        label,
+        weighted_cluster,
+        store=store,
+        clamp_min=CONTEXT_CLAMP_MIN,
+        clamp_max=CONTEXT_CLAMP_MAX,
+    )
+    return resolved.canonical_id
+
+
+def _dedupe_missing_explain_by_matched_concept(
+    matched_skills: List[str],
+    missing_skills: List[str],
+    *,
+    offer_cluster: Optional[str],
+) -> List[str]:
+    matched_canonical_ids = {
+        canonical_id
+        for canonical_id in (
+            _canonical_id_for_explain_label(label, offer_cluster)
+            for label in matched_skills
+        )
+        if canonical_id
+    }
+    if not matched_canonical_ids:
+        return missing_skills
+
+    deduped: List[str] = []
+    for label in missing_skills:
+        canonical_id = _canonical_id_for_explain_label(label, offer_cluster)
+        if canonical_id and canonical_id in matched_canonical_ids:
+            continue
+        deduped.append(label)
+    return deduped
+
 # ============================================================================
 # CONSTANTES (VERROUILLÉES - spec lignes 78-83)
 # ============================================================================
@@ -655,14 +698,35 @@ class MatchingEngine:
             offer_country = offer.get("country") or offer.get("pays") or ""
             country_match = canonize_country(offer_country) in profile.preferred_countries
 
+        offer_cluster = offer.get("offer_cluster")
+        matched_for_explain = list(matched_skills)
+        missing_for_explain = _dedupe_missing_explain_by_matched_concept(
+            matched_for_explain,
+            list(missing_skills),
+            offer_cluster=offer_cluster,
+        )
+        context_for_explain: Optional[Dict[str, List[str]]] = None
+        if context_breakdown:
+            context_for_explain = {
+                key: list(value)
+                for key, value in context_breakdown.items()
+                if isinstance(value, list)
+            }
+            for key in ("missing_core", "missing_secondary", "missing_context"):
+                context_for_explain[key] = _dedupe_missing_explain_by_matched_concept(
+                    matched_for_explain,
+                    context_for_explain.get(key, []),
+                    offer_cluster=offer_cluster,
+                )
+
         skills_debug: Dict[str, Any] = {
-            "matched": matched_skills,
-            "missing": missing_skills,
+            "matched": matched_for_explain,
+            "missing": missing_for_explain,
             "weight": int(WEIGHT_SKILLS * 100),
             "score": round(skills_score * WEIGHT_SKILLS * 100, 1),
         }
-        if context_breakdown:
-            skills_debug.update(context_breakdown)
+        if context_for_explain:
+            skills_debug.update(context_for_explain)
         if _use_uri_scoring():
             offer_uri_list = offer.get("skills_uri") or []
             skills_debug.update({
