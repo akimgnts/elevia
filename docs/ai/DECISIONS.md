@@ -169,6 +169,14 @@
 - Les offres `contract_type=VIE` passent le hard filter si `payload_json.is_vie=true`.
 - Les offres `contract_type=VIA` restent représentées par leur payload (`payload_json.is_vie=false`) tant qu'aucune décision produit ne dit de les traiter comme scorables VIE.
 
+### R23 — IA1 post-fix matching validation = conditional only
+- Après correction de propagation `is_vie`, le matching s'exécute bien sur les offres Business France VIE.
+- IA1 ne doit pas être évaluée uniquement sur la qualité du parsing ; la décision produit dépend du matching réel.
+- Sur Nawel, IA1 récupère des expériences mais n'améliore ni score, ni matched_core, ni missing_core, ni matched_full, ni ranking.
+- Sur Moustapha, IA1 améliore une offre data (`BF-242343`) : score 41→47, matched_core 1→2, missing_core 1→0, matched_full 2→3.
+- Décision : IA1 reste `CONDITIONAL`, pas `KEEP` global.
+- Toute activation large IA1 reste interdite sans critères conditionnels fondés sur gain matching mesurable.
+
 ---
 
 ## Paramétrage figé du filtre V1

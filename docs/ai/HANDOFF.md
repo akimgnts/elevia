@@ -144,6 +144,14 @@ Business France `is_vie` propagation fix est appliqué :
 - `BF-242353` reste rejetée car `payload_json.is_vie=false` et `contract_type=VIA` ;
 - aucun changement de `matching_v1.py`, scoring, parsing CV ou frontend.
 
+IA1 post-fix matching validation est terminée :
+- CV testés : `CV - Nawel KADI 2026.pdf`, `CV CDI MOUSTAPHA LO DATA.pdf` ;
+- IA2 OFF, même catalogue, même `/inbox`, seule variable IA1 OFF/ON ;
+- sanity OK : `match_debug` est présent sur les offres BF VIE après propagation `is_vie` ;
+- Nawel : IA1 récupère des expériences au parsing mais ne change pas les scores, core, full-match ou ranking ; verdict REMOVE pour valeur matching ;
+- Moustapha : IA1 améliore `BF-242343` score 41→47, matched_core 1→2, missing_core 1→0 ; ranking inchangé ; verdict CONDITIONAL ;
+- décision globale : IA1 CONDITIONAL, pas d'activation large sans politique conditionnelle plus stricte.
+
 Règles appliquées :
 - lire uniquement le contenu fourni (`cv_text`, `career_profile`, `experiences`, `selected_skills`, `structured_signal_units`, `validated_items`, `canonical_skills`) ;
 - produire un JSON strict de suggestions structurées ;
@@ -169,11 +177,10 @@ Règles appliquées :
 
 ## Prochaine action
 
-1. Rejouer la validation matching IA1 OFF/ON après propagation `is_vie` Business France.
-2. Vérifier que les offres VIE BF ne sont plus rejetées avant scoring.
-3. Vérifier que `match_debug`, `matched_full`, `missing_full`, `matched_core`, `missing_core` sont désormais calculés sur les offres VIE.
-4. Rejouer ensuite le comparatif IA1 Dirty CV Policy sur `/Users/akimguentas/Downloads/cvtest`.
-5. Ne pas modifier scoring, ranking, filtrage, canonicalisation backend ou classes de tags.
+1. Définir si IA1 doit rester strictement conditionnelle, et sur quels critères observables de gain matching.
+2. Ne pas activer IA1 largement : Nawel ne montre aucun gain matching malgré gain parsing.
+3. Si nouveau test IA1 : mesurer directement score, matched_core, missing_core, matched_full, missing_full et ranking, pas seulement parsing.
+4. Ne pas modifier scoring, ranking, filtrage, canonicalisation backend ou classes de tags.
 
 ## Points d'entrée utiles
 

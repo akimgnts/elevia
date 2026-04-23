@@ -2,11 +2,38 @@
   "product": "elevia-compass",
   "product_summary": "CV ↔ offers matching engine",
   "current_sprint": "profile_quality_v1",
-  "status": "business_france_is_vie_payload_propagation_fixed",
+  "status": "ia1_post_fix_matching_validation_conditional",
   "validated": true,
-  "last_completed_step": "business_france_is_vie_contract_loader_fix",
-  "next_step": "rerun_ia1_matching_validation_after_business_france_is_vie_fix",
+  "last_completed_step": "ia1_post_fix_matching_validation_nawel_moustapha",
+  "next_step": "define_ia1_conditional_policy_or_hold_before_product_rollout",
   "next_step_mode": "matching_observability_no_ia2_no_scoring_change",
+  "last_ia1_post_fix_validation": {
+    "date": "2026-04-23",
+    "scope": [
+      "CV - Nawel KADI 2026.pdf",
+      "CV CDI MOUSTAPHA LO DATA.pdf"
+    ],
+    "setup": {
+      "same_catalog": true,
+      "ia2": "OFF",
+      "only_variable": "ELEVIA_ENABLE_AI_RAW_CV_RECONSTRUCTION"
+    },
+    "sanity": {
+      "bf_vie_not_rejected_by_is_vie": true,
+      "match_debug_present_on_vie_offers": true
+    },
+    "results": {
+      "nawel": {
+        "verdict": "REMOVE",
+        "reason": "IA1 recovered parsing experiences but produced no score, core, full-match, or ranking gain on returned VIE offers."
+      },
+      "moustapha": {
+        "verdict": "CONDITIONAL",
+        "reason": "IA1 improved BF-242343 score 41 to 47, matched_core 1 to 2, missing_core 1 to 0; top offer and ranking unchanged."
+      }
+    },
+    "global_decision": "CONDITIONAL"
+  },
   "last_business_france_is_vie_fix": {
     "date": "2026-04-23",
     "contract_check": {

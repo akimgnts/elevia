@@ -1092,3 +1092,45 @@ Double validation OFF vs ON sur 10 profils réels contre 839 offres BF :
 
 ### Note
 - `apps/api/tests/test_inbox_scoring.py` échoue encore sur 2 assertions historiques dépendantes d'un catalogue >10 offres VIE ; le test ciblé de contrat BF passe.
+
+---
+
+## 2026-04-23 — IA 1 post-fix matching validation
+
+### Protocole
+- CV testés : `CV - Nawel KADI 2026.pdf`, `CV CDI MOUSTAPHA LO DATA.pdf`.
+- Deux runs par CV : IA1 OFF puis IA1 ON.
+- IA2 OFF.
+- Même process, même catalogue, mêmes paramètres `/inbox`.
+- Route matching produit utilisée : `/inbox` avec `explain=true`, `limit=10`, `min_score=0`.
+- Seule variable changée : `ELEVIA_ENABLE_AI_RAW_CV_RECONSTRUCTION`.
+
+### Sanity check
+- Après propagation `is_vie`, les offres BF `VIE` ne sont plus rejetées avant scoring.
+- `match_debug` est présent sur les offres VIE testées.
+- `BF-242353` reste rejetée car `payload_json.is_vie=false` et `contract_type=VIA`.
+
+### Résultat Nawel
+- Parsing :
+  - OFF : 0 expérience, 35 canonical entries, 19 `profile.skills_uri`.
+  - ON : 4 expériences, 36 canonical entries, 20 `profile.skills_uri`.
+- Matching top :
+  - `BF-242362` : score 30 → 30 ; matched_core 0 → 0 ; missing_core 0 → 0 ; matched_full 0 → 0 ; missing_full 9 → 9 ; position 1 → 1.
+  - `BF-242346` : score 36 → 36 ; matched_core 0 → 0 ; missing_core 1 → 1 ; matched_full 1 → 1 ; missing_full 12 → 12 ; position 2 → 2.
+  - `BF-242348` : score 30 → 30 ; matched_core 0 → 0 ; missing_core 0 → 0 ; matched_full 0 → 0 ; missing_full 7 → 7 ; position 3 → 3.
+- Verdict Nawel : REMOVE pour valeur matching actuelle.
+
+### Résultat Moustapha
+- Parsing :
+  - OFF : 0 expérience, 22 canonical entries, 41 `profile.skills_uri`.
+  - ON : 0 expérience, 23 canonical entries, 44 `profile.skills_uri`.
+- Matching top :
+  - `BF-242349` : score 50 → 50 ; matched_core 1 → 1 ; missing_core 0 → 0 ; matched_full 3 → 3 ; missing_full 8 → 8 ; position 1 → 1.
+  - `BF-242343` : score 41 → 47 ; matched_core 1 → 2 ; missing_core 1 → 0 ; matched_full 2 → 3 ; missing_full 12 → 11 ; position 2 → 2.
+- Verdict Moustapha : CONDITIONAL, gain sur une offre data mais ranking inchangé.
+
+### Décision globale
+- IA1 : CONDITIONAL.
+- IA1 n'est pas validée comme amélioration globale.
+- IA1 apporte un gain matching mesurable uniquement sur Moustapha / `BF-242343` dans ce protocole post-fix.
+- Ne pas passer à une activation large sans politique conditionnelle plus stricte.
