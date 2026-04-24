@@ -101,10 +101,12 @@ def ensure_offer_skills_table(conn, *, table_name: str = "offer_skills", clean_t
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id BIGSERIAL PRIMARY KEY,
                     offer_id BIGINT NOT NULL REFERENCES {clean_table}(id) ON DELETE CASCADE,
+                    source TEXT NOT NULL,
+                    external_id TEXT NOT NULL,
                     canonical_id TEXT NOT NULL,
                     label TEXT NOT NULL,
                     importance_level TEXT NOT NULL CHECK (importance_level IN ('CORE', 'SECONDARY')),
-                    source TEXT NOT NULL,
+                    source_method TEXT NOT NULL,
                     confidence DOUBLE PRECISION,
                     enrichment_version TEXT NOT NULL,
                     content_hash TEXT NOT NULL,
@@ -116,6 +118,70 @@ def ensure_offer_skills_table(conn, *, table_name: str = "offer_skills", clean_t
                 table_name=sql.Identifier(table_name),
                 clean_table=sql.Identifier(clean_table),
                 uq_name=sql.Identifier(f"{table_name}_offer_id_canonical_id_key"),
+            )
+        )
+        # Idempotent migration for legacy tables:
+        # - legacy schema stored the enrichment method in a column literally named
+        #   "source". We rename it to source_method, then introduce the business
+        #   identity columns (source, external_id) populated from clean_offers.
+        cursor.execute(
+            """
+            SELECT
+                EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_schema = 'public' AND table_name = %s
+                      AND column_name = 'source_method'
+                ) AS has_method,
+                EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_schema = 'public' AND table_name = %s
+                      AND column_name = 'external_id'
+                ) AS has_external_id
+            """,
+            (table_name, table_name),
+        )
+        has_method, has_external_id = cursor.fetchone()
+        if not has_method and not has_external_id:
+            # Pre-migration schema: the column named "source" actually stores the
+            # enrichment method. Rename it before adding the business key.
+            cursor.execute(
+                sql.SQL("ALTER TABLE {table_name} RENAME COLUMN source TO source_method").format(
+                    table_name=sql.Identifier(table_name),
+                )
+            )
+        cursor.execute(
+            sql.SQL("ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS source TEXT").format(
+                table_name=sql.Identifier(table_name),
+            )
+        )
+        cursor.execute(
+            sql.SQL("ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS external_id TEXT").format(
+                table_name=sql.Identifier(table_name),
+            )
+        )
+        cursor.execute(
+            sql.SQL(
+                """
+                UPDATE {table_name} AS os
+                SET source = co.source,
+                    external_id = co.external_id
+                FROM {clean_table} AS co
+                WHERE os.offer_id = co.id
+                  AND (os.source IS NULL OR os.external_id IS NULL)
+                """
+            ).format(
+                table_name=sql.Identifier(table_name),
+                clean_table=sql.Identifier(clean_table),
+            )
+        )
+        cursor.execute(
+            sql.SQL("ALTER TABLE {table_name} ALTER COLUMN source SET NOT NULL").format(
+                table_name=sql.Identifier(table_name),
+            )
+        )
+        cursor.execute(
+            sql.SQL("ALTER TABLE {table_name} ALTER COLUMN external_id SET NOT NULL").format(
+                table_name=sql.Identifier(table_name),
             )
         )
         cursor.execute(
@@ -133,6 +199,12 @@ def ensure_offer_skills_table(conn, *, table_name: str = "offer_skills", clean_t
         cursor.execute(
             sql.SQL("CREATE INDEX IF NOT EXISTS {idx_name} ON {table_name}(content_hash)").format(
                 idx_name=sql.Identifier(f"idx_{table_name}_content_hash"),
+                table_name=sql.Identifier(table_name),
+            )
+        )
+        cursor.execute(
+            sql.SQL("CREATE INDEX IF NOT EXISTS {idx_name} ON {table_name}(source, external_id)").format(
+                idx_name=sql.Identifier(f"idx_{table_name}_source_external_id"),
                 table_name=sql.Identifier(table_name),
             )
         )
@@ -319,6 +391,8 @@ def generate_ai_offer_skills_batch(items: list[Mapping[str, Any]]) -> dict[str, 
 def _build_deterministic_rows_for_offer(
     *,
     offer_id: int,
+    source: str,
+    external_id: str,
     title: str | None,
     description: str | None,
     canonical_builder: Callable[[dict[str, Any]], dict[str, Any]] | None,
@@ -357,10 +431,12 @@ def _build_deterministic_rows_for_offer(
         rows.append(
             {
                 "offer_id": int(offer_id),
+                "source": source,
+                "external_id": external_id,
                 "canonical_id": canonical_id,
                 "label": label,
                 "importance_level": _normalize_importance(resolved.importance_level),
-                "source": str(entry.get("strategy") or "canonical_mapping"),
+                "source_method": str(entry.get("strategy") or "canonical_mapping"),
                 "confidence": float(entry.get("confidence") or 0.0),
                 "enrichment_version": enrichment_version,
                 "content_hash": content_hash,
@@ -373,6 +449,8 @@ def _build_deterministic_rows_for_offer(
 def _canonicalize_ai_labels_to_rows(
     *,
     offer_id: int,
+    source: str,
+    external_id: str,
     base_offer: dict[str, Any],
     ai_labels: Iterable[str],
     existing_canonical_ids: Iterable[str],
@@ -401,10 +479,12 @@ def _canonicalize_ai_labels_to_rows(
         rows.append(
             {
                 "offer_id": int(offer_id),
+                "source": source,
+                "external_id": external_id,
                 "canonical_id": canonical_id,
                 "label": label,
                 "importance_level": "SECONDARY",
-                "source": "ai_fallback",
+                "source_method": "ai_fallback",
                 "confidence": AI_FALLBACK_CONFIDENCE,
                 "enrichment_version": enrichment_version,
                 "content_hash": content_hash,
@@ -417,6 +497,8 @@ def _canonicalize_ai_labels_to_rows(
 def build_offer_skills_rows(
     *,
     offer_id: int,
+    source: str,
+    external_id: str,
     title: str | None,
     description: str | None,
     canonical_builder: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
@@ -433,6 +515,8 @@ def build_offer_skills_rows(
     now = _utc_now()
     det_rows, base_offer = _build_deterministic_rows_for_offer(
         offer_id=offer_id,
+        source=source,
+        external_id=external_id,
         title=title,
         description=description,
         canonical_builder=canonical_builder,
@@ -453,6 +537,8 @@ def build_offer_skills_rows(
         stats["ai_triggered"] = 1
         ai_rows = _canonicalize_ai_labels_to_rows(
             offer_id=offer_id,
+            source=source,
+            external_id=external_id,
             base_offer=base_offer,
             ai_labels=ai_labels,
             existing_canonical_ids={row["canonical_id"] for row in det_rows},
@@ -544,7 +630,7 @@ def backfill_offer_skills_with_connection(
     limit_sql = sql.SQL(" LIMIT %s") if (limit is not None and int(limit) > 0) else sql.SQL("")
     select_sql = sql.SQL(
         """
-        SELECT id, title, description
+        SELECT id, source, external_id, title, description
         FROM {clean_table}
         {where_clause}
         ORDER BY id ASC
@@ -571,18 +657,20 @@ def backfill_offer_skills_with_connection(
     insert_sql = sql.SQL(
         """
         INSERT INTO {offer_skills_table} (
-            offer_id, canonical_id, label, importance_level, source, confidence,
-            enrichment_version, content_hash, created_at
+            offer_id, source, external_id, canonical_id, label, importance_level,
+            source_method, confidence, enrichment_version, content_hash, created_at
         )
         VALUES (
-            %(offer_id)s, %(canonical_id)s, %(label)s, %(importance_level)s, %(source)s, %(confidence)s,
-            %(enrichment_version)s, %(content_hash)s, %(created_at)s
+            %(offer_id)s, %(source)s, %(external_id)s, %(canonical_id)s, %(label)s, %(importance_level)s,
+            %(source_method)s, %(confidence)s, %(enrichment_version)s, %(content_hash)s, %(created_at)s
         )
         ON CONFLICT (offer_id, canonical_id)
         DO UPDATE SET
+            source = EXCLUDED.source,
+            external_id = EXCLUDED.external_id,
             label = EXCLUDED.label,
             importance_level = EXCLUDED.importance_level,
-            source = EXCLUDED.source,
+            source_method = EXCLUDED.source_method,
             confidence = EXCLUDED.confidence,
             enrichment_version = EXCLUDED.enrichment_version,
             content_hash = EXCLUDED.content_hash
@@ -600,10 +688,12 @@ def backfill_offer_skills_with_connection(
     with conn.cursor() as cursor:
         cursor.execute(select_sql, tuple(params))
         rows_db = cursor.fetchall()
-        for offer_id_raw, title, description in rows_db:
+        for offer_id_raw, row_source, row_external_id, title, description in rows_db:
             offers_scanned += 1
             offer_id = int(offer_id_raw)
             content_hash = compute_offer_skills_content_hash(title=title, description=description)
+            row_source_str = str(row_source)
+            row_external_id_str = str(row_external_id)
 
             cursor.execute(existing_sql, (offer_id,))
             existing_count, min_hash, max_hash, min_version, max_version = cursor.fetchone()
@@ -619,6 +709,8 @@ def backfill_offer_skills_with_connection(
 
             det_rows, base_offer = _build_deterministic_rows_for_offer(
                 offer_id=offer_id,
+                source=row_source_str,
+                external_id=row_external_id_str,
                 title=title,
                 description=description,
                 canonical_builder=canonical_builder,
@@ -630,6 +722,8 @@ def backfill_offer_skills_with_connection(
             pending.append(
                 {
                     "offer_id": offer_id,
+                    "source": row_source_str,
+                    "external_id": row_external_id_str,
                     "title": title or "",
                     "description": description or "",
                     "det_rows": det_rows,
@@ -674,6 +768,8 @@ def backfill_offer_skills_with_connection(
                 if ai_labels:
                     ai_rows = _canonicalize_ai_labels_to_rows(
                         offer_id=offer_id,
+                        source=item["source"],
+                        external_id=item["external_id"],
                         base_offer=item["base_offer"],
                         ai_labels=ai_labels,
                         existing_canonical_ids={row["canonical_id"] for row in item["det_rows"]},

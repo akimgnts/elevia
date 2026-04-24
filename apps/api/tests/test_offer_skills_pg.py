@@ -87,16 +87,28 @@ def test_offer_skills_table_insert_and_idempotent_skip():
             assert cur.fetchone()[0] == 2
             cur.execute(
                 f"""
-                SELECT canonical_id, label, importance_level, source, confidence
+                SELECT canonical_id, label, importance_level, source_method, confidence,
+                       source, external_id
                 FROM {skills_table}
                 ORDER BY canonical_id
                 """
             )
             rows = cur.fetchall()
             assert rows == [
-                ("skill:data_analysis", "Data Analysis", "CORE", "synonym_match", 1.0),
-                ("skill:machine_learning", "Machine Learning", "CORE", "synonym_match", 0.9),
+                ("skill:data_analysis", "Data Analysis", "CORE", "synonym_match", 1.0,
+                 "business_france", "BF-SK-1"),
+                ("skill:machine_learning", "Machine Learning", "CORE", "synonym_match", 0.9,
+                 "business_france", "BF-SK-1"),
             ]
+            # Identity consistency: offer_skills natural key matches clean_offers.
+            cur.execute(
+                f"""
+                SELECT COUNT(*) FROM {skills_table} os
+                JOIN {clean_table} co ON co.id = os.offer_id
+                WHERE os.source <> co.source OR os.external_id <> co.external_id
+                """
+            )
+            assert cur.fetchone()[0] == 0
             cur.execute(f"DROP TABLE {skills_table}")
             cur.execute(f"DROP TABLE {clean_table}")
         conn.commit()
@@ -323,16 +335,20 @@ def test_offer_skills_ai_fallback_triggers_only_when_needed_and_persists_resolve
         with conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT canonical_id, label, importance_level, source, confidence
+                SELECT canonical_id, label, importance_level, source_method, confidence,
+                       source, external_id
                 FROM {skills_table}
                 ORDER BY canonical_id
                 """
             )
             rows = cur.fetchall()
             assert rows == [
-                ("skill:crm", "CRM", "CORE", "synonym_match", 0.9),
-                ("skill:lead_generation", "Lead Generation", "SECONDARY", "ai_fallback", 0.6),
-                ("skill:sales", "Sales", "SECONDARY", "synonym_match", 1.0),
+                ("skill:crm", "CRM", "CORE", "synonym_match", 0.9,
+                 "business_france", "BF-SK-AI-1"),
+                ("skill:lead_generation", "Lead Generation", "SECONDARY", "ai_fallback", 0.6,
+                 "business_france", "BF-SK-AI-1"),
+                ("skill:sales", "Sales", "SECONDARY", "synonym_match", 1.0,
+                 "business_france", "BF-SK-AI-1"),
             ]
             cur.execute(f"DROP TABLE {skills_table}")
             cur.execute(f"DROP TABLE {clean_table}")
@@ -559,7 +575,8 @@ def test_offer_skills_ai_fallback_batches_multiple_offers_in_single_call():
         with conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT offer_id, canonical_id, importance_level, source, confidence
+                SELECT offer_id, canonical_id, importance_level, source_method, confidence,
+                       source, external_id
                 FROM {skills_table}
                 ORDER BY offer_id, canonical_id
                 """
@@ -575,6 +592,8 @@ def test_offer_skills_ai_fallback_batches_multiple_offers_in_single_call():
                 assert row[1] == "SECONDARY"
                 assert row[2] == "ai_fallback"
                 assert row[3] == 0.6
+                assert row[4] == "business_france"
+                assert row[5] == "BF-BATCH-1"
             # "sales prospecting" → "lead generation" (prospecting rule),
             # "crm management" → "crm management", "recruitment" → "recruitment"
             assert {r[0] for r in by_offer[1]} == {
@@ -586,6 +605,9 @@ def test_offer_skills_ai_fallback_batches_multiple_offers_in_single_call():
             # Offer 2: only 2 rows persist (recruitment + onboarding). Blocklisted
             # labels and unresolved "made up skill xyz" are discarded.
             assert {r[0] for r in by_offer[2]} == {"skill:recruitment", "skill:onboarding"}
+            for row in by_offer[2]:
+                assert row[4] == "business_france"
+                assert row[5] == "BF-BATCH-2"
 
             # Offer 3: max 5 cap — 7 labels provided, only 5 should reach the
             # builder and persist.
@@ -593,6 +615,8 @@ def test_offer_skills_ai_fallback_batches_multiple_offers_in_single_call():
             for row in by_offer[3]:
                 assert row[1] == "SECONDARY"
                 assert row[2] == "ai_fallback"
+                assert row[4] == "business_france"
+                assert row[5] == "BF-BATCH-3"
 
             cur.execute(f"DROP TABLE {skills_table}")
             cur.execute(f"DROP TABLE {clean_table}")
@@ -685,3 +709,131 @@ def test_offer_skills_ai_fallback_batch_chunks_by_batch_size():
     assert result["ai_batches_sent"] == 3
     assert result["rows_written"] == 0
     assert result["fixed_offers"] == 0
+
+
+@pytest.mark.skipif(not _database_url(), reason="DATABASE_URL not configured")
+def test_ensure_offer_skills_table_migrates_legacy_rows_to_natural_key():
+    """Legacy offer_skills table (no source/external_id) is migrated idempotently.
+
+    Simulates the pre-patch schema and verifies that ensure_offer_skills_table
+    renames the old `source` column to `source_method`, adds `source` and
+    `external_id`, backfills them from clean_offers, and enforces NOT NULL.
+    """
+
+    import psycopg
+
+    from api.utils.offer_skills_pg import ensure_offer_skills_table
+
+    database_url = _database_url()
+    assert database_url
+    suffix = uuid.uuid4().hex[:8]
+    clean_table = f"clean_offers_offer_skills_{suffix}"
+    skills_table = f"offer_skills_{suffix}"
+
+    with psycopg.connect(database_url, connect_timeout=5) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                CREATE TABLE {clean_table} (
+                    id BIGSERIAL PRIMARY KEY,
+                    source TEXT NOT NULL,
+                    external_id TEXT NOT NULL,
+                    title TEXT,
+                    description TEXT,
+                    CONSTRAINT uq_{clean_table} UNIQUE (source, external_id)
+                )
+                """
+            )
+            cur.execute(
+                f"""
+                INSERT INTO {clean_table} (source, external_id, title, description)
+                VALUES
+                    ('business_france', 'BF-LEGACY-1', 'Data Analyst', 'desc1'),
+                    ('business_france', 'BF-LEGACY-2', 'Sales Manager', 'desc2')
+                RETURNING id
+                """
+            )
+            ids = [r[0] for r in cur.fetchall()]
+            # Legacy schema: `source` column stores enrichment method, no
+            # external_id column at all.
+            cur.execute(
+                f"""
+                CREATE TABLE {skills_table} (
+                    id BIGSERIAL PRIMARY KEY,
+                    offer_id BIGINT NOT NULL REFERENCES {clean_table}(id) ON DELETE CASCADE,
+                    canonical_id TEXT NOT NULL,
+                    label TEXT NOT NULL,
+                    importance_level TEXT NOT NULL CHECK (importance_level IN ('CORE', 'SECONDARY')),
+                    source TEXT NOT NULL,
+                    confidence DOUBLE PRECISION,
+                    enrichment_version TEXT NOT NULL,
+                    content_hash TEXT NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL,
+                    CONSTRAINT uq_{skills_table} UNIQUE (offer_id, canonical_id)
+                )
+                """
+            )
+            cur.execute(
+                f"""
+                INSERT INTO {skills_table}
+                    (offer_id, canonical_id, label, importance_level, source, confidence,
+                     enrichment_version, content_hash, created_at)
+                VALUES
+                    (%s, 'skill:sql', 'SQL', 'CORE', 'synonym_match', 1.0, 'offer_skills_v1', 'hash1', NOW()),
+                    (%s, 'skill:python', 'Python', 'CORE', 'tool_match', 0.9, 'offer_skills_v1', 'hash1', NOW()),
+                    (%s, 'skill:sales', 'Sales', 'CORE', 'synonym_match', 1.0, 'offer_skills_v1', 'hash2', NOW())
+                """,
+                (ids[0], ids[0], ids[1]),
+            )
+        conn.commit()
+
+        ensure_offer_skills_table(conn, table_name=skills_table, clean_table=clean_table)
+        conn.commit()
+
+        with conn.cursor() as cur:
+            # New columns exist and are NOT NULL
+            cur.execute(
+                """
+                SELECT column_name, is_nullable FROM information_schema.columns
+                WHERE table_schema='public' AND table_name=%s
+                  AND column_name IN ('source', 'external_id', 'source_method')
+                ORDER BY column_name
+                """,
+                (skills_table,),
+            )
+            cols = {r[0]: r[1] for r in cur.fetchall()}
+            assert cols == {"external_id": "NO", "source": "NO", "source_method": "NO"}
+
+            # Backfill: natural key matches the parent clean_offers row
+            cur.execute(
+                f"""
+                SELECT canonical_id, source, external_id, source_method
+                FROM {skills_table}
+                ORDER BY canonical_id
+                """
+            )
+            rows = cur.fetchall()
+            assert rows == [
+                ("skill:python", "business_france", "BF-LEGACY-1", "tool_match"),
+                ("skill:sales", "business_france", "BF-LEGACY-2", "synonym_match"),
+                ("skill:sql", "business_france", "BF-LEGACY-1", "synonym_match"),
+            ]
+
+            # Identity invariant across the join
+            cur.execute(
+                f"""
+                SELECT COUNT(*) FROM {skills_table} os
+                JOIN {clean_table} co ON co.id = os.offer_id
+                WHERE os.source <> co.source OR os.external_id <> co.external_id
+                """
+            )
+            assert cur.fetchone()[0] == 0
+
+            # Idempotency: second call is a no-op
+            ensure_offer_skills_table(conn, table_name=skills_table, clean_table=clean_table)
+            cur.execute(f"SELECT COUNT(*) FROM {skills_table}")
+            assert cur.fetchone()[0] == 3
+
+            cur.execute(f"DROP TABLE {skills_table}")
+            cur.execute(f"DROP TABLE {clean_table}")
+        conn.commit()
