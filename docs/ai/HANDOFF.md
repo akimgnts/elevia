@@ -392,6 +392,22 @@ Domain enrichment BF AI fallback du 2026-04-24 :
   - run ON : `classified = 142`, `skipped = 756`, `ai_processed = 142`, `ai_success = 142`, `ai_failed = 0`, `remaining = 0`
   - rerun identique : `classified = 0`, `skipped = 898`, `ai_processed = 0`, `remaining = 0`
 
+Telegram reporting BF du 2026-04-24 :
+- flag : `ELEVIA_ENABLE_TELEGRAM_REPORT=0` par défaut ;
+- env :
+  - `TELEGRAM_BOT_TOKEN`
+  - `TELEGRAM_CHAT_ID`
+- reporting uniquement, aucun effet scoring / matching / `skills_uri` / frontend ;
+- message construit à partir du record de run + top 5 domaines actifs BF ;
+- les top domains viennent de `offer_domain_enrichment` joint à `clean_offers` actifs ;
+- le reporting ne bloque jamais l'ingestion ;
+- si Telegram échoue :
+  - `status` du run reste inchangé ;
+  - `telegram_warning` est ajouté au record JSON ;
+- validation manuelle :
+  - OFF : `telegram_enabled=false`, `telegram_sent=false`
+  - ON : run success, `telegram_enabled=true`, `telegram_sent=true`
+
 IA1 post-fix matching validation est terminée :
 - CV testés : `CV - Nawel KADI 2026.pdf`, `CV CDI MOUSTAPHA LO DATA.pdf` ;
 - IA2 OFF, même catalogue, même `/inbox`, seule variable IA1 OFF/ON ;

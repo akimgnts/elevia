@@ -987,5 +987,44 @@
     ],
     "global_decision": "NOT_VALIDATED_FOR_MATCHING_VALUE",
     "observation": "IA1 improved parsing for Nawel but did not improve /inbox matching scores, matched_core, missing_core, or ranking in this validation."
+  },
+  "last_business_france_telegram_reporting": {
+    "date": "2026-04-24",
+    "script": "scripts/run_business_france_ingestion.py",
+    "env": {
+      "flag": "ELEVIA_ENABLE_TELEGRAM_REPORT",
+      "bot_token": "TELEGRAM_BOT_TOKEN",
+      "chat_id": "TELEGRAM_CHAT_ID",
+      "default": "0"
+    },
+    "message_fields": [
+      "status",
+      "fetched_count",
+      "new_count",
+      "existing_count",
+      "missing_count",
+      "active_total",
+      "top_domains",
+      "domain_ai_fallback_count",
+      "finished_at"
+    ],
+    "top_domains_source": "offer_domain_enrichment joined with active clean_offers for business_france",
+    "tests": "22 passed",
+    "manual_validation": {
+      "off": {
+        "status": "success",
+        "telegram_enabled": false,
+        "telegram_sent": false,
+        "fetched_count": 876,
+        "active_total": 876
+      },
+      "on": {
+        "status": "success",
+        "telegram_enabled": true,
+        "telegram_sent": true,
+        "fetched_count": 876,
+        "active_total": 876
+      }
+    }
   }
 }

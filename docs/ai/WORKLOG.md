@@ -1640,3 +1640,50 @@ Double validation OFF vs ON sur 10 profils réels contre 839 offres BF :
 - `230224` → `operations`
 - `231210` → `finance`
 - `231440` → `engineering`
+
+---
+
+## 2026-04-24 — Business France Telegram reporting
+
+### Implémentation
+- Fichier modifié : `scripts/run_business_france_ingestion.py`.
+- Variables d'env utilisées :
+  - `TELEGRAM_BOT_TOKEN`
+  - `TELEGRAM_CHAT_ID`
+  - `ELEVIA_ENABLE_TELEGRAM_REPORT` (défaut `0`)
+- Reporting Telegram ajouté en fin de run, hors pipeline métier.
+- Le message inclut :
+  - `status`
+  - `fetched_count`
+  - `new_count`
+  - `existing_count`
+  - `missing_count`
+  - `active_total`
+  - top 5 domaines actifs BF
+  - `domain_ai_fallback_count`
+  - `finished_at`
+- Les domaines sont calculés sur :
+  - `offer_domain_enrichment`
+  - joint à `clean_offers`
+  - filtré sur `source='business_france'` et `is_active=true`
+
+### Robustesse
+- Si Telegram est désactivé : aucun appel HTTP.
+- Si Telegram échoue : l'ingestion reste `success`, un warning est loggé dans le record JSON.
+
+### Validation
+- Tests wrapper Telegram :
+  - format message
+  - flag OFF = pas d'appel
+  - échec Telegram non bloquant
+  - top domains inclus
+- Suite BF ciblée :
+  - `22 passed`
+
+### Validation manuelle
+- OFF :
+  - `ELEVIA_ENABLE_TELEGRAM_REPORT=0 python3 scripts/run_business_france_ingestion.py`
+  - résultat : `status=success`, `telegram_enabled=false`, `telegram_sent=false`
+- ON :
+  - `ELEVIA_ENABLE_TELEGRAM_REPORT=1 TELEGRAM_CHAT_ID=<validated_chat_id> python3 scripts/run_business_france_ingestion.py`
+  - résultat : `status=success`, `telegram_enabled=true`, `telegram_sent=true`

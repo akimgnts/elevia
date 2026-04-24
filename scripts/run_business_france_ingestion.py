@@ -26,6 +26,10 @@ from api.utils.clean_offers_pg import (
     sync_business_france_offer_presence_with_connection,
 )
 
+FLAG_ENABLE_TELEGRAM_REPORT = "ELEVIA_ENABLE_TELEGRAM_REPORT"
+ENV_TELEGRAM_BOT_TOKEN = "TELEGRAM_BOT_TOKEN"
+ENV_TELEGRAM_CHAT_ID = "TELEGRAM_CHAT_ID"
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -43,6 +47,10 @@ def build_env(repo_root: Path) -> dict[str, str]:
     env["PYTHONPATH"] = str(repo_root / "apps" / "api" / "src")
     env["ELEVIA_DEV_TOOLS"] = env.get("ELEVIA_DEV_TOOLS", "1")
     return env
+
+
+def telegram_reporting_enabled(env: dict[str, str]) -> bool:
+    return (env.get(FLAG_ENABLE_TELEGRAM_REPORT) or "0").strip() == "1"
 
 
 def run_json_command(cmd: list[str], env: dict[str, str]) -> dict[str, Any]:
@@ -119,6 +127,81 @@ def with_database_connection(database_url: str | None, fn):
 
     with psycopg.connect(database_url) as conn:
         return fn(conn)
+
+
+def get_top_active_domain_distribution(database_url: str | None, *, limit: int = 5) -> list[tuple[str, int]]:
+    if not database_url:
+        return []
+
+    def _query(conn):
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT e.domain_tag, COUNT(*)
+                FROM offer_domain_enrichment e
+                JOIN clean_offers c
+                  ON c.source = e.source AND c.external_id = e.external_id
+                WHERE e.source = 'business_france'
+                  AND c.source = 'business_france'
+                  AND COALESCE(c.is_active, TRUE) = TRUE
+                GROUP BY e.domain_tag
+                ORDER BY COUNT(*) DESC, e.domain_tag ASC
+                LIMIT %s
+                """,
+                (limit,),
+            )
+            return [(str(domain), int(count)) for domain, count in cur.fetchall()]
+
+    return with_database_connection(database_url, _query)
+
+
+def build_telegram_message(record: dict[str, Any], top_domains: list[tuple[str, int]]) -> str:
+    lines = [
+        "Elevia BF ingestion",
+        f"Status: {record.get('status', 'unknown')}",
+        f"Fetched: {int(record.get('fetched_count') or 0)}",
+        f"New: {int(record.get('new_count') or 0)}",
+        f"Existing: {int(record.get('existing_count') or 0)}",
+        f"Missing: {int(record.get('missing_count') or 0)}",
+        f"Active total: {int(record.get('active_total') or 0)}",
+        "",
+        "Top domains:",
+    ]
+    if top_domains:
+        lines.extend(f"{domain}: {count}" for domain, count in top_domains)
+    else:
+        lines.append("none")
+    lines.extend(
+        [
+            "",
+            f"AI fallback: {int(record.get('domain_ai_fallback_count') or 0)}",
+            f"Timestamp: {record.get('finished_at') or record.get('timestamp') or ''}",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def send_telegram_message(text: str, env: dict[str, str]) -> dict[str, Any]:
+    if not telegram_reporting_enabled(env):
+        return {"enabled": False, "sent": False, "warning": None}
+    bot_token = (env.get(ENV_TELEGRAM_BOT_TOKEN) or "").strip()
+    chat_id = (env.get(ENV_TELEGRAM_CHAT_ID) or "").strip()
+    if not bot_token or not chat_id:
+        return {"enabled": True, "sent": False, "warning": "telegram config missing"}
+    try:
+        response = requests.post(
+            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            json={"chat_id": chat_id, "text": text},
+            timeout=10,
+        )
+        if response.status_code != 200:
+            return {"enabled": True, "sent": False, "warning": f"telegram http {response.status_code}"}
+        payload = response.json()
+        if not payload.get("ok"):
+            return {"enabled": True, "sent": False, "warning": "telegram api not ok"}
+        return {"enabled": True, "sent": True, "warning": None}
+    except Exception as exc:
+        return {"enabled": True, "sent": False, "warning": str(exc)}
 
 
 def run_ingestion(*, repo_root: Path, log_path: Path) -> dict[str, Any]:
@@ -248,6 +331,14 @@ def run_ingestion(*, repo_root: Path, log_path: Path) -> dict[str, Any]:
         if record.get("error") is None:
             record["error"] = f"run tracking failed: {exc}"
             record["status"] = "failure"
+
+    top_domains = get_top_active_domain_distribution(database_url, limit=5)
+    record["top_domains"] = [{"domain_tag": domain, "count": count} for domain, count in top_domains]
+    telegram_result = send_telegram_message(build_telegram_message(record, top_domains), env)
+    record["telegram_enabled"] = bool(telegram_result.get("enabled"))
+    record["telegram_sent"] = bool(telegram_result.get("sent"))
+    if telegram_result.get("warning"):
+        record["telegram_warning"] = str(telegram_result["warning"])
 
     append_json_log_line(log_path, record)
     return record

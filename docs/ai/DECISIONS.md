@@ -328,3 +328,4 @@ Ces items ne sont pas interdits de façon permanente — ils sont **hors scope V
 | 2026-04-22 | IA 1 Prompt Preserve Content V1 | `rebuilt_profile_text` doit conserver le contenu, pas le compresser ni le synthétiser avant déterministe |
 | 2026-04-22 | IA 1 Dirty CV Policy V1 | IA1 s'active seulement sur CV mal exploitable, après évaluation déterministe et avec hard-blocks conservateurs |
 | 2026-04-24 | Domain enrichment AI fallback V1 | Fallback IA autorisé uniquement pour les offres BF encore `needs_ai_review=true`, flag-gated via `ELEVIA_DOMAIN_AI_FALLBACK`, taxonomie fermée, validation stricte du JSON, skip par `content_hash` inchangé |
+| 2026-04-24 | Telegram reporting BF V1 | Reporting de fin de run uniquement, flag-gated via `ELEVIA_ENABLE_TELEGRAM_REPORT`, non bloquant ; tout échec Telegram devient un warning loggé sans faire échouer l'ingestion |
