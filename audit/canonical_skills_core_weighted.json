@@ -357,7 +357,8 @@
           "aliases": [
             "ml",
             "apprentissage automatique",
-            "predictive modeling"
+            "predictive modeling",
+            "machine learning"
           ],
           "tools": [
             "python",
@@ -370,7 +371,7 @@
           "mapping_confidence": "high",
           "status": "active",
           "esco_fr_label": "apprentissage automatique",
-          "importance_level": "SECONDARY",
+          "importance_level": "CORE",
           "contextual_weight": 1.0,
           "offer_cluster_affinity": [
             "DATA_ANALYTICS_AI"
@@ -819,11 +820,13 @@
         {
           "canonical_skill_id": "skill:data_mining",
           "label": "Data Mining",
-          "skill_type": "support",
+          "skill_type": "core",
           "concept_type": "concept",
           "aliases": [
             "exploration de données",
-            "data mining"
+            "data mining",
+            "data exploration",
+            "exploratory data analysis"
           ],
           "tools": [
             "python",
@@ -834,7 +837,7 @@
           "mapping_confidence": "low",
           "status": "active",
           "esco_fr_label": "exploration de données",
-          "importance_level": "SECONDARY",
+          "importance_level": "CORE",
           "contextual_weight": 1.0,
           "offer_cluster_affinity": [
             "DATA_ANALYTICS_AI"
@@ -1873,11 +1876,14 @@
         {
           "canonical_skill_id": "skill:lead_generation",
           "label": "Lead Generation",
-          "skill_type": "support",
+          "skill_type": "core",
           "concept_type": "concept",
           "aliases": [
             "prospecting",
-            "lead sourcing"
+            "lead sourcing",
+            "méthodes de prospection",
+            "prospection commerciale",
+            "sales prospecting"
           ],
           "tools": [
             "salesforce",
@@ -1888,7 +1894,7 @@
           "genericity_score": 0.3,
           "mapping_confidence": "medium",
           "status": "active",
-          "importance_level": "SECONDARY",
+          "importance_level": "CORE",
           "contextual_weight": 1.0,
           "offer_cluster_affinity": [
             "MARKETING_SALES_GROWTH"
@@ -1981,6 +1987,30 @@
           "mapping_confidence": "low",
           "status": "active",
           "importance_level": "SECONDARY",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "MARKETING_SALES_GROWTH"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:sales_pitch",
+          "label": "Sales Pitch",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "argumentaire de vente",
+            "sales pitch",
+            "pitch commercial"
+          ],
+          "tools": [
+            "salesforce",
+            "hubspot"
+          ],
+          "potential_esco_mapping_label": "present sales arguments",
+          "genericity_score": 0.28,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "importance_level": "CORE",
           "contextual_weight": 1.0,
           "offer_cluster_affinity": [
             "MARKETING_SALES_GROWTH"
@@ -2701,6 +2731,58 @@
           "contextual_weight": 0.5,
           "offer_cluster_affinity": [
             "ALL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:recruitment",
+          "label": "Recruitment",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "recruter du personnel",
+            "recrutement",
+            "recruitment",
+            "hiring"
+          ],
+          "tools": [
+            "linkedin recruiter",
+            "ats"
+          ],
+          "potential_esco_mapping_label": "recruit staff",
+          "genericity_score": 0.3,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "recruter du personnel",
+          "importance_level": "CORE",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "GENERIC_TRANSVERSAL"
+          ]
+        },
+        {
+          "canonical_skill_id": "skill:human_resources_management",
+          "label": "Human Resources Management",
+          "skill_type": "core",
+          "concept_type": "concept",
+          "aliases": [
+            "gérer les ressources humaines",
+            "ressources humaines",
+            "gestion des ressources humaines",
+            "human resources",
+            "hr management"
+          ],
+          "tools": [
+            "hris"
+          ],
+          "potential_esco_mapping_label": "manage human resources",
+          "genericity_score": 0.35,
+          "mapping_confidence": "medium",
+          "status": "active",
+          "esco_fr_label": "gérer les ressources humaines",
+          "importance_level": "CORE",
+          "contextual_weight": 1.0,
+          "offer_cluster_affinity": [
+            "GENERIC_TRANSVERSAL"
           ]
         }
       ]

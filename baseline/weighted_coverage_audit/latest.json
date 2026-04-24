@@ -1,0 +1,1519 @@
+{
+  "summary": {
+    "cv_count": 5,
+    "offers_analyzed": 50,
+    "candidate_count": 69
+  },
+  "domains": {
+    "admin": [
+      {
+        "label": "gestion",
+        "uri": "compass:skill:ADMIN_HR:gestion",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242128",
+            "offer_title": "Chargé(e) Back Office - Settlement/Transfert (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "participation",
+        "uri": "compass:skill:ADMIN_HR:participation",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242128",
+            "offer_title": "Chargé(e) Back Office - Settlement/Transfert (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "suivi",
+        "uri": "compass:skill:ADMIN_HR:suivi",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242128",
+            "offer_title": "Chargé(e) Back Office - Settlement/Transfert (H/F)"
+          }
+        ]
+      }
+    ],
+    "data": [
+      {
+        "label": "Python (programmation informatique)",
+        "uri": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+        "frequency": 8,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 8
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242079",
+            "offer_title": "AI Operations Engineer - VIE - Barcelona (H/F)"
+          },
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238106",
+            "offer_title": "Data Integration Expert (VIE) - French market (F/H) (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "237997",
+            "offer_title": "AI Data Engineer (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "238106",
+            "offer_title": "Data Integration Expert (VIE) - French market (F/H) (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242043",
+            "offer_title": "Data Scientist (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "machine",
+        "uri": "compass:skill:DATA_IT:machine",
+        "frequency": 8,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 8
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "238204",
+            "offer_title": "VIE - Pricing analyst - Barcelona (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242505",
+            "offer_title": "Methods & Tools Quality Engineer (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "237997",
+            "offer_title": "AI Data Engineer (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242043",
+            "offer_title": "Data Scientist (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242209",
+            "offer_title": "Développeur PHP junior (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "développement par itérations",
+        "uri": "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+        "frequency": 4,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 4
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "237987",
+            "offer_title": "Mid IT Business Analyst (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242043",
+            "offer_title": "Data Scientist (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "238157",
+            "offer_title": "VIE-Synthesis Researcher(M/F/D) (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242043",
+            "offer_title": "Data Scientist (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "gestion de projets par méthode Agile",
+        "uri": "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4",
+        "frequency": 4,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 4
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "237987",
+            "offer_title": "Mid IT Business Analyst (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242043",
+            "offer_title": "Data Scientist (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "238157",
+            "offer_title": "VIE-Synthesis Researcher(M/F/D) (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242043",
+            "offer_title": "Data Scientist (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "logiciel de visualisation des données",
+        "uri": "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+        "frequency": 4,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 4
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242079",
+            "offer_title": "AI Operations Engineer - VIE - Barcelona (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "238204",
+            "offer_title": "VIE - Pricing analyst - Barcelona (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242505",
+            "offer_title": "Methods & Tools Quality Engineer (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242389",
+            "offer_title": "Data Analyst (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "analyse",
+        "uri": "compass:skill:DATA_IT:analyse",
+        "frequency": 3,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 3
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238437",
+            "offer_title": "Analyste SOC (H/F)"
+          },
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238414",
+            "offer_title": "Environment Policy analyst - (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "238437",
+            "offer_title": "Analyste SOC (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "DevOps",
+        "uri": "http://data.europa.eu/esco/skill/f0de4973-0a70-4644-8fd4-3a97080476f4",
+        "frequency": 2,
+        "resolved": true,
+        "canonical_id": "skill:devops",
+        "importance_level": "SECONDARY",
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242209",
+            "offer_title": "Développeur PHP junior (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "237997",
+            "offer_title": "AI Data Engineer (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "espagnol",
+        "uri": "http://data.europa.eu/esco/skill/14ee9f76-3524-43d5-8a1a-5ba8283f8bd7",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238437",
+            "offer_title": "Analyste SOC (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "238437",
+            "offer_title": "Analyste SOC (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "hybrid",
+        "uri": "compass:skill:DATA_IT:hybrid",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "237987",
+            "offer_title": "Mid IT Business Analyst (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "237997",
+            "offer_title": "AI Data Engineer (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "utiliser un logiciel de tableur",
+        "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+        "frequency": 2,
+        "resolved": true,
+        "canonical_id": "skill:spreadsheet_analysis",
+        "importance_level": "SECONDARY",
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238106",
+            "offer_title": "Data Integration Expert (VIE) - French market (F/H) (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "238106",
+            "offer_title": "Data Integration Expert (VIE) - French market (F/H) (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "JavaScript",
+        "uri": "http://data.europa.eu/esco/skill/3cd569a2-4f88-4c1e-9995-8dce8c5e51a7",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242209",
+            "offer_title": "Développeur PHP junior (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "JavaScript Framework",
+        "uri": "http://data.europa.eu/esco/skill/9b9de2a4-d8af-4a7b-933a-a8334ae60067",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "237997",
+            "offer_title": "AI Data Engineer (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "analyse marketing",
+        "uri": "http://data.europa.eu/esco/skill/11c56452-fcec-4b00-9695-cca4728e5048",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "238204",
+            "offer_title": "VIE - Pricing analyst - Barcelona (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "analyst",
+        "uri": "compass:skill:DATA_IT:analyst",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238414",
+            "offer_title": "Environment Policy analyst - (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "culture",
+        "uri": "compass:skill:DATA_IT:culture",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "238157",
+            "offer_title": "VIE-Synthesis Researcher(M/F/D) (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "data analyst",
+        "uri": "compass:skill:DATA_IT:data analyst",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242389",
+            "offer_title": "Data Analyst (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "machines",
+        "uri": "http://data.europa.eu/esco/skill/70198e4e-86ad-4acc-a9eb-e24e2c107d18",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238437",
+            "offer_title": "Analyste SOC (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "outils de gestion de configuration logicielle",
+        "uri": "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242209",
+            "offer_title": "Développeur PHP junior (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "production",
+        "uri": "compass:skill:DATA_IT:production",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242468",
+            "offer_title": "Responsable Reporting & data - VIE Madrid (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "programmation informatique",
+        "uri": "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242209",
+            "offer_title": "Développeur PHP junior (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "recherche",
+        "uri": "compass:skill:DATA_IT:recherche",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242079",
+            "offer_title": "AI Operations Engineer - VIE - Barcelona (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "science des big data",
+        "uri": "http://data.europa.eu/esco/skill/edebd83d-35f6-4ed5-a940-6c203d178c01",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "231966",
+            "offer_title": "DATA ANALYST - DATA SCIENTIST - DATA ENGINEER H/F (H/F)"
+          }
+        ]
+      }
+    ],
+    "engineering": [
+      {
+        "label": "développement par itérations",
+        "uri": "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "237001",
+            "offer_title": "Développeur Python (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242529",
+            "offer_title": "INGÉNIEUR SYSTÈMES EMBARQUÉS (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "gestion de projets par méthode Agile",
+        "uri": "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "237001",
+            "offer_title": "Développeur Python (H/F)"
+          },
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242529",
+            "offer_title": "INGÉNIEUR SYSTÈMES EMBARQUÉS (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "logiciel de visualisation des données",
+        "uri": "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238285",
+            "offer_title": "Ingénieur qualité (H/F)"
+          },
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238286",
+            "offer_title": "Ingénieur qualité (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "production",
+        "uri": "compass:skill:DATA_IT:production",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238285",
+            "offer_title": "Ingénieur qualité (H/F)"
+          },
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238286",
+            "offer_title": "Ingénieur qualité (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "suivi",
+        "uri": "compass:skill:DATA_IT:suivi",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238285",
+            "offer_title": "Ingénieur qualité (H/F)"
+          },
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "238286",
+            "offer_title": "Ingénieur qualité (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "DevOps",
+        "uri": "http://data.europa.eu/esco/skill/f0de4973-0a70-4644-8fd4-3a97080476f4",
+        "frequency": 1,
+        "resolved": true,
+        "canonical_id": "skill:devops",
+        "importance_level": "SECONDARY",
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242529",
+            "offer_title": "INGÉNIEUR SYSTÈMES EMBARQUÉS (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "Python (programmation informatique)",
+        "uri": "http://data.europa.eu/esco/skill/ccd0a1d9-afda-43d9-b901-96344886e14d",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "237001",
+            "offer_title": "Développeur Python (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "formation",
+        "uri": "compass:skill:ADMIN_HR:formation",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242108",
+            "offer_title": "Ingénieur Process (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "informatique",
+        "uri": "http://data.europa.eu/esco/skill/7b5cce4d-c7fe-4119-b48f-70aa05391787",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "238303",
+            "offer_title": "Technicien(ne) IT Junior (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "mes",
+        "uri": "compass:skill:DATA_IT:mes",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "238303",
+            "offer_title": "Technicien(ne) IT Junior (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "outils de gestion de configuration logicielle",
+        "uri": "http://data.europa.eu/esco/skill/9d2e926f-53d9-41f5-98f3-19dfaa687f3f",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "242529",
+            "offer_title": "INGÉNIEUR SYSTÈMES EMBARQUÉS (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "participation",
+        "uri": "compass:skill:ADMIN_HR:participation",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242108",
+            "offer_title": "Ingénieur Process (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "suivi",
+        "uri": "compass:skill:ADMIN_HR:suivi",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242108",
+            "offer_title": "Ingénieur Process (H/F)"
+          }
+        ]
+      }
+    ],
+    "finance": [
+      {
+        "label": "analyse",
+        "uri": "compass:skill:MARKETING_SALES:analyse",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242350",
+            "offer_title": "VIE - Meeting Planner contrat H_F_X - BRUXELLES - 6 MONTHS (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "analyse marketing",
+        "uri": "http://data.europa.eu/esco/skill/11c56452-fcec-4b00-9695-cca4728e5048",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242119",
+            "offer_title": "Analyste support tarification et reporting du marché secondaire (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "gestion",
+        "uri": "compass:skill:MARKETING_SALES:gestion",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242350",
+            "offer_title": "VIE - Meeting Planner contrat H_F_X - BRUXELLES - 6 MONTHS (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "machines",
+        "uri": "http://data.europa.eu/esco/skill/70198e4e-86ad-4acc-a9eb-e24e2c107d18",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242119",
+            "offer_title": "Analyste support tarification et reporting du marché secondaire (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "participation",
+        "uri": "compass:skill:ADMIN_HR:participation",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242319",
+            "offer_title": "INGENIEUR QUALITE H/F (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "utiliser un logiciel de tableur",
+        "uri": "http://data.europa.eu/esco/skill/1973c966-f236-40c9-b2d4-5d71a89019be",
+        "frequency": 1,
+        "resolved": true,
+        "canonical_id": "skill:spreadsheet_analysis",
+        "importance_level": "SECONDARY",
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242119",
+            "offer_title": "Analyste support tarification et reporting du marché secondaire (H/F)"
+          }
+        ]
+      }
+    ],
+    "hr": [
+      {
+        "label": "humaines",
+        "uri": "compass:skill:ADMIN_HR:humaines",
+        "frequency": 5,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 5
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "232562",
+            "offer_title": "BUSINESS MANAGER (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "230179",
+            "offer_title": "BUSINESS MANAGER BXL H/F (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242226",
+            "offer_title": "BUSINESS MANAGER BCN (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242116",
+            "offer_title": "BUSINESS MANAGER (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242188",
+            "offer_title": "Manager Paie (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "ressources",
+        "uri": "compass:skill:ADMIN_HR:ressources",
+        "frequency": 5,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 5
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "232562",
+            "offer_title": "BUSINESS MANAGER (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "230179",
+            "offer_title": "BUSINESS MANAGER BXL H/F (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242226",
+            "offer_title": "BUSINESS MANAGER BCN (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242116",
+            "offer_title": "BUSINESS MANAGER (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242188",
+            "offer_title": "Manager Paie (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "participation",
+        "uri": "compass:skill:ADMIN_HR:participation",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "230179",
+            "offer_title": "BUSINESS MANAGER BXL H/F (H/F)"
+          },
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "242226",
+            "offer_title": "BUSINESS MANAGER BCN (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "logiciel de visualisation des données",
+        "uri": "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242093",
+            "offer_title": "HR Transversal Management (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "tracking",
+        "uri": "compass:skill:DATA_IT:tracking",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV CDI MOUSTAPHA LO DATA.pdf",
+            "offer_id": "242093",
+            "offer_title": "HR Transversal Management (H/F)"
+          }
+        ]
+      }
+    ],
+    "marketing": [
+      {
+        "label": "analyse",
+        "uri": "compass:skill:MARKETING_SALES:analyse",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "237882",
+            "offer_title": "CHEF DE PROJET MARKETING DIGITAL (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "235859",
+            "offer_title": "GRAPHIC DESIGNER (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "analyse marketing",
+        "uri": "http://data.europa.eu/esco/skill/11c56452-fcec-4b00-9695-cca4728e5048",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "237882",
+            "offer_title": "CHEF DE PROJET MARKETING DIGITAL (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "235859",
+            "offer_title": "GRAPHIC DESIGNER (H/F)"
+          }
+        ]
+      }
+    ],
+    "other": [
+      {
+        "label": "culture",
+        "uri": "compass:skill:DATA_IT:culture",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "237223",
+            "offer_title": "Product Owner (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "développement par itérations",
+        "uri": "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "237223",
+            "offer_title": "Product Owner (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "gestion",
+        "uri": "compass:skill:ADMIN_HR:gestion",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "240118",
+            "offer_title": "VIE CHARGÉ(E) DE MISSION - AFFAIRES PUBLIQUES EUROPÉENNES, énergie F/H (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "gestion de projets par méthode Agile",
+        "uri": "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV WECKER.pdf",
+            "offer_id": "237223",
+            "offer_title": "Product Owner (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "participation",
+        "uri": "compass:skill:ADMIN_HR:participation",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "240118",
+            "offer_title": "VIE CHARGÉ(E) DE MISSION - AFFAIRES PUBLIQUES EUROPÉENNES, énergie F/H (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "suivi",
+        "uri": "compass:skill:ADMIN_HR:suivi",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV - Nawel KADI 2026.pdf",
+            "offer_id": "240118",
+            "offer_title": "VIE CHARGÉ(E) DE MISSION - AFFAIRES PUBLIQUES EUROPÉENNES, énergie F/H (H/F)"
+          }
+        ]
+      }
+    ],
+    "sales": [
+      {
+        "label": "analyse",
+        "uri": "compass:skill:MARKETING_SALES:analyse",
+        "frequency": 4,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 4
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "237985",
+            "offer_title": "AREA SALES MANAGER EXPORT AFRIQUE DU NORD et de l’OUEST (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242460",
+            "offer_title": "Airline Marketing Analyst (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242502",
+            "offer_title": "Responsable Développement Marché - Asie du Sud-Est (Business Development) M/F (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242178",
+            "offer_title": "Business Developer - VIE - Barcelone (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "analyse marketing",
+        "uri": "http://data.europa.eu/esco/skill/11c56452-fcec-4b00-9695-cca4728e5048",
+        "frequency": 4,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 4
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "237985",
+            "offer_title": "AREA SALES MANAGER EXPORT AFRIQUE DU NORD et de l’OUEST (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242460",
+            "offer_title": "Airline Marketing Analyst (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242502",
+            "offer_title": "Responsable Développement Marché - Asie du Sud-Est (Business Development) M/F (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242246",
+            "offer_title": "Sales and Admissions officer (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "espagnol",
+        "uri": "http://data.europa.eu/esco/skill/14ee9f76-3524-43d5-8a1a-5ba8283f8bd7",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242246",
+            "offer_title": "Sales and Admissions officer (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "gestion",
+        "uri": "compass:skill:MARKETING_SALES:gestion",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "241003",
+            "offer_title": "BUSINESS DEVELOPER - ACCOUNT MANAGER (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "veille",
+        "uri": "compass:skill:MARKETING_SALES:veille",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242502",
+            "offer_title": "Responsable Développement Marché - Asie du Sud-Est (Business Development) M/F (H/F)"
+          }
+        ]
+      }
+    ],
+    "supply": [
+      {
+        "label": "analyse marketing",
+        "uri": "http://data.europa.eu/esco/skill/11c56452-fcec-4b00-9695-cca4728e5048",
+        "frequency": 3,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 3
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "238350",
+            "offer_title": "Commercial Operations Associate (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242266",
+            "offer_title": "Omnichannel Project Lead (H/F)"
+          },
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242449",
+            "offer_title": "Junior Buyer (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "développement par itérations",
+        "uri": "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242509",
+            "offer_title": "VIE - Data Project Leader (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242266",
+            "offer_title": "Omnichannel Project Lead (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "gestion de projets par méthode Agile",
+        "uri": "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4",
+        "frequency": 2,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 2
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242509",
+            "offer_title": "VIE - Data Project Leader (H/F)"
+          },
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242266",
+            "offer_title": "Omnichannel Project Lead (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "analyse",
+        "uri": "compass:skill:MARKETING_SALES:analyse",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242449",
+            "offer_title": "Junior Buyer (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "analytics",
+        "uri": "compass:skill:DATA_IT:analytics",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "242509",
+            "offer_title": "VIE - Data Project Leader (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "gestion",
+        "uri": "compass:skill:MARKETING_SALES:gestion",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "CV Mathilde CEVAK.pdf",
+            "offer_id": "242449",
+            "offer_title": "Junior Buyer (H/F)"
+          }
+        ]
+      },
+      {
+        "label": "logiciel de visualisation des données",
+        "uri": "http://data.europa.eu/esco/skill/65e58886-bd1e-4c5b-8ca5-8d9b353c8aa1",
+        "frequency": 1,
+        "resolved": false,
+        "canonical_id": null,
+        "importance_level": null,
+        "bucket_counts": {
+          "matched_secondary": 1
+        },
+        "examples": [
+          {
+            "cv": "Akim_Guentas_Resume.pdf",
+            "offer_id": "238350",
+            "offer_title": "Commercial Operations Associate (H/F)"
+          }
+        ]
+      }
+    ]
+  },
+  "excluded_notes": [
+    "communication",
+    "organisation",
+    "anglais"
+  ]
+}

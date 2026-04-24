@@ -240,6 +240,24 @@
   - ou ancienne row invalide
 - `created_at` doit être préservé ; seul `updated_at` bouge lors d'une vraie reclassification.
 
+### R29 — Weighted coverage Batch 1 = promotion CORE à poids neutre uniquement
+- Les promotions Batch 1 du weighted canonical store sont autorisées uniquement dans `audit/canonical_skills_core_weighted.json`.
+- Scope validé :
+  - `exploration de données`
+  - `apprentissage automatique`
+  - `recruter du personnel`
+  - `gérer les ressources humaines`
+  - `ressources humaines`
+  - `argumentaire de vente`
+  - `méthodes de prospection`
+- Le but est strictement de corriger la classification `matched_core` / `matched_secondary`.
+- `importance_level` peut passer à `CORE`, mais `contextual_weight` doit rester neutre (`1.0`) pour préserver l'invariance de score.
+- Interdictions explicites pour ce batch :
+  - pas de modification de `matching_v1.py`
+  - pas de modification de la formule de score, IDF, poids globaux ou `skills_uri`
+  - pas de promotion des termes génériques mono-mot (`machine`, `ressources`, `humaines`, `gestion`, `data`, `acquisition`, `talent`)
+- Toute extension au-delà de ce batch doit repasser par un audit coverage mesuré.
+
 ---
 
 ## Paramétrage figé du filtre V1
@@ -329,3 +347,4 @@ Ces items ne sont pas interdits de façon permanente — ils sont **hors scope V
 | 2026-04-22 | IA 1 Dirty CV Policy V1 | IA1 s'active seulement sur CV mal exploitable, après évaluation déterministe et avec hard-blocks conservateurs |
 | 2026-04-24 | Domain enrichment AI fallback V1 | Fallback IA autorisé uniquement pour les offres BF encore `needs_ai_review=true`, flag-gated via `ELEVIA_DOMAIN_AI_FALLBACK`, taxonomie fermée, validation stricte du JSON, skip par `content_hash` inchangé |
 | 2026-04-24 | Telegram reporting BF V1 | Reporting de fin de run uniquement, flag-gated via `ELEVIA_ENABLE_TELEGRAM_REPORT`, non bloquant ; tout échec Telegram devient un warning loggé sans faire échouer l'ingestion |
+| 2026-04-24 | Weighted coverage Batch 1 validé, score invariant | Promotion ciblée de 7 concepts multi-mots vers `CORE` dans le weighted store uniquement, `contextual_weight=1.0`, audit `candidate_count 85 -> 69`, Nawel `matched_core` corrigé sans changement de score |

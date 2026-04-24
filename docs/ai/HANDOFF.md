@@ -408,6 +408,29 @@ Telegram reporting BF du 2026-04-24 :
   - OFF : `telegram_enabled=false`, `telegram_sent=false`
   - ON : run success, `telegram_enabled=true`, `telegram_sent=true`
 
+Weighted coverage Batch 1 du 2026-04-24 est maintenant validé :
+- fichier de vérité : `audit/canonical_skills_core_weighted.json` ;
+- scope strict :
+  - `exploration de données`
+  - `apprentissage automatique`
+  - `recruter du personnel`
+  - `gérer les ressources humaines`
+  - `ressources humaines`
+  - `argumentaire de vente`
+  - `méthodes de prospection`
+- méthode :
+  - promotion vers `importance_level = CORE` dans le weighted store uniquement ;
+  - aucun changement dans `matching_v1.py`, score, IDF, `skills_uri` ou architecture ;
+  - `contextual_weight = 1.0` maintenu pour préserver l'invariance de score.
+- validation :
+  - audit coverage `candidate_count` : `85 -> 69` ;
+  - Nawel × `238239` :
+    - avant : `score=65`, `matched_core=[]`, `matched_secondary=["recruter du personnel", "recrutement"]`
+    - après : `score=65`, `matched_core=["recruter du personnel", "recrutement"]`, `matched_secondary=[]`
+- conclusion :
+  - Batch 1 est validé ;
+  - le gain est sur la classification `core/secondary`, pas sur la formule de score.
+
 IA1 post-fix matching validation est terminée :
 - CV testés : `CV - Nawel KADI 2026.pdf`, `CV CDI MOUSTAPHA LO DATA.pdf` ;
 - IA2 OFF, même catalogue, même `/inbox`, seule variable IA1 OFF/ON ;

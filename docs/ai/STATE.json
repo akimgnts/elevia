@@ -1026,5 +1026,103 @@
         "active_total": 876
       }
     }
+  },
+  "last_weighted_coverage_batch1": {
+    "date": "2026-04-24",
+    "weighted_store_file": "audit/canonical_skills_core_weighted.json",
+    "scope": [
+      "exploration de données",
+      "apprentissage automatique",
+      "recruter du personnel",
+      "gérer les ressources humaines",
+      "ressources humaines",
+      "argumentaire de vente",
+      "méthodes de prospection"
+    ],
+    "invariants": [
+      "no matching_v1.py change",
+      "no score formula change",
+      "no idf change",
+      "no skills_uri change",
+      "contextual_weight kept neutral at 1.0"
+    ],
+    "resolution_changes": {
+      "promoted_existing": {
+        "skill:data_mining": [
+          "exploration de données",
+          "data exploration",
+          "exploratory data analysis"
+        ],
+        "skill:machine_learning": [
+          "apprentissage automatique",
+          "machine learning"
+        ],
+        "skill:lead_generation": [
+          "méthodes de prospection",
+          "prospection commerciale",
+          "sales prospecting"
+        ]
+      },
+      "new_core_entries": {
+        "skill:recruitment": [
+          "recruter du personnel",
+          "recrutement",
+          "recruitment",
+          "hiring"
+        ],
+        "skill:human_resources_management": [
+          "gérer les ressources humaines",
+          "ressources humaines",
+          "gestion des ressources humaines",
+          "human resources",
+          "hr management"
+        ],
+        "skill:sales_pitch": [
+          "argumentaire de vente",
+          "sales pitch",
+          "pitch commercial"
+        ]
+      },
+      "explicit_exclusions": [
+        "machine",
+        "ressources",
+        "humaines",
+        "gestion",
+        "data",
+        "acquisition",
+        "talent"
+      ]
+    },
+    "validation": {
+      "tests": "apps/api/tests/test_weighted_store_batch1.py + test_weighted_core_coverage_audit.py: 7 passed",
+      "audit_before": {
+        "candidate_count": 85
+      },
+      "audit_after": {
+        "candidate_count": 69
+      },
+      "nawel_micro_case": {
+        "cv": "CV - Nawel KADI 2026.pdf",
+        "offer_id": "238239",
+        "offer_title": "TALENT ACQUISITION SPECIALIST (H/F)",
+        "before": {
+          "score": 65,
+          "matched_core": [],
+          "matched_secondary": [
+            "recruter du personnel",
+            "recrutement"
+          ]
+        },
+        "after": {
+          "score": 65,
+          "matched_core": [
+            "recruter du personnel",
+            "recrutement"
+          ],
+          "matched_secondary": []
+        }
+      }
+    },
+    "decision": "validated_score_invariant"
   }
 }

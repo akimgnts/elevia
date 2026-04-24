@@ -1687,3 +1687,84 @@ Double validation OFF vs ON sur 10 profils réels contre 839 offres BF :
 - ON :
   - `ELEVIA_ENABLE_TELEGRAM_REPORT=1 TELEGRAM_CHAT_ID=<validated_chat_id> python3 scripts/run_business_france_ingestion.py`
   - résultat : `status=success`, `telegram_enabled=true`, `telegram_sent=true`
+
+---
+
+## 2026-04-24 — Weighted coverage Batch 1 validé
+
+### Objectif
+- Promouvoir un petit lot de concepts métier fréquents vers `CORE` dans le weighted canonical store.
+- Ne pas modifier le scoring core, `matching_v1.py`, `skills_uri` ou la formule de score.
+
+### Fichiers touchés
+- `audit/canonical_skills_core_weighted.json`
+- `apps/api/tests/test_weighted_store_batch1.py`
+- `scripts/audit_weighted_core_coverage.py`
+- `apps/api/tests/test_weighted_core_coverage_audit.py`
+
+### Batch 1 appliqué
+- DATA :
+  - `exploration de données` -> `skill:data_mining` promu `CORE`
+  - `apprentissage automatique` -> `skill:machine_learning` promu `CORE`
+- HR :
+  - nouveau `skill:recruitment`
+    - aliases : `recruter du personnel`, `recrutement`, `recruitment`, `hiring`
+  - nouveau `skill:human_resources_management`
+    - aliases : `gérer les ressources humaines`, `ressources humaines`, `gestion des ressources humaines`, `human resources`, `hr management`
+- SALES :
+  - nouveau `skill:sales_pitch`
+    - aliases : `argumentaire de vente`, `sales pitch`, `pitch commercial`
+  - `skill:lead_generation` promu `CORE`
+    - aliases ajoutés : `méthodes de prospection`, `prospection commerciale`, `sales prospecting`
+
+### Garde-fous
+- `importance_level = CORE` seulement.
+- `contextual_weight = 1.0` conservé pour le batch afin d'éviter toute dérive de score.
+- exclusions explicites non promues :
+  - `machine`
+  - `ressources`
+  - `humaines`
+  - `gestion`
+  - `data`
+  - `acquisition`
+  - `talent`
+
+### Validation tests
+- `apps/api/tests/test_weighted_store_batch1.py` : résolution `CORE` pour les 7 concepts / non-régression exclusions / concept existant inchangé.
+- `apps/api/tests/test_weighted_core_coverage_audit.py` : agrégation audit inchangée.
+- suite ciblée :
+  - `7 passed`
+
+### Validation audit
+- commande :
+  - `PYTHONPATH=apps/api/src:apps/api apps/api/.venv/bin/python scripts/audit_weighted_core_coverage.py`
+- avant :
+  - `candidate_count = 85`
+- après :
+  - `candidate_count = 69`
+- delta :
+  - `-16`
+- les candidats Batch 1 disparaissent du rapport après patch :
+  - `exploration de données`
+  - `apprentissage automatique`
+  - `recruter du personnel`
+  - `gérer les ressources humaines`
+  - `ressources humaines`
+  - `argumentaire de vente`
+  - `méthodes de prospection`
+
+### Micro-validation Nawel
+- cas :
+  - `CV - Nawel KADI 2026.pdf`
+  - offre `238239 TALENT ACQUISITION SPECIALIST (H/F)`
+- avant :
+  - `score = 65`
+  - `matched_core = []`
+  - `matched_secondary = ["recruter du personnel", "recrutement"]`
+- après :
+  - `score = 65`
+  - `matched_core = ["recruter du personnel", "recrutement"]`
+  - `matched_secondary = []`
+- conclusion :
+  - Batch 1 améliore `matched_core`
+  - score invariant
