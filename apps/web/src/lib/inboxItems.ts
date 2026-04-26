@@ -62,6 +62,8 @@ export type NormalizedInboxItem = {
   core_matched_count?: number;
   core_total_count?: number;
   dominant_reason?: string;
+  domain_affinity?: "aligned" | "adjacent" | "distant" | "neutral";
+  domain_affinity_score?: number;
 };
 
 function normalizeScore(value: unknown): number {
@@ -289,6 +291,15 @@ export function normalizeInboxItems(raw: unknown): NormalizedInboxItem[] {
       core_matched_count: typeof rec.core_matched_count === "number" ? rec.core_matched_count : undefined,
       core_total_count: typeof rec.core_total_count === "number" ? rec.core_total_count : undefined,
       dominant_reason: typeof rec.dominant_reason === "string" ? rec.dominant_reason : undefined,
+      domain_affinity:
+        rec.domain_affinity === "aligned" ||
+        rec.domain_affinity === "adjacent" ||
+        rec.domain_affinity === "distant" ||
+        rec.domain_affinity === "neutral"
+          ? (rec.domain_affinity as "aligned" | "adjacent" | "distant" | "neutral")
+          : undefined,
+      domain_affinity_score:
+        typeof rec.domain_affinity_score === "number" ? rec.domain_affinity_score : undefined,
     });
   }
   return results;

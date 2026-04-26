@@ -38,6 +38,112 @@
 
 ## Objectif actuel
 
+**Sprint actuel terminé : Domain-aware Soft Signal v1 (inbox enrichment only).**
+
+- Objectif : exposer la classification d'affinité de domaine (aligned/adjacent/distant/neutral) comme **signal soft pure-enrichment** sur la réponse `/api/inbox`. Aucun impact sur scoring, ranking, filtering.
+- Single source of truth créée : `apps/api/src/api/utils/domain_affinity.py` partagé entre runtime et audit script.
+- Schema : `InboxItem` reçoit deux champs optionnels — `domain_affinity` (aligned|adjacent|distant|neutral) et `domain_affinity_score` (2|1|0|null).
+- Route : helper `_apply_domain_affinity_enrichment` appelé après finalisation de `items` dans les deux chemins (`/inbox` direct + `_get_inbox_filtered`). Inférence cv_domain via strong-signals only sur les normalized labels du `extracted.skills` préfixés `skill:`. Bulk SELECT `offer_domain_enrichment` pour les ids `business_france` uniquement. Erreur dans l'enrichment loggée et ignorée — ne casse jamais `/inbox`.
+- Audit script refactoré : importe `STRONG_SIGNALS` + `ADJACENCY` + `domain_affinity` depuis le nouveau module. `WEAK_SIGNALS` reste local (le runtime n'en a pas besoin).
+- Validation :
+  - 39 tests scoring/matching passés (`test_inbox`, `test_inbox_score_consistency`, `test_inbox_scoring`, `test_matching_v1`, `test_matching_contract`, `test_inbox_domain_mode`).
+  - Smoke /api/inbox (profile_01_data_analyst) : 200 OK, 5 items, tous portent `domain_affinity` + `domain_affinity_score`. Top scores 52, 52, 47, 47, 47 (ordre préservé).
+  - Audit script : 100% expected_vs_inferred match rate préservé (mêmes métriques 12.2/25.4/61.1/1.4 que pré-refactor).
+  - 4 échecs `test_inbox_filters_v2.py` confirmés **pré-existants** (`git stash` du patch — failures persistent).
+- Frozen rule : *Domain affinity added as soft signal only (aligned/adjacent/distant), no impact on scoring or filtering.*
+
+**Prochain sprint candidat** : (a) lecture frontend de `domain_affinity` (badge / tri secondaire optionnel côté UI) ; (b) raffinement v2 de `STRONG_SIGNALS` après split DB taxonomy `engineering_software/industrial` ; (c) tighten les 4 paires bruyantes identifiées par l'audit (data↔engineering, supply↔engineering, hr↔operations, sales↔operations) ; (d) prototyper un soft re-rank flag-gated.
+
+---
+
+## Objectif précédent (clos — 2026-04-26)
+
+**Sprint terminé : Domain Affinity Audit v1 (audit-only). Décision : B — useful but needs edits.**
+
+- Objectif : remplacer la classification binaire `aligned vs mismatched` par un audit à 3 niveaux `aligned / adjacent / distant`, mesurer si l'adjacence apporte un signal soft utile.
+- Patch : `scripts/run_domain_aware_matching_audit.py` reçoit une matrice `ADJACENCY` (14 paires DB 11-tag), un helper `domain_affinity()`, et une `affinity_projection` par profil dans le JSON + le rapport.
+- Mapping interne v1.1 12-tag → DB 11-tag (engineering_software/industrial → engineering, sales_business_development → sales, marketing_communication → marketing, supply_chain_logistics → supply, operations_project + consulting_strategy → operations, legal_compliance → legal, product_ecommerce skipped).
+- Résultats (avant binaire vs après 3-niveaux) :
+  - hard exclusion 86.4 % → distant-only exclusion **61.1 %** (-25.3 pp).
+  - soft-keep moyen (aligned + adjacent) = **37.5 %** (vs 12.2 % aligned seul).
+  - réduction d'exclusion vs binaire = **+25.4 pp** en moyenne.
+  - P1 data gagne le plus (+54 pp soft-keep) car le collapse `engineering_software` dans `engineering` rend l'adjacence très large.
+- Échantillonnage manuel :
+  - **OK** : `data↔finance`, `finance↔operations`, `sales↔marketing`, `data↔marketing`, `hr↔admin`.
+  - **Trop bruyant en DB 11-tag** : `data↔engineering`, `supply↔engineering`, `hr↔operations`, `sales↔operations` (le collapse engineering_software+industrial et la largeur de operations introduisent du faux adjacent).
+  - **Manquant** : `sales↔supply` (technico-commercial, account manager Villa Supply).
+- Décision **B — useful but needs edits** : utile quantitativement, à n'utiliser **qu'en soft re-rank** (jamais hard filter) ; tighten v2 après split DB taxonomy `engineering_software/industrial` et opérations granulaires.
+- Domain-aware matching **toujours pas activé en production**. Pas de runtime, route, scoring, `matching_v1.py`, schéma, frontend, DB ou IA touchés.
+
+**Prochain sprint candidat** : (a) tighten les 4 paires bruyantes (data↔engineering, supply↔engineering, hr↔operations, sales↔operations) une fois la taxonomie DB raffinée ; (b) ajouter `sales↔supply` ; (c) prototyper un soft re-rank flag-gated avec `weight(adjacent) < weight(aligned)`.
+
+---
+
+## Objectif précédent (clos — 2026-04-26)
+
+**Sprint terminé : CV Domain Inference Hardening v1 (audit-only).**
+
+- Objectif : corriger les mauvaises inférences `cv_domain` repérées par l'audit (P1 data_analyst → finance).
+- Patch : remplacement de la logique purement data-driven par un poids `strong (3.0) > data-driven (1.0) > weak (×0.2)` avec exigence ≥1 strong signal sinon `other`.
+- Fichier modifié : `scripts/run_domain_aware_matching_audit.py` (audit script uniquement).
+- Strong signals : 79 canonical IDs curés sur 10 domaines (data 15, finance 11, hr 9, marketing 9, sales 7, supply 7, engineering 10, operations 4, legal 4, admin 3).
+- Weak signals : `excel, powerpoint, word, office, communication, reporting, documentation, project_management, teamwork, leadership, compliance, problem_solving, time_management, presentation`.
+- Résultats avant → après :
+  - expected_vs_inferred : **85.7 % → 100.0 %** (cible >90 % atteinte).
+  - average_hard_filter_exclusion_pct : 85.8 → 86.4 (P1 cesse de s'aligner sur les 107 finance, s'aligne sur les 65 data — plus juste).
+  - average_aligned_pct : 12.9 → 12.2.
+- P1 corrigé : `finance` → `data` (strong=5, weak=1, score data ≈ 15.6 vs finance ≈ 0.5).
+- Domain-aware matching **toujours pas activé en production**. Pas de runtime, route, scoring, `matching_v1.py`, schéma, frontend, DB ou IA touchés.
+
+**Prochain sprint candidat** : (a) inspection manuelle des mismatches échantillonnés (toujours ~85 % d'exclusion en hard) pour ratio bons/faux mismatches, (b) décision soft vs hard filter, puis (c) éventuel branchement runtime flag-gated.
+
+---
+
+## Objectif précédent (clos — 2026-04-26)
+
+**Sprint terminé : Domain-aware Matching Audit v1 (audit-only).**
+
+- Objectif : mesurer l'effet hypothétique d'un filtre par domaine CV→offre **avant** tout branchement runtime.
+- Aucune modification scoring / matching / `matching_v1.py` / route / `inbox.py` / schema / frontend / DB. Lecture seule sur PostgreSQL BF.
+- Taxonomie utilisée : DB 11-tag (`data, finance, hr, marketing, sales, supply, engineering, operations, admin, legal, other`).
+- Méthode : carte `canonical_id → distribution domain_tag` agrégée depuis `offer_skills × offer_domain_enrichment`. Inférence `cv_domain` data-driven (per-skill normalized distribution sommée). Classification `aligned / mismatched / neutral`. Projection hard et soft.
+- 7 profils synthétiques canonical_ids, 876 offres BF actives.
+- Résultats clés :
+  - expected_vs_inferred : **85.7 %** (1/7 mismatch — P1 data_analyst inféré `finance`).
+  - average_hard_filter_exclusion_pct : **85.8 %** (filtre très agressif tel quel).
+  - average_aligned_pct : **12.9 %**.
+  - 12 offres `unknown/other` constantes par profil.
+- Artefacts :
+  - `scripts/run_domain_aware_matching_audit.py` (flag `ELEVIA_DOMAIN_AUDIT=1`)
+  - `baseline/domain_aware_matching_audit/audit_v1.json`
+  - `docs/ai/reports/domain_aware_matching_audit_v1.md`
+
+**Prochain sprint candidat** : (a) inspection manuelle des mismatches échantillonnés pour ratio bons/faux mismatches, (b) renforcement de l'inférence cv_domain pour le cas P1 (excel/sql dominent finance), puis (c) décision soft vs hard filter avant tout branchement runtime.
+
+---
+
+## Objectif précédent (clos)
+
+**Sprint terminé : Domain Taxonomy v1.1 Consolidation Patch (artifact-only).**
+
+- Décision de l'analyse v1 : B = accept with small edits.
+- Patch appliqué sur les artefacts `baseline/domain_taxonomy_discovery/full_v1/` :
+  - `closed_domain_count` : 14 → **12** (suppression de `product_ecommerce` et `administration_support`).
+  - `data` tightening : retrait des synonymes transport/mobility/biopharma supply chain ; exigence d'une evidence explicite (analytics, BI, ML, ETL, SQL, dashboard, predictive, datahub, etc.).
+  - `engineering_consulting` disambiguation documentée : default `engineering_industrial`, override `consulting_strategy` si subdomain advisory/strategy/transformation.
+  - 5 offres reclassifiées sur 250 (2.0 %), `needs_ai_review` reste à 3 (1.2 %).
+- Artefacts produits :
+  - `baseline/domain_taxonomy_discovery/full_v1/consolidated_v1_1.json`
+  - `baseline/domain_taxonomy_discovery/full_v1/classification_validation_v1_1.json`
+  - `docs/ai/reports/domain_taxonomy_discovery_v1_1.md`
+- Garanties : aucun rerun IA, aucune mutation DB, aucun changement scoring / matching / `matching_v1.py` / schema / frontend.
+
+**Prochain sprint : Domain Evidence Hardening v1.** Le backfill complet `offer_skills` + le fix overmatch `skill:statistical_programming` sont terminés. État actuel BF (903 offres) : `≥1 skill = 84,2 %`, `≥3 skills = 21,0 %`, `offer_skills.statistical_programming = 0` (vs 538 avant fix), intégrité canonique 100 %. Le prochain sprint durcit les règles `offer_domain_enrichment` (weak-evidence blocklist type `support`→admin, `communication`→marketing), introduit la corroboration croisée skills↔domain et produit un rapport audit avant toute mutation. Aucun changement de scoring, matching, filtrage ou frontend.
+
+---
+
+## Objectif précédent (clos)
+
 **Valider Profile Reconstruction V1 sur un CV réel et un profil authentifié** après branchement UI V1, sans modifier scoring, canonicalisation backend ou `skills_uri`.
 
 Le tagging V1 fournit uniquement :
@@ -463,6 +569,18 @@ Règles appliquées :
 - ❌ **Ne pas créer d'URIs ou de skills absentes du CV** dans Profile Reconstruction V1.
 
 ## Prochaine action
+
+**Sprint actuel : Domain Evidence Hardening v1.**
+
+1. Investiguer la sur-application de `skill:statistical_programming` (538/903 = 59,6 % des offres BF) : identifier les règles de résolution canonique trop permissives dans le pipeline `offer_skills` (synonym_match / AI fallback) et produire un rapport avant toute correction.
+2. Durcir les règles `offer_domain_enrichment` sur les evidences faibles (blocklist par domaine : `support` pour `admin`, `communication` pour `marketing`, etc.) — voir `docs/ai/reports/offer_identity_and_domain_audit.md`.
+3. Cross-signal validation : flagger `needs_ai_review=true` si le domaine n'a aucune co-occurrence avec les canonical skills persistés pour l'offre.
+4. Déliver audit-only d'abord (rapport CSV/JSON sur les offres à flagger), puis appliquer les règles après revue humaine.
+5. Ne pas modifier scoring, ranking, `matching_v1.py`, `skills_uri`, `idf.py` ou les classes de tags. Ne pas introduire de logique complexe.
+
+---
+
+## Prochaine action (archivée, post IA1 validation)
 
 1. Définir si IA1 doit rester strictement conditionnelle, et sur quels critères observables de gain matching.
 2. Ne pas activer IA1 largement : Nawel ne montre aucun gain matching malgré gain parsing.

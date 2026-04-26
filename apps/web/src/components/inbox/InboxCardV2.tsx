@@ -2,6 +2,8 @@ import { ArrowRight, Building2, MapPin, Star } from "lucide-react";
 import type { OfferExplanation, OfferIntelligence, ScoringV3, SemanticExplainability } from "../../lib/api";
 import { buildOfferNarrative } from "./offerNarrative";
 
+export type DomainAffinity = "aligned" | "adjacent" | "distant" | "neutral";
+
 export interface InboxCardV2Props {
   offerId: string;
   company: string;
@@ -12,9 +14,23 @@ export interface InboxCardV2Props {
   semanticExplainability?: SemanticExplainability | null;
   scoringV3?: ScoringV3 | null;
   offerIntelligence?: OfferIntelligence | null;
+  domainAffinity?: DomainAffinity;
   onOpenDetails: (offerId: string) => void;
   onShortlist: (offerId: string) => void;
   secondaryActionLabel?: string;
+}
+
+const DOMAIN_AFFINITY_LABEL: Record<DomainAffinity, string> = {
+  aligned: "Domaine aligné",
+  adjacent: "Domaine adjacent",
+  distant: "Hors domaine",
+  neutral: "",
+};
+
+function domainAffinityTone(affinity: DomainAffinity): string {
+  if (affinity === "aligned") return "border-emerald-200 bg-emerald-50 text-emerald-700";
+  if (affinity === "adjacent") return "border-amber-200 bg-amber-50 text-amber-700";
+  return "border-slate-200 bg-slate-100 text-slate-600";
 }
 
 function scoreTone(score: number): string {
@@ -37,6 +53,7 @@ export function InboxCardV2({
   semanticExplainability,
   scoringV3,
   offerIntelligence,
+  domainAffinity,
   onOpenDetails,
   onShortlist,
   secondaryActionLabel = "Shortlist",
@@ -62,6 +79,13 @@ export function InboxCardV2({
             <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-700">
               {formatContractTag(offerId)}
             </span>
+            {domainAffinity && domainAffinity !== "neutral" && (
+              <span
+                className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${domainAffinityTone(domainAffinity)}`}
+              >
+                {DOMAIN_AFFINITY_LABEL[domainAffinity]}
+              </span>
+            )}
           </div>
           <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-slate-950">{title}</h3>
           <div className="mt-2 flex items-center gap-2 text-sm text-slate-600">

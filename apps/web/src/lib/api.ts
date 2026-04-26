@@ -550,6 +550,8 @@ export interface InboxItem {
   scoring_v2?: ScoringV2 | null;
   scoring_v3?: ScoringV3 | null;
   career_intelligence?: CareerIntelligence | null;
+  domain_affinity?: "aligned" | "adjacent" | "distant" | "neutral" | null;
+  domain_affinity_score?: number | null;
   /** @deprecated Inbox UI no longer uses this. Safe backend cleanup candidate. */
   explain_v1?: CompassExplainCompact | null;
 }

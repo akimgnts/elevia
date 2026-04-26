@@ -1,12 +1,372 @@
 {
   "product": "elevia-compass",
   "product_summary": "CV ↔ offers matching engine",
-  "current_sprint": "profile_quality_v1",
-  "status": "ia1_post_fix_matching_validation_conditional",
+  "current_sprint": "domain_aware_soft_signal_v1",
+  "status": "domain_aware_soft_signal_v1_shipped_pure_enrichment_no_score_change",
   "validated": true,
-  "last_completed_step": "ia1_post_fix_matching_validation_nawel_moustapha",
-  "next_step": "define_ia1_conditional_policy_or_hold_before_product_rollout",
-  "next_step_mode": "matching_observability_no_ia2_no_scoring_change",
+  "last_completed_step": "domain_aware_soft_signal_v1_inbox_response_only",
+  "next_step": "observe_domain_affinity_in_frontend_then_decide_v2_taxonomy_refinement",
+  "next_step_mode": "production_payload_enrichment_observation_window",
+  "last_domain_aware_soft_signal_v1": {
+    "date": "2026-04-26",
+    "scope": "inbox_response_payload_only_no_score_no_filter_no_rank_no_db_mutation_no_ai",
+    "files_modified": [
+      "apps/api/src/api/utils/domain_affinity.py (NEW — shared module, single source of truth)",
+      "apps/api/src/api/schemas/inbox.py (added 2 optional fields: domain_affinity, domain_affinity_score)",
+      "apps/api/src/api/routes/inbox.py (added _apply_domain_affinity_enrichment helper + 2 call sites: main route + filtered route, post-items pre-return)",
+      "scripts/run_domain_aware_matching_audit.py (refactored to import STRONG_SIGNALS + ADJACENCY + domain_affinity from new module — single source of truth)"
+    ],
+    "new_response_fields": {
+      "domain_affinity": "aligned | adjacent | distant | neutral",
+      "domain_affinity_score": "2 (aligned) | 1 (adjacent) | 0 (distant) | null (neutral)"
+    },
+    "runtime_inference": {
+      "version": "v1_strong_only",
+      "rationale": "Audit showed strong signals alone yield 100% expected_vs_inferred match rate; no DB query at request time.",
+      "fallback": "If no strong signal present, cv_domain='other' and all items get neutral affinity."
+    },
+    "shared_module_constants": {
+      "STRONG_SIGNALS": "10 domains × ~80 canonical IDs (data, finance, hr, marketing, sales, supply, engineering, operations, legal, admin)",
+      "ADJACENCY": "14 frozenset pairs (DB 11-tag taxonomy)",
+      "WEAK_SIGNALS": "kept local to audit script only — runtime uses strong-only"
+    },
+    "validation": {
+      "matching_unchanged": "39 scoring/matching tests passed — score, order, offer ids identical to pre-patch",
+      "inbox_route_smoke": "200 OK on /api/inbox with profile_01_data_analyst — 5 returned items all carry domain_affinity (aligned/adjacent) and domain_affinity_score (2/1)",
+      "audit_script_refactor": "100% expected_vs_inferred match rate preserved after import refactor (same numbers as pre-refactor)",
+      "schema_validation": "InboxItem rejects bogus domain_affinity values (pydantic pattern enforcement)"
+    },
+    "decision": "shipped_as_soft_signal_only",
+    "frozen_rule": "Domain affinity added as soft signal only (aligned/adjacent/distant); no impact on scoring or filtering. Pure enrichment layer — matching behavior strictly identical.",
+    "non_regression": [
+      "no scoring change",
+      "no matching_v1.py change",
+      "no offer_domain_enrichment change",
+      "no DB schema or mutation",
+      "no AI call",
+      "no frontend change",
+      "no ranking or sorting change",
+      "no filter change",
+      "exception in enrichment is swallowed and logged — never breaks /inbox response"
+    ]
+  },
+  "last_domain_affinity_audit_v1": {
+    "date": "2026-04-26",
+    "scope": "audit_only_affinity_matrix_in_audit_script_no_runtime_no_route_no_scoring_no_matching_no_schema_no_frontend_no_db_mutation",
+    "file_modified": "scripts/run_domain_aware_matching_audit.py",
+    "affinity_version": "v1_3_level_aligned_adjacent_distant",
+    "taxonomy_used": "db_11_tag",
+    "v1_1_to_db_mapping_inside_audit": {
+      "engineering_software": "engineering",
+      "engineering_industrial": "engineering",
+      "sales_business_development": "sales",
+      "marketing_communication": "marketing",
+      "supply_chain_logistics": "supply",
+      "operations_project": "operations",
+      "consulting_strategy": "operations (proxy — no consulting tag in DB)",
+      "legal_compliance": "legal",
+      "product_ecommerce": "skipped (no DB tag)"
+    },
+    "adjacency_pairs": [
+      "admin|operations", "data|engineering", "data|finance", "data|marketing",
+      "data|operations", "engineering|operations", "engineering|supply",
+      "finance|legal", "finance|operations", "hr|admin", "hr|operations",
+      "legal|operations", "sales|marketing", "sales|operations"
+    ],
+    "metrics_summary": {
+      "expected_vs_inferred_match_rate_pct": 100.0,
+      "average_aligned_pct": 12.2,
+      "average_adjacent_pct": 25.4,
+      "average_distant_pct": 61.1,
+      "average_neutral_pct": 1.4,
+      "average_soft_keep_aligned_plus_adjacent_pct": 37.5,
+      "average_distant_only_exclusion_pct": 61.1,
+      "average_exclusion_reduction_vs_binary_pct": 25.4
+    },
+    "before_after_binary_vs_3_level": {
+      "binary_hard_exclusion_pct": 86.4,
+      "three_level_distant_only_exclusion_pct": 61.1,
+      "absolute_reduction_pct": 25.3,
+      "interpretation": "shifting 25 pp of offers from hard-excluded to soft-kept (adjacent)"
+    },
+    "per_profile": {
+      "P1_data_analyst": {"aligned": 65, "adjacent": 476, "distant": 323, "neutral": 12, "soft_keep_pct": 61.8, "reduction_pct": 54.3},
+      "P2_software_engineer": {"aligned": 272, "adjacent": 257, "distant": 335, "neutral": 12, "soft_keep_pct": 60.4, "reduction_pct": 29.3},
+      "P3_finance_controller": {"aligned": 107, "adjacent": 154, "distant": 603, "neutral": 12, "soft_keep_pct": 29.8, "reduction_pct": 17.6},
+      "P4_marketing_manager": {"aligned": 20, "adjacent": 194, "distant": 650, "neutral": 12, "soft_keep_pct": 24.4, "reduction_pct": 22.1},
+      "P5_hr_recruiter": {"aligned": 39, "adjacent": 105, "distant": 720, "neutral": 12, "soft_keep_pct": 16.4, "reduction_pct": 12.0},
+      "P6_supply_chain": {"aligned": 115, "adjacent": 272, "distant": 477, "neutral": 12, "soft_keep_pct": 44.2, "reduction_pct": 31.1},
+      "P7_sales_b2b": {"aligned": 129, "adjacent": 97, "distant": 638, "neutral": 12, "soft_keep_pct": 25.8, "reduction_pct": 11.1}
+    },
+    "manual_sampling_findings": {
+      "adjacencies_validated_correct": [
+        "data ↔ finance (Contrôleur de gestion catches data analysts in finance dept)",
+        "finance ↔ operations (CFO/financier titles often mistagged operations — adjacency saves)",
+        "sales ↔ marketing (Growth/Account Manager, Digital Account Manager, User Acquisition)",
+        "data ↔ marketing (Business Analyst MOA, Marketing Analyst)",
+        "hr ↔ admin (Finance Transformation Administrator pulled in for HR)"
+      ],
+      "adjacencies_too_noisy_in_db_11_tag": [
+        "data ↔ engineering — catches all hard mechanical/aero/composite engineering (engineering_software needed but DB collapses both)",
+        "supply ↔ engineering — same problem (supply only wants industrial process, gets all engineering)",
+        "hr ↔ operations — operations is overly broad in 11-tag DB (catches HSE, Automation Engineer, Construction PM)",
+        "sales ↔ operations — same problem (catches HSE, Automation Engineer, CFO)"
+      ],
+      "missing_adjacencies_observed_in_distant_samples": [
+        "sales ↔ supply (Technico-Commercial, Account Manager Villa Supply have hybrid sales+supply nature)",
+        "engineering ↔ data already present but does not help in reverse for industrial profiles"
+      ]
+    },
+    "decision": "B_useful_but_needs_edits",
+    "decision_rationale": "Quantitatively very useful (-25.3 pp exclusion vs binary, soft-keep 37.5% avg). Qualitatively mixed: 5 adjacency pairs validated correct, 4 pairs too noisy due to 11-tag DB collapsing engineering_software+engineering_industrial and over-broad operations. Recommend: when activated as runtime soft signal, weight adjacent < aligned (re-rank only, never hard exclude). Tighten v2 noisy pairs after DB taxonomy refinement (split engineering subdomains).",
+    "frozen_rule": "Domain affinity is a soft re-rank signal only; never a hard filter as long as DB taxonomy uses single engineering and broad operations tags.",
+    "artifacts_produced": [
+      "scripts/run_domain_aware_matching_audit.py (modified — ADJACENCY set + domain_affinity helper + per-profile affinity_projection + 3-level samples)",
+      "baseline/domain_aware_matching_audit/audit_v1.json (regenerated, exposes affinity_version=v1_3_level_aligned_adjacent_distant + adjacency_pairs)",
+      "docs/ai/reports/domain_aware_matching_audit_v1.md (regenerated with affinity matrix + per-profile adjacent/distant samples)"
+    ],
+    "non_regression": [
+      "no scoring change",
+      "no matching change",
+      "no matching_v1.py change",
+      "no offer_domain_enrichment change",
+      "no route change",
+      "no inbox.py change",
+      "no schema change",
+      "no frontend change",
+      "no DB mutation",
+      "no AI call",
+      "domain-aware matching still NOT enabled in production"
+    ]
+  },
+  "last_cv_domain_inference_hardening_v1": {
+    "date": "2026-04-26",
+    "scope": "audit_only_inference_logic_in_audit_script_no_runtime_no_route_no_scoring_no_matching_no_schema_no_frontend_no_db_mutation",
+    "file_modified": "scripts/run_domain_aware_matching_audit.py",
+    "inference_version": "v2_strong_weak_weighting",
+    "weights": {
+      "strong_signal": 3.0,
+      "data_driven_normal": 1.0,
+      "data_driven_weak": 0.2
+    },
+    "rules": [
+      "strong_signal in curated per-domain set adds +3.0 to that domain",
+      "data-driven distribution from offer_skills x offer_domain_enrichment still contributes (downweighted x0.2 for weak signals)",
+      "require >=1 strong signal; otherwise cv_domain = 'other' (low confidence)"
+    ],
+    "weak_signals": [
+      "skill:excel", "skill:powerpoint", "skill:word", "skill:office",
+      "skill:communication", "skill:reporting", "skill:documentation",
+      "skill:project_management", "skill:teamwork", "skill:leadership",
+      "skill:compliance", "skill:problem_solving", "skill:time_management",
+      "skill:presentation"
+    ],
+    "strong_signals_per_domain_count": {
+      "data": 15, "finance": 11, "hr": 9, "marketing": 9, "sales": 7,
+      "supply": 7, "engineering": 10, "operations": 4, "legal": 4, "admin": 3
+    },
+    "before_after_metrics": {
+      "expected_vs_inferred_match_rate_pct": {"before": 85.7, "after": 100.0, "target_>90": "achieved"},
+      "average_hard_filter_exclusion_pct": {"before": 85.8, "after": 86.4, "delta": "+0.6 (P1 now correctly maps to data, which has fewer offers than finance)"},
+      "average_aligned_pct": {"before": 12.9, "after": 12.2, "delta": "-0.7 (more truthful: P1 aligned drops from 107 finance offers to 65 data offers)"}
+    },
+    "fixed_mismatches": [
+      {"profile": "P1_data_analyst", "before_inferred": "finance", "after_inferred": "data", "root_cause": "BF data-driven map biased: skill:business_intelligence top=finance (45/116), skill:excel top=finance (11/27), and skill:sql/statistical_programming/data_visualization had 0 BF signal"}
+    ],
+    "per_profile_after": {
+      "P1_data_analyst": {"inferred": "data", "match": true, "strong": 5, "weak": 1, "aligned": 65, "excl_pct": 91.2},
+      "P2_software_engineer": {"inferred": "engineering", "match": true, "strong": 4, "weak": 2, "aligned": 272, "excl_pct": 67.6},
+      "P3_finance_controller": {"inferred": "finance", "match": true, "strong": 3, "weak": 3, "aligned": 107, "excl_pct": 86.4},
+      "P4_marketing_manager": {"inferred": "marketing", "match": true, "strong": 5, "weak": 0, "aligned": 20, "excl_pct": 96.3},
+      "P5_hr_recruiter": {"inferred": "hr", "match": true, "strong": 4, "weak": 0, "aligned": 39, "excl_pct": 94.2},
+      "P6_supply_chain": {"inferred": "supply", "match": true, "strong": 4, "weak": 0, "aligned": 115, "excl_pct": 85.5},
+      "P7_sales_b2b": {"inferred": "sales", "match": true, "strong": 5, "weak": 0, "aligned": 129, "excl_pct": 83.9}
+    },
+    "remaining_edge_cases": [
+      "P1 hard exclusion 91.2% high — data offers are scarce (~65/876) in BF; ratio reflects catalog reality, not inference bug",
+      "P4 marketing has only 20 aligned offers in BF (small target market)",
+      "skill:compliance is treated as weak (would otherwise drag P3 finance toward engineering); may need re-evaluation if compliance officer profile is ever audited"
+    ],
+    "artifacts_produced": [
+      "scripts/run_domain_aware_matching_audit.py (modified)",
+      "baseline/domain_aware_matching_audit/audit_v1.json (regenerated)",
+      "docs/ai/reports/domain_aware_matching_audit_v1.md (regenerated)"
+    ],
+    "non_regression": [
+      "no scoring change",
+      "no matching change",
+      "no matching_v1.py change",
+      "no offer_domain_enrichment change",
+      "no route change",
+      "no inbox.py change",
+      "no schema change",
+      "no frontend change",
+      "no DB mutation",
+      "no AI call",
+      "domain-aware matching still NOT enabled in production"
+    ]
+  },
+  "last_domain_aware_matching_audit_v1_baseline": {
+    "note": "Replaced by last_cv_domain_inference_hardening_v1 above; original audit metrics preserved in before_after_metrics.",
+    "date_baseline": "2026-04-26",
+    "expected_vs_inferred_baseline_pct": 85.7,
+    "average_hard_filter_exclusion_baseline_pct": 85.8,
+    "average_aligned_baseline_pct": 12.9
+  },
+  "last_domain_aware_matching_audit_v1": {
+    "date": "2026-04-26",
+    "scope": "audit_only_no_runtime_no_route_no_scoring_no_matching_no_schema_no_frontend_no_db_mutation",
+    "taxonomy_used": "db_11_tag",
+    "taxonomy_tags": ["data", "finance", "hr", "marketing", "sales", "supply", "engineering", "operations", "admin", "legal", "other"],
+    "flag": "ELEVIA_DOMAIN_AUDIT",
+    "default": "0",
+    "script": "scripts/run_domain_aware_matching_audit.py",
+    "method": {
+      "skill_to_domain_map": "aggregated from offer_skills JOIN offer_domain_enrichment grouped by canonical_id, domain_tag",
+      "cv_domain_inference": "per-skill normalized domain distribution, summed across CV canonical_ids, top domain wins",
+      "offer_classification": "aligned (offer.domain_tag == cv_domain) | mismatched | neutral (unknown/other)",
+      "filter_projections": [
+        "hard_filter: drop mismatched, count would_keep / would_exclude / exclusion_pct",
+        "soft_filter: low priority for mismatched, neutral kept, high for aligned"
+      ]
+    },
+    "sample_profiles": 7,
+    "profile_names": [
+      "P1_data_analyst", "P2_software_engineer", "P3_finance_controller",
+      "P4_marketing_manager", "P5_hr_recruiter", "P6_supply_chain", "P7_sales_b2b"
+    ],
+    "active_bf_offers": 876,
+    "skill_universe_size": 93,
+    "results_summary": {
+      "expected_vs_inferred_match_rate_pct": 85.7,
+      "expected_vs_inferred_mismatches": [
+        "P1_data_analyst expected=data inferred=finance (excel/sql/data_analysis dominate finance domain in BF dataset)"
+      ],
+      "average_hard_filter_exclusion_pct": 85.8,
+      "average_aligned_pct": 12.9
+    },
+    "per_profile_aligned_counts": {
+      "P1_data_analyst": 107,
+      "P2_software_engineer": 272,
+      "P3_finance_controller": 107,
+      "P4_marketing_manager": 20,
+      "P5_hr_recruiter": 39,
+      "P6_supply_chain": 115,
+      "P7_sales_b2b": 129
+    },
+    "per_profile_hard_filter_exclusion_pct": {
+      "P1_data_analyst": 86.4,
+      "P2_software_engineer": 67.6,
+      "P3_finance_controller": 86.4,
+      "P4_marketing_manager": 96.3,
+      "P5_hr_recruiter": 94.2,
+      "P6_supply_chain": 85.5,
+      "P7_sales_b2b": 83.9
+    },
+    "neutral_offers_per_profile": 12,
+    "artifacts_produced": [
+      "baseline/domain_aware_matching_audit/audit_v1.json",
+      "docs/ai/reports/domain_aware_matching_audit_v1.md"
+    ],
+    "decision_criteria_for_next_sprint": {
+      "if_hard_filter_exclusion_high_and_mismatches_mostly_good": "hard filter may be safe to ship",
+      "if_false_mismatches_dominate": "prefer soft filter (re-rank only)",
+      "if_expected_vs_inferred_lt_80_pct": "strengthen cv_domain inference (more skills, smarter weighting) before any runtime activation"
+    },
+    "non_regression": [
+      "no scoring change",
+      "no matching change",
+      "no matching_v1.py change",
+      "no route change",
+      "no inbox.py change",
+      "no schema change",
+      "no frontend change",
+      "no DB mutation",
+      "no AI call"
+    ]
+  },
+  "last_domain_taxonomy_v1_1_consolidation_patch": {
+    "date": "2026-04-26",
+    "based_on": [
+      "baseline/domain_taxonomy_discovery/full_v1/consolidated_v1.json",
+      "baseline/domain_taxonomy_discovery/full_v1/classification_validation_v1.json",
+      "docs/ai/reports/domain_taxonomy_discovery_v1.md"
+    ],
+    "decision": "B_accept_with_small_edits",
+    "closed_domain_count": {"before": 14, "after": 12},
+    "removed_domains": ["product_ecommerce", "administration_support"],
+    "removal_routing": {
+      "administration_support": {
+        "information technology": "engineering_software",
+        "real estate and parking services": "other",
+        "construction and safety management": "operations_project"
+      },
+      "product_ecommerce": {
+        "mining industry solutions": "sales_business_development",
+        "cosmetics and beauty": "marketing_communication",
+        "product development": "engineering_industrial",
+        "agricultural and construction equipment": "sales_business_development"
+      }
+    },
+    "data_tightening_required_evidence": [
+      "analytics", "business intelligence", "bi", "machine learning", "ml",
+      "data pipeline", "data governance", "dashboard", "database",
+      "data science", "data engineering", "data analyst", "data analytics", "data analysis",
+      "etl", "sql", "power bi", "tableau", "ai engineer", "ai operations",
+      "predictive analytics", "predictive maintenance", "deep learning", "big data",
+      "data integration", "data modeling", "data quality", "data warehouse", "data lake"
+    ],
+    "engineering_consulting_disambiguation": {
+      "default": "engineering_industrial",
+      "advisory_target": "consulting_strategy",
+      "advisory_signals": ["strategy", "transformation", "advisory", "change management", "consulting"]
+    },
+    "validation": {
+      "sample_size": 250,
+      "offers_changed": 5,
+      "needs_ai_review_after": 3,
+      "distribution_after": {
+        "engineering_industrial": 52,
+        "finance": 32,
+        "sales_business_development": 31,
+        "data": 25,
+        "engineering_software": 24,
+        "supply_chain_logistics": 19,
+        "consulting_strategy": 18,
+        "hr": 16,
+        "operations_project": 12,
+        "legal_compliance": 9,
+        "marketing_communication": 9,
+        "other": 3
+      }
+    },
+    "changed_offers": [
+      {"offer_id": "238157", "title": "VIE-Synthesis Researcher (M/F/D)", "from": "data", "to": "engineering_industrial"},
+      {"offer_id": "242327", "title": "Analyst Transformation", "from": "data", "to": "consulting_strategy"},
+      {"offer_id": "236316", "title": "Product Owner", "from": "product_ecommerce", "to": "operations_project"},
+      {"offer_id": "237348", "title": "Business Applications Support Analyst", "from": "administration_support", "to": "engineering_software"},
+      {"offer_id": "238347", "title": "IT Installation & Support Technician", "from": "administration_support", "to": "engineering_software"}
+    ],
+    "remaining_ambiguous_other": [
+      {"offer_id": "238291", "title": "Assistant(e) Architecte d'intérieur", "confidence": 0.50},
+      {"offer_id": "242510", "title": "VIA Chargé(e) de mission pédagogique", "confidence": 0.30},
+      {"offer_id": "238429", "title": "Hydro(géo)logue de terrain", "confidence": 0.50}
+    ],
+    "artifacts_produced": [
+      "baseline/domain_taxonomy_discovery/full_v1/consolidated_v1_1.json",
+      "baseline/domain_taxonomy_discovery/full_v1/classification_validation_v1_1.json",
+      "docs/ai/reports/domain_taxonomy_discovery_v1_1.md"
+    ],
+    "non_regression": [
+      "no scoring change",
+      "no matching change",
+      "no matching_v1.py change",
+      "no schema change",
+      "no frontend change",
+      "no DB mutation",
+      "no new AI discovery run"
+    ]
+  },
   "last_ia1_post_fix_validation": {
     "date": "2026-04-23",
     "scope": [
@@ -1026,6 +1386,204 @@
         "active_total": 876
       }
     }
+  },
+  "last_skill_overmatch_fix_v1": {
+    "date": "2026-04-25",
+    "target_canonical": "skill:statistical_programming",
+    "root_cause": "alias 'python -> skill:statistical_programming' in apps/api/src/compass/canonical/canonical_alias_fr.jsonl",
+    "files_touched": [
+      "apps/api/src/compass/canonical/canonical_alias_fr.jsonl",
+      "apps/api/tests/test_canonical_aliases_data.py"
+    ],
+    "diagnostic": {
+      "total_rows_before": 538,
+      "source_method_distribution": {"synonym_match": 538, "ai_fallback": 0},
+      "label_distribution": {"Statistical Programming": 538},
+      "domain_distribution": {
+        "engineering": 185, "sales": 79, "finance": 71, "supply": 68,
+        "data": 41, "operations": 38, "hr": 19, "admin": 14,
+        "marketing": 10, "other": 7, "legal": 6
+      },
+      "false_positive_rate_pct": 92.4
+    },
+    "patch": {
+      "alias_removed": "python -> skill:statistical_programming",
+      "aliases_preserved": [
+        "r programming -> skill:statistical_programming (FR)",
+        "r -> skill:statistical_programming (core)",
+        "statistical programming -> skill:statistical_programming (core)",
+        "programmation statistique -> skill:statistical_programming (core)"
+      ],
+      "data_aliases_unchanged": ["pandas", "numpy", "scikit-learn", "jupyter"]
+    },
+    "tests": {
+      "file": "apps/api/tests/test_canonical_aliases_data.py",
+      "added": [
+        "test_python_does_not_map_to_statistical_programming",
+        "test_strong_data_aliases_still_resolve"
+      ],
+      "preserved": "test_alias_r_maps (R still maps)",
+      "result": "7 passed"
+    },
+    "db_cleanup": {
+      "query": "DELETE FROM offer_skills WHERE source='business_france' AND canonical_id='skill:statistical_programming'",
+      "rows_deleted": 538,
+      "canonical_integrity_after": {
+        "null_canonical_id": 0,
+        "non_skill_prefix": 0,
+        "duplicates_offer_canonical": 0
+      }
+    },
+    "metrics_before_after": {
+      "statistical_programming_offers": {"before": 538, "after": 0, "reduction_pct": 100.0},
+      "offer_skills_rows_bf": {"before": 2005, "after": 1467},
+      "offers_ge_1_skill_pct": {"before": 95.5, "after": 84.2},
+      "offers_ge_3_skills_pct": {"before": 39.1, "after": 21.0},
+      "top_canonical_after": "skill:project_management (191)"
+    },
+    "sample_fixed_offers": [
+      {"external_id": "242099", "title": "Program Controller", "after": ["skill:business_intelligence", "skill:time_series_analysis"]},
+      {"external_id": "240134", "title": "Contrôleur de Gestion / ADV", "after": ["skill:budgeting", "skill:business_intelligence"]},
+      {"external_id": "237441", "title": "BUSINESS MANAGER", "after": ["skill:leadership"]},
+      {"external_id": "236352", "title": "Spécialiste Support Manufacturing & Conformité GMP", "after": ["skill:compliance"]},
+      {"external_id": "238332", "title": "Responsable maintenance", "after": ["skill:process_optimization"]},
+      {"external_id": "237030", "title": "BUSINESS DEVELOPMENT MANAGER ITALIE", "after": ["skill:lead_generation"]},
+      {"external_id": "242068", "title": "Commercial B2B", "after": ["skill:b2b_sales"]},
+      {"external_id": "237574", "title": "Pre-Sales Architect V.I.E", "after": ["skill:cloud_architecture", "skill:documentation"]},
+      {"external_id": "238402", "title": "HR Coordinator", "after": ["skill:compliance", "skill:onboarding"]},
+      {"external_id": "237358", "title": "Consultant en recrutement", "after": ["skill:project_management", "skill:recruitment"]}
+    ],
+    "verdict": {
+      "overmatch_eliminated": true,
+      "target_lt_150": true,
+      "canonical_integrity_preserved": true,
+      "data_role_legitimate_matches_preserved": "r, r programming, pandas, numpy, scikit-learn still resolve",
+      "non_regression": "no scoring, matching, ranking, frontend or schema change"
+    },
+    "risks": [
+      "41 data-domain offers lost python-derived statistical_programming mapping (acceptable: python is not a statistical signal)",
+      "≥3 skills target 60-70% still not met (21% after fix); remediation via Domain Evidence Hardening v1"
+    ]
+  },
+  "last_offer_skills_full_backfill_v1": {
+    "date": "2026-04-24",
+    "command": "apps/api/.venv/bin/python scripts/backfill_offer_skills.py --batch-size 15",
+    "scope": "business_france",
+    "schema_identity": {
+      "source": "business_france",
+      "external_id": "NOT NULL",
+      "offer_id_fk": "clean_offers(id) ON DELETE CASCADE",
+      "unique_key_table_level": "(offer_id, canonical_id)",
+      "natural_key_index": "idx_offer_skills_source_external_id"
+    },
+    "baseline_before_run": {
+      "clean_offers_business_france": 903,
+      "offers_with_ge_1_skill": 620,
+      "offers_with_ge_1_skill_pct": 68.7,
+      "offers_with_ge_3_skills": 51,
+      "offers_with_ge_3_skills_pct": 5.6,
+      "offer_skills_rows": 817
+    },
+    "run1_full_backfill": {
+      "offers_scanned": 903,
+      "offers_processed": 856,
+      "skipped_offers": 47,
+      "rows_written": 1862,
+      "ai_triggered_offers": 826,
+      "ai_batches_sent": 56,
+      "ai_added_rows": 1161,
+      "fixed_offers": 649,
+      "dry_run": false
+    },
+    "coverage_after_run1": {
+      "clean_offers_business_france": 903,
+      "offers_with_ge_1_skill": 841,
+      "offers_with_ge_1_skill_pct": 93.1,
+      "offers_with_ge_3_skills": 353,
+      "offers_with_ge_3_skills_pct": 39.1,
+      "offers_with_ge_5_skills": 28,
+      "offer_skills_rows": 1978,
+      "skills_per_offer_distribution": {
+        "0": 41,
+        "1": 231,
+        "2": 278,
+        "3": 225,
+        "4": 100,
+        "5": 25,
+        "6": 3
+      }
+    },
+    "batching_efficiency": {
+      "ai_triggered_offers": 826,
+      "ai_batches_sent": 56,
+      "offers_per_batch_avg": 14.75,
+      "verdict": "batching_validated"
+    },
+    "canonical_integrity": {
+      "null_canonical_id": 0,
+      "non_skill_prefix": 0,
+      "verdict": "clean"
+    },
+    "quality_sample_10_offers": [
+      {"external_id": "237574", "title": "Pre-Sales Architect V.I.E", "skills": ["skill:cloud_architecture", "skill:documentation"]},
+      {"external_id": "242099", "title": "Program Controller", "skills": ["skill:business_intelligence", "skill:statistical_programming", "skill:time_series_analysis"]},
+      {"external_id": "237358", "title": "Consultant en recrutement", "skills": ["skill:project_management", "skill:recruitment", "skill:statistical_programming"]},
+      {"external_id": "242535", "title": "Asia Staffing Lead", "skills": ["skill:recruitment", "skill:sap"]},
+      {"external_id": "238332", "title": "Responsable maintenance", "skills": ["skill:process_optimization", "skill:statistical_programming"]},
+      {"external_id": "237175", "title": "INGENIEUR AMELIORATION CONTINUE", "skills": ["skill:process_optimization", "skill:statistical_programming"]},
+      {"external_id": "242538", "title": "INGENIEUR.E INFRASTRUCTURES", "skills": ["skill:statistical_programming"]},
+      {"external_id": "239997", "title": "Charge d'Integration et Developpement", "skills": ["skill:business_intelligence", "skill:excel", "skill:statistical_programming"]},
+      {"external_id": "237441", "title": "BUSINESS MANAGER", "skills": ["skill:leadership", "skill:statistical_programming"]},
+      {"external_id": "236352", "title": "Specialiste Support Manufacturing", "skills": ["skill:compliance", "skill:statistical_programming"]}
+    ],
+    "top_canonical_ids": {
+      "skill:statistical_programming": 538,
+      "skill:project_management": 191,
+      "skill:business_intelligence": 116,
+      "skill:compliance": 102,
+      "skill:process_optimization": 76,
+      "skill:b2b_sales": 75,
+      "skill:data_analysis": 72,
+      "skill:documentation": 65,
+      "skill:budgeting": 63,
+      "skill:market_analysis": 49
+    },
+    "run2_idempotency": {
+      "offers_scanned": 903,
+      "offers_processed": 62,
+      "skipped_offers": 841,
+      "rows_written": 27,
+      "ai_triggered_offers": 62,
+      "ai_batches_sent": 5,
+      "ai_added_rows": 27,
+      "fixed_offers": 21,
+      "duplicates_offer_canonical": 0,
+      "coverage_after": {
+        "offers_with_ge_1_skill": 862,
+        "offers_with_ge_3_skills": 353,
+        "offer_skills_rows": 2005
+      }
+    },
+    "verdict": {
+      "batching_validated": true,
+      "canonical_integrity_validated": true,
+      "coverage_ge_1_target_95_100_pct": "93.1_below_target",
+      "coverage_ge_3_target_60_70_pct": "39.1_below_target",
+      "idempotency_no_duplicates": true,
+      "idempotency_rerun_cost": "partial_62_offers_retriggered",
+      "quality_generic_noise_detected": false,
+      "quality_canonical_overmatch_detected": "skill:statistical_programming_on_538_offers_59.6_pct",
+      "overall": "batching_and_integrity_validated_coverage_and_canonical_resolution_need_hardening"
+    },
+    "next_sprint": "domain_evidence_hardening_v1",
+    "non_regression": [
+      "no matching_v1.py change",
+      "no scoring change",
+      "no ranking change",
+      "no UI change",
+      "no skills_uri mutation",
+      "offer_skills schema unchanged this run"
+    ]
   },
   "last_weighted_coverage_batch1": {
     "date": "2026-04-24",

@@ -209,6 +209,7 @@ function OfferCard({
       offerIntelligence={offer.offer_intelligence}
       semanticExplainability={offer.semantic_explainability}
       scoringV3={offer.scoring_v3}
+      domainAffinity={offer.domain_affinity}
       onOpenDetails={() => onOpen()}
       onShortlist={() => onShortlist()}
       secondaryActionLabel="Envoyer au suivi"

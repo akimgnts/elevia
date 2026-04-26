@@ -4,6 +4,245 @@
 
 ---
 
+## 2026-04-26 — Domain-aware Soft Signal v1 (inbox enrichment only)
+
+### 1. Objectif
+- Brancher l'affinity matrix dans la **réponse** `/api/inbox` en pure enrichment.
+- **Aucun** impact sur scoring, ordering, filtering. Pas de DB mutation, pas d'IA, pas de modification de `matching_v1.py`, pas d'`offer_domain_enrichment`.
+- Single source of truth partagée entre l'audit script (offline) et la route runtime.
+
+### 2. Patch implémenté
+- **NEW** `apps/api/src/api/utils/domain_affinity.py` — module partagé : `STRONG_SIGNALS`, `ADJACENCY`, `infer_cv_domain` (strong-only, "other" si aucun strong), `domain_affinity`, `affinity_score`, `fetch_offer_domain_tags` (bulk SELECT read-only).
+- `apps/api/src/api/schemas/inbox.py` — 2 nouveaux champs **optionnels** sur `InboxItem` : `domain_affinity` (pattern aligned/adjacent/distant/neutral), `domain_affinity_score` (0..2, null pour neutral).
+- `apps/api/src/api/routes/inbox.py` — helper `_apply_domain_affinity_enrichment(items, extracted, source_map)` appelé **après** la finalisation de `items` et **avant** la construction de `meta` dans les deux chemins (`/inbox` direct et `_get_inbox_filtered`). Inférence cv_domain via `extracted.skills` (préfixés `skill:`), bulk-fetch `offer_domain_enrichment` pour les `business_france` ids uniquement, fallback silencieux en cas d'erreur.
+- `scripts/run_domain_aware_matching_audit.py` — refactor : importe `STRONG_SIGNALS`, `ADJACENCY`, `domain_affinity` du nouveau module au lieu de les redéfinir localement. `WEAK_SIGNALS` reste local (le runtime n'en a pas besoin).
+
+### 3. Inférence runtime simplifiée
+- Le runtime utilise **strong-signals only** (pas de query BF skill_weights par requête). L'audit a montré 100% expected_vs_inferred match rate via cette approche → simplification acceptée et frozen.
+- Si la profile n'a aucun strong signal, `cv_domain="other"` → tous les items reçoivent `domain_affinity="neutral"`.
+- Mapping label → canonical_id : préfixe `skill:` sur les normalized labels du `extracted.skills` frozenset (les sample profiles utilisent ce format).
+
+### 4. Validation
+- **Tests scoring/matching** : 39 tests passés (`test_inbox`, `test_inbox_score_consistency`, `test_inbox_scoring`, `test_matching_v1`, `test_matching_contract`, `test_inbox_domain_mode`) — score, order, offer ids identiques.
+- **Smoke /api/inbox** : 200 OK avec `profile_01_data_analyst`, 5 items retournés, tous portent `domain_affinity` + `domain_affinity_score` (2 aligned/2 + 3 adjacent/1). Top scores 52, 52, 47, 47, 47 (ordre préservé).
+- **Audit script refactor** : 100% expected_vs_inferred match rate préservé après import refactor (mêmes 7 profiles, même 12.2% / 25.4% / 61.1% / 1.4%).
+- **Schema** : pydantic rejette une valeur bogus pour `domain_affinity` (pattern enforcement).
+- **4 échecs `test_inbox_filters_v2.py`** confirmés **pré-existants** (vérifié via `git stash` du patch — failures persistent sans mes changes).
+
+### 5. Frozen rule
+> Domain affinity is a soft signal only (aligned/adjacent/distant). Pure enrichment layer in inbox response. **Never** affects score, ordering, or filtering.
+
+### 6. Non-regression
+- no scoring change · no `matching_v1.py` change · no `offer_domain_enrichment` change · no DB schema/mutation · no AI call · no frontend change · no filter/sort change · enrichment failure is swallowed (never breaks `/inbox`).
+
+---
+
+## 2026-04-26 — Domain Affinity Audit v1
+
+### 1. Objectif
+- Remplacer la classification binaire `aligned vs mismatched` par un audit à 3 niveaux : **aligned / adjacent / distant** (+ `neutral` pour `unknown/other`).
+- Mesurer l'effet d'une matrice d'affinité de domaines en signal soft, **avant** tout branchement runtime.
+- Audit-only : pas de runtime, pas de filtrage, pas de scoring, pas de `matching_v1.py`, pas de DB, pas de frontend, pas d'IA.
+
+### 2. Patch implémenté
+Fichier : `scripts/run_domain_aware_matching_audit.py`.
+
+- Ajout d'une matrice `ADJACENCY` (set de `frozenset`) avec 14 paires non ordonnées en taxonomie DB 11-tag.
+- Mapping interne v1.1 12-tag → DB 11-tag : `engineering_software/industrial → engineering`, `sales_business_development → sales`, `marketing_communication → marketing`, `supply_chain_logistics → supply`, `operations_project → operations`, `consulting_strategy → operations` (proxy), `legal_compliance → legal`, `product_ecommerce → skipped`.
+- Helper `domain_affinity(cv, offer)` retourne `aligned | adjacent | distant | neutral`.
+- `audit_cv` enrichi : compteurs par classe, `affinity_projection` (aligned_pct, adjacent_pct, distant_pct, soft_keep_aligned_plus_adjacent_pct, distant_only_exclusion_pct, exclusion_reduction_vs_binary_pct), nouveaux échantillons `adjacent_top10` et `distant_top10`.
+- Rapport markdown enrichi avec section "Domain Affinity Matrix v1" listant les 14 paires.
+
+### 3. Résultats globaux
+
+| métrique | binaire | 3-niveaux |
+|---|---|---|
+| hard exclusion | 86.4 % | n/a |
+| distant-only exclusion | n/a | **61.1 %** |
+| aligned moyen | 12.2 % | 12.2 % |
+| adjacent moyen | n/a | **25.4 %** |
+| soft keep moyen (aligned+adjacent) | n/a | **37.5 %** |
+| réduction d'exclusion vs binaire | n/a | **+25.3 pp** |
+
+→ Le filtre 3-niveaux déplace **25 pp** des offres de "hard-excluded" vers "soft-kept (adjacent)" sans changer le scoring.
+
+### 4. Per-profile (aligned / adjacent / distant / soft-keep%)
+
+| profile | cv | aligned | adjacent | distant | soft-keep | reduction |
+|---|---|---|---|---|---|---|
+| P1_data_analyst | data | 65 | **476** | 323 | 61.8 % | +54.3 pp |
+| P2_software_engineer | engineering | 272 | 257 | 335 | 60.4 % | +29.3 pp |
+| P3_finance_controller | finance | 107 | 154 | 603 | 29.8 % | +17.6 pp |
+| P4_marketing_manager | marketing | 20 | 194 | 650 | 24.4 % | +22.1 pp |
+| P5_hr_recruiter | hr | 39 | 105 | 720 | 16.4 % | +12.0 pp |
+| P6_supply_chain | supply | 115 | 272 | 477 | 44.2 % | +31.1 pp |
+| P7_sales_b2b | sales | 129 | 97 | 638 | 25.8 % | +11.1 pp |
+
+P1 (data) gagne le plus (+54 pp) car la taxonomie DB collapse `engineering_software` dans `engineering`.
+
+### 5. Échantillonnage manuel
+
+**Adjacencies validées (correctes) :**
+- `data ↔ finance` (Contrôleur de gestion catches data analysts in finance dept)
+- `finance ↔ operations` (CFO/financier titres souvent mistaggés operations — adjacency rattrape)
+- `sales ↔ marketing` (Growth/Account Manager, Digital Account Manager, User Acquisition)
+- `data ↔ marketing` (Business Analyst MOA, Marketing Analyst)
+- `hr ↔ admin` (Finance Transformation Administrator)
+
+**Adjacencies trop bruyantes en DB 11-tag :**
+- `data ↔ engineering` — capte tous les ingénieurs mécaniques/aéro/composite (collapse engineering_software+engineering_industrial)
+- `supply ↔ engineering` — même problème
+- `hr ↔ operations` — `operations` trop large (HSE, Automation Engineer, Construction PM)
+- `sales ↔ operations` — même problème
+
+**Adjacencies manquantes vues dans les distant samples :**
+- `sales ↔ supply` (Technico-Commercial, Account Manager Villa Supply — hybrides)
+
+### 6. Décision : **B — useful but needs edits**
+
+- Quantitativement très utile (−25.3 pp d'exclusion).
+- Qualitativement mixte : 5 paires validées, 4 paires trop bruyantes à cause du collapse DB (engineering, operations).
+- Si activée plus tard en runtime : **soft re-rank uniquement, jamais hard filter**, et `weight(adjacent) < weight(aligned)`.
+- Itération v2 quand la taxonomie DB sera affinée (split engineering_software / engineering_industrial, opérations plus granulaires).
+
+### 7. Artefacts
+- `scripts/run_domain_aware_matching_audit.py` (modifié)
+- `baseline/domain_aware_matching_audit/audit_v1.json` (regénéré, expose `affinity_version=v1_3_level_aligned_adjacent_distant` + `adjacency_pairs`)
+- `docs/ai/reports/domain_aware_matching_audit_v1.md` (regénéré)
+
+---
+
+## 2026-04-26 — CV Domain Inference Hardening v1
+
+### 1. Objectif
+- Corriger les inférences `cv_domain` erronées identifiées par l'audit (notamment P1 data_analyst → finance) en remplaçant la logique purement data-driven par un poids `strong vs weak signal`.
+- Audit-only : pas de runtime, pas de route, pas de scoring, pas de `matching_v1.py`, pas de `offer_domain_enrichment`, pas de schéma, pas de frontend, pas de DB, pas d'IA. Domain-aware matching **toujours pas activé en production**.
+
+### 2. Diagnostic des biais (avant)
+- P1_data_analyst inféré `finance` car la carte data-driven BF est biaisée :
+  - `skill:business_intelligence` top=finance (45/116) — controllers BF mentionnent BI
+  - `skill:excel` top=finance (11/27) — excel est générique
+  - `skill:sql`, `skill:statistical_programming`, `skill:data_visualization` ont **0** signal BF (jamais peuplés dans `offer_skills`)
+- L'inférence purement empirique ne peut pas attraper un profil data tant que ces 3 skills n'ont pas de couverture.
+
+### 3. Patch implémenté
+Fichier : `scripts/run_domain_aware_matching_audit.py` (audit script uniquement).
+
+Nouveau pipeline `infer_cv_domain` :
+- `STRONG_SIGNALS` : dict `domain → set[canonical_id]` curé (data 15, finance 11, hr 9, marketing 9, sales 7, supply 7, engineering 10, operations 4, legal 4, admin 3).
+- `WEAK_SIGNALS` : `excel, powerpoint, word, office, communication, reporting, documentation, project_management, teamwork, leadership, compliance, problem_solving, time_management, presentation`.
+- Poids : strong = **3.0**, data-driven normal = **1.0**, data-driven weak = **0.2**.
+- Règle d'or : il faut au moins **1 strong signal** ; sinon `cv_domain = "other"` (low confidence).
+- La carte data-driven BF est conservée comme signal complémentaire (×0.2 pour les weak).
+
+### 4. Résultats (avant → après)
+
+| métrique | avant | après | cible |
+|---|---|---|---|
+| expected_vs_inferred_match_rate_pct | 85.7 | **100.0** | >90 ✅ |
+| average_hard_filter_exclusion_pct | 85.8 | 86.4 | n/a |
+| average_aligned_pct | 12.9 | 12.2 | n/a |
+
+- Le léger `+0.6` exclusion / `−0.7` aligned vient du fait que P1 cesse d'aligner sur les ~107 offres `finance` (faux signal) et s'aligne désormais sur les ~65 offres `data` (vraie cible). C'est plus juste, pas une régression.
+- Les 6 autres profils (P2…P7) restent stables et corrects.
+
+### 5. Mismatches corrigés
+- **P1_data_analyst** : `finance` → `data` ✅. Dist score : `data ≈ 15.6, finance ≈ 0.5` (était `finance 0.89, data 0.61`).
+- Aucun nouveau faux mismatch introduit sur P2–P7.
+
+### 6. Edge cases résiduels
+- P1 hard exclusion 91.2 % reste élevé mais reflète la rareté des offres `data` dans BF (~65/876), pas un bug d'inférence.
+- P4 marketing : 20 offres BF seulement (petit marché cible).
+- `skill:compliance` placé en weak pour ne pas tirer les controllers vers `engineering` ; à réévaluer si un profil compliance/légal pur est ajouté un jour.
+
+### 7. Artefacts
+- `scripts/run_domain_aware_matching_audit.py` (modifié — strong/weak signal mapping + nouvelle fonction `infer_cv_domain`)
+- `baseline/domain_aware_matching_audit/audit_v1.json` (regénéré, expose `inference_version=v2_strong_weak_weighting` et les poids)
+- `docs/ai/reports/domain_aware_matching_audit_v1.md` (regénéré, méthode v2 documentée)
+
+---
+
+## 2026-04-26 — Domain-aware Matching Audit v1
+
+### 1. Objectif
+- Mesurer l'effet hypothétique d'un filtre par domaine CV→offre **avant** tout branchement runtime.
+- Aucune modification scoring / matching / `matching_v1.py` / route / `inbox.py` / schema / frontend / DB. Lecture seule sur PostgreSQL BF.
+- Taxonomie utilisée : DB 11-tag (`data, finance, hr, marketing, sales, supply, engineering, operations, admin, legal, other`) — pas la v1.1 12-tag artefact-only.
+- Flag : `ELEVIA_DOMAIN_AUDIT=1` (default 0, audit-only, pas de runtime impact).
+
+### 2. Méthode
+- Carte `canonical_id → distribution domain_tag` agrégée depuis `offer_skills × offer_domain_enrichment` (BF actives).
+- Inférence `cv_domain` data-driven : pour chaque skill du CV, distribution normalisée `count/sum(domains)` ; somme sur tout le CV ; top domain.
+- Classification de chaque offre : `aligned` (== cv_domain) / `mismatched` / `neutral` (`unknown`/`other`).
+- Projection hypothétique de deux filtres : hard (drop mismatched) et soft (low-priority mismatched, neutral kept).
+
+### 3. Résultats
+- Profils audités : **7** (P1 data analyst, P2 software engineer, P3 finance controller, P4 marketing manager, P5 hr recruiter, P6 supply chain, P7 sales b2b).
+- Offres BF actives : **876** ; skill universe couvert : **93**.
+- expected_vs_inferred match rate : **85.7 %** (6/7 profils inférés correctement).
+  - Seul mismatch : P1 data_analyst inféré `finance` (excel/sql/data_analysis dominent finance dans la distribution actuelle BF).
+- average_hard_filter_exclusion_pct : **85.8 %** (filtre très agressif tel quel).
+- average_aligned_pct : **12.9 %**.
+- Aligned per profile : P1=107, P2=272, P3=107, P4=20, P5=39, P6=115, P7=129.
+- Hard exclusion per profile (%) : P1=86.4, P2=67.6, P3=86.4, P4=96.3, P5=94.2, P6=85.5, P7=83.9.
+- Neutral (unknown/other) constant : **12** offres / profil.
+
+### 4. Décision (pour la suite)
+- Pas de branchement runtime tant que (a) les faux mismatches ne sont pas inspectés manuellement et (b) l'inférence cv_domain n'est pas plus robuste sur les profils data (P1 cas représentatif).
+- Si faux mismatches dominent → préférer soft filter (re-rank only) au lieu de hard.
+- Si expected_vs_inferred < 80 % sur un panel élargi → renforcer la carte skill→domain (plus de skills, pondération smarter) avant activation.
+
+### 5. Artefacts produits
+- `scripts/run_domain_aware_matching_audit.py`
+- `baseline/domain_aware_matching_audit/audit_v1.json`
+- `docs/ai/reports/domain_aware_matching_audit_v1.md`
+
+---
+
+## 2026-04-26 — Domain Taxonomy v1.1 Consolidation Patch
+
+### 1. Objectif
+- Patcher la taxonomie consolidée v1 (14 domaines) en v1.1 (12 domaines), sans rerun IA, sans mutation DB, sans changement scoring/matching/schema/frontend.
+- Décision préalable : B = accept with small edits (analyse v1 du même jour).
+
+### 2. Édits appliqués
+- Suppression `product_ecommerce` (1/250 dans validation v1) → split par raw_domain :
+  - `mining industry solutions`, `agricultural and construction equipment` → `sales_business_development`
+  - `cosmetics and beauty` → `marketing_communication`
+  - `product development` → `engineering_industrial`
+- Suppression `administration_support` (2/250) → split par raw_domain :
+  - `information technology` → `engineering_software`
+  - `construction and safety management` → `operations_project`
+  - `real estate and parking services` → `other`
+- Tightening `data` : retrait des synonymes transport/mobility/biopharma supply chain, exigence d'evidence explicite (analytics, BI, ML, ETL, SQL, dashboard, predictive, datahub, donnees systemiques, etc.).
+- Disambiguation `engineering_consulting` documentée (default `engineering_industrial`, override `consulting_strategy` si subdomain advisory/strategy/transformation).
+
+### 3. Résultats sur la validation (250 offres)
+- closed_domain_count : 14 → **12**
+- offers_changed : **5 / 250 (2.0 %)**
+  - 238157 Synthesis Researcher : data → engineering_industrial
+  - 242327 Analyst Transformation : data → consulting_strategy
+  - 236316 Product Owner : product_ecommerce → operations_project
+  - 237348 Business Applications Support : administration_support → engineering_software
+  - 238347 IT Installation & Support : administration_support → engineering_software
+- needs_ai_review_after : **3 / 250 (1.2 %)** (inchangé)
+- distribution v1.1 (top 5) : engineering_industrial 52, finance 32, sales_business_development 31, data 25, engineering_software 24
+- ambigus restants (3, tous `other`) : Architecte d'intérieur, mission pédagogique francophone, Hydrogéologue de terrain — bord de taxonomie, route correcte vers `other`.
+
+### 4. Validation
+- closed_domain_count = 12 ✓
+- aucun rerun IA ✓
+- aucune mutation DB ✓
+- aucun changement scoring/matching/`matching_v1.py`/schema/frontend ✓
+- rerouting déterministe à partir du titre + evidence v1 ✓
+
+### 5. Artefacts produits
+- `baseline/domain_taxonomy_discovery/full_v1/consolidated_v1_1.json`
+- `baseline/domain_taxonomy_discovery/full_v1/classification_validation_v1_1.json`
+- `docs/ai/reports/domain_taxonomy_discovery_v1_1.md`
+
+---
+
 ## 2026-04-22 — Revalidation branchement UI V1 Profile Reconstruction
 
 ### 1. Objectif
@@ -1768,3 +2007,195 @@ Double validation OFF vs ON sur 10 profils réels contre 839 offres BF :
 - conclusion :
   - Batch 1 améliore `matched_core`
   - score invariant
+
+---
+
+## 2026-04-24 — Offer Skills AI Fallback Full Backfill v1 (Business France)
+
+### Objectif
+- Exécuter un backfill complet de `offer_skills` sur l'ensemble du catalogue Business France en activant le batching AI fallback v1.
+- Mesurer la couverture atteinte, l'efficacité du batching, la qualité des skills persistés, l'intégrité canonique et l'idempotence.
+
+### Fichiers touchés
+- Aucun changement de code.
+- Commande utilisée : `apps/api/.venv/bin/python scripts/backfill_offer_skills.py --batch-size 15`
+- Sorties : `logs/offer_skills_full_backfill_run1.json`, `logs/offer_skills_full_backfill_run2.json`
+
+### Baseline avant run
+- `clean_offers.business_france` : 903
+- offres avec ≥1 skill : 620 (68,7 %)
+- offres avec ≥3 skills : 51 (5,6 %)
+- `offer_skills.business_france` : 817
+
+### Résultat run 1 (backfill complet)
+```
+offers_scanned      = 903
+offers_processed    = 856
+skipped_offers      = 47
+rows_written        = 1862
+ai_triggered_offers = 826
+ai_batches_sent     = 56
+ai_added_rows       = 1161
+fixed_offers        = 649
+```
+
+### Couverture après run 1
+- offres avec ≥1 skill : 841 (93,1 %) — cible 95–100 % ⚠️ légèrement sous-cible
+- offres avec ≥3 skills : 353 (39,1 %) — cible 60–70 % ❌ sous-cible significatif
+- offres avec ≥5 skills : 28 (3,1 %)
+- `offer_skills.business_france` : 1978 rows
+
+### Distribution skills-par-offre
+- 0 skills : 41 (4,5 %)
+- 1 skill : 231 (25,6 %)
+- 2 skills : 278 (30,8 %)
+- 3 skills : 225 (24,9 %)
+- 4 skills : 100 (11,1 %)
+- 5 skills : 25 (2,8 %)
+- 6 skills : 3 (0,3 %)
+
+### Efficacité batching
+- `ai_triggered_offers / ai_batches_sent = 826 / 56 = 14,75` offres par batch
+- cible `ai_batches_sent << ai_triggered_offers` : respectée (~15× compression)
+
+### Intégrité canonique
+- `canonical_id IS NULL` : 0
+- `canonical_id NOT LIKE 'skill:%'` : 0
+- 100 % des rows sont canoniques et préfixées `skill:`.
+
+### Échantillonnage qualité (10 offres tirées au hash de `external_id`)
+- `237574 Pre-Sales Architect V.I.E` → `skill:cloud_architecture, skill:documentation` (ai_fallback)
+- `242099 Program Controller` → `skill:business_intelligence, skill:statistical_programming, skill:time_series_analysis`
+- `237358 Consultant en recrutement` → `skill:project_management, skill:recruitment, skill:statistical_programming`
+- `242535 Asia Staffing Lead` → `skill:recruitment, skill:sap`
+- `238332 Responsable maintenance` → `skill:process_optimization, skill:statistical_programming`
+- `237175 INGÉNIEUR AMÉLIORATION CONTINUE` → `skill:process_optimization, skill:statistical_programming`
+- `242538 INGENIEUR.E INFRASTRUCTURES` → `skill:statistical_programming`
+- `239997 Chargé d'Intégration et Développement` → `skill:business_intelligence, skill:excel, skill:statistical_programming`
+- `237441 BUSINESS MANAGER` → `skill:leadership, skill:statistical_programming`
+- `236352 Spécialiste Support Manufacturing & Conformité GMP` → `skill:compliance, skill:statistical_programming`
+
+Observations qualité :
+- aucun bruit générique (`communication`, `motivation`, `organisation`, `gestion`, `data` seul) détecté — tous les labels sont canonicalisés vers `skill:*`.
+- forte présence justifiée sur plusieurs rôles : `recruitment`, `process_optimization`, `cloud_architecture`, `compliance`.
+- **alerte bruit canonique** : `skill:statistical_programming` apparaît sur **538 offres (59,6 %)**, y compris des rôles non-data (`Program Controller`, `Responsable maintenance`, `INGENIEUR INFRASTRUCTURES`, `BUSINESS MANAGER`, `Support Manufacturing`). Résolution canonique probablement trop permissive — à traiter dans le prochain sprint de hardening.
+
+### Résultat run 2 (idempotence)
+```
+offers_scanned      = 903
+offers_processed    = 62
+skipped_offers      = 841
+rows_written        = 27
+ai_triggered_offers = 62
+ai_batches_sent     = 5
+ai_added_rows       = 27
+fixed_offers        = 21
+```
+- duplicats `(offer_id, canonical_id)` : 0 (`UNIQUE` + `ON CONFLICT` respectés)
+- 93,1 % des offres (`841 / 903`) skippées via `content_hash`
+- 62 offres re-entrées dans la pipeline AI car encore sous le seuil `<3` canoniques — coût résiduel de 5 batches AI ≈ ~1 % de la charge initiale
+- ≥1 skill : 862 après run 2 (+21), ≥3 skills inchangé (353)
+
+### Edge checks
+- offres auparavant à 0 skill : 41 subsistent (parmi eux le déterministe et l'AI n'ont produit aucun canonical valide → à investiguer dans Domain Evidence Hardening v1).
+- offres déjà enrichies au-dessus du seuil : non modifiées (841 skippées), intégrité `(offer_id, canonical_id)` préservée.
+- Identité : `source=business_france` et `external_id` renseignés sur 100 % des `offer_skills`, 0 mismatch vs `clean_offers`.
+
+### Risques / limites
+- R1 — `skill:statistical_programming` sur-appliqué (59,6 %) suggère un mapping canonical trop laxe vers `analyse`/`analytics` ; effet probable sur la précision du scoring. À investiguer.
+- R2 — Cible ≥3 skills atteinte seulement à 39,1 % : le batch AI ajoute en moyenne ~1,4 skill par offre déclenchée. Améliorer le rappel déterministe (bloc taxonomy / weighted store) reste plus sûr qu'élargir l'AI.
+- R3 — Idempotence partielle : offres sous-seuil rejouent l'AI à chaque run (5 batches sur rerun). Acceptable tant que rare, mais à surveiller si le seuil reste à 3.
+- R4 — Aucune modification `matching_v1.py`, scoring, ranking, filtrage ou frontend.
+
+---
+
+## 2026-04-25 — Skill Overmatch Fix v1 : `skill:statistical_programming`
+
+### Objectif
+- Corriger la sur-application de `skill:statistical_programming` (538 / 903 offres BF = 59,6 %) détectée après le backfill AI fallback complet.
+- Restreindre la résolution canonique à des contextes data/stats légitimes.
+- Ne pas modifier le scoring, `matching_v1.py`, le schéma DB ou l'architecture.
+
+### Fichiers touchés
+- `apps/api/src/compass/canonical/canonical_alias_fr.jsonl` (suppression d'un alias)
+- `apps/api/tests/test_canonical_aliases_data.py` (tests ajoutés)
+
+### Diagnostic
+- 538 / 538 rows via `source_method='synonym_match'` avec label persisté `"Statistical Programming"`.
+- Distribution domaine des offres concernées :
+  - engineering 185, sales 79, finance 71, supply 68, data 41, operations 38, hr 19, admin 14, marketing 10, other 7, legal 6
+  - seulement 41 / 538 (7,6 %) en domaine `data`, 92 % faux positifs.
+- Cause racine : alias `python -> skill:statistical_programming` dans `canonical_alias_fr.jsonl` (Python est un langage généraliste, cité dans la plupart des descriptions techniques BF).
+
+### Patch
+- Suppression de la seule ligne `python -> skill:statistical_programming` dans `canonical_alias_fr.jsonl` avec commentaire de traçabilité.
+- Alias restants pointant vers `skill:statistical_programming` (inchangés, tous contextes forts) :
+  - FR file : `r programming -> skill:statistical_programming`
+  - Core store : `r`, `statistical programming`, `programmation statistique`
+- Les alias data corrects sont conservés : `pandas`, `numpy`, `scikit-learn`, `jupyter`, etc.
+
+### Tests
+- Nouveau `test_python_does_not_map_to_statistical_programming` :
+  - `_map("Python") != "skill:statistical_programming"`
+  - `_map("python") != "skill:statistical_programming"`
+- Nouveau `test_strong_data_aliases_still_resolve` :
+  - `pandas → skill:data_analysis`
+  - `numpy → skill:data_analysis`
+  - `scikit-learn → skill:machine_learning`
+  - `r programming → skill:statistical_programming`
+  - `statistical programming → skill:statistical_programming`
+- `test_alias_r_maps` préservé, `_map("R") == "skill:statistical_programming"` toujours OK.
+- `apps/api/tests/test_canonical_aliases_data.py` : **7 passed**.
+
+### Nettoyage DB (Business France)
+- `DELETE FROM offer_skills WHERE source='business_france' AND canonical_id='skill:statistical_programming'` → **538 rows supprimées**.
+- Intégrité canonique post-delete :
+  - `canonical_id IS NULL` : 0
+  - `canonical_id NOT LIKE 'skill:%'` : 0
+  - duplicates `(offer_id, canonical_id)` : 0
+
+### Métriques avant / après (BF, 903 offres)
+| Métrique | Avant | Après |
+|---|---|---|
+| `skill:statistical_programming` distinct offers | 538 (59,6 %) | **0 (0 %)** |
+| `offer_skills` rows BF | 2 005 | 1 467 |
+| offres ≥1 skill | 862 (95,5 %) | 760 (84,2 %) |
+| offres ≥3 skills | 353 (39,1 %) | 190 (21,0 %) |
+| top canonical BF | `skill:statistical_programming` 538 | `skill:project_management` 191 |
+
+La réduction de couverture `≥1 skill` (95,5 % → 84,2 %) reflète 81 offres dont le SEUL skill persisté était `skill:statistical_programming` (faux signal) — leur absence est désormais la vérité, et leur valeur matching restera nulle jusqu'à un ré-enrichissement avec des signaux corrects.
+
+### Échantillon 20 offres après fix
+- `242099 Program Controller` → `business_intelligence, time_series_analysis` (avant contenait `statistical_programming`)
+- `240134 Contrôleur de Gestion / ADV` → `budgeting, business_intelligence`
+- `240125 BUSINESS CONTROLLER` → `budgeting, business_intelligence`
+- `237441 BUSINESS MANAGER` → `leadership`
+- `236352 Spécialiste Support Manufacturing & Conformité GMP` → `compliance`
+- `238332 Responsable maintenance` → `process_optimization`
+- `237175 INGÉNIEUR AMÉLIORATION CONTINUE` → `process_optimization`
+- `242502 Responsable Développement Marché Asie du Sud-Est` → `b2b_sales, compliance, crm_management, market_analysis, salesforce`
+- `237030 BUSINESS DEVELOPMENT MANAGER ITALIE` → `lead_generation`
+- `242068 Commercial B2B` → `b2b_sales`
+- `238446 Ingénieur IAM` → `cloud_architecture, documentation`
+- `242296 Ingénieur Bureau d'Études Électrotechnique` → `documentation, process_optimization`
+- `238140 Project Engineer Packaging` → `maintenance_planning, sap`
+- `242491 T&C CFO – Ingénieur Essais et Mise en Service` → `excel, project_management`
+- `232304 HARDWARE DESIGNER` → `documentation`
+- `237574 Pre-Sales Architect V.I.E` → `cloud_architecture, documentation`
+- `238402 HR Coordinator` → `compliance, onboarding`
+- `239997 Chargé d'Intégration et Développement` → `business_intelligence, excel`
+- `237358 Consultant en recrutement` → `project_management, recruitment`
+- `242535 Asia Staffing Lead` → `recruitment, sap`
+
+Plus aucune occurrence de `skill:statistical_programming` sur les rôles non-data.
+
+### Safety check
+- Intégrité canonique : 100 % `skill:*`, 0 null, 0 malformé.
+- Aucun changement de `matching_v1.py`, `idf.py`, `weights_*`, scoring, ranking, frontend, DB schema.
+- Fallback AI batching : mécanisme inchangé.
+- Les offres dont `skill:statistical_programming` était le seul skill ne seront pas re-traitées automatiquement (content_hash inchangé) — à reprendre via Domain Evidence Hardening v1.
+
+### Risques
+- R1 — 41 offres en domaine `data` ont perdu leur mapping `statistical_programming` issu de Python. Acceptable : Python seul n'anchore pas un rôle data, les offres concernées conservent `pandas`, `numpy`, `data_analysis`, etc. quand ces signaux existent.
+- R2 — Cible produit `≥3 skills = 60–70 %` reste sous-atteinte (21 %). Redressement via Domain Evidence Hardening v1 (plus d'alias forts, pas plus de bruit).
+- R3 — Aucun impact scoring / matching / frontend par construction.
