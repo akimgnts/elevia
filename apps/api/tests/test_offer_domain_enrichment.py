@@ -93,6 +93,94 @@ def test_classify_offer_domain_rules_tie_requires_ai_review():
     assert result["domain_tag"] in {"hr", "sales", "admin", "operations"}
 
 
+def test_classify_offer_domain_rules_support_alone_blocks_admin():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Support applicatif",
+        description="",
+    )
+
+    assert result["domain_tag"] != "admin"
+    assert result["domain_tag"] == "other"
+    assert result["needs_ai_review"] is True
+
+
+def test_classify_offer_domain_rules_communication_alone_blocks_marketing():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Chargé de communication RH",
+        description="",
+    )
+
+    assert result["domain_tag"] != "marketing"
+    assert result["needs_ai_review"] is True
+
+
+def test_classify_offer_domain_rules_analyst_alone_blocks_data():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Senior Analyst",
+        description="",
+    )
+
+    assert result["domain_tag"] != "data"
+    assert result["needs_ai_review"] is True
+
+
+def test_classify_offer_domain_rules_talent_acquisition_resolves_to_hr():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Talent acquisition specialist",
+        description="",
+    )
+
+    assert result["domain_tag"] == "hr"
+    assert result["needs_ai_review"] is False
+    assert result["confidence"] == 0.9
+
+
+def test_classify_offer_domain_rules_marketing_manager_resolves_to_marketing():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Marketing manager",
+        description="",
+    )
+
+    assert result["domain_tag"] == "marketing"
+    assert result["needs_ai_review"] is False
+    assert result["confidence"] == 0.9
+
+
+def test_classify_offer_domain_rules_low_evidence_returns_other():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Stagiaire",
+        description="audit",
+    )
+
+    assert result["domain_tag"] == "other"
+    assert result["needs_ai_review"] is True
+    assert result["evidence"] == ["low_evidence"]
+
+
+def test_classify_offer_domain_rules_strong_data_keywords_still_resolve():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Senior Analyst",
+        description="SQL Python Power BI dashboards reporting",
+    )
+
+    assert result["domain_tag"] == "data"
+    assert result["needs_ai_review"] is False
+
+
 def test_compute_offer_content_hash_changes_with_title_or_description():
     from api.utils.offer_domain_enrichment import compute_offer_content_hash
 

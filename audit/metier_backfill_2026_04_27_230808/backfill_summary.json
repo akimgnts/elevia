@@ -1,0 +1,129 @@
+{
+  "enrichment_version": "offer_skills_v3_metier",
+  "source": "business_france",
+  "batch_size": 5,
+  "dry_run": false,
+  "n_offers_total": 10,
+  "n_batches": 2,
+  "kept_total": 43,
+  "dropped_total": 7,
+  "rows_written_total": 43,
+  "errors_total": 0,
+  "batch_summaries": [
+    {
+      "batch_idx": 1,
+      "total_batches": 2,
+      "n_offers": 5,
+      "kept_total": 21,
+      "dropped_total": 4,
+      "rows_written": 21,
+      "errors": 0,
+      "offer_summaries": [
+        {
+          "offer_id": 2,
+          "external_id": "BF-242362",
+          "domain_tag": "hr",
+          "title": "Development Technician VIE (HR) (H/F)",
+          "kept": 4,
+          "dropped": 1,
+          "error": ""
+        },
+        {
+          "offer_id": 10,
+          "external_id": "BF-242353",
+          "domain_tag": "hr",
+          "title": "Charg\u00e9(e) de mission (universitaire) (H/F)",
+          "kept": 5,
+          "dropped": 0,
+          "error": ""
+        },
+        {
+          "offer_id": 41,
+          "external_id": "242537",
+          "domain_tag": "other",
+          "title": "Charg\u00e9(e) de mission (H/F)",
+          "kept": 2,
+          "dropped": 3,
+          "error": ""
+        },
+        {
+          "offer_id": 49,
+          "external_id": "242519",
+          "domain_tag": "marketing",
+          "title": "D&IS Product Marketing (H/F)",
+          "kept": 5,
+          "dropped": 0,
+          "error": ""
+        },
+        {
+          "offer_id": 51,
+          "external_id": "242526",
+          "domain_tag": "sales",
+          "title": "VIA Charg\u00e9(e) de D\u00e9veloppement Tech & Services \u00e0 Houston (H/F)",
+          "kept": 5,
+          "dropped": 0,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "batch_idx": 2,
+      "total_batches": 2,
+      "n_offers": 5,
+      "kept_total": 22,
+      "dropped_total": 3,
+      "rows_written": 22,
+      "errors": 0,
+      "offer_summaries": [
+        {
+          "offer_id": 52,
+          "external_id": "242552",
+          "domain_tag": "finance",
+          "title": "Investment controlling (H/F)",
+          "kept": 4,
+          "dropped": 1,
+          "error": ""
+        },
+        {
+          "offer_id": 53,
+          "external_id": "242548",
+          "domain_tag": "finance",
+          "title": "Contr\u00f4leur de gestion (H/F)",
+          "kept": 5,
+          "dropped": 0,
+          "error": ""
+        },
+        {
+          "offer_id": 54,
+          "external_id": "242547",
+          "domain_tag": "sales",
+          "title": "Key Account Manager Junior (H/F)",
+          "kept": 3,
+          "dropped": 2,
+          "error": ""
+        },
+        {
+          "offer_id": 56,
+          "external_id": "242543",
+          "domain_tag": "admin",
+          "title": "V.I.E. Trustee Administrator (H/F)",
+          "kept": 5,
+          "dropped": 0,
+          "error": ""
+        },
+        {
+          "offer_id": 57,
+          "external_id": "242541",
+          "domain_tag": "finance",
+          "title": "CONTROLEUR DE GESTION (H/F) - BELGIQUE",
+          "kept": 5,
+          "dropped": 0,
+          "error": ""
+        }
+      ]
+    }
+  ],
+  "avg_kept_per_offer": 4.3,
+  "offers_with_3_or_more": 9,
+  "pct_offers_with_3_or_more": 90.0
+}

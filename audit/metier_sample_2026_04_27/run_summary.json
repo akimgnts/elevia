@@ -1,0 +1,13 @@
+{
+  "enrichment_version": "offer_skills_v3_metier",
+  "source": "business_france",
+  "top_domains": 6,
+  "per_domain": 5,
+  "dry_run": false,
+  "n_offers": 30,
+  "kept_total": 126,
+  "dropped_total": 6,
+  "avg_kept_per_offer": 4.2,
+  "offers_with_3_or_more": 28,
+  "pct_offers_with_3_or_more": 93.33
+}

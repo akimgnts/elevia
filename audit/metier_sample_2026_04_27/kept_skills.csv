@@ -1,0 +1,127 @@
+offer_id,external_id,domain_tag,canonical_id,label,skill_type,importance_level,confidence,evidence
+4,BF-242349,data,metier:ai_tool_development,AI tool development,CORE_METIER,CORE,0.9,design and improve AI assistants to increase efficiency.
+4,BF-242349,data,metier:python_programming,Python programming,TOOL,SECONDARY,0.9,"Good level in Python, Langchain, FastAPI, MCP servers, and interest in AI and automation."
+4,BF-242349,data,metier:javascript_knowledge,JavaScript knowledge,TOOL,SECONDARY,0.8,Knowledge of JavaScript and/or Docker environments is a plus.
+4,BF-242349,data,metier:industrial_context_understanding,industrial context understanding,CONTEXT,SECONDARY,0.7,A good understanding of industrial contexts is a plus.
+45,242523,data,metier:data_analysis_activities,data analysis activities,CORE_METIER,CORE,0.9,carry out various data analysis activities for the DPM client base
+45,242523,data,metier:vba_automation,VBA automation,CORE_METIER,CORE,0.9,automate and improve existing and new processes through the use of VBA
+45,242523,data,metier:dashboard_implementation,dashboard implementation,CORE_METIER,CORE,0.9,work on the implementation of dashboards providing the managers with continuously updated financial data
+45,242523,data,metier:powerpoint_reporting,PowerPoint reporting,CORE_METIER,CORE,0.9,"create PowerPoint presentations, reports, performance files, etc."
+45,242523,data,metier:international_environment,international environment,CONTEXT,SECONDARY,0.8,You will be part of a stimulating and rapidly evolving international environment
+106,242505,data,metier:automated_data_pipelines_development,automated data pipelines development,CORE_METIER,CORE,1.0,Develop and maintain automated data pipelines to ensure efficient data flow
+106,242505,data,metier:interactive_dashboards_creation,interactive dashboards creation,CORE_METIER,CORE,1.0,Create interactive dashboards and insightful reports using Power BI and/or Qlik Sense
+106,242505,data,metier:machine_learning_algorithms_application,Machine Learning algorithms application,CORE_METIER,CORE,1.0,Apply Machine Learning algorithms to clusterize reported train defects
+106,242505,data,metier:power_automate,Power Automate,TOOL,SECONDARY,1.0,"efficient data flow (using Power Automate, API …)"
+106,242505,data,metier:power_bi_and_qlik_sense,Power BI and Qlik Sense,TOOL,SECONDARY,1.0,using Power BI and/or Qlik Sense to support decision-making
+126,237412,data,metier:data_modeling,data modeling,CORE_METIER,CORE,1.0,"Design and maintain robust, standardized, and scalable data models aligned with business needs."
+126,237412,data,metier:workflow_automation,workflow automation,TOOL,SECONDARY,1.0,Implement Power Automate workflows to reduce manual activities and improve data flow efficiency.
+126,237412,data,metier:advanced_excel_skills,advanced Excel skills,TOOL,SECONDARY,1.0,"Advanced Excel skills (Power Query, data models)."
+5,BF-242348,engineering,metier:validation_d_automates_et_mes,Validation d'automates et MES,CORE_METIER,CORE,1.0,"La Validation d'automates, de superviseurs et de MES (Manufacturing Execution System)"
+5,BF-242348,engineering,metier:r_daction_de_protocoles_de_tests,Rédaction de protocoles de tests,CORE_METIER,CORE,1.0,"La rédaction des protocoles de tests, change control et rapport de validation"
+5,BF-242348,engineering,metier:compliance_gamp_et_21_cfr_part_11,Compliance GAMP et 21 CFR Part 11,CORE_METIER,CORE,1.0,"La compliance GAMP, 21 CFR part 11, BPx"
+5,BF-242348,engineering,metier:manufacturing_execution_system,Manufacturing Execution System,TOOL,SECONDARY,1.0,"Validation d'automates, de superviseurs et de MES (Manufacturing Execution System)"
+5,BF-242348,engineering,metier:environnement_pharmaceutique,Environnement pharmaceutique,CONTEXT,SECONDARY,1.0,"dans de nombreux domaines tels que la pharmaceutique, les dispositifs médicaux, la biotechnologie"
+42,242528,engineering,metier:analyses_des_probl_mes_d_adh_sion,analyses des problèmes d’adhésion,CORE_METIER,CORE,1.0,Analyses des problèmes d’adhésion
+42,242528,engineering,metier:recherche_et_d_veloppement_de_solutions,recherche et développement de solutions,CORE_METIER,CORE,1.0,Piloter la recherche et développement de solutions
+42,242528,engineering,metier:support_technique_chimique,support technique chimique,CORE_METIER,CORE,1.0,Apporter un support technique chimique aux équipes process
+42,242528,engineering,metier:essais_en_laboratoire,essais en laboratoire,CORE_METIER,CORE,1.0,Réaliser et suivre les tests et essais en laboratoire
+59,242538,engineering,metier:infrastructure_project_deployment,infrastructure project deployment,CORE_METIER,CORE,0.9,accompagnant dans leurs projets de déploiement de leurs infrastructures réseau
+59,242538,engineering,metier:network_architecture_strategy,network architecture strategy,CORE_METIER,CORE,0.9,participer à la définition de la stratégie d’architecture réseau et énergétique
+59,242538,engineering,metier:immersion_cooling_technology,immersion cooling technology,CORE_METIER,CORE,0.9,développement technique de notre solution d’hébergement refroidie par la technologie de refroidissement par l’immersion
+59,242538,engineering,metier:autocad,Autocad,TOOL,SECONDARY,0.9,"maitrisez les logiciels métiers tels que Autocad, Allplan ou SolidWorks"
+59,242538,engineering,metier:allplan,Allplan,TOOL,SECONDARY,0.9,"maitrisez les logiciels métiers tels que Autocad, Allplan ou SolidWorks"
+64,242530,engineering,metier:conception_m_canique_et_mod_lisation_cao,conception mécanique et modélisation CAO,CORE_METIER,CORE,1.0,Conception mécanique et modélisation CAO des produits fabriqués
+64,242530,engineering,metier:calcul_des_contraintes_fonctionnelles,calcul des contraintes fonctionnelles,CORE_METIER,CORE,1.0,"Calcul des contraintes fonctionnelles, physiques, dimensionnelles et structurelles"
+64,242530,engineering,metier:choix_des_mat_riaux_et_dimensionnement,choix des matériaux et dimensionnement,CORE_METIER,CORE,1.0,"Choix des matériaux, dimensionnement des structures et des équipements"
+64,242530,engineering,metier:r_daction_de_proc_dures_de_montage,rédaction de procédures de montage,CORE_METIER,CORE,1.0,Rédaction de procédures de montage
+64,242530,engineering,metier:r_daction_des_notices_d_utilisation,rédaction des notices d’utilisation,CORE_METIER,CORE,1.0,"Rédaction des notices d’utilisation, de maintenance préventive et maintenance corrective"
+3,BF-242350,finance,metier:contract_management,contract management,CORE_METIER,CORE,0.9,Rédige les offres sur mesure (cousu main). Assure le suivi des offres contractuelles
+3,BF-242350,finance,metier:client_qualification,client qualification,CORE_METIER,CORE,0.8,"Répondre à la demande du client, connaissance du produit et des capacités des salons"
+3,BF-242350,finance,metier:opera_software,OPERA software,TOOL,SECONDARY,0.9,Connaissance souhaitée Logiciel OPERA
+3,BF-242350,finance,metier:sales_strategy_participation,sales strategy participation,CORE_METIER,CORE,0.8,Participe à la stratégie commerciale MICE
+3,BF-242350,finance,metier:french_and_english_proficiency,French and English proficiency,NOISE,SECONDARY,0.7,Français / Anglais écrit et oral
+6,BF-242346,finance,metier:financial_reporting_management,financial reporting management,CORE_METIER,CORE,1.0,Gère les rapports analytiques/de gestion sur l'ensemble des Business Lines
+6,BF-242346,finance,metier:budget_process_coordination,budget process coordination,CORE_METIER,CORE,1.0,Dirige les processus budgétaires et coordonne les activités des différents secteurs
+6,BF-242346,finance,metier:financial_compliance_assurance,financial compliance assurance,CORE_METIER,CORE,1.0,Assure la qualité et la conformité des informations financières
+6,BF-242346,finance,metier:erp_software_knowledge,ERP software knowledge,TOOL,SECONDARY,1.0,"Bonne connaissance d’un ou plusieurs progiciels de gestion intégrée (ERP) (SAP, Oracle, etc.)"
+6,BF-242346,finance,metier:excel_proficiency,Excel proficiency,TOOL,SECONDARY,1.0,Excellente maîtrise d’Excel
+43,242525,finance,metier:budget_management,budget management,CORE_METIER,CORE,1.0,Gestion budgétaire : Décomposition des budgets initiaux et saisie dans l’ERP.
+43,242525,finance,metier:excel,Excel,TOOL,SECONDARY,1.0,"mettre en place un planning d’exécution (MS project, EXCEL)."
+43,242525,finance,metier:erp_systems,ERP systems,TOOL,SECONDARY,1.0,saisie dans l’ERP.
+44,242524,finance,metier:portfolio_management,portfolio management,CORE_METIER,CORE,1.0,Monitor and control portfolio transactions and fund-flows with periodic reconciliations
+44,242524,finance,metier:fund_valuation_and_reporting,fund valuation and reporting,CORE_METIER,CORE,1.0,Assist in reviewing and monitoring the quarterly valuation of portfolio assets
+44,242524,finance,metier:data_management_and_automation,data management and automation,CORE_METIER,CORE,1.0,Assist in the improvement and maintenance of the portfolio management database & systems
+44,242524,finance,metier:excel,Excel,TOOL,SECONDARY,0.8,"Design, implement, and automate various files for fund management data"
+44,242524,finance,metier:investor_servicing,investor servicing,CORE_METIER,CORE,1.0,Assist distributors / investors with all their requests
+47,242521,finance,metier:syst_me_qualit,système qualité,CORE_METIER,CORE,0.9,s’assure de la correcte définition et implémentation du système qualité durant toute l’exécution du projet.
+47,242521,finance,metier:plans_d_assurance_qualit,plans d'assurance qualité,CORE_METIER,CORE,0.9,La mise en place des plans d’assurance qualité projet
+47,242521,finance,metier:documentation_finale,documentation finale,CORE_METIER,CORE,0.9,suivi de la documentation finale des fournisseurs.
+47,242521,finance,metier:technologie_hvdc,technologie HVDC,TOOL,SECONDARY,0.8,développer votre expertise en technologie HVDC
+48,242520,operations,metier:pilotage_op_rationnel_du_projet,pilotage opérationnel du projet,CORE_METIER,CORE,0.9,"Assistance au pilotage opérationnel du projet (planning, coûts, qualité, sécurité)"
+48,242520,operations,metier:suivi_financier_et_reporting_projet,suivi financier et reporting projet,CORE_METIER,CORE,0.9,Contribution au suivi financier et au reporting projet
+48,242520,operations,metier:gestion_documentaire,gestion documentaire,CORE_METIER,CORE,0.9,Appui à la gestion documentaire et à l’amélioration des processus internes
+48,242520,operations,metier:lectricit_ou_lectrotechnique,électricité ou électrotechnique,TOOL,SECONDARY,0.8,Formation dans le domaine de l'électricité ou de l'électrotechnique
+60,242536,operations,metier:planification_de_travaux,planification de travaux,CORE_METIER,CORE,1.0,planification de travaux
+60,242536,operations,metier:pilotage_et_suivi_de_chantier,pilotage et suivi de chantier,CORE_METIER,CORE,1.0,pilotage et suivi de chantier
+60,242536,operations,metier:contr_le_de_l_avancement_et_de_la_qualit_des_travaux,contrôle de l'avancement et de la qualité des travaux,CORE_METIER,CORE,1.0,contrôle de l'avancement et de la qualité des travaux
+60,242536,operations,metier:gestion_du_planning_et_des_mat_riaux,gestion du planning et des matériaux,CORE_METIER,CORE,1.0,gestion du planning et des matériaux
+60,242536,operations,metier:proposition_de_solutions_innovantes_et_durables,proposition de solutions innovantes et durables,CORE_METIER,CORE,1.0,proposition de solutions innovantes et durables
+108,242497,operations,metier:innovation_project_management,innovation project management,CORE_METIER,CORE,1.0,Manage innovation projects from planning to execution
+108,242497,operations,metier:market_research,market research,CORE_METIER,CORE,1.0,Conduct market research to identify new business opportunities
+108,242497,operations,metier:innovation_strategy_implementation,innovation strategy implementation,CORE_METIER,CORE,1.0,Update and implement the innovation strategy
+108,242497,operations,metier:international_environment,international environment,CONTEXT,SECONDARY,1.0,driving innovation projects in an international and fast-evolving environment
+118,242347,operations,metier:carpooling_community_building,carpooling community building,CORE_METIER,CORE,0.9,"Build carpooling communities: On the ground and online, you’ll create energy around carpooling"
+118,242347,operations,metier:data_analysis_for_engagement,data analysis for engagement,CORE_METIER,CORE,0.9,"keeping an eye on data (usage, engagement, KPIs)"
+118,242347,operations,metier:client_empowerment_strategies,client empowerment strategies,CORE_METIER,CORE,0.9,You’ll work closely with your clients - a combination of companies and government authorities
+118,242347,operations,metier:creative_campaign_design,creative campaign design,CORE_METIER,CORE,0.9,set up actions and processes that boost adoption and embed carpooling
+118,242347,operations,metier:public_transport_integration,public transport integration,CORE_METIER,CORE,0.9,embed carpooling into public transport networks and people’s daily routines
+138,242436,operations,metier:digitalisation_des_processus_supports,digitalisation des processus supports,CORE_METIER,CORE,0.9,Appuyer le projet global de digitalisation des processus supports
+138,242436,operations,metier:analyse_des_donn_es_a_ronautiques,analyse des données aéronautiques,CORE_METIER,CORE,0.9,Analyser les données aéronautiques et proposer des rapports statistiques
+138,242436,operations,metier:logiciel_de_gestion_de_l_a_roport_aodb,logiciel de gestion de l’aéroport (AODB),TOOL,SECONDARY,0.9,Être référent du logiciel de gestion de l’aéroport (AODB)
+1,BF-242363,sales,metier:customer_support,Customer Support,CORE_METIER,CORE,0.9,to support the Customers technically and continue to build the relation with our customers.
+1,BF-242363,sales,metier:performance_dashboard_development,Performance Dashboard Development,CORE_METIER,CORE,0.9,leading projects to Create performance Dashboard and index trackers
+1,BF-242363,sales,metier:salesforce,Salesforce,TOOL,SECONDARY,0.9,"Create performance Dashboard and index trackers (SalesForce, Skywise)"
+1,BF-242363,sales,metier:digital_transformation,Digital Transformation,CONTEXT,SECONDARY,0.8,Field Service Business Operations & Digital Transformation
+7,BF-242345,sales,metier:reservoir_engineering_expertise,Reservoir Engineering expertise,CORE_METIER,CORE,0.9,"Provide Reservoir Engineering expertise on new challenges such as CCS, Unconventional, deep offshore"
+7,BF-242345,sales,metier:re_studio_software_proficiency,RE-Studio software proficiency,TOOL,SECONDARY,0.9,Become a technical expert on how to use the RE-Studio environment & any other Amarile products.
+7,BF-242345,sales,metier:eclipse_software_experience,Eclipse software experience,TOOL,SECONDARY,0.9,"Proven experience using Eclipse (must-have); IX, CMG, Gap and/or tNav would be a plus"
+7,BF-242345,sales,metier:technical_sales_skills,Technical sales skills,CORE_METIER,CORE,0.9,"The successful candidate will take part in technical sales on his/her zone, being responsible for both the technical and"
+7,BF-242345,sales,metier:market_research_and_customer_information_gathering,Market research and customer information gathering,CORE_METIER,CORE,0.9,Gathering market research and customer information
+8,BF-242344,sales,metier:reservoir_engineering_expertise,Reservoir Engineering expertise,CORE_METIER,CORE,0.9,"Provide Reservoir Engineering expertise on new challenges such as CCS, Unconventional, deep offshore"
+8,BF-242344,sales,metier:re_studio_software_proficiency,RE-Studio software proficiency,TOOL,SECONDARY,0.9,Become a technical expert on how to use the RE-Studio environment & any other Amarile products.
+8,BF-242344,sales,metier:technical_sales_experience,Technical sales experience,CORE_METIER,CORE,0.9,"The successful candidate will take part in technical sales on his/her zone, being responsible for both the technical and"
+8,BF-242344,sales,metier:eclipse_software_experience,Eclipse software experience,TOOL,SECONDARY,0.9,"Proven experience using Eclipse (must-have); IX, CMG, Gap and/or tNav would be a plus"
+8,BF-242344,sales,metier:international_business_context,International business context,CONTEXT,SECONDARY,0.9,Excellent written and verbal communication skills in an international environment are of the essence.
+9,BF-242343,sales,metier:business_development_support,business development support,CORE_METIER,CORE,0.9,supporting the business development in South Asia through Aviation Ecosystem and partner mapping.
+9,BF-242343,sales,metier:data_visualization,data visualization,CORE_METIER,CORE,0.9,"Apply AI and data visualisation for dashboarding of regional landscapes, business plans, tactical plans and projects"
+9,BF-242343,sales,metier:project_management,project management,CORE_METIER,CORE,0.9,management of the projects in a structured and agile way
+9,BF-242343,sales,metier:data_analysis,data analysis,CORE_METIER,CORE,0.8,Data analysis
+9,BF-242343,sales,metier:stakeholder_management,stakeholder management,CORE_METIER,CORE,0.8,Stakeholder management
+46,242522,sales,metier:cycle_de_vente,cycle de vente,CORE_METIER,CORE,1.0,gère l’intégralité du cycle de vente
+46,242522,sales,metier:n_gociation_de_contrats,négociation de contrats,CORE_METIER,CORE,1.0,Négocier des contrats avec tes interlocuteurs
+46,242522,sales,metier:d_veloppement_de_portefeuille,développement de portefeuille,CORE_METIER,CORE,1.0,"Constituer, développer tes portefeuilles clients/candidats"
+46,242522,sales,metier:recrutement,recrutement,CORE_METIER,CORE,1.0,réalise Commerce et Recrutement
+46,242522,sales,metier:international_recruitment,international recruitment,CONTEXT,SECONDARY,1.0,en France et à l’international
+50,242553,supply,metier:production_operations_coordination,production operations coordination,CORE_METIER,CORE,1.0,"Coordonner les opérations de production (planning, ordonnancement, suivi des délais)"
+50,242553,supply,metier:operational_performance_tracking,operational performance tracking,CORE_METIER,CORE,1.0,Suivre la performance opérationnelle (KPI) et fiabiliser les données
+50,242553,supply,metier:quality_standards_compliance,quality standards compliance,CORE_METIER,CORE,1.0,Garantir le respect des standards qualité et des exigences clients
+50,242553,supply,metier:international_operational_environment,international operational environment,CONTEXT,SECONDARY,1.0,"Une expérience terrain à l’international, au cœur des opérations"
+55,242545,supply,metier:predictive_maintenance,predictive maintenance,CORE_METIER,CORE,0.9,focus on: *Predictive maintenance for rolling stock and infrastructure
+55,242545,supply,metier:digital_asset_management,digital asset management,CORE_METIER,CORE,0.8,drive digital innovation for railway maintenance
+55,242545,supply,metier:data_requirements_definition,data requirements definition,CORE_METIER,CORE,0.8,Definition of data requirements for maintenance from the design and procurement stages
+55,242545,supply,metier:enterprise_asset_management_system,Enterprise Asset Management System,CORE_METIER,CORE,0.8,Description of a target Enterprise Asset Management System
+55,242545,supply,metier:iot_sensors,IoT sensors,TOOL,SECONDARY,0.7,Health monitoring of critical assets (on-board and trackside) through IoT sensors
+62,242532,supply,metier:manufacturing_and_purchasing_flow_analysis,manufacturing and purchasing flow analysis,CORE_METIER,CORE,0.9,analyse and improve the manufacturing and purchasing flows
+62,242532,supply,metier:erp_system_coordination,ERP system coordination,CORE_METIER,CORE,0.9,Coordinate with the production team to deploy the result within the ERP - Silver.
+62,242532,supply,metier:data_management_structure_analysis,data management structure analysis,CORE_METIER,CORE,0.9,Analyse the current information/data management structure and identify the needs.
+62,242532,supply,metier:kpi_monitoring_system_deployment,KPI monitoring system deployment,CORE_METIER,CORE,0.9,deploy supervision and management KPI with a lean mentality.
+62,242532,supply,metier:hutchinson_excellence_system_support,Hutchinson Excellence System support,CORE_METIER,CORE,0.9,Support the HES (Hutchinson Excellence System) team to carry out different production projects.
+77,232908,supply,metier:supply_chain_management,supply chain management,CORE_METIER,CORE,0.9,la gestion de la supply chain est un élément essentiel de la réussite de toute entreprise.
+77,232908,supply,metier:client_relationship_management,client relationship management,CORE_METIER,CORE,0.8,Assurer la relation clients dans la durée
+77,232908,supply,metier:sales_prospecting,sales prospecting,CORE_METIER,CORE,0.8,Prospecter de nouveaux clients
+77,232908,supply,metier:sap_integration,SAP integration,TOOL,SECONDARY,0.8,compatible avec des plates-formes renommées telles que SAP
+102,242514,supply,metier:procurement_strategy_implementation,Procurement strategy implementation,CORE_METIER,CORE,1.0,defining and implementing Club Med’s Procurement strategy
+102,242514,supply,metier:supplier_performance_monitoring,Supplier performance monitoring,CORE_METIER,CORE,1.0,Monitoring of suppliers performance/ CAPA.
+102,242514,supply,metier:contract_negotiation,Contract negotiation,CORE_METIER,CORE,1.0,"Handling of tenders, contract negotiation (in close coordination with Buyers)"
+102,242514,supply,metier:market_research_and_sourcing,Market research and sourcing,CORE_METIER,CORE,1.0,"Conduct market research, sourcing & innovation (suppliers, markets, products…)"
+102,242514,supply,metier:supplier_strategy_definition,Supplier strategy definition,CORE_METIER,CORE,1.0,Define the supplier strategy on the categories: definition of suppliers panel

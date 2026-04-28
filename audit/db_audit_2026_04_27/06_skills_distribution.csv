@@ -1,0 +1,7 @@
+metric,importance_level,source_method,n,pct
+by_importance,SECONDARY,,1406,95.84
+by_importance,CORE,,61,4.16
+by_source_method,,ai_fallback,1258,85.75
+by_source_method,,synonym_match,180,12.27
+by_source_method,,tool_match,29,1.98
+global_total,,,1467,

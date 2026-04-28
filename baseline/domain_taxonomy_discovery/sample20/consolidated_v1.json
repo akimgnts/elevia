@@ -1,0 +1,360 @@
+{
+  "closed_domain_list_v1": [
+    "hr",
+    "finance",
+    "engineering_industrial",
+    "marketing_communication",
+    "data",
+    "supply_chain_logistics",
+    "scientific_rnd",
+    "sales_business_development",
+    "consulting_strategy",
+    "engineering_software",
+    "other"
+  ],
+  "raw_to_closed": {
+    "automotive technology": "other",
+    "human resources": "hr",
+    "industrial engineering": "engineering_industrial",
+    "engineering and it services": "finance",
+    "human resources management": "hr",
+    "transportation and mobility": "data",
+    "marketing and communications": "marketing_communication",
+    "transportation engineering": "supply_chain_logistics",
+    "economic development and digital innovation": "scientific_rnd",
+    "manufacturing and engineering": "engineering_industrial",
+    "international business development": "sales_business_development",
+    "mining and training solutions": "other",
+    "financial services": "finance",
+    "consulting and technology services": "consulting_strategy",
+    "finance and management": "finance",
+    "consulting and compliance": "finance",
+    "marketing and sales": "marketing_communication",
+    "human resources and learning development": "hr",
+    "cybersecurity": "engineering_software"
+  },
+  "grouped_domains": [
+    {
+      "closed_domain": "finance",
+      "frequency": 4,
+      "raw_domains": [
+        [
+          "engineering and it services",
+          1
+        ],
+        [
+          "financial services",
+          1
+        ],
+        [
+          "finance and management",
+          1
+        ],
+        [
+          "consulting and compliance",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "accounting and finance",
+          1
+        ],
+        [
+          "corporate credit analysis",
+          1
+        ],
+        [
+          "financial control and reporting",
+          1
+        ],
+        [
+          "regulatory compliance in financial sector",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "hr",
+      "frequency": 4,
+      "raw_domains": [
+        [
+          "human resources",
+          2
+        ],
+        [
+          "human resources management",
+          1
+        ],
+        [
+          "human resources and learning development",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "talent acquisition",
+          1
+        ],
+        [
+          "project management office",
+          1
+        ],
+        [
+          "talent acquisition and campus management",
+          1
+        ],
+        [
+          "international project management",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "engineering_industrial",
+      "frequency": 2,
+      "raw_domains": [
+        [
+          "industrial engineering",
+          1
+        ],
+        [
+          "manufacturing and engineering",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "robotics and automation",
+          1
+        ],
+        [
+          "customer service and technical support",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "marketing_communication",
+      "frequency": 2,
+      "raw_domains": [
+        [
+          "marketing and communications",
+          1
+        ],
+        [
+          "marketing and sales",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "product marketing",
+          1
+        ],
+        [
+          "campaign management and crm optimization",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "other",
+      "frequency": 2,
+      "raw_domains": [
+        [
+          "automotive technology",
+          1
+        ],
+        [
+          "mining and training solutions",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "operational excellence",
+          1
+        ],
+        [
+          "blasting technology education",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "consulting_strategy",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "consulting and technology services",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "embedded systems and automation testing",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "data",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "transportation and mobility",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "contract management and compliance",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "engineering_software",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "cybersecurity",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "operational technology security",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "sales_business_development",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "international business development",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "market analysis and networking",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "scientific_rnd",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "economic development and digital innovation",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "international cooperation and start-up ecosystems",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "supply_chain_logistics",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "transportation engineering",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "railway maintenance and safety",
+          1
+        ]
+      ]
+    }
+  ],
+  "raw_domain_counts": [
+    [
+      "human resources",
+      2
+    ],
+    [
+      "automotive technology",
+      1
+    ],
+    [
+      "industrial engineering",
+      1
+    ],
+    [
+      "engineering and it services",
+      1
+    ],
+    [
+      "human resources management",
+      1
+    ],
+    [
+      "transportation and mobility",
+      1
+    ],
+    [
+      "marketing and communications",
+      1
+    ],
+    [
+      "transportation engineering",
+      1
+    ],
+    [
+      "economic development and digital innovation",
+      1
+    ],
+    [
+      "manufacturing and engineering",
+      1
+    ],
+    [
+      "international business development",
+      1
+    ],
+    [
+      "mining and training solutions",
+      1
+    ],
+    [
+      "financial services",
+      1
+    ],
+    [
+      "consulting and technology services",
+      1
+    ],
+    [
+      "finance and management",
+      1
+    ],
+    [
+      "consulting and compliance",
+      1
+    ],
+    [
+      "marketing and sales",
+      1
+    ],
+    [
+      "human resources and learning development",
+      1
+    ],
+    [
+      "cybersecurity",
+      1
+    ]
+  ]
+}

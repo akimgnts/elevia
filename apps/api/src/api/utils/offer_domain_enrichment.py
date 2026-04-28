@@ -49,6 +49,21 @@ DOMAIN_KEYWORDS: dict[str, tuple[str, ...]] = {
     "legal": ("legal", "compliance", "law", "contract", "juridique"),
 }
 
+# Weak-evidence guard: a domain whose only matched keywords sit inside this set
+# is considered insufficient evidence and gets zeroed. Strong phrases (DOMAIN_STRONG_PHRASES)
+# bypass this guard via the phrase-first path. Keys here use NORMALIZED tokens
+# (lowercase, no diacritics) so the comparison after _normalize_text works.
+# Why: single ambiguous tokens like "support" (admin), "communication" (marketing),
+# "analyst" (data), "manager" (operations) cause domain drift on cross-functional roles.
+DOMAIN_WEAK_EVIDENCE: dict[str, frozenset[str]] = {
+    "admin": frozenset({"support", "assistant", "office", "gestionnaire", "administrator", "administration"}),
+    "marketing": frozenset({"communication", "content", "branding", "campaign"}),
+    "data": frozenset({"data", "analyst", "analyste"}),
+    "sales": frozenset({"business", "client", "account", "revenue"}),
+    "operations": frozenset({"manager", "operations", "process", "project", "coordination"}),
+    "legal": frozenset({"contract"}),
+}
+
 LOW_CONFIDENCE_THRESHOLD = 2
 FLAG_DOMAIN_AI_FALLBACK = "ELEVIA_DOMAIN_AI_FALLBACK"
 FLAG_DOMAIN_AI_MODEL = "ELEVIA_DOMAIN_AI_MODEL"
@@ -139,14 +154,11 @@ def classify_offer_domain_rules(*, title: str | None, description: str | None, s
         domain_scores[domain] = score
         domain_evidence[domain] = matched
 
-    data_evidence = domain_evidence.get("data", [])
-    if data_evidence and set(data_evidence) <= {"data"}:
-        domain_scores["data"] = 0
-        domain_evidence["data"] = []
-
-    sales_evidence = domain_evidence.get("sales", [])
-    if sales_evidence and set(sales_evidence) <= {"business", "client", "account"}:
-        domain_scores["sales"] = min(domain_scores["sales"], 1)
+    for domain_name, weak_terms in DOMAIN_WEAK_EVIDENCE.items():
+        evidence = domain_evidence.get(domain_name, [])
+        if evidence and set(evidence) <= weak_terms:
+            domain_scores[domain_name] = 0
+            domain_evidence[domain_name] = []
 
     if domain_scores.get("operations", 0) > 0 and any(domain_scores.get(domain, 0) > 0 for domain in _STRONG_DOMAINS):
         domain_scores["operations"] = 0
@@ -162,11 +174,20 @@ def classify_offer_domain_rules(*, title: str | None, description: str | None, s
             "needs_ai_review": True,
         }
 
+    if top_score < LOW_CONFIDENCE_THRESHOLD:
+        return {
+            "domain_tag": "other",
+            "confidence": 0.0,
+            "method": "rules",
+            "evidence": ["low_evidence"],
+            "needs_ai_review": True,
+        }
+
     tied_domains = [domain for domain in DOMAIN_TAXONOMY if domain in domain_scores and domain_scores[domain] == top_score]
     selected_domain = tied_domains[0]
     total_hits = sum(domain_scores.values()) or 1
     confidence = round(top_score / total_hits, 4)
-    needs_ai_review = len(tied_domains) > 1 or top_score < LOW_CONFIDENCE_THRESHOLD
+    needs_ai_review = len(tied_domains) > 1
 
     return {
         "domain_tag": selected_domain,

@@ -526,27 +526,29 @@ export default function ProfileUnderstandingPage() {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Résumé du profil
+                  Profil
                 </div>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
                   {title}
                 </h2>
-                {summary && <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{summary}</p>}
+                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Domaine</span>
+                  <span className="font-semibold text-slate-900">{title}</span>
+                </div>
+                {profileSkills.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Compétences clés</span>
+                    <SuggestionChips items={profileSkills} />
+                  </div>
+                )}
+                {summary && <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">{summary}</p>}
               </div>
               <div className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                 Brouillon prêt
               </div>
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Compétences principales
-                </div>
-                <div className="mt-3">
-                  <SuggestionChips items={profileSkills} />
-                </div>
-              </div>
+            <div className="mt-5">
               <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                   Outils détectés

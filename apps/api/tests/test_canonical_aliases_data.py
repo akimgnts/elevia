@@ -36,3 +36,16 @@ def test_alias_bi_ml_dataiku_maps():
     assert _map("BI") == "skill:business_intelligence"
     assert _map("ML") == "skill:machine_learning"
     assert _map("dataiku") == "skill:data_science_platform"
+
+
+def test_python_does_not_map_to_statistical_programming():
+    assert _map("Python") != "skill:statistical_programming"
+    assert _map("python") != "skill:statistical_programming"
+
+
+def test_strong_data_aliases_still_resolve():
+    assert _map("pandas") == "skill:data_analysis"
+    assert _map("numpy") == "skill:data_analysis"
+    assert _map("scikit-learn") == "skill:machine_learning"
+    assert _map("r programming") == "skill:statistical_programming"
+    assert _map("statistical programming") == "skill:statistical_programming"

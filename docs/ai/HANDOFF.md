@@ -38,7 +38,23 @@
 
 ## Objectif actuel
 
-**Sprint actuel terminé : Domain-aware Soft Signal v1 (inbox enrichment only).**
+**Sprint actuel terminé : Fit Score V2 Shadow (déterministe, sans IA, sans impact ranking).**
+
+- Objectif : décomposer le score V1 monolithique en `eligibility_status` + `fit_score` (compétence×domaine×titre) + `preference_score` (langue/diplôme/pays/contrat), exposés en **shadow** uniquement.
+- Flag : `ELEVIA_FIT_SCORE_V2_SHADOW` (default `0`). OFF → comportement strictement identique. ON → 3 nouveaux champs additifs sur `InboxItem`, sans changer `score` ni l'ordre.
+- Module : `apps/api/src/matching/fit_score_v2/{__init__,types,eligibility,fit,preference}.py`. Entry point unique `score_offer_v2(profile, offer, *, domain_affinity, offer_domain, cv_domain, match_debug)`.
+- Wiring : helper `_apply_fit_score_v2_shadow` appelé **après** `_apply_domain_affinity_enrichment` dans les deux chemins inbox. Réutilise `match_debug.skills.{matched,missing}_{core,secondary,context}` du V1.
+- Schema : `InboxItem.preference_score` (0..100, optional), `InboxItem.eligibility_status` (dict {ok, reasons}, optional).
+- Tests : 22/22 unit + 6/6 inbox-shadow + 11/11 inbox baseline.
+- Frozen rule : *Fit Score v2 Shadow = signal expérimental, déterministe, sans IA, sans impact ranking, derrière `ELEVIA_FIT_SCORE_V2_SHADOW`.*
+
+**Prochain sprint candidat** : calibration empirique des poids CORE/SECONDARY/CONTEXT et de `missing_core_penalty` via `scripts/compare_v1_v2_panel.py` sur le panel CV ; décision produit avant promotion en non-shadow.
+
+---
+
+## Objectif précédent (clos — 2026-04-26)
+
+**Sprint clos : Domain-aware Soft Signal v1 (inbox enrichment only).**
 
 - Objectif : exposer la classification d'affinité de domaine (aligned/adjacent/distant/neutral) comme **signal soft pure-enrichment** sur la réponse `/api/inbox`. Aucun impact sur scoring, ranking, filtering.
 - Single source of truth créée : `apps/api/src/api/utils/domain_affinity.py` partagé entre runtime et audit script.

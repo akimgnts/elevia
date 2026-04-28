@@ -1,0 +1,31 @@
+canonical_id,sample_label,n
+skill:ab_testing,A/B Testing,1
+skill:accounts_payable,Accounts Payable,1
+skill:data_modeling,Data Modeling,1
+skill:decision_making,Decision Making,1
+skill:devops,DevOps,1
+skill:erp_usage,ERP Usage,1
+skill:financial_modeling,Financial Modeling,1
+skill:health_safety_compliance,Health and Safety Compliance,1
+skill:industrial_automation,Industrial Automation,1
+skill:learning_agility,Learning Agility,1
+skill:mlops,MLOps,1
+skill:observability,Observability,1
+skill:process_mapping,Process Mapping,1
+skill:product_analytics,Product Analytics,1
+skill:quotation_preparation,Quote Preparation,1
+skill:reconciliation,Reconciliation,1
+skill:software_api,Software API,1
+skill:warehouse_operations,Warehouse Operations,1
+skill:web_service_api,Web Service API,1
+skill:agile_delivery,Agile Delivery,2
+skill:cad_modeling,CAD Modeling,2
+skill:data_science_platform,Data Science Platform,2
+skill:database_design,Database Design,2
+skill:electrical_engineering_basics,Electrical Engineering Basics,2
+skill:hr_administration,HR Administration,2
+skill:internal_communication,Internal Communication,2
+skill:legal_analysis,Legal Analysis,2
+skill:microservices_architecture,Microservices Architecture,2
+skill:operations_management,Operations Management,2
+skill:time_series_analysis,Time Series Analysis,2

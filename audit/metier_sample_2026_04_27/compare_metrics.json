@@ -1,0 +1,109 @@
+{
+  "n_offers_compared": 28,
+  "v2": {
+    "avg_skills_per_offer": 1.89,
+    "pct_offers_with_3_or_more": 32.14,
+    "min_skills": 0,
+    "max_skills": 5,
+    "top_labels": [
+      [
+        "project management",
+        7
+      ],
+      [
+        "business intelligence",
+        5
+      ],
+      [
+        "data analysis",
+        5
+      ],
+      [
+        "market research",
+        4
+      ],
+      [
+        "crm management",
+        3
+      ],
+      [
+        "excel",
+        3
+      ],
+      [
+        "process optimization",
+        3
+      ],
+      [
+        "b2b sales",
+        2
+      ],
+      [
+        "documentation",
+        2
+      ],
+      [
+        "power bi",
+        2
+      ]
+    ]
+  },
+  "v3_metier": {
+    "avg_skills_per_offer": 4.5,
+    "pct_offers_with_3_or_more": 100.0,
+    "min_skills": 3,
+    "max_skills": 5,
+    "top_labels": [
+      [
+        "eclipse software experience",
+        2
+      ],
+      [
+        "excel",
+        2
+      ],
+      [
+        "international environment",
+        2
+      ],
+      [
+        "re-studio software proficiency",
+        2
+      ],
+      [
+        "reservoir engineering expertise",
+        2
+      ],
+      [
+        "advanced excel skills",
+        1
+      ],
+      [
+        "ai tool development",
+        1
+      ],
+      [
+        "allplan",
+        1
+      ],
+      [
+        "analyse des donn\u00e9es a\u00e9ronautiques",
+        1
+      ],
+      [
+        "analyses des probl\u00e8mes d\u2019adh\u00e9sion",
+        1
+      ]
+    ],
+    "skill_type_breakdown": {
+      "CORE_METIER": 92,
+      "CONTEXT": 8,
+      "TOOL": 25,
+      "NOISE": 1
+    }
+  },
+  "deltas": {
+    "avg_skills_delta": 2.61,
+    "pct_3_plus_delta": 67.86
+  }
+}

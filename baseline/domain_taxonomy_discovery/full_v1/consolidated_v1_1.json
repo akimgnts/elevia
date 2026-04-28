@@ -1,0 +1,1819 @@
+{
+  "version": "v1.1",
+  "based_on": "consolidated_v1.json",
+  "closed_domain_list_v1_1": [
+    "operations_project",
+    "finance",
+    "hr",
+    "engineering_industrial",
+    "data",
+    "marketing_communication",
+    "consulting_strategy",
+    "sales_business_development",
+    "supply_chain_logistics",
+    "legal_compliance",
+    "engineering_software",
+    "other"
+  ],
+  "removed_domains": [
+    "product_ecommerce",
+    "administration_support"
+  ],
+  "removal_routing": {
+    "administration_support": {
+      "information technology": "engineering_software",
+      "real estate and parking services": "other",
+      "construction and safety management": "operations_project"
+    },
+    "product_ecommerce": {
+      "mining industry solutions": "sales_business_development",
+      "cosmetics and beauty": "marketing_communication",
+      "product development": "engineering_industrial",
+      "agricultural and construction equipment": "sales_business_development"
+    }
+  },
+  "data_tightening": {
+    "removed_synonyms": [
+      "transportation",
+      "transportation and mobility",
+      "biopharmaceutical supply chain management"
+    ],
+    "required_evidence_terms": [
+      "analytics",
+      "business intelligence",
+      "bi",
+      "machine learning",
+      "ml",
+      "data pipeline",
+      "data governance",
+      "dashboard",
+      "dashboarding",
+      "database",
+      "data science",
+      "data engineering",
+      "data analyst",
+      "data analytics",
+      "data analysis",
+      "etl",
+      "sql",
+      "power bi",
+      "tableau",
+      "ai engineer",
+      "ai operations",
+      "predictive analytics",
+      "predictive maintenance",
+      "deep learning",
+      "big data",
+      "data integration",
+      "data modeling",
+      "data quality",
+      "data warehouse",
+      "data lake"
+    ],
+    "rule": "an offer maps to data only if title and description (or evidence) jointly carry an explicit data signal; otherwise reroute by sector heuristic"
+  },
+  "engineering_consulting_disambiguation": {
+    "default": "engineering_industrial",
+    "advisory_subdomain_signals": [
+      "strategy",
+      "transformation",
+      "advisory",
+      "change management",
+      "consulting"
+    ],
+    "advisory_target": "consulting_strategy",
+    "rule": "When raw_domain == 'engineering consulting' or 'engineering and technology consulting': route to consulting_strategy if subdomain matches advisory signals, else engineering_industrial"
+  },
+  "raw_to_closed": {
+    "automotive technology": "other",
+    "human resources": "hr",
+    "robotics engineering": "operations_project",
+    "engineering services": "other",
+    "transportation and mobility": "supply_chain_logistics",
+    "marketing and communications": "marketing_communication",
+    "railway engineering": "other",
+    "economic development": "other",
+    "manufacturing and engineering": "engineering_industrial",
+    "international business development": "sales_business_development",
+    "mining industry solutions": "sales_business_development",
+    "corporate finance": "finance",
+    "engineering and technology consulting": "consulting_strategy",
+    "nuclear industry services": "finance",
+    "regulatory compliance": "finance",
+    "marketing": "marketing_communication",
+    "learning and development": "hr",
+    "cybersecurity": "engineering_software",
+    "food industry": "marketing_communication",
+    "renewable energy": "other",
+    "real estate and parking services": "other",
+    "finance": "finance",
+    "engineering": "other",
+    "banking and finance": "finance",
+    "digital policy and regulation": "consulting_strategy",
+    "consulting and engineering": "supply_chain_logistics",
+    "project management": "operations_project",
+    "public affairs": "other",
+    "technology and defense": "sales_business_development",
+    "railway operations": "operations_project",
+    "pharmaceutical manufacturing": "engineering_industrial",
+    "process management": "operations_project",
+    "engineering and construction": "operations_project",
+    "automotive industry": "finance",
+    "legal services": "legal_compliance",
+    "digital marketing": "marketing_communication",
+    "energy technology": "operations_project",
+    "information security": "legal_compliance",
+    "smart technology": "sales_business_development",
+    "transportation engineering": "supply_chain_logistics",
+    "aerospace": "legal_compliance",
+    "gaming marketing": "marketing_communication",
+    "international energy relations": "other",
+    "healthcare software": "sales_business_development",
+    "luxury goods manufacturing": "finance",
+    "financial services": "finance",
+    "transportation": "supply_chain_logistics",
+    "manufacturing": "engineering_industrial",
+    "robotics": "engineering_industrial",
+    "cosmetics and beauty": "marketing_communication",
+    "construction and engineering": "operations_project",
+    "software development": "engineering_software",
+    "environmental consulting": "consulting_strategy",
+    "procurement and sourcing": "supply_chain_logistics",
+    "mining and training": "other",
+    "pharmaceuticals and ai": "other",
+    "energy and business development": "sales_business_development",
+    "digital transformation": "operations_project",
+    "engineering consulting": "engineering_industrial",
+    "product development": "engineering_industrial",
+    "high-tech and photonics": "sales_business_development",
+    "contract management": "legal_compliance",
+    "energy sector": "other",
+    "industrial safety": "engineering_industrial",
+    "procurement and supply chain": "supply_chain_logistics",
+    "legal and compliance": "legal_compliance",
+    "sports and community development": "other",
+    "consulting": "sales_business_development",
+    "business development": "marketing_communication",
+    "logistics": "supply_chain_logistics",
+    "training and development": "other",
+    "environmental services": "other",
+    "human resources and consulting": "hr",
+    "insurance and compliance": "legal_compliance",
+    "manufacturing and distribution": "engineering_industrial",
+    "industrial trade": "engineering_industrial",
+    "information technology": "engineering_software",
+    "data analytics and sales management": "data",
+    "finance and administration": "finance",
+    "human resources and recruitment": "hr",
+    "compliance and risk management": "finance",
+    "pharmaceuticals": "other",
+    "biotechnology": "engineering_industrial",
+    "energy engineering": "operations_project",
+    "data science and engineering": "data",
+    "financial compliance": "finance",
+    "pharmaceutical law": "legal_compliance",
+    "innovation management": "operations_project",
+    "commercial development": "sales_business_development",
+    "biopharmaceutical supply chain management": "supply_chain_logistics",
+    "digital e-commerce management": "sales_business_development",
+    "engineering consultancy": "other",
+    "industrial engineering": "engineering_industrial",
+    "payroll management": "hr",
+    "sustainability consulting": "consulting_strategy",
+    "customer relationship management": "other",
+    "construction and safety management": "operations_project",
+    "international cooperation": "other",
+    "digital project management": "operations_project",
+    "business analysis": "other",
+    "building information modeling (bim)": "engineering_industrial",
+    "recruitment services": "hr",
+    "marketing and sales": "marketing_communication",
+    "agriculture and electronics": "sales_business_development",
+    "transportation and quality management": "supply_chain_logistics",
+    "finance and digital transformation": "finance",
+    "technology consulting": "consulting_strategy",
+    "sales and marketing": "marketing_communication",
+    "supply chain management": "supply_chain_logistics",
+    "engineering and design": "engineering_industrial",
+    "business consulting": "finance",
+    "government and policy analysis": "other",
+    "sales and business development": "sales_business_development",
+    "engineering and technology": "other",
+    "software and consulting": "engineering_software",
+    "environmental policy and analysis": "legal_compliance",
+    "manufacturing and quality control": "engineering_industrial",
+    "agricultural and construction equipment": "sales_business_development",
+    "engineering and project management": "operations_project",
+    "software solutions": "engineering_software",
+    "data science": "data",
+    "embedded systems": "other",
+    "sales operations": "sales_business_development",
+    "industrial manufacturing": "marketing_communication",
+    "consulting services": "operations_project",
+    "industrial services": "engineering_industrial",
+    "travel and hospitality": "marketing_communication",
+    "consulting and technology": "operations_project",
+    "consulting and business development": "sales_business_development",
+    "management consulting": "supply_chain_logistics",
+    "accounting and finance": "finance",
+    "business operations": "operations_project",
+    "energy": "operations_project"
+  },
+  "grouped_domains_inherited": [
+    {
+      "closed_domain": "other",
+      "frequency": 30,
+      "raw_domains": [
+        [
+          "engineering",
+          3
+        ],
+        [
+          "renewable energy",
+          2
+        ],
+        [
+          "public affairs",
+          2
+        ],
+        [
+          "energy sector",
+          2
+        ],
+        [
+          "automotive technology",
+          1
+        ],
+        [
+          "railway engineering",
+          1
+        ],
+        [
+          "economic development",
+          1
+        ],
+        [
+          "energy technology",
+          1
+        ],
+        [
+          "international energy relations",
+          1
+        ],
+        [
+          "mining and training",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "solar energy solutions",
+          2
+        ],
+        [
+          "automation engineering",
+          2
+        ],
+        [
+          "operational excellence",
+          1
+        ],
+        [
+          "wagon maintenance",
+          1
+        ],
+        [
+          "digital and start-ups",
+          1
+        ],
+        [
+          "structural engineering",
+          1
+        ],
+        [
+          "european energy policy",
+          1
+        ],
+        [
+          "design engineering",
+          1
+        ],
+        [
+          "nuclear and renewable energy",
+          1
+        ],
+        [
+          "blasting solutions",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "operations_project",
+      "frequency": 21,
+      "raw_domains": [
+        [
+          "project management",
+          3
+        ],
+        [
+          "construction and engineering",
+          2
+        ],
+        [
+          "robotics engineering",
+          1
+        ],
+        [
+          "railway operations",
+          1
+        ],
+        [
+          "process management",
+          1
+        ],
+        [
+          "engineering and construction",
+          1
+        ],
+        [
+          "energy technology",
+          1
+        ],
+        [
+          "digital transformation",
+          1
+        ],
+        [
+          "energy engineering",
+          1
+        ],
+        [
+          "innovation management",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "project management",
+          4
+        ],
+        [
+          "business process optimization",
+          2
+        ],
+        [
+          "field operations",
+          1
+        ],
+        [
+          "construction and environmental planning",
+          1
+        ],
+        [
+          "asset management",
+          1
+        ],
+        [
+          "electrical engineering and substation projects",
+          1
+        ],
+        [
+          "strategic development",
+          1
+        ],
+        [
+          "lng project management",
+          1
+        ],
+        [
+          "technological innovation and project management",
+          1
+        ],
+        [
+          "product ownership and support coordination",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "finance",
+      "frequency": 20,
+      "raw_domains": [
+        [
+          "finance",
+          3
+        ],
+        [
+          "financial services",
+          3
+        ],
+        [
+          "engineering services",
+          1
+        ],
+        [
+          "corporate finance",
+          1
+        ],
+        [
+          "nuclear industry services",
+          1
+        ],
+        [
+          "regulatory compliance",
+          1
+        ],
+        [
+          "banking and finance",
+          1
+        ],
+        [
+          "automotive industry",
+          1
+        ],
+        [
+          "luxury goods manufacturing",
+          1
+        ],
+        [
+          "project management",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "financial control",
+          2
+        ],
+        [
+          "accounting",
+          1
+        ],
+        [
+          "credit analysis and risk assessment",
+          1
+        ],
+        [
+          "financial management and compliance",
+          1
+        ],
+        [
+          "financial sector compliance",
+          1
+        ],
+        [
+          "private debt and investment analysis",
+          1
+        ],
+        [
+          "real estate credit analysis",
+          1
+        ],
+        [
+          "financial management and reporting",
+          1
+        ],
+        [
+          "back office operations",
+          1
+        ],
+        [
+          "legal advisory",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "engineering_industrial",
+      "frequency": 18,
+      "raw_domains": [
+        [
+          "engineering consulting",
+          5
+        ],
+        [
+          "manufacturing and engineering",
+          1
+        ],
+        [
+          "pharmaceutical manufacturing",
+          1
+        ],
+        [
+          "manufacturing",
+          1
+        ],
+        [
+          "robotics",
+          1
+        ],
+        [
+          "industrial safety",
+          1
+        ],
+        [
+          "construction and engineering",
+          1
+        ],
+        [
+          "manufacturing and distribution",
+          1
+        ],
+        [
+          "industrial trade",
+          1
+        ],
+        [
+          "industrial engineering",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "customer service and support",
+          1
+        ],
+        [
+          "quality compliance",
+          1
+        ],
+        [
+          "aerospace engineering",
+          1
+        ],
+        [
+          "autonomous manufacturing systems",
+          1
+        ],
+        [
+          "risk management and compliance",
+          1
+        ],
+        [
+          "quality assurance in mechanical and electrical projects",
+          1
+        ],
+        [
+          "personal protective equipment",
+          1
+        ],
+        [
+          "oil & gas and mining equipment",
+          1
+        ],
+        [
+          "mechanical engineering and product development",
+          1
+        ],
+        [
+          "quality assurance in manufacturing",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "hr",
+      "frequency": 18,
+      "raw_domains": [
+        [
+          "human resources",
+          12
+        ],
+        [
+          "human resources and consulting",
+          2
+        ],
+        [
+          "learning and development",
+          1
+        ],
+        [
+          "human resources and recruitment",
+          1
+        ],
+        [
+          "payroll management",
+          1
+        ],
+        [
+          "recruitment services",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "talent acquisition",
+          2
+        ],
+        [
+          "project management office",
+          2
+        ],
+        [
+          "talent acquisition and campus management",
+          1
+        ],
+        [
+          "global hr project management",
+          1
+        ],
+        [
+          "hr information systems",
+          1
+        ],
+        [
+          "learning and development",
+          1
+        ],
+        [
+          "campus recruitment",
+          1
+        ],
+        [
+          "payroll and compensation consulting",
+          1
+        ],
+        [
+          "talent management and recruitment",
+          1
+        ],
+        [
+          "talent acquisition and management",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "data",
+      "frequency": 15,
+      "raw_domains": [
+        [
+          "transportation",
+          2
+        ],
+        [
+          "data science",
+          2
+        ],
+        [
+          "transportation and mobility",
+          1
+        ],
+        [
+          "human resources",
+          1
+        ],
+        [
+          "data analytics and sales management",
+          1
+        ],
+        [
+          "biotechnology",
+          1
+        ],
+        [
+          "data science and engineering",
+          1
+        ],
+        [
+          "biopharmaceutical supply chain management",
+          1
+        ],
+        [
+          "digital e-commerce management",
+          1
+        ],
+        [
+          "legal services",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "contract management",
+          1
+        ],
+        [
+          "sustainable rail mobility",
+          1
+        ],
+        [
+          "sustainability and employee experience",
+          1
+        ],
+        [
+          "pricing strategy and digital initiatives",
+          1
+        ],
+        [
+          "carpooling and mobility solutions",
+          1
+        ],
+        [
+          "ai in drug discovery",
+          1
+        ],
+        [
+          "data analysis and modeling",
+          1
+        ],
+        [
+          "demand forecasting and logistics",
+          1
+        ],
+        [
+          "product ownership and data management",
+          1
+        ],
+        [
+          "data privacy and contract law",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "marketing_communication",
+      "frequency": 15,
+      "raw_domains": [
+        [
+          "digital marketing",
+          3
+        ],
+        [
+          "marketing",
+          2
+        ],
+        [
+          "marketing and communications",
+          1
+        ],
+        [
+          "consulting and engineering",
+          1
+        ],
+        [
+          "gaming marketing",
+          1
+        ],
+        [
+          "food industry",
+          1
+        ],
+        [
+          "business development",
+          1
+        ],
+        [
+          "marketing and sales",
+          1
+        ],
+        [
+          "sales and marketing",
+          1
+        ],
+        [
+          "agricultural and construction equipment",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "product marketing",
+          1
+        ],
+        [
+          "campaign management",
+          1
+        ],
+        [
+          "employer branding and communication",
+          1
+        ],
+        [
+          "crm and customer retention strategies",
+          1
+        ],
+        [
+          "user acquisition",
+          1
+        ],
+        [
+          "marketing",
+          1
+        ],
+        [
+          "sales and marketing",
+          1
+        ],
+        [
+          "search engine advertising and optimization",
+          1
+        ],
+        [
+          "user acquisition for gaming",
+          1
+        ],
+        [
+          "b2b marketing",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "consulting_strategy",
+      "frequency": 14,
+      "raw_domains": [
+        [
+          "consulting",
+          5
+        ],
+        [
+          "engineering consulting",
+          4
+        ],
+        [
+          "engineering and technology consulting",
+          1
+        ],
+        [
+          "digital policy and regulation",
+          1
+        ],
+        [
+          "environmental consulting",
+          1
+        ],
+        [
+          "technology consulting",
+          1
+        ],
+        [
+          "consulting and engineering",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "business management",
+          2
+        ],
+        [
+          "automated testing solutions",
+          1
+        ],
+        [
+          "global digital strategy",
+          1
+        ],
+        [
+          "energy advisory",
+          1
+        ],
+        [
+          "strategy consulting",
+          1
+        ],
+        [
+          "strategy development",
+          1
+        ],
+        [
+          "business analysis and solution design",
+          1
+        ],
+        [
+          "quality assurance",
+          1
+        ],
+        [
+          "business analysis and technology",
+          1
+        ],
+        [
+          "automation engineering",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "sales_business_development",
+      "frequency": 13,
+      "raw_domains": [
+        [
+          "international business development",
+          1
+        ],
+        [
+          "food industry",
+          1
+        ],
+        [
+          "technology and defense",
+          1
+        ],
+        [
+          "consulting and engineering",
+          1
+        ],
+        [
+          "smart technology",
+          1
+        ],
+        [
+          "healthcare software",
+          1
+        ],
+        [
+          "energy and business development",
+          1
+        ],
+        [
+          "high-tech and photonics",
+          1
+        ],
+        [
+          "commercial development",
+          1
+        ],
+        [
+          "agriculture and electronics",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "business development",
+          4
+        ],
+        [
+          "export services and market analysis",
+          1
+        ],
+        [
+          "sales and business development",
+          1
+        ],
+        [
+          "business development and management",
+          1
+        ],
+        [
+          "renewable energy solutions",
+          1
+        ],
+        [
+          "sales and technical support",
+          1
+        ],
+        [
+          "sales management",
+          1
+        ],
+        [
+          "sales and after-sales services",
+          1
+        ],
+        [
+          "technology solutions",
+          1
+        ],
+        [
+          "life sciences management",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "supply_chain_logistics",
+      "frequency": 12,
+      "raw_domains": [
+        [
+          "consulting",
+          2
+        ],
+        [
+          "supply chain management",
+          2
+        ],
+        [
+          "transportation engineering",
+          1
+        ],
+        [
+          "procurement and sourcing",
+          1
+        ],
+        [
+          "digital transformation",
+          1
+        ],
+        [
+          "procurement and supply chain",
+          1
+        ],
+        [
+          "logistics",
+          1
+        ],
+        [
+          "transportation and quality management",
+          1
+        ],
+        [
+          "consulting and engineering",
+          1
+        ],
+        [
+          "management consulting",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "subsystem management",
+          1
+        ],
+        [
+          "electrical components",
+          1
+        ],
+        [
+          "procurement systems",
+          1
+        ],
+        [
+          "commodity management",
+          1
+        ],
+        [
+          "operations management",
+          1
+        ],
+        [
+          "logistics and supply chain",
+          1
+        ],
+        [
+          "supplier quality engineering",
+          1
+        ],
+        [
+          "procurement and digital tools",
+          1
+        ],
+        [
+          "logistics optimization",
+          1
+        ],
+        [
+          "procurement engineering",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "legal_compliance",
+      "frequency": 9,
+      "raw_domains": [
+        [
+          "legal services",
+          2
+        ],
+        [
+          "information security",
+          1
+        ],
+        [
+          "aerospace",
+          1
+        ],
+        [
+          "contract management",
+          1
+        ],
+        [
+          "legal and compliance",
+          1
+        ],
+        [
+          "insurance and compliance",
+          1
+        ],
+        [
+          "pharmaceutical law",
+          1
+        ],
+        [
+          "environmental policy and analysis",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "corporate and compliance law",
+          1
+        ],
+        [
+          "iso compliance",
+          1
+        ],
+        [
+          "contract management",
+          1
+        ],
+        [
+          "corporate law",
+          1
+        ],
+        [
+          "supplier relations and compliance",
+          1
+        ],
+        [
+          "corporate compliance training",
+          1
+        ],
+        [
+          "risk management and regulatory compliance",
+          1
+        ],
+        [
+          "legal affairs",
+          1
+        ],
+        [
+          "regulatory compliance",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "engineering_software",
+      "frequency": 6,
+      "raw_domains": [
+        [
+          "software solutions",
+          2
+        ],
+        [
+          "cybersecurity",
+          1
+        ],
+        [
+          "software development",
+          1
+        ],
+        [
+          "engineering and technology",
+          1
+        ],
+        [
+          "software and consulting",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "project portfolio management",
+          2
+        ],
+        [
+          "operational technology security",
+          1
+        ],
+        [
+          "government technology",
+          1
+        ],
+        [
+          "embedded software development",
+          1
+        ],
+        [
+          "project and portfolio management",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "administration_support",
+      "frequency": 5,
+      "raw_domains": [
+        [
+          "information technology",
+          3
+        ],
+        [
+          "real estate and parking services",
+          1
+        ],
+        [
+          "construction and safety management",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "customer support and administration",
+          1
+        ],
+        [
+          "technical support",
+          1
+        ],
+        [
+          "health and safety coordination",
+          1
+        ],
+        [
+          "it administration",
+          1
+        ],
+        [
+          "infrastructure and user support",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "product_ecommerce",
+      "frequency": 4,
+      "raw_domains": [
+        [
+          "mining industry solutions",
+          1
+        ],
+        [
+          "cosmetics and beauty",
+          1
+        ],
+        [
+          "product development",
+          1
+        ],
+        [
+          "agricultural and construction equipment",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "training and product implementation",
+          1
+        ],
+        [
+          "product development",
+          1
+        ],
+        [
+          "product management",
+          1
+        ],
+        [
+          "digital product management",
+          1
+        ]
+      ]
+    }
+  ],
+  "raw_domain_counts_inherited": [
+    [
+      "human resources",
+      13
+    ],
+    [
+      "engineering consulting",
+      9
+    ],
+    [
+      "consulting",
+      8
+    ],
+    [
+      "consulting and engineering",
+      5
+    ],
+    [
+      "project management",
+      4
+    ],
+    [
+      "information technology",
+      4
+    ],
+    [
+      "engineering services",
+      3
+    ],
+    [
+      "finance",
+      3
+    ],
+    [
+      "engineering",
+      3
+    ],
+    [
+      "legal services",
+      3
+    ],
+    [
+      "digital marketing",
+      3
+    ],
+    [
+      "financial services",
+      3
+    ],
+    [
+      "construction and engineering",
+      3
+    ],
+    [
+      "marketing",
+      2
+    ],
+    [
+      "food industry",
+      2
+    ],
+    [
+      "renewable energy",
+      2
+    ],
+    [
+      "public affairs",
+      2
+    ],
+    [
+      "energy technology",
+      2
+    ],
+    [
+      "transportation",
+      2
+    ],
+    [
+      "digital transformation",
+      2
+    ],
+    [
+      "energy sector",
+      2
+    ],
+    [
+      "human resources and consulting",
+      2
+    ],
+    [
+      "engineering consultancy",
+      2
+    ],
+    [
+      "supply chain management",
+      2
+    ],
+    [
+      "engineering and design",
+      2
+    ],
+    [
+      "engineering and technology",
+      2
+    ],
+    [
+      "agricultural and construction equipment",
+      2
+    ],
+    [
+      "software solutions",
+      2
+    ],
+    [
+      "data science",
+      2
+    ],
+    [
+      "automotive technology",
+      1
+    ],
+    [
+      "robotics engineering",
+      1
+    ],
+    [
+      "transportation and mobility",
+      1
+    ],
+    [
+      "marketing and communications",
+      1
+    ],
+    [
+      "railway engineering",
+      1
+    ],
+    [
+      "economic development",
+      1
+    ],
+    [
+      "manufacturing and engineering",
+      1
+    ],
+    [
+      "international business development",
+      1
+    ],
+    [
+      "mining industry solutions",
+      1
+    ],
+    [
+      "corporate finance",
+      1
+    ],
+    [
+      "engineering and technology consulting",
+      1
+    ],
+    [
+      "nuclear industry services",
+      1
+    ],
+    [
+      "regulatory compliance",
+      1
+    ],
+    [
+      "learning and development",
+      1
+    ],
+    [
+      "cybersecurity",
+      1
+    ],
+    [
+      "real estate and parking services",
+      1
+    ],
+    [
+      "banking and finance",
+      1
+    ],
+    [
+      "digital policy and regulation",
+      1
+    ],
+    [
+      "technology and defense",
+      1
+    ],
+    [
+      "railway operations",
+      1
+    ],
+    [
+      "pharmaceutical manufacturing",
+      1
+    ],
+    [
+      "process management",
+      1
+    ],
+    [
+      "engineering and construction",
+      1
+    ],
+    [
+      "automotive industry",
+      1
+    ],
+    [
+      "information security",
+      1
+    ],
+    [
+      "smart technology",
+      1
+    ],
+    [
+      "transportation engineering",
+      1
+    ],
+    [
+      "aerospace",
+      1
+    ],
+    [
+      "gaming marketing",
+      1
+    ],
+    [
+      "international energy relations",
+      1
+    ],
+    [
+      "healthcare software",
+      1
+    ],
+    [
+      "luxury goods manufacturing",
+      1
+    ],
+    [
+      "manufacturing",
+      1
+    ],
+    [
+      "robotics",
+      1
+    ],
+    [
+      "cosmetics and beauty",
+      1
+    ],
+    [
+      "software development",
+      1
+    ],
+    [
+      "environmental consulting",
+      1
+    ],
+    [
+      "procurement and sourcing",
+      1
+    ],
+    [
+      "mining and training",
+      1
+    ],
+    [
+      "pharmaceuticals and ai",
+      1
+    ],
+    [
+      "energy and business development",
+      1
+    ],
+    [
+      "product development",
+      1
+    ],
+    [
+      "high-tech and photonics",
+      1
+    ],
+    [
+      "contract management",
+      1
+    ],
+    [
+      "industrial safety",
+      1
+    ],
+    [
+      "procurement and supply chain",
+      1
+    ],
+    [
+      "legal and compliance",
+      1
+    ],
+    [
+      "sports and community development",
+      1
+    ],
+    [
+      "business development",
+      1
+    ],
+    [
+      "logistics",
+      1
+    ],
+    [
+      "training and development",
+      1
+    ],
+    [
+      "environmental services",
+      1
+    ],
+    [
+      "insurance and compliance",
+      1
+    ],
+    [
+      "manufacturing and distribution",
+      1
+    ],
+    [
+      "industrial trade",
+      1
+    ],
+    [
+      "data analytics and sales management",
+      1
+    ],
+    [
+      "finance and administration",
+      1
+    ],
+    [
+      "human resources and recruitment",
+      1
+    ],
+    [
+      "compliance and risk management",
+      1
+    ],
+    [
+      "pharmaceuticals",
+      1
+    ],
+    [
+      "biotechnology",
+      1
+    ],
+    [
+      "energy engineering",
+      1
+    ],
+    [
+      "data science and engineering",
+      1
+    ],
+    [
+      "financial compliance",
+      1
+    ],
+    [
+      "pharmaceutical law",
+      1
+    ],
+    [
+      "innovation management",
+      1
+    ],
+    [
+      "commercial development",
+      1
+    ],
+    [
+      "biopharmaceutical supply chain management",
+      1
+    ],
+    [
+      "digital e-commerce management",
+      1
+    ],
+    [
+      "industrial engineering",
+      1
+    ],
+    [
+      "payroll management",
+      1
+    ],
+    [
+      "sustainability consulting",
+      1
+    ],
+    [
+      "customer relationship management",
+      1
+    ],
+    [
+      "construction and safety management",
+      1
+    ],
+    [
+      "international cooperation",
+      1
+    ],
+    [
+      "digital project management",
+      1
+    ],
+    [
+      "business analysis",
+      1
+    ],
+    [
+      "building information modeling (bim)",
+      1
+    ],
+    [
+      "recruitment services",
+      1
+    ],
+    [
+      "marketing and sales",
+      1
+    ],
+    [
+      "agriculture and electronics",
+      1
+    ],
+    [
+      "transportation and quality management",
+      1
+    ],
+    [
+      "finance and digital transformation",
+      1
+    ],
+    [
+      "technology consulting",
+      1
+    ],
+    [
+      "sales and marketing",
+      1
+    ],
+    [
+      "business consulting",
+      1
+    ],
+    [
+      "government and policy analysis",
+      1
+    ],
+    [
+      "sales and business development",
+      1
+    ],
+    [
+      "software and consulting",
+      1
+    ],
+    [
+      "environmental policy and analysis",
+      1
+    ],
+    [
+      "manufacturing and quality control",
+      1
+    ],
+    [
+      "engineering and project management",
+      1
+    ],
+    [
+      "embedded systems",
+      1
+    ],
+    [
+      "sales operations",
+      1
+    ],
+    [
+      "industrial manufacturing",
+      1
+    ],
+    [
+      "consulting services",
+      1
+    ],
+    [
+      "industrial services",
+      1
+    ],
+    [
+      "travel and hospitality",
+      1
+    ],
+    [
+      "consulting and technology",
+      1
+    ],
+    [
+      "consulting and business development",
+      1
+    ],
+    [
+      "management consulting",
+      1
+    ],
+    [
+      "accounting and finance",
+      1
+    ],
+    [
+      "business operations",
+      1
+    ],
+    [
+      "energy",
+      1
+    ]
+  ],
+  "patch_metadata": {
+    "patched_at": "2026-04-26T01:34:01+00:00",
+    "no_new_ai_run": true,
+    "no_db_mutation": true
+  }
+}

@@ -1,0 +1,21 @@
+canonical_id,sample_label,occurrences,offers_using,core_count,secondary_count,pct_of_total
+skill:project_management,Project Management,191,191,0,191,13.02
+skill:business_intelligence,Business Intelligence,116,116,3,113,7.91
+skill:compliance,Compliance,102,102,0,102,6.95
+skill:process_optimization,Process Optimization,76,76,0,76,5.18
+skill:b2b_sales,B2B Sales,75,75,0,75,5.11
+skill:data_analysis,Data Analysis,72,72,0,72,4.91
+skill:documentation,Documentation,65,65,0,65,4.43
+skill:budgeting,Budgeting,63,63,0,63,4.29
+skill:market_analysis,Market Analysis,49,49,0,49,3.34
+skill:crm_management,CRM Management,41,41,0,41,2.79
+skill:sap,SAP,37,37,0,37,2.52
+skill:supply_chain_management,Supply Chain Management,37,37,0,37,2.52
+skill:recruitment,Recruitment,36,36,0,36,2.45
+skill:excel,Excel,27,27,0,27,1.84
+skill:power_bi,Power BI,23,23,0,23,1.57
+skill:sql_querying,SQL Querying,22,22,22,0,1.50
+skill:lead_generation,Lead Generation,21,21,0,21,1.43
+skill:risk_analysis,Risk Analysis,20,20,0,20,1.36
+skill:cloud_architecture,Cloud Architecture,17,17,16,1,1.16
+skill:onboarding,Onboarding,17,17,0,17,1.16

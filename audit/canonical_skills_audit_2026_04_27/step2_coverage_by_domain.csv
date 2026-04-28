@@ -1,0 +1,12 @@
+domain_tag,offer_count,no_skills,avg_skills,max_skills,pct_no_skills
+admin,29,13,0.86,3,44.83
+other,12,5,0.67,2,41.67
+marketing,21,5,1.38,4,23.81
+engineering,282,62,1.33,5,21.99
+finance,111,17,1.94,4,15.32
+operations,78,10,1.67,4,12.82
+sales,133,13,1.83,5,9.77
+supply,116,11,1.75,4,9.48
+legal,12,1,1.17,2,8.33
+data,66,5,2.15,5,7.58
+hr,43,1,1.91,4,2.33

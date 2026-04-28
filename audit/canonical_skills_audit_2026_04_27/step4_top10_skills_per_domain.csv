@@ -1,0 +1,103 @@
+domain_tag,canonical_id,sample_label,n,rank
+admin,skill:project_management,Project Management,7,1
+admin,skill:sql_querying,SQL Querying,2,2
+admin,skill:compliance,Compliance,2,3
+admin,skill:backend_development,Backend Development,1,4
+admin,skill:excel,Excel,1,5
+admin,skill:cloud_architecture,Cloud Architecture,1,6
+admin,skill:quotation_preparation,Quote Preparation,1,7
+admin,skill:crm_management,CRM Management,1,8
+admin,skill:negotiation,Negotiation,1,9
+admin,skill:supply_chain_management,Supply Chain Management,1,10
+data,skill:business_intelligence,Business Intelligence,19,1
+data,skill:data_analysis,Data Analysis,19,2
+data,skill:project_management,Project Management,12,3
+data,skill:power_bi,Power BI,8,4
+data,skill:sql_querying,SQL Querying,7,5
+data,skill:machine_learning,Machine Learning,6,6
+data,skill:excel,Excel,5,7
+data,skill:data_engineering,Data Engineering,5,8
+data,skill:process_optimization,Process Optimization,5,9
+data,skill:compliance,Compliance,4,10
+engineering,skill:project_management,Project Management,53,1
+engineering,skill:documentation,Documentation,46,2
+engineering,skill:compliance,Compliance,40,3
+engineering,skill:process_optimization,Process Optimization,28,4
+engineering,skill:data_analysis,Data Analysis,15,5
+engineering,skill:backend_development,Backend Development,14,6
+engineering,skill:mechanical_design,Mechanical Design,13,7
+engineering,skill:sql_querying,SQL Querying,9,8
+engineering,skill:version_control,Version Control,9,9
+engineering,skill:cloud_architecture,Cloud Architecture,8,10
+finance,skill:business_intelligence,Business Intelligence,45,1
+finance,skill:budgeting,Budgeting,33,2
+finance,skill:compliance,Compliance,18,3
+finance,skill:process_optimization,Process Optimization,13,4
+finance,skill:project_management,Project Management,12,5
+finance,skill:excel,Excel,11,6
+finance,skill:financial_analysis,Financial Analysis,10,7
+finance,skill:sap,SAP,9,8
+finance,skill:data_analysis,Data Analysis,7,9
+finance,skill:risk_analysis,Risk Analysis,6,10
+hr,skill:recruitment,Recruitment,21,1
+hr,skill:onboarding,Onboarding,8,2
+hr,skill:business_intelligence,Business Intelligence,8,3
+hr,skill:data_analysis,Data Analysis,6,4
+hr,skill:project_management,Project Management,6,5
+hr,skill:b2b_sales,B2B Sales,6,6
+hr,skill:process_optimization,Process Optimization,4,7
+hr,skill:sap,SAP,4,8
+hr,skill:compliance,Compliance,4,9
+hr,skill:lead_generation,Lead Generation,3,10
+legal,skill:compliance,Compliance,7,1
+legal,skill:legal_analysis,Legal Analysis,2,2
+legal,skill:business_intelligence,Business Intelligence,2,3
+legal,skill:powerpoint,PowerPoint,1,4
+legal,skill:sap,SAP,1,5
+legal,skill:financial_analysis,Financial Analysis,1,6
+marketing,skill:data_analysis,Data Analysis,5,1
+marketing,skill:crm_management,CRM Management,4,2
+marketing,skill:salesforce,Salesforce,4,3
+marketing,skill:project_management,Project Management,2,4
+marketing,skill:digital_marketing,Digital Marketing,2,5
+marketing,skill:sql_querying,SQL Querying,2,6
+marketing,skill:lead_generation,Lead Generation,2,7
+marketing,skill:business_intelligence,Business Intelligence,2,8
+marketing,skill:internal_communication,Internal Communication,1,9
+marketing,skill:market_analysis,Market Analysis,1,10
+operations,skill:project_management,Project Management,40,1
+operations,skill:business_intelligence,Business Intelligence,14,2
+operations,skill:process_optimization,Process Optimization,10,3
+operations,skill:budgeting,Budgeting,9,4
+operations,skill:compliance,Compliance,8,5
+operations,skill:documentation,Documentation,7,6
+operations,skill:excel,Excel,5,7
+operations,skill:data_analysis,Data Analysis,5,8
+operations,skill:financial_analysis,Financial Analysis,3,9
+operations,skill:incident_management,Incident Management,3,10
+other,skill:compliance,Compliance,2,1
+other,skill:project_management,Project Management,2,2
+other,skill:requirements_gathering,Requirements Gathering,1,3
+other,skill:process_optimization,Process Optimization,1,4
+other,skill:documentation,Documentation,1,5
+other,skill:onboarding,Onboarding,1,6
+sales,skill:b2b_sales,B2B Sales,59,1
+sales,skill:market_analysis,Market Analysis,31,2
+sales,skill:crm_management,CRM Management,26,3
+sales,skill:project_management,Project Management,20,4
+sales,skill:business_intelligence,Business Intelligence,11,5
+sales,skill:lead_generation,Lead Generation,11,6
+sales,skill:market_research,Market Research,11,7
+sales,skill:recruitment,Recruitment,9,8
+sales,skill:data_analysis,Data Analysis,9,9
+sales,skill:salesforce,Salesforce,6,10
+supply,skill:project_management,Project Management,37,1
+supply,skill:supply_chain_management,Supply Chain Management,31,2
+supply,skill:sap,SAP,12,3
+supply,skill:budgeting,Budgeting,11,4
+supply,skill:compliance,Compliance,11,5
+supply,skill:process_optimization,Process Optimization,10,6
+supply,skill:market_analysis,Market Analysis,9,7
+supply,skill:vendor_management,Vendor Management,9,8
+supply,skill:procurement_basics,Procurement Basics,7,9
+supply,skill:data_analysis,Data Analysis,6,10

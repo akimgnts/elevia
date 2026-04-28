@@ -1,0 +1,510 @@
+{
+  "phase": "classification",
+  "processed_ids": [
+    "240143",
+    "242425",
+    "238223",
+    "238399",
+    "238330",
+    "242461",
+    "242231",
+    "238075",
+    "238369",
+    "237974",
+    "237239",
+    "242128",
+    "242500",
+    "242125",
+    "242070",
+    "240116",
+    "237800",
+    "242080",
+    "238077",
+    "242428",
+    "238008",
+    "237373",
+    "237500",
+    "242078",
+    "242331",
+    "242512",
+    "242116",
+    "238255",
+    "238276",
+    "238079",
+    "232891",
+    "238295",
+    "238389",
+    "242435",
+    "242190",
+    "242022",
+    "240111",
+    "242264",
+    "238267",
+    "242311"
+  ],
+  "results": [
+    {
+      "offer_id": "240143",
+      "domain_tag": "engineering_industrial",
+      "confidence": 0.8,
+      "evidence": [
+        "technical coordination expertise",
+        "supporting the sub-system manager",
+        "traction and rolling stock subsystems",
+        "monitoring subsystem requirements"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242425",
+      "domain_tag": "hr",
+      "confidence": 0.9,
+      "evidence": [
+        "talent acquisition specialist",
+        "cycle complet de recrutement",
+        "recrutement pour des postes it/tech",
+        "suivi des indicateurs de performance cles"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238223",
+      "domain_tag": "engineering_industrial",
+      "confidence": 0.7,
+      "evidence": [
+        "ingenieur design",
+        "modeles 3d",
+        "documentation technique",
+        "amelioration continue des processus"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238399",
+      "domain_tag": "finance",
+      "confidence": 0.9,
+      "evidence": [
+        "controleur financier",
+        "gerer la tresorerie",
+        "preparation du reporting",
+        "analyser les resultats financiers"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238330",
+      "domain_tag": "hr",
+      "confidence": 0.85,
+      "evidence": [
+        "junior corporate recruiter",
+        "campus recruitment",
+        "attract, select, interview",
+        "collaborate on employer branding projects"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242461",
+      "domain_tag": "sales_business_development",
+      "confidence": 0.8,
+      "evidence": [
+        "pilotage des contrats de maintenance",
+        "gestion des services de reparation clients",
+        "responsable de la satisfaction globale des clients"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242231",
+      "domain_tag": "marketing_communication",
+      "confidence": 0.9,
+      "evidence": [
+        "user acquisition specialist",
+        "focus on marketing actions to increase customer acquisition",
+        "plan, execute, and analyse user acquisition campaigns"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238075",
+      "domain_tag": "engineering_industrial",
+      "confidence": 0.95,
+      "evidence": [
+        "plan, develop, and implement automation solutions",
+        "responsible for creating and adapting control programs",
+        "support projects from planning to successful commissioning"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238369",
+      "domain_tag": "legal_compliance",
+      "confidence": 0.85,
+      "evidence": [
+        "deploiement et a l’amelioration continue du systeme de management de la securite de l’information",
+        "conformement a la norme iso 27001",
+        "gestion des risques, de conformite et de protection des donnees"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "237974",
+      "domain_tag": "sales_business_development",
+      "confidence": 0.9,
+      "evidence": [
+        "developper et structurer l’activite commerciale",
+        "prospection de nouveaux clients b2b",
+        "developpement et animation d’un reseau de distributeurs"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "237239",
+      "domain_tag": "hr",
+      "confidence": 0.9,
+      "evidence": [
+        "hr learning & development",
+        "dynamic hr team",
+        "hr administration",
+        "personnel development & learning"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242128",
+      "domain_tag": "operations_project",
+      "confidence": 0.8,
+      "evidence": [
+        "back office",
+        "transfers",
+        "improvement of procedures",
+        "efficiency and productivity"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242500",
+      "domain_tag": "operations_project",
+      "confidence": 0.85,
+      "evidence": [
+        "support the implementation and operation",
+        "sustainable rail operations",
+        "project coordination"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242125",
+      "domain_tag": "engineering_industrial",
+      "confidence": 0.8,
+      "evidence": [
+        "optimise manufacturing processes",
+        "project managing",
+        "industry 4.0 manufacturing processes"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242070",
+      "domain_tag": "engineering_industrial",
+      "confidence": 0.9,
+      "evidence": [
+        "ingenieur robotique et systemes de fabrication autonome",
+        "developpement, a l’integration et a l’optimisation de systemes robotises",
+        "automatisation"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "240116",
+      "domain_tag": "hr",
+      "confidence": 0.9,
+      "evidence": [
+        "strengthening the company’s hr strategy",
+        "trusted and approachable hr partner",
+        "guidance on day to day hr topics",
+        "hr transversal projects & internal communication",
+        "diversity, equity & inclusion (de&i) benelux ambassador"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "237800",
+      "domain_tag": "legal_compliance",
+      "confidence": 0.85,
+      "evidence": [
+        "traitement des successions et evenements sur comptes",
+        "relecture et analyse des contrats",
+        "assurer la veille juridique",
+        "droit des societes, droit bancaire, civil"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242080",
+      "domain_tag": "engineering_software",
+      "confidence": 0.6,
+      "evidence": [
+        "create and develop high-performance, sustainable, and original solutions",
+        "propose innovative formulas",
+        "interact with korean network"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238077",
+      "domain_tag": "operations_project",
+      "confidence": 0.75,
+      "evidence": [
+        "assist the project management team in planning and executing",
+        "contribute to the preparation and coordination of schedules",
+        "ensure compliance with legal requirements"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242428",
+      "domain_tag": "consulting_strategy",
+      "confidence": 0.7,
+      "evidence": [
+        "renforcer la cooperation franco-coreenne",
+        "analyse et met en forme des informations",
+        "produit des notes de situation et de synthese"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238008",
+      "domain_tag": "sales_business_development",
+      "confidence": 0.9,
+      "evidence": [
+        "developpement commercial",
+        "presence commerciale",
+        "prospection",
+        "developpement d’un reseau",
+        "opportunites commerciales"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "237373",
+      "domain_tag": "engineering_industrial",
+      "confidence": 0.8,
+      "evidence": [
+        "junior industrial controller",
+        "preparation des etats financiers",
+        "gestion des couts",
+        "analyse des ecarts"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "237500",
+      "domain_tag": "operations_project",
+      "confidence": 0.7,
+      "evidence": [
+        "support a la formation",
+        "deploiement de nouveaux produits",
+        "optimisation des projets",
+        "processus operationnels"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242078",
+      "domain_tag": "data",
+      "confidence": 0.8,
+      "evidence": [
+        "intelligence artificielle",
+        "ameliorer la productivite",
+        "mesurer les gains",
+        "reporting strategique"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242331",
+      "domain_tag": "sales_business_development",
+      "confidence": 0.85,
+      "evidence": [
+        "business developer",
+        "developpement des activites",
+        "sourcing et origination de projets",
+        "analyse de marche"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242512",
+      "domain_tag": "operations_project",
+      "confidence": 0.8,
+      "evidence": [
+        "support the rollout of a software solution",
+        "cross-functional team",
+        "optimizing procurement-related data",
+        "operational support to the project team"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242116",
+      "domain_tag": "sales_business_development",
+      "confidence": 0.9,
+      "evidence": [
+        "developpement commercial",
+        "monter ta propre business unit",
+        "prospecter et developper ton portefeuille clients",
+        "mener les negociations commerciales"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238255",
+      "domain_tag": "legal_compliance",
+      "confidence": 0.9,
+      "evidence": [
+        "assistez nos juristes",
+        "suivi des evolutions legislatives",
+        "recherches documentaires et analyses",
+        "prevenir, encadrer et gerer les risques juridiques"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238276",
+      "domain_tag": "marketing_communication",
+      "confidence": 0.9,
+      "evidence": [
+        "ensuring execution of the marketing plan",
+        "managing digital platforms",
+        "collect, process and analyze market information",
+        "support and assist the sales force"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238079",
+      "domain_tag": "operations_project",
+      "confidence": 0.8,
+      "evidence": [
+        "responsible for the planning and execution of substation construction projects",
+        "manage and monitor project execution",
+        "prepare and coordinate project schedules"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "232891",
+      "domain_tag": "engineering_software",
+      "confidence": 0.7,
+      "evidence": [
+        "solutions logicielles",
+        "applications digitales",
+        "projets digitaux"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238295",
+      "domain_tag": "consulting_strategy",
+      "confidence": 0.8,
+      "evidence": [
+        "advisory and implementation support services",
+        "optimise energy use",
+        "decarbonise our clients’ operations"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238389",
+      "domain_tag": "operations_project",
+      "confidence": 0.6,
+      "evidence": [
+        "strategie achats",
+        "analyse du portefeuille achats",
+        "suivi des fournisseurs"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242435",
+      "domain_tag": "legal_compliance",
+      "confidence": 0.7,
+      "evidence": [
+        "gerer les dossiers d’appel d’offres",
+        "negocier les clauses commerciales des contrats",
+        "suivi post-signature des contrats"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242190",
+      "domain_tag": "consulting_strategy",
+      "confidence": 0.7,
+      "evidence": [
+        "evaluation economique de projets",
+        "preparation des comites d'approbation",
+        "analyser et interpreter les informations financieres"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242022",
+      "domain_tag": "engineering_industrial",
+      "confidence": 0.9,
+      "evidence": [
+        "ingenieur(e) risques industriels",
+        "maitriser les risques",
+        "securite industrielle",
+        "gestion des risques"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "240111",
+      "domain_tag": "operations_project",
+      "confidence": 0.8,
+      "evidence": [
+        "acheteur projet",
+        "gere les relations avec un groupe de fournisseurs",
+        "suit et controle l'evolution des couts"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242264",
+      "domain_tag": "hr",
+      "confidence": 0.9,
+      "evidence": [
+        "hr performance consultant",
+        "analyzing payroll charges",
+        "conducting hr performance audits"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "238267",
+      "domain_tag": "legal_compliance",
+      "confidence": 0.85,
+      "evidence": [
+        "support various compliance awareness",
+        "compliance online training modules",
+        "monitoring of compliance initiatives"
+      ],
+      "needs_ai_review": false
+    },
+    {
+      "offer_id": "242311",
+      "domain_tag": "marketing_communication",
+      "confidence": 0.75,
+      "evidence": [
+        "strategie de partenariats",
+        "developpement et gestion du portefeuille de partenaires",
+        "conception d'offres de partenariat"
+      ],
+      "needs_ai_review": false
+    }
+  ],
+  "batch_count": 8,
+  "updated_at": "2026-04-26T01:06:31.833315+00:00"
+}

@@ -1,0 +1,94 @@
+canonical_id,sample_label,occurrences,offers_using,pct_of_total
+skill:project_management,Project Management,191,191,13.02
+skill:business_intelligence,Business Intelligence,116,116,7.91
+skill:compliance,Compliance,102,102,6.95
+skill:process_optimization,Process Optimization,76,76,5.18
+skill:b2b_sales,B2B Sales,75,75,5.11
+skill:data_analysis,Data Analysis,72,72,4.91
+skill:documentation,Documentation,65,65,4.43
+skill:budgeting,Budgeting,63,63,4.29
+skill:market_analysis,Market Analysis,49,49,3.34
+skill:crm_management,CRM Management,41,41,2.79
+skill:sap,SAP,37,37,2.52
+skill:supply_chain_management,Supply Chain Management,37,37,2.52
+skill:recruitment,Recruitment,36,36,2.45
+skill:excel,Excel,27,27,1.84
+skill:power_bi,Power BI,23,23,1.57
+skill:sql_querying,SQL Querying,22,22,1.50
+skill:lead_generation,Lead Generation,21,21,1.43
+skill:risk_analysis,Risk Analysis,20,20,1.36
+skill:financial_analysis,Financial Analysis,17,17,1.16
+skill:vendor_management,Vendor Management,17,17,1.16
+skill:onboarding,Onboarding,17,17,1.16
+skill:cloud_architecture,Cloud Architecture,17,17,1.16
+skill:backend_development,Backend Development,16,16,1.09
+skill:mechanical_design,Mechanical Design,15,15,1.02
+skill:market_research,Market Research,15,15,1.02
+skill:salesforce,Salesforce,15,15,1.02
+skill:negotiation,Negotiation,14,14,0.95
+skill:version_control,Version Control,13,13,0.89
+skill:quality_engineering,Quality Engineering,12,12,0.82
+skill:maintenance_planning,Maintenance Planning,11,11,0.75
+skill:containerization,Containerization,11,11,0.75
+skill:powerpoint,PowerPoint,10,10,0.68
+skill:business_analysis,Business Analysis,9,9,0.61
+skill:procurement_basics,Procurement Basics,8,8,0.55
+skill:data_engineering,Data Engineering,8,8,0.55
+skill:frontend_development,Frontend Development,7,7,0.48
+skill:machine_learning,Machine Learning,7,7,0.48
+skill:root_cause_analysis,Root Cause Analysis,7,7,0.48
+skill:software_architecture,Software Architecture,7,7,0.48
+skill:software_testing,Software Testing,7,7,0.48
+skill:management_control,Management Control,6,6,0.41
+skill:incident_management,Incident Management,6,6,0.41
+skill:scripting_automation,Scripting Automation,6,6,0.41
+skill:teamwork,Teamwork,6,6,0.41
+skill:statistical_analysis,Statistical Analysis,5,5,0.34
+skill:account_management,Account Management,5,5,0.34
+skill:digital_marketing,Digital Marketing,5,5,0.34
+skill:data_governance,Data Governance,5,5,0.34
+skill:requirements_gathering,Requirements Gathering,4,4,0.27
+skill:lean_six_sigma,Lean Six Sigma,4,4,0.27
+skill:problem_solving,Problem Solving,4,4,0.27
+skill:accounting_basics,Accounting Basics,4,4,0.27
+skill:process_documentation,Process Documentation,3,3,0.20
+skill:data_cleaning,Data Cleaning,3,3,0.20
+skill:leadership,Leadership,3,3,0.20
+skill:social_media_marketing,Social Media Marketing,3,3,0.20
+skill:production_planning,Production Planning,3,3,0.20
+skill:internal_control,Internal Control,3,3,0.20
+skill:logistics_coordination,Logistics Coordination,3,3,0.20
+skill:technical_drawing,Technical Drawing,3,3,0.20
+skill:manufacturing_processes,Manufacturing Processes,3,3,0.20
+skill:stakeholder_management,Stakeholder Management,3,3,0.20
+skill:stakeholder_communication,Stakeholder Communication,3,3,0.20
+skill:operations_management,Operations Management,2,2,0.14
+skill:internal_communication,Internal Communication,2,2,0.14
+skill:microservices_architecture,Microservices Architecture,2,2,0.14
+skill:hr_administration,HR Administration,2,2,0.14
+skill:electrical_engineering_basics,Electrical Engineering Basics,2,2,0.14
+skill:database_design,Database Design,2,2,0.14
+skill:data_science_platform,Data Science Platform,2,2,0.14
+skill:cad_modeling,CAD Modeling,2,2,0.14
+skill:agile_delivery,Agile Delivery,2,2,0.14
+skill:time_series_analysis,Time Series Analysis,2,2,0.14
+skill:legal_analysis,Legal Analysis,2,2,0.14
+skill:data_modeling,Data Modeling,1,1,0.07
+skill:product_analytics,Product Analytics,1,1,0.07
+skill:warehouse_operations,Warehouse Operations,1,1,0.07
+skill:erp_usage,ERP Usage,1,1,0.07
+skill:software_api,Software API,1,1,0.07
+skill:process_mapping,Process Mapping,1,1,0.07
+skill:industrial_automation,Industrial Automation,1,1,0.07
+skill:mlops,MLOps,1,1,0.07
+skill:financial_modeling,Financial Modeling,1,1,0.07
+skill:health_safety_compliance,Health and Safety Compliance,1,1,0.07
+skill:learning_agility,Learning Agility,1,1,0.07
+skill:accounts_payable,Accounts Payable,1,1,0.07
+skill:web_service_api,Web Service API,1,1,0.07
+skill:quotation_preparation,Quote Preparation,1,1,0.07
+skill:reconciliation,Reconciliation,1,1,0.07
+skill:decision_making,Decision Making,1,1,0.07
+skill:devops,DevOps,1,1,0.07
+skill:observability,Observability,1,1,0.07
+skill:ab_testing,A/B Testing,1,1,0.07

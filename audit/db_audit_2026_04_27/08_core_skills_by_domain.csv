@@ -1,0 +1,22 @@
+domain_tag,canonical_id,label,n,rank
+admin,skill:sql_querying,SQL Querying,2,1
+admin,skill:database_design,Database Design,1,2
+admin,skill:cloud_architecture,Cloud Architecture,1,3
+admin,skill:backend_development,Backend Development,1,4
+data,skill:sql_querying,SQL Querying,7,1
+data,skill:cloud_architecture,Cloud Architecture,3,2
+data,skill:business_intelligence,Business Intelligence,1,3
+data,skill:backend_development,Backend Development,1,4
+data,skill:frontend_development,Frontend Development,1,5
+engineering,skill:backend_development,Backend Development,11,1
+engineering,skill:sql_querying,SQL Querying,9,2
+engineering,skill:cloud_architecture,Cloud Architecture,8,3
+engineering,skill:frontend_development,Frontend Development,4,4
+engineering,skill:database_design,Database Design,1,5
+finance,skill:business_intelligence,Business Intelligence,1,1
+finance,skill:cloud_architecture,Cloud Architecture,1,2
+hr,skill:sql_querying,SQL Querying,2,1
+marketing,skill:sql_querying,SQL Querying,2,1
+operations,skill:business_intelligence,Business Intelligence,1,1
+operations,skill:cloud_architecture,Cloud Architecture,1,2
+supply,skill:cloud_architecture,Cloud Architecture,2,1

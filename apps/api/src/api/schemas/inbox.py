@@ -239,6 +239,10 @@ class InboxItem(BaseModel):
     scoring_v2: Optional[ScoringV2] = None
     scoring_v3: Optional[ScoringV3] = None
     career_intelligence: Optional[Dict[str, Any]] = None
+    domain_affinity: Optional[str] = Field(
+        default=None, pattern="^(aligned|adjacent|distant|neutral)$"
+    )
+    domain_affinity_score: Optional[int] = Field(default=None, ge=0, le=2)
     explain_v1: Optional[CompassExplainCompact] = None  # compass signal (always computed)
     near_match_count: Optional[int] = None  # compact, display-only (list view)
     match_strength: Optional[str] = Field(default=None, pattern="^(STRONG|MEDIUM|WEAK)$")
@@ -246,6 +250,8 @@ class InboxItem(BaseModel):
     core_total_count: Optional[int] = None
     dominant_reason: Optional[str] = None
     fit_score: Optional[int] = Field(default=None, ge=0, le=100)
+    preference_score: Optional[int] = Field(default=None, ge=0, le=100)
+    eligibility_status: Optional[Dict[str, Any]] = None
     why_match: List[str] = Field(default_factory=list)
     main_blockers: List[str] = Field(default_factory=list)
     distance: Optional[str] = None

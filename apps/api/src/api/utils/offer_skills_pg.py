@@ -209,6 +209,65 @@ def ensure_offer_skills_table(conn, *, table_name: str = "offer_skills", clean_t
             )
         )
 
+        # v3 metier columns (additive, nullable, backward-compatible).
+        # skill_type classifies the skill role (CORE_METIER / TOOL / CONTEXT / NOISE);
+        # evidence stores the verbatim quote from the offer that justifies the skill.
+        cursor.execute(
+            sql.SQL("ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS skill_type TEXT").format(
+                table_name=sql.Identifier(table_name),
+            )
+        )
+        cursor.execute(
+            sql.SQL("ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS evidence TEXT").format(
+                table_name=sql.Identifier(table_name),
+            )
+        )
+        cursor.execute(
+            """
+            SELECT 1 FROM information_schema.constraint_column_usage
+            WHERE table_schema = 'public' AND table_name = %s
+              AND constraint_name = %s
+            """,
+            (table_name, f"{table_name}_skill_type_check"),
+        )
+        if not cursor.fetchone():
+            cursor.execute(
+                sql.SQL(
+                    "ALTER TABLE {table_name} ADD CONSTRAINT {ck_name} "
+                    "CHECK (skill_type IS NULL OR skill_type IN ('CORE_METIER','TOOL','CONTEXT','NOISE'))"
+                ).format(
+                    table_name=sql.Identifier(table_name),
+                    ck_name=sql.Identifier(f"{table_name}_skill_type_check"),
+                )
+            )
+
+        # Relax UNIQUE(offer_id, canonical_id) -> UNIQUE(offer_id, canonical_id, enrichment_version)
+        # so v2 and v3 rows can coexist for comparison without overwriting each other.
+        cursor.execute(
+            sql.SQL("ALTER TABLE {table_name} DROP CONSTRAINT IF EXISTS {old_uq_name}").format(
+                table_name=sql.Identifier(table_name),
+                old_uq_name=sql.Identifier(f"{table_name}_offer_id_canonical_id_key"),
+            )
+        )
+        cursor.execute(
+            """
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE table_schema = 'public' AND table_name = %s
+              AND constraint_name = %s
+            """,
+            (table_name, f"{table_name}_offer_id_canonical_id_version_key"),
+        )
+        if not cursor.fetchone():
+            cursor.execute(
+                sql.SQL(
+                    "ALTER TABLE {table_name} ADD CONSTRAINT {new_uq_name} "
+                    "UNIQUE (offer_id, canonical_id, enrichment_version)"
+                ).format(
+                    table_name=sql.Identifier(table_name),
+                    new_uq_name=sql.Identifier(f"{table_name}_offer_id_canonical_id_version_key"),
+                )
+            )
+
 
 def _normalize_importance(value: str | None) -> str:
     if str(value or "").upper() == "CORE":
@@ -644,16 +703,18 @@ def backfill_offer_skills_with_connection(
     if limit is not None and int(limit) > 0:
         params.append(int(limit))
 
+    # Scope idempotency + delete by enrichment_version so that runs of one
+    # version (e.g. v2) never touch rows from another version (e.g. v3 metier).
     existing_sql = sql.SQL(
         """
         SELECT COUNT(*), MIN(content_hash), MAX(content_hash), MIN(enrichment_version), MAX(enrichment_version)
         FROM {offer_skills_table}
-        WHERE offer_id = %s
+        WHERE offer_id = %s AND enrichment_version = %s
         """
     ).format(offer_skills_table=sql.Identifier(offer_skills_table))
-    delete_sql = sql.SQL("DELETE FROM {offer_skills_table} WHERE offer_id = %s").format(
-        offer_skills_table=sql.Identifier(offer_skills_table)
-    )
+    delete_sql = sql.SQL(
+        "DELETE FROM {offer_skills_table} WHERE offer_id = %s AND enrichment_version = %s"
+    ).format(offer_skills_table=sql.Identifier(offer_skills_table))
     insert_sql = sql.SQL(
         """
         INSERT INTO {offer_skills_table} (
@@ -664,7 +725,7 @@ def backfill_offer_skills_with_connection(
             %(offer_id)s, %(source)s, %(external_id)s, %(canonical_id)s, %(label)s, %(importance_level)s,
             %(source_method)s, %(confidence)s, %(enrichment_version)s, %(content_hash)s, %(created_at)s
         )
-        ON CONFLICT (offer_id, canonical_id)
+        ON CONFLICT (offer_id, canonical_id, enrichment_version)
         DO UPDATE SET
             source = EXCLUDED.source,
             external_id = EXCLUDED.external_id,
@@ -672,7 +733,6 @@ def backfill_offer_skills_with_connection(
             importance_level = EXCLUDED.importance_level,
             source_method = EXCLUDED.source_method,
             confidence = EXCLUDED.confidence,
-            enrichment_version = EXCLUDED.enrichment_version,
             content_hash = EXCLUDED.content_hash
         """
     ).format(offer_skills_table=sql.Identifier(offer_skills_table))
@@ -695,14 +755,12 @@ def backfill_offer_skills_with_connection(
             row_source_str = str(row_source)
             row_external_id_str = str(row_external_id)
 
-            cursor.execute(existing_sql, (offer_id,))
-            existing_count, min_hash, max_hash, min_version, max_version = cursor.fetchone()
+            cursor.execute(existing_sql, (offer_id, enrichment_version))
+            existing_count, min_hash, max_hash, _min_version, _max_version = cursor.fetchone()
             if (
                 int(existing_count or 0) > 0
                 and min_hash == content_hash
                 and max_hash == content_hash
-                and min_version == enrichment_version
-                and max_version == enrichment_version
             ):
                 skipped_offers += 1
                 continue
@@ -788,7 +846,7 @@ def backfill_offer_skills_with_connection(
                 rows_written += len(final_rows)
                 continue
 
-            cursor.execute(delete_sql, (offer_id,))
+            cursor.execute(delete_sql, (offer_id, enrichment_version))
             for row in final_rows:
                 cursor.execute(insert_sql, row)
                 rows_written += 1

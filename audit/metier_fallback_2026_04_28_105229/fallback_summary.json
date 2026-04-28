@@ -1,0 +1,12 @@
+{
+  "enrichment_version": "offer_skills_v3_fallback",
+  "source": "business_france",
+  "dry_run": false,
+  "n_offers": 50,
+  "n_offers_with_skills": 47,
+  "pct_offers_with_skills": 94.0,
+  "kept_total": 136,
+  "dropped_total": 6,
+  "errors": 0,
+  "avg_kept_per_offer": 2.72
+}

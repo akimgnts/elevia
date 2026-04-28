@@ -41,7 +41,10 @@ data pipeline -> skill:data_engineering
 data pipelines -> skill:data_engineering
 
 # ── Python / Data ecosystem ───────────────────────────────────────────────────
-python -> skill:statistical_programming
+# NOTE: bare "python" alias removed 2026-04-24 — too generic, caused 538/903 BF
+# offers to map to skill:statistical_programming (92% non-data roles).
+# Python is a general-purpose language; rely on stronger signals (pandas, numpy,
+# scikit-learn, r programming, statistical_programming) for data/stats anchoring.
 pandas -> skill:data_analysis
 numpy -> skill:data_analysis
 scikit-learn -> skill:machine_learning

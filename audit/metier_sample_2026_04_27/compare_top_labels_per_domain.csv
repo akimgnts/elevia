@@ -1,0 +1,31 @@
+domain_tag,rank,v2_label,v2_n,v3_label,v3_n
+data,1,Business Intelligence,3,AI tool development,1
+data,2,Data Analysis,2,JavaScript knowledge,1
+data,3,Power BI,2,Machine Learning algorithms application,1
+data,4,Containerization,1,Power Automate,1
+data,5,Documentation,1,Power BI and Qlik Sense,1
+engineering,1,CAD Modeling,1,Allplan,1
+engineering,2,Compliance,1,Autocad,1
+engineering,3,Documentation,1,Compliance GAMP et 21 CFR Part 11,1
+engineering,4,Mechanical Design,1,Environnement pharmaceutique,1
+engineering,5,Project Management,1,Manufacturing Execution System,1
+finance,1,Excel,2,Excel,2
+finance,2,Budgeting,1,ERP software knowledge,1
+finance,3,Business Intelligence,1,ERP systems,1
+finance,4,CRM Management,1,Excel proficiency,1
+finance,5,Data Analysis,1,French and English proficiency,1
+operations,1,Data Analysis,2,analyse des données aéronautiques,1
+operations,2,Project Management,2,carpooling community building,1
+operations,3,Market Research,1,client empowerment strategies,1
+operations,4,,0,contrôle de l'avancement et de la qualité des travaux,1
+operations,5,,0,creative campaign design,1
+sales,1,Project Management,3,Eclipse software experience,2
+sales,2,B2B Sales,2,RE-Studio software proficiency,2
+sales,3,CRM Management,2,Reservoir Engineering expertise,2
+sales,4,Market Research,2,Customer Support,1
+sales,5,Business Intelligence,1,Digital Transformation,1
+supply,1,Market Research,1,Contract negotiation,1
+supply,2,Process Optimization,1,ERP system coordination,1
+supply,3,Project Management,1,Enterprise Asset Management System,1
+supply,4,SAP,1,Hutchinson Excellence System support,1
+supply,5,Salesforce,1,IoT sensors,1

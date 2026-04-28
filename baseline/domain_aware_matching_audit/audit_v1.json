@@ -1,0 +1,2487 @@
+{
+  "version": "v1",
+  "type": "domain_aware_matching_audit",
+  "taxonomy_used": "db_11_tag",
+  "scope": "business_france_active",
+  "behavior_change": "none",
+  "inference_version": "v2_strong_weak_weighting",
+  "affinity_version": "v1_3_level_aligned_adjacent_distant",
+  "inference_weights": {
+    "strong_weight": 3.0,
+    "data_driven_weight": 1.0,
+    "weak_data_driven_weight": 0.2,
+    "strong_signals_per_domain": {
+      "data": [
+        "skill:big_data",
+        "skill:business_intelligence",
+        "skill:data_analysis",
+        "skill:data_engineering",
+        "skill:data_mining",
+        "skill:data_modeling",
+        "skill:data_pipeline",
+        "skill:data_science",
+        "skill:data_visualization",
+        "skill:etl",
+        "skill:machine_learning",
+        "skill:predictive_analytics",
+        "skill:sql",
+        "skill:statistical_programming",
+        "skill:time_series_analysis"
+      ],
+      "finance": [
+        "skill:accounting",
+        "skill:audit",
+        "skill:budgeting",
+        "skill:controlling",
+        "skill:cost_accounting",
+        "skill:financial_analysis",
+        "skill:financial_modeling",
+        "skill:financial_reporting",
+        "skill:management_accounting",
+        "skill:tax",
+        "skill:treasury"
+      ],
+      "hr": [
+        "skill:compensation_and_benefits",
+        "skill:employee_relations",
+        "skill:human_resources_management",
+        "skill:learning_and_development",
+        "skill:onboarding",
+        "skill:performance_management",
+        "skill:recruitment",
+        "skill:talent_acquisition",
+        "skill:talent_management"
+      ],
+      "marketing": [
+        "skill:brand_management",
+        "skill:campaign_management",
+        "skill:content_marketing",
+        "skill:digital_marketing",
+        "skill:market_analysis",
+        "skill:product_marketing",
+        "skill:public_relations",
+        "skill:seo",
+        "skill:social_media"
+      ],
+      "sales": [
+        "skill:account_management",
+        "skill:b2b_sales",
+        "skill:business_development",
+        "skill:customer_relationship_management",
+        "skill:lead_generation",
+        "skill:negotiation",
+        "skill:sales_pitch"
+      ],
+      "supply": [
+        "skill:demand_planning",
+        "skill:inventory_management",
+        "skill:logistics",
+        "skill:procurement",
+        "skill:supplier_management",
+        "skill:supply_chain_management",
+        "skill:warehouse_management"
+      ],
+      "engineering": [
+        "skill:agile",
+        "skill:cloud_architecture",
+        "skill:devops",
+        "skill:electrical_engineering",
+        "skill:industrial_engineering",
+        "skill:mechanical_engineering",
+        "skill:process_engineering",
+        "skill:quality_engineering",
+        "skill:software_development",
+        "skill:systems_engineering"
+      ],
+      "operations": [
+        "skill:continuous_improvement",
+        "skill:lean_management",
+        "skill:operations_management",
+        "skill:six_sigma"
+      ],
+      "legal": [
+        "skill:contract_management",
+        "skill:legal_analysis",
+        "skill:legal_research",
+        "skill:regulatory_affairs"
+      ],
+      "admin": [
+        "skill:administrative_support",
+        "skill:executive_assistance",
+        "skill:office_administration"
+      ]
+    },
+    "weak_signals": [
+      "skill:communication",
+      "skill:compliance",
+      "skill:documentation",
+      "skill:excel",
+      "skill:leadership",
+      "skill:office",
+      "skill:powerpoint",
+      "skill:presentation",
+      "skill:problem_solving",
+      "skill:project_management",
+      "skill:reporting",
+      "skill:teamwork",
+      "skill:time_management",
+      "skill:word"
+    ]
+  },
+  "adjacency_pairs": [
+    "admin|hr",
+    "admin|operations",
+    "data|engineering",
+    "data|finance",
+    "data|marketing",
+    "data|operations",
+    "engineering|operations",
+    "engineering|supply",
+    "finance|legal",
+    "finance|operations",
+    "hr|operations",
+    "legal|operations",
+    "marketing|sales",
+    "operations|sales"
+  ],
+  "summary": {
+    "audit_date": "2026-04-26T15:10:55+00:00",
+    "profiles_audited": 7,
+    "active_offers_total": 876,
+    "skill_universe_size": 93,
+    "expected_vs_inferred_match_rate_pct": 100.0,
+    "average_hard_filter_exclusion_pct": 86.4,
+    "average_aligned_pct": 12.2,
+    "average_adjacent_pct": 25.4,
+    "average_distant_pct": 61.1,
+    "average_neutral_pct": 1.4,
+    "average_soft_keep_aligned_plus_adjacent_pct": 37.5,
+    "average_distant_only_exclusion_pct": 61.1,
+    "average_exclusion_reduction_vs_binary_pct": 25.4
+  },
+  "sample_profiles": [
+    {
+      "name": "P1_data_analyst",
+      "expected_domain": "data",
+      "canonical_ids": [
+        "skill:data_analysis",
+        "skill:business_intelligence",
+        "skill:sql",
+        "skill:excel",
+        "skill:statistical_programming",
+        "skill:data_visualization"
+      ]
+    },
+    {
+      "name": "P2_software_engineer",
+      "expected_domain": "engineering",
+      "canonical_ids": [
+        "skill:software_development",
+        "skill:cloud_architecture",
+        "skill:devops",
+        "skill:agile",
+        "skill:documentation",
+        "skill:project_management"
+      ]
+    },
+    {
+      "name": "P3_finance_controller",
+      "expected_domain": "finance",
+      "canonical_ids": [
+        "skill:budgeting",
+        "skill:financial_analysis",
+        "skill:accounting",
+        "skill:excel",
+        "skill:compliance",
+        "skill:reporting"
+      ]
+    },
+    {
+      "name": "P4_marketing_manager",
+      "expected_domain": "marketing",
+      "canonical_ids": [
+        "skill:digital_marketing",
+        "skill:seo",
+        "skill:content_marketing",
+        "skill:social_media",
+        "skill:campaign_management"
+      ]
+    },
+    {
+      "name": "P5_hr_recruiter",
+      "expected_domain": "hr",
+      "canonical_ids": [
+        "skill:recruitment",
+        "skill:talent_acquisition",
+        "skill:human_resources_management",
+        "skill:onboarding"
+      ]
+    },
+    {
+      "name": "P6_supply_chain",
+      "expected_domain": "supply",
+      "canonical_ids": [
+        "skill:supply_chain_management",
+        "skill:procurement",
+        "skill:logistics",
+        "skill:inventory_management"
+      ]
+    },
+    {
+      "name": "P7_sales_b2b",
+      "expected_domain": "sales",
+      "canonical_ids": [
+        "skill:b2b_sales",
+        "skill:lead_generation",
+        "skill:account_management",
+        "skill:business_development",
+        "skill:negotiation"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "profile": "P1_data_analyst",
+      "expected_domain": "data",
+      "cv_domain_inferred": "data",
+      "expected_matches_inferred": true,
+      "confidence": "ok",
+      "strong_signal_count": 5,
+      "weak_signal_count": 1,
+      "skills_with_signal": 6,
+      "skills_total": 6,
+      "score_distribution_top5": {
+        "data": 15.464719029374201,
+        "finance": 0.5666347381864623,
+        "engineering": 0.2921136653895275,
+        "sales": 0.22723499361430397,
+        "operations": 0.22717113665389527
+      },
+      "totals": {
+        "active_offers": 876,
+        "aligned": 65,
+        "adjacent": 476,
+        "distant": 323,
+        "neutral_unknown_or_other": 12,
+        "mismatched_legacy": 799
+      },
+      "hard_filter_projection": {
+        "would_keep": 65,
+        "would_keep_with_neutral": 77,
+        "would_exclude": 799,
+        "exclusion_pct": 91.2
+      },
+      "soft_filter_projection": {
+        "high_priority": 65,
+        "low_priority": 799,
+        "neutral": 12
+      },
+      "affinity_projection": {
+        "aligned_pct": 7.4,
+        "adjacent_pct": 54.3,
+        "distant_pct": 36.9,
+        "neutral_pct": 1.4,
+        "soft_keep_aligned_plus_adjacent_pct": 61.8,
+        "distant_only_exclusion_pct": 36.9,
+        "exclusion_reduction_vs_binary_pct": 54.3
+      },
+      "samples": {
+        "aligned_top5": [
+          {
+            "external_id": "237194",
+            "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "237414",
+            "title": "Data engineer (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238049",
+            "title": "V.I.E. – Project Coordinator – Edmonton, CANADA- (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "242148",
+            "title": "Analyste SOC & CTI (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "242439",
+            "title": "Business operations improvement Analyst (H/F)",
+            "domain_tag": "data"
+          }
+        ],
+        "adjacent_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242548",
+            "title": "Contrôleur de gestion (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242337",
+            "title": "ASSISTANT CONTROLE DE GESTION (H/F) BODEN (SUEDE)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "232362",
+            "title": "INGÉNIEUR(E) EMBARQUÉ LINUX (YOCTO) (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242521",
+            "title": "INGENIEUR QUALITE (H/F)",
+            "domain_tag": "finance"
+          }
+        ],
+        "distant_top10": [
+          {
+            "external_id": "242301",
+            "title": "Growth & Account Manager – Villa Supply (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242504",
+            "title": "Supply Chain Manager in Singapore (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242441",
+            "title": "Responsable Technico-Commercial (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242532",
+            "title": "HES Engineer M/W (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "237014",
+            "title": "AI Solutions & Automation Specialist (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242471",
+            "title": "COMMERCIAL TERRAIN (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238346",
+            "title": "Digital Account Manager - FR & ITALIAN MARKET (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238427",
+            "title": "Application & Support Engineer M/F (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242270",
+            "title": "Field Engineer (H/F) - Mobilité Internationale",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "238056",
+            "title": "Account Manager (pôle E-Commerce) (H/F)",
+            "domain_tag": "sales"
+          }
+        ],
+        "mismatched_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242548",
+            "title": "Contrôleur de gestion (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242337",
+            "title": "ASSISTANT CONTROLE DE GESTION (H/F) BODEN (SUEDE)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "232362",
+            "title": "INGÉNIEUR(E) EMBARQUÉ LINUX (YOCTO) (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242521",
+            "title": "INGENIEUR QUALITE (H/F)",
+            "domain_tag": "finance"
+          }
+        ],
+        "neutral_top5": [
+          {
+            "external_id": "237223",
+            "title": "Product Owner (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242454",
+            "title": "Application Scientist (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242437",
+            "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242428",
+            "title": "CHARGE (E) DE MISSION ENERGIE ET NOUVELLES TECHNOLOGIES (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242399",
+            "title": "VIE - Strategy Consultant (H/F)",
+            "domain_tag": "other"
+          }
+        ]
+      },
+      "skill_breakdown": [
+        {
+          "skill": "skill:data_analysis",
+          "signal_type": "strong",
+          "strong_domain": "data",
+          "data_driven_top": "data",
+          "data_driven_n": 72,
+          "data_driven_distribution": {
+            "operations": 5,
+            "marketing": 5,
+            "engineering": 15,
+            "supply": 6,
+            "sales": 9,
+            "data": 19,
+            "finance": 7,
+            "hr": 6
+          }
+        },
+        {
+          "skill": "skill:business_intelligence",
+          "signal_type": "strong",
+          "strong_domain": "data",
+          "data_driven_top": "finance",
+          "data_driven_n": 116,
+          "data_driven_distribution": {
+            "marketing": 2,
+            "admin": 1,
+            "legal": 2,
+            "data": 19,
+            "hr": 8,
+            "operations": 14,
+            "engineering": 8,
+            "sales": 11,
+            "supply": 6,
+            "finance": 45
+          }
+        },
+        {
+          "skill": "skill:sql",
+          "signal_type": "strong",
+          "strong_domain": "data",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:excel",
+          "signal_type": "weak",
+          "strong_domain": null,
+          "data_driven_top": "finance",
+          "data_driven_n": 27,
+          "data_driven_distribution": {
+            "engineering": 2,
+            "supply": 1,
+            "sales": 1,
+            "admin": 1,
+            "operations": 5,
+            "hr": 1,
+            "finance": 11,
+            "data": 5
+          }
+        },
+        {
+          "skill": "skill:statistical_programming",
+          "signal_type": "strong",
+          "strong_domain": "data",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:data_visualization",
+          "signal_type": "strong",
+          "strong_domain": "data",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        }
+      ]
+    },
+    {
+      "profile": "P2_software_engineer",
+      "expected_domain": "engineering",
+      "cv_domain_inferred": "engineering",
+      "expected_matches_inferred": true,
+      "confidence": "ok",
+      "strong_signal_count": 4,
+      "weak_signal_count": 2,
+      "skills_with_signal": 6,
+      "skills_total": 6,
+      "score_distribution_top5": {
+        "engineering": 12.667624079031532,
+        "data": 1.1921129563383952,
+        "supply": 0.1686982066286039,
+        "operations": 0.12224680770415296,
+        "sales": 0.08591978394257421
+      },
+      "totals": {
+        "active_offers": 876,
+        "aligned": 272,
+        "adjacent": 257,
+        "distant": 335,
+        "neutral_unknown_or_other": 12,
+        "mismatched_legacy": 592
+      },
+      "hard_filter_projection": {
+        "would_keep": 272,
+        "would_keep_with_neutral": 284,
+        "would_exclude": 592,
+        "exclusion_pct": 67.6
+      },
+      "soft_filter_projection": {
+        "high_priority": 272,
+        "low_priority": 592,
+        "neutral": 12
+      },
+      "affinity_projection": {
+        "aligned_pct": 31.1,
+        "adjacent_pct": 29.3,
+        "distant_pct": 38.2,
+        "neutral_pct": 1.4,
+        "soft_keep_aligned_plus_adjacent_pct": 60.4,
+        "distant_only_exclusion_pct": 38.2,
+        "exclusion_reduction_vs_binary_pct": 29.3
+      },
+      "samples": {
+        "aligned_top5": [
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          }
+        ],
+        "adjacent_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242504",
+            "title": "Supply Chain Manager in Singapore (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242441",
+            "title": "Responsable Technico-Commercial (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242532",
+            "title": "HES Engineer M/W (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "237194",
+            "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242450",
+            "title": "VIE - Operations Oversight Officer (12 months) (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242270",
+            "title": "Field Engineer (H/F) - Mobilité Internationale",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "232738",
+            "title": "ACHETEUR(SE) - APPROVISIONNEUR(SE) (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242379",
+            "title": "Clinical Operations Leader (H/F)",
+            "domain_tag": "supply"
+          }
+        ],
+        "distant_top10": [
+          {
+            "external_id": "242301",
+            "title": "Growth & Account Manager – Villa Supply (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242548",
+            "title": "Contrôleur de gestion (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242337",
+            "title": "ASSISTANT CONTROLE DE GESTION (H/F) BODEN (SUEDE)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "237014",
+            "title": "AI Solutions & Automation Specialist (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242521",
+            "title": "INGENIEUR QUALITE (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242519",
+            "title": "D&IS Product Marketing (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "242471",
+            "title": "COMMERCIAL TERRAIN (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238346",
+            "title": "Digital Account Manager - FR & ITALIAN MARKET (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238427",
+            "title": "Application & Support Engineer M/F (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238056",
+            "title": "Account Manager (pôle E-Commerce) (H/F)",
+            "domain_tag": "sales"
+          }
+        ],
+        "mismatched_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242504",
+            "title": "Supply Chain Manager in Singapore (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242441",
+            "title": "Responsable Technico-Commercial (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242532",
+            "title": "HES Engineer M/W (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "237194",
+            "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242450",
+            "title": "VIE - Operations Oversight Officer (12 months) (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242270",
+            "title": "Field Engineer (H/F) - Mobilité Internationale",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "232738",
+            "title": "ACHETEUR(SE) - APPROVISIONNEUR(SE) (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242379",
+            "title": "Clinical Operations Leader (H/F)",
+            "domain_tag": "supply"
+          }
+        ],
+        "neutral_top5": [
+          {
+            "external_id": "237223",
+            "title": "Product Owner (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242454",
+            "title": "Application Scientist (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242437",
+            "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242428",
+            "title": "CHARGE (E) DE MISSION ENERGIE ET NOUVELLES TECHNOLOGIES (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242399",
+            "title": "VIE - Strategy Consultant (H/F)",
+            "domain_tag": "other"
+          }
+        ]
+      },
+      "skill_breakdown": [
+        {
+          "skill": "skill:software_development",
+          "signal_type": "strong",
+          "strong_domain": "engineering",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:cloud_architecture",
+          "signal_type": "strong",
+          "strong_domain": "engineering",
+          "data_driven_top": "engineering",
+          "data_driven_n": 17,
+          "data_driven_distribution": {
+            "data": 3,
+            "operations": 1,
+            "engineering": 8,
+            "admin": 1,
+            "supply": 2,
+            "sales": 1,
+            "finance": 1
+          }
+        },
+        {
+          "skill": "skill:devops",
+          "signal_type": "strong",
+          "strong_domain": "engineering",
+          "data_driven_top": "data",
+          "data_driven_n": 1,
+          "data_driven_distribution": {
+            "data": 1
+          }
+        },
+        {
+          "skill": "skill:agile",
+          "signal_type": "strong",
+          "strong_domain": "engineering",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:documentation",
+          "signal_type": "weak",
+          "strong_domain": null,
+          "data_driven_top": "engineering",
+          "data_driven_n": 65,
+          "data_driven_distribution": {
+            "supply": 4,
+            "finance": 4,
+            "engineering": 46,
+            "operations": 7,
+            "data": 1,
+            "other": 1,
+            "sales": 2
+          }
+        },
+        {
+          "skill": "skill:project_management",
+          "signal_type": "weak",
+          "strong_domain": null,
+          "data_driven_top": "engineering",
+          "data_driven_n": 191,
+          "data_driven_distribution": {
+            "engineering": 53,
+            "admin": 7,
+            "marketing": 2,
+            "operations": 40,
+            "hr": 6,
+            "data": 12,
+            "supply": 37,
+            "other": 2,
+            "finance": 12,
+            "sales": 20
+          }
+        }
+      ]
+    },
+    {
+      "profile": "P3_finance_controller",
+      "expected_domain": "finance",
+      "cv_domain_inferred": "finance",
+      "expected_matches_inferred": true,
+      "confidence": "ok",
+      "strong_signal_count": 3,
+      "weak_signal_count": 3,
+      "skills_with_signal": 5,
+      "skills_total": 6,
+      "score_distribution_top5": {
+        "finance": 10.228820417055712,
+        "operations": 0.3720510426392779,
+        "engineering": 0.20435729847494552,
+        "supply": 0.2035792094615624,
+        "sales": 0.15073140367258014
+      },
+      "totals": {
+        "active_offers": 876,
+        "aligned": 107,
+        "adjacent": 154,
+        "distant": 603,
+        "neutral_unknown_or_other": 12,
+        "mismatched_legacy": 757
+      },
+      "hard_filter_projection": {
+        "would_keep": 107,
+        "would_keep_with_neutral": 119,
+        "would_exclude": 757,
+        "exclusion_pct": 86.4
+      },
+      "soft_filter_projection": {
+        "high_priority": 107,
+        "low_priority": 757,
+        "neutral": 12
+      },
+      "affinity_projection": {
+        "aligned_pct": 12.2,
+        "adjacent_pct": 17.6,
+        "distant_pct": 68.8,
+        "neutral_pct": 1.4,
+        "soft_keep_aligned_plus_adjacent_pct": 29.8,
+        "distant_only_exclusion_pct": 68.8,
+        "exclusion_reduction_vs_binary_pct": 17.6
+      },
+      "samples": {
+        "aligned_top5": [
+          {
+            "external_id": "242548",
+            "title": "Contrôleur de gestion (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242337",
+            "title": "ASSISTANT CONTROLE DE GESTION (H/F) BODEN (SUEDE)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242521",
+            "title": "INGENIEUR QUALITE (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "238332",
+            "title": "Responsable maintenance (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242296",
+            "title": "Ingénieur Bureau d'Études Électrotechnique (H/F)",
+            "domain_tag": "finance"
+          }
+        ],
+        "adjacent_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "237194",
+            "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242450",
+            "title": "VIE - Operations Oversight Officer (12 months) (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242367",
+            "title": "Responsable financier H/F/X (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242327",
+            "title": "Analyst Transformation (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242333",
+            "title": "VIE HSE COORDINATOR SOLAR FARM (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "238075",
+            "title": "Automation Engineer _Energy Technology (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "237414",
+            "title": "Data engineer (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238049",
+            "title": "V.I.E. – Project Coordinator – Edmonton, CANADA- (H/F)",
+            "domain_tag": "data"
+          }
+        ],
+        "distant_top10": [
+          {
+            "external_id": "242301",
+            "title": "Growth & Account Manager – Villa Supply (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242504",
+            "title": "Supply Chain Manager in Singapore (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242441",
+            "title": "Responsable Technico-Commercial (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242532",
+            "title": "HES Engineer M/W (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "237014",
+            "title": "AI Solutions & Automation Specialist (H/F)",
+            "domain_tag": "sales"
+          }
+        ],
+        "mismatched_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "237194",
+            "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242450",
+            "title": "VIE - Operations Oversight Officer (12 months) (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242367",
+            "title": "Responsable financier H/F/X (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242327",
+            "title": "Analyst Transformation (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242333",
+            "title": "VIE HSE COORDINATOR SOLAR FARM (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "238075",
+            "title": "Automation Engineer _Energy Technology (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "237414",
+            "title": "Data engineer (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238049",
+            "title": "V.I.E. – Project Coordinator – Edmonton, CANADA- (H/F)",
+            "domain_tag": "data"
+          }
+        ],
+        "neutral_top5": [
+          {
+            "external_id": "237223",
+            "title": "Product Owner (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242454",
+            "title": "Application Scientist (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242437",
+            "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242428",
+            "title": "CHARGE (E) DE MISSION ENERGIE ET NOUVELLES TECHNOLOGIES (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242399",
+            "title": "VIE - Strategy Consultant (H/F)",
+            "domain_tag": "other"
+          }
+        ]
+      },
+      "skill_breakdown": [
+        {
+          "skill": "skill:budgeting",
+          "signal_type": "strong",
+          "strong_domain": "finance",
+          "data_driven_top": "finance",
+          "data_driven_n": 63,
+          "data_driven_distribution": {
+            "operations": 9,
+            "supply": 11,
+            "hr": 1,
+            "sales": 1,
+            "data": 1,
+            "finance": 33,
+            "engineering": 7
+          }
+        },
+        {
+          "skill": "skill:financial_analysis",
+          "signal_type": "strong",
+          "strong_domain": "finance",
+          "data_driven_top": "finance",
+          "data_driven_n": 17,
+          "data_driven_distribution": {
+            "operations": 3,
+            "legal": 1,
+            "finance": 10,
+            "sales": 2,
+            "data": 1
+          }
+        },
+        {
+          "skill": "skill:accounting",
+          "signal_type": "strong",
+          "strong_domain": "finance",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:excel",
+          "signal_type": "weak",
+          "strong_domain": null,
+          "data_driven_top": "finance",
+          "data_driven_n": 27,
+          "data_driven_distribution": {
+            "engineering": 2,
+            "supply": 1,
+            "sales": 1,
+            "admin": 1,
+            "operations": 5,
+            "hr": 1,
+            "finance": 11,
+            "data": 5
+          }
+        },
+        {
+          "skill": "skill:compliance",
+          "signal_type": "weak",
+          "strong_domain": null,
+          "data_driven_top": "engineering",
+          "data_driven_n": 102,
+          "data_driven_distribution": {
+            "marketing": 1,
+            "other": 2,
+            "engineering": 40,
+            "finance": 18,
+            "sales": 5,
+            "supply": 11,
+            "data": 4,
+            "legal": 7,
+            "operations": 8,
+            "admin": 2,
+            "hr": 4
+          }
+        },
+        {
+          "skill": "skill:reporting",
+          "signal_type": "weak",
+          "strong_domain": null,
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        }
+      ]
+    },
+    {
+      "profile": "P4_marketing_manager",
+      "expected_domain": "marketing",
+      "cv_domain_inferred": "marketing",
+      "expected_matches_inferred": true,
+      "confidence": "ok",
+      "strong_signal_count": 5,
+      "weak_signal_count": 0,
+      "skills_with_signal": 5,
+      "skills_total": 5,
+      "score_distribution_top5": {
+        "marketing": 15.4,
+        "sales": 0.4,
+        "supply": 0.2
+      },
+      "totals": {
+        "active_offers": 876,
+        "aligned": 20,
+        "adjacent": 194,
+        "distant": 650,
+        "neutral_unknown_or_other": 12,
+        "mismatched_legacy": 844
+      },
+      "hard_filter_projection": {
+        "would_keep": 20,
+        "would_keep_with_neutral": 32,
+        "would_exclude": 844,
+        "exclusion_pct": 96.3
+      },
+      "soft_filter_projection": {
+        "high_priority": 20,
+        "low_priority": 844,
+        "neutral": 12
+      },
+      "affinity_projection": {
+        "aligned_pct": 2.3,
+        "adjacent_pct": 22.1,
+        "distant_pct": 74.2,
+        "neutral_pct": 1.4,
+        "soft_keep_aligned_plus_adjacent_pct": 24.4,
+        "distant_only_exclusion_pct": 74.2,
+        "exclusion_reduction_vs_binary_pct": 22.1
+      },
+      "samples": {
+        "aligned_top5": [
+          {
+            "external_id": "242519",
+            "title": "D&IS Product Marketing (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "242311",
+            "title": "Chargé·e partenariats et sponsoring (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "242231",
+            "title": "User Acquisition Specialist (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "238407",
+            "title": "CRM B2B Lifecycle Manager - VIE - Barcelona (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "235953",
+            "title": "Consultant SEA/SMA (H/F)",
+            "domain_tag": "marketing"
+          }
+        ],
+        "adjacent_top10": [
+          {
+            "external_id": "242301",
+            "title": "Growth & Account Manager – Villa Supply (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "237014",
+            "title": "AI Solutions & Automation Specialist (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242471",
+            "title": "COMMERCIAL TERRAIN (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "237194",
+            "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238346",
+            "title": "Digital Account Manager - FR & ITALIAN MARKET (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238427",
+            "title": "Application & Support Engineer M/F (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238056",
+            "title": "Account Manager (pôle E-Commerce) (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242460",
+            "title": "Airline Marketing Analyst (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242248",
+            "title": "VIE - Certificate Portfolio Manager (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242395",
+            "title": "Chef de projet (H/F)",
+            "domain_tag": "sales"
+          }
+        ],
+        "distant_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242548",
+            "title": "Contrôleur de gestion (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242504",
+            "title": "Supply Chain Manager in Singapore (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242441",
+            "title": "Responsable Technico-Commercial (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242337",
+            "title": "ASSISTANT CONTROLE DE GESTION (H/F) BODEN (SUEDE)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          }
+        ],
+        "mismatched_top10": [
+          {
+            "external_id": "242301",
+            "title": "Growth & Account Manager – Villa Supply (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "237014",
+            "title": "AI Solutions & Automation Specialist (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242471",
+            "title": "COMMERCIAL TERRAIN (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "237194",
+            "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238346",
+            "title": "Digital Account Manager - FR & ITALIAN MARKET (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238427",
+            "title": "Application & Support Engineer M/F (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238056",
+            "title": "Account Manager (pôle E-Commerce) (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242460",
+            "title": "Airline Marketing Analyst (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242248",
+            "title": "VIE - Certificate Portfolio Manager (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242395",
+            "title": "Chef de projet (H/F)",
+            "domain_tag": "sales"
+          }
+        ],
+        "neutral_top5": [
+          {
+            "external_id": "237223",
+            "title": "Product Owner (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242454",
+            "title": "Application Scientist (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242437",
+            "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242428",
+            "title": "CHARGE (E) DE MISSION ENERGIE ET NOUVELLES TECHNOLOGIES (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242399",
+            "title": "VIE - Strategy Consultant (H/F)",
+            "domain_tag": "other"
+          }
+        ]
+      },
+      "skill_breakdown": [
+        {
+          "skill": "skill:digital_marketing",
+          "signal_type": "strong",
+          "strong_domain": "marketing",
+          "data_driven_top": "marketing",
+          "data_driven_n": 5,
+          "data_driven_distribution": {
+            "marketing": 2,
+            "supply": 1,
+            "sales": 2
+          }
+        },
+        {
+          "skill": "skill:seo",
+          "signal_type": "strong",
+          "strong_domain": "marketing",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:content_marketing",
+          "signal_type": "strong",
+          "strong_domain": "marketing",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:social_media",
+          "signal_type": "strong",
+          "strong_domain": "marketing",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:campaign_management",
+          "signal_type": "strong",
+          "strong_domain": "marketing",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        }
+      ]
+    },
+    {
+      "profile": "P5_hr_recruiter",
+      "expected_domain": "hr",
+      "cv_domain_inferred": "hr",
+      "expected_matches_inferred": true,
+      "confidence": "ok",
+      "strong_signal_count": 4,
+      "weak_signal_count": 0,
+      "skills_with_signal": 4,
+      "skills_total": 4,
+      "score_distribution_top5": {
+        "hr": 13.053921568627452,
+        "sales": 0.4852941176470588,
+        "engineering": 0.25980392156862747,
+        "other": 0.058823529411764705,
+        "admin": 0.058823529411764705
+      },
+      "totals": {
+        "active_offers": 876,
+        "aligned": 39,
+        "adjacent": 105,
+        "distant": 720,
+        "neutral_unknown_or_other": 12,
+        "mismatched_legacy": 825
+      },
+      "hard_filter_projection": {
+        "would_keep": 39,
+        "would_keep_with_neutral": 51,
+        "would_exclude": 825,
+        "exclusion_pct": 94.2
+      },
+      "soft_filter_projection": {
+        "high_priority": 39,
+        "low_priority": 825,
+        "neutral": 12
+      },
+      "affinity_projection": {
+        "aligned_pct": 4.5,
+        "adjacent_pct": 12.0,
+        "distant_pct": 82.2,
+        "neutral_pct": 1.4,
+        "soft_keep_aligned_plus_adjacent_pct": 16.4,
+        "distant_only_exclusion_pct": 82.2,
+        "exclusion_reduction_vs_binary_pct": 12.0
+      },
+      "samples": {
+        "aligned_top5": [
+          {
+            "external_id": "238239",
+            "title": "TALENT ACQUISITION SPECIALIST (H/F)",
+            "domain_tag": "hr"
+          },
+          {
+            "external_id": "242510",
+            "title": "VIA Chargé(e) de mission pédagogique (H/F)",
+            "domain_tag": "hr"
+          },
+          {
+            "external_id": "242511",
+            "title": "Sales Operations B2B - RevOps - VIE - Barcelone (H/F)",
+            "domain_tag": "hr"
+          },
+          {
+            "external_id": "242384",
+            "title": "Consultant.e en recrutement (H/F)",
+            "domain_tag": "hr"
+          },
+          {
+            "external_id": "236438",
+            "title": "VMS Tool Officer (H/F)",
+            "domain_tag": "hr"
+          }
+        ],
+        "adjacent_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242450",
+            "title": "VIE - Operations Oversight Officer (12 months) (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242367",
+            "title": "Responsable financier H/F/X (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242327",
+            "title": "Analyst Transformation (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242333",
+            "title": "VIE HSE COORDINATOR SOLAR FARM (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "238075",
+            "title": "Automation Engineer _Energy Technology (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242158",
+            "title": "VIE – Finance Transformation Administrator - Barcelona (H/F)",
+            "domain_tag": "admin"
+          },
+          {
+            "external_id": "242207",
+            "title": "Strategy and competitive intelligence project manager (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "236241",
+            "title": "Junior Construction Project Manager (H/F)",
+            "domain_tag": "operations"
+          }
+        ],
+        "distant_top10": [
+          {
+            "external_id": "242301",
+            "title": "Growth & Account Manager – Villa Supply (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242548",
+            "title": "Contrôleur de gestion (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242504",
+            "title": "Supply Chain Manager in Singapore (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242441",
+            "title": "Responsable Technico-Commercial (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242337",
+            "title": "ASSISTANT CONTROLE DE GESTION (H/F) BODEN (SUEDE)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          }
+        ],
+        "mismatched_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242450",
+            "title": "VIE - Operations Oversight Officer (12 months) (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242367",
+            "title": "Responsable financier H/F/X (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242327",
+            "title": "Analyst Transformation (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242333",
+            "title": "VIE HSE COORDINATOR SOLAR FARM (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "238075",
+            "title": "Automation Engineer _Energy Technology (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242158",
+            "title": "VIE – Finance Transformation Administrator - Barcelona (H/F)",
+            "domain_tag": "admin"
+          },
+          {
+            "external_id": "242207",
+            "title": "Strategy and competitive intelligence project manager (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "236241",
+            "title": "Junior Construction Project Manager (H/F)",
+            "domain_tag": "operations"
+          }
+        ],
+        "neutral_top5": [
+          {
+            "external_id": "237223",
+            "title": "Product Owner (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242454",
+            "title": "Application Scientist (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242437",
+            "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242428",
+            "title": "CHARGE (E) DE MISSION ENERGIE ET NOUVELLES TECHNOLOGIES (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242399",
+            "title": "VIE - Strategy Consultant (H/F)",
+            "domain_tag": "other"
+          }
+        ]
+      },
+      "skill_breakdown": [
+        {
+          "skill": "skill:recruitment",
+          "signal_type": "strong",
+          "strong_domain": "hr",
+          "data_driven_top": "hr",
+          "data_driven_n": 36,
+          "data_driven_distribution": {
+            "data": 2,
+            "operations": 1,
+            "hr": 21,
+            "sales": 9,
+            "engineering": 3
+          }
+        },
+        {
+          "skill": "skill:talent_acquisition",
+          "signal_type": "strong",
+          "strong_domain": "hr",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:human_resources_management",
+          "signal_type": "strong",
+          "strong_domain": "hr",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:onboarding",
+          "signal_type": "strong",
+          "strong_domain": "hr",
+          "data_driven_top": "hr",
+          "data_driven_n": 17,
+          "data_driven_distribution": {
+            "other": 1,
+            "sales": 4,
+            "hr": 8,
+            "engineering": 3,
+            "admin": 1
+          }
+        }
+      ]
+    },
+    {
+      "profile": "P6_supply_chain",
+      "expected_domain": "supply",
+      "cv_domain_inferred": "supply",
+      "expected_matches_inferred": true,
+      "confidence": "ok",
+      "strong_signal_count": 4,
+      "weak_signal_count": 0,
+      "skills_with_signal": 4,
+      "skills_total": 4,
+      "score_distribution_top5": {
+        "supply": 12.837837837837839,
+        "sales": 0.08108108108108109,
+        "operations": 0.02702702702702703,
+        "admin": 0.02702702702702703,
+        "data": 0.02702702702702703
+      },
+      "totals": {
+        "active_offers": 876,
+        "aligned": 115,
+        "adjacent": 272,
+        "distant": 477,
+        "neutral_unknown_or_other": 12,
+        "mismatched_legacy": 749
+      },
+      "hard_filter_projection": {
+        "would_keep": 115,
+        "would_keep_with_neutral": 127,
+        "would_exclude": 749,
+        "exclusion_pct": 85.5
+      },
+      "soft_filter_projection": {
+        "high_priority": 115,
+        "low_priority": 749,
+        "neutral": 12
+      },
+      "affinity_projection": {
+        "aligned_pct": 13.1,
+        "adjacent_pct": 31.1,
+        "distant_pct": 54.5,
+        "neutral_pct": 1.4,
+        "soft_keep_aligned_plus_adjacent_pct": 44.2,
+        "distant_only_exclusion_pct": 54.5,
+        "exclusion_reduction_vs_binary_pct": 31.1
+      },
+      "samples": {
+        "aligned_top5": [
+          {
+            "external_id": "242504",
+            "title": "Supply Chain Manager in Singapore (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242441",
+            "title": "Responsable Technico-Commercial (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242532",
+            "title": "HES Engineer M/W (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242270",
+            "title": "Field Engineer (H/F) - Mobilité Internationale",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "232738",
+            "title": "ACHETEUR(SE) - APPROVISIONNEUR(SE) (H/F)",
+            "domain_tag": "supply"
+          }
+        ],
+        "adjacent_top10": [
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "232362",
+            "title": "INGÉNIEUR(E) EMBARQUÉ LINUX (YOCTO) (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "238242",
+            "title": "CONCEPTEUR MECANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237571",
+            "title": "Software Engineer C++ (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242465",
+            "title": "Ingénieur RAMS / FMDS (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242022",
+            "title": "Ingénieur(e) risques industriels (H/F)",
+            "domain_tag": "engineering"
+          }
+        ],
+        "distant_top10": [
+          {
+            "external_id": "242301",
+            "title": "Growth & Account Manager – Villa Supply (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242548",
+            "title": "Contrôleur de gestion (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242337",
+            "title": "ASSISTANT CONTROLE DE GESTION (H/F) BODEN (SUEDE)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "237014",
+            "title": "AI Solutions & Automation Specialist (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242521",
+            "title": "INGENIEUR QUALITE (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242519",
+            "title": "D&IS Product Marketing (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "242471",
+            "title": "COMMERCIAL TERRAIN (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "237194",
+            "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+            "domain_tag": "data"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          }
+        ],
+        "mismatched_top10": [
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "232362",
+            "title": "INGÉNIEUR(E) EMBARQUÉ LINUX (YOCTO) (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "238242",
+            "title": "CONCEPTEUR MECANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237571",
+            "title": "Software Engineer C++ (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242465",
+            "title": "Ingénieur RAMS / FMDS (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242022",
+            "title": "Ingénieur(e) risques industriels (H/F)",
+            "domain_tag": "engineering"
+          }
+        ],
+        "neutral_top5": [
+          {
+            "external_id": "237223",
+            "title": "Product Owner (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242454",
+            "title": "Application Scientist (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242437",
+            "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242428",
+            "title": "CHARGE (E) DE MISSION ENERGIE ET NOUVELLES TECHNOLOGIES (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242399",
+            "title": "VIE - Strategy Consultant (H/F)",
+            "domain_tag": "other"
+          }
+        ]
+      },
+      "skill_breakdown": [
+        {
+          "skill": "skill:supply_chain_management",
+          "signal_type": "strong",
+          "strong_domain": "supply",
+          "data_driven_top": "supply",
+          "data_driven_n": 37,
+          "data_driven_distribution": {
+            "sales": 3,
+            "operations": 1,
+            "admin": 1,
+            "supply": 31,
+            "data": 1
+          }
+        },
+        {
+          "skill": "skill:procurement",
+          "signal_type": "strong",
+          "strong_domain": "supply",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:logistics",
+          "signal_type": "strong",
+          "strong_domain": "supply",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:inventory_management",
+          "signal_type": "strong",
+          "strong_domain": "supply",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        }
+      ]
+    },
+    {
+      "profile": "P7_sales_b2b",
+      "expected_domain": "sales",
+      "cv_domain_inferred": "sales",
+      "expected_matches_inferred": true,
+      "confidence": "ok",
+      "strong_signal_count": 5,
+      "weak_signal_count": 0,
+      "skills_with_signal": 5,
+      "skills_total": 5,
+      "score_distribution_top5": {
+        "sales": 17.46761904761905,
+        "supply": 0.4476190476190476,
+        "engineering": 0.31238095238095237,
+        "hr": 0.29428571428571426,
+        "finance": 0.2
+      },
+      "totals": {
+        "active_offers": 876,
+        "aligned": 129,
+        "adjacent": 97,
+        "distant": 638,
+        "neutral_unknown_or_other": 12,
+        "mismatched_legacy": 735
+      },
+      "hard_filter_projection": {
+        "would_keep": 129,
+        "would_keep_with_neutral": 141,
+        "would_exclude": 735,
+        "exclusion_pct": 83.9
+      },
+      "soft_filter_projection": {
+        "high_priority": 129,
+        "low_priority": 735,
+        "neutral": 12
+      },
+      "affinity_projection": {
+        "aligned_pct": 14.7,
+        "adjacent_pct": 11.1,
+        "distant_pct": 72.8,
+        "neutral_pct": 1.4,
+        "soft_keep_aligned_plus_adjacent_pct": 25.8,
+        "distant_only_exclusion_pct": 72.8,
+        "exclusion_reduction_vs_binary_pct": 11.1
+      },
+      "samples": {
+        "aligned_top5": [
+          {
+            "external_id": "242301",
+            "title": "Growth & Account Manager – Villa Supply (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "237014",
+            "title": "AI Solutions & Automation Specialist (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "242471",
+            "title": "COMMERCIAL TERRAIN (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238346",
+            "title": "Digital Account Manager - FR & ITALIAN MARKET (H/F)",
+            "domain_tag": "sales"
+          },
+          {
+            "external_id": "238427",
+            "title": "Application & Support Engineer M/F (H/F)",
+            "domain_tag": "sales"
+          }
+        ],
+        "adjacent_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242519",
+            "title": "D&IS Product Marketing (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242450",
+            "title": "VIE - Operations Oversight Officer (12 months) (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242367",
+            "title": "Responsable financier H/F/X (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242327",
+            "title": "Analyst Transformation (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242311",
+            "title": "Chargé·e partenariats et sponsoring (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "242333",
+            "title": "VIE HSE COORDINATOR SOLAR FARM (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "238075",
+            "title": "Automation Engineer _Energy Technology (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242231",
+            "title": "User Acquisition Specialist (H/F)",
+            "domain_tag": "marketing"
+          }
+        ],
+        "distant_top10": [
+          {
+            "external_id": "242548",
+            "title": "Contrôleur de gestion (H/F)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242504",
+            "title": "Supply Chain Manager in Singapore (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242530",
+            "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "237232",
+            "title": "CONTAINER PROCESS DEVELOPMENT ENGINEER (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242466",
+            "title": "Ingénieur Méthodes (F/H/X) - Aéronautique-Spatial-Défense (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242528",
+            "title": "INGÉNIEUR MATÉRIAUX COMPOSITE (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242441",
+            "title": "Responsable Technico-Commercial (H/F)",
+            "domain_tag": "supply"
+          },
+          {
+            "external_id": "242337",
+            "title": "ASSISTANT CONTROLE DE GESTION (H/F) BODEN (SUEDE)",
+            "domain_tag": "finance"
+          },
+          {
+            "external_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "domain_tag": "engineering"
+          },
+          {
+            "external_id": "242532",
+            "title": "HES Engineer M/W (H/F)",
+            "domain_tag": "supply"
+          }
+        ],
+        "mismatched_top10": [
+          {
+            "external_id": "242491",
+            "title": "T&C CFO – Ingénieur Essais et Mise en Service CFO (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242519",
+            "title": "D&IS Product Marketing (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "238269",
+            "title": "Chargé de HSE (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242450",
+            "title": "VIE - Operations Oversight Officer (12 months) (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242367",
+            "title": "Responsable financier H/F/X (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242327",
+            "title": "Analyst Transformation (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242311",
+            "title": "Chargé·e partenariats et sponsoring (H/F)",
+            "domain_tag": "marketing"
+          },
+          {
+            "external_id": "242333",
+            "title": "VIE HSE COORDINATOR SOLAR FARM (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "238075",
+            "title": "Automation Engineer _Energy Technology (H/F)",
+            "domain_tag": "operations"
+          },
+          {
+            "external_id": "242231",
+            "title": "User Acquisition Specialist (H/F)",
+            "domain_tag": "marketing"
+          }
+        ],
+        "neutral_top5": [
+          {
+            "external_id": "237223",
+            "title": "Product Owner (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242454",
+            "title": "Application Scientist (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242437",
+            "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242428",
+            "title": "CHARGE (E) DE MISSION ENERGIE ET NOUVELLES TECHNOLOGIES (H/F)",
+            "domain_tag": "other"
+          },
+          {
+            "external_id": "242399",
+            "title": "VIE - Strategy Consultant (H/F)",
+            "domain_tag": "other"
+          }
+        ]
+      },
+      "skill_breakdown": [
+        {
+          "skill": "skill:b2b_sales",
+          "signal_type": "strong",
+          "strong_domain": "sales",
+          "data_driven_top": "sales",
+          "data_driven_n": 75,
+          "data_driven_distribution": {
+            "operations": 3,
+            "hr": 6,
+            "sales": 59,
+            "supply": 5,
+            "engineering": 2
+          }
+        },
+        {
+          "skill": "skill:lead_generation",
+          "signal_type": "strong",
+          "strong_domain": "sales",
+          "data_driven_top": "sales",
+          "data_driven_n": 21,
+          "data_driven_distribution": {
+            "supply": 2,
+            "engineering": 3,
+            "marketing": 2,
+            "sales": 11,
+            "hr": 3
+          }
+        },
+        {
+          "skill": "skill:account_management",
+          "signal_type": "strong",
+          "strong_domain": "sales",
+          "data_driven_top": "sales",
+          "data_driven_n": 5,
+          "data_driven_distribution": {
+            "sales": 4,
+            "finance": 1
+          }
+        },
+        {
+          "skill": "skill:business_development",
+          "signal_type": "strong",
+          "strong_domain": "sales",
+          "data_driven_top": null,
+          "data_driven_n": 0,
+          "data_driven_distribution": {}
+        },
+        {
+          "skill": "skill:negotiation",
+          "signal_type": "strong",
+          "strong_domain": "sales",
+          "data_driven_top": "sales",
+          "data_driven_n": 14,
+          "data_driven_distribution": {
+            "hr": 1,
+            "engineering": 2,
+            "marketing": 1,
+            "admin": 1,
+            "sales": 5,
+            "supply": 4
+          }
+        }
+      ]
+    }
+  ]
+}

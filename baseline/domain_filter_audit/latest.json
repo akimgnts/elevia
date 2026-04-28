@@ -1,0 +1,1117 @@
+{
+  "api_base": "http://127.0.0.1:8000",
+  "cv_dir": "/Users/akimguentas/Downloads/cvtest",
+  "top_k": 10,
+  "panel": {
+    "Akim_Guentas_Resume.pdf": "data",
+    "CV CDI MOUSTAPHA LO DATA.pdf": "data",
+    "CV - Nawel KADI 2026.pdf": "hr",
+    "CV Mathilde CEVAK.pdf": "sales",
+    "CV WECKER.pdf": "engineering"
+  },
+  "results": [
+    {
+      "cv_file": "Akim_Guentas_Resume.pdf",
+      "expected_domain": "data",
+      "baseline": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "238204",
+            "title": "VIE - Pricing analyst - Barcelona (H/F)",
+            "company": "SCHNEIDER ELECTRIC INDUSTRIES SAS",
+            "domain_tag": "data",
+            "score": 75,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "237987",
+            "title": "Mid IT Business Analyst (H/F)",
+            "company": "ASF ACT DIGITAL",
+            "domain_tag": "data",
+            "score": 71,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242509",
+            "title": "VIE - Data Project Leader (H/F)",
+            "company": "SCHNEIDER ELECTRIC INDUSTRIES SAS",
+            "domain_tag": "supply",
+            "score": 70,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "242505",
+            "title": "Methods & Tools Quality Engineer (H/F)",
+            "company": "ALSTOM TRANSPORT SA",
+            "domain_tag": "data",
+            "score": 69,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "238350",
+            "title": "Commercial Operations Associate (H/F)",
+            "company": "TISSIUM",
+            "domain_tag": "supply",
+            "score": 67,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "237997",
+            "title": "AI Data Engineer (H/F)",
+            "company": "ASF ACT DIGITAL",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "242043",
+            "title": "Data Scientist (H/F)",
+            "company": "ILIAD",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "242266",
+            "title": "Omnichannel Project Lead (H/F)",
+            "company": "SANOFI WINTHROP INDUSTRIE",
+            "domain_tag": "supply",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "242389",
+            "title": "Data Analyst (H/F)",
+            "company": "SAFRAN NACELLES",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "238106",
+            "title": "Data Integration Expert (VIE) - French market (F/H) (H/F)",
+            "company": "AGICAP",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "data": 7,
+          "supply": 3
+        }
+      },
+      "domain_filter": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "238204",
+            "title": "VIE - Pricing analyst - Barcelona (H/F)",
+            "company": "SCHNEIDER ELECTRIC INDUSTRIES SAS",
+            "domain_tag": "data",
+            "score": 75,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "237987",
+            "title": "Mid IT Business Analyst (H/F)",
+            "company": "ASF ACT DIGITAL",
+            "domain_tag": "data",
+            "score": 71,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242505",
+            "title": "Methods & Tools Quality Engineer (H/F)",
+            "company": "ALSTOM TRANSPORT SA",
+            "domain_tag": "data",
+            "score": 69,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "237997",
+            "title": "AI Data Engineer (H/F)",
+            "company": "ASF ACT DIGITAL",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "242043",
+            "title": "Data Scientist (H/F)",
+            "company": "ILIAD",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "242389",
+            "title": "Data Analyst (H/F)",
+            "company": "SAFRAN NACELLES",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "238106",
+            "title": "Data Integration Expert (VIE) - French market (F/H) (H/F)",
+            "company": "AGICAP",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "242468",
+            "title": "Responsable Reporting & data - VIE Madrid (H/F)",
+            "company": "KIMPA",
+            "domain_tag": "data",
+            "score": 64,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "242439",
+            "title": "Business operations improvement Analyst (H/F)",
+            "company": "AIRBUS OPERATIONS",
+            "domain_tag": "data",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "242079",
+            "title": "AI Operations Engineer - VIE - Barcelona (H/F)",
+            "company": "FLASH CONTRACT",
+            "domain_tag": "data",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "data": 10
+        }
+      }
+    },
+    {
+      "cv_file": "CV CDI MOUSTAPHA LO DATA.pdf",
+      "expected_domain": "data",
+      "baseline": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "238437",
+            "title": "Analyste SOC (H/F)",
+            "company": "ASTEK FRANCE",
+            "domain_tag": "data",
+            "score": 77,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "242468",
+            "title": "Responsable Reporting & data - VIE Madrid (H/F)",
+            "company": "KIMPA",
+            "domain_tag": "data",
+            "score": 73,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242079",
+            "title": "AI Operations Engineer - VIE - Barcelona (H/F)",
+            "company": "FLASH CONTRACT",
+            "domain_tag": "data",
+            "score": 68,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "242093",
+            "title": "HR Transversal Management (H/F)",
+            "company": "AIRBUS",
+            "domain_tag": "hr",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "238285",
+            "title": "Ingénieur qualité (H/F)",
+            "company": "STMICROELECTRONICS (TOURS) SAS",
+            "domain_tag": "engineering",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "238286",
+            "title": "Ingénieur qualité (H/F)",
+            "company": "STMICROELECTRONICS (TOURS) SAS",
+            "domain_tag": "engineering",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "238414",
+            "title": "Environment Policy analyst - (H/F)",
+            "company": "AIRBUS",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "238106",
+            "title": "Data Integration Expert (VIE) - French market (F/H) (H/F)",
+            "company": "AGICAP",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "242119",
+            "title": "Analyste support tarification et reporting du marché secondaire (H/F)",
+            "company": "CNH INDUSTRIAL FRANCE",
+            "domain_tag": "finance",
+            "score": 65,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "242560",
+            "title": "Data Scientist (H/F)",
+            "company": "TOTALENERGIES SE",
+            "domain_tag": "data",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "data": 6,
+          "engineering": 2,
+          "finance": 1,
+          "hr": 1
+        }
+      },
+      "domain_filter": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "238437",
+            "title": "Analyste SOC (H/F)",
+            "company": "ASTEK FRANCE",
+            "domain_tag": "data",
+            "score": 77,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "242468",
+            "title": "Responsable Reporting & data - VIE Madrid (H/F)",
+            "company": "KIMPA",
+            "domain_tag": "data",
+            "score": 73,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242079",
+            "title": "AI Operations Engineer - VIE - Barcelona (H/F)",
+            "company": "FLASH CONTRACT",
+            "domain_tag": "data",
+            "score": 68,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "238414",
+            "title": "Environment Policy analyst - (H/F)",
+            "company": "AIRBUS",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "238106",
+            "title": "Data Integration Expert (VIE) - French market (F/H) (H/F)",
+            "company": "AGICAP",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "242560",
+            "title": "Data Scientist (H/F)",
+            "company": "TOTALENERGIES SE",
+            "domain_tag": "data",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "242267",
+            "title": "VIE-Digital & Sales Data Analyst (H/F)",
+            "company": "L'AIR LIQUIDE SOCIETE ANONYME POUR L'ETUDE ET L'EXPLOITATION DES PROCEDES GEORGES CLAUDE",
+            "domain_tag": "data",
+            "score": 60,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "242369",
+            "title": "DATA SCIENTIST (H/F)",
+            "company": "DAVIDSON NORD",
+            "domain_tag": "data",
+            "score": 59,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "242095",
+            "title": "VIE – Sourcing Digitalization Analyst (H/F)",
+            "company": "FAIVELEY TRANSPORT",
+            "domain_tag": "data",
+            "score": 59,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "238204",
+            "title": "VIE - Pricing analyst - Barcelona (H/F)",
+            "company": "SCHNEIDER ELECTRIC INDUSTRIES SAS",
+            "domain_tag": "data",
+            "score": 57,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "data": 10
+        }
+      }
+    },
+    {
+      "cv_file": "CV - Nawel KADI 2026.pdf",
+      "expected_domain": "hr",
+      "baseline": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "242108",
+            "title": "Ingénieur Process (H/F)",
+            "company": "NEXIRA",
+            "domain_tag": "engineering",
+            "score": 100,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "232562",
+            "title": "BUSINESS MANAGER (H/F)",
+            "company": "ALPINEO CONSULTING LYON",
+            "domain_tag": "hr",
+            "score": 84,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "230179",
+            "title": "BUSINESS MANAGER BXL H/F (H/F)",
+            "company": "EFE INTERNATIONAL",
+            "domain_tag": "hr",
+            "score": 79,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "242226",
+            "title": "BUSINESS MANAGER BCN (H/F)",
+            "company": "EFE INTERNATIONAL",
+            "domain_tag": "hr",
+            "score": 79,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "242116",
+            "title": "BUSINESS MANAGER (H/F)",
+            "company": "ACALY",
+            "domain_tag": "hr",
+            "score": 75,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "242128",
+            "title": "Chargé(e) Back Office - Settlement/Transfert (H/F)",
+            "company": "ARKEA PROCAPITAL SERVICES",
+            "domain_tag": "admin",
+            "score": 72,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "240118",
+            "title": "VIE CHARGÉ(E) DE MISSION - AFFAIRES PUBLIQUES EUROPÉENNES, énergie F/H (H/F)",
+            "company": "ORANO SUPPORT",
+            "domain_tag": "other",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "242319",
+            "title": "INGENIEUR QUALITE H/F (H/F)",
+            "company": "NGEN LILLE",
+            "domain_tag": "finance",
+            "score": 65,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "238239",
+            "title": "TALENT ACQUISITION SPECIALIST (H/F)",
+            "company": "EXALT FI",
+            "domain_tag": "hr",
+            "score": 65,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "242188",
+            "title": "Manager Paie (H/F)",
+            "company": "YOUR BO",
+            "domain_tag": "hr",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "hr": 6,
+          "admin": 1,
+          "engineering": 1,
+          "finance": 1,
+          "other": 1
+        }
+      },
+      "domain_filter": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "232562",
+            "title": "BUSINESS MANAGER (H/F)",
+            "company": "ALPINEO CONSULTING LYON",
+            "domain_tag": "hr",
+            "score": 84,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "230179",
+            "title": "BUSINESS MANAGER BXL H/F (H/F)",
+            "company": "EFE INTERNATIONAL",
+            "domain_tag": "hr",
+            "score": 79,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242226",
+            "title": "BUSINESS MANAGER BCN (H/F)",
+            "company": "EFE INTERNATIONAL",
+            "domain_tag": "hr",
+            "score": 79,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "242116",
+            "title": "BUSINESS MANAGER (H/F)",
+            "company": "ACALY",
+            "domain_tag": "hr",
+            "score": 75,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "238239",
+            "title": "TALENT ACQUISITION SPECIALIST (H/F)",
+            "company": "EXALT FI",
+            "domain_tag": "hr",
+            "score": 65,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "242188",
+            "title": "Manager Paie (H/F)",
+            "company": "YOUR BO",
+            "domain_tag": "hr",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "236438",
+            "title": "VMS Tool Officer (H/F)",
+            "company": "INNOHA",
+            "domain_tag": "hr",
+            "score": 61,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "242384",
+            "title": "Consultant.e en recrutement (H/F)",
+            "company": "ADSEARCH PARIS",
+            "domain_tag": "hr",
+            "score": 46,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "237602",
+            "title": "Consultant SAP HR (H/F)",
+            "company": "HCM CONSULTING PLUS",
+            "domain_tag": "hr",
+            "score": 42,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "236398",
+            "title": "Talent Acquisition Specialist (H/F)",
+            "company": "ALPINEO CONSULTING LYON",
+            "domain_tag": "hr",
+            "score": 40,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "hr": 10
+        }
+      }
+    },
+    {
+      "cv_file": "CV Mathilde CEVAK.pdf",
+      "expected_domain": "sales",
+      "baseline": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "242350",
+            "title": "VIE - Meeting Planner contrat H_F_X - BRUXELLES - 6 MONTHS (H/F)",
+            "company": "ACCOR",
+            "domain_tag": "finance",
+            "score": 79,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "237985",
+            "title": "AREA SALES MANAGER EXPORT AFRIQUE DU NORD et de l’OUEST (H/F)",
+            "company": "MAPED",
+            "domain_tag": "sales",
+            "score": 76,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242502",
+            "title": "Responsable Développement Marché - Asie du Sud-Est (Business Development) M/F (H/F)",
+            "company": "AIRBUS HELICOPTERS",
+            "domain_tag": "sales",
+            "score": 73,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "242460",
+            "title": "Airline Marketing Analyst (H/F)",
+            "company": "AIRBUS",
+            "domain_tag": "sales",
+            "score": 73,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "241003",
+            "title": "BUSINESS DEVELOPER - ACCOUNT MANAGER (H/F)",
+            "company": "BK CONSULTING FRANCE",
+            "domain_tag": "sales",
+            "score": 70,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "237882",
+            "title": "CHEF DE PROJET MARKETING DIGITAL (H/F)",
+            "company": "LINKEO.COM",
+            "domain_tag": "marketing",
+            "score": 68,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "242178",
+            "title": "Business Developer - VIE - Barcelone (H/F)",
+            "company": "FLASH CONTRACT",
+            "domain_tag": "sales",
+            "score": 68,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "242246",
+            "title": "Sales and Admissions officer (H/F)",
+            "company": "ALBERT GLOBAL DATA SCHOOL",
+            "domain_tag": "sales",
+            "score": 64,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "235859",
+            "title": "GRAPHIC DESIGNER (H/F)",
+            "company": "GYS",
+            "domain_tag": "marketing",
+            "score": 64,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "242449",
+            "title": "Junior Buyer (H/F)",
+            "company": "PAYFIT",
+            "domain_tag": "supply",
+            "score": 64,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "sales": 6,
+          "marketing": 2,
+          "finance": 1,
+          "supply": 1
+        }
+      },
+      "domain_filter": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "237985",
+            "title": "AREA SALES MANAGER EXPORT AFRIQUE DU NORD et de l’OUEST (H/F)",
+            "company": "MAPED",
+            "domain_tag": "sales",
+            "score": 76,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "242502",
+            "title": "Responsable Développement Marché - Asie du Sud-Est (Business Development) M/F (H/F)",
+            "company": "AIRBUS HELICOPTERS",
+            "domain_tag": "sales",
+            "score": 73,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242460",
+            "title": "Airline Marketing Analyst (H/F)",
+            "company": "AIRBUS",
+            "domain_tag": "sales",
+            "score": 73,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "241003",
+            "title": "BUSINESS DEVELOPER - ACCOUNT MANAGER (H/F)",
+            "company": "BK CONSULTING FRANCE",
+            "domain_tag": "sales",
+            "score": 70,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "242178",
+            "title": "Business Developer - VIE - Barcelone (H/F)",
+            "company": "FLASH CONTRACT",
+            "domain_tag": "sales",
+            "score": 68,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "242246",
+            "title": "Sales and Admissions officer (H/F)",
+            "company": "ALBERT GLOBAL DATA SCHOOL",
+            "domain_tag": "sales",
+            "score": 64,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "242539",
+            "title": "Sales Coordinator (H/F)",
+            "company": "NAOS",
+            "domain_tag": "sales",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "242134",
+            "title": "Service Business Developer – Food & Pharma Division (H/F)",
+            "company": "ALFA LAVAL FRANCE & NORTH WEST AFRICA SAS",
+            "domain_tag": "sales",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "241002",
+            "title": "Business Developer (H/F)",
+            "company": "GENERAL AU SERVICE DU CHEVAL",
+            "domain_tag": "sales",
+            "score": 60,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "236852",
+            "title": "BUSINESS ANALYST (H/F)",
+            "company": "TOTALENERGIES SE",
+            "domain_tag": "sales",
+            "score": 59,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "sales": 10
+        }
+      }
+    },
+    {
+      "cv_file": "CV WECKER.pdf",
+      "expected_domain": "engineering",
+      "baseline": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "238157",
+            "title": "VIE-Synthesis Researcher(M/F/D) (H/F)",
+            "company": "L'AIR LIQUIDE SOCIETE ANONYME POUR L'ETUDE ET L'EXPLOITATION DES PROCEDES GEORGES CLAUDE",
+            "domain_tag": "data",
+            "score": 70,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "242209",
+            "title": "Développeur PHP junior (H/F)",
+            "company": "MOONGY",
+            "domain_tag": "data",
+            "score": 68,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242043",
+            "title": "Data Scientist (H/F)",
+            "company": "ILIAD",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "238303",
+            "title": "Technicien(ne) IT Junior (H/F)",
+            "company": "ALTEN",
+            "domain_tag": "engineering",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "238437",
+            "title": "Analyste SOC (H/F)",
+            "company": "ASTEK FRANCE",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "231966",
+            "title": "DATA ANALYST - DATA SCIENTIST - DATA ENGINEER H/F (H/F)",
+            "company": "CLEEVEN ND",
+            "domain_tag": "data",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "237997",
+            "title": "AI Data Engineer (H/F)",
+            "company": "ASF ACT DIGITAL",
+            "domain_tag": "data",
+            "score": 65,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "237001",
+            "title": "Développeur Python (H/F)",
+            "company": "EXTIA",
+            "domain_tag": "engineering",
+            "score": 65,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "242529",
+            "title": "INGÉNIEUR SYSTÈMES EMBARQUÉS (H/F)",
+            "company": "FORTIL GROUP",
+            "domain_tag": "engineering",
+            "score": 64,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "237223",
+            "title": "Product Owner (H/F)",
+            "company": "SOCIETE POUR L'INFORMATIQUE INDUSTRIELLE",
+            "domain_tag": "other",
+            "score": 63,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "data": 6,
+          "engineering": 3,
+          "other": 1
+        }
+      },
+      "domain_filter": {
+        "top_offers": [
+          {
+            "rank": 1,
+            "offer_id": "238303",
+            "title": "Technicien(ne) IT Junior (H/F)",
+            "company": "ALTEN",
+            "domain_tag": "engineering",
+            "score": 66,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 2,
+            "offer_id": "237001",
+            "title": "Développeur Python (H/F)",
+            "company": "EXTIA",
+            "domain_tag": "engineering",
+            "score": 65,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 3,
+            "offer_id": "242529",
+            "title": "INGÉNIEUR SYSTÈMES EMBARQUÉS (H/F)",
+            "company": "FORTIL GROUP",
+            "domain_tag": "engineering",
+            "score": 64,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 4,
+            "offer_id": "233057",
+            "title": "TALENT RECRUITER (H/F)",
+            "company": "JEMS",
+            "domain_tag": "engineering",
+            "score": 61,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 5,
+            "offer_id": "237615",
+            "title": "Ingénieur Intelligence Artificielle (H/F)",
+            "company": "TOTALENERGIES SE",
+            "domain_tag": "engineering",
+            "score": 60,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 6,
+            "offer_id": "242479",
+            "title": "QA Officer (H/F)",
+            "company": "BRED BANQUE POPULAIRE",
+            "domain_tag": "engineering",
+            "score": 60,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 7,
+            "offer_id": "238010",
+            "title": "Oracle HCM Developer (H/F)",
+            "company": "ASF ACT DIGITAL",
+            "domain_tag": "engineering",
+            "score": 59,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 8,
+            "offer_id": "240135",
+            "title": "Junior Developer – Electricity Markets (H/F)",
+            "company": "ACENSI SAS",
+            "domain_tag": "engineering",
+            "score": 58,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 9,
+            "offer_id": "242474",
+            "title": "Data Management & Analytical Method Lifecycle (H/F)",
+            "company": "BAXTER S.A.S",
+            "domain_tag": "engineering",
+            "score": 57,
+            "matched_core": [],
+            "missing_core": []
+          },
+          {
+            "rank": 10,
+            "offer_id": "232362",
+            "title": "INGÉNIEUR(E) EMBARQUÉ LINUX (YOCTO) (H/F)",
+            "company": "WITEKIO HOLDING",
+            "domain_tag": "engineering",
+            "score": 57,
+            "matched_core": [],
+            "missing_core": []
+          }
+        ],
+        "top_domain_distribution": {
+          "engineering": 10
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "sample_size": 5,
+  "offers": [
+    {
+      "external_id": "238371",
+      "title": "VIE Functional Excellence Support (H/F)",
+      "description": "Join the technological revolution of autonomous and connected vehicles at Valeo! World leader in driving aids, Valeo Brain is reinventing life on board the vehicle and revolutionizing the driving experience. From connectivity and interior control solutions to sensing systems, we make mobility safer and more intuitive. The site of Bietigheim-Bissingen based in Germany belongs to BRAIN Division. We are looking for a VIE Functional Excellence Support for 12 months within the team. Your challenges? You will be responsible for leading continuous improvement initiatives within the department, which will involve analyzing current operational processes, identifying areas for optimization, and supporting the implementation of best practices and new tools. You drive continuous improvement initiatives within the function You analyze current operational processes and identify areas for optimization You support the deployment of best practices and new tools You manage small-scale projects to enhance efficiency and cross-functional collaboration You bring expertise to optimize local processes and deploy global best practices You strengthen site performance and support competitiveness within the group",
+      "country": "ALLEMAGNE",
+      "current_domain": "admin"
+    },
+    {
+      "external_id": "238287",
+      "title": "TALENT ACQUISITION SPECIALIST BERLIN (H/F)",
+      "description": "Cher/Chère Talent Acquisition Specialist, Bienvenue chez CBTW, où nous exploitons le pouvoir de la collaboration pour créer et fournir des solutions technologiques et business innovantes. Nous sommes une équipe innovante de plus de 3 000 employés dans 21 pays, experts dans la stratégie, la cybersécurité, l'ingénierie logicielle, l'IA, et plus encore. A Berlin, nous sommes à la recherche d'un(e) Talent Acquisition Specialist pour rejoindre notre équipe ! How you’ll Make an Impact > Recrutement Consultant de Profils IT/Tech - Participer activement au cycle complet de recrutement pour des postes IT/Tech, notamment développeurs, DevOps, Product Owners, Data Analysts, etc. - Sourcer des talents via des canaux variés tels que LinkedIn, job boards, et bases de données internes. - Préqualifier les candidats par des entretiens téléphoniques et coordonner les étapes suivantes du processus avec les managers opérationnels. > Reporting et Suivi des KPI - Contribuer au suivi des indicateurs de performance clés (KPI) tels que le délai de recrutement, le taux de conversion des entretiens et la satisfaction des candidats. - Partager régulièrement des mises à jour sur les activités de recrutement avec le Talent Acquisition Manager et les équipes Sales. - Identifier des axes d’amélioration dans les pratiques de recrutement et proposer des ajustements pour gagner en efficacité.",
+      "country": "ALLEMAGNE",
+      "current_domain": "data"
+    },
+    {
+      "external_id": "236293",
+      "title": "Field Engineer (H/F)",
+      "description": "Tu veux vivre une expérience internationale, travailler au cœur de l’industrie 4.0 et intervenir directement sur des technologies robotiques de pointe ? Rejoins NORCAN pour une mission VIE passionnante en Allemagne. ________________________________________ Ta mission : Basé(e) à Leipzig, tu interviendras chez nos clients industriels dans toute la région (et ponctuellement en Pologne et pays voisins) pour déployer et optimiser nos solutions robotiques. Tu seras un acteur clé du succès de nos projets terrain : • Installer et mettre en service nos solutions robotiques chez les clients • Assurer la maintenance, le diagnostic et la résolution de problèmes • Former les équipes clients à l’utilisation des équipements • Conseiller les ingénieurs et responsables de production • Optimiser l’usage de nos produits dans des environnements industriels variés Chaque mission est différente : tu verras du concret, du terrain et de la technologie en action.",
+      "country": "ALLEMAGNE",
+      "current_domain": "engineering"
+    },
+    {
+      "external_id": "227195",
+      "title": "V.I.E JUNIOR ACCOUNTANT (M/W) (H/F)",
+      "description": "Présentation de la société : We are the designers of today for the world of tomorrow. As one of the world's leading engineering service providers, we at ALTEN are committed to positively shaping the future of our partners, the careers of our employees and the challenges facing our society and environment. More than 50,000 employees in 30 countries are already working on innovative solutions in various engineering and IT sectors such as automotive, aerospace, renewable energy, medical technology and railway technology. Poste et missions : You... •post incoming invoices and, if necessary, travel expenses •handle bank postings and may act as a point of contact for the weekly cash forecast •create payment files in SAP •perform month-end closing activities and assist with preparing VAT pre-declarations •regularly reconcile a group of accounts payable and general ledger accounts •help optimize and further develop relevant processes in accounting",
+      "country": "ALLEMAGNE",
+      "current_domain": "finance"
+    },
+    {
+      "external_id": "231644",
+      "title": "JR HR PMO (H/F)",
+      "description": "At TE, you will unleash your potential working with people from diverse backgrounds and industries to create a safer, sustainable and more connected world. TE’s HR Business Partners implement Human Resources policies at the business unit level partnering with management to drive company-wide programs and initiatives (i.e. succession, talent acquisition, total rewards and change management). They foster partnership across the HR function to deliver value-added service to management and employees that reflects the business objectives, strategies and policies of the organization. Job Overview Are you passionate about driving impactful changes in Human Resources through data, structure, and strategic execution? We’re looking for a dynamic Jr HR PMO to support our global HR initiatives. This hybrid role offers the opportunity to work at the heart of a purpose-driven, international organization while being based in one of our preferred European locations. (Switzerland, Germany, Spain, Portugal, Island, Netherland or Belgium) As an HR PMO, you will play a key role in enhancing the efficiency, consistency, and quality of HR projects by leading standardized processes, implementing best practices, and supporting strategic people initiatives. You will have the opportunity to work closely with senior HR Leaders in an international environment. Responsibilities and Duties - Support the Transportation Solutions & Auto HR PMO in all HR processes and activities regarding: Talent, Training, Organization and Culture and any ad-hoc topics depending on business needs. - Provide support to coordinate and drive the annual HR Calendar and related initiatives considering our regional, global, and segment objectives and timelines. - Prepare and organize the HR Leadership meetings (calendar, agenda, stakeholder coordination, etc…) ensuring productive outcomes and actionable follow-ups. - Compile, analyze and interpret data from various HR systems and tools and develop reports and presentations to help leadership make informed decisions. - Lead the tracking and reporting of HR KPIs, with a strong focus on talent management and succession pipeline - Establishes and promotes the use of best practices across the HR team. - Analize Employee Engagement survey results, and identify key strengths and opportunities - Executive Development Program : Tracking project progress, budget, timelines, and deliverables. - Manage sensitive and highly confidential proprietary information with discretion and utmost confidentiality.",
+      "country": "ALLEMAGNE",
+      "current_domain": "hr"
+    }
+  ],
+  "discoveries": [
+    {
+      "offer_id": "238371",
+      "domain_proposed": "automotive technology",
+      "subdomain": "operational excellence and process improvement",
+      "confidence": 0.9,
+      "evidence": [
+        "technological revolution of autonomous and connected vehicles",
+        "continuous improvement initiatives",
+        "analyzing current operational processes",
+        "supporting the implementation of best practices",
+        "enhance efficiency and cross-functional collaboration"
+      ]
+    },
+    {
+      "offer_id": "238287",
+      "domain_proposed": "human resources",
+      "subdomain": "talent acquisition",
+      "confidence": 0.9,
+      "evidence": [
+        "talent acquisition specialist",
+        "cycle complet de recrutement",
+        "recrutement pour des postes it/tech",
+        "sourcer des talents",
+        "suivi des indicateurs de performance cles (kpi)"
+      ]
+    },
+    {
+      "offer_id": "236293",
+      "domain_proposed": "industrial engineering",
+      "subdomain": "robotics and automation",
+      "confidence": 0.9,
+      "evidence": [
+        "experience internationale",
+        "industrie 4.0",
+        "technologies robotiques de pointe",
+        "deployer et optimiser nos solutions robotiques",
+        "maintenance, le diagnostic et la resolution de problemes",
+        "former les equipes clients"
+      ]
+    },
+    {
+      "offer_id": "227195",
+      "domain_proposed": "engineering services",
+      "subdomain": "accounting and finance",
+      "confidence": 0.0,
+      "evidence": [
+        "designers of today for the world of tomorrow",
+        "engineering service providers",
+        "post incoming invoices",
+        "handle bank postings",
+        "month-end closing activities",
+        "optimize and further develop relevant processes in accounting"
+      ]
+    },
+    {
+      "offer_id": "231644",
+      "domain_proposed": "human resources management",
+      "subdomain": "project management office",
+      "confidence": 0.9,
+      "evidence": [
+        "hr pmo",
+        "driving impactful changes in human resources",
+        "support global hr initiatives",
+        "enhancing the efficiency, consistency, and quality of hr projects",
+        "lead standardized processes",
+        "support strategic people initiatives"
+      ]
+    }
+  ]
+}

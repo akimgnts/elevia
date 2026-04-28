@@ -1,0 +1,112 @@
+{
+  "closed_domain_list_v1": [
+    "hr",
+    "operations_project",
+    "engineering_industrial",
+    "finance",
+    "other"
+  ],
+  "raw_to_closed": {
+    "automotive technology": "operations_project",
+    "human resources": "hr",
+    "industrial engineering": "engineering_industrial",
+    "engineering services": "finance",
+    "human resources management": "hr"
+  },
+  "grouped_domains": [
+    {
+      "closed_domain": "hr",
+      "frequency": 2,
+      "raw_domains": [
+        [
+          "human resources",
+          1
+        ],
+        [
+          "human resources management",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "talent acquisition",
+          1
+        ],
+        [
+          "project management office",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "engineering_industrial",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "industrial engineering",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "robotics and automation",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "finance",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "engineering services",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "accounting and finance",
+          1
+        ]
+      ]
+    },
+    {
+      "closed_domain": "operations_project",
+      "frequency": 1,
+      "raw_domains": [
+        [
+          "automotive technology",
+          1
+        ]
+      ],
+      "subdomains": [
+        [
+          "operational excellence and process improvement",
+          1
+        ]
+      ]
+    }
+  ],
+  "raw_domain_counts": [
+    [
+      "automotive technology",
+      1
+    ],
+    [
+      "human resources",
+      1
+    ],
+    [
+      "industrial engineering",
+      1
+    ],
+    [
+      "engineering services",
+      1
+    ],
+    [
+      "human resources management",
+      1
+    ]
+  ]
+}

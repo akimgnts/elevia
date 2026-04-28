@@ -1,0 +1,2525 @@
+{
+  "phase": "discovery",
+  "processed_ids": [
+    "238371",
+    "238287",
+    "236293",
+    "227195",
+    "231644",
+    "238415",
+    "242519",
+    "227716",
+    "242437",
+    "228714",
+    "242262",
+    "237501",
+    "238422",
+    "237411",
+    "237154",
+    "240151",
+    "231967",
+    "242205",
+    "235316",
+    "237484",
+    "237251",
+    "231018",
+    "236448",
+    "242273",
+    "238069",
+    "238164",
+    "242326",
+    "242508",
+    "242306",
+    "238074",
+    "240118",
+    "237820",
+    "236958",
+    "236352",
+    "242424",
+    "238076",
+    "238257",
+    "230179",
+    "242490",
+    "240124",
+    "238075",
+    "238369",
+    "237974",
+    "237239",
+    "240143",
+    "242425",
+    "238223",
+    "238399",
+    "238330",
+    "242461",
+    "242231",
+    "238077",
+    "242428",
+    "238008",
+    "237373",
+    "242128",
+    "242500",
+    "242125",
+    "242070",
+    "240116",
+    "237800",
+    "242080",
+    "238079",
+    "232891",
+    "238295",
+    "238389",
+    "237500",
+    "242078",
+    "242331",
+    "242512",
+    "242116",
+    "238255",
+    "238276",
+    "238082",
+    "237223",
+    "238427",
+    "240150",
+    "242435",
+    "242190",
+    "242022",
+    "240111",
+    "242264",
+    "238267",
+    "242311",
+    "238340",
+    "242398",
+    "241002",
+    "230383",
+    "237493",
+    "242271",
+    "242334",
+    "242101",
+    "242377",
+    "238337",
+    "235953",
+    "242180",
+    "242399",
+    "242068",
+    "236998",
+    "242217",
+    "242267",
+    "224085",
+    "236446",
+    "242421",
+    "242302",
+    "238189",
+    "242347",
+    "242454",
+    "242136",
+    "242240",
+    "242452",
+    "231966",
+    "227499",
+    "231210",
+    "242256",
+    "238145",
+    "238320",
+    "242497",
+    "242537",
+    "242243",
+    "242432",
+    "230520",
+    "231968",
+    "227513",
+    "231829",
+    "242093",
+    "242342",
+    "237270",
+    "232386",
+    "229739",
+    "232756",
+    "231643",
+    "238407",
+    "242333",
+    "242495",
+    "238153",
+    "236315",
+    "231157",
+    "232829",
+    "235753",
+    "242412",
+    "231441",
+    "242471",
+    "238292",
+    "242158",
+    "237194",
+    "231372",
+    "233039",
+    "236438",
+    "238205",
+    "232755",
+    "238235",
+    "231590",
+    "236021",
+    "237230",
+    "231440",
+    "236095",
+    "237358",
+    "242314",
+    "232825",
+    "229126",
+    "232332",
+    "236374",
+    "238414",
+    "232251",
+    "236247",
+    "237602",
+    "230774",
+    "236229",
+    "231969",
+    "232333",
+    "236375",
+    "242369",
+    "232304",
+    "236331",
+    "242226",
+    "235859",
+    "236301",
+    "236852",
+    "233040",
+    "236566",
+    "242371",
+    "232818",
+    "237459",
+    "242362",
+    "237982",
+    "237191",
+    "237416",
+    "236730",
+    "237889",
+    "242380",
+    "232819",
+    "238005",
+    "242511",
+    "242126",
+    "237196",
+    "237797",
+    "237112",
+    "242230",
+    "242414"
+  ],
+  "results": [
+    {
+      "offer_id": "238371",
+      "domain_proposed": "automotive technology",
+      "subdomain": "operational excellence",
+      "confidence": 0.9,
+      "evidence": [
+        "autonomous and connected vehicles",
+        "continuous improvement initiatives",
+        "analyzing current operational processes"
+      ]
+    },
+    {
+      "offer_id": "238287",
+      "domain_proposed": "human resources",
+      "subdomain": "talent acquisition",
+      "confidence": 0.9,
+      "evidence": [
+        "talent acquisition specialist",
+        "cycle complet de recrutement",
+        "sourcer des talents"
+      ]
+    },
+    {
+      "offer_id": "236293",
+      "domain_proposed": "robotics engineering",
+      "subdomain": "field operations",
+      "confidence": 0.85,
+      "evidence": [
+        "technologies robotiques de pointe",
+        "deployer et optimiser nos solutions robotiques",
+        "maintenance, diagnostic et resolution de problemes"
+      ]
+    },
+    {
+      "offer_id": "227195",
+      "domain_proposed": "engineering services",
+      "subdomain": "accounting",
+      "confidence": 0.8,
+      "evidence": [
+        "post incoming invoices",
+        "month-end closing activities",
+        "optimize and further develop relevant processes in accounting"
+      ]
+    },
+    {
+      "offer_id": "231644",
+      "domain_proposed": "human resources",
+      "subdomain": "project management office",
+      "confidence": 0.85,
+      "evidence": [
+        "hr pmo",
+        "support global hr initiatives",
+        "enhancing the efficiency, consistency, and quality of hr projects"
+      ]
+    },
+    {
+      "offer_id": "238415",
+      "domain_proposed": "transportation and mobility",
+      "subdomain": "contract management",
+      "confidence": 0.0,
+      "evidence": [
+        "contract management",
+        "transport networks",
+        "successful execution of contracts",
+        "contractual obligations and claims"
+      ]
+    },
+    {
+      "offer_id": "242519",
+      "domain_proposed": "marketing and communications",
+      "subdomain": "product marketing",
+      "confidence": 0.0,
+      "evidence": [
+        "product line marketing",
+        "shaping how our digital & integrated systems solutions are perceived",
+        "creating impactful marketing materials"
+      ]
+    },
+    {
+      "offer_id": "227716",
+      "domain_proposed": "railway engineering",
+      "subdomain": "wagon maintenance",
+      "confidence": 0.0,
+      "evidence": [
+        "junior wagon engineer",
+        "supporting wagon engineers",
+        "ensuring safety of wagons",
+        "monitor the maintenance suppliers"
+      ]
+    },
+    {
+      "offer_id": "242437",
+      "domain_proposed": "economic development",
+      "subdomain": "digital and start-ups",
+      "confidence": 0.0,
+      "evidence": [
+        "charge(e) de mission numerique et start-ups",
+        "cooperation franco-allemande",
+        "politiques numeriques et start-ups"
+      ]
+    },
+    {
+      "offer_id": "228714",
+      "domain_proposed": "manufacturing and engineering",
+      "subdomain": "customer service and support",
+      "confidence": 0.0,
+      "evidence": [
+        "technicien service client",
+        "support technique avant et apres-vente",
+        "maintenance et interventions sav"
+      ]
+    },
+    {
+      "offer_id": "242262",
+      "domain_proposed": "international business development",
+      "subdomain": "export services and market analysis",
+      "confidence": 0.0,
+      "evidence": [
+        "accompagnement des entreprises dans leur developpement a l’export",
+        "etudes de marche",
+        "prospection active de distributeurs"
+      ]
+    },
+    {
+      "offer_id": "237501",
+      "domain_proposed": "mining industry solutions",
+      "subdomain": "training and product implementation",
+      "confidence": 0.0,
+      "evidence": [
+        "support the training and implementation team",
+        "educational content related to product training",
+        "humanize the mining industry"
+      ]
+    },
+    {
+      "offer_id": "238422",
+      "domain_proposed": "corporate finance",
+      "subdomain": "credit analysis and risk assessment",
+      "confidence": 0.0,
+      "evidence": [
+        "redaction de notes de credit",
+        "analyse approfondie des etats financiers",
+        "etude des marches"
+      ]
+    },
+    {
+      "offer_id": "237411",
+      "domain_proposed": "engineering and technology consulting",
+      "subdomain": "automated testing solutions",
+      "confidence": 0.0,
+      "evidence": [
+        "developpement de solutions de test automatisees",
+        "outils labview et teststand",
+        "systemes de mesure et d’instrumentation"
+      ]
+    },
+    {
+      "offer_id": "237154",
+      "domain_proposed": "nuclear industry services",
+      "subdomain": "financial management and compliance",
+      "confidence": 0.0,
+      "evidence": [
+        "soutenir l’equipe finance",
+        "reporting financier",
+        "conformite aux exigences du groupe"
+      ]
+    },
+    {
+      "offer_id": "240151",
+      "domain_proposed": "human resources",
+      "subdomain": "talent acquisition and campus management",
+      "confidence": 0.9,
+      "evidence": [
+        "talent acquisition team",
+        "manage talent acquisition and campus management",
+        "recruit diverse and talented candidates",
+        "organize, plan and participate in regional school relation activities"
+      ]
+    },
+    {
+      "offer_id": "231967",
+      "domain_proposed": "regulatory compliance",
+      "subdomain": "financial sector compliance",
+      "confidence": 0.85,
+      "evidence": [
+        "monitor and interpret regulatory developments",
+        "ensure regulatory compliance",
+        "support audits and internal controls",
+        "identify, assess, and mitigate regulatory risks"
+      ]
+    },
+    {
+      "offer_id": "242205",
+      "domain_proposed": "marketing",
+      "subdomain": "campaign management",
+      "confidence": 0.8,
+      "evidence": [
+        "concevoir et deployer les campagnes marketing",
+        "analyser les performances",
+        "contribuer a la strategie marketing",
+        "coordonner avec les prestataires externes"
+      ]
+    },
+    {
+      "offer_id": "235316",
+      "domain_proposed": "learning and development",
+      "subdomain": "global hr project management",
+      "confidence": 0.75,
+      "evidence": [
+        "shape some of our global initiatives",
+        "design, coordination, and delivery of global l&d initiatives",
+        "supporting key programs",
+        "managing timelines, resources, and stakeholder alignment"
+      ]
+    },
+    {
+      "offer_id": "237484",
+      "domain_proposed": "cybersecurity",
+      "subdomain": "operational technology security",
+      "confidence": 0.9,
+      "evidence": [
+        "support the cyber security and digital risk requirements",
+        "bridge the gap between traditional it security and the world of ot",
+        "protect their production processes",
+        "complying with the iec 62443 family of standards"
+      ]
+    },
+    {
+      "offer_id": "237251",
+      "domain_proposed": "food industry",
+      "subdomain": "sales and business development",
+      "confidence": 0.0,
+      "evidence": [
+        "transformation alimentaire",
+        "ingredients, des aromes et des melanges d'epices",
+        "mission vie",
+        "prospection active",
+        "developper vos parts de marches"
+      ]
+    },
+    {
+      "offer_id": "231018",
+      "domain_proposed": "renewable energy",
+      "subdomain": "solar energy solutions",
+      "confidence": 0.0,
+      "evidence": [
+        "sourcing, ingenierie et negoce de panneaux photovoltaiques",
+        "transition energetique",
+        "developper le marche local",
+        "promouvoir notre modele innovant"
+      ]
+    },
+    {
+      "offer_id": "236448",
+      "domain_proposed": "real estate and parking services",
+      "subdomain": "customer support and administration",
+      "confidence": 0.0,
+      "evidence": [
+        "satisfaction des clients",
+        "support administratif",
+        "gestion des reclamations",
+        "performance operationnelle"
+      ]
+    },
+    {
+      "offer_id": "242273",
+      "domain_proposed": "finance",
+      "subdomain": "private debt and investment analysis",
+      "confidence": 0.0,
+      "evidence": [
+        "private debt arm",
+        "direct lending",
+        "credit research",
+        "investment memos"
+      ]
+    },
+    {
+      "offer_id": "238069",
+      "domain_proposed": "engineering",
+      "subdomain": "structural engineering",
+      "confidence": 0.0,
+      "evidence": [
+        "creation de designs structurels",
+        "responsable pour la capacite portante",
+        "gestion de projet",
+        "ingenierie civile"
+      ]
+    },
+    {
+      "offer_id": "238164",
+      "domain_proposed": "banking and finance",
+      "subdomain": "real estate credit analysis",
+      "confidence": 0.0,
+      "evidence": [
+        "analyste credits professionnels de l'immobilier",
+        "gestion des engagements de credit",
+        "examen juridique des contrats de pret"
+      ]
+    },
+    {
+      "offer_id": "242326",
+      "domain_proposed": "human resources",
+      "subdomain": "hr information systems",
+      "confidence": 0.0,
+      "evidence": [
+        "support international human resources information systems",
+        "sap successfactors",
+        "hr digitalization and diversity initiatives"
+      ]
+    },
+    {
+      "offer_id": "242508",
+      "domain_proposed": "digital policy and regulation",
+      "subdomain": "global digital strategy",
+      "confidence": 0.0,
+      "evidence": [
+        "strategie globale de l’entreprise en matiere de politiques numeriques",
+        "suivi et a l’analyse des reglementations digitales"
+      ]
+    },
+    {
+      "offer_id": "242306",
+      "domain_proposed": "consulting and engineering",
+      "subdomain": "employer branding and communication",
+      "confidence": 0.0,
+      "evidence": [
+        "charge(e) de communication et marque employeur",
+        "deployer un plan de communication",
+        "visibilite, recrutement, image"
+      ]
+    },
+    {
+      "offer_id": "238074",
+      "domain_proposed": "project management",
+      "subdomain": "construction and environmental planning",
+      "confidence": 0.0,
+      "evidence": [
+        "cost-effective project management",
+        "planning specifications",
+        "environmental impact"
+      ]
+    },
+    {
+      "offer_id": "240118",
+      "domain_proposed": "public affairs",
+      "subdomain": "european energy policy",
+      "confidence": 0.0,
+      "evidence": [
+        "affaires publiques europeennes",
+        "bureau de representation",
+        "legislation europeenne",
+        "energie, climat"
+      ]
+    },
+    {
+      "offer_id": "237820",
+      "domain_proposed": "technology and defense",
+      "subdomain": "business development",
+      "confidence": 0.0,
+      "evidence": [
+        "developpement commercial",
+        "solutions logicielles",
+        "expertise technique",
+        "marche allemand"
+      ]
+    },
+    {
+      "offer_id": "236958",
+      "domain_proposed": "railway operations",
+      "subdomain": "asset management",
+      "confidence": 0.0,
+      "evidence": [
+        "leasing companies",
+        "fleet performance",
+        "maintenance",
+        "procurement"
+      ]
+    },
+    {
+      "offer_id": "236352",
+      "domain_proposed": "pharmaceutical manufacturing",
+      "subdomain": "quality compliance",
+      "confidence": 0.0,
+      "evidence": [
+        "production pharmaceutique",
+        "conformite aux referentiels",
+        "audits qualite",
+        "transferts technologiques"
+      ]
+    },
+    {
+      "offer_id": "242424",
+      "domain_proposed": "process management",
+      "subdomain": "business process optimization",
+      "confidence": 0.0,
+      "evidence": [
+        "process improvement",
+        "process management frameworks",
+        "process mining",
+        "automation"
+      ]
+    },
+    {
+      "offer_id": "238076",
+      "domain_proposed": "engineering and construction",
+      "subdomain": "electrical engineering and substation projects",
+      "confidence": 0.0,
+      "evidence": [
+        "electrical engineer",
+        "substation construction",
+        "quality",
+        "drive"
+      ]
+    },
+    {
+      "offer_id": "238257",
+      "domain_proposed": "automotive industry",
+      "subdomain": "financial management and reporting",
+      "confidence": 0.0,
+      "evidence": [
+        "vie management controller",
+        "automotive lighting",
+        "financial reports",
+        "project follow-up"
+      ]
+    },
+    {
+      "offer_id": "230179",
+      "domain_proposed": "consulting and engineering",
+      "subdomain": "business development and management",
+      "confidence": 0.0,
+      "evidence": [
+        "business manager",
+        "societe de conseil en ingenierie",
+        "developpement commercial",
+        "prospection a froid"
+      ]
+    },
+    {
+      "offer_id": "242490",
+      "domain_proposed": "legal services",
+      "subdomain": "corporate and compliance law",
+      "confidence": 0.0,
+      "evidence": [
+        "junior legal counsel",
+        "compliance programs",
+        "corporate governance",
+        "contract law & negotiation"
+      ]
+    },
+    {
+      "offer_id": "240124",
+      "domain_proposed": "digital marketing",
+      "subdomain": "crm and customer retention strategies",
+      "confidence": 0.0,
+      "evidence": [
+        "specialiste crm & digital",
+        "strategie omnicanale",
+        "automatisation",
+        "optimisation"
+      ]
+    },
+    {
+      "offer_id": "238075",
+      "domain_proposed": "energy technology",
+      "subdomain": "automation engineering",
+      "confidence": 0.9,
+      "evidence": [
+        "automation & control technology",
+        "energy supply systems",
+        "automation solutions",
+        "control programs",
+        "system tests"
+      ]
+    },
+    {
+      "offer_id": "238369",
+      "domain_proposed": "information security",
+      "subdomain": "iso compliance",
+      "confidence": 0.85,
+      "evidence": [
+        "systeme de management de la securite de l’information",
+        "iso 27001",
+        "gestion des risques",
+        "protection des donnees"
+      ]
+    },
+    {
+      "offer_id": "237974",
+      "domain_proposed": "smart technology",
+      "subdomain": "business development",
+      "confidence": 0.8,
+      "evidence": [
+        "capteurs connectes",
+        "solutions iot",
+        "smart building",
+        "developpement commercial",
+        "marche allemand"
+      ]
+    },
+    {
+      "offer_id": "237239",
+      "domain_proposed": "human resources",
+      "subdomain": "learning and development",
+      "confidence": 0.75,
+      "evidence": [
+        "learning & development",
+        "hr administration",
+        "training management",
+        "personnel development"
+      ]
+    },
+    {
+      "offer_id": "240143",
+      "domain_proposed": "transportation engineering",
+      "subdomain": "subsystem management",
+      "confidence": 0.8,
+      "evidence": [
+        "sub-system manager support",
+        "traction and rolling stock subsystems",
+        "technical coordination",
+        "project execution"
+      ]
+    },
+    {
+      "offer_id": "242425",
+      "domain_proposed": "human resources",
+      "subdomain": "talent acquisition",
+      "confidence": 0.9,
+      "evidence": [
+        "talent acquisition specialist",
+        "cycle complet de recrutement",
+        "sourcer des talents",
+        "kpi"
+      ]
+    },
+    {
+      "offer_id": "238223",
+      "domain_proposed": "engineering",
+      "subdomain": "design engineering",
+      "confidence": 0.85,
+      "evidence": [
+        "ingenieur design",
+        "modeles 3d",
+        "documentation technique",
+        "amelioration continue"
+      ]
+    },
+    {
+      "offer_id": "238399",
+      "domain_proposed": "finance",
+      "subdomain": "financial control",
+      "confidence": 0.9,
+      "evidence": [
+        "controleur financier",
+        "reporting",
+        "trading d'uranium",
+        "analyse des resultats financiers"
+      ]
+    },
+    {
+      "offer_id": "238330",
+      "domain_proposed": "human resources",
+      "subdomain": "campus recruitment",
+      "confidence": 0.8,
+      "evidence": [
+        "corporate recruiter",
+        "campus recruitment",
+        "recruit university campus talent",
+        "employer branding"
+      ]
+    },
+    {
+      "offer_id": "242461",
+      "domain_proposed": "aerospace",
+      "subdomain": "contract management",
+      "confidence": 0.85,
+      "evidence": [
+        "gma contract manager",
+        "pilotage des contrats de maintenance",
+        "satisfaction globale des clients",
+        "facturation"
+      ]
+    },
+    {
+      "offer_id": "242231",
+      "domain_proposed": "gaming marketing",
+      "subdomain": "user acquisition",
+      "confidence": 0.9,
+      "evidence": [
+        "user acquisition specialist",
+        "increase customer acquisition",
+        "performance ua channels",
+        "user acquisition campaigns"
+      ]
+    },
+    {
+      "offer_id": "238077",
+      "domain_proposed": "energy technology",
+      "subdomain": "project management",
+      "confidence": 0.85,
+      "evidence": [
+        "technical project specialist",
+        "planning and executing switchgear construction projects",
+        "high- and extrahigh-voltage sector"
+      ]
+    },
+    {
+      "offer_id": "242428",
+      "domain_proposed": "international energy relations",
+      "subdomain": "nuclear and renewable energy",
+      "confidence": 0.8,
+      "evidence": [
+        "cooperation franco-coreenne",
+        "energies nucleaire et renouvelables",
+        "analyse et mise en forme des informations"
+      ]
+    },
+    {
+      "offer_id": "238008",
+      "domain_proposed": "healthcare software",
+      "subdomain": "business development",
+      "confidence": 0.9,
+      "evidence": [
+        "developpement commercial",
+        "securisation de la prescription medicamenteuse",
+        "marche europeen, notamment allemand"
+      ]
+    },
+    {
+      "offer_id": "237373",
+      "domain_proposed": "luxury goods manufacturing",
+      "subdomain": "financial control",
+      "confidence": 0.85,
+      "evidence": [
+        "junior industrial controller",
+        "monthly financial statements",
+        "cost trends of raw materials"
+      ]
+    },
+    {
+      "offer_id": "242128",
+      "domain_proposed": "financial services",
+      "subdomain": "back office operations",
+      "confidence": 0.0,
+      "evidence": [
+        "prestataire de services d’investissement",
+        "services de front et back-office titres",
+        "gestion et traitement des comptes"
+      ]
+    },
+    {
+      "offer_id": "242500",
+      "domain_proposed": "transportation",
+      "subdomain": "sustainable rail mobility",
+      "confidence": 0.0,
+      "evidence": [
+        "sustainable rail operations",
+        "battery electric trains",
+        "innovative rail mobility projects"
+      ]
+    },
+    {
+      "offer_id": "242125",
+      "domain_proposed": "manufacturing",
+      "subdomain": "aerospace engineering",
+      "confidence": 0.0,
+      "evidence": [
+        "optimise manufacturing processes",
+        "aircraft production",
+        "industry 4.0 manufacturing processes"
+      ]
+    },
+    {
+      "offer_id": "242070",
+      "domain_proposed": "robotics",
+      "subdomain": "autonomous manufacturing systems",
+      "confidence": 0.0,
+      "evidence": [
+        "systemes robotises et autonomes",
+        "augmentation de l’automatisation",
+        "optimisation de chaines de processus automatisees"
+      ]
+    },
+    {
+      "offer_id": "240116",
+      "domain_proposed": "human resources",
+      "subdomain": "sustainability and employee experience",
+      "confidence": 0.0,
+      "evidence": [
+        "hr strategy",
+        "sustainability roadmap",
+        "b corp certification"
+      ]
+    },
+    {
+      "offer_id": "237800",
+      "domain_proposed": "legal services",
+      "subdomain": "corporate law",
+      "confidence": 0.0,
+      "evidence": [
+        "juriste h/f",
+        "veille juridique",
+        "droit des societes",
+        "droit bancaire"
+      ]
+    },
+    {
+      "offer_id": "242080",
+      "domain_proposed": "cosmetics and beauty",
+      "subdomain": "product development",
+      "confidence": 0.0,
+      "evidence": [
+        "research & innovation",
+        "high-performance, sustainable, and original solutions",
+        "innovative formulas"
+      ]
+    },
+    {
+      "offer_id": "238079",
+      "domain_proposed": "construction and engineering",
+      "subdomain": "project management",
+      "confidence": 0.0,
+      "evidence": [
+        "project manager",
+        "substation construction",
+        "planning and execution"
+      ]
+    },
+    {
+      "offer_id": "232891",
+      "domain_proposed": "software development",
+      "subdomain": "government technology",
+      "confidence": 0.0,
+      "evidence": [
+        "solutions logicielles",
+        "projets digitaux a fort impacts",
+        "gouvernements et organismes financiers"
+      ]
+    },
+    {
+      "offer_id": "238295",
+      "domain_proposed": "environmental consulting",
+      "subdomain": "energy advisory",
+      "confidence": 0.0,
+      "evidence": [
+        "energy advisory analyst",
+        "emission reduction",
+        "energy management"
+      ]
+    },
+    {
+      "offer_id": "238389",
+      "domain_proposed": "procurement and sourcing",
+      "subdomain": "electrical components",
+      "confidence": 0.0,
+      "evidence": [
+        "strategie achats",
+        "composants electriques",
+        "analyse du portefeuille achats"
+      ]
+    },
+    {
+      "offer_id": "237500",
+      "domain_proposed": "mining and training",
+      "subdomain": "blasting solutions",
+      "confidence": 0.0,
+      "evidence": [
+        "support the training",
+        "blasting operational process",
+        "educational content"
+      ]
+    },
+    {
+      "offer_id": "242078",
+      "domain_proposed": "pharmaceuticals and ai",
+      "subdomain": "ai integration",
+      "confidence": 0.0,
+      "evidence": [
+        "intelligence artificielle",
+        "ameliorer la productivite",
+        "promouvoir la culture ia"
+      ]
+    },
+    {
+      "offer_id": "242331",
+      "domain_proposed": "energy and business development",
+      "subdomain": "renewable energy solutions",
+      "confidence": 0.0,
+      "evidence": [
+        "developpement des activites",
+        "modeles d’affaires de l’energie",
+        "analyse de marche"
+      ]
+    },
+    {
+      "offer_id": "242512",
+      "domain_proposed": "digital transformation",
+      "subdomain": "procurement systems",
+      "confidence": 0.0,
+      "evidence": [
+        "support the rollout",
+        "procurement data",
+        "system implementation phase"
+      ]
+    },
+    {
+      "offer_id": "242116",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "business management",
+      "confidence": 0.0,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "solutions technologiques innovantes",
+        "developpement commercial",
+        "recrutement de talents",
+        "monter ta propre business unit"
+      ]
+    },
+    {
+      "offer_id": "238255",
+      "domain_proposed": "financial services",
+      "subdomain": "legal advisory",
+      "confidence": 0.0,
+      "evidence": [
+        "acteur financier incontournable",
+        "departement « legal »",
+        "prevenir, encadrer et gerer les risques juridiques",
+        "assistez nos juristes"
+      ]
+    },
+    {
+      "offer_id": "238276",
+      "domain_proposed": "food industry",
+      "subdomain": "marketing",
+      "confidence": 0.0,
+      "evidence": [
+        "promoting the segmented \"yeast & baking ingredients\"",
+        "trade marketing",
+        "digital marketing",
+        "collect, process and analyze market information"
+      ]
+    },
+    {
+      "offer_id": "238082",
+      "domain_proposed": "engineering",
+      "subdomain": "electrical engineering",
+      "confidence": 0.0,
+      "evidence": [
+        "design the low voltage engineering",
+        "substation construction projects",
+        "planning auxiliary power supply systems"
+      ]
+    },
+    {
+      "offer_id": "237223",
+      "domain_proposed": "product development",
+      "subdomain": "product management",
+      "confidence": 0.0,
+      "evidence": [
+        "maximizing the value delivered by the development team",
+        "define the product vision",
+        "manage the product backlog",
+        "collaborate with business stakeholders"
+      ]
+    },
+    {
+      "offer_id": "238427",
+      "domain_proposed": "high-tech and photonics",
+      "subdomain": "sales and technical support",
+      "confidence": 0.0,
+      "evidence": [
+        "high-tech company in the photonics sector",
+        "pre-sales support",
+        "technical support on our products"
+      ]
+    },
+    {
+      "offer_id": "240150",
+      "domain_proposed": "renewable energy",
+      "subdomain": "solar energy solutions",
+      "confidence": 0.0,
+      "evidence": [
+        "transition energetique grace a des solutions photovoltaiques",
+        "developpement commercial dans ce pays"
+      ]
+    },
+    {
+      "offer_id": "242435",
+      "domain_proposed": "contract management",
+      "subdomain": "supplier relations and compliance",
+      "confidence": 0.0,
+      "evidence": [
+        "elaborer et gerer les dossiers d’appel d’offres",
+        "suivi post-signature des contrats"
+      ]
+    },
+    {
+      "offer_id": "242190",
+      "domain_proposed": "energy sector",
+      "subdomain": "strategic analysis",
+      "confidence": 0.0,
+      "evidence": [
+        "evaluation economique de projets",
+        "suivre l'actualite commerciale et economique du marche de l'energie"
+      ]
+    },
+    {
+      "offer_id": "242022",
+      "domain_proposed": "industrial safety",
+      "subdomain": "risk management and compliance",
+      "confidence": 0.0,
+      "evidence": [
+        "maitriser les risques",
+        "analyses de risques de type hazid, hazop"
+      ]
+    },
+    {
+      "offer_id": "240111",
+      "domain_proposed": "procurement and supply chain",
+      "subdomain": "commodity management",
+      "confidence": 0.0,
+      "evidence": [
+        "acheteur projet et commodite",
+        "gerera les relations avec un groupe de fournisseurs",
+        "selection des fournisseurs",
+        "evolution des couts",
+        "revues de performance avec les fournisseurs"
+      ]
+    },
+    {
+      "offer_id": "242264",
+      "domain_proposed": "human resources",
+      "subdomain": "payroll and compensation consulting",
+      "confidence": 0.0,
+      "evidence": [
+        "analyzing all the existing lines between the ‘gross amount’ and the ‘net amount’",
+        "hr performance audits",
+        "optimizing the calculation of the client’s salary costs",
+        "maintaining good relations with all parties involved"
+      ]
+    },
+    {
+      "offer_id": "238267",
+      "domain_proposed": "legal and compliance",
+      "subdomain": "corporate compliance training",
+      "confidence": 0.0,
+      "evidence": [
+        "support various compliance awareness and communication projects",
+        "compliance online training modules",
+        "culture of compliance",
+        "compliance policies and procedures"
+      ]
+    },
+    {
+      "offer_id": "242311",
+      "domain_proposed": "sports and community development",
+      "subdomain": "partnerships and sponsorships",
+      "confidence": 0.0,
+      "evidence": [
+        "developper la strategie de partenariats",
+        "prospection a l’activation",
+        "generer des revenus",
+        "evenementiel generatrice de revenus"
+      ]
+    },
+    {
+      "offer_id": "238340",
+      "domain_proposed": "project management",
+      "subdomain": "financial program control",
+      "confidence": 0.0,
+      "evidence": [
+        "program controller",
+        "financial stability and success of our projects",
+        "monitor project outcomes",
+        "budget and forecast data consolidation"
+      ]
+    },
+    {
+      "offer_id": "242398",
+      "domain_proposed": "consulting",
+      "subdomain": "strategy consulting",
+      "confidence": 0.9,
+      "evidence": [
+        "strategy consultant",
+        "support client engagements",
+        "analyzing and synthesizing insights",
+        "developing high-quality client deliverables"
+      ]
+    },
+    {
+      "offer_id": "241002",
+      "domain_proposed": "business development",
+      "subdomain": "sales and marketing",
+      "confidence": 0.85,
+      "evidence": [
+        "business developer",
+        "developper notre portefeuille clients",
+        "cycle de vente de a a z",
+        "negocierez et conclurez des partenariats"
+      ]
+    },
+    {
+      "offer_id": "230383",
+      "domain_proposed": "logistics",
+      "subdomain": "operations management",
+      "confidence": 0.8,
+      "evidence": [
+        "operations manager",
+        "transport et logistique",
+        "organiser les operations de transit",
+        "gerer et superviser les equipes operationnelles"
+      ]
+    },
+    {
+      "offer_id": "237493",
+      "domain_proposed": "training and development",
+      "subdomain": "technical training",
+      "confidence": 0.75,
+      "evidence": [
+        "technology training support",
+        "support the training and implementation team",
+        "create educational content related to product training"
+      ]
+    },
+    {
+      "offer_id": "242271",
+      "domain_proposed": "finance",
+      "subdomain": "financial planning and analysis",
+      "confidence": 0.9,
+      "evidence": [
+        "fp&a analyst",
+        "pilotage de la performance financiere",
+        "reporting et l’analyse des activites",
+        "analyser les ventes, les marges"
+      ]
+    },
+    {
+      "offer_id": "242334",
+      "domain_proposed": "construction and engineering",
+      "subdomain": "quality assurance in mechanical and electrical projects",
+      "confidence": 0.0,
+      "evidence": [
+        "e&m quality engineer",
+        "project quality management system",
+        "quality control and assurance processes"
+      ]
+    },
+    {
+      "offer_id": "242101",
+      "domain_proposed": "environmental services",
+      "subdomain": "wastewater treatment and resource management",
+      "confidence": 0.0,
+      "evidence": [
+        "treatment des eaux usees",
+        "optimisation des procedes avances",
+        "economie circulaire"
+      ]
+    },
+    {
+      "offer_id": "242377",
+      "domain_proposed": "human resources and consulting",
+      "subdomain": "talent management and recruitment",
+      "confidence": 0.0,
+      "evidence": [
+        "talent manager",
+        "selection process",
+        "consultant’s career path"
+      ]
+    },
+    {
+      "offer_id": "238337",
+      "domain_proposed": "insurance and compliance",
+      "subdomain": "risk management and regulatory compliance",
+      "confidence": 0.0,
+      "evidence": [
+        "compliance verification",
+        "legal advice",
+        "anti-corruption and fraud prevention"
+      ]
+    },
+    {
+      "offer_id": "235953",
+      "domain_proposed": "digital marketing",
+      "subdomain": "search engine advertising and optimization",
+      "confidence": 0.0,
+      "evidence": [
+        "agence de marketing digital",
+        "seo, sea et sma",
+        "strategies d’acquisition payantes"
+      ]
+    },
+    {
+      "offer_id": "242180",
+      "domain_proposed": "project management",
+      "subdomain": "strategic development",
+      "confidence": 0.0,
+      "evidence": [
+        "junior project manager",
+        "mise en œuvre des initiatives cles",
+        "developpement strategique",
+        "optimisation des processus"
+      ]
+    },
+    {
+      "offer_id": "242399",
+      "domain_proposed": "consulting",
+      "subdomain": "strategy development",
+      "confidence": 0.0,
+      "evidence": [
+        "strategy consultant",
+        "support client engagements",
+        "analyzing and synthesizing insights",
+        "developing high-quality client deliverables"
+      ]
+    },
+    {
+      "offer_id": "242068",
+      "domain_proposed": "manufacturing and distribution",
+      "subdomain": "personal protective equipment",
+      "confidence": 0.0,
+      "evidence": [
+        "protection auditive sur mesure",
+        "developper et fideliser ton portefeuille clients",
+        "solutions efficaces, economiques"
+      ]
+    },
+    {
+      "offer_id": "236998",
+      "domain_proposed": "industrial trade",
+      "subdomain": "oil & gas and mining equipment",
+      "confidence": 0.0,
+      "evidence": [
+        "acteur cle du negoce industriel",
+        "fourniture d'equipements techniques",
+        "secteurs petroliers, parapetroliers et miniers"
+      ]
+    },
+    {
+      "offer_id": "242217",
+      "domain_proposed": "information technology",
+      "subdomain": "technical support",
+      "confidence": 0.0,
+      "evidence": [
+        "support informatique",
+        "assurer le support de plus de 1500 utilisateurs",
+        "administrer l'ensemble du parc informatique"
+      ]
+    },
+    {
+      "offer_id": "242267",
+      "domain_proposed": "data analytics and sales management",
+      "subdomain": "pricing strategy and digital initiatives",
+      "confidence": 0.0,
+      "evidence": [
+        "analysis of sales data",
+        "pricing management",
+        "improvement of existing pricing tools",
+        "development and implementation of pricing strategies",
+        "digital initiatives to improve the customer experience"
+      ]
+    },
+    {
+      "offer_id": "224085",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "mechanical engineering and product development",
+      "confidence": 0.0,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "developper des produits",
+        "aeronautique, automobile, spatial",
+        "developper en partenariat avec le client un produit electromecanique"
+      ]
+    },
+    {
+      "offer_id": "236446",
+      "domain_proposed": "finance and administration",
+      "subdomain": "accounting and reporting",
+      "confidence": 0.0,
+      "evidence": [
+        "finance & comptabilite",
+        "tenue de la comptabilite courante",
+        "reportings mensuels",
+        "gestion des contrats et documents administratifs"
+      ]
+    },
+    {
+      "offer_id": "242421",
+      "domain_proposed": "human resources and recruitment",
+      "subdomain": "talent acquisition and management",
+      "confidence": 0.0,
+      "evidence": [
+        "it recruitment specialist",
+        "source and proactively approach candidates",
+        "conduct phone pre-screening interviews",
+        "coordinate interviews"
+      ]
+    },
+    {
+      "offer_id": "242302",
+      "domain_proposed": "compliance and risk management",
+      "subdomain": "financial compliance and internal controls",
+      "confidence": 0.0,
+      "evidence": [
+        "analysis, preparation and execution of diverse activities",
+        "internal controls",
+        "enterprise risk management",
+        "support in the day to day activities of compliance"
+      ]
+    },
+    {
+      "offer_id": "238189",
+      "domain_proposed": "pharmaceuticals",
+      "subdomain": "medical affairs",
+      "confidence": 0.9,
+      "evidence": [
+        "junior medical advisor",
+        "pharmaceutical company",
+        "medical plan",
+        "scientific relationships",
+        "medical support"
+      ]
+    },
+    {
+      "offer_id": "242347",
+      "domain_proposed": "transportation",
+      "subdomain": "carpooling and mobility solutions",
+      "confidence": 0.85,
+      "evidence": [
+        "carpool project lead",
+        "carpooling projects",
+        "local carpooling networks",
+        "sustainable mobility"
+      ]
+    },
+    {
+      "offer_id": "242454",
+      "domain_proposed": "biotechnology",
+      "subdomain": "ai in drug discovery",
+      "confidence": 0.9,
+      "evidence": [
+        "application scientist",
+        "ai-driven platform",
+        "drug discovery",
+        "customer engagement"
+      ]
+    },
+    {
+      "offer_id": "242136",
+      "domain_proposed": "digital transformation",
+      "subdomain": "business process optimization",
+      "confidence": 0.8,
+      "evidence": [
+        "ingenieur technico-commercial",
+        "solutions de dematerialisation",
+        "transformation digitale",
+        "optimisation des processus"
+      ]
+    },
+    {
+      "offer_id": "242240",
+      "domain_proposed": "consulting",
+      "subdomain": "logistics and supply chain",
+      "confidence": 0.85,
+      "evidence": [
+        "support hypercare & deploiement",
+        "logistique",
+        "supply chain",
+        "deploiement de solutions"
+      ]
+    },
+    {
+      "offer_id": "242452",
+      "domain_proposed": "energy engineering",
+      "subdomain": "lng project management",
+      "confidence": 0.0,
+      "evidence": [
+        "technip energies",
+        "transition energetique",
+        "gaz naturel liquefie",
+        "ruwais lng projet",
+        "sous-traitance de travaux de construction"
+      ]
+    },
+    {
+      "offer_id": "231966",
+      "domain_proposed": "data science and engineering",
+      "subdomain": "data analysis and modeling",
+      "confidence": 0.0,
+      "evidence": [
+        "data analyst",
+        "statistical modeling",
+        "big data",
+        "machine learning",
+        "cleeven"
+      ]
+    },
+    {
+      "offer_id": "227499",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "quality assurance in manufacturing",
+      "confidence": 0.0,
+      "evidence": [
+        "conseil en ingenierie",
+        "solutions technologiques innovantes",
+        "projets industriels",
+        "qualite fournisseur"
+      ]
+    },
+    {
+      "offer_id": "231210",
+      "domain_proposed": "financial compliance",
+      "subdomain": "kyc and risk management",
+      "confidence": 0.0,
+      "evidence": [
+        "kyc analyst",
+        "compliance challenges",
+        "regulatory expectations",
+        "financial institutions"
+      ]
+    },
+    {
+      "offer_id": "242256",
+      "domain_proposed": "digital marketing",
+      "subdomain": "user acquisition for gaming",
+      "confidence": 0.0,
+      "evidence": [
+        "user acquisition specialist",
+        "customer acquisition",
+        "performance marketing",
+        "gameloft"
+      ]
+    },
+    {
+      "offer_id": "238145",
+      "domain_proposed": "pharmaceutical law",
+      "subdomain": "legal affairs",
+      "confidence": 0.0,
+      "evidence": [
+        "legal affairs",
+        "contracts",
+        "general legal advice",
+        "pharma law"
+      ]
+    },
+    {
+      "offer_id": "238320",
+      "domain_proposed": "marketing",
+      "subdomain": "b2b marketing",
+      "confidence": 0.0,
+      "evidence": [
+        "b2b marketing",
+        "lead generation campaigns",
+        "content creation",
+        "strategic campaigns"
+      ]
+    },
+    {
+      "offer_id": "242497",
+      "domain_proposed": "innovation management",
+      "subdomain": "project management",
+      "confidence": 0.0,
+      "evidence": [
+        "junior innovation manager",
+        "manage innovation projects",
+        "identify new business opportunities"
+      ]
+    },
+    {
+      "offer_id": "242537",
+      "domain_proposed": "public affairs",
+      "subdomain": "diplomatic services",
+      "confidence": 0.0,
+      "evidence": [
+        "affaires publiques",
+        "diplomacy",
+        "communication externe",
+        "organisation evenementielle"
+      ]
+    },
+    {
+      "offer_id": "242243",
+      "domain_proposed": "commercial development",
+      "subdomain": "sales management",
+      "confidence": 0.0,
+      "evidence": [
+        "developpement commercial",
+        "suivi commercial",
+        "objectifs de ventes",
+        "veille concurrentielle"
+      ]
+    },
+    {
+      "offer_id": "242432",
+      "domain_proposed": "biopharmaceutical supply chain management",
+      "subdomain": "demand forecasting and logistics",
+      "confidence": 0.9,
+      "evidence": [
+        "supply chain business partner",
+        "demand forecasting",
+        "logistics execution",
+        "performance measurement frameworks",
+        "manufacturing & supply",
+        "life-changing treatments"
+      ]
+    },
+    {
+      "offer_id": "230520",
+      "domain_proposed": "digital e-commerce management",
+      "subdomain": "product ownership and data management",
+      "confidence": 0.85,
+      "evidence": [
+        "product owner",
+        "e-commerce",
+        "back-office",
+        "data products",
+        "pim/dam",
+        "roadmap"
+      ]
+    },
+    {
+      "offer_id": "231968",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "business analysis and solution design",
+      "confidence": 0.8,
+      "evidence": [
+        "business analyst",
+        "gather and analyze requirements",
+        "bridge business and it",
+        "design solutions",
+        "data models"
+      ]
+    },
+    {
+      "offer_id": "227513",
+      "domain_proposed": "engineering consultancy",
+      "subdomain": "technological innovation and project management",
+      "confidence": 0.75,
+      "evidence": [
+        "conseil en ingenierie",
+        "solutions technologiques innovantes",
+        "projets a fortes valeurs ajoutees",
+        "transformation technologique"
+      ]
+    },
+    {
+      "offer_id": "231829",
+      "domain_proposed": "industrial engineering",
+      "subdomain": "product industrialization and quality assurance",
+      "confidence": 0.8,
+      "evidence": [
+        "ingenieur industriel",
+        "industrialisation d’un nouveau produit",
+        "coordination entre equipes",
+        "qualite des livrables techniques",
+        "tracabilite des composants"
+      ]
+    },
+    {
+      "offer_id": "242093",
+      "domain_proposed": "human resources",
+      "subdomain": "hr operations and management",
+      "confidence": 0.9,
+      "evidence": [
+        "comprehensive, high-quality support for decision-making",
+        "transversal hr initiatives and projects",
+        "process optimization and efficiency improvements",
+        "hr team administrative coordination"
+      ]
+    },
+    {
+      "offer_id": "242342",
+      "domain_proposed": "legal services",
+      "subdomain": "data privacy and contract law",
+      "confidence": 0.85,
+      "evidence": [
+        "protection des donnees",
+        "conformite rgpd",
+        "revue et la redaction de clauses data protection",
+        "contrats commerciaux internationaux"
+      ]
+    },
+    {
+      "offer_id": "237270",
+      "domain_proposed": "payroll management",
+      "subdomain": "payroll processing and administration",
+      "confidence": 0.8,
+      "evidence": [
+        "apprendre le metier de gestionnaire de paie",
+        "actions de paie simples",
+        "outil de paie",
+        "etats de suivis interne"
+      ]
+    },
+    {
+      "offer_id": "232386",
+      "domain_proposed": "sustainability consulting",
+      "subdomain": "sustainability strategy and analysis",
+      "confidence": 0.9,
+      "evidence": [
+        "junior group sustainability analyst",
+        "executing the group sustainability strategy",
+        "analyze and visualize data related to sustainability initiatives",
+        "support sustainability team"
+      ]
+    },
+    {
+      "offer_id": "229739",
+      "domain_proposed": "engineering services",
+      "subdomain": "mechanical design engineering",
+      "confidence": 0.85,
+      "evidence": [
+        "ingenieur(e) en conception mecanique",
+        "concevez des pieces de structure",
+        "modelisez les pieces a produire",
+        "veille pour s’adapter aux evolutions technologiques"
+      ]
+    },
+    {
+      "offer_id": "232756",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "quality assurance",
+      "confidence": 0.9,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "consultant ingenieur qualite",
+        "plans qualite",
+        "audits internes et externes",
+        "amelioration continue"
+      ]
+    },
+    {
+      "offer_id": "231643",
+      "domain_proposed": "human resources",
+      "subdomain": "project management office",
+      "confidence": 0.85,
+      "evidence": [
+        "driving impactful changes in human resources",
+        "support global hr initiatives",
+        "enhancing efficiency",
+        "hr processes and activities"
+      ]
+    },
+    {
+      "offer_id": "238407",
+      "domain_proposed": "customer relationship management",
+      "subdomain": "b2b lifecycle management",
+      "confidence": 0.88,
+      "evidence": [
+        "optimizing customer journeys",
+        "b2b lifecycle",
+        "improve product adoption",
+        "cross-team collaboration"
+      ]
+    },
+    {
+      "offer_id": "242333",
+      "domain_proposed": "construction and safety management",
+      "subdomain": "health and safety coordination",
+      "confidence": 0.9,
+      "evidence": [
+        "hse coordinator",
+        "safety and compliance",
+        "develop and maintain hse documentation",
+        "safety audits"
+      ]
+    },
+    {
+      "offer_id": "242495",
+      "domain_proposed": "international cooperation",
+      "subdomain": "cultural and technical exchange",
+      "confidence": 0.87,
+      "evidence": [
+        "cooperation decentralisee",
+        "transition ecologique",
+        "developpement urbain",
+        "societe civile roumaine"
+      ]
+    },
+    {
+      "offer_id": "238153",
+      "domain_proposed": "digital project management",
+      "subdomain": "product ownership and support coordination",
+      "confidence": 0.0,
+      "evidence": [
+        "solution digitale complete pour le management de projet",
+        "product owner/chef de produit digital",
+        "cycle de vie de notre application"
+      ]
+    },
+    {
+      "offer_id": "236315",
+      "domain_proposed": "business analysis",
+      "subdomain": "requirements gathering and documentation",
+      "confidence": 0.0,
+      "evidence": [
+        "recueillir et analyser les besoins metiers",
+        "rediger les specifications fonctionnelles",
+        "lien entre les equipes metiers et techniques"
+      ]
+    },
+    {
+      "offer_id": "231157",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "industrial process improvement",
+      "confidence": 0.0,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "analyser et ameliorer les processus de production",
+        "participation a l'industrialisation de nouveaux produits"
+      ]
+    },
+    {
+      "offer_id": "232829",
+      "domain_proposed": "building information modeling (bim)",
+      "subdomain": "structural modeling and coordination",
+      "confidence": 0.0,
+      "evidence": [
+        "modelisation 3d des structures",
+        "logiciels bim tels que revit",
+        "collaboration avec les ingenieurs structures"
+      ]
+    },
+    {
+      "offer_id": "235753",
+      "domain_proposed": "recruitment services",
+      "subdomain": "digital recruitment consulting",
+      "confidence": 0.0,
+      "evidence": [
+        "plateforme de recrutement 100% digitale",
+        "developpement commercial",
+        "processus de recrutement"
+      ]
+    },
+    {
+      "offer_id": "242412",
+      "domain_proposed": "marketing and sales",
+      "subdomain": "lead generation and crm",
+      "confidence": 0.9,
+      "evidence": [
+        "demand generation",
+        "multi-channel campaigns",
+        "crm & marketing automation",
+        "lead scoring",
+        "analyze key performance indicators"
+      ]
+    },
+    {
+      "offer_id": "231441",
+      "domain_proposed": "construction and engineering",
+      "subdomain": "electrical project management",
+      "confidence": 0.85,
+      "evidence": [
+        "chef de projet electricite",
+        "organize and manage project team",
+        "cost estimation",
+        "installations in high or low voltage"
+      ]
+    },
+    {
+      "offer_id": "242471",
+      "domain_proposed": "agriculture and electronics",
+      "subdomain": "sales and after-sales services",
+      "confidence": 0.8,
+      "evidence": [
+        "repairing electronic components",
+        "sales representative",
+        "maintain relationships with existing customers",
+        "b2b"
+      ]
+    },
+    {
+      "offer_id": "238292",
+      "domain_proposed": "transportation and quality management",
+      "subdomain": "supplier quality engineering",
+      "confidence": 0.9,
+      "evidence": [
+        "supplier quality engineer",
+        "quality management expertise",
+        "non-conformities",
+        "continuous improvement initiatives"
+      ]
+    },
+    {
+      "offer_id": "242158",
+      "domain_proposed": "finance and digital transformation",
+      "subdomain": "finance process management",
+      "confidence": 0.85,
+      "evidence": [
+        "finance transformation program",
+        "digital finance model",
+        "business process harmonization",
+        "finance personas"
+      ]
+    },
+    {
+      "offer_id": "237194",
+      "domain_proposed": "consulting",
+      "subdomain": "business analysis and technology",
+      "confidence": 0.9,
+      "evidence": [
+        "consulting company in business & technology",
+        "business analyst",
+        "translate business requirements",
+        "impact analysis",
+        "test strategy"
+      ]
+    },
+    {
+      "offer_id": "231372",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "hvac and project management",
+      "confidence": 0.85,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "ingenieur projet hvac",
+        "projets techniques ambitieux",
+        "respect des normes de qualite"
+      ]
+    },
+    {
+      "offer_id": "233039",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "automation engineering",
+      "confidence": 0.85,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "consultant ingenieur automaticien",
+        "systemes d’automatisation",
+        "projets techniques"
+      ]
+    },
+    {
+      "offer_id": "236438",
+      "domain_proposed": "consulting",
+      "subdomain": "procurement and digital tools",
+      "confidence": 0.9,
+      "evidence": [
+        "acteur majeur des achats",
+        "conseil",
+        "outil sap fieldglass",
+        "support utilisateurs",
+        "chaine de valeur achats"
+      ]
+    },
+    {
+      "offer_id": "238205",
+      "domain_proposed": "technology consulting",
+      "subdomain": "go-to-market strategy",
+      "confidence": 0.9,
+      "evidence": [
+        "gtm engineering studio",
+        "go-to-market systems",
+        "b2b saas",
+        "ai agents and automation",
+        "designing and launching gtm experiments"
+      ]
+    },
+    {
+      "offer_id": "232755",
+      "domain_proposed": "consulting and engineering",
+      "subdomain": "project management",
+      "confidence": 0.0,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "accompagnement de projets techniques",
+        "consultant project manager",
+        "projets a fort impact"
+      ]
+    },
+    {
+      "offer_id": "238235",
+      "domain_proposed": "sales and marketing",
+      "subdomain": "technical sales",
+      "confidence": 0.0,
+      "evidence": [
+        "developper la presence",
+        "analyser les differentes opportunites",
+        "identifier de nouveaux partenaires commerciaux"
+      ]
+    },
+    {
+      "offer_id": "231590",
+      "domain_proposed": "supply chain management",
+      "subdomain": "logistics optimization",
+      "confidence": 0.0,
+      "evidence": [
+        "optimiser l’efficience logistique",
+        "projets d’amelioration supply chain",
+        "reduction des couts"
+      ]
+    },
+    {
+      "offer_id": "236021",
+      "domain_proposed": "information technology",
+      "subdomain": "it administration",
+      "confidence": 0.0,
+      "evidence": [
+        "fonctionnement du reseau informatique",
+        "gestion les serveurs",
+        "administration des systemes d'information"
+      ]
+    },
+    {
+      "offer_id": "237230",
+      "domain_proposed": "consulting",
+      "subdomain": "banking and insurance",
+      "confidence": 0.0,
+      "evidence": [
+        "consultant banking & insurance",
+        "transformation programs within banks",
+        "regulatory frameworks"
+      ]
+    },
+    {
+      "offer_id": "231440",
+      "domain_proposed": "engineering and design",
+      "subdomain": "electrical design",
+      "confidence": 0.0,
+      "evidence": [
+        "designer en electricite",
+        "realisation de plans electriques",
+        "maitrise d'un logiciel de cao"
+      ]
+    },
+    {
+      "offer_id": "236095",
+      "domain_proposed": "business consulting",
+      "subdomain": "financial analysis",
+      "confidence": 0.0,
+      "evidence": [
+        "business controller & analyst",
+        "consolidating and analysing operational data",
+        "producing operational reports"
+      ]
+    },
+    {
+      "offer_id": "237358",
+      "domain_proposed": "human resources",
+      "subdomain": "recruitment consulting",
+      "confidence": 0.0,
+      "evidence": [
+        "consultant en recrutement",
+        "acquisition et evaluation des talents",
+        "campagnes de recrutement"
+      ]
+    },
+    {
+      "offer_id": "242314",
+      "domain_proposed": "government and policy analysis",
+      "subdomain": "trade policy",
+      "confidence": 0.0,
+      "evidence": [
+        "veille et analyse de la politique commerciale",
+        "relations commerciales entre les etats-unis et l’union europeenne",
+        "redaction de notes d’analyse"
+      ]
+    },
+    {
+      "offer_id": "232825",
+      "domain_proposed": "project management",
+      "subdomain": "electrical engineering projects",
+      "confidence": 0.0,
+      "evidence": [
+        "responsable de projets electricite",
+        "gerer des projets a orientation electrotechnique",
+        "assurer la mise en œuvre et le suivi du projet"
+      ]
+    },
+    {
+      "offer_id": "229126",
+      "domain_proposed": "sales and business development",
+      "subdomain": "technology solutions",
+      "confidence": 0.0,
+      "evidence": [
+        "sales specialist",
+        "atlassian partnership management",
+        "business development",
+        "promote atlassian tools"
+      ]
+    },
+    {
+      "offer_id": "232332",
+      "domain_proposed": "engineering and technology",
+      "subdomain": "embedded software development",
+      "confidence": 0.0,
+      "evidence": [
+        "ingenieur logiciel embarque",
+        "developper des logiciels embarques",
+        "microcontroleurs",
+        "projets existants"
+      ]
+    },
+    {
+      "offer_id": "236374",
+      "domain_proposed": "software and consulting",
+      "subdomain": "project portfolio management",
+      "confidence": 0.0,
+      "evidence": [
+        "implementation consultant",
+        "planisware solutions",
+        "project and portfolio management",
+        "transform business requirements"
+      ]
+    },
+    {
+      "offer_id": "238414",
+      "domain_proposed": "environmental policy and analysis",
+      "subdomain": "regulatory compliance",
+      "confidence": 0.0,
+      "evidence": [
+        "environment policy analyst",
+        "analyse reglementaire",
+        "preparation de documents de synthese"
+      ]
+    },
+    {
+      "offer_id": "232251",
+      "domain_proposed": "engineering and design",
+      "subdomain": "mechanical design",
+      "confidence": 0.0,
+      "evidence": [
+        "ingenieur(e) en conception mecanique",
+        "concevoir des pieces",
+        "modeliser en 3d",
+        "revues de conception"
+      ]
+    },
+    {
+      "offer_id": "236247",
+      "domain_proposed": "manufacturing and quality control",
+      "subdomain": "quality engineering",
+      "confidence": 0.9,
+      "evidence": [
+        "ingenieur qualite",
+        "fabricant de sacs",
+        "analyse des methodes de travail",
+        "systemes de controle",
+        "missions integrent notamment"
+      ]
+    },
+    {
+      "offer_id": "237602",
+      "domain_proposed": "human resources and consulting",
+      "subdomain": "sap hr solutions",
+      "confidence": 0.9,
+      "evidence": [
+        "consultant sap hr",
+        "transformation rh",
+        "integration de solutions sap",
+        "digitalisation des processus rh"
+      ]
+    },
+    {
+      "offer_id": "230774",
+      "domain_proposed": "agricultural and construction equipment",
+      "subdomain": "dealer communication",
+      "confidence": 0.8,
+      "evidence": [
+        "regional dealers communication specialist",
+        "ameliorer la communication",
+        "satisfaction des concessionnaires/clients"
+      ]
+    },
+    {
+      "offer_id": "236229",
+      "domain_proposed": "engineering and project management",
+      "subdomain": "electrical engineering",
+      "confidence": 0.85,
+      "evidence": [
+        "electrical/project engineer",
+        "etudes de commande",
+        "suivi de la manufacture",
+        "promote energy efficiency"
+      ]
+    },
+    {
+      "offer_id": "231969",
+      "domain_proposed": "engineering consultancy",
+      "subdomain": "business management",
+      "confidence": 0.8,
+      "evidence": [
+        "business manager",
+        "international engineering consultancy",
+        "build lasting trust",
+        "developing commercial relationships"
+      ]
+    },
+    {
+      "offer_id": "232333",
+      "domain_proposed": "engineering consulting",
+      "subdomain": "mechatronics engineering",
+      "confidence": 0.9,
+      "evidence": [
+        "cabinet de conseil en ingenierie",
+        "developpement de produits innovants",
+        "ingenieur mecatronique produit"
+      ]
+    },
+    {
+      "offer_id": "236375",
+      "domain_proposed": "software solutions",
+      "subdomain": "project portfolio management",
+      "confidence": 0.9,
+      "evidence": [
+        "leading software solution for project and portfolio management",
+        "design, configure, and deploy planisware solutions"
+      ]
+    },
+    {
+      "offer_id": "242369",
+      "domain_proposed": "data science",
+      "subdomain": "customer insights",
+      "confidence": 0.9,
+      "evidence": [
+        "analyser et traiter des donnees conversationnelles",
+        "transformer les donnees en insights metiers actionnables"
+      ]
+    },
+    {
+      "offer_id": "232304",
+      "domain_proposed": "embedded systems",
+      "subdomain": "electronic engineering",
+      "confidence": 0.9,
+      "evidence": [
+        "developpement des systemes electroniques embarques",
+        "conception, integration et validation de solutions electroniques"
+      ]
+    },
+    {
+      "offer_id": "236331",
+      "domain_proposed": "sales operations",
+      "subdomain": "business analytics",
+      "confidence": 0.9,
+      "evidence": [
+        "lien entre les objectifs commerciaux et leur execution operationnelle",
+        "analyser les donnees de vente et elaborez des rapports de gestion"
+      ]
+    },
+    {
+      "offer_id": "242226",
+      "domain_proposed": "consulting and engineering",
+      "subdomain": "business management",
+      "confidence": 0.9,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "developpement d’une business unit",
+        "responsable de ton developpement commercial"
+      ]
+    },
+    {
+      "offer_id": "235859",
+      "domain_proposed": "industrial manufacturing",
+      "subdomain": "graphic design and marketing",
+      "confidence": 0.85,
+      "evidence": [
+        "conception et mise en page de supports de communication",
+        "creation et gestion des newsletters",
+        "strategie de communication visuelle"
+      ]
+    },
+    {
+      "offer_id": "236301",
+      "domain_proposed": "information technology",
+      "subdomain": "performance management",
+      "confidence": 0.8,
+      "evidence": [
+        "contribuer a la performance et a l’organisation de la dsi",
+        "communication interne",
+        "optimisation des dispositifs operationnels"
+      ]
+    },
+    {
+      "offer_id": "236852",
+      "domain_proposed": "energy sector",
+      "subdomain": "business analysis",
+      "confidence": 0.9,
+      "evidence": [
+        "contribuer a la transformation d’une entreprise",
+        "support analytique aux equipes",
+        "pilotage de projets transverses"
+      ]
+    },
+    {
+      "offer_id": "233040",
+      "domain_proposed": "consulting and engineering",
+      "subdomain": "procurement engineering",
+      "confidence": 0.85,
+      "evidence": [
+        "societe de conseil en ingenierie",
+        "identifier et selectionner les fournisseurs",
+        "negocier les conditions d’achat"
+      ]
+    },
+    {
+      "offer_id": "236566",
+      "domain_proposed": "software solutions",
+      "subdomain": "project and portfolio management",
+      "confidence": 0.0,
+      "evidence": [
+        "leading software solution for project and portfolio management",
+        "design, configure, and deploy planisware solutions",
+        "support product development, engineering, and it business processes"
+      ]
+    },
+    {
+      "offer_id": "242371",
+      "domain_proposed": "consulting services",
+      "subdomain": "business analysis and digital transformation",
+      "confidence": 0.0,
+      "evidence": [
+        "accompany our clients in their digital transformation projects",
+        "recueillir et analyser les besoins metiers",
+        "formaliser les processus metiers"
+      ]
+    },
+    {
+      "offer_id": "232818",
+      "domain_proposed": "engineering services",
+      "subdomain": "construction and structural design",
+      "confidence": 0.0,
+      "evidence": [
+        "dessinateur projeteur en construction",
+        "etablir les schemas de modelisation de structures",
+        "accompagner l’ingenieur d’etudes"
+      ]
+    },
+    {
+      "offer_id": "237459",
+      "domain_proposed": "industrial services",
+      "subdomain": "quality assurance and compliance",
+      "confidence": 0.0,
+      "evidence": [
+        "identifier les non-conformites",
+        "mettre en place les solutions correctives et preventives",
+        "qualite fournisseurs"
+      ]
+    },
+    {
+      "offer_id": "242362",
+      "domain_proposed": "human resources",
+      "subdomain": "recruitment and onboarding",
+      "confidence": 0.0,
+      "evidence": [
+        "manage end-to-end recruitment processes",
+        "support and participate in the onboarding process",
+        "promote and develop the company’s internal communication strategy"
+      ]
+    },
+    {
+      "offer_id": "237982",
+      "domain_proposed": "travel and hospitality",
+      "subdomain": "marketing and campaign management",
+      "confidence": 0.9,
+      "evidence": [
+        "marketing campaign planning",
+        "support the coordination, planning and implementation of marketing campaigns",
+        "effective deployment of global guidelines"
+      ]
+    },
+    {
+      "offer_id": "237191",
+      "domain_proposed": "consulting and technology",
+      "subdomain": "agile project management",
+      "confidence": 0.85,
+      "evidence": [
+        "scrum master",
+        "smooth use of the scrum methodology",
+        "organise and facilitate all the scrum ceremonies"
+      ]
+    },
+    {
+      "offer_id": "237416",
+      "domain_proposed": "consulting and business development",
+      "subdomain": "life sciences management",
+      "confidence": 0.8,
+      "evidence": [
+        "business manager",
+        "specialised in life sciences",
+        "business development, recruitment and people management"
+      ]
+    },
+    {
+      "offer_id": "236730",
+      "domain_proposed": "management consulting",
+      "subdomain": "procurement and supply chain",
+      "confidence": 0.9,
+      "evidence": [
+        "procurement consultant",
+        "improve the operational efficiency",
+        "support companies facing strategic and operational challenges"
+      ]
+    },
+    {
+      "offer_id": "237889",
+      "domain_proposed": "information technology",
+      "subdomain": "infrastructure and user support",
+      "confidence": 0.9,
+      "evidence": [
+        "it infrastructure & network administrator",
+        "ensure the proper functioning of cast’s global hybrid infrastructure",
+        "provide timely and professional support to users"
+      ]
+    },
+    {
+      "offer_id": "242380",
+      "domain_proposed": "financial services",
+      "subdomain": "credit risk management",
+      "confidence": 0.9,
+      "evidence": [
+        "analyste de risque de credit",
+        "evaluer et prendre en charge les risques de credit",
+        "gerer l'evolution des risques « sensibles »"
+      ]
+    },
+    {
+      "offer_id": "232819",
+      "domain_proposed": "engineering and technology",
+      "subdomain": "automation engineering",
+      "confidence": 0.85,
+      "evidence": [
+        "automaticien",
+        "programmation (automates siemens)",
+        "mise en service"
+      ]
+    },
+    {
+      "offer_id": "238005",
+      "domain_proposed": "accounting and finance",
+      "subdomain": "international accounting",
+      "confidence": 0.9,
+      "evidence": [
+        "accountant in an international environment",
+        "us gaap and statutory financial statements",
+        "complex accounting matters"
+      ]
+    },
+    {
+      "offer_id": "242511",
+      "domain_proposed": "business operations",
+      "subdomain": "revenue operations",
+      "confidence": 0.88,
+      "evidence": [
+        "sales operations b2b - revops",
+        "automate and maximize the activity",
+        "b2b projects with business stakeholders"
+      ]
+    },
+    {
+      "offer_id": "242126",
+      "domain_proposed": "agricultural and construction equipment",
+      "subdomain": "digital product management",
+      "confidence": 0.9,
+      "evidence": [
+        "digital product manager",
+        "connected solutions",
+        "subscription monetization"
+      ]
+    },
+    {
+      "offer_id": "237196",
+      "domain_proposed": "consulting",
+      "subdomain": "business & technology",
+      "confidence": 0.0,
+      "evidence": [
+        "consulting company",
+        "business & technology",
+        "functional analyst",
+        "translating business requirements"
+      ]
+    },
+    {
+      "offer_id": "237797",
+      "domain_proposed": "consulting",
+      "subdomain": "business development",
+      "confidence": 0.0,
+      "evidence": [
+        "business developer",
+        "intrapreneur",
+        "business development",
+        "market analysis"
+      ]
+    },
+    {
+      "offer_id": "237112",
+      "domain_proposed": "energy",
+      "subdomain": "digital transformation",
+      "confidence": 0.0,
+      "evidence": [
+        "transformation digitale",
+        "harmonize the digital ecosystem",
+        "automatisation des processus"
+      ]
+    },
+    {
+      "offer_id": "242230",
+      "domain_proposed": "supply chain management",
+      "subdomain": "purchasing",
+      "confidence": 0.0,
+      "evidence": [
+        "specialiste des achats",
+        "execution des commandes d’achat",
+        "suivi aupres des fournisseurs"
+      ]
+    },
+    {
+      "offer_id": "242414",
+      "domain_proposed": "data science",
+      "subdomain": "data analysis",
+      "confidence": 0.0,
+      "evidence": [
+        "data analyst",
+        "dataiku",
+        "migration and optimization of data management programs"
+      ]
+    }
+  ],
+  "batch_count": 40,
+  "updated_at": "2026-04-26T01:15:42.112800+00:00"
+}

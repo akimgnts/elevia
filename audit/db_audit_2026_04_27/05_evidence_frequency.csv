@@ -1,0 +1,201 @@
+method,domain_tag,evidence_item,n
+rules,engineering,ingenieur,114
+rules,engineering,ingénieur,114
+rules,engineering,engineer,42
+rules,sales,commercial,42
+rules,supply,supply chain,42
+rules,finance,controle,42
+rules,sales,business,42
+rules,sales,business development,38
+rules,supply,logistique,27
+rules,operations,project manager,25
+rules,admin,support,25
+rules,engineering,software,22
+rules,sales,client,21
+rules,sales,sales,20
+rules,data,analyst,20
+rules,data,data,20
+rules,data,reporting,20
+rules,engineering,développeur,17
+rules,sales,vente,17
+rules,supply,procurement,17
+rules,engineering,developpeur,17
+rules,finance,controle de gestion,16
+rules,engineering,devops,16
+rules,operations,chef de projet,16
+rules,supply,approvisionnement,15
+rules,finance,accounting,15
+rules,engineering,software engineer,14
+rules,sales,sales manager,13
+rules,engineering,developer,12
+rules,admin,office,12
+rules,data,analyste,11
+rules,hr,hr,11
+rules,engineering,automation,9
+rules,data,data analyst,9
+rules,sales,account manager,8
+rules,marketing,communication,8
+rules,hr,human resources,8
+rules,finance,controleur de gestion,8
+rules,hr,recruitment,8
+rules,marketing,marketing,8
+rules,hr,talent acquisition,8
+rules,hr,talent,7
+rules,hr,ressources humaines,7
+rules,hr,onboarding,7
+rules,operations,manager,6
+rules,engineering,automatisation,6
+rules,operations,operations,6
+rules,legal,legal,6
+rules,supply,acheteur,5
+rules,engineering,backend,5
+rules,finance,comptabilite,5
+rules,data,data engineer,5
+ai_fallback,engineering,ingénierie,5
+rules,sales,key account,5
+rules,data,business intelligence,5
+rules,finance,controller,5
+rules,data,data scientist,5
+rules,data,machine learning,5
+rules,admin,administration,4
+rules,supply,buyer,4
+rules,operations,project,4
+rules,finance,business controller,4
+rules,operations,coordination,4
+rules,legal,compliance,4
+rules,finance,finance,4
+rules,admin,gestionnaire,3
+rules,data,python,3
+rules,data,sql,3
+rules,admin,assistant,3
+rules,marketing,seo,3
+rules,hr,recrutement,3
+ai_fallback,engineering,engineering,3
+rules,marketing,content,3
+ai_fallback,engineering,conception,3
+rules,finance,financial controller,3
+ai_fallback,engineering,développement,3
+rules,data,power bi,3
+rules,admin,administrator,3
+rules,data,bi,3
+rules,legal,legal counsel,2
+ai_fallback,operations,Security Operation Center,2
+ai_fallback,hr,recrutement,2
+rules,legal,juriste,2
+ai_fallback,engineering,Quality Control inspection,2
+ai_fallback,other,analyzing and synthesizing insights,2
+rules,sales,revenue,2
+rules,sales,account,2
+ai_fallback,engineering,Concevoir des schémas détaillés,2
+ai_fallback,sales,analyser les ventes,2
+ai_fallback,other,support client engagements,2
+ai_fallback,other,Strategy Consultant,2
+rules,engineering,backend developer,2
+rules,marketing,campaign,2
+rules,supply,logistics,2
+ai_fallback,engineering,Ingénieur(e) Sécurité Réseau,2
+rules,marketing,digital marketing,2
+ai_fallback,operations,traiter les alertes et incidents,2
+ai_fallback,sales,développer et fidéliser nos enseignes partenaires,2
+ai_fallback,operations,direction opérationnelle,2
+rules,admin,administratif,2
+ai_fallback,engineering,projet d’exploration,2
+rules,supply,supply,2
+rules,legal,contract,2
+ai_fallback,engineering,solutions de sécurité réseau,2
+ai_fallback,engineering,pare-feux Fortinet et Palo Alto,2
+ai_fallback,other,affaires publiques,2
+rules,supply,fournisseur,2
+ai_fallback,sales,booster les performances commerciales,2
+ai_fallback,engineering,études techniques,2
+rules,operations,process,2
+ai_fallback,other,developing high-quality client deliverables,2
+ai_fallback,engineering,infrastructures hybrides,2
+rules,legal,law,2
+ai_fallback,operations,lutter contre la cybercriminalité,2
+ai_fallback,engineering,Piping Construction Manager,1
+ai_fallback,engineering,engineering knowledge,1
+ai_fallback,engineering,piping erection activity,1
+ai_fallback,finance,dépôt des dossiers,1
+ai_fallback,operations,technical support to application teams,1
+ai_fallback,engineering,gestion de la qualité,1
+ai_fallback,other,Finance Technology,1
+ai_fallback,engineering,Project Quality and Safety Manager,1
+ai_fallback,engineering,engineering documentation,1
+ai_fallback,engineering,Junior Industrial Performance Specialist,1
+ai_fallback,operations,soutenir le déploiement des projets stratégiques,1
+ai_fallback,operations,Manage innovation projects from planning to execution,1
+ai_fallback,sales,développe et maintient une connaissance approfondie des clients,1
+ai_fallback,marketing,GTM experiments,1
+ai_fallback,operations,control processes,1
+ai_fallback,operations,ensure smooth delivery of the training demand,1
+ai_fallback,engineering,Bills of Material,1
+ai_fallback,operations,continuous improvement initiatives,1
+ai_fallback,sales,prospection,1
+ai_fallback,engineering,"process, mécanique, électrique, automatisme",1
+ai_fallback,engineering,planification des projets,1
+ai_fallback,engineering,Technicien d’installation,1
+ai_fallback,engineering,Projects and PMO activities,1
+ai_fallback,engineering,Avionics testing department,1
+ai_fallback,engineering,analyses techniques,1
+ai_fallback,engineering,CONCEPTEUR MECANIQUE,1
+ai_fallback,engineering,amélioration de procédés de fabrication,1
+ai_fallback,engineering,continuous improvement initiatives,1
+ai_fallback,sales,commandes,1
+ai_fallback,engineering,Mechanical Design Engineer,1
+ai_fallback,engineering,projets industriels,1
+ai_fallback,engineering,process management,1
+ai_fallback,operations,Operations Oversight,1
+ai_fallback,engineering,expertise technique,1
+ai_fallback,supply,optimiser les coûts,1
+ai_fallback,operations,suivi budgétaire,1
+ai_fallback,engineering,automation,1
+ai_fallback,other,cyber security,1
+ai_fallback,engineering,cybersécurité,1
+ai_fallback,engineering,Conception de l’Architecture Logicielle,1
+ai_fallback,sales,traiter les plaintes des clients,1
+ai_fallback,engineering,IT Support Engineer,1
+ai_fallback,engineering,"Engineering, Industrial, and Supplier Quality teams",1
+ai_fallback,finance,reportings financiers,1
+rules,data,dashboard,1
+ai_fallback,engineering,Rédacteur Technique,1
+ai_fallback,engineering,R&D Interface & Technical Coordination,1
+ai_fallback,engineering,production,1
+ai_fallback,engineering,technical degree,1
+ai_fallback,engineering,systèmes d'information,1
+ai_fallback,supply,négocier les conditions contractuelles,1
+ai_fallback,marketing,trends,1
+ai_fallback,marketing,go-to-market readiness,1
+ai_fallback,operations,execute and control production processes,1
+ai_fallback,engineering,degree in Electrical Engineering,1
+ai_fallback,engineering,rédaction des spécifications techniques,1
+ai_fallback,supply,gestion de crise au sein des achats,1
+ai_fallback,engineering,continuous improvement,1
+ai_fallback,engineering,mechanical engineering,1
+ai_fallback,sales,opportunités commerciales,1
+ai_fallback,engineering,high-performance thin-film deposition processes,1
+ai_fallback,engineering,durcissement des systèmes,1
+ai_fallback,operations,rattaché à la direction des opérations,1
+ai_fallback,operations,déploiement de la stratégie de Régionalisation,1
+ai_fallback,supply,energy management,1
+ai_fallback,operations,Scrum methodology,1
+ai_fallback,operations,Coordinate the Training Operations,1
+ai_fallback,finance,AML/KYC,1
+ai_fallback,engineering,project quality management system,1
+ai_fallback,engineering,system tests,1
+rules,data,tableau,1
+ai_fallback,finance,appels à projets,1
+ai_fallback,engineering,conseil en ingénierie,1
+ai_fallback,engineering,Project Engineer,1
+ai_fallback,engineering,ingénierie de fabrication,1
+ai_fallback,engineering,Architecture Systèmes,1
+ai_fallback,operations,performance opérationnelle,1
+ai_fallback,engineering,automaticien,1
+ai_fallback,engineering,Application Security Engineer,1
+ai_fallback,finance,structuration des dossiers,1
+ai_fallback,marketing,User Acquisition Specialist,1
+ai_fallback,engineering,root cause analysis,1
+ai_fallback,operations,exploitation,1
+ai_fallback,engineering,manufacturing processes,1
+ai_fallback,engineering,tests du modèle,1
+ai_fallback,engineering,Injection Equipment Engineer,1

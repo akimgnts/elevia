@@ -1,0 +1,7 @@
+offer_id,external_id,domain_tag,label,skill_type,evidence,reason
+126,237412,data,Power BI dashboards,TOOL,"Design, develop, and maintain Power Application & Power BI dashboards to standardize data entry.",evidence_not_in_offer
+126,237412,data,data analysis,CORE_METIER,Analyze operational data to identify: Trends and performance patterns.,evidence_not_in_offer
+43,242525,finance,planning management,CORE_METIER,Gestion planning : A partir du détail des travaux a exécuter et en collaboration avec le chef de chantier.,evidence_not_in_offer
+43,242525,finance,contract management,CORE_METIER,Gestion contractuelle : Grâce a l’analyse de contrat préalablement établi par les responsables juridiques.,evidence_not_in_offer
+47,242521,finance,suivi des non-conformités,CORE_METIER,gestion et suivi des non-conformités,evidence_not_in_offer
+77,232908,supply,Salesforce integration,TOOL,compatible avec des plates-formes renommées telles que Salesforce,evidence_not_in_offer

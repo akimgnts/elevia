@@ -1,0 +1,21 @@
+domain_tag,canonical_id,label,importance_level,n
+finance,skill:business_intelligence,Business Intelligence,SECONDARY,44
+operations,skill:business_intelligence,Business Intelligence,SECONDARY,13
+sales,skill:business_intelligence,Business Intelligence,SECONDARY,11
+hr,skill:business_intelligence,Business Intelligence,SECONDARY,8
+supply,skill:business_intelligence,Business Intelligence,SECONDARY,6
+supply,skill:cloud_architecture,Cloud Architecture,CORE,2
+admin,skill:sql_querying,SQL Querying,CORE,2
+hr,skill:sql_querying,SQL Querying,CORE,2
+legal,skill:business_intelligence,Business Intelligence,SECONDARY,2
+marketing,skill:business_intelligence,Business Intelligence,SECONDARY,2
+marketing,skill:sql_querying,SQL Querying,CORE,2
+admin,skill:business_intelligence,Business Intelligence,SECONDARY,1
+admin,skill:backend_development,Backend Development,CORE,1
+operations,skill:business_intelligence,Business Intelligence,CORE,1
+admin,skill:database_design,Database Design,CORE,1
+operations,skill:cloud_architecture,Cloud Architecture,CORE,1
+finance,skill:cloud_architecture,Cloud Architecture,CORE,1
+finance,skill:business_intelligence,Business Intelligence,CORE,1
+admin,skill:cloud_architecture,Cloud Architecture,CORE,1
+sales,skill:cloud_architecture,Cloud Architecture,SECONDARY,1

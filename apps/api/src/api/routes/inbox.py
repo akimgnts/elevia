@@ -472,6 +472,124 @@ def _apply_scoring_v3(
     item.scoring_v3 = ScoringV3(**payload) if payload else None
 
 
+def _apply_domain_affinity_enrichment(
+    items: List[InboxItem],
+    *,
+    extracted,
+    source_map: Dict[str, str],
+) -> None:
+    """Soft signal: tag each item with aligned/adjacent/distant/neutral.
+
+    Pure enrichment — does NOT touch score, ordering, or filtering. A failure
+    in this layer must never affect the inbox response.
+    """
+    if not items:
+        return
+    try:
+        from ..utils.domain_affinity import (
+            affinity_score,
+            domain_affinity,
+            fetch_offer_domain_tags,
+            infer_cv_domain,
+        )
+        from ..utils.inbox_catalog import _database_url
+
+        canonical_ids = {
+            f"skill:{label}"
+            for label in (getattr(extracted, "skills", None) or set())
+            if isinstance(label, str) and label
+        }
+        cv_domain = infer_cv_domain(canonical_ids)
+
+        bf_ids = [
+            item.offer_id
+            for item in items
+            if (source_map.get(item.offer_id) or item.source) == "business_france"
+        ]
+        tags: Dict[str, str] = {}
+        if bf_ids:
+            try:
+                import psycopg
+
+                url = _database_url()
+                if url:
+                    with psycopg.connect(url, connect_timeout=5) as conn:
+                        tags = fetch_offer_domain_tags(conn, bf_ids, source="business_france")
+            except Exception as fetch_exc:  # pragma: no cover - soft signal
+                logger.warning("[inbox] domain_affinity tag fetch failed: %s", fetch_exc)
+                tags = {}
+
+        for item in items:
+            tag = tags.get(item.offer_id)
+            label = domain_affinity(cv_domain, tag)
+            item.domain_affinity = label
+            score = affinity_score(label)
+            if score is not None:
+                item.domain_affinity_score = score
+    except Exception as exc:  # pragma: no cover - soft signal
+        logger.warning("[inbox] domain_affinity enrichment skipped: %s", exc)
+
+
+def _fit_score_v2_shadow_enabled() -> bool:
+    return os.getenv("ELEVIA_FIT_SCORE_V2_SHADOW", "0").strip() == "1"
+
+
+def _apply_fit_score_v2_shadow(
+    items: List[InboxItem],
+    *,
+    extracted,
+    explain_debug: Dict[str, tuple],
+    offer_lookup: Dict[str, Dict],
+) -> None:
+    """Shadow signal: compute fit_score / preference_score / eligibility_status.
+
+    Pure enrichment — does NOT touch item.score, ordering, or filtering. A
+    failure in this layer must never affect the inbox response. Reads V1's
+    match_debug from explain_debug to reuse CORE/SECONDARY/CONTEXT counts
+    without recomputing.
+    """
+    if not items or not _fit_score_v2_shadow_enabled():
+        return
+    try:
+        from matching.fit_score_v2 import score_offer_v2
+    except Exception as imp_exc:  # pragma: no cover - soft signal
+        logger.warning("[inbox] fit_score_v2 import failed: %s", imp_exc)
+        return
+
+    for item in items:
+        try:
+            offer = offer_lookup.get(item.offer_id) or {}
+            stash = explain_debug.get(item.offer_id)
+            match_debug = None
+            if stash:
+                debug_payload = stash[0] if len(stash) >= 1 else None
+                if isinstance(debug_payload, dict):
+                    match_debug = debug_payload
+
+            domain_affinity_label = item.domain_affinity  # set by V1 enrichment above
+            # Title multiplier short-circuit: aligned ⇒ same domain by construction.
+            cv_domain_eq = "x" if domain_affinity_label == "aligned" else None
+            offer_domain_eq = "x" if domain_affinity_label == "aligned" else None
+
+            result = score_offer_v2(
+                extracted,
+                offer,
+                domain_affinity=domain_affinity_label,
+                offer_domain=offer_domain_eq,
+                cv_domain=cv_domain_eq,
+                match_debug=match_debug,
+            )
+            item.fit_score = result.fit_score
+            item.preference_score = result.preference_score
+            item.eligibility_status = result.eligibility_status.to_dict()
+        except Exception as exc:  # pragma: no cover - soft signal
+            logger.warning(
+                "[inbox] fit_score_v2 shadow failed for offer=%s: %s",
+                item.offer_id,
+                exc,
+            )
+
+
 def _parse_date_param(value: str) -> date:
     try:
         return datetime.strptime(value, "%Y-%m-%d").date()
@@ -1314,6 +1432,17 @@ def get_inbox(
             len(decided_ids),
         )
 
+    _apply_domain_affinity_enrichment(items, extracted=extracted, source_map=source_map)
+    try:
+        _apply_fit_score_v2_shadow(
+            items,
+            extracted=extracted,
+            explain_debug=_explain_debug,
+            offer_lookup=offer_lookup,
+        )
+    except Exception as _shadow_exc:  # pragma: no cover - soft signal
+        logger.warning("[inbox] fit_score_v2 shadow wrapper failed: %s", _shadow_exc)
+
     meta = InboxMeta(
         profile_cluster=profile_cluster,
         gating_mode=gating_mode,
@@ -1777,6 +1906,17 @@ def _get_inbox_filtered(
                 }
             ),
         )
+
+    _apply_domain_affinity_enrichment(items, extracted=extracted, source_map=source_map)
+    try:
+        _apply_fit_score_v2_shadow(
+            items,
+            extracted=extracted,
+            explain_debug=_explain_debug,
+            offer_lookup=offer_lookup,
+        )
+    except Exception as _shadow_exc:  # pragma: no cover - soft signal
+        logger.warning("[inbox] fit_score_v2 shadow wrapper failed: %s", _shadow_exc)
 
     meta = InboxMeta(
         profile_cluster=profile_cluster,

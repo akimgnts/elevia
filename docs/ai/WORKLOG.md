@@ -4,6 +4,45 @@
 
 ---
 
+## 2026-04-27 — Fit Score V2 Shadow (déterministe, sans IA, sans impact ranking)
+
+### 1. Objectif
+- Implémenter `fit_score_v2` en **shadow mode**, derrière `ELEVIA_FIT_SCORE_V2_SHADOW=1`.
+- Décomposer le score V1 monolithique en : `eligibility_status` (binaire), `fit_score` (compétence × domaine × titre), `preference_score` (langue/diplôme/pays/contrat) — séparés.
+- **Aucune** IA, **aucune** modification de `matching_v1.py / idf.py / weights_*`, **aucun** changement à `item.score` ni à l'ordre des items.
+
+### 2. Patch implémenté
+- **NEW** `apps/api/src/matching/fit_score_v2/__init__.py` — entry point unique `score_offer_v2(profile, offer, *, domain_affinity, offer_domain, cv_domain, match_debug)`.
+- **NEW** `apps/api/src/matching/fit_score_v2/types.py` — `EligibilityStatus`, `FitScoreV2Result` (dataclasses + `to_dict`).
+- **NEW** `apps/api/src/matching/fit_score_v2/eligibility.py` — `evaluate_eligibility` : `is_vie==True`, country, title, company, required_languages (lenient quand profile silent).
+- **NEW** `apps/api/src/matching/fit_score_v2/fit.py` — pondération CORE=1.0/SECONDARY=0.5/CONTEXT=0.2 + `missing_core_penalty` (cap 0.10) × domain multiplier (aligned 1.10, adjacent 1.00, distant 0.85, neutral/None 1.00) × title multiplier (1.05 si même domaine ET aligned). HARD_GENERIC_URIS retirées offer-side. Fallback flat quand `match_debug` absent.
+- **NEW** `apps/api/src/matching/fit_score_v2/preference.py` — `compute_preference_score` (lang 0.40 / edu 0.25 / country 0.20 / contract 0.15, neutre).
+- `apps/api/src/api/schemas/inbox.py` — 2 nouveaux champs **optionnels** sur `InboxItem` : `preference_score` (0..100), `eligibility_status` (dict).
+- `apps/api/src/api/routes/inbox.py` — helper `_apply_fit_score_v2_shadow(items, extracted, explain_debug, offer_lookup)` appelé **après** `_apply_domain_affinity_enrichment` dans les deux chemins (`/inbox` direct + filtré). Réutilise `match_debug.skills.{matched,missing}_{core,secondary,context}` du V1 → pas de re-résolution `weighted_store`. Wrapper try/except → soft-signal failure ne casse jamais la réponse.
+- **NEW** `apps/api/tests/test_fit_score_v2.py` — 22 tests unitaires (eligibility, tier weighting, multipliers, no mutation, no AI, fallback flat, dict profile).
+- **NEW** `apps/api/tests/test_inbox_fit_score_v2_shadow.py` — 6 tests d'intégration (flag OFF=neutre, flag ON populates fit_score & eligibility_status, V1 score & ordering invariant, soft-signal failure ⇒ 200).
+- **NEW** `scripts/compare_v1_v2_panel.py` — A/B compare flag ON vs OFF, émet JSON + markdown (top10, distributions, top10 overlap, ranking_unchanged check).
+
+### 3. Validation
+- `tests/test_fit_score_v2.py` : **22 / 22 passed** (0.78s).
+- `tests/test_inbox_fit_score_v2_shadow.py` : **6 / 6 passed** (72s — full inbox HTTP path).
+- `tests/test_inbox.py` : **11 / 11 passed** — invariants préservés.
+- Flag OFF → response identique (preference_score & eligibility_status = None).
+- Flag ON → `item.score` (V1) inchangé, ordre inchangé, `fit_score` populé pour items éligibles.
+
+### 4. Invariants gardés
+- `matching_v1.py / idf.py / weights_*` non touchés.
+- `extracted.skills_uri` jamais muté (frozenset, vérifié par test).
+- `offer.skills_uri` jamais muté (vérifié par test).
+- Aucun appel HTTP (vérifié par patch `urlopen`).
+- Schema `InboxItem` : ajouts strictement additifs, optionnels.
+
+### 5. Prochaine étape (hors scope)
+- Calibration empirique des poids CORE/SECONDARY/CONTEXT et de `missing_core_penalty` sur le panel via `scripts/compare_v1_v2_panel.py`.
+- Décision produit avant promotion en non-shadow.
+
+---
+
 ## 2026-04-26 — Domain-aware Soft Signal v1 (inbox enrichment only)
 
 ### 1. Objectif

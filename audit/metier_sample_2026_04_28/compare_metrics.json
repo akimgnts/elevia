@@ -1,0 +1,109 @@
+{
+  "n_offers_compared": 853,
+  "v2": {
+    "avg_skills_per_offer": 1.65,
+    "pct_offers_with_3_or_more": 21.57,
+    "min_skills": 0,
+    "max_skills": 5,
+    "top_labels": [
+      [
+        "project management",
+        184
+      ],
+      [
+        "business intelligence",
+        114
+      ],
+      [
+        "compliance",
+        98
+      ],
+      [
+        "b2b sales",
+        73
+      ],
+      [
+        "process optimization",
+        67
+      ],
+      [
+        "data analysis",
+        66
+      ],
+      [
+        "budgeting",
+        62
+      ],
+      [
+        "documentation",
+        61
+      ],
+      [
+        "market analysis",
+        48
+      ],
+      [
+        "crm management",
+        39
+      ]
+    ]
+  },
+  "v3_metier": {
+    "avg_skills_per_offer": 4.43,
+    "pct_offers_with_3_or_more": 95.66,
+    "min_skills": 1,
+    "max_skills": 5,
+    "top_labels": [
+      [
+        "international environment",
+        41
+      ],
+      [
+        "b2b prospecting",
+        16
+      ],
+      [
+        "client relationship management",
+        16
+      ],
+      [
+        "excel",
+        16
+      ],
+      [
+        "business development",
+        15
+      ],
+      [
+        "market analysis",
+        14
+      ],
+      [
+        "environnement international",
+        11
+      ],
+      [
+        "financial reporting",
+        11
+      ],
+      [
+        "python programming",
+        11
+      ],
+      [
+        "salesforce",
+        11
+      ]
+    ],
+    "skill_type_breakdown": {
+      "CORE_METIER": 3052,
+      "TOOL": 439,
+      "CONTEXT": 255,
+      "NOISE": 33
+    }
+  },
+  "deltas": {
+    "avg_skills_delta": 2.78,
+    "pct_3_plus_delta": 74.09
+  }
+}
