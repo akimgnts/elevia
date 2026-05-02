@@ -6,6 +6,8 @@ import logging
 from typing import Any, Dict, Optional
 
 from api.utils.analyze_recovery_cache import PIPELINE_VERSION
+from api.utils.cv_skill_extractor import extract_and_map_cv_skills
+from api.utils.db import get_connection
 from compass.ai_raw_cv_reconstruction import (
     RawCvReconstructionV1,
     build_raw_cv_reconstruction,
@@ -358,6 +360,34 @@ def build_parse_file_response_payload(request: ParseFilePipelineRequest) -> Dict
 
     if not bool(decision["enabled"]):
         response_payload = build_parse_file_response_payload_from_artifacts(initial_artifacts)
+
+        # Extract CV canonical skills
+        try:
+            conn = get_connection()
+            canonical_skills, breakdown = extract_and_map_cv_skills(extraction.cv_text, conn)
+            response_payload["canonical_skills"] = [
+                {
+                    "canonical_id": skill["canonical_id"],
+                    "label": skill["label"],
+                    "skill_type": skill["skill_type"],
+                    "domain_tag": skill["domain_tag"],
+                    "occurrences": skill["occurrences"],
+                    "cv_source": skill.get("cv_source", ""),
+                }
+                for skill in canonical_skills
+            ]
+            response_payload["canonical_skills_count"] = len(canonical_skills)
+            response_payload["skill_breakdown"] = {
+                "core_metier": len(breakdown["core_metier"]),
+                "tool": len(breakdown["tool"]),
+                "context": len(breakdown["context"]),
+                "unmapped": len(breakdown["unmapped"]),
+            }
+        except Exception as e:
+            logger.warning(f"CV skill extraction failed: {e}")
+            response_payload["canonical_skills"] = []
+            response_payload["canonical_skills_count"] = 0
+
         if dev_tools_enabled():
             response_payload["analyze_dev"] = build_analyze_dev_payload(initial_artifacts)
         return response_payload
@@ -385,6 +415,34 @@ def build_parse_file_response_payload(request: ParseFilePipelineRequest) -> Dict
     )
 
     response_payload = build_parse_file_response_payload_from_artifacts(artifacts)
+
+    # Extract CV canonical skills
+    try:
+        conn = get_connection()
+        canonical_skills, breakdown = extract_and_map_cv_skills(extraction.cv_text, conn)
+        response_payload["canonical_skills"] = [
+            {
+                "canonical_id": skill["canonical_id"],
+                "label": skill["label"],
+                "skill_type": skill["skill_type"],
+                "domain_tag": skill["domain_tag"],
+                "occurrences": skill["occurrences"],
+                "cv_source": skill.get("cv_source", ""),
+            }
+            for skill in canonical_skills
+        ]
+        response_payload["canonical_skills_count"] = len(canonical_skills)
+        response_payload["skill_breakdown"] = {
+            "core_metier": len(breakdown["core_metier"]),
+            "tool": len(breakdown["tool"]),
+            "context": len(breakdown["context"]),
+            "unmapped": len(breakdown["unmapped"]),
+        }
+    except Exception as e:
+        logger.warning(f"CV skill extraction failed: {e}")
+        response_payload["canonical_skills"] = []
+        response_payload["canonical_skills_count"] = 0
+
     if dev_tools_enabled():
         response_payload["analyze_dev"] = build_analyze_dev_payload(artifacts)
     return response_payload
