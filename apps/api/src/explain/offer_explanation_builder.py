@@ -7,6 +7,13 @@ from __future__ import annotations
 
 from typing import List, Dict, Any, Optional
 from api.schemas.inbox import ExplainBlock, SkillExplainItem, OfferExplanation
+from .skill_label_cleaner import clean_skill_label
+
+
+def _format_skill_label(skill: SkillExplainItem) -> Optional[str]:
+    """Clean and format a skill label. Return None if should be filtered."""
+    clean = clean_skill_label(skill.label)
+    return clean
 
 
 def _get_core_skills_summary(
@@ -106,14 +113,16 @@ def _extract_gaps(missing_core: List[SkillExplainItem], missing_secondary: List[
     # Core missing (MUST address)
     if missing_core:
         for skill in missing_core[:4]:
-            label = skill.label.lower()
-            gaps.append(f"Maîtriser {label}")
+            clean_label = _format_skill_label(skill)
+            if clean_label:  # Skip blacklisted
+                gaps.append(f"Maîtriser {clean_label}")
 
     # Secondary missing (nice-to-have) — only if room
     if len(gaps) < 3 and missing_secondary:
         for skill in missing_secondary[:2]:
-            label = skill.label.lower()
-            gaps.append(f"Bénéficierait de {label}")
+            clean_label = _format_skill_label(skill)
+            if clean_label:  # Skip blacklisted
+                gaps.append(f"Bénéficierait de {clean_label}")
 
     return gaps[:4]
 
@@ -127,8 +136,14 @@ def _extract_blockers(missing_core: List[SkillExplainItem]) -> List[str]:
 
     # Only flag if >3 core missing (suggests not ready yet)
     if len(missing_core) >= 3:
-        blocker_msg = f"Manquent {len(missing_core)} compétences clés: {', '.join(s.label for s in missing_core[:3])}"
-        blockers.append(blocker_msg)
+        clean_labels = []
+        for s in missing_core[:3]:
+            clean = _format_skill_label(s)
+            if clean:
+                clean_labels.append(clean)
+        if clean_labels:
+            blocker_msg = f"Manquent {len(missing_core)} compétences clés: {', '.join(clean_labels)}"
+            blockers.append(blocker_msg)
 
     return blockers
 
@@ -145,16 +160,19 @@ def _generate_next_actions(missing_core: List[SkillExplainItem], missing_seconda
 
     # Priority 1: Top core missing (will have biggest impact)
     if missing_core:
-        priority_skill = missing_core[0].label.lower()
-        actions.append(f"Apprendre les bases de {priority_skill}")
+        priority_clean = _format_skill_label(missing_core[0])
+        if priority_clean:
+            actions.append(f"Apprendre les bases de {priority_clean}")
         if len(missing_core) > 1:
-            second_skill = missing_core[1].label.lower()
-            actions.append(f"Acquérir de l'expérience en {second_skill}")
+            second_clean = _format_skill_label(missing_core[1])
+            if second_clean:
+                actions.append(f"Acquérir de l'expérience en {second_clean}")
 
     # Priority 2: Top secondary missing
     if len(actions) < 3 and missing_secondary:
-        secondary_skill = missing_secondary[0].label.lower()
-        actions.append(f"Explorer des projets {secondary_skill}")
+        secondary_clean = _format_skill_label(missing_secondary[0])
+        if secondary_clean:
+            actions.append(f"Explorer des projets {secondary_clean}")
 
     # Priority 3: Generic upskilling
     if len(actions) < 2:

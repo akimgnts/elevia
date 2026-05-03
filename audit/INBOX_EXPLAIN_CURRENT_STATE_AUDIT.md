@@ -320,6 +320,8 @@ To improve this match:
 **Needs**:
 - Why was candidate shortlisted?
 - What skills are in demand?
+
+
 - What's the gap analysis?
 
 **Current explain complexity**: GOOD for this use case  
