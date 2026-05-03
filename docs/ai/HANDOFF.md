@@ -12,6 +12,28 @@
 - **Sprint actuel** : *Tagging Generic vs Domain V1*. Helpers + observabilité DEV-only implémentés, smoke test OK, signal catalogue réel à valider.
 - **Bloc ajouté** : *Career Intelligence V1*. Module pur implémenté, exposé en DEV-only dans `/dev/metrics`, puis exposé en produit dans `/match` de façon additive, testé.
 
+## ⚠️ Critical Finding — Skill Extraction Pipeline (2026-05-03)
+
+**Root Cause**: V3 IA extraction is **completely unused**. Two-system architecture with no integration.
+
+| Component | Storage | Status |
+|-----------|---------|--------|
+| **V3 IA** (backfill_offer_skills_v3_metier.py) | PostgreSQL offer_skills | BUILT but UNUSED |
+| **Ingest pipeline** (ingest_pipeline.py) | SQLite fact_offer_skills | ACTIVE, generates 95% garbage |
+| **Reading layer** (offer_skills.py) | Reads SQLite only | Never sees PostgreSQL V3 rows |
+
+**Evidence**:
+- V3 IA writes `enrichment_version='offer_skills_v3_metier'` to PostgreSQL
+- fact_offer_skills (SQLite) has zero rows with enrichment_version (column doesn't exist)
+- All 144.7k rows = {1,062 ESCO + 143,652 garbage from ingest_pipeline fallback}
+- Ingest pipeline has no validation: accepts 2-char fragments ("we", "it", "qu") as skills
+
+**Decision**: Either (A) integrate V3 IA properly (high effort, best quality), or (B) fix ingest_pipeline validation (medium effort, marginal improvement). See `audit/OFFER_SKILL_PIPELINE_AUDIT.md`.
+
+**Matching Status**: Skill-based matching **BLOCKED** until pipeline fixed.
+
+---
+
 ## Où en est le code
 
 - Filtre implémenté dans `apps/api/src/api/utils/generic_skills_filter.py`.

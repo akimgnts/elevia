@@ -62,8 +62,9 @@ from matching import MatchingEngine
 from matching.explanation_builder import build_explanation
 from matching.extractors import extract_profile
 from compass.contracts import SkillRef
-from compass.explainability.explanation_builder import build_offer_explanation
+from compass.explainability.explanation_builder import build_offer_explanation as build_offer_explanation_compass
 from compass.explainability.semantic_explanation_builder import build_semantic_explainability
+from explain import build_offer_explanation as build_offer_explanation_french
 from compass.offer.offer_intelligence import (
     build_offer_intelligence,
     evaluate_role_domain_gate,
@@ -386,14 +387,26 @@ def _apply_front_explanation(
     profile_labels: List[str],
     offer_labels: List[str],
 ) -> None:
-    explanation_payload = build_offer_explanation(
-        match_debug,
-        score=item.score,
-        confidence=confidence,
-        profile_effective_skills=profile_labels,
-        job_required_skills=offer_labels,
-    )
-    item.explanation = OfferExplanation(**explanation_payload)
+    # Use French narrative builder when explain block is available
+    if item.explain:
+        skill_overlap = item.intersection_count if item.intersection_count is not None else len(item.matched_skills)
+        item.explanation = build_offer_explanation_french(
+            score=item.score,
+            skill_overlap=skill_overlap,
+            title=item.title,
+            explain_block=item.explain,
+            domain_affinity=item.domain_affinity,
+        )
+    else:
+        # Fallback: use compass builder if no explain block
+        explanation_payload = build_offer_explanation_compass(
+            match_debug,
+            score=item.score,
+            confidence=confidence,
+            profile_effective_skills=profile_labels,
+            job_required_skills=offer_labels,
+        )
+        item.explanation = OfferExplanation(**explanation_payload)
 
     legacy = build_explanation(
         match_debug,

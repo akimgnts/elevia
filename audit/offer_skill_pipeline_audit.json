@@ -1,0 +1,139 @@
+{
+  "audit_date": "2026-05-03",
+  "status": "V3_IA_NOT_INTEGRATED",
+  "verdict": "V3 IA extraction pipeline exists but is completely disconnected from the runtime system",
+  "question": "Est-ce que l'extraction IA V3 est réellement utilisée dans le système actuel?",
+  "answer": "NON. V3 IA écrit dans PostgreSQL offer_skills table, mais le système lit depuis SQLite fact_offer_skills. Aucune intégration.",
+  "architecture": {
+    "current_pipeline": [
+      "France Travail API",
+      "→ ingest_pipeline.py",
+      "→ _extract_ft_skill_candidates()",
+      "→ normalize_offers_to_uris() [ESCO mapping]",
+      "→ fact_offer_skills (SQLite)",
+      "← offer_skills.py reads from SQLite only"
+    ],
+    "v3_ia_pipeline": [
+      "backfill_offer_skills_v3_metier.py (PostgreSQL + OpenAI)",
+      "→ offer_skills (PostgreSQL)",
+      "→ enrichment_version='offer_skills_v3_metier'",
+      "[DEAD END — never read by SQLite system]"
+    ],
+    "integration_status": "DISCONNECTED"
+  },
+  "evidence": {
+    "v3_usage_count": 0,
+    "fact_offer_skills_sources": {
+      "france_travail": 0,
+      "esco": 1062,
+      "manual": 143652,
+      "total": 144714
+    },
+    "enrichment_version_column_exists": false,
+    "v3_rows_in_sqlite": "NONE (PostgreSQL offer_skills never synced to SQLite)",
+    "garbage_coverage": "94.81% (137,199 NULL uri rows from ingest_pipeline fallback)"
+  },
+  "root_cause": "ingest_pipeline.py → normalize_offers_to_uris() tokenizes raw text without validation, inserts unmapped fragments as 'manual' with NULL uri",
+  "garbage_examples": [
+    "we (204 occurrences)",
+    "it (193)",
+    "qu (141)",
+    "up (137)",
+    "us (127)",
+    "se (119)",
+    "si (89)",
+    "il (77)",
+    "bi (62)",
+    "ms (62)"
+  ],
+  "break_points": [
+    {
+      "stage": "Tokenization",
+      "component": "ingest_pipeline.py",
+      "issue": "No minimum length check (permits 2-char fragments)",
+      "impact": "Garbage in fact_offer_skills"
+    },
+    {
+      "stage": "Mapping",
+      "component": "normalize_offers_to_uris()",
+      "issue": "ESCO mapping fails silently, allows NULL uri",
+      "impact": "95% unmapped rows"
+    },
+    {
+      "stage": "Integration",
+      "component": "V3 IA → SQLite",
+      "issue": "No bridge from PostgreSQL offer_skills to SQLite fact_offer_skills",
+      "impact": "V3 never used"
+    },
+    {
+      "stage": "Schema",
+      "component": "fact_offer_skills",
+      "issue": "No enrichment_version column to track source",
+      "impact": "Cannot identify V3 rows"
+    },
+    {
+      "stage": "Reading",
+      "component": "offer_skills.py",
+      "issue": "Reads only from SQLite, ignores PostgreSQL",
+      "impact": "V3 rows never accessed"
+    }
+  ],
+  "current_state": {
+    "total_rows": 144714,
+    "distinct_offers": 839,
+    "avg_skills_per_offer": 172.48,
+    "metier_coverage_pct": 0.0,
+    "esco_coverage_pct": 0.73,
+    "garbage_coverage_pct": 94.81,
+    "ready_for_matching": false
+  },
+  "v3_ia_state": {
+    "code_exists": true,
+    "scripts": [
+      "backfill_offer_skills_v3_metier.py",
+      "backfill_offer_skills_v3_fallback.py",
+      "validate_v3_backfill_complete.py"
+    ],
+    "expected_coverage": "3-5 skills per offer, 100% metier:*, 0% garbage",
+    "actual_usage": "ZERO",
+    "status": "Built but disconnected"
+  },
+  "recommendations": {
+    "option_a": {
+      "name": "Integrate V3 IA",
+      "effort": "HIGH",
+      "payoff": "BEST matching quality",
+      "steps": [
+        "Add enrichment_version column to fact_offer_skills",
+        "Create migration: PostgreSQL → SQLite",
+        "Re-run backfill_offer_skills_v3_metier.py",
+        "Update offer_skills.py to prefer V3 rows"
+      ]
+    },
+    "option_b": {
+      "name": "Fix ingest_pipeline.py",
+      "effort": "MEDIUM",
+      "payoff": "MARGINAL (60% garbage reduction, still <10% metier)",
+      "steps": [
+        "Add min length check (skip <3 char tokens)",
+        "Add semantic validation against known skills",
+        "Remove NULL uri rows from fact_offer_skills"
+      ]
+    },
+    "option_c": {
+      "name": "Hybrid approach",
+      "effort": "MEDIUM-HIGH",
+      "payoff": "BEST overall (V3 quality + fallback coverage)",
+      "steps": [
+        "Implement Option A for production offers",
+        "Keep fixed ingest_pipeline for edge cases",
+        "Maintain backfill_offer_skills_canonical for incremental"
+      ]
+    }
+  },
+  "matching_readiness": {
+    "cv_side": "READY (17+ skills extracted, 95% coverage)",
+    "offer_side": "NOT_READY (0% metier:*, 95% garbage)",
+    "decision": "DEFER skill-based matching until V3 IA is integrated"
+  }
+}

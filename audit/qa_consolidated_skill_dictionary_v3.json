@@ -1,0 +1,55 @@
+{
+  "status": "READY",
+  "qa_score": 88,
+  "canonical_skills_count": 1968,
+  "merges_count": 1164,
+  "suspicious_merges": 0,
+  "low_coherence_clusters": 6,
+  "findings": {
+    "suspicious_merges": [],
+    "low_coherence_clusters": [
+      {
+        "canonical": "customer_relationship_management",
+        "occurrences": 55,
+        "aliases_count": 32,
+        "avg_word_overlap": 0.25,
+        "severity": "MEDIUM"
+      },
+      {
+        "canonical": "excel",
+        "occurrences": 30,
+        "aliases_count": 12,
+        "avg_word_overlap": 0.25,
+        "severity": "MEDIUM"
+      },
+      {
+        "canonical": "negotiation",
+        "occurrences": 18,
+        "aliases_count": 14,
+        "avg_word_overlap": 0.17,
+        "severity": "MEDIUM"
+      },
+      {
+        "canonical": "procurement",
+        "occurrences": 17,
+        "aliases_count": 16,
+        "avg_word_overlap": 0.28,
+        "severity": "MEDIUM"
+      },
+      {
+        "canonical": "technology_monitoring",
+        "occurrences": 13,
+        "aliases_count": 9,
+        "avg_word_overlap": 0.06,
+        "severity": "MEDIUM"
+      },
+      {
+        "canonical": "industrial_environment",
+        "occurrences": 13,
+        "aliases_count": 19,
+        "avg_word_overlap": 0.2,
+        "severity": "MEDIUM"
+      }
+    ]
+  }
+}

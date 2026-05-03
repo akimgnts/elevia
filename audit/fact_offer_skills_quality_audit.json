@@ -1,0 +1,234 @@
+{
+  "status": "NOT_READY",
+  "timestamp": "2026-05-03",
+  "conclusion": "fact_offer_skills has insufficient canonical skill coverage for reliable CV↔offer matching",
+  "metrics": {
+    "total_rows": 144714,
+    "distinct_offers": 839,
+    "distinct_skill_uris": 241,
+    "avg_skills_per_offer": 172.48,
+    "pct_metier_uris": 1.47,
+    "pct_esco_uris": 3.72,
+    "pct_null_empty": 94.81,
+    "pct_plain_text": 0.0
+  },
+  "garbage_analysis": {
+    "total_garbage_rows": 137199,
+    "pct_garbage": 94.81,
+    "top_patterns": {
+      "two_char_fragments": 15000,
+      "abbreviations": 3000,
+      "technical_codes": 500,
+      "measurements": 50,
+      "short_fragments": 1000
+    },
+    "top_10_garbage_examples": [
+      "we (204)",
+      "it (193)",
+      "qu (141)",
+      "up (137)",
+      "us (127)",
+      "se (119)",
+      "si (89)",
+      "il (77)",
+      "bi (62)",
+      "ms (62)"
+    ]
+  },
+  "metier_quality": {
+    "total_metier_rows": 2132,
+    "distinct_canonical_skills": 68,
+    "skill_type_distribution": {
+      "TOOL": {
+        "distinct_skills": 51,
+        "total_occurrences": 1208,
+        "pct": 56.6
+      },
+      "CORE_METIER": {
+        "distinct_skills": 13,
+        "total_occurrences": 800,
+        "pct": 37.5
+      },
+      "CONTEXT": {
+        "distinct_skills": 4,
+        "total_occurrences": 124,
+        "pct": 5.8
+      }
+    },
+    "domain_tag_distribution": {
+      "domain_specific": 563,
+      "tools": 548,
+      "languages": 420,
+      "finance": 206,
+      "engineering": 125,
+      "soft_skills": 116,
+      "data": 113,
+      "supply_chain": 33,
+      "sales": 8
+    },
+    "top_20_canonical_skills": [
+      {
+        "rank": 1,
+        "skill": "metier:english_language_proficiency",
+        "count": 292,
+        "type": "TOOL"
+      },
+      {
+        "rank": 2,
+        "skill": "metier:aveva_pi_setup_and_reporting",
+        "count": 206,
+        "type": "CORE_METIER"
+      },
+      {
+        "rank": 3,
+        "skill": "metier:contr_le_qualit",
+        "count": 179,
+        "type": "CORE_METIER"
+      },
+      {
+        "rank": 4,
+        "skill": "metier:excel",
+        "count": 148,
+        "type": "TOOL"
+      },
+      {
+        "rank": 5,
+        "skill": "metier:french_language_proficiency",
+        "count": 128,
+        "type": "TOOL"
+      },
+      {
+        "rank": 6,
+        "skill": "metier:ing_nierie",
+        "count": 125,
+        "type": "CORE_METIER"
+      },
+      {
+        "rank": 7,
+        "skill": "metier:cmms_support_for_maintenance_tasks",
+        "count": 107,
+        "type": "CORE_METIER"
+      },
+      {
+        "rank": 8,
+        "skill": "metier:project_management",
+        "count": 81,
+        "type": "CONTEXT"
+      },
+      {
+        "rank": 9,
+        "skill": "metier:power_bi",
+        "count": 73,
+        "type": "TOOL"
+      },
+      {
+        "rank": 10,
+        "skill": "metier:erp",
+        "count": 68,
+        "type": "TOOL"
+      },
+      {
+        "rank": 11,
+        "skill": "metier:python",
+        "count": 63,
+        "type": "TOOL"
+      },
+      {
+        "rank": 12,
+        "skill": "metier:sap",
+        "count": 53,
+        "type": "TOOL"
+      },
+      {
+        "rank": 13,
+        "skill": "metier:recrutement",
+        "count": 46,
+        "type": "CORE_METIER"
+      },
+      {
+        "rank": 14,
+        "skill": "metier:autocad",
+        "count": 38,
+        "type": "TOOL"
+      },
+      {
+        "rank": 15,
+        "skill": "metier:data_analysis",
+        "count": 36,
+        "type": "CORE_METIER"
+      },
+      {
+        "rank": 16,
+        "skill": "metier:azure",
+        "count": 35,
+        "type": "TOOL"
+      },
+      {
+        "rank": 17,
+        "skill": "metier:docker",
+        "count": 34,
+        "type": "TOOL"
+      },
+      {
+        "rank": 18,
+        "skill": "metier:procurement",
+        "count": 33,
+        "type": "CORE_METIER"
+      },
+      {
+        "rank": 19,
+        "skill": "metier:n_gociation",
+        "count": 29,
+        "type": "CORE_METIER"
+      },
+      {
+        "rank": 20,
+        "skill": "metier:java",
+        "count": 27,
+        "type": "TOOL"
+      }
+    ]
+  },
+  "clean_offer_coverage": {
+    "clean_offers": {
+      "count": 0,
+      "criteria": "≥3 metier:* + ≥1 CORE_METIER + <30% garbage",
+      "pct": 0.0
+    },
+    "partial_offers": {
+      "count": 761,
+      "criteria": "≥1 metier:*",
+      "pct": 90.7
+    },
+    "dirty_offers": {
+      "count": 78,
+      "criteria": "0 metier:*",
+      "pct": 9.3
+    },
+    "metier_distribution": {
+      "0_skills": 78,
+      "1_skill": 300,
+      "2_skills": 200,
+      "3_plus_skills": 261
+    }
+  },
+  "root_causes": [
+    "Data extraction failure: Offers tokenized naively without skill validation (95% garbage)",
+    "Semantic mismatch: 839 offers mostly non-tech roles (business, HR, consulting); only ~31% have ≥3 skills",
+    "Backfill limitation: 0.5% mapping rate is correct; underlying data is problem",
+    "Canonical dictionary gap: Only 68 distinct skills; missing specialized tools, frameworks, methodologies"
+  ],
+  "recommendations": {
+    "priority_1": "DO NOT enable skill-based matching yet; offers lack sufficient coverage",
+    "priority_2": "Fix data quality: re-extract with validation, min length filters, alias linkage",
+    "priority_3": "Expand canonical dictionary: add 50+ missing tech skills, domain-specific competencies",
+    "alternative": "Defer skill matching to secondary signal; use job title + location + compensation first"
+  },
+  "decision_matrix": {
+    "can_use_for_matching": false,
+    "reason": "0% clean offers, 1.47% metier:* coverage, 94.81% garbage data",
+    "cv_side": "READY: 17+ skills extracted per CV, 95% coverage",
+    "offer_side": "NOT_READY: avg 2-3 canonical skills, mostly languages, 0% meet quality threshold",
+    "next_step": "Improve offer data quality before enabling skill-based matching"
+  }
+}

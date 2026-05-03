@@ -4,6 +4,56 @@
 
 ---
 
+## 2026-05-03 — Canonical Skills Matching Readiness Audit
+
+### 1. Objectif
+- Auditer la qualité de `fact_offer_skills` avant de démarrer le matching complet
+- Déterminer si le backfill + extraction CV suffisent pour du matching fiable
+
+### 2. Résultats
+
+**Backfill execution** (prior work):
+- Script `backfill_offer_skills_canonical.py` exécuté avec succès
+- 2,132 rows mappées vers `metier:*` canonical IDs
+- Coverage très basse: 73 out of 15,083 unique manual skills (0.5%)
+
+**Audit findings**:
+- **Total rows**: 144,714 skill records across 839 offers
+- **Metier:* coverage**: 1.47% (2,132 rows)
+- **Garbage data**: 94.81% (137,199 rows) — tokenization artifacts, fragments
+- **ESCO URIs**: 3.72% (5,383 rows) — legacy mapping
+- **Distinct canonical skills**: 68 (too narrow)
+  - Top skills: english_language_proficiency (292), havia_pi_setup (206), quality_control (179), excel (148)
+  - Languages dominate (420 occurrences); tech tools sparse (python 63, java 27, docker 34)
+- **Offer quality**: 0% "clean" offers (meeting ≥3 canonical + ≥1 CORE_METIER threshold)
+  - 90.7% PARTIAL (≥1 metier:*): mostly 1-3 skills, language-heavy
+  - 9.3% DIRTY (0 metier:*): no canonical skills at all
+- **Garbage patterns**: 95%+ 2-char fragments (we, it, qu, up), abbreviations, codes
+  - Root cause: naive tokenization without skill validation
+
+### 3. CV vs Offer Asymmetry
+
+| Aspect | CV Side | Offer Side |
+|--------|---------|-----------|
+| **Extraction** | Works | Broken (95% garbage) |
+| **Skill count** | 17+ per CV | 2-3 per offer (mostly languages) |
+| **Coverage** | 95% on tech CV | 1.47% canonical, mostly generic |
+| **Readiness** | READY | NOT_READY |
+
+### 4. Décision
+- **Cannot enable skill-based matching** with current data
+- CV↔offer skill overlap will be incoherent (low density, semantic mismatch)
+- Recommendation: Defer skill matching to secondary signal; use title/location/compensation for initial ranking
+- New audit reports: `audit/FACT_OFFER_SKILLS_QUALITY_AUDIT.md` + JSON
+
+### 5. Next Steps
+1. Fix offer data extraction pipeline (re-implement with validation)
+2. Expand canonical dictionary (50+ missing tech skills)
+3. Consider A/B test: skill-free ranking vs skill-based ranking on production subset
+4. Implement skill matching as secondary re-rank (flag-gated) once data improves
+
+---
+
 ## 2026-04-27 — Fit Score V2 Shadow (déterministe, sans IA, sans impact ranking)
 
 ### 1. Objectif
