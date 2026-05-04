@@ -835,7 +835,8 @@ export default function InboxPage() {
   );
 
   // Displayed = available after server-side filters
-  const displayedItems = useMemo(() => sortInboxItemsForDisplay(availableItems), [availableItems]);
+  // Note: order is already set by backend, filter preserves it
+  const displayedItems = useMemo(() => availableItems, [availableItems]);
 
   const displayedCount = displayedItems.length;
   const maskedCount = receivedCount - displayedCount;

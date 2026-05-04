@@ -156,13 +156,19 @@ function recencyValue(publicationDate?: string | null): number {
 
 export function sortInboxItemsForDisplay(items: NormalizedInboxItem[]): NormalizedInboxItem[] {
   return [...items].sort((a, b) => {
-    return (
-      primaryDisplayScore(b) - primaryDisplayScore(a) ||
-      blockersCount(a) - blockersCount(b) ||
-      strengthsCount(b) - strengthsCount(a) ||
-      recencyValue(b.publication_date) - recencyValue(a.publication_date) ||
-      a.offer_id.localeCompare(b.offer_id)
-    );
+    // Match backend sort exactly: score desc, signal_score desc, offer_id asc
+    const scoreA = a.score || 0;
+    const scoreB = b.score || 0;
+    const signalA = a.signal_score || 0;
+    const signalB = b.signal_score || 0;
+
+    if (scoreB !== scoreA) {
+      return scoreB - scoreA; // score desc
+    }
+    if (signalB !== signalA) {
+      return signalB - signalA; // signal_score desc
+    }
+    return a.offer_id.localeCompare(b.offer_id); // offer_id asc
   });
 }
 
