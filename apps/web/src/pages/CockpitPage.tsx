@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
-import { fetchInbox, postDecision } from "../lib/api";
+import { fetchInbox, fetchProfileFromDB, postDecision } from "../lib/api";
 import { listApplications, upsertApplication } from "../api/applications";
 import type { InboxItem } from "../lib/api";
 import type { ApplicationItem } from "../api/applications";
@@ -23,8 +23,18 @@ export default function CockpitPage() {
     setLoading(true);
     setError(null);
     try {
+      // Try to fetch profile from DB first, fallback to store profile
+      let profileToUse = userProfile;
+      if (profileId && profileId !== "anonymous") {
+        const dbProfile = await fetchProfileFromDB(profileId);
+        if (dbProfile) {
+          profileToUse = dbProfile;
+          console.debug("[cockpit] Using profile from DB");
+        }
+      }
+
       const [inbox, tracker] = await Promise.all([
-        fetchInbox(userProfile, profileId, 65, 40),
+        fetchInbox(profileToUse, profileId, 65, 40),
         listApplications(),
       ]);
       setItems(inbox.items);

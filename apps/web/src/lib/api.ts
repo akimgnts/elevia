@@ -746,6 +746,22 @@ async function fetchInboxOnce(
   }
 }
 
+/**
+ * Fetch profile from DB by ID (if available).
+ * Returns null if not found or DB unavailable.
+ */
+export async function fetchProfileFromDB(profileId: string): Promise<unknown | null> {
+  try {
+    const res = await fetch(`${API_BASE}/profiles/${encodeURIComponent(profileId)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.profile_data || null;
+  } catch (e) {
+    console.warn("[api] Failed to fetch profile from DB", e);
+    return null;
+  }
+}
+
 export async function fetchInbox(
   profile: unknown,
   profileId: string,
