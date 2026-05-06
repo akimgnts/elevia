@@ -54,6 +54,7 @@ from offer.generic_skill_stats import (
     signal_score,
 )
 from profile.profile_cluster import detect_profile_cluster
+from ..utils.profiles_db import get_profile as get_profile_from_db
 
 # Import matching engine
 import sys
@@ -260,6 +261,41 @@ def _career_intelligence_for_display(profile_skills_uri: List[str], offer: Dict)
         "strengths": _display_values(list(payload.get("strengths") or [])),
         "gaps": _display_values(list(payload.get("gaps") or [])),
     }
+
+
+def _load_profile(profile_id: str, payload: Dict) -> tuple[Dict, str]:
+    """
+    Load profile with multiple fallback sources.
+
+    Order of resolution:
+    1. PostgreSQL profiles table (new)
+    2. Fixtures (legacy, if enabled)
+    3. Request payload (compat)
+
+    Returns (profile_data, source_indicator).
+    source_indicator: "db" | "fixture" | "request_payload" | "default"
+    """
+    # Try 1: PostgreSQL profiles table (NEW)
+    if profile_id:
+        db_profile = get_profile_from_db(profile_id)
+        if db_profile:
+            logger.debug("[inbox] Profile loaded from DB: profile_id=%s", profile_id)
+            return db_profile, "db"
+
+    # Try 2: Fixtures (legacy, if enabled)
+    fixture_profile, fixture_status = _load_profile_fixture(profile_id, payload)
+    if fixture_status == "FOUND":
+        logger.debug("[inbox] Profile loaded from fixture: profile_id=%s", profile_id)
+        return fixture_profile, "fixture"
+
+    # Try 3: Request payload (compat)
+    if payload:
+        logger.debug("[inbox] Using profile from request payload: profile_id=%s", profile_id)
+        return payload, "request_payload"
+
+    # Fallback: empty profile
+    logger.warning("[inbox] No profile found, using default: profile_id=%s", profile_id)
+    return {}, "default"
 
 
 def _load_profile_fixture(profile_id: str, payload: Dict) -> tuple[Dict, str]:
@@ -1066,15 +1102,15 @@ def get_inbox(
 ) -> InboxResponse:
     """Score catalog offers against profile, excluding already-decided ones."""
     t0 = time.perf_counter()
-    profile_payload, lookup_status = _load_profile_fixture(req.profile_id, req.profile)
+    profile_payload, profile_source = _load_profile(req.profile_id, req.profile)
     profile_intelligence = _extract_profile_intelligence_payload(profile_payload)
     if _debug_matching_enabled():
         raw_skills = profile_payload.get("matching_skills") or profile_payload.get("skills") or []
         logger.info(
-            "INBOX_MATCH_INPUT profile_id=%s lookup_status=%s profile_internal_id=%s "
+            "INBOX_MATCH_INPUT profile_id=%s profile_source=%s profile_internal_id=%s "
             "profile_skills_raw_count=%s profile_skills_raw_sample=%s",
             req.profile_id,
-            lookup_status,
+            profile_source,
             profile_payload.get("id") or profile_payload.get("profile_id"),
             len(raw_skills) if isinstance(raw_skills, list) else (1 if raw_skills else 0),
             _sample_list(raw_skills),
@@ -1103,6 +1139,7 @@ def get_inbox(
         return _get_inbox_filtered(
             req=req,
             profile_payload=profile_payload,
+            profile_source=profile_source,
             domain_mode=domain_mode,
             q_company=q_company,
             country=country,
@@ -1458,6 +1495,7 @@ def get_inbox(
 
     meta = InboxMeta(
         profile_cluster=profile_cluster,
+        profile_source=profile_source,
         gating_mode=gating_mode,
         coverage_before=coverage_before,
         coverage_after=coverage_after,
@@ -1482,6 +1520,7 @@ def _get_inbox_filtered(
     *,
     req: InboxRequest,
     profile_payload: Dict,
+    profile_source: str,
     domain_mode: str,
     q_company: Optional[str],
     country: Optional[str],
@@ -1933,6 +1972,7 @@ def _get_inbox_filtered(
 
     meta = InboxMeta(
         profile_cluster=profile_cluster,
+        profile_source=profile_source,
         gating_mode=gating_meta.get("gating_mode"),
         coverage_before=gating_meta.get("coverage_before"),
         coverage_after=gating_meta.get("coverage_after"),

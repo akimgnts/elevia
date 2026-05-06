@@ -260,6 +260,7 @@ class InboxItem(BaseModel):
 
 class InboxMeta(BaseModel):
     profile_cluster: Optional[str] = None
+    profile_source: Optional[str] = Field(default=None, pattern="^(db|fixture|request_payload|default)$")
     gating_mode: Optional[str] = Field(
         default=None,
         pattern="^(IN_DOMAIN|STRICT_PLUS_NEIGHBORS|OUT_OF_DOMAIN)$",

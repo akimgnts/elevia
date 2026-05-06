@@ -161,6 +161,9 @@ _TITLE_BLOCK_HINTS: tuple[tuple[str, str], ...] = (
     ("project", "project_ops"),
     ("software", "software_it"),
     ("developer", "software_it"),
+    ("data engineer", "data_analytics"),
+    ("data scientist", "data_analytics"),
+    ("analytics engineer", "data_analytics"),
     ("engineer", "software_it"),
     ("devops", "software_it"),
 )
@@ -311,6 +314,18 @@ _TOOL_LIKE_SIGNALS = {
     "looker studio",
     "databricks",
 }
+
+_CV_HEADER_DATA_ROLES: frozenset[str] = frozenset({
+    "data engineer",
+    "data analyst",
+    "data scientist",
+    "analytics engineer",
+    "bi analyst",
+    "business intelligence analyst",
+    "ingenieur donnees",
+    "ingenieur de donnees",
+    "data engineering",
+})
 
 _MAX_TOP_SIGNALS = 5
 _MAX_ROLE_HYPOTHESES = 3
@@ -875,6 +890,10 @@ def _infer_title_block(title: str, role_resolution: dict | None) -> tuple[str | 
         return "finance_ops", 0.9
 
     exact_patterns: tuple[tuple[str, str, float], ...] = (
+        ("data engineer", "data_analytics", 0.96),
+        ("analytics engineer", "data_analytics", 0.95),
+        ("data scientist", "data_analytics", 0.97),
+        ("data engineering", "data_analytics", 0.94),
         ("business analyst", "business_analysis", 0.98),
         ("marketing analyst", "marketing_communication", 0.98),
         ("assistant marketing digital", "marketing_communication", 0.98),
@@ -912,11 +931,30 @@ def _infer_title_block(title: str, role_resolution: dict | None) -> tuple[str | 
     return None, 0.0
 
 
+def _extract_cv_header_title(cv_text: str) -> str:
+    """Check first 5 lines for an explicit data-role title. Returns normalized match or empty."""
+    lines = (cv_text or "").splitlines()
+    for line in lines[:5]:
+        norm = _normalize(line.strip())
+        if not norm or len(norm.split()) > 5:
+            continue
+        for role in _CV_HEADER_DATA_ROLES:
+            if role in norm:
+                return norm
+    return ""
+
+
 def _safe_role_resolution(cv_text: str, canonical_skills: Sequence[dict]) -> dict[str, object]:
-    extracted_title = extract_title(cv_text)
     recent_experience_title = _extract_recent_experience_title(cv_text)
-    if not extracted_title and recent_experience_title:
-        extracted_title = recent_experience_title
+
+    # Header priority: if first 5 lines explicitly state a data role, trust it over keyword scorer
+    header_title = _extract_cv_header_title(cv_text)
+    if header_title:
+        extracted_title = header_title
+    else:
+        extracted_title = extract_title(cv_text)
+        if not extracted_title and recent_experience_title:
+            extracted_title = recent_experience_title
     normalized_title = normalize_title(extracted_title)
     if not normalized_title:
         return {
@@ -1153,6 +1191,14 @@ def build_profile_intelligence(
             4,
         )
         acc.scores["data_analytics"] = round(acc.scores["data_analytics"] * 0.82, 4)
+
+    # Guard: CV header declares data role + data signals → prevent false sales_business_dev
+    _header_data = _extract_cv_header_title(cv_text)
+    if _header_data and data_anchor_hits >= 2:
+        _sales_score = acc.scores.get("sales_business_dev", 0.0)
+        _data_score = acc.scores.get("data_analytics", 0.0)
+        if _sales_score > _data_score:
+            acc.scores["data_analytics"] = round(_sales_score + 1.2, 4)
 
     sorted_scores = _sorted_block_scores(acc.scores)
     dominant_role_block = sorted_scores[0][0] if sorted_scores and sorted_scores[0][1] > 0 else "generalist_other"

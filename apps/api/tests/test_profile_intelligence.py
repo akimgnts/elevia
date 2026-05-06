@@ -78,3 +78,94 @@ def test_finance_controlling_profile_intelligence_prefers_finance_block():
 
     assert profile_intelligence["dominant_role_block"] == "finance_ops"
     assert profile_intelligence["role_hypotheses"][0]["label"] in {"Contrôleur de gestion", "Financial Analyst"}
+
+
+def test_data_engineer_header_not_classified_as_sales():
+    from compass.profile.profile_intelligence import build_profile_intelligence
+
+    result = build_profile_intelligence(
+        cv_text=(
+            "DATA ENGINEER\n"
+            "John Doe · john@example.com\n\n"
+            "PROFESSIONAL EXPERIENCE\n"
+            "Data & Business Analyst\n"
+            "Acme Corp — 2023–2025\n"
+            "Business Developer — Data-driven Commercial Operations\n"
+            "OldCo — 2022–2023\n"
+        ),
+        profile={},
+        profile_cluster={"dominant_cluster": "DATA_IT", "confidence": 0.6},
+        top_signal_units=[
+            {"action_verb": "built", "object": "etl pipeline", "domain": "data", "ranking_score": 0.9},
+        ],
+        secondary_signal_units=[],
+        preserved_explicit_skills=[
+            {"label": "sql", "cluster_name": "DATA_ANALYTICS_AI", "genericity_score": 0.0},
+            {"label": "python", "cluster_name": "DATA_ANALYTICS_AI", "genericity_score": 0.0},
+            {"label": "power bi", "cluster_name": "DATA_ANALYTICS_AI", "genericity_score": 0.1},
+        ],
+        profile_summary_skills=[],
+        canonical_skills=[],
+    )
+    assert result["dominant_role_block"] != "sales_business_dev", (
+        f"Expected data role, got {result['dominant_role_block']}. "
+        f"Scores: {result.get('role_block_scores')}"
+    )
+    assert result["dominant_role_block"] in {"data_analytics", "software_it"}
+
+
+def test_true_business_developer_stays_sales():
+    from compass.profile.profile_intelligence import build_profile_intelligence
+
+    result = build_profile_intelligence(
+        cv_text=(
+            "BUSINESS DEVELOPER\n"
+            "Jane Smith · jane@example.com\n\n"
+            "PROFESSIONAL EXPERIENCE\n"
+            "Business Developer B2B\n"
+            "SalesCo — 2022–2025\n"
+        ),
+        profile={},
+        profile_cluster={"dominant_cluster": "MARKETING_SALES", "confidence": 0.8},
+        top_signal_units=[
+            {"action_verb": "prospected", "object": "new clients crm salesforce", "domain": "sales", "ranking_score": 0.9},
+        ],
+        secondary_signal_units=[],
+        preserved_explicit_skills=[
+            {"label": "crm management", "cluster_name": "MARKETING_SALES_GROWTH", "genericity_score": 0.0},
+            {"label": "lead qualification", "cluster_name": "MARKETING_SALES_GROWTH", "genericity_score": 0.0},
+            {"label": "salesforce", "cluster_name": "MARKETING_SALES_GROWTH", "genericity_score": 0.0},
+        ],
+        profile_summary_skills=[],
+        canonical_skills=[],
+    )
+    assert result["dominant_role_block"] == "sales_business_dev"
+
+
+def test_data_analyst_with_old_sales_role_stays_data():
+    from compass.profile.profile_intelligence import build_profile_intelligence
+
+    result = build_profile_intelligence(
+        cv_text=(
+            "DATA ANALYST\n"
+            "Alex · alex@example.com\n\n"
+            "PROFESSIONAL EXPERIENCE\n"
+            "Data Analyst\n"
+            "DataCo — 2023–2025\n"
+            "Sales Representative\n"
+            "SalesCo — 2020–2022\n"
+        ),
+        profile={},
+        profile_cluster={"dominant_cluster": "DATA_IT", "confidence": 0.75},
+        top_signal_units=[
+            {"action_verb": "built", "object": "dashboard reporting sql", "domain": "data", "ranking_score": 0.9},
+        ],
+        secondary_signal_units=[],
+        preserved_explicit_skills=[
+            {"label": "sql", "cluster_name": "DATA_ANALYTICS_AI", "genericity_score": 0.0},
+            {"label": "power bi", "cluster_name": "DATA_ANALYTICS_AI", "genericity_score": 0.1},
+        ],
+        profile_summary_skills=[],
+        canonical_skills=[],
+    )
+    assert result["dominant_role_block"] == "data_analytics"
