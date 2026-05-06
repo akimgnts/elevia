@@ -5,11 +5,13 @@ POST /profile/parse-file
   - Accepts PDF or TXT (multipart/form-data field: `file`)
   - Extracts text from the file
   - Runs deterministic baseline parsing (no LLM required)
+  - Persists profile to DB
   - Returns profile compatible with POST /inbox
 """
 from __future__ import annotations
 
 import sys
+import uuid
 from pathlib import Path
 from typing import List, Optional
 
@@ -20,11 +22,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from compass.pipeline import build_parse_file_response_payload
 from compass.pipeline.contracts import ParseFilePipelineRequest, PipelineHTTPError
+from api.utils.profiles_db import save_profile
 
 router = APIRouter(tags=["profile"])
 
 
 class ParseFileResponse(BaseModel):
+    profile_id: str  # NEW: Generated UUID for this parsed profile
     source: str
     mode: str = "baseline"
     pipeline_used: str = "canonical_compass"
@@ -108,6 +112,8 @@ async def parse_file(
     enrich_llm: int = Query(0, ge=0, le=1, description="1 = attempt LLM skill enrichment"),
 ) -> ParseFileResponse:
     request_id = getattr(request.state, "request_id", "n/a")
+    profile_id = str(uuid.uuid4())  # Generate unique profile ID
+
     try:
         response_payload = build_parse_file_response_payload(
             ParseFilePipelineRequest(
@@ -123,4 +129,43 @@ async def parse_file(
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Extraction failed") from exc
 
+    # Save profile to DB (best-effort, doesn't fail the request if DB unavailable)
+    profile_data = response_payload.get("profile", {})
+    save_profile(profile_id, profile_data, user_id=None)
+
+    # Add profile_id to response
+    response_payload["profile_id"] = profile_id
+
     return ParseFileResponse(**response_payload)
+
+
+# ============================================================================
+# GET /profiles/{profile_id} — Fetch persisted profile
+# ============================================================================
+
+class GetProfileResponse(BaseModel):
+    profile_id: str
+    profile_data: dict
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+@router.get("/profiles/{profile_id}", response_model=GetProfileResponse)
+async def get_profile(profile_id: str) -> GetProfileResponse:
+    """
+    Fetch persisted profile by ID.
+
+    Returns profile data if found, 404 otherwise.
+    """
+    from api.utils.profiles_db import get_profile
+
+    profile_data = get_profile(profile_id)
+    if not profile_data:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    return GetProfileResponse(
+        profile_id=profile_id,
+        profile_data=profile_data,
+        created_at=None,  # TODO: fetch from DB metadata
+        updated_at=None,  # TODO: fetch from DB metadata
+    )
