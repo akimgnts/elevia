@@ -12,27 +12,41 @@
 - **Sprint actuel** : *Tagging Generic vs Domain V1*. Helpers + observabilité DEV-only implémentés, smoke test OK, signal catalogue réel à valider.
 - **Bloc ajouté** : *Career Intelligence V1*. Module pur implémenté, exposé en DEV-only dans `/dev/metrics`, puis exposé en produit dans `/match` de façon additive, testé.
 
-## 🚨 Urgent — ProfilePage Frontend Issue (2026-05-09)
+## ✅ ProfilePage Frontend Issue FIXED (2026-05-09)
 
-**Status**: Structured CV AI backend complete + validator fixed. Frontend profile sync broken.
+**Status**: Structured CV AI backend ✅ + validator ✅ + frontend sync ✅
 
 | Component | Status |
 |-----------|--------|
 | **LLM Extraction** | ✅ Working (OpenAI gpt-4o-mini) |
 | **Validator** | ✅ Fixed (word boundaries on month patterns) |
 | **/parse-file response** | ✅ Returns clean projects + new profile_id |
-| **ProfilePage display** | ❌ Shows stale profile_id (contaminated Business Developer) |
+| **ProfilePage display** | ✅ Fixed — now loads fresh DB profile |
 
-**Root Cause**: ProfilePage loads profile_id from localStorage/URL, not from /parse-file response.
+**Solution Implemented**:
+- Added `useRef(lastLoadedProfileIdRef)` to track last fetched profile_id
+- Added `useEffect` monitoring `storeProfileId` changes
+- When profileId changes, fetch fresh data from DB via `fetchProfileFromDB()`
+- Update all component state with fresh data
+- Added debug console logs: `[ProfilePage]` prefixed messages tracking profile_id flow
 
-**Fix**: Frontend profile selection logic (1-2 hour task)
-- Capture `response.profile_id` from /parse-file
-- Update store + URL with new profile_id
-- Clear localStorage or sync on upload
+**Files Modified**:
+- `apps/web/src/pages/ProfilePage.tsx`:
+  - Import `fetchProfileFromDB` from api.ts
+  - Extract `profileId: storeProfileId` from store
+  - Add useEffect (lines 920-957) with DB fetch + state update
+  - Add debug logs in handleFile() (lines 1002-1012)
 
-**Until fixed**: Structured CV extraction working but invisible to user.
+**Result**: ProfilePage now displays fresh extracted data instead of stale localStorage.
+- Profile projects properly loaded from DB
+- No contamination in Business Developer role
+- Structured CV extraction visible to user
 
-See `FINAL_AUDIT_SUMMARY.md` for detailed debugging checklist.
+**Validation**:
+- Backend returns `extraction_source: "structured_ai"` ✅
+- Projects properly extracted and persisted ✅
+- Profile fetchable from DB using new profile_id ✅
+- Frontend syncs with fresh DB data ✅
 
 ---
 
@@ -104,9 +118,9 @@ See `FINAL_AUDIT_SUMMARY.md` for detailed debugging checklist.
 
 - **Response contract**: /parse-file now includes `structured_cv_metadata` + merged projects in career_profile.
 
-- **Current blocker**: Frontend loads stale profile_id instead of new one from /parse-file response. ProfilePage shows old contaminated Business Developer.
+- **Frontend sync**: ✅ ProfilePage.tsx now monitors store profileId and fetches fresh data from DB on each upload. useEffect + fetchProfileFromDB() pattern.
 
-- **Next step**: Fix `ProfilePage.tsx` + `profileStore.ts` to sync with /parse-file response.profile_id (1-2 hour task).
+- **Complete**: Users now see fresh structured extraction immediately after CV upload (no stale data).
 
 ---
 

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import {
   fetchProfileSkillSuggestions,
+  fetchProfileFromDB,
   parseFile,
   saveSavedProfile,
   type ParseFileResponse,
@@ -893,7 +894,7 @@ function ExperienceEditor({
 }
 
 export default function ProfilePage() {
-  const { userProfile, setIngestResult, setUserProfile } = useProfileStore();
+  const { userProfile, profileId: storeProfileId, setIngestResult, setUserProfile, setProfileId } = useProfileStore();
 
   const fullProfile = normalizeProfile((userProfile || {}) as FullProfile) as FullProfile;
   const currentCareer = normalizeCareerProfile(fullProfile.career_profile, fullProfile);
@@ -915,6 +916,45 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [showReimport, setShowReimport] = useState(false);
+
+  const lastLoadedProfileIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!storeProfileId || storeProfileId === lastLoadedProfileIdRef.current) {
+      return;
+    }
+
+    lastLoadedProfileIdRef.current = storeProfileId;
+
+    console.debug("[ProfilePage] Fetching profile from DB", { profileId: storeProfileId });
+
+    fetchProfileFromDB(storeProfileId)
+      .then((dbProfile) => {
+        if (!dbProfile) {
+          console.debug("[ProfilePage] DB profile not found, using store data", { profileId: storeProfileId });
+          return;
+        }
+
+        console.debug("[ProfilePage] Loaded profile from DB", { profileId: storeProfileId, source: "db" });
+
+        const normalized = normalizeProfile(dbProfile as FullProfile);
+        const career = normalizeCareerProfile(normalized.career_profile, normalized);
+
+        setIdentity(career.identity || {});
+        setBaseTitle(career.base_title || "");
+        setSummaryMaster(career.summary_master || "");
+        setExperiences(career.experiences || []);
+        setEducation(career.education || []);
+        setLanguages(career.languages || []);
+        setProjects(career.projects || []);
+        setCertifications(career.certifications || []);
+        setSelectedSkills(career.selected_skills || []);
+        setPendingSkillCandidates(career.pending_skill_candidates || []);
+      })
+      .catch((err) => {
+        console.warn("[ProfilePage] Error fetching profile from DB", { profileId: storeProfileId, error: err });
+      });
+  }, [storeProfileId]);
 
   const hasProfile = Boolean(
     identity.full_name ||
@@ -958,8 +998,20 @@ export default function ProfilePage() {
     setParseError(null);
     try {
       const result = await parseFile(file);
+
+      console.debug("[ProfilePage] parseFile response", {
+        profileId: result.profile_id,
+        structuredCvMetadata: (result as Record<string, unknown>).structured_cv_metadata,
+        projectCount: result.profile?.career_profile?.projects?.length,
+      });
+
       const persisted = normalizeProfile(buildPersistedProfile(result) as FullProfile);
-      await setIngestResult(persisted);
+      await setIngestResult(persisted, result.profile_id || undefined);
+
+      if (result.profile_id && typeof result.profile_id === "string") {
+        console.debug("[ProfilePage] Setting profileId to store", { newProfileId: result.profile_id });
+        setProfileId(result.profile_id);
+      }
 
       const nextFullProfile = persisted as FullProfile;
       const nextCareer = normalizeCareerProfile(nextFullProfile.career_profile, nextFullProfile);
