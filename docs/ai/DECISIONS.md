@@ -76,7 +76,17 @@
 - Les overlays `scoring_v2`, `scoring_v3`, `explain_v1_full`, confidence et rare signal ne doivent pas structurer la lecture utilisateur standard ; ils restent au plus en debug.
 - Cette décision ne modifie pas le scoring, le tri, le ranking, le filtrage ou `skills_uri`.
 
-### R13 — Profile UI = surface produit, pas miroir backend
+### R13 — Structured CV AI — Phase 2 Architecture (2026-05-09)
+- **Extraction**: OpenAI gpt-4o-mini, Pydantic strict validation. Runtime env flag check (not import-time).
+- **Flags**: `ELEVIA_STRUCTURED_CV_AI` (enable extraction), `ELEVIA_STRUCTURED_CV_MOCK` (mock without quota), `ELEVIA_CV_STRUCTURER_MODEL` (model selection).
+- **Validator**: Contamination detection (projects in responsibilities, companies, section headers, date patterns). Word boundaries on month patterns to avoid false positives on "marketing"/"management".
+- **Fallback chain**: LLM → Validation → Legacy parser. No matching/scoring impact if validation fails or extraction unavailable.
+- **Schema**: career_profile.projects, education, certifications merged when structured_ai succeeds. No schema mutations (frozen files untouched).
+- **Frontend sync**: ProfilePage MUST load profile_id from /parse-file response.profile_id, not from localStorage/URL params. This is critical for displaying structured data.
+- **Non-regression**: No matching_v1.py, idf.py, weights_* changes. No profile.skills_uri mutations. Existing tests all pass.
+- **Do not touch**: Matching core, scoring, validator patterns, backend parsing pipeline (unless explicitly fixing contamination detection).
+
+### R14 — Profile UI = surface produit, pas miroir backend
 - `ProfileUnderstandingPage` sert à valider les éléments utiles avant édition, pas à exposer tous les signaux techniques.
 - Les signaux secondaires peuvent rester accessibles, mais repliés et non structurants.
 - `ProfilePage` suit l'ordre produit : Résumé profil, Expériences, Compétences contrôlées, Parcours complémentaire.

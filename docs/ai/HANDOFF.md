@@ -12,6 +12,30 @@
 - **Sprint actuel** : *Tagging Generic vs Domain V1*. Helpers + observabilité DEV-only implémentés, smoke test OK, signal catalogue réel à valider.
 - **Bloc ajouté** : *Career Intelligence V1*. Module pur implémenté, exposé en DEV-only dans `/dev/metrics`, puis exposé en produit dans `/match` de façon additive, testé.
 
+## 🚨 Urgent — ProfilePage Frontend Issue (2026-05-09)
+
+**Status**: Structured CV AI backend complete + validator fixed. Frontend profile sync broken.
+
+| Component | Status |
+|-----------|--------|
+| **LLM Extraction** | ✅ Working (OpenAI gpt-4o-mini) |
+| **Validator** | ✅ Fixed (word boundaries on month patterns) |
+| **/parse-file response** | ✅ Returns clean projects + new profile_id |
+| **ProfilePage display** | ❌ Shows stale profile_id (contaminated Business Developer) |
+
+**Root Cause**: ProfilePage loads profile_id from localStorage/URL, not from /parse-file response.
+
+**Fix**: Frontend profile selection logic (1-2 hour task)
+- Capture `response.profile_id` from /parse-file
+- Update store + URL with new profile_id
+- Clear localStorage or sync on upload
+
+**Until fixed**: Structured CV extraction working but invisible to user.
+
+See `FINAL_AUDIT_SUMMARY.md` for detailed debugging checklist.
+
+---
+
 ## ⚠️ Critical Finding — Skill Extraction Pipeline (2026-05-03)
 
 **Root Cause**: V3 IA extraction is **completely unused**. Two-system architecture with no integration.
@@ -59,6 +83,32 @@
 - Seule la route DEV `/dev/metrics` expose le tagging V1. Le scoring et les routes produit n'ont pas été modifiés.
 
 ## Objectif actuel
+
+**Parallel sprint (Phase 2): Structured CV AI Extraction (IMPLEMENTATION COMPLETE, FRONTEND SYNC PENDING).**
+
+- **Modules implémentés** :
+  - `src/compass/profile/structured_cv_extractor.py` — OpenAI gpt-4o-mini, Pydantic strict validation
+  - `src/compass/profile/structured_cv_validator.py` — Contamination detection (projects, companies, sections, date patterns)
+  - `src/compass/profile/structured_cv_adapter.py` — Convert to ProfileStructuredV1
+  - `src/compass/profile/structured_cv_mock.py` — Mock extraction for testing (ELEVIA_STRUCTURED_CV_MOCK=1)
+  - `src/compass/profile/structured_cv_integration.py` — Fallback chain (LLM → Validation → Legacy)
+  
+- **Feature flags**:
+  - `ELEVIA_STRUCTURED_CV_AI` — Enable extraction (runtime env check)
+  - `ELEVIA_STRUCTURED_CV_MOCK` — Use mock instead of API
+  - `ELEVIA_CV_STRUCTURER_MODEL` — Model selection (default gpt-4o-mini)
+
+- **Validator false positive fix**: Word boundaries on month patterns. Correctly ignores "marketing"/"management" while detecting "March 2022".
+
+- **Tests**: 39/39 passed (mock extraction, integration, validation, false-positive fix).
+
+- **Response contract**: /parse-file now includes `structured_cv_metadata` + merged projects in career_profile.
+
+- **Current blocker**: Frontend loads stale profile_id instead of new one from /parse-file response. ProfilePage shows old contaminated Business Developer.
+
+- **Next step**: Fix `ProfilePage.tsx` + `profileStore.ts` to sync with /parse-file response.profile_id (1-2 hour task).
+
+---
 
 **Sprint actuel terminé : Fit Score V2 Shadow (déterministe, sans IA, sans impact ranking).**
 

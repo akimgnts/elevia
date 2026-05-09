@@ -1682,5 +1682,102 @@
       }
     },
     "decision": "validated_score_invariant"
+  },
+  "last_structured_cv_ai_v1": {
+    "date": "2026-05-09",
+    "phase": "phase_2_ai_extraction",
+    "status": "implementation_complete_frontend_profile_sync_pending",
+    "modules": [
+      "src/compass/profile/structured_cv_schemas.py",
+      "src/compass/profile/structured_cv_extractor.py",
+      "src/compass/profile/structured_cv_validator.py",
+      "src/compass/profile/structured_cv_adapter.py",
+      "src/compass/profile/structured_cv_integration.py",
+      "src/compass/profile/structured_cv_mock.py",
+      "src/compass/profile/structured_cv_pipeline.py"
+    ],
+    "integration_points": [
+      "src/api/routes/profile_file.py (added structured_cv_metadata field)",
+      "src/compass/pipeline/profile_parse_pipeline.py (calls enhance_profile_with_structured_cv)"
+    ],
+    "feature_flags": {
+      "ELEVIA_STRUCTURED_CV_AI": "enable/disable extraction (runtime check, not import-time)",
+      "ELEVIA_STRUCTURED_CV_MOCK": "use mock instead of API (for testing without quota)",
+      "ELEVIA_CV_STRUCTURER_MODEL": "LLM selection, default gpt-4o-mini"
+    },
+    "extractor": {
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "pydantic_strict": true,
+      "runtime_env_check": true
+    },
+    "validator": {
+      "checks": [
+        "projects separation (projects[] not in responsibilities)",
+        "company contamination detection",
+        "section header detection",
+        "job title pattern detection"
+      ],
+      "false_positive_fix_v1": {
+        "issue": "Regex matched 'mar' in 'marketing' as month abbreviation",
+        "root_cause": "month pattern without word boundaries",
+        "fix": "word boundaries + full month names + dash+year pattern"
+      }
+    },
+    "tests": {
+      "total": 39,
+      "mock_extraction": 11,
+      "integration_layer": 8,
+      "extractor_validation": 11,
+      "validator_false_positive_fix": 9,
+      "all_passing": true
+    },
+    "response_contract": {
+      "structured_cv_metadata": {
+        "extraction_source": "structured_ai|structured_mock|legacy_parser",
+        "structured_cv_success": "boolean",
+        "structured_cv_validation": "boolean",
+        "structured_cv_warnings": "list",
+        "fallback_reason": "null|feature_flag_off|extraction_unavailable|validation_failed"
+      },
+      "career_profile_enrichment": "projects, education, certifications merged when structured_ai succeeds"
+    },
+    "validation": {
+      "unit_tests": "39/39 passed",
+      "mock_extraction": "project names preserved through adapter",
+      "real_openai_api": "tested with gpt-4o-mini, validation passed",
+      "false_positive_fix": "marketing/management/market analysis correctly ignored",
+      "contamination_patterns": "Elevia/personal-project correctly separated into projects[]"
+    },
+    "current_issue": {
+      "title": "ProfilePage displays stale profile_id",
+      "evidence": "Backend /parse-file returns clean data + new profile_id, but frontend shows old contaminated Business Developer",
+      "root_cause": "Frontend loads profile_id from localStorage/URL instead of /parse-file response.profile_id",
+      "fix_location": [
+        "src/pages/ProfilePage.tsx",
+        "src/store/profileStore.ts",
+        "Upload success handler"
+      ],
+      "fix_scope": "Frontend profile selection logic (1-2 hour task)"
+    },
+    "non_regression": [
+      "no matching_v1.py change",
+      "no scoring change",
+      "no schema mutations",
+      "legacy parser fallback functional",
+      "all existing tests pass"
+    ],
+    "frozen_files": [
+      "apps/api/src/matching/matching_v1.py",
+      "apps/api/src/matching/idf.py",
+      "apps/api/src/matching/weights_*"
+    ],
+    "do_not_touch": [
+      "matching core",
+      "scoring",
+      "structured extractor",
+      "validator patterns",
+      "backend parsing pipeline"
+    ]
   }
 }

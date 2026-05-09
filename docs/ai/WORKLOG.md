@@ -4,6 +4,103 @@
 
 ---
 
+## 2026-05-09 — Structured CV AI + ProfilePage Contamination Audit
+
+### 1. Objectif
+- Implémenter Structured CV extraction via OpenAI gpt-4o-mini (Phase 2)
+- Fixer validator false positive sur "marketing" → faux positif "mars" détecté
+- Auditer pourquoi ProfilePage affiche profil contaminé malgré structured_ai activé
+
+### 2. Structured CV AI — COMPLETE ✓
+
+**Implementation**:
+- `src/compass/profile/structured_cv_extractor.py` — OpenAI extraction gpt-4o-mini, Pydantic strict validation
+- `src/compass/profile/structured_cv_validator.py` — Contamination detection (projects, companies, sections, date patterns)
+- `src/compass/profile/structured_cv_adapter.py` — Convert StructuredCV → ProfileStructuredV1
+- `src/compass/profile/structured_cv_integration.py` — Fallback chain: LLM → Validation → Legacy parser
+- `src/compass/profile/structured_cv_mock.py` — Mock extraction (ELEVIA_STRUCTURED_CV_MOCK=1) for testing without API quota
+- `src/compass/profile/structured_cv_pipeline.py` — Schema definitions
+
+**Integration**:
+- `src/api/routes/profile_file.py` — Added `structured_cv_metadata` field to response
+- `src/compass/pipeline/profile_parse_pipeline.py` — Calls `attempt_structured_cv_extraction()`, merges projects into career_profile via `enhance_profile_with_structured_cv()`
+
+**Tests**: 39/39 passing
+- Mock extraction: 11 tests
+- Integration layer: 8 tests
+- Extractor validation: 11 tests
+- Validator false positive fix: 9 tests
+
+**Feature flags**:
+- `ELEVIA_STRUCTURED_CV_AI` — Enable/disable extraction (runtime env check, not import-time)
+- `ELEVIA_STRUCTURED_CV_MOCK` — Use mock instead of API
+- `ELEVIA_CV_STRUCTURER_MODEL` — LLM selection (default: gpt-4o-mini)
+
+### 3. Validator False Positive Fix ✓
+
+**Problem**: Regex pattern matched "mar" in "marketing" as month abbreviation "Mars", rejecting valid extractions.
+
+**Root cause**: Month abbreviation pattern `(?:jan|feb|mar|...)` without word boundaries matched within longer words.
+
+**Fix**: 
+- Added word boundaries `\b` around month patterns
+- Support both 3-letter abbreviations (Feb, Mar) and full names (February, March)
+- Separate pattern for "dash + year" format (e.g., "DevOps Engineer – 2023")
+
+**Patterns now correctly handled**:
+- DETECTED: "Data Engineer — Acme — 2022-2023", "DevOps Engineer – 2023", "Consultant, March 2021"
+- IGNORED: "marketing", "management", "market analysis"
+
+### 4. ProfilePage Contamination Audit
+
+**Finding**: Backend works correctly. Frontend loads stale profile_id.
+
+**Evidence**:
+- /parse-file returns fresh profile_id + clean structured data + projects ✓
+- Mock extraction preserves project names through adapter ✓
+- Projects merged into career_profile.projects in response ✓
+- BUT: ProfilePage displays old contaminated Business Developer
+
+**Root cause**: ProfilePage likely loads profile_id from localStorage/URL params, not from /parse-file response.profile_id.
+
+**Fix location**: Frontend profile selection logic
+- `src/pages/ProfilePage.tsx` — Check how profile_id is selected after upload
+- `src/store/profileStore.ts` — Ensure new profile_id from response is stored
+- Upload success handler — Pass response.profile_id to store + update URL
+
+**Validation**: After upload, verify:
+1. response.profile_id from /parse-file
+2. store.profileId matches response.profile_id
+3. localStorage profileId cleared or updated
+4. ProfilePage loaded profile_id matches new one
+→ Business Developer should show clean, Elevia in projects[]
+
+### 5. Non-Regression
+- No matching/scoring changes
+- No schema mutations (frozen files)
+- Validator correctly ignores business terms
+- Legacy parser fallback works seamlessly
+- All existing tests pass
+
+### 6. Artifacts
+- `CONTAMINATION_AUDIT_FINDINGS.md` — Detailed audit methodology
+- `FINAL_AUDIT_SUMMARY.md` — Root cause analysis + debugging checklist
+- `VALIDATOR_FIX_COMPLETION.md` — False positive fix verification
+
+### 7. Handoff to Next Agent
+**Ready to implement**:
+- Frontend profile selection fix (1-2 hour task)
+- Verify store sync after /parse-file upload
+- Test with real CV to confirm clean Business Developer display
+
+**Do NOT touch**:
+- Matching/scoring core
+- Structured CV extractor
+- Validator patterns
+- Backend parsing pipeline
+
+---
+
 ## 2026-05-03 — Canonical Skills Matching Readiness Audit
 
 ### 1. Objectif
