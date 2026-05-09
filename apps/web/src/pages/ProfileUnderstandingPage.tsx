@@ -232,6 +232,42 @@ function buildDisplayExperiences(
   return (reconstruction?.suggested_experiences ?? []).map(displayExperienceFromSuggestion).slice(0, MAX_ITEMS);
 }
 
+type DisplayProject = {
+  title: string;
+  technologies: string[];
+  impact: string;
+  source: "profile" | "suggestion";
+};
+
+function displayProjectFromProfile(project: Record<string, unknown>): DisplayProject {
+  return {
+    title: cleanDisplayValue(project.title) || "projet reconnu",
+    technologies: labelsFromUnknown(Array.isArray(project.technologies) ? project.technologies : []),
+    impact: cleanDisplayValue(project.impact) || "",
+    source: "profile",
+  };
+}
+
+function displayProjectFromSuggestion(project: Record<string, unknown>): DisplayProject {
+  return {
+    title: cleanDisplayValue(project.name) || "projet suggere",
+    technologies: labelsFromUnknown(Array.isArray(project.tools) ? project.tools : []),
+    impact: cleanDisplayValue(project.description) || "",
+    source: "suggestion",
+  };
+}
+
+function buildDisplayProjects(
+  careerProfile: CareerProfile,
+  reconstruction: ProfileReconstructionOutput | null,
+): DisplayProject[] {
+  const profileProjects = Array.isArray(careerProfile.projects) ? careerProfile.projects : [];
+  if (profileProjects.length > 0) {
+    return profileProjects.map(displayProjectFromProfile).slice(0, MAX_ITEMS);
+  }
+  return (reconstruction?.suggested_projects ?? []).map(displayProjectFromSuggestion).slice(0, MAX_ITEMS);
+}
+
 function getSuggestedSummary(careerProfile: CareerProfile, reconstruction: ProfileReconstructionOutput | null): string {
   const profileSummary = cleanDisplayList([careerProfile.summary_master], 3).join(", ");
   if (profileSummary) return profileSummary;
@@ -427,6 +463,10 @@ export default function ProfileUnderstandingPage() {
     () => buildDisplayExperiences(careerProfile, profileReconstruction),
     [careerProfile, profileReconstruction],
   );
+  const profileProjects = useMemo(
+    () => buildDisplayProjects(careerProfile, profileReconstruction),
+    [careerProfile, profileReconstruction],
+  );
   const profileTools = useMemo(
     () => cleanDisplayList(profileExperiences.flatMap((experience) => experience.skillsAndTools), 4),
     [profileExperiences],
@@ -606,6 +646,45 @@ export default function ProfileUnderstandingPage() {
               ) : (
                 <p className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
                   Aucune expérience suffisamment structurée n'a été reconnue.
+                </p>
+              )}
+            </div>
+          </article>
+
+          <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Projets
+            </div>
+            <h2 className="mt-3 text-lg font-semibold text-slate-950">
+              Réalisations identifiées
+            </h2>
+            <div className="mt-5 grid gap-3">
+              {profileProjects.length > 0 ? (
+                profileProjects.map((project, index) => (
+                  <div key={`${project.title}-${index}`} className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="text-base font-semibold text-slate-950">{project.title}</div>
+                        {project.impact && (
+                          <p className="mt-2 text-sm text-slate-600">{project.impact}</p>
+                        )}
+                      </div>
+                      {project.source === "suggestion" && (
+                        <span className="rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700">
+                          suggestion
+                        </span>
+                      )}
+                    </div>
+                    {project.technologies.length > 0 && (
+                      <div className="mt-3">
+                        <SuggestionChips items={project.technologies} />
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                  Aucun projet suffisamment structuré n'a été reconnu.
                 </p>
               )}
             </div>
