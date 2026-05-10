@@ -1611,8 +1611,10 @@ def _get_inbox_filtered(
         PROFILE_INTELLIGENCE_MAX_PREFETCH_PAGES if profile_intelligence else DEFAULT_MAX_PREFETCH_PAGES
     )
     pages_fetched = 0
-    cursor_page = page_effective
-    while pages_fetched < max_prefetch_pages and len(candidate_items) < page_size_effective:
+    cursor_page = 1  # FIXED: Always start from page 1, not from page_effective
+    # Load a consistent set of pages (don't vary based on requested page)
+    # This ensures stable sorting/filtering regardless of page number
+    while pages_fetched < max_prefetch_pages:
         offset = (cursor_page - 1) * page_size_effective
         offers_page = load_catalog_offers_filtered(
             q_company=q_company,
@@ -1752,7 +1754,9 @@ def _get_inbox_filtered(
     # else: sort_mode == "published_desc" or any other: keep global score order
 
     total_matched = len(filtered_items)
-    items = filtered_items[:page_size_effective]
+    # Apply pagination: convert global sorted list to page offset
+    offset = (page_effective - 1) * page_size_effective
+    items = filtered_items[offset : offset + page_size_effective]
 
     for item in items:
         _c_stash = _explain_debug.get(item.offer_id)
