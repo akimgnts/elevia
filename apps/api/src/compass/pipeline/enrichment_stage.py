@@ -214,6 +214,11 @@ def run_enrichment_stage(
         for item in result.get("validated_items", [])
         if isinstance(item, dict) and (item.get("label") or item.get("uri"))
     ]
+
+    # Ensure profile has matching_skills field for matching algorithm
+    if profile and "matching_skills" not in profile:
+        profile["matching_skills"] = profile.get("skills", [])
+
     skill_provenance = {
         "baseline_esco": baseline_esco_labels,
         "library_token_to_esco": [

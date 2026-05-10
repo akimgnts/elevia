@@ -154,6 +154,7 @@ def run_baseline_from_tokens(
             "skills": skills_canonical,
             "skills_source": "baseline",
             "skills_uri": skills_uri,
+            "matching_skills": skills_canonical,
         },
         "warnings": [],
     }
