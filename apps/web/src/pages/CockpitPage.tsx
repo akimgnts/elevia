@@ -9,8 +9,8 @@ import { useProfileStore } from "../store/profileStore";
 import { OfferCard } from "../components/ui/OfferCard";
 
 export default function CockpitPage() {
-  const { userProfile, profileHash } = useProfileStore();
-  const profileId = profileHash ?? "anonymous";
+  const { userProfile, profileHash, profileId: storeProfileId, activeProfileId } = useProfileStore();
+  const profileId = activeProfileId || storeProfileId || profileHash || "anonymous";
 
   const [items, setItems] = useState<InboxItem[]>([]);
   const [trackerItems, setTrackerItems] = useState<ApplicationItem[]>([]);

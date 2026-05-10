@@ -98,6 +98,7 @@ class ParseFileResponse(BaseModel):
     profile_intelligence_ai_assist: dict = {}
     raw_cv_reconstruction: dict = {}
     profile_reconstruction: dict = {}
+    structured_cv_metadata: dict = {}
     analyze_dev: Optional[dict] = None
 
 

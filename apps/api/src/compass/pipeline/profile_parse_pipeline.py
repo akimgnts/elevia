@@ -23,6 +23,10 @@ from compass.extraction.enriched_signal_builder import build_enriched_signals
 from compass.extraction.precanonical_recovery import build_precanonical_recovery
 from compass.profile.profile_intelligence import build_profile_intelligence
 from compass.profile.profile_intelligence_ai_assist import build_profile_intelligence_ai_assist
+from compass.profile.structured_cv_integration import (
+    attempt_structured_cv_extraction,
+    enhance_profile_with_structured_cv,
+)
 
 from .cache_hooks import run_profile_cache_hooks
 from .canonical_mapping_stage import dedupe_by_canonical_key, run_canonical_mapping_stage, select_mapping_inputs
@@ -335,6 +339,20 @@ def _run_profile_text_pipeline(
 def build_parse_file_response_payload(request: ParseFilePipelineRequest) -> Dict[str, object]:
     ingestion = ingest_profile_file(request)
     extraction = extract_profile_text(ingestion)
+
+    # Attempt structured CV extraction (optional, early stage)
+    structured_cv, structured_metadata = attempt_structured_cv_extraction(extraction.cv_text)
+    logger.info(
+        json.dumps({
+            "event": "STRUCTURED_CV_EXTRACTION",
+            "enabled": structured_metadata["structured_cv_enabled"],
+            "success": structured_metadata["structured_cv_success"],
+            "source": structured_metadata["extraction_source"],
+            "fallback_reason": structured_metadata["fallback_reason"],
+            "request_id": request.request_id,
+        })
+    )
+
     initial_artifacts = _run_profile_text_pipeline(
         cv_text=extraction.cv_text,
         source_cv_text=extraction.cv_text,
@@ -360,6 +378,22 @@ def build_parse_file_response_payload(request: ParseFilePipelineRequest) -> Dict
 
     if not bool(decision["enabled"]):
         response_payload = build_parse_file_response_payload_from_artifacts(initial_artifacts)
+
+        # Enhance profile with structured CV data if available (after response payload is built)
+        if structured_cv and structured_metadata["structured_cv_success"]:
+            profile = response_payload.get("profile", {})
+            if profile:
+                enhanced_profile = enhance_profile_with_structured_cv(profile, structured_cv)
+                response_payload["profile"] = enhanced_profile
+                logger.info(
+                    "[parse-file] Profile enhanced with structured CV: "
+                    "%d exp, %d proj",
+                    len(structured_cv.experiences),
+                    len(structured_cv.projects),
+                )
+
+        # Add structured CV metadata to response
+        response_payload["structured_cv_metadata"] = structured_metadata
 
         # Extract CV canonical skills
         try:
@@ -415,6 +449,22 @@ def build_parse_file_response_payload(request: ParseFilePipelineRequest) -> Dict
     )
 
     response_payload = build_parse_file_response_payload_from_artifacts(artifacts)
+
+    # Enhance profile with structured CV data if available (after response payload is built)
+    if structured_cv and structured_metadata["structured_cv_success"]:
+        profile = response_payload.get("profile", {})
+        if profile:
+            enhanced_profile = enhance_profile_with_structured_cv(profile, structured_cv)
+            response_payload["profile"] = enhanced_profile
+            logger.info(
+                "[parse-file] Profile enhanced with structured CV (AI reconstruction): "
+                "%d exp, %d proj",
+                len(structured_cv.experiences),
+                len(structured_cv.projects),
+            )
+
+    # Add structured CV metadata to response
+    response_payload["structured_cv_metadata"] = structured_metadata
 
     # Extract CV canonical skills
     try:

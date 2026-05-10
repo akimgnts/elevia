@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2, HelpCircle } from "lucide-react";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
-import { startProfileUnderstandingSession } from "../lib/api";
+import { ProfileIntelligenceHero } from "../components/profile/ProfileIntelligenceHero";
+import { SkillTypeGroup } from "../components/profile/SkillTypeGroup";
+import { ProjectCard } from "../components/profile/ProjectCard";
+import { startProfileUnderstandingSession, fetchProfileFromDB } from "../lib/api";
 import type {
   ProfileReconstructionOutput,
   SuggestedExperience,
@@ -239,6 +242,12 @@ type DisplayProject = {
   source: "profile" | "suggestion";
 };
 
+type SkillWithType = {
+  label: string;
+  type?: "hard" | "tool" | "domain";
+  confidence?: number;
+};
+
 function displayProjectFromProfile(project: Record<string, unknown>): DisplayProject {
   return {
     title: cleanDisplayValue(project.title) || "projet reconnu",
@@ -263,9 +272,9 @@ function buildDisplayProjects(
 ): DisplayProject[] {
   const profileProjects = Array.isArray(careerProfile.projects) ? careerProfile.projects : [];
   if (profileProjects.length > 0) {
-    return profileProjects.map(displayProjectFromProfile).slice(0, MAX_ITEMS);
+    return profileProjects.map((p) => displayProjectFromProfile(asRecord(p))).slice(0, MAX_ITEMS);
   }
-  return (reconstruction?.suggested_projects ?? []).map(displayProjectFromSuggestion).slice(0, MAX_ITEMS);
+  return (reconstruction?.suggested_projects ?? []).map((p) => displayProjectFromSuggestion(asRecord(p))).slice(0, MAX_ITEMS);
 }
 
 function getSuggestedSummary(careerProfile: CareerProfile, reconstruction: ProfileReconstructionOutput | null): string {
@@ -443,10 +452,37 @@ function SuggestionChips({ items }: { items: string[] }) {
   );
 }
 
+function buildProfileSkillsWithType(
+  profileSkills: string[],
+  profileReconstruction: ProfileReconstructionOutput | null,
+): SkillWithType[] {
+  if (profileSkills.length === 0) return [];
+
+  const suggestedSkills = profileReconstruction?.suggested_skills || [];
+  const skillMap = new Map<string, { type?: string; confidence?: number }>();
+
+  suggestedSkills.forEach((skill: unknown) => {
+    const s = asRecord(skill);
+    const label = String(s.label || "");
+    if (label) {
+      skillMap.set(label, {
+        type: s.type as string | undefined,
+        confidence: s.confidence as number | undefined,
+      });
+    }
+  });
+
+  return profileSkills.map((label) => ({
+    label,
+    type: (skillMap.get(label)?.type as "hard" | "tool" | "domain" | undefined),
+    confidence: skillMap.get(label)?.confidence,
+  }));
+}
+
 export default function ProfileUnderstandingPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userProfile, setIngestResult } = useProfileStore();
+  const { userProfile, activeProfileId, setIngestResult } = useProfileStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -459,6 +495,10 @@ export default function ProfileUnderstandingPage() {
   const careerProfile = useMemo(() => getCareerProfile(userProfile), [userProfile]);
   const profileReconstruction = useMemo(() => getProfileReconstruction(userProfile), [userProfile]);
   const profileSkills = useMemo(() => skillLabelsFromProfile(profile, careerProfile), [careerProfile, profile]);
+  const profileSkillsWithType = useMemo(
+    () => buildProfileSkillsWithType(profileSkills, profileReconstruction),
+    [profileSkills, profileReconstruction],
+  );
   const profileExperiences = useMemo(
     () => buildDisplayExperiences(careerProfile, profileReconstruction),
     [careerProfile, profileReconstruction],
@@ -480,16 +520,31 @@ export default function ProfileUnderstandingPage() {
     [careerProfile, profileExperiences],
   );
   const summary = getSuggestedSummary(careerProfile, profileReconstruction);
-  const title = cleanDisplayValue(careerProfile.base_title || careerProfile.target_title) || "profil reconstruit";
   const missingLanguages = !hasArrayItems(careerProfile.languages)
     ? cleanDisplayList((profileReconstruction?.suggested_languages ?? []).map((language) => [language.language, language.level].filter(Boolean).join(" ")))
     : [];
   const missingCertifications = !hasArrayItems(careerProfile.certifications)
     ? cleanDisplayList((profileReconstruction?.suggested_certifications ?? []).map((certification) => certification.name))
     : [];
-  const missingProjects = !hasArrayItems(careerProfile.projects)
-    ? cleanDisplayList((profileReconstruction?.suggested_projects ?? []).map((project) => project.name || project.description))
-    : [];
+
+  useEffect(() => {
+    if (!activeProfileId) return;
+
+    const profileIdStr = activeProfileId as string;
+    async function loadFromDB() {
+      try {
+        const dbProfile = await fetchProfileFromDB(profileIdStr);
+        if (dbProfile) {
+          console.debug("[ProfileUnderstanding] Loaded profile from DB:", profileIdStr);
+          await setIngestResult(dbProfile, profileIdStr);
+        }
+      } catch (err) {
+        console.warn("[ProfileUnderstanding] DB fetch failed, using store data:", err);
+      }
+    }
+
+    void loadFromDB();
+  }, [activeProfileId, setIngestResult]);
 
   useEffect(() => {
     if (!userProfile) return;
@@ -520,6 +575,29 @@ export default function ProfileUnderstandingPage() {
       cancelled = true;
     };
   }, [sourceContext, userProfile]);
+
+  if (!userProfile && !activeProfileId) {
+    return (
+      <PremiumAppShell
+        eyebrow="Profil"
+        title="Aucun profil actif"
+        description="Analysez un CV pour commencer et découvrir votre profil en détail."
+      >
+        <div className="mx-auto max-w-2xl space-y-6">
+          <div className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <p className="text-slate-600 mb-4">Il n'y a pas de profil actif pour l'instant. Commencez par analyser votre CV.</p>
+            <Link
+              to="/analyze"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Analyser mon CV
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </PremiumAppShell>
+    );
+  }
 
   if (!userProfile) {
     return <Navigate to="/analyze" replace />;
@@ -562,45 +640,45 @@ export default function ProfileUnderstandingPage() {
             </div>
           )}
 
+          <ProfileIntelligenceHero
+            profileIntelligence={(userProfile as Record<string, unknown>)?.profile_intelligence}
+            structuredCvMetadata={(userProfile as Record<string, unknown>)?.structured_cv_metadata}
+            variant="full"
+          />
+
           <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Profil
-                </div>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                  {title}
-                </h2>
-                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Domaine</span>
-                  <span className="font-semibold text-slate-900">{title}</span>
-                </div>
-                {profileSkills.length > 0 && (
-                  <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Compétences clés</span>
-                    <SuggestionChips items={profileSkills} />
-                  </div>
-                )}
-                {summary && <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">{summary}</p>}
-              </div>
-              <div className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                Brouillon prêt
-              </div>
+            {summary && (
+              <p className="text-sm leading-6 text-slate-600">
+                {summary}
+              </p>
+            )}
+          </article>
+
+          <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Compétences
+            </div>
+            <h2 className="mt-3 text-lg font-semibold text-slate-950">
+              Ce qui a été identifié
+            </h2>
+            <div className="mt-5">
+              {profileSkillsWithType.length > 0 ? (
+                <SkillTypeGroup skills={profileSkillsWithType} />
+              ) : (
+                <p className="text-sm text-slate-500">Aucune compétence principale détectée.</p>
+              )}
             </div>
 
-            <div className="mt-5">
-              <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+            {profileTools.length > 0 && (
+              <div className="mt-5 rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                   Outils détectés
                 </div>
                 <div className="mt-3">
                   <SuggestionChips items={profileTools} />
-                  {profileTools.length === 0 && (
-                    <p className="text-sm text-slate-500">Aucun outil principal détecté avec assez de clarté.</p>
-                  )}
                 </div>
               </div>
-            </div>
+            )}
           </article>
 
           <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
@@ -661,26 +739,10 @@ export default function ProfileUnderstandingPage() {
             <div className="mt-5 grid gap-3">
               {profileProjects.length > 0 ? (
                 profileProjects.map((project, index) => (
-                  <div key={`${project.title}-${index}`} className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="text-base font-semibold text-slate-950">{project.title}</div>
-                        {project.impact && (
-                          <p className="mt-2 text-sm text-slate-600">{project.impact}</p>
-                        )}
-                      </div>
-                      {project.source === "suggestion" && (
-                        <span className="rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700">
-                          suggestion
-                        </span>
-                      )}
-                    </div>
-                    {project.technologies.length > 0 && (
-                      <div className="mt-3">
-                        <SuggestionChips items={project.technologies} />
-                      </div>
-                    )}
-                  </div>
+                  <ProjectCard
+                    key={`${project.title}-${index}`}
+                    project={project}
+                  />
                 ))
               ) : (
                 <p className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
@@ -690,34 +752,33 @@ export default function ProfileUnderstandingPage() {
             </div>
           </article>
 
-          <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-              Suggestions
-            </div>
-            <h2 className="mt-3 text-lg font-semibold text-slate-950">
-              Éléments proposés, non imposés
-            </h2>
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                <div className="text-sm font-semibold text-slate-900">Compétences suggérées</div>
-                <div className="mt-3">
-                  <SuggestionChips items={suggestedSkills} />
-                  {suggestedSkills.length === 0 && <p className="text-sm text-slate-500">Aucune compétence candidate claire.</p>}
-                </div>
+          {(suggestedSkills.length > 0 || missingLanguages.length > 0 || missingCertifications.length > 0) && (
+            <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Suggestions
               </div>
-              <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
-                <div className="text-sm font-semibold text-slate-900">Compléments possibles</div>
-                <div className="mt-3 space-y-3">
-                  <SuggestionChips items={missingLanguages} />
-                  <SuggestionChips items={missingCertifications} />
-                  <SuggestionChips items={missingProjects} />
-                  {missingLanguages.length === 0 && missingCertifications.length === 0 && missingProjects.length === 0 && (
-                    <p className="text-sm text-slate-500">Aucun complément prioritaire à proposer.</p>
-                  )}
-                </div>
+              <h2 className="mt-3 text-lg font-semibold text-slate-950">
+                Éléments proposés, non imposés
+              </h2>
+              <div className="mt-5 space-y-4">
+                {suggestedSkills.length > 0 && (
+                  <div>
+                    <div className="text-sm font-semibold text-slate-900 mb-2">Compétences suggérées</div>
+                    <SuggestionChips items={suggestedSkills} />
+                  </div>
+                )}
+                {(missingLanguages.length > 0 || missingCertifications.length > 0) && (
+                  <div>
+                    <div className="text-sm font-semibold text-slate-900 mb-2">Compléments à ajouter</div>
+                    <div className="space-y-2">
+                      {missingLanguages.length > 0 && <SuggestionChips items={missingLanguages} />}
+                      {missingCertifications.length > 0 && <SuggestionChips items={missingCertifications} />}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          </article>
+            </article>
+          )}
 
           <article className="rounded-[1.75rem] border border-white/80 bg-white/90 p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -757,7 +818,7 @@ export default function ProfileUnderstandingPage() {
           <div className="rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
               <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-              Action principale
+              Actions principales
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-600">
               La validation crée votre profil éditable à partir des éléments déjà compris. Les suggestions restent
@@ -765,22 +826,42 @@ export default function ProfileUnderstandingPage() {
             </p>
             <button
               type="button"
+              onClick={() => navigate("/inbox")}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+            >
+              Voir mes offres compatibles
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
               onClick={() => void handleContinue()}
               disabled={loading || Boolean(error)}
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               Valider et générer mon profil
               <ArrowRight className="h-4 w-4" />
             </button>
+            <button
+              type="button"
+              onClick={() => navigate("/profile")}
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Modifier mon profil
+            </button>
           </div>
 
-          <div className="rounded-[1.75rem] border border-white/80 bg-white/90 p-5 text-sm leading-6 text-slate-600 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <div className="font-semibold text-slate-900">Ce qui ne change pas</div>
-            <ul className="mt-3 space-y-2">
-              <li>• aucune modification du scoring</li>
-              <li>• aucun changement du signal de matching</li>
-              <li>• aucune donnée remplacée silencieusement</li>
-            </ul>
+          <div className="rounded-[1.75rem] border border-white/80 bg-white/90 p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 mb-3">
+              Ce qu'Elevia a détecté
+            </div>
+            <ProfileIntelligenceHero
+              profileIntelligence={(userProfile as Record<string, unknown>)?.profile_intelligence}
+              structuredCvMetadata={(userProfile as Record<string, unknown>)?.structured_cv_metadata}
+              variant="compact"
+            />
+            {activeProfileId && (
+              <p className="mt-3 text-[10px] text-slate-400">Profil ID: {activeProfileId}</p>
+            )}
           </div>
         </aside>
       </div>

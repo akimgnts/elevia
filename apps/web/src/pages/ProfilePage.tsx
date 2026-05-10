@@ -20,6 +20,7 @@ import {
 import { normalizeProfile } from "../lib/profile/normalizers";
 import { useProfileStore } from "../store/profileStore";
 import { PremiumAppShell } from "../components/layout/PremiumAppShell";
+import { ProfileIntelligenceHero } from "../components/profile/ProfileIntelligenceHero";
 
 type CanonicalSkillRef = {
   label: string;
@@ -400,10 +401,6 @@ function cleanDisplayItems(values: Array<string | undefined | null>, limit = 5):
       .map((value) => String(value || "").replace(/\|/g, " ").replace(/\s+/g, " ").trim())
       .filter((value) => value.length >= 2)
   ).slice(0, limit);
-}
-
-function skillLabels(values: CanonicalSkillRef[] | undefined, limit = 5): string[] {
-  return cleanDisplayItems((values || []).map((item) => item.label), limit);
 }
 
 function experienceToolLabels(experience: ExperienceV2, limit = 3): string[] {
@@ -894,7 +891,7 @@ function ExperienceEditor({
 }
 
 export default function ProfilePage() {
-  const { userProfile, profileId: storeProfileId, setIngestResult, setUserProfile, setProfileId } = useProfileStore();
+  const { userProfile, profileId: storeProfileId, setIngestResult, setUserProfile, setProfileId, setActiveProfileId } = useProfileStore();
 
   const fullProfile = normalizeProfile((userProfile || {}) as FullProfile) as FullProfile;
   const currentCareer = normalizeCareerProfile(fullProfile.career_profile, fullProfile);
@@ -974,7 +971,6 @@ export default function ProfilePage() {
     languages,
   });
   const completePct = Math.round(completeness * 100);
-  const keySkillLabels = skillLabels(selectedSkills, 5);
   const completenessColor =
     completePct >= 80
       ? "text-emerald-700 bg-emerald-50 border-emerald-200"
@@ -1001,8 +997,6 @@ export default function ProfilePage() {
 
       console.debug("[ProfilePage] parseFile response", {
         profileId: result.profile_id,
-        structuredCvMetadata: (result as Record<string, unknown>).structured_cv_metadata,
-        projectCount: result.profile?.career_profile?.projects?.length,
       });
 
       const persisted = normalizeProfile(buildPersistedProfile(result) as FullProfile);
@@ -1011,6 +1005,7 @@ export default function ProfilePage() {
       if (result.profile_id && typeof result.profile_id === "string") {
         console.debug("[ProfilePage] Setting profileId to store", { newProfileId: result.profile_id });
         setProfileId(result.profile_id);
+        setActiveProfileId(result.profile_id);
       }
 
       const nextFullProfile = persisted as FullProfile;
@@ -1245,8 +1240,14 @@ export default function ProfilePage() {
           </div>
         )}
 
+        <ProfileIntelligenceHero
+          profileIntelligence={(fullProfile as Record<string, unknown>)?.profile_intelligence}
+          structuredCvMetadata={(fullProfile as Record<string, unknown>)?.structured_cv_metadata}
+          variant="compact"
+        />
+
         <section className={GLASS}>
-          <SectionLabel text="Résumé profil" />
+          <SectionLabel text="Identité" />
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="grid gap-1">
               <FieldLabel>Nom complet</FieldLabel>
@@ -1280,19 +1281,6 @@ export default function ProfilePage() {
             <div className="grid gap-1 sm:col-span-2">
               <FieldLabel>Résumé maître</FieldLabel>
               <TextArea value={summaryMaster} onChange={setSummaryMaster} placeholder="Positionnement de base, forces, environnements et logique de valeur." rows={4} />
-            </div>
-            <div className="grid gap-2 sm:col-span-2">
-              <FieldLabel>Forces clés</FieldLabel>
-              <div className="flex flex-wrap gap-2">
-                {keySkillLabels.map((skill) => (
-                  <span key={skill} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">
-                    {skill}
-                  </span>
-                ))}
-                {keySkillLabels.length === 0 && (
-                  <span className="text-sm text-slate-400">Ajoutez des compétences contrôlées pour faire ressortir vos forces principales.</span>
-                )}
-              </div>
             </div>
           </div>
         </section>
@@ -1328,7 +1316,7 @@ export default function ProfilePage() {
         </section>
 
         <section className={GLASS}>
-          <SectionLabel text="Compétences contrôlées" />
+          <SectionLabel text="Compétences" />
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
             Une seule liste principale. Ajoutez ou retirez ici les compétences et outils que vous voulez vraiment faire exister dans votre profil.
           </p>
@@ -1364,7 +1352,7 @@ export default function ProfilePage() {
         </section>
 
         <section className={GLASS}>
-          <SectionLabel text="Parcours complémentaire" />
+          <SectionLabel text="Formation & Langues" />
           <div className="mt-4 grid gap-6 lg:grid-cols-3">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -1423,16 +1411,16 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {projects.length > 0 ? (
-          <section className={GLASS}>
-            <div className="flex items-center justify-between">
-              <SectionLabel text={`Projets (${projects.length})`} />
-              <button type="button" onClick={() => setProjects((current) => [...current, { title: "", technologies: [], impact: "" }])} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                <Plus className="h-3.5 w-3.5" /> Ajouter
-              </button>
-            </div>
-            <div className="mt-4 space-y-3">
-              {projects.map((project, index) => (
+        <section className={GLASS}>
+          <div className="flex items-center justify-between">
+            <SectionLabel text="Projets" />
+            <button type="button" onClick={() => setProjects((current) => [...current, { title: "", technologies: [], impact: "" }])} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+              <Plus className="h-3.5 w-3.5" /> Ajouter
+            </button>
+          </div>
+          <div className="mt-4 space-y-3">
+            {projects.length > 0 ? (
+              projects.map((project, index) => (
                 <div key={`project-${index}`} className="grid gap-3 rounded-[1rem] border border-slate-200 bg-white p-4 sm:grid-cols-2">
                   <TextInput value={project.title || ""} onChange={(value) => setProjects((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, title: value } : item)))} placeholder="Titre du projet" />
                   <TextInput value={(project.technologies || []).join(", ")} onChange={(value) => setProjects((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, technologies: value.split(",").map((skill) => skill.trim()).filter(Boolean) } : item)))} placeholder="Technologies" />
@@ -1442,14 +1430,14 @@ export default function ProfilePage() {
                     <button type="button" onClick={() => setProjects((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="text-xs font-semibold text-rose-500 hover:text-rose-700">Supprimer</button>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
-        ) : (
-          <button type="button" onClick={() => setProjects([{ title: "", technologies: [], impact: "" }])} className="w-full rounded-[1.5rem] border-2 border-dashed border-slate-200 py-4 text-sm font-semibold text-slate-400 transition hover:border-slate-300 hover:text-slate-700">
-            + Ajouter des projets personnels
-          </button>
-        )}
+              ))
+            ) : (
+              <div className="rounded-[1rem] border-2 border-dashed border-slate-200 py-8 text-center text-sm text-slate-400">
+                Aucun projet personnel pour l&apos;instant.
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </PremiumAppShell>
   );

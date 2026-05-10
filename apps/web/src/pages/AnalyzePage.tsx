@@ -114,7 +114,7 @@ function buildPersistedAnalyzeProfile(result: ParseFileResponse): Record<string,
 
 export default function AnalyzePage() {
   const navigate = useNavigate();
-  const { setIngestResult } = useProfileStore();
+  const { setIngestResult, setActiveProfileId } = useProfileStore();
 
   // ── Tab ─────────────────────────────────────────────────────────────────────
   const [tab, setTab] = useState<Tab>("file");
@@ -232,6 +232,12 @@ export default function AnalyzePage() {
       const result = useLegacyLlm
         ? await parseFileEnriched(selectedFile)
         : await parseFile(selectedFile);
+
+      const rawResult = result as unknown as Record<string, unknown>;
+      if (rawResult.profile_id && typeof rawResult.profile_id === "string") {
+        console.debug("[AnalyzePage] parse response profile_id:", rawResult.profile_id);
+      }
+
       setParseResult(result);
 
       // Bridge domain signals to InboxPage (profile-level, not per-offer)
@@ -269,6 +275,14 @@ export default function AnalyzePage() {
       const parseSource = parseResult as unknown as Record<string, unknown>;
       const persistedProfile = buildPersistedAnalyzeProfile(parseResult);
       await setIngestResult(persistedProfile);
+
+      // Set activeProfileId from parse result if available
+      const profileIdFromParse = parseSource.profile_id as string | undefined;
+      if (profileIdFromParse) {
+        setActiveProfileId(profileIdFromParse);
+        console.debug("[AnalyzePage] activeProfileId set:", profileIdFromParse);
+      }
+
       navigate("/profile-understanding", {
         state: {
           sourceContext: {

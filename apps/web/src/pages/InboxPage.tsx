@@ -18,6 +18,7 @@ import {
   fetchProfileContext,
   fetchContextFit,
   postDecision,
+  fetchProfileFromDB,
   type ApplyPackResponse,
   type OfferSemanticResponse,
   type OfferContext,
@@ -458,7 +459,7 @@ function FiltersDrawer({
 
 export default function InboxPage() {
   const navigate = useNavigate();
-  const { userProfile, profileHash, setUserProfile } = useProfileStore();
+  const { userProfile, profileHash, profileId: storeProfileId, activeProfileId, setUserProfile } = useProfileStore();
   const [items, setItems] = useState<NormalizedInboxItem[]>([]);
   const [rawResponseCount, setRawResponseCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -499,7 +500,7 @@ export default function InboxPage() {
   const [trackerNotice, setTrackerNotice] = useState<{ offerId: string; status: "saved" | "cv_ready" } | null>(null);
   const inboxLoadKeyRef = useRef<string | null>(null);
 
-  const profileId = profileHash ?? "anonymous";
+  const profileId = activeProfileId || storeProfileId || profileHash || "anonymous";
   const selectedOfferId = selectedOffer?.offer_id || selectedOffer?.id;
   const selectedSemantic = selectedOfferId ? semanticByOfferId[selectedOfferId] : undefined;
   const selectedOfferContext = selectedOfferId ? offerContextById[selectedOfferId] : undefined;
@@ -683,8 +684,18 @@ export default function InboxPage() {
     setProfileIncomplete(false);
 
     try {
+      // Try to fetch profile from DB first, fallback to store profile
+      let profileToUse = userProfile;
+      if (profileId && profileId !== "anonymous") {
+        const dbProfile = await fetchProfileFromDB(profileId);
+        if (dbProfile) {
+          profileToUse = dbProfile;
+          console.debug("[inbox] Using profile from DB");
+        }
+      }
+
       const { profile: matchingProfile, skillsSource: source, needsSeedHydration } = buildMatchingProfile(
-        userProfile as Record<string, unknown>,
+        profileToUse as Record<string, unknown>,
         profileId
       );
 
@@ -745,6 +756,12 @@ export default function InboxPage() {
       inboxLoadKeyRef.current = requestKey;
 
       if (DEBUG_INBOX) {
+        console.info("[inbox] Profile identifiers:", {
+          activeProfileId,
+          storeProfileId,
+          profileHash,
+          resolvedProfileId: profileId,
+        });
         console.info("[inbox] Profile payload:", {
           profile_id: profileId,
           skills_source: source,
@@ -785,7 +802,38 @@ export default function InboxPage() {
 
       const rawCount = Array.isArray(data.items) ? data.items.length : 0;
       setRawResponseCount(rawCount);
+
+      // AUDIT: Level 1 - Raw response
+      if (DEBUG_INBOX && Array.isArray(data.items)) {
+        const rawTop10 = (data.items as unknown[]).slice(0, 10).map((item: unknown) => {
+          const rec = item as Record<string, unknown>;
+          return {
+            offer_id: rec.offer_id,
+            title: rec.title,
+            score: rec.score,
+            signal_score: rec.signal_score,
+            score_type: typeof rec.score,
+          };
+        });
+        console.info("[inbox-audit] LEVEL 1 - RAW_RESPONSE (first 10):", rawTop10);
+      }
+
       const normalized = normalizeAndSortInboxItems(data.items);
+
+      // AUDIT: Level 2 - After normalization + sort
+      if (DEBUG_INBOX) {
+        const normalizedTop10 = normalized.slice(0, 10).map((item) => ({
+          offer_id: item.offer_id,
+          title: item.title,
+          score: item.score,
+          signal_score: item.signal_score,
+          score_type: typeof item.score,
+          score_raw: item.score_raw,
+          score_pct: item.score_pct,
+        }));
+        console.info("[inbox-audit] LEVEL 2 - NORMALIZED_SORTED (first 10):", normalizedTop10);
+      }
+
       setItems(normalized);
 
       if (DEBUG_INBOX) {
@@ -834,9 +882,38 @@ export default function InboxPage() {
     [items, decisions]
   );
 
+  // AUDIT: Level 3 - After filtering decisions
+  useEffect(() => {
+    if (DEBUG_INBOX && availableItems.length > 0) {
+      const availableTop10 = availableItems.slice(0, 10).map((item) => ({
+        offer_id: item.offer_id,
+        title: item.title,
+        score: item.score,
+        signal_score: item.signal_score,
+      }));
+      console.info("[inbox-audit] LEVEL 3 - AVAILABLE_ITEMS (first 10):", availableTop10);
+    }
+  }, [availableItems]);
+
   // Displayed = available after server-side filters
   // Note: order is already set by backend, filter preserves it
   const displayedItems = useMemo(() => availableItems, [availableItems]);
+
+  // AUDIT: Level 4 - Before rendering
+  useEffect(() => {
+    if (DEBUG_INBOX && displayedItems.length > 0) {
+      const displayedTop10 = displayedItems.slice(0, 10).map((item) => ({
+        offer_id: item.offer_id,
+        title: item.title,
+        score: item.score,
+        signal_score: item.signal_score,
+        page,
+        pageSize,
+      }));
+      console.info("[inbox-audit] LEVEL 4 - DISPLAYED_ITEMS (first 10):", displayedTop10);
+      console.info("[inbox-audit] PAGE_STATE:", { page, pageSize, displayedCount: displayedItems.length, totalCount: items.length });
+    }
+  }, [displayedItems, page, pageSize, items.length]);
 
   const displayedCount = displayedItems.length;
   const maskedCount = receivedCount - displayedCount;

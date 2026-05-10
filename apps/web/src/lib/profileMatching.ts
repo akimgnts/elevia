@@ -115,23 +115,29 @@ export function buildMatchingProfile(profile: ProfileInput, profileId: string): 
   const careerSelectedSkillLabels = careerSelectedSkills.map(skillLabel).filter(Boolean);
   const careerSelectedSkillUris = careerSelectedSkills.map(skillUri).filter(Boolean);
 
-  const unmapped = Array.isArray(profile.unmapped_skills_high_confidence)
-    ? profile.unmapped_skills_high_confidence.map((skill) => skill?.raw_skill || "")
-    : [];
-
-  const detectedTools = Array.isArray(profile.detected_capabilities)
-    ? profile.detected_capabilities.flatMap((cap) => cap?.tools_detected || [])
-    : [];
-
   let matchingSkills = uniqueStrings([
     ...explicitSkills,
     ...canonicalSkillLabels,
     ...careerSelectedSkillLabels,
-    ...unmapped,
-    ...detectedTools,
   ])
     .map((skill) => skill.toLowerCase())
     .sort();
+
+  const unmappedCount = Array.isArray(profile.unmapped_skills_high_confidence)
+    ? profile.unmapped_skills_high_confidence.length
+    : 0;
+  const detectedToolsCount = Array.isArray(profile.detected_capabilities)
+    ? profile.detected_capabilities.flatMap((cap) => cap?.tools_detected || []).length
+    : 0;
+
+  if (import.meta.env.DEV && localStorage.getItem("elevia_debug_inbox") === "1") {
+    console.debug("[buildMatchingProfile] Contamination removed:", {
+      clean_skills: matchingSkills.length,
+      removed_unmapped: unmappedCount,
+      removed_detected_tools: detectedToolsCount,
+      profile_id: profileId,
+    });
+  }
 
   // Step 2: If we have user skills, mark source as "user"
   if (matchingSkills.length > 0) {
