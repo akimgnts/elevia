@@ -1730,22 +1730,26 @@ def _get_inbox_filtered(
     else:
         filtered_items = gated_items
 
-    # Optional sort on filtered set
-    if sort_mode == "score_desc":
-        filtered_items = sorted(
-            filtered_items,
-            key=lambda i: (-i.score, -(i.signal_score or 0.0), i.offer_id),
-        )
-    elif sort_mode == "confidence_desc":
+    # Global score sort first (items accumulated from multiple prefetch pages, must be ordered globally)
+    # This ensures correct global ranking across pages
+    filtered_items = sorted(
+        filtered_items,
+        key=lambda i: (-i.score, -(i.signal_score or 0.0), i.offer_id),
+    )
+
+    # Optional secondary sort based on user request
+    if sort_mode == "confidence_desc":
         rank = {"HIGH": 2, "MED": 1, "LOW": 0}
         filtered_items = sorted(
             filtered_items,
             key=lambda i: (
                 -rank.get(i.explain_v1.confidence if i.explain_v1 else "LOW", 0),
-                -i.score,
+                -i.score,  # Score as tiebreaker to maintain global ranking
+                -(i.signal_score or 0.0),
                 i.offer_id,
             ),
         )
+    # else: sort_mode == "published_desc" or any other: keep global score order
 
     total_matched = len(filtered_items)
     items = filtered_items[:page_size_effective]
