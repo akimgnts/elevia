@@ -4,7 +4,7 @@
 - Expected domain: `data_finance`
 - Expected orientation: `audit_data`
 - Current verdict: `discutable`
-- Replay source: `/Users/akimguentas/Downloads/cvtest/Akim Guentas – Audit & Data Analyst.pdf`
+- Replay source: `sentinel_panel.json -> cv_relative_path="Akim Guentas – Audit & Data Analyst.pdf"`
 
 ## Known Runtime Issues
 - Generic analyst vocabulary leaks into cyber, policy, and broad data roles.

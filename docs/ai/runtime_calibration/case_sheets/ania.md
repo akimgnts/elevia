@@ -4,7 +4,7 @@
 - Expected domain: `finance`
 - Expected orientation: `finance_compliance`
 - Current verdict: `mauvais`
-- Replay source: `/Users/akimguentas/Downloads/cvtest/CV_2026-02-17_Ania_Benabbas (1).pdf`
+- Replay source: `sentinel_panel.json -> cv_relative_path="CV_2026-02-17_Ania_Benabbas (1).pdf"`
 
 ## Known Runtime Issues
 - Finance profile drifts to policy, privacy, and generic analyst roles.

@@ -4,7 +4,7 @@
 - Expected domain: `engineering`
 - Expected orientation: `software_engineering`
 - Current verdict: `discutable`
-- Replay source: `/Users/akimguentas/Downloads/cvtest/CV_MouisseTheo.pdf`
+- Replay source: `sentinel_panel.json -> cv_relative_path="CV_MouisseTheo.pdf"`
 
 ## Known Runtime Issues
 - Software profile drifts into HR and project roles.

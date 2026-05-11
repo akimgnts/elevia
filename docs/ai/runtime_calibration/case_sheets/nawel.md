@@ -4,7 +4,7 @@
 - Expected domain: `hr`
 - Expected orientation: `hr_ops`
 - Current verdict: `mauvais`
-- Replay source: `/Users/akimguentas/Downloads/cvtest/CV - Nawel KADI 2026.pdf`
+- Replay source: `sentinel_panel.json -> cv_relative_path="CV - Nawel KADI 2026.pdf"`
 
 ## Known Runtime Issues
 - RH profile overmatches generic process and manager signals.

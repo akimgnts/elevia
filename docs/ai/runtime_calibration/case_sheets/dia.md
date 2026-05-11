@@ -4,14 +4,14 @@
 - Expected domain: `finance`
 - Expected orientation: `wealth_management`
 - Current verdict: `mauvais`
-- Replay source: `/Users/akimguentas/Downloads/cvtest/Dia Madina-CV alternance en gestion de patrimoine.pdf`
+- Replay source: `sentinel_panel.json -> cv_relative_path="Dia Madina-CV alternance en gestion de patrimoine.pdf"`
 
 ## Known Runtime Issues
 - Patrimoine anchors remain too weak.
 - Matching falls back to generic finance or unrelated roles.
 
 ## Current Dominant Drift
-- `wealth management anchors too sparse`
+- `wealth management -> generic finance drift`
 
 ## Latest Human Reading
 - Too few stable specialized overlaps are visible.
