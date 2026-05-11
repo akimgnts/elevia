@@ -37,3 +37,9 @@ None recorded yet.
   - `akim_audit`
 - Status:
   - provisional
+
+### wealth management -> generic finance drift
+- Triggering cases:
+  - `dia`
+- Status:
+  - provisional
