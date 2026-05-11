@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import os
 import sys
@@ -24,11 +25,10 @@ _venv_site_packages = sorted((REPO_ROOT / "apps" / "api" / ".venv" / "lib").glob
 if _venv_site_packages:
     sys.path.insert(0, str(_venv_site_packages[0]))
 
-from api.main import app
-
 
 DEFAULT_PANEL_PATH = Path("docs/ai/runtime_calibration/sentinel_panel.json")
 DEFAULT_OUTPUT_PATH = Path("docs/ai/runtime_calibration/latest_sentinel_replay.md")
+app: Any | None = None
 
 
 def _utc_now() -> str:
@@ -55,10 +55,20 @@ def load_sentinel_panel(panel_path: Path) -> list[dict[str, Any]]:
         if not isinstance(item, dict):
             raise ValueError("Each sentinel entry must be an object")
         sentinel = dict(item)
-        if panel_cv_root_env and "cv_root_env" not in sentinel:
+        sentinel_cv_root_env = str(sentinel.get("cv_root_env") or "").strip()
+        if sentinel_cv_root_env:
+            sentinel["cv_root_env"] = sentinel_cv_root_env
+        elif panel_cv_root_env:
             sentinel["cv_root_env"] = panel_cv_root_env
         normalized.append(sentinel)
     return normalized
+
+
+def _get_app() -> Any:
+    global app
+    if app is None:
+        app = importlib.import_module("api.main").app
+    return app
 
 
 def _resolve_cv_path(sentinel: dict[str, Any]) -> Path:
@@ -82,7 +92,7 @@ def replay_single_sentinel(sentinel: dict[str, Any], *, limit: int = 10) -> dict
     if not cv_path.exists():
         raise FileNotFoundError(f"Missing CV file: {cv_path}")
 
-    with TestClient(app) as client:
+    with TestClient(_get_app()) as client:
         with cv_path.open("rb") as fh:
             parse_response = client.post(
                 "/profile/parse-file",

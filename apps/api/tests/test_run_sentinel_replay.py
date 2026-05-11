@@ -34,6 +34,82 @@ def test_load_sentinel_panel_reads_ids(tmp_path):
     assert [item["id"] for item in panel] == ["nawel", "ania"]
 
 
+def test_load_sentinel_panel_inherits_panel_cv_root_env_when_override_is_empty(tmp_path):
+    panel_path = tmp_path / "sentinel_panel.json"
+    panel_path.write_text(
+        json.dumps(
+            {
+                "version": "v1",
+                "cv_root_env": "PANEL_ROOT",
+                "sentinels": [
+                    {"id": "nawel", "cv_relative_path": "nawel.pdf", "cv_root_env": ""},
+                    {"id": "ania", "cv_relative_path": "ania.pdf"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    panel = run_sentinel_replay.load_sentinel_panel(panel_path)
+
+    assert panel[0]["cv_root_env"] == "PANEL_ROOT"
+    assert panel[1]["cv_root_env"] == "PANEL_ROOT"
+
+
+def test_resolve_cv_path_uses_sentinel_override_over_panel_default(tmp_path):
+    panel_path = tmp_path / "sentinel_panel.json"
+    panel_path.write_text(
+        json.dumps(
+            {
+                "version": "v1",
+                "cv_root_env": "PANEL_ROOT",
+                "sentinels": [
+                    {
+                        "id": "nawel",
+                        "cv_relative_path": "nested/nawel.pdf",
+                        "cv_root_env": "SENTINEL_ROOT",
+                    }
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    panel = run_sentinel_replay.load_sentinel_panel(panel_path)
+
+    expected_root = tmp_path / "sentinel-root"
+    monkey_env = {"PANEL_ROOT": str(tmp_path / "panel-root"), "SENTINEL_ROOT": str(expected_root)}
+    original = {key: run_sentinel_replay.os.environ.get(key) for key in monkey_env}
+    try:
+        run_sentinel_replay.os.environ.update(monkey_env)
+        resolved = run_sentinel_replay._resolve_cv_path(panel[0])
+    finally:
+        for key, value in original.items():
+            if value is None:
+                run_sentinel_replay.os.environ.pop(key, None)
+            else:
+                run_sentinel_replay.os.environ[key] = value
+
+    assert resolved == expected_root / "nested/nawel.pdf"
+
+
+def test_resolve_cv_path_falls_back_to_default_env_name(tmp_path):
+    sentinel = {"id": "nawel", "cv_relative_path": "nawel.pdf"}
+    expected_root = tmp_path / "default-root"
+    original = run_sentinel_replay.os.environ.get("ELEVIA_SENTINEL_CV_ROOT")
+    try:
+        run_sentinel_replay.os.environ["ELEVIA_SENTINEL_CV_ROOT"] = str(expected_root)
+        resolved = run_sentinel_replay._resolve_cv_path(sentinel)
+    finally:
+        if original is None:
+            run_sentinel_replay.os.environ.pop("ELEVIA_SENTINEL_CV_ROOT", None)
+        else:
+            run_sentinel_replay.os.environ["ELEVIA_SENTINEL_CV_ROOT"] = original
+
+    assert resolved == expected_root / "nawel.pdf"
+
+
 def test_summarize_top_items_counts_verdict_buckets():
     summary = run_sentinel_replay.summarize_top_items(
         sentinel={"id": "nawel"},
