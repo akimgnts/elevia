@@ -25,3 +25,23 @@ This file is append-only.
 - Active sentinel replay matrix:
   - `<sentinel id>`: `pass|stable|regressed`
 - Decision:
+
+### 2026-05-11 — sentinel baseline replay — no patch
+- Verdict before:
+  - `nawel`: pending
+  - `ania`: pending
+  - `dia`: pending
+  - `akim_audit`: pending
+  - `mouissetheo`: pending
+- Main false positives:
+  - to be filled after human reading of `latest_sentinel_replay.md`
+- Dominant cause hypothesis:
+  - baseline observation only
+- Patch scope:
+  - none
+- Replay result after:
+  - baseline only
+- Regressions on other sentinels:
+  - not applicable
+- Decision:
+  - establish benchmark baseline
