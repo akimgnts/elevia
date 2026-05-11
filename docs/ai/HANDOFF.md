@@ -11,6 +11,613 @@
 - **Sprint venant d'être terminé** : *Generic Skills Filter V1* avec guard profile-aware. **Validé produit** — voir `baseline/generic_filter_validation_guard/`.
 - **Sprint actuel** : *Tagging Generic vs Domain V1*. Helpers + observabilité DEV-only implémentés, smoke test OK, signal catalogue réel à valider.
 - **Bloc ajouté** : *Career Intelligence V1*. Module pur implémenté, exposé en DEV-only dans `/dev/metrics`, puis exposé en produit dans `/match` de façon additive, testé.
+- **Nouveau bloc local (2026-05-11)** : *Elevia Métier V0* créé en mode **offline / dev-only non branché**. Registre statique + helper pur + tests unitaires, sans impact runtime.
+
+## ✅ Runtime Offer Skills URI Injection (Business France) Completed (2026-05-11)
+
+**Status**: patch runtime loader **flag-gated**, additif, sans modification du scoring core.
+
+**Objectif**:
+- réparer la chaîne côté offres :
+  - `offer_skills` PostgreSQL
+  - → `skills_uri` runtime
+  - → input offre effectivement consommé par `MatchingEngine`
+
+**Modifié**:
+- `apps/api/src/api/utils/inbox_catalog.py`
+- `apps/api/tests/test_inbox_catalog_offer_skills_runtime.py`
+
+**Flags**:
+- `ELEVIA_RUNTIME_OFFER_SKILLS_INJECTION`
+  - `0` par défaut : comportement historique inchangé
+  - `1` : active l’injection runtime depuis `offer_skills`
+
+**Ce que fait le patch**:
+- propage `payload_json.skills_uri` si déjà présent
+- charge les lignes `offer_skills` PostgreSQL pour les offres Business France
+- filtre les canonicals trop génériques (`english`, `communication`, `analysis`, `management`, `project_management`, `reporting`, `coordination`, etc.)
+- convertit les canonicals spécialisés en URIs runtime via `build_canonical_esco_promoted(..., _promote_override=True)`
+- fusionne additivement avec les URIs payload existantes
+- garde les labels `skills` pour fallback normalizer si aucune URI n’est résolue
+
+**Observabilité runtime ajoutée**:
+- `runtime_offer_skills_uri_source`
+- `runtime_offer_injected_from_offer_skills`
+- `runtime_offer_skills_uri_count`
+- `runtime_offer_unresolved_skills`
+- `runtime_offer_specialized_count`
+- `runtime_offer_canonical_resolution_success`
+- `runtime_offer_canonical_bridge_source`
+
+**Validation tests**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_inbox_catalog_offer_skills_runtime.py -q`
+  - résultat : `3 passed`
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_inbox_catalog_offer_skills_runtime.py apps/api/tests/test_business_france_db_first.py apps/api/tests/test_offer_normalization_consistency.py apps/api/tests/test_inbox.py -q`
+  - résultat : `21 passed, 2 warnings`
+
+**Validation réelle DB**:
+- Loader BF direct :
+  - flag OFF : `0/903` offres avec `skills_uri` runtime non vide
+  - flag ON : `409/903` offres avec `skills_uri` runtime non vide via `offer_skills_db`
+- Replay `/inbox` réel :
+  - `Nawel` s’améliore fortement vers recrutement RH
+  - `Ania` récupère des offres finance mais garde du bruit policy/analyst
+  - `Akim Audit/Data` gagne des offres audit / data plus métier
+  - `Dia` reste faible (patrimoine encore trop peu résolu)
+
+**Limites connues**:
+- le bridge offre → URI reste incomplet sur plusieurs anchors BF
+- une grande partie des offres n’a encore que des labels `offer_skills`, sans URI runtime résolue
+- le flag ON change réellement les résultats inbox, car il change enfin les signaux offre scorés
+
+**Do NOT touch**:
+- `matching_v1.py`
+- `idf.py`
+- `weights_*`
+- formule de scoring
+
+**Next likely bottleneck**:
+- améliorer encore la résolution `canonical_id offer_skills -> URI runtime`
+- surtout pour finance patrimoniale, RH avancé, operations
+
+## ✅ Elevia Métier V0 Created (2026-05-11)
+
+**Status**: Phase 1 uniquement, terminée localement, non branchée aux routes produit.
+
+**Créé**:
+- `apps/api/src/compass/registry/elevia_metier_registry.json`
+- `apps/api/src/api/utils/elevia_metier.py`
+- `apps/api/tests/test_elevia_metier.py`
+
+**Scope**:
+- 3 clusters seulement :
+  - `DATA_ENGINEERING`
+  - `BI_ANALYTICS`
+  - `PRODUCT_ANALYTICS`
+- Helper pur :
+  - `infer_elevia_metier(input_data: dict) -> dict`
+- Sortie :
+  - `primary_cluster`
+  - `candidate_clusters`
+  - `confidence`
+  - `strong_matches`
+  - `weak_matches`
+  - `tools_matched`
+  - `project_patterns_matched`
+  - `trajectory_hints`
+  - `evidence`
+
+**Pourquoi**:
+- Préparer le référentiel métier Elevia sans casser les invariants déjà gelés.
+- Garder une première version calibrable hors scoring et hors `/inbox`.
+
+**Limites V0**:
+- Taxonomie minuscule et volontairement incomplète.
+- Heuristiques textuelles seulement.
+- Aucun branchement `/dev/metrics`, audit script, `/inbox`, `/match` ou DB.
+- Aucun traitement avancé des trajectoires mixtes.
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_elevia_metier.py -q`
+- Résultat : `6 passed`
+
+**Do NOT touch for this sprint**:
+- `matching_v1.py`
+- `idf.py`
+- `weights_*`
+- scoring / ranking
+- `/inbox` runtime
+- DB schema / migration
+
+**Next step if explicitly approved later**:
+- Observer le helper en audit script ou surface DEV-only, sans impact produit.
+
+## ✅ Elevia Métier V0 Audit Completed (2026-05-11)
+
+**Status**: Phase 2 audit/calibration réalisée en mode offline uniquement. Toujours aucun branchement produit.
+
+**Créé**:
+- `scripts/run_elevia_metier_audit.py`
+- `apps/api/tests/test_elevia_metier_audit.py`
+- artefacts générés :
+  - `baseline/elevia_metier_audit/latest.json`
+  - `docs/ai/reports/elevia_metier_audit_v0.md`
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_elevia_metier_audit.py -q`
+- résultat : `1 passed`
+- `apps/api/.venv/bin/python scripts/run_elevia_metier_audit.py --mode full`
+
+**Résultats clés**:
+- `14` profils + `35` offres audités
+- cas valides :
+  - `sample_delta_txt` → `DATA_ENGINEERING`
+  - `golden_01` → `BI_ANALYTICS`
+  - `akim_guentas_matching` → `BI_ANALYTICS`
+- ambiguïtés majeures :
+  - `cv_fixture_v0` → quasi ex-aequo `BI_ANALYTICS` / `DATA_ENGINEERING`
+  - `Analytics Engineer VIE - API & BI` → quasi ex-aequo `BI_ANALYTICS` / `DATA_ENGINEERING`
+- faux positifs majeurs :
+  - finance / RH / talent acquisition peuvent dériver vers `BI_ANALYTICS`
+- conclusion provisoire :
+  - `BI_ANALYTICS` est trop large
+  - `PRODUCT_ANALYTICS` est trop faible sur le corpus local
+
+**Signaux les plus fiables observés**:
+- `DATA_ENGINEERING` :
+  - `etl`
+  - `pipeline`
+  - `api`
+  - `postgresql`
+  - patterns pipeline/orchestration
+- `BI_ANALYTICS` :
+  - `power bi`
+  - `tableau`
+  - `business intelligence`
+  - pattern `reporting_stack`
+
+**Signaux trop génériques / dangereux**:
+- `reporting`
+- `sql`
+- `excel`
+- `kpi`
+- `analysis`
+- `bi` trop court, trop bruyant comme strong signal
+
+**Limites importantes**:
+- Pas de corpus local riche en vrai `PRODUCT_ANALYTICS`
+- L’ablation automatique montre peu d’effet de `tools/projects/experiences` dans V0 actuel
+- `data ops` et `analytics engineer` restent insuffisamment séparés
+
+**Do NOT do yet**:
+- aucun branchement `/inbox`
+- aucun reranking
+- aucun scoring
+- aucune migration DB
+- aucune exposition frontend
+
+**Recommended next adjustment set**:
+- durcir ou retirer `bi` comme strong signal isolé
+- réduire le poids de `reporting`, `sql`, `excel`, `kpi` seuls
+- enrichir `DATA_ENGINEERING` sur `data ops`, `data quality`, `data marts`, `orchestration`
+- reporter toute exposition `PRODUCT_ANALYTICS` tant qu’un corpus local plus réaliste n’est pas disponible
+
+## ✅ Elevia PostgreSQL Multi-Domain Audit v1 Completed (2026-05-11)
+
+**Status**: audit-only, lecture seule, Business France uniquement, aucun impact produit.
+
+**Créé**:
+- `scripts/run_elevia_metier_postgres_audit.py`
+- `apps/api/tests/test_elevia_metier_postgres_audit.py`
+- artefacts générés :
+  - `baseline/elevia_metier_postgres_audit/latest.json`
+  - `docs/ai/reports/elevia_metier_postgres_audit_v1.md`
+
+**Scope exact**:
+- `clean_offers WHERE source='business_france' AND COALESCE(is_active, TRUE)=TRUE`
+- jointures read-only :
+  - `offer_domain_enrichment`
+  - `offer_skills`
+  - `fact_offer_skills` seulement en fallback si `offer_skills` absent
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_elevia_metier_postgres_audit.py -q`
+  - résultat : `1 passed`
+- `apps/api/.venv/bin/python scripts/run_elevia_metier_postgres_audit.py --mode full`
+
+**Chiffres clés**:
+- `876` offres BF actives auditées
+- `903` lignes `offer_domain_enrichment`
+- `5382` lignes `offer_skills`
+
+**Répartition réelle des domaines**:
+- `engineering`: `272` (`31.05 %`)
+- `sales`: `129` (`14.73 %`)
+- `supply`: `115` (`13.13 %`)
+- `finance`: `107` (`12.21 %`)
+- `operations`: `77` (`8.79 %`)
+- `data`: `65` (`7.42 %`)
+- `hr`: `39` (`4.45 %`)
+- `admin`: `28` (`3.20 %`)
+- `marketing`: `20` (`2.28 %`)
+- `legal`: `12` (`1.37 %`)
+- `other`: `12` (`1.37 %`)
+
+**Conclusion importante**:
+- la DB BF n’est **pas** centrée data par volume
+- le biais data-centric observé jusqu’ici vient surtout de la calibration du référentiel, pas du corpus
+
+**Signaux vraiment discriminants observés**:
+- `finance` :
+  - `financial analysis`
+  - `financial reporting`
+  - `management control`
+  - `accounting basics`
+- `sales` :
+  - `b2b sales`
+  - `crm`
+  - `crm management`
+  - `salesforce`
+
+  - `business development`
+- `supply` :
+  - `supply chain management`
+  - `supplier relationship management`
+  - `procurement basics`
+- `engineering` :
+  - `backend development`
+  - `mechanical design`
+  - `version control`
+  - `software testing`
+  - `containerization`
+- `hr` :
+  - `candidate sourcing`
+  - `talent management`
+  - `hr reporting and dashboards`
+
+**Signaux génériques dangereux**:
+- `management`
+- `analysis`
+- `reporting`
+- `communication`
+- `kpi`
+- `excel`
+- `sql`
+
+**Pourquoi BI absorbe trop**:
+- ces signaux apparaissent dans plusieurs domaines à la fois
+
+## ✅ Runtime canonical injection wired into matching inputs (2026-05-11)
+
+**Status**: implemented, flag-gated, additive, no scoring-core change.
+
+**What changed**:
+- `apps/api/src/matching/extractors.py`
+  - new runtime flag: `ELEVIA_RUNTIME_CANONICAL_INJECTION` (default OFF)
+  - `extract_profile(raw_profile)` now reads persisted DB `canonical_skills`
+  - obvious generic canonicals are filtered out before promotion
+  - remaining canonical IDs are bridged to ESCO URIs through `build_canonical_esco_promoted(..., _promote_override=True)`
+  - promoted URIs are injected additively into the **local runtime URI input** before the score is computed
+- `apps/api/src/api/routes/profile_file.py`
+  - small no-op `_build_matching_input_trace(...)` helper restored so trace contract stays explicit
+- tests:
+  - `apps/api/tests/test_runtime_canonical_injection.py`
+
+**What did NOT change**:
+- no edit to `matching_v1.py`
+- no edit to `idf.py`
+- no edit to `weights_*`
+- no scoring formula change
+- no ranking / pagination / filter logic change
+
+**Debug trace now available**:
+- `profile_effective_skills_debug.canonical_runtime_ids`
+- `profile_effective_skills_debug.canonical_runtime_injected_uris`
+- `profile_effective_skills_debug.canonical_runtime_injected_count`
+- `profile_effective_skills_debug.effective_skills_uri_after_canonical`
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_runtime_canonical_injection.py apps/api/tests/test_esco_promotion_scaffold.py apps/api/tests/test_profile_skill_deduplication.py apps/api/tests/test_matching_skills_pipeline.py apps/api/tests/test_canonical_runtime_persistence.py apps/api/tests/test_inbox.py -q`
+- result: `45 passed, 2 warnings`
+
+**Real-profile observation after patch**:
+- `Akim Guentas – Audit & Data Analyst.pdf`
+  - runtime injected `2` ESCO URIs from canonicals
+- `CV - Nawel KADI 2026.pdf`
+  - runtime canonical IDs detected (`Recruitment`, `Training Coordination`)
+  - injected ESCO URIs: `0`
+- `CV_2026-02-17_Ania_Benabbas (1).pdf`
+  - runtime canonical IDs detected (`Financial Analysis`, `Compliance`, `Legal Analysis`)
+  - injected ESCO URIs: `0`
+- `Dia Madina...`
+  - no promotable anchor beyond `English`
+- `CV_MouisseTheo.pdf`
+  - several canonical IDs detected
+  - injected ESCO URIs: `0`
+
+**Current limit / next likely bottleneck**:
+- runtime wiring is now in place
+- visible ranking impact is still weak because the canonical→ESCO bridge resolves too few anchors on finance/RH/ops profiles
+- next audit should focus on bridge coverage / exact-label mapping quality, not on the runtime wiring itself
+
+## ✅ Canonical → ESCO bridge widened for runtime anchors (2026-05-11)
+
+**Status**: implemented, additive, scoring-safe, flag-compatible.
+
+**What changed**:
+- `apps/api/src/compass/canonical/esco_bridge.py`
+  - bridge now tries a bounded candidate chain per canonical ID instead of relying only on `esco_fr_label`
+  - candidate priority:
+    - `esco_fr_label`
+    - `potential_esco_mapping_label`
+    - explicit runtime bridge labels for critical métier anchors
+    - exact aliases
+  - max `2` promoted URIs per canonical ID
+- `apps/api/src/matching/extractors.py`
+  - runtime injection still happens in `extract_profile(...)`
+  - bridge trace is now surfaced into `profile_effective_skills_debug`
+
+**Critical anchors now covered better**:
+- `skill:recruitment`
+- `skill:financial_analysis`
+- `skill:compliance`
+- `skill:training_coordination`
+- `skill:audit`
+- `skill:internal_control`
+- `skill:legal_analysis`
+- placeholder support added for hypothetical `skill:wealth_management`
+
+**New debug fields**:
+- `canonical_resolution_success`
+- `unresolved_canonical_ids`
+- `canonical_bridge_source`
+- `promoted_runtime_uris`
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_esco_promotion_bridge.py apps/api/tests/test_runtime_canonical_injection.py apps/api/tests/test_esco_promotion_scaffold.py apps/api/tests/test_profile_skill_deduplication.py apps/api/tests/test_matching_skills_pipeline.py apps/api/tests/test_canonical_runtime_persistence.py apps/api/tests/test_inbox.py -q`
+- result: `69 passed, 2 warnings`
+
+**Measured before/after on real profiles**:
+- `Nawel`
+  - before bridge widening: `canonical_runtime_injected_count = 0`
+  - after: `2`
+  - resolved: `Training Coordination`
+  - unresolved: `Recruitment`
+- `Ania`
+  - before: `0`
+  - after: `4`
+  - resolved: `Financial Analysis`, `Compliance`, `Legal Analysis`
+- `Akim Audit`
+  - before: `2`
+  - after: `5`
+  - resolved: `Audit`, `Data Cleaning`, `Financial Analysis`, `Internal Control`
+- `Dia`
+  - before: `0`
+  - after: `0`
+  - reason: no durable wealth-management canonical anchor available yet
+
+**Important interpretation**:
+- bridge coverage improved materially
+- runtime effective URI sets are richer now
+- but sampled `/inbox` top results barely moved
+- likely next bottleneck:
+  - weak overlap between newly promoted ESCO URIs and offer-side URIs
+  - generic/domain-library signals still dominating the final score surface
+
+## ✅ Elevia V1 Offline Extension: FINANCE_CONTROL (2026-05-11)
+
+**Status**: première extension V1 implémentée offline uniquement. Aucun branchement runtime.
+
+**Modifié**:
+- `apps/api/src/compass/registry/elevia_metier_registry.json`
+  - ajout de `FINANCE_CONTROL`
+- `apps/api/tests/test_elevia_metier.py`
+  - nouveaux tests finance / BI overlap
+- `docs/ai/reports/elevia_finance_control_calibration_v1.md`
+  - calibration rapide et exemples représentatifs
+
+**Ce qui a été ajouté dans le registre**:
+- `strong_signals`
+  - `financial analysis`
+  - `financial reporting`
+  - `management control`
+  - `accounting`
+  - `budgeting`
+  - `sap`
+  - `controlling`
+  - `financial planning`
+- `weak/contextual signals`
+  - `excel`
+  - `reporting`
+  - `analysis`
+  - `kpi`
+  - `management`
+  - `dashboard`
+- `forbidden_standalone_anchors`
+  - `excel`
+  - `reporting`
+  - `analysis`
+  - `kpi`
+  - `sql`
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_elevia_metier.py -q`
+- résultat : `10 passed`
+
+**Comportement observé**:
+- cas controller / budgeting / SAP :
+  - classés `FINANCE_CONTROL`
+- cas BI avec `Power BI` / `dashboard` / `reporting` / `excel` :
+  - restent `BI_ANALYTICS`
+- cas mixtes `Business Controller BI` :
+  - ambiguïté visible
+  - `FINANCE_CONTROL` primaire
+  - `BI_ANALYTICS` second candidat
+
+**Limites**:
+- aucune exposition `/inbox`, `/match`, `/dev/metrics` ou autre route
+- aucun changement scoring / ranking / filtering
+- `BI_ANALYTICS` reste plus large que souhaité tant que les autres clusters V1 ne sont pas calibrés
+- `sap` est utile mais non exclusif au domaine finance
+
+**Do NOT touch in this step**:
+- `matching_v1.py`
+- `idf.py`
+- `weights_*`
+- scoring / ranking / filtering
+- `/inbox` runtime
+- DB schema / migration
+
+**Next recommended step if explicitly approved**:
+- étendre ensuite un seul cluster non-data supplémentaire :
+  - `SALES_BUSINESS_DEVELOPMENT`
+  - ou `SUPPLY_CHAIN_PROCUREMENT`
+
+## ✅ Elevia V1 Offline Extension: Sales / Supply / Operations / Engineering / HR (2026-05-11)
+
+**Status**: extension V1 offline implémentée, toujours sans runtime.
+
+**Modifié**:
+- `apps/api/src/compass/registry/elevia_metier_registry.json`
+  - ajout de :
+    - `SALES_BUSINESS_DEVELOPMENT`
+    - `SUPPLY_CHAIN_PROCUREMENT`
+    - `OPERATIONS_PROJECT_PMO`
+    - `ENGINEERING_BUILD_RUN`
+    - `HR_TALENT_OPERATIONS`
+- `apps/api/tests/test_elevia_metier.py`
+  - nouveaux tests cluster + overlap
+- `docs/ai/reports/elevia_reference_v1_offline_calibration.md`
+  - calibration globale offline par cluster
+
+**Couverture actuelle du helper offline**:
+- `DATA_ENGINEERING`
+- `BI_ANALYTICS`
+- `PRODUCT_ANALYTICS`
+- `FINANCE_CONTROL`
+- `SALES_BUSINESS_DEVELOPMENT`
+- `SUPPLY_CHAIN_PROCUREMENT`
+- `OPERATIONS_PROJECT_PMO`
+- `ENGINEERING_BUILD_RUN`
+- `HR_TALENT_OPERATIONS`
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_elevia_metier.py -q`
+- résultat : `19 passed`
+
+**Points importants observés**:
+- `FINANCE_CONTROL` reste primaire devant `BI_ANALYTICS` sur les cas finance/BI mixtes
+- `SUPPLY_CHAIN_PROCUREMENT` reste primaire devant `OPERATIONS_PROJECT_PMO` sur les cas supply projects
+- `ENGINEERING_BUILD_RUN` reste primaire devant `DATA_ENGINEERING` quand les signaux data sont faibles
+- `HR_TALENT_OPERATIONS` reste primaire devant `OPERATIONS_PROJECT_PMO` quand les signaux talent sont présents
+
+**Règle toujours active**:
+- `sql`, `excel`, `reporting`, `analysis`, `communication`, `management`, `kpi` restent faibles/contextuels
+- jamais des strong anchors autonomes
+
+**Toujours hors scope**:
+- aucun scoring
+- aucun ranking
+- aucun filtering
+- aucune route `/inbox`
+- aucun changement `matching_v1.py`
+- aucun changement `idf.py`
+- aucun changement `weights_*`
+- aucun frontend
+- aucune migration DB
+
+**Next recommended step if explicitly approved**:
+- rerun audit-only sur corpus représentatif avec ce registre élargi avant toute surface DEV-only ou runtime
+
+## ✅ Elevia V1 Shadow Mode in `/inbox` (2026-05-11)
+
+**Status**: branché en shadow mode debug-only, sans impact produit.
+
+**Modifié**:
+- `apps/api/src/api/routes/inbox.py`
+  - ajout de l’enrichissement Elevia shadow après scoring uniquement
+- `apps/api/src/api/schemas/inbox.py`
+  - `InboxItem` / `InboxMeta` autorisent des champs extra pour que debug OFF reste inchangé
+- `apps/api/tests/test_inbox_elevia_shadow.py`
+  - tests score / ordre / pagination / payload debug OFF
+- `docs/ai/reports/elevia_inbox_shadow_observation.md`
+  - rapport d’observation réel
+
+**Règles effectivement respectées**:
+- aucun impact score
+- aucun impact ranking
+- aucun impact pagination
+- aucun impact filtering
+- aucun changement `matching_v1.py`
+- aucun changement `idf.py`
+- aucun changement `weights_*`
+- aucune exposition utilisateur finale
+
+**Champs ajoutés uniquement si `ELEVIA_DEBUG_MATCHING=1`**:
+- `meta.profile_elevia_cluster`
+- `item.offer_elevia_clusters`
+- `item.cluster_alignment`
+- `item.cluster_confidence`
+- `item.cluster_evidence`
+
+**Logs debug ajoutés**:
+- `ELEVIA_SHADOW_PROFILE`
+- `ELEVIA_SHADOW_OFFER`
+- `ELEVIA_HIGH_SCORE_CLUSTER_MISMATCH`
+- `ELEVIA_MEDIUM_SCORE_CLUSTER_MATCH`
+- `ELEVIA_AMBIGUITY_BI_FINANCE`
+- `ELEVIA_AMBIGUITY_ENGINEERING_DATA`
+- `ELEVIA_AMBIGUITY_SALES_BI`
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_inbox_elevia_shadow.py -q`
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_inbox_fit_score_v2_shadow.py -q`
+- invariants confirmés :
+  - payload inchangé si debug OFF
+  - score inchangé
+  - ordre inchangé
+  - pagination inchangée
+  - cluster profil calculé une seule fois par requête
+
+**Observation réelle disponible**:
+- `docs/ai/reports/elevia_inbox_shadow_observation.md`
+- profil local observé :
+  - `akim_guentas_matching`
+- signal principal :
+  - profil `BI_ANALYTICS`
+  - plusieurs top offres `DATA_ENGINEERING` en `candidate_match`
+
+**Next recommended step if explicitly approved**:
+- laisser tourner l’observation shadow en DEV
+- relire un petit corpus de mismatchs avant toute expérimentation rerank / boost
+- ils ne deviennent discriminants qu’avec contexte métier + tooling + titre
+- exemple :
+  - `reporting` traverse finance, sales, engineering, data, supply, operations, hr
+  - `sql` apparaît aussi en engineering, hr, marketing, admin
+
+**Patterns émergents utiles pour V1**:
+- `Finance Ops`
+- `Sales Ops`
+- `HR Operations`
+- `Supply Analytics`
+- `Project Operations`
+- `Backend Automation`
+- `RevOps`
+- `Compliance`
+
+**Do NOT do yet**:
+- aucun branchement `/inbox`
+- aucun scoring
+- aucun reranking
+- aucune migration DB
+- aucun frontend
+- aucun nouveau cluster runtime
+
+**Recommended next step**:
+- recalibrer le référentiel à partir de ces signaux multi-domaines réels
+- traiter les signaux transverses comme contextuels, pas comme ancres de cluster
+- prioriser les domaines bien représentés hors data avant d’étendre V0
+- ne pas implémenter encore de layer Finance/RevOps/Sales Ops tant que la calibration V1 n’est pas écrite proprement
 
 ## ✅ ProfilePage Frontend Issue FIXED (2026-05-09)
 
@@ -699,3 +1306,29 @@ Règles appliquées :
 - Exposition produit : `apps/api/src/api/routes/matching.py` + `apps/api/src/api/schemas/matching.py`.
 - Routes scoring existantes : `apps/api/src/api/routes/{inbox,matching,dev_tools,debug_match}.py`.
 - Décisions figées : `docs/ai/DECISIONS.md`.
+
+## ✅ Runtime Calibration Governance Tooling Completed (2026-05-11)
+
+**Status**: audit/governance tooling only, no scoring-core change.
+
+**Created**:
+- `docs/ai/runtime_calibration/sentinel_panel.json`
+- `docs/ai/runtime_calibration/case_sheets/`
+- `docs/ai/runtime_calibration/iteration_log.md`
+- `docs/ai/runtime_calibration/drift_categories.md`
+- `docs/ai/runtime_calibration/latest_sentinel_replay.md`
+- `scripts/run_sentinel_replay.py`
+- `apps/api/tests/test_run_sentinel_replay.py`
+
+**How to use**:
+- replay the fixed sentinel panel with:
+  - `apps/api/.venv/bin/python scripts/run_sentinel_replay.py --limit 10`
+- read `latest_sentinel_replay.md`
+- assign human verdicts
+- log the iteration before discussing any patch
+
+**Process rule**:
+- no runtime patch should be attempted without a triggering sentinel case and a replayable before/after comparison.
+
+**Operational note**:
+- on this machine, the baseline replay required `ELEVIA_SENTINEL_CV_ROOT=/Users/akimguentas/Downloads/cvtest` because the real CV corpus is stored outside the repo.
