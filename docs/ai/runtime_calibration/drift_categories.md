@@ -3,7 +3,7 @@
 This register separates confirmed repeated drifts from provisional observed drifts.
 
 ## Rules
-- Confirmed categories require repeated real cases.
+- Confirmed categories require >= 2 distinct real observed cases.
 - Provisional categories record observed drift not yet promoted.
 - A category helps read history and does not justify a patch by itself.
 
