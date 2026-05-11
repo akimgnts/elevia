@@ -3,8 +3,9 @@
 This register separates confirmed repeated drifts from provisional observed drifts.
 
 ## Rules
-- Confirmed categories require >= 2 distinct real observed cases.
+- Confirmed categories require >= 2 different sentinels with the same drift family observed in real runtime cases.
 - Provisional categories record observed drift not yet promoted.
+- Promotion to confirmed requires references to the supporting iteration log entries.
 - A category helps read history and does not justify a patch by itself.
 
 ## Confirmed Repeated Categories
