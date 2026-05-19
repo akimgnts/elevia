@@ -37,8 +37,9 @@ def test_hybrid_sector_config_requires_minimum_offer_count_of_10():
 
     assert set(module.HYBRID_SECTORS) == {
         "finance_bi",
-        "supply_operations",
-        "hr_business",
+        "hr_operations",
+        "data_software",
+        "operations_supply",
     }
     for sector_name, config in module.HYBRID_SECTORS.items():
         assert config["slug"] == sector_name, (

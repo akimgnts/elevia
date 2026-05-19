@@ -28,12 +28,16 @@ HYBRID_SECTORS = {
         "slug": "finance_bi",
         "min_offer_count": 10,
     },
-    "supply_operations": {
-        "slug": "supply_operations",
+    "hr_operations": {
+        "slug": "hr_operations",
         "min_offer_count": 10,
     },
-    "hr_business": {
-        "slug": "hr_business",
+    "data_software": {
+        "slug": "data_software",
+        "min_offer_count": 10,
+    },
+    "operations_supply": {
+        "slug": "operations_supply",
         "min_offer_count": 10,
     },
 }
