@@ -233,6 +233,19 @@ def _compute_explicit_hybrid_side_fit(
     }
 
 
+def _build_selection_entry(
+    offer: dict[str, object],
+    *,
+    fit: dict[str, object],
+    score: int,
+) -> dict[str, object]:
+    return {
+        "offer": offer,
+        "fit": fit,
+        "score": score,
+    }
+
+
 def select_central_sector_offers(
     offers: list[dict[str, object]],
     *,
@@ -240,14 +253,17 @@ def select_central_sector_offers(
     target_count: int,
 ) -> list[dict[str, object]]:
     central_target = math.floor(target_count * 0.8)
-    ranked: list[tuple[int, int, str, dict[str, object]]] = []
+    ranked: list[tuple[int, int, str, dict[str, object], dict[str, object]]] = []
     for offer in offers:
         fit = compute_sector_fit(offer, sector_key)
         if fit["central_score"] <= 0 or not fit["central_domain_hits"]:
             continue
-        ranked.append((fit["central_score"], fit["peripheral_score"], str(offer["offer_id"]), offer))
+        ranked.append((fit["central_score"], fit["peripheral_score"], str(offer["offer_id"]), offer, fit))
     ranked.sort(key=lambda item: (-item[0], -item[1], item[2]))
-    return [offer for _, _, _, offer in ranked[:central_target]]
+    return [
+        _build_selection_entry(offer, fit=fit, score=central_score)
+        for central_score, _, _, offer, fit in ranked[:central_target]
+    ]
 
 
 def select_coherent_peripheral_offers(
@@ -259,7 +275,7 @@ def select_coherent_peripheral_offers(
 ) -> list[dict[str, object]]:
     central_target = math.floor(target_count * 0.8)
     peripheral_target = max(target_count - central_target, 0)
-    ranked: list[tuple[int, int, str, dict[str, object]]] = []
+    ranked: list[tuple[int, int, str, dict[str, object], dict[str, object]]] = []
     for offer in offers:
         offer_id = str(offer["offer_id"])
         if offer_id in already_selected_offer_ids:
@@ -267,9 +283,12 @@ def select_coherent_peripheral_offers(
         fit = compute_sector_fit(offer, sector_key)
         if fit["peripheral_score"] <= 0 or not fit["peripheral_domain_hits"]:
             continue
-        ranked.append((fit["peripheral_score"], fit["central_score"], offer_id, offer))
+        ranked.append((fit["peripheral_score"], fit["central_score"], offer_id, offer, fit))
     ranked.sort(key=lambda item: (-item[0], -item[1], item[2]))
-    return [offer for _, _, _, offer in ranked[:peripheral_target]]
+    return [
+        _build_selection_entry(offer, fit=fit, score=peripheral_score)
+        for peripheral_score, _, _, offer, fit in ranked[:peripheral_target]
+    ]
 
 
 def select_hybrid_sector_offers(
@@ -284,14 +303,21 @@ def select_hybrid_sector_offers(
             f"hybrid sector {sector_key} requires at least {config['min_offer_count']} offers"
         )
 
-    ranked: list[tuple[int, str, dict[str, object]]] = []
+    ranked: list[tuple[int, str, dict[str, object], dict[str, object]]] = []
     for offer in offers:
         side_scores: list[int] = []
+        side_fits: list[dict[str, object]] = []
         components = config.get("components", ())
         explicit_sides = config.get("explicit_sides", ())
         if components:
             for component in components:
                 fit = compute_sector_fit(offer, component)
+                side_fits.append(
+                    {
+                        "sector_key": component,
+                        **fit,
+                    }
+                )
                 if not fit["central_domain_hits"]:
                     side_scores.append(0)
                     continue
@@ -299,13 +325,28 @@ def select_hybrid_sector_offers(
         else:
             for side in explicit_sides:
                 fit = _compute_explicit_hybrid_side_fit(offer, side)
-                if not fit["domain_hits"]:
+                side_fits.append(fit)
+                if not fit["domain_hits"] or not fit["matched_keywords"]:
                     side_scores.append(0)
                     continue
                 side_scores.append(fit["score"])
         if len(side_scores) != 2 or any(score <= 0 for score in side_scores):
             continue
         total_score = sum(side_scores)
-        ranked.append((total_score, str(offer["offer_id"]), offer))
+        ranked.append(
+            (
+                total_score,
+                str(offer["offer_id"]),
+                offer,
+                {
+                    "side_fits": side_fits,
+                    "side_scores": side_scores,
+                    "total_score": total_score,
+                },
+            )
+        )
     ranked.sort(key=lambda item: (-item[0], item[1]))
-    return [offer for _, _, offer in ranked[:target_count]]
+    return [
+        _build_selection_entry(offer, fit=fit, score=total_score)
+        for total_score, _, offer, fit in ranked[:target_count]
+    ]

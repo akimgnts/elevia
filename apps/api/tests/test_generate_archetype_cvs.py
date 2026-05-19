@@ -202,7 +202,7 @@ def test_central_selection_keeps_80_percent_central_and_20_percent_coherent_peri
         sector_key="finance_controller",
         target_count=10,
     )
-    selected_ids = {offer["offer_id"] for offer in central}
+    selected_ids = {entry["offer"]["offer_id"] for entry in central}
     peripheral = module.select_coherent_peripheral_offers(
         offers,
         sector_key="finance_controller",
@@ -210,7 +210,7 @@ def test_central_selection_keeps_80_percent_central_and_20_percent_coherent_peri
         target_count=10,
     )
 
-    assert [offer["offer_id"] for offer in central] == [
+    assert [entry["offer"]["offer_id"] for entry in central] == [
         "business_france:F-1",
         "business_france:F-2",
         "business_france:F-3",
@@ -220,10 +220,13 @@ def test_central_selection_keeps_80_percent_central_and_20_percent_coherent_peri
         "business_france:F-7",
         "business_france:F-8",
     ]
-    assert {offer["offer_id"] for offer in peripheral} == {
+    assert {entry["offer"]["offer_id"] for entry in peripheral} == {
         "business_france:P-1",
         "business_france:P-2",
     }
+    assert central[0]["fit"]["central_domain_hits"] == ["finance"]
+    assert "budget" in central[0]["fit"]["matched_keywords"]
+    assert peripheral[0]["fit"]["peripheral_domain_hits"]
     assert len(central) == 8
     assert len(peripheral) == 2
 
@@ -295,9 +298,46 @@ def test_hybrid_selection_requires_both_sides_of_the_hybrid_to_contribute_eviden
         target_count=10,
     )
 
-    assert [offer["offer_id"] for offer in selected] == [
+    assert [entry["offer"]["offer_id"] for entry in selected] == [
         "business_france:OS-BOTH-1",
         "business_france:OS-BOTH-2",
         "business_france:OS-BOTH-3",
         "business_france:OS-BOTH-4",
     ]
+    assert selected[0]["fit"]["side_fits"][0]["matched_keywords"]
+    assert selected[0]["fit"]["side_fits"][1]["matched_keywords"]
+
+
+def test_explicit_side_hybrid_rejects_dual_tag_offer_without_second_side_real_evidence():
+    module = _load_module()
+
+    rows = [
+        {
+            "source": "business_france",
+            "external_id": f"OS-BOTH-{index}",
+            "title": f"Operations Supply Planner {index}",
+            "description": "Supply planning, logistics coordination and process improvement.",
+            "offer_domain_enrichment": {"domain_tags": ["operations", "supply"]},
+            "offer_skills": [{"skill_label": "Supply planning"}, {"skill_label": "Process improvement"}],
+        }
+        for index in range(1, 10)
+    ] + [
+        {
+            "source": "business_france",
+            "external_id": "OS-PSEUDO-1",
+            "title": "Operations Planner",
+            "description": "Process improvement, lean planning and operations reporting.",
+            "offer_domain_enrichment": {"domain_tags": ["operations", "supply"]},
+            "offer_skills": [{"skill_label": "Lean"}, {"skill_label": "Process improvement"}],
+        }
+    ]
+
+    offers = module.normalize_bf_offer_rows(rows)
+    selected = module.select_hybrid_sector_offers(
+        offers,
+        sector_key="operations_supply",
+        target_count=10,
+    )
+
+    selected_ids = [entry["offer"]["offer_id"] for entry in selected]
+    assert "business_france:OS-PSEUDO-1" not in selected_ids
