@@ -6,20 +6,20 @@ from pathlib import Path
 OUTPUT_ROOT = Path("exports") / "archetype_cvs"
 
 CENTRAL_SECTORS = {
-    "FINANCE_CONTROL": {
+    "finance_controller": {
         "slug": "finance_control",
     },
-    "SALES_BUSINESS_DEVELOPMENT": {
-        "slug": "sales_business_development",
+    "hr_recruitment": {
+        "slug": "hr_recruitment",
     },
-    "SUPPLY_CHAIN_PROCUREMENT": {
-        "slug": "supply_chain_procurement",
+    "data_analytics": {
+        "slug": "data_analytics",
     },
-    "OPERATIONS_PROJECT_PMO": {
-        "slug": "operations_project_pmo",
+    "software_engineering": {
+        "slug": "software_engineering",
     },
-    "HR_TALENT_OPERATIONS": {
-        "slug": "hr_talent_operations",
+    "operations_process": {
+        "slug": "operations_process",
     },
 }
 

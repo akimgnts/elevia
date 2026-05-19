@@ -21,11 +21,11 @@ def test_central_sector_config_contains_expected_five_sectors():
     module = _load_module()
 
     assert set(module.CENTRAL_SECTORS) == {
-        "FINANCE_CONTROL",
-        "SALES_BUSINESS_DEVELOPMENT",
-        "SUPPLY_CHAIN_PROCUREMENT",
-        "OPERATIONS_PROJECT_PMO",
-        "HR_TALENT_OPERATIONS",
+        "finance_controller",
+        "hr_recruitment",
+        "data_analytics",
+        "software_engineering",
+        "operations_process",
     }
 
 
