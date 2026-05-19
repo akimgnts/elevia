@@ -62,7 +62,16 @@ HYBRID_SECTORS = {
     "operations_supply": {
         "slug": "operations_supply",
         "min_offer_count": 10,
-        "components": ("operations_process",),
+        "explicit_sides": (
+            {
+                "domains": ("operations",),
+                "keywords": ("process", "operations", "lean", "planning"),
+            },
+            {
+                "domains": ("supply",),
+                "keywords": ("supply", "logistics", "inventory", "procurement"),
+            },
+        ),
     },
 }
 
@@ -200,6 +209,30 @@ def compute_sector_fit(offer: dict[str, object], sector_key: str) -> dict[str, o
     }
 
 
+def _compute_explicit_hybrid_side_fit(
+    offer: dict[str, object],
+    side_config: dict[str, tuple[str, ...]],
+) -> dict[str, object]:
+    domain_tags = set(offer.get("domain_tags", []))
+    skill_labels = offer.get("skill_labels", [])
+    text = str(offer.get("text") or "")
+
+    domain_hits = sorted(domain_tags.intersection(side_config["domains"]))
+    matched_keywords: list[str] = []
+    for keyword in side_config["keywords"]:
+        in_skill = any(keyword in label for label in skill_labels)
+        in_text = keyword in text
+        if in_skill or in_text:
+            matched_keywords.append(keyword)
+
+    score = len(domain_hits) * 6 + len(matched_keywords) * 2
+    return {
+        "score": score,
+        "domain_hits": domain_hits,
+        "matched_keywords": matched_keywords,
+    }
+
+
 def select_central_sector_offers(
     offers: list[dict[str, object]],
     *,
@@ -253,10 +286,26 @@ def select_hybrid_sector_offers(
 
     ranked: list[tuple[int, str, dict[str, object]]] = []
     for offer in offers:
-        total_score = 0
-        for component in config["components"]:
-            fit = compute_sector_fit(offer, component)
-            total_score += fit["central_score"] + fit["peripheral_score"]
+        side_scores: list[int] = []
+        components = config.get("components", ())
+        explicit_sides = config.get("explicit_sides", ())
+        if components:
+            for component in components:
+                fit = compute_sector_fit(offer, component)
+                if not fit["central_domain_hits"]:
+                    side_scores.append(0)
+                    continue
+                side_scores.append(fit["central_score"] + fit["peripheral_score"])
+        else:
+            for side in explicit_sides:
+                fit = _compute_explicit_hybrid_side_fit(offer, side)
+                if not fit["domain_hits"]:
+                    side_scores.append(0)
+                    continue
+                side_scores.append(fit["score"])
+        if len(side_scores) != 2 or any(score <= 0 for score in side_scores):
+            continue
+        total_score = sum(side_scores)
         ranked.append((total_score, str(offer["offer_id"]), offer))
     ranked.sort(key=lambda item: (-item[0], item[1]))
     return [offer for _, _, offer in ranked[:target_count]]

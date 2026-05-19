@@ -32,7 +32,7 @@ def test_central_sector_config_contains_expected_five_sectors():
         assert config["slug"], f"central archetype {archetype_name} must expose a non-empty slug"
 
 
-def test_hybrid_sector_config_requires_minimum_offer_count_of_10():
+def test_hybrid_sector_config_requires_minimum_offer_count_of_10_and_real_two_sided_definition():
     module = _load_module()
 
     assert set(module.HYBRID_SECTORS) == {
@@ -48,6 +48,23 @@ def test_hybrid_sector_config_requires_minimum_offer_count_of_10():
         assert config["min_offer_count"] >= 10, (
             f"hybrid sector {sector_name} must require min_offer_count >= 10"
         )
+        components = config.get("components", ())
+        explicit_sides = config.get("explicit_sides", ())
+        if components:
+            assert len(components) == 2, (
+                f"hybrid sector {sector_name} must define exactly two components when using components"
+            )
+        else:
+            assert len(explicit_sides) == 2, (
+                f"hybrid sector {sector_name} must define exactly two explicit sides"
+            )
+            for side in explicit_sides:
+                assert side["domains"], (
+                    f"hybrid sector {sector_name} explicit sides must declare non-empty domains"
+                )
+                assert side["keywords"], (
+                    f"hybrid sector {sector_name} explicit sides must declare non-empty keywords"
+                )
 
 
 def test_output_path_helpers_split_markdown_and_json_into_central_and_hybrid():
@@ -234,3 +251,53 @@ def test_hybrid_selection_refuses_when_offer_count_is_below_minimum_threshold():
             sector_key="finance_bi",
             target_count=10,
         )
+
+
+def test_hybrid_selection_requires_both_sides_of_the_hybrid_to_contribute_evidence():
+    module = _load_module()
+
+    rows = [
+        {
+            "source": "business_france",
+            "external_id": f"OS-BOTH-{index}",
+            "title": f"Operations Supply Planner {index}",
+            "description": "Supply planning, logistics coordination and process improvement.",
+            "offer_domain_enrichment": {"domain_tags": ["operations", "supply"]},
+            "offer_skills": [{"skill_label": "Supply planning"}, {"skill_label": "Process improvement"}],
+        }
+        for index in range(1, 5)
+    ] + [
+        {
+            "source": "business_france",
+            "external_id": f"OS-OPS-{index}",
+            "title": f"Operations Coordinator {index}",
+            "description": "Process improvement, operations reporting and lean execution.",
+            "offer_domain_enrichment": {"domain_tags": ["operations"]},
+            "offer_skills": [{"skill_label": "Lean"}, {"skill_label": "Process improvement"}],
+        }
+        for index in range(1, 4)
+    ] + [
+        {
+            "source": "business_france",
+            "external_id": f"OS-SUP-{index}",
+            "title": f"Supply Planner {index}",
+            "description": "Supply planning, inventory flow and logistics execution.",
+            "offer_domain_enrichment": {"domain_tags": ["supply"]},
+            "offer_skills": [{"skill_label": "Supply planning"}, {"skill_label": "Logistics"}],
+        }
+        for index in range(1, 4)
+    ]
+
+    offers = module.normalize_bf_offer_rows(rows)
+    selected = module.select_hybrid_sector_offers(
+        offers,
+        sector_key="operations_supply",
+        target_count=10,
+    )
+
+    assert [offer["offer_id"] for offer in selected] == [
+        "business_france:OS-BOTH-1",
+        "business_france:OS-BOTH-2",
+        "business_france:OS-BOTH-3",
+        "business_france:OS-BOTH-4",
+    ]
