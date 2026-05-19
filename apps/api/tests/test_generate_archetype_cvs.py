@@ -100,3 +100,137 @@ def test_output_path_helpers_fail_fast_for_misuse():
             sector_type="unsupported",
             sector_slug="finance_control",
         )
+
+
+def test_normalize_bf_offer_rows_extracts_domains_skills_and_text():
+    module = _load_module()
+
+    rows = [
+        {
+            "source": "business_france",
+            "external_id": "BF-001",
+            "title": "Financial Controller",
+            "description": "Budget control, forecasting and SAP reporting.",
+            "offer_domain_enrichment": {
+                "domain_tag": "finance",
+                "domain_tags": ["finance", "operations"],
+            },
+            "offer_skills": [
+                {"skill_label": "Budgeting", "skill_uri": "skill:budgeting"},
+                {"skill_label": "SAP", "skill_uri": "skill:sap"},
+            ],
+        }
+    ]
+
+    normalized = module.normalize_bf_offer_rows(rows)
+
+    assert normalized == [
+        {
+            "source": "business_france",
+            "external_id": "BF-001",
+            "offer_id": "business_france:BF-001",
+            "title": "Financial Controller",
+            "description": "Budget control, forecasting and SAP reporting.",
+            "text": "financial controller budget control forecasting and sap reporting",
+            "domain_tags": ["finance", "operations"],
+            "skill_labels": ["budgeting", "sap"],
+            "skill_uris": ["skill:budgeting", "skill:sap"],
+        }
+    ]
+
+
+def test_central_selection_keeps_80_percent_central_and_20_percent_coherent_peripheral():
+    module = _load_module()
+
+    rows = [
+        {
+            "source": "business_france",
+            "external_id": f"F-{index}",
+            "title": f"Financial Controller {index}",
+            "description": "Budget control, forecasting, reporting and SAP.",
+            "offer_domain_enrichment": {"domain_tag": "finance"},
+            "offer_skills": [{"skill_label": "Budgeting"}, {"skill_label": "SAP"}],
+        }
+        for index in range(1, 9)
+    ] + [
+        {
+            "source": "business_france",
+            "external_id": "P-1",
+            "title": "BI Analyst Finance",
+            "description": "Dashboards, SQL reporting and finance KPIs.",
+            "offer_domain_enrichment": {"domain_tag": "data"},
+            "offer_skills": [{"skill_label": "SQL"}, {"skill_label": "Reporting"}],
+        },
+        {
+            "source": "business_france",
+            "external_id": "P-2",
+            "title": "Operations Cost Analyst",
+            "description": "Cost control, process reporting and budget follow-up.",
+            "offer_domain_enrichment": {"domain_tag": "operations"},
+            "offer_skills": [{"skill_label": "Cost control"}, {"skill_label": "Reporting"}],
+        },
+        {
+            "source": "business_france",
+            "external_id": "X-1",
+            "title": "Recruiter",
+            "description": "Talent sourcing and interviews.",
+            "offer_domain_enrichment": {"domain_tag": "hr"},
+            "offer_skills": [{"skill_label": "Recruitment"}],
+        },
+    ]
+
+    offers = module.normalize_bf_offer_rows(rows)
+    central = module.select_central_sector_offers(
+        offers,
+        sector_key="finance_controller",
+        target_count=10,
+    )
+    selected_ids = {offer["offer_id"] for offer in central}
+    peripheral = module.select_coherent_peripheral_offers(
+        offers,
+        sector_key="finance_controller",
+        already_selected_offer_ids=selected_ids,
+        target_count=10,
+    )
+
+    assert [offer["offer_id"] for offer in central] == [
+        "business_france:F-1",
+        "business_france:F-2",
+        "business_france:F-3",
+        "business_france:F-4",
+        "business_france:F-5",
+        "business_france:F-6",
+        "business_france:F-7",
+        "business_france:F-8",
+    ]
+    assert {offer["offer_id"] for offer in peripheral} == {
+        "business_france:P-1",
+        "business_france:P-2",
+    }
+    assert len(central) == 8
+    assert len(peripheral) == 2
+
+
+def test_hybrid_selection_refuses_when_offer_count_is_below_minimum_threshold():
+    module = _load_module()
+
+    rows = [
+        {
+            "source": "business_france",
+            "external_id": f"FB-{index}",
+            "title": f"Finance BI {index}",
+            "description": "Finance reporting, dashboards, SQL and controlling.",
+            "offer_domain_enrichment": {"domain_tags": ["finance", "data"]},
+            "offer_skills": [{"skill_label": "SQL"}, {"skill_label": "Budgeting"}],
+        }
+        for index in range(1, 10)
+    ]
+
+    offers = module.normalize_bf_offer_rows(rows)
+
+    with pytest.raises(ValueError, match="requires at least 10 offers"):
+        module.select_hybrid_sector_offers(
+            offers,
+            sector_key="finance_bi",
+            target_count=10,
+        )
