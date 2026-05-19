@@ -16,21 +16,30 @@ CENTRAL_SECTORS = {
         "central_domains": ("finance",),
         "peripheral_domains": ("data", "operations"),
         "keywords": ("budget", "forecast", "controll", "report", "sap", "finance", "cost"),
-        "hybrid_evidence_keywords": ("budget", "forecast", "controll", "sap", "cost"),
+        "hybrid_evidence_keywords": (
+            "budget",
+            "budgeting",
+            "forecast",
+            "forecasting",
+            "control",
+            "controlling",
+            "sap",
+            "cost",
+        ),
     },
     "hr_recruitment": {
         "slug": "hr_recruitment",
         "central_domains": ("hr",),
         "peripheral_domains": ("operations", "admin"),
         "keywords": ("recruit", "talent", "sourcing", "interview", "hr"),
-        "hybrid_evidence_keywords": ("recruit", "talent", "sourcing", "interview"),
+        "hybrid_evidence_keywords": ("recruit", "recruitment", "talent", "sourcing", "interview"),
     },
     "data_analytics": {
         "slug": "data_analytics",
         "central_domains": ("data",),
         "peripheral_domains": ("finance", "engineering"),
         "keywords": ("sql", "dashboard", "analytics", "data", "bi", "report"),
-        "hybrid_evidence_keywords": ("sql", "dashboard", "analytics", "data", "bi"),
+        "hybrid_evidence_keywords": ("sql", "dashboard", "dashboards", "analytics", "data", "bi"),
     },
     "software_engineering": {
         "slug": "software_engineering",
@@ -251,9 +260,20 @@ def _build_selection_entry(
     }
 
 
-def _has_component_hybrid_evidence(fit: dict[str, object], sector_key: str) -> bool:
+def _offer_evidence_tokens(offer: dict[str, object]) -> set[str]:
+    tokens = set(str(offer.get("text") or "").split())
+    for label in offer.get("skill_labels", []):
+        tokens.update(WORD_RE.findall(str(label).lower()))
+    return tokens
+
+
+def _has_component_hybrid_evidence(
+    offer: dict[str, object],
+    fit: dict[str, object],
+    sector_key: str,
+) -> bool:
     hybrid_keywords = set(CENTRAL_SECTORS[sector_key]["hybrid_evidence_keywords"])
-    return bool(hybrid_keywords.intersection(fit["matched_keywords"]))
+    return bool(hybrid_keywords.intersection(_offer_evidence_tokens(offer)))
 
 
 def select_central_sector_offers(
@@ -325,10 +345,15 @@ def select_hybrid_sector_offers(
                 side_fits.append(
                     {
                         "sector_key": component,
+                        "offer": offer,
                         **fit,
                     }
                 )
-                if not fit["central_domain_hits"] or not _has_component_hybrid_evidence(fit, component):
+                if not fit["central_domain_hits"] or not _has_component_hybrid_evidence(
+                    offer,
+                    fit,
+                    component,
+                ):
                     side_scores.append(0)
                     continue
                 side_scores.append(fit["central_score"] + fit["peripheral_score"])
