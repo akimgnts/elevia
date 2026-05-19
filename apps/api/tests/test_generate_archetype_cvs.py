@@ -341,3 +341,38 @@ def test_explicit_side_hybrid_rejects_dual_tag_offer_without_second_side_real_ev
 
     selected_ids = [entry["offer"]["offer_id"] for entry in selected]
     assert "business_france:OS-PSEUDO-1" not in selected_ids
+
+
+def test_component_hybrid_rejects_dual_tag_offer_without_second_side_real_evidence():
+    module = _load_module()
+
+    rows = [
+        {
+            "source": "business_france",
+            "external_id": f"FB-BOTH-{index}",
+            "title": f"Finance BI Analyst {index}",
+            "description": "Finance reporting, SQL dashboards and controlling KPIs.",
+            "offer_domain_enrichment": {"domain_tags": ["finance", "data"]},
+            "offer_skills": [{"skill_label": "Budgeting"}, {"skill_label": "SQL"}],
+        }
+        for index in range(1, 10)
+    ] + [
+        {
+            "source": "business_france",
+            "external_id": "FB-PSEUDO-1",
+            "title": "Finance Controller",
+            "description": "Budget control, forecasting, SAP reporting and cost follow-up.",
+            "offer_domain_enrichment": {"domain_tags": ["finance", "data"]},
+            "offer_skills": [{"skill_label": "Budgeting"}, {"skill_label": "SAP"}],
+        }
+    ]
+
+    offers = module.normalize_bf_offer_rows(rows)
+    selected = module.select_hybrid_sector_offers(
+        offers,
+        sector_key="finance_bi",
+        target_count=10,
+    )
+
+    selected_ids = [entry["offer"]["offer_id"] for entry in selected]
+    assert "business_france:FB-PSEUDO-1" not in selected_ids
