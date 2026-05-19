@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -27,13 +28,22 @@ def test_central_sector_config_contains_expected_five_sectors():
         "software_engineering",
         "operations_process",
     }
+    for archetype_name, config in module.CENTRAL_SECTORS.items():
+        assert config["slug"], f"central archetype {archetype_name} must expose a non-empty slug"
 
 
 def test_hybrid_sector_config_requires_minimum_offer_count_of_10():
     module = _load_module()
 
-    assert module.HYBRID_SECTORS, "hybrid sector config must not be empty"
+    assert set(module.HYBRID_SECTORS) == {
+        "finance_bi",
+        "supply_operations",
+        "hr_business",
+    }
     for sector_name, config in module.HYBRID_SECTORS.items():
+        assert config["slug"] == sector_name, (
+            f"hybrid sector {sector_name} must use a slug-style key that matches its slug"
+        )
         assert config["min_offer_count"] >= 10, (
             f"hybrid sector {sector_name} must require min_offer_count >= 10"
         )
@@ -68,3 +78,24 @@ def test_output_path_helpers_split_markdown_and_json_into_central_and_hybrid():
     assert central_json == output_root / "central" / "finance_control.json"
     assert hybrid_markdown == output_root / "hybrid" / "finance_bi.md"
     assert hybrid_json == output_root / "hybrid" / "finance_bi.json"
+
+
+def test_output_path_helpers_fail_fast_for_misuse():
+    module = _load_module()
+
+    with pytest.raises(TypeError):
+        module.build_markdown_output_path()
+
+    with pytest.raises(ValueError, match="sector_slug"):
+        module.build_json_output_path(
+            output_root=Path("/tmp/archetype-cvs"),
+            sector_type="central",
+            sector_slug="",
+        )
+
+    with pytest.raises(ValueError, match="unsupported sector_type"):
+        module.build_markdown_output_path(
+            output_root=Path("/tmp/archetype-cvs"),
+            sector_type="unsupported",
+            sector_slug="finance_control",
+        )
