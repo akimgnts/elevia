@@ -1,0 +1,468 @@
+{
+  "anchor_skills": [
+    {
+      "classification": "ANCHOR",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 8,
+      "offer_count": 8,
+      "skill_label": "recruitment"
+    }
+  ],
+  "experience_types": [
+    {
+      "evidence_count": 10,
+      "label": "h f"
+    },
+    {
+      "evidence_count": 3,
+      "label": "hr pmo"
+    },
+    {
+      "evidence_count": 3,
+      "label": "jr hr"
+    }
+  ],
+  "generic_skills_to_limit": [
+    {
+      "classification": "GENERIC",
+      "domain_tags": [
+        "hr",
+        "operations"
+      ],
+      "evidence_count": 4,
+      "offer_count": 4,
+      "skill_label": "data analysis"
+    },
+    {
+      "classification": "GENERIC",
+      "domain_tags": [
+        "hr",
+        "operations"
+      ],
+      "evidence_count": 4,
+      "offer_count": 4,
+      "skill_label": "project management"
+    }
+  ],
+  "market_evidence": {
+    "domain_tags": [
+      "hr",
+      "operations"
+    ],
+    "offer_count": 10,
+    "offer_ids": [
+      "business_france:231640",
+      "business_france:231643",
+      "business_france:231644",
+      "business_france:235316",
+      "business_france:236398",
+      "business_france:238330",
+      "business_france:240151",
+      "business_france:242327",
+      "business_france:242377",
+      "business_france:242421"
+    ]
+  },
+  "orientation": {
+    "domain_tags": [
+      "hr",
+      "operations"
+    ],
+    "offer_count": 10
+  },
+  "profile_summary": [
+    {
+      "evidence_count": 11,
+      "label": "f"
+    },
+    {
+      "evidence_count": 10,
+      "label": "h"
+    },
+    {
+      "evidence_count": 4,
+      "label": "hr"
+    }
+  ],
+  "project_types": [
+    {
+      "evidence_count": 21,
+      "label": "you will"
+    },
+    {
+      "evidence_count": 11,
+      "label": "talent acquisition"
+    },
+    {
+      "evidence_count": 10,
+      "label": "opportunity to"
+    }
+  ],
+  "sector_slug": "hr_recruitment",
+  "sector_type": "central",
+  "support_skills": [
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "ai opportunity assessment"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "automation solutions design"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "campus recruitment"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "candidate headhunting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "candidate pipeline follow-up"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "candidate qualification and evaluation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "candidate sourcing"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "career path management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "centralized ai & automation opportunity tracker"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "change management programs"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "crm management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 3,
+      "offer_count": 3,
+      "skill_label": "data analysis and reporting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "data analysis for learning processes"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "employer branding development"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "employer branding projects"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "employer branding strategy"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "entire selection process management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "global l&d initiatives delivery"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 3,
+      "offer_count": 3,
+      "skill_label": "hr project tracking"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 3,
+      "offer_count": 3,
+      "skill_label": "hr systems and tools"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "internal recruitment process management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 4,
+      "offer_count": 4,
+      "skill_label": "international environment"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "job openings publication"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "linkedin promotion"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "local hr action plan implementation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "market analysis and benchmarking"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "market research"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 2,
+      "offer_count": 2,
+      "skill_label": "onboarding"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "phone pre-screening interviews"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "process flow documentation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "process optimization"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "project ownership for initiatives"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "recruiting strategy improvement"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "recruitment platforms"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "recruitment process optimization"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "talent acquisition management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 3,
+      "offer_count": 3,
+      "skill_label": "talent management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "technical engineering skills understanding"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "hr"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "training and coaching needs assessment"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "vendor coordination"
+    }
+  ],
+  "tools_technologies": []
+}

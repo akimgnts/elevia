@@ -1,0 +1,640 @@
+{
+  "version": "elevia_metier_v0_finance_control",
+  "clusters": {
+    "DATA_ENGINEERING": {
+      "strong_signals": [
+        "data engineer",
+        "etl",
+        "elt",
+        "data pipeline",
+        "data pipelines",
+        "pipeline",
+        "pipelines",
+        "orchestration",
+        "api",
+        "apis",
+        "ingestion",
+        "batch processing",
+        "streaming",
+        "data modeling"
+      ],
+      "weak_signals": [
+        "sql",
+        "python",
+        "analytics engineering",
+        "backend data",
+        "warehouse",
+        "data platform"
+      ],
+      "context_signals": [
+        "backend",
+        "infrastructure",
+        "reliability",
+        "orchestrated workflows",
+        "data architecture"
+      ],
+      "tools": [
+        "airflow",
+        "dbt",
+        "postgresql",
+        "snowflake",
+        "bigquery",
+        "spark",
+        "databricks",
+        "kafka",
+        "python",
+        "sql"
+      ],
+      "project_patterns": [
+        {
+          "label": "etl_api_postgres_pipeline",
+          "terms": ["etl", "api", "postgresql"]
+        },
+        {
+          "label": "orchestrated_data_pipeline",
+          "terms": ["airflow", "pipeline"]
+        },
+        {
+          "label": "warehouse_transformation_stack",
+          "terms": ["dbt", "sql"]
+        }
+      ],
+      "trajectory_hints": [
+        "data engineer",
+        "analytics engineer",
+        "etl developer",
+        "data platform engineer"
+      ],
+      "negative_signals": [
+        "cohort analysis",
+        "experimentation",
+        "ab testing",
+        "a/b testing",
+        "product manager",
+        "recruitment",
+        "candidate sourcing"
+      ]
+    },
+    "BI_ANALYTICS": {
+      "strong_signals": [
+        "business intelligence",
+        "bi",
+        "dashboard",
+        "dashboards",
+        "kpi",
+        "executive reporting",
+        "self service analytics",
+        "data visualization"
+      ],
+      "weak_signals": [
+        "reporting",
+        "sql",
+        "excel",
+        "analysis",
+        "analytics",
+        "stakeholder reporting"
+      ],
+      "context_signals": [
+        "business stakeholders",
+        "executive visibility",
+        "performance tracking",
+        "management reporting"
+      ],
+      "tools": [
+        "power bi",
+        "tableau",
+        "looker",
+        "excel",
+        "sql",
+        "power query"
+      ],
+      "project_patterns": [
+        {
+          "label": "power_bi_kpi_dashboard",
+          "terms": ["power bi", "kpi", "dashboard"]
+        },
+        {
+          "label": "reporting_stack",
+          "terms": ["reporting", "sql"]
+        }
+      ],
+      "trajectory_hints": [
+        "bi analyst",
+        "business intelligence analyst",
+        "reporting analyst",
+        "data analyst"
+      ],
+      "negative_signals": [
+        "product analytics",
+        "cohort analysis",
+        "experimentation",
+        "feature adoption",
+        "retention",
+        "funnel"
+      ]
+    },
+    "PRODUCT_ANALYTICS": {
+      "strong_signals": [
+        "product analytics",
+        "product analyst",
+        "cohort analysis",
+        "experimentation",
+        "ab testing",
+        "a/b testing",
+        "feature adoption",
+        "retention",
+        "funnel analysis",
+        "activation"
+      ],
+      "weak_signals": [
+        "dashboard",
+        "kpi",
+        "sql",
+        "analytics",
+        "conversion"
+      ],
+      "context_signals": [
+        "product managers",
+        "product squads",
+        "user journey",
+        "feature usage",
+        "growth loops"
+      ],
+      "tools": [
+        "amplitude",
+        "mixpanel",
+        "sql",
+        "ga4",
+        "google analytics"
+      ],
+      "project_patterns": [
+        {
+          "label": "cohort_experimentation_pattern",
+          "terms": ["cohort", "experimentation"]
+        },
+        {
+          "label": "product_funnel_pattern",
+          "terms": ["funnel", "retention"]
+        }
+      ],
+      "trajectory_hints": [
+        "product analyst",
+        "growth analyst",
+        "product analytics manager"
+      ],
+      "negative_signals": [
+        "etl",
+        "orchestration",
+        "airflow",
+        "dbt",
+        "backend data"
+      ]
+    },
+    "FINANCE_CONTROL": {
+      "strong_signals": [
+        "financial analysis",
+        "financial reporting",
+        "management control",
+        "accounting",
+        "budgeting",
+        "sap",
+        "controlling",
+        "financial planning",
+        "finance controller",
+        "management controller",
+        "business controller",
+        "controle de gestion",
+        "contrôle de gestion"
+      ],
+      "weak_signals": [
+        "excel",
+        "reporting",
+        "analysis",
+        "kpi",
+        "management",
+        "dashboard"
+      ],
+      "context_signals": [
+        "variance analysis",
+        "monthly close",
+        "budget follow-up",
+        "p&l",
+        "profitability",
+        "forecasting",
+        "cost control",
+        "financial close"
+      ],
+      "tools": [
+        "sap",
+        "excel",
+        "power bi",
+        "oracle"
+      ],
+      "project_patterns": [
+        {
+          "label": "sap_budgeting_reporting",
+          "terms": ["sap", "budgeting", "financial reporting"]
+        },
+        {
+          "label": "controlling_close_cycle",
+          "terms": ["controlling", "monthly close"]
+        }
+      ],
+      "trajectory_hints": [
+        "finance controller",
+        "management controller",
+        "business controller",
+        "fp&a analyst",
+        "controleur de gestion",
+        "financial controller"
+      ],
+      "negative_signals": [
+        "cohort analysis",
+        "experimentation",
+        "product analytics",
+        "candidate sourcing",
+        "talent acquisition",
+        "supplier management",
+        "procurement",
+        "logistics"
+      ],
+      "forbidden_standalone_anchors": [
+        "excel",
+        "reporting",
+        "analysis",
+        "kpi",
+        "sql"
+      ],
+      "representative_examples": [
+        "controleur de gestion",
+        "finance controller",
+        "vie management controller"
+      ]
+    },
+    "SALES_BUSINESS_DEVELOPMENT": {
+      "strong_signals": [
+        "b2b sales",
+        "business development",
+        "crm",
+        "crm management",
+        "salesforce",
+        "hubspot",
+        "prospecting",
+        "lead generation",
+        "account management",
+        "sales development",
+        "commercial development"
+      ],
+      "weak_signals": [
+        "reporting",
+        "analysis",
+        "excel",
+        "kpi",
+        "communication",
+        "management",
+        "dashboard"
+      ],
+      "context_signals": [
+        "pipeline follow-up",
+        "client portfolio",
+        "deal flow",
+        "revenue growth",
+        "commercial performance",
+        "sales cycle"
+      ],
+      "tools": [
+        "salesforce",
+        "hubspot",
+        "crm",
+        "excel",
+        "power bi"
+      ],
+      "project_patterns": [
+        {
+          "label": "crm_prospecting_growth",
+          "terms": ["crm", "prospecting", "account management"]
+        },
+        {
+          "label": "salesforce_pipeline_cycle",
+          "terms": ["salesforce", "pipeline", "sales"]
+        }
+      ],
+      "trajectory_hints": [
+        "business developer",
+        "business development manager",
+        "account executive",
+        "sales development representative",
+        "commercial"
+      ],
+      "negative_signals": [
+        "candidate sourcing",
+        "recruitment",
+        "procurement",
+        "supply chain",
+        "management control"
+      ],
+      "forbidden_standalone_anchors": [
+        "excel",
+        "reporting",
+        "analysis",
+        "kpi",
+        "communication",
+        "management"
+      ],
+      "representative_examples": [
+        "business developer",
+        "commercial export",
+        "technico-commercial"
+      ]
+    },
+    "SUPPLY_CHAIN_PROCUREMENT": {
+      "strong_signals": [
+        "supply chain",
+        "supply chain management",
+        "procurement",
+        "purchasing",
+        "supplier management",
+        "inventory",
+        "logistics",
+        "replenishment",
+        "approvisionnement",
+        "acheteur",
+        "sap supply"
+      ],
+      "weak_signals": [
+        "reporting",
+        "analysis",
+        "excel",
+        "kpi",
+        "management",
+        "dashboard"
+      ],
+      "context_signals": [
+        "supplier governance",
+        "stock planning",
+        "inventory coordination",
+        "sourcing operations",
+        "procurement planning",
+        "supply flows"
+      ],
+      "tools": [
+        "sap supply",
+        "sap",
+        "excel",
+        "power bi"
+      ],
+      "project_patterns": [
+        {
+          "label": "procurement_supplier_inventory",
+          "terms": ["procurement", "supplier management", "inventory"]
+        },
+        {
+          "label": "sap_supply_logistics",
+          "terms": ["sap supply", "logistics"]
+        }
+      ],
+      "trajectory_hints": [
+        "procurement specialist",
+        "buyer",
+        "purchasing specialist",
+        "supply chain coordinator",
+        "approvisionneur"
+      ],
+      "negative_signals": [
+        "financial reporting",
+        "management control",
+        "candidate sourcing",
+        "recruitment"
+      ],
+      "forbidden_standalone_anchors": [
+        "excel",
+        "reporting",
+        "analysis",
+        "kpi",
+        "management"
+      ],
+      "representative_examples": [
+        "acheteur",
+        "approvisionneur",
+        "purchasing vie"
+      ]
+    },
+    "OPERATIONS_PROJECT_PMO": {
+      "strong_signals": [
+        "project management",
+        "pmo",
+        "governance",
+        "process improvement",
+        "operational coordination",
+        "project coordination",
+        "service management",
+        "process governance"
+      ],
+      "weak_signals": [
+        "reporting",
+        "analysis",
+        "excel",
+        "kpi",
+        "communication",
+        "management",
+        "dashboard"
+      ],
+      "context_signals": [
+        "project reporting",
+        "cross-functional coordination",
+        "operational follow-up",
+        "project streams",
+        "process standardization",
+        "governance cadence"
+      ],
+      "tools": [
+        "jira",
+        "servicenow",
+        "excel",
+        "power bi"
+      ],
+      "project_patterns": [
+        {
+          "label": "pmo_governance_jira",
+          "terms": ["pmo", "governance", "jira"]
+        },
+        {
+          "label": "operations_process_coordination",
+          "terms": ["process improvement", "operational coordination"]
+        }
+      ],
+      "trajectory_hints": [
+        "pmo coordinator",
+        "project manager",
+        "operations coordinator",
+        "project operations"
+      ],
+      "negative_signals": [
+        "candidate sourcing",
+        "recruitment",
+        "b2b sales",
+        "supply chain"
+      ],
+      "forbidden_standalone_anchors": [
+        "excel",
+        "reporting",
+        "analysis",
+        "kpi",
+        "communication",
+        "management"
+      ],
+      "representative_examples": [
+        "pmo coordinator",
+        "project operations coordinator",
+        "operations project manager"
+      ]
+    },
+    "ENGINEERING_BUILD_RUN": {
+      "strong_signals": [
+        "backend development",
+        "software testing",
+        "docker",
+        "kubernetes",
+        "containerization",
+        "mechanical design",
+        "devops",
+        "azure",
+        "cloud operations",
+        "backend engineer",
+        "build and run"
+      ],
+      "weak_signals": [
+        "reporting",
+        "analysis",
+        "excel",
+        "kpi",
+        "communication",
+        "management",
+        "python"
+      ],
+      "context_signals": [
+        "deployment automation",
+        "platform reliability",
+        "build pipelines",
+        "run reliability",
+        "cloud services",
+        "production support"
+      ],
+      "tools": [
+        "docker",
+        "kubernetes",
+        "azure",
+        "aws",
+        "linux",
+        "python"
+      ],
+      "project_patterns": [
+        {
+          "label": "container_platform_reliability",
+          "terms": ["docker", "kubernetes", "containerization"]
+        },
+        {
+          "label": "backend_devops_stack",
+          "terms": ["backend development", "devops"]
+        }
+      ],
+      "trajectory_hints": [
+        "backend engineer",
+        "devops engineer",
+        "site reliability engineer",
+        "mechanical design engineer"
+      ],
+      "negative_signals": [
+        "etl",
+        "data pipeline",
+        "cohort analysis",
+        "candidate sourcing"
+      ],
+      "forbidden_standalone_anchors": [
+        "excel",
+        "reporting",
+        "analysis",
+        "kpi",
+        "communication",
+        "management"
+      ],
+      "representative_examples": [
+        "backend engineer",
+        "devops engineer",
+        "mechanical design engineer"
+      ]
+    },
+    "HR_TALENT_OPERATIONS": {
+      "strong_signals": [
+        "recruitment",
+        "candidate sourcing",
+        "talent management",
+        "onboarding",
+        "successfactors",
+        "hr systems",
+        "workforce planning",
+        "talent acquisition",
+        "hr operations",
+        "people operations"
+      ],
+      "weak_signals": [
+        "reporting",
+        "analysis",
+        "excel",
+        "kpi",
+        "communication",
+        "management",
+        "dashboard"
+      ],
+      "context_signals": [
+        "hiring workflows",
+        "recruitment funnel",
+        "employee lifecycle",
+        "hr governance",
+        "people processes",
+        "talent operations"
+      ],
+      "tools": [
+        "successfactors",
+        "workday",
+        "excel",
+        "crm"
+      ],
+      "project_patterns": [
+        {
+          "label": "recruitment_onboarding_systems",
+          "terms": ["recruitment", "onboarding", "hr systems"]
+        },
+        {
+          "label": "talent_operations_workforce",
+          "terms": ["talent management", "workforce planning"]
+        }
+      ],
+      "trajectory_hints": [
+        "talent acquisition specialist",
+        "hr operations coordinator",
+        "recruiter",
+        "people operations specialist"
+      ],
+      "negative_signals": [
+        "b2b sales",
+        "procurement",
+        "management control",
+        "etl"
+      ],
+      "forbidden_standalone_anchors": [
+        "excel",
+        "reporting",
+        "analysis",
+        "kpi",
+        "communication",
+        "management"
+      ],
+      "representative_examples": [
+        "talent acquisition specialist",
+        "hr coordinator",
+        "people operations specialist"
+      ]
+    }
+  }
+}

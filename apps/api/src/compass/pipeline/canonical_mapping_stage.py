@@ -94,6 +94,49 @@ def select_mapping_inputs(skill_candidates: SkillCandidateStageResult) -> List[s
     return mapping_inputs
 
 
+def _strategy_from_preserved_canonical_target(strategy: str) -> str:
+    if strategy == "tool_match":
+        return "tool_match"
+    return "synonym_match"
+
+
+def merge_preserved_explicit_canonical_skills(
+    canonical_skills: List[dict],
+    preserved_explicit_skills: List[dict],
+) -> List[dict]:
+    merged = list(canonical_skills or [])
+
+    for explicit in preserved_explicit_skills or []:
+        if not isinstance(explicit, dict):
+            continue
+        target = explicit.get("canonical_target") or {}
+        if not isinstance(target, dict):
+            continue
+        canonical_id = str(target.get("canonical_id") or "").strip()
+        if not canonical_id:
+            continue
+        label = str(target.get("label") or explicit.get("label") or canonical_id).strip()
+        if not label:
+            continue
+        merged.append(
+            {
+                "raw": explicit.get("raw_text") or explicit.get("label") or label,
+                "canonical_id": canonical_id,
+                "label": label,
+                "strategy": _strategy_from_preserved_canonical_target(
+                    str(target.get("strategy") or "")
+                ),
+                "confidence": float(explicit.get("source_confidence") or 1.0),
+                "cluster_name": explicit.get("cluster_name"),
+                "genericity_score": explicit.get("genericity_score"),
+                "source": "preserved_explicit",
+                "source_section": explicit.get("source_section"),
+            }
+        )
+
+    return merged
+
+
 def run_canonical_mapping_stage(
     *,
     request_id: str,
@@ -158,18 +201,34 @@ def run_canonical_mapping_stage(
             }
             for m in _cmap.mappings
         ]
+        canonical_skills_list = merge_preserved_explicit_canonical_skills(
+            canonical_skills_list,
+            preserved_explicit_skills,
+        )
         canonical_stats = {
-            "matched_count": _cmap.matched_count,
+            "matched_count": len(
+                [item for item in canonical_skills_list if item.get("canonical_id")]
+            ),
             "unresolved_count": _cmap.unresolved_count,
             "synonym_count": _cmap.synonym_count,
             "tool_count": _cmap.tool_count,
         }
-        resolved_ids = list(dict.fromkeys(m.canonical_id for m in _cmap.mappings if m.canonical_id))
+        resolved_ids = list(
+            dict.fromkeys(
+                str(item.get("canonical_id") or "")
+                for item in canonical_skills_list
+                if item.get("canonical_id")
+            )
+        )
         _exp = expand_hierarchy(resolved_ids)
         canonical_hierarchy_added = _exp.added_parents
         expansion_map = _exp.expansion_map
         expanded_ids = _exp.expanded_ids
-        resolved_labels = [m.label for m in _cmap.mappings if m.label]
+        resolved_labels = [
+            str(item.get("label") or "")
+            for item in canonical_skills_list
+            if item.get("label")
+        ]
         canonical_enriched_labels = list(dict.fromkeys(resolved_labels + mapping_inputs))
         if _cmap.matched_count or canonical_hierarchy_added:
             logger.info(json.dumps({

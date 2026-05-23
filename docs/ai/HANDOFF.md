@@ -4,6 +4,123 @@
 
 ---
 
+## ✅ Archetype Replay Task 4 Executed (2026-05-22)
+
+**Status**: central archetype replay CLI implemented and executed end-to-end. Report writing is working; current replay output is observation-only and shows no returned top items on this run.
+
+**Commands run**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_run_archetype_replay.py -q`
+  - result: `8 passed`
+- `apps/api/.venv/bin/python scripts/run_archetype_replay.py`
+
+**Input scope**:
+- `docs/ai/runtime_calibration/archetype_cvs/central/`
+- replayed archetypes:
+  - `finance_control`
+  - `hr_recruitment`
+  - `operations_process`
+- hybrids excluded by design
+
+**Generated report**:
+- `docs/ai/runtime_calibration/latest_archetype_replay.md`
+
+**Dominant observed drifts**:
+- all three central archetypes produced `Observed: None`
+- current issue is therefore missing replay recall, not an interpretable top-match drift pattern
+
+**Important constraint preserved**:
+- the report keeps `Observed` and `Interpreted` separate
+- verdict remains `pending`
+- no human biography or invented narrative is introduced
+
+**Rerun command**:
+- `apps/api/.venv/bin/python scripts/run_archetype_replay.py`
+
+## ✅ Archetype CV Generator Task 5 Executed (2026-05-22, quick-mode fallback)
+
+**Status**: CLI + artifact writing implemented. Local execution completed, but **without PostgreSQL live BF data** because `DATABASE_URL` was unavailable in the environment at run time.
+
+**Commands run**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_generate_archetype_cvs.py -q`
+  - result: `23 passed`
+- `apps/api/.venv/bin/python scripts/generate_archetype_cvs.py`
+  - mode used: `quick` via auto fallback
+
+**Output root**:
+- `docs/ai/runtime_calibration/archetype_cvs/`
+
+**Created central artifacts**:
+- `finance_control`
+- `data_analytics`
+- `operations_process`
+
+**Refused central sectors**:
+- `hr_recruitment` — `insufficient evidence: anchor skills missing`
+- `software_engineering` — `insufficient evidence: anchor skills missing`
+
+**Created hybrid artifacts**:
+- none
+
+**Refused hybrids**:
+- `finance_bi` — `hybrid sector finance_bi requires at least 10 offers`
+- `hr_operations` — `hybrid sector hr_operations requires at least 10 offers`
+- `data_software` — `hybrid sector data_software requires at least 10 offers`
+- `operations_supply` — `hybrid sector operations_supply requires at least 10 offers`
+
+**Generated files**:
+- `docs/ai/runtime_calibration/archetype_cvs/central/finance_control.md`
+- `docs/ai/runtime_calibration/archetype_cvs/central/finance_control.json`
+- `docs/ai/runtime_calibration/archetype_cvs/central/data_analytics.md`
+- `docs/ai/runtime_calibration/archetype_cvs/central/data_analytics.json`
+- `docs/ai/runtime_calibration/archetype_cvs/central/operations_process.md`
+- `docs/ai/runtime_calibration/archetype_cvs/central/operations_process.json`
+
+**Important limitation**:
+- This is **not yet** the real BF corpus generation pass requested by product. The implementation is ready, but a true Task 5 validation now depends on rerunning:
+  - `apps/api/.venv/bin/python scripts/generate_archetype_cvs.py`
+  with `DATABASE_URL` exported and reachable.
+
+**Weak zones to inspect next on live BF data**:
+- whether current evidence gates are too permissive for central creation
+- whether hybrid refusals remain all-below-threshold or start producing valid files
+- whether the rendered profile/project blocks remain adequately constrained on the real corpus
+
+## ✅ Task 5 blocker fixed — auto mode now loads `apps/api/.env` first
+
+**Fix**:
+- `scripts/generate_archetype_cvs.py` now calls `_load_repo_env()` before resolving `--mode auto`.
+- `DATABASE_URL` can therefore be sourced from `apps/api/.env` for the standard command:
+  - `apps/api/.venv/bin/python scripts/generate_archetype_cvs.py`
+
+**Validation**:
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_generate_archetype_cvs.py -q`
+  - result: `24 passed`
+- new test covers `--mode auto` choosing the PostgreSQL branch after env loading
+
+**Real rerun after fix**:
+- command:
+  - `apps/api/.venv/bin/python scripts/generate_archetype_cvs.py`
+- mode actually used:
+  - PostgreSQL, via `DATABASE_URL` loaded from `apps/api/.env`
+
+**Created central artifacts after real run**:
+- `finance_control`
+- `hr_recruitment`
+- `operations_process`
+
+**Refused central sectors after real run**:
+- `data_analytics` — `insufficient evidence: anchor skills missing`
+- `software_engineering` — `insufficient evidence: anchor skills missing`
+
+**Created hybrid artifacts after real run**:
+- none
+
+**Refused hybrids after real run**:
+- `finance_bi` — `requires at least 10 evidenced offers`
+- `hr_operations` — `requires at least 10 evidenced offers`
+- `data_software` — `requires at least 10 evidenced offers`
+- `operations_supply` — `requires at least 10 evidenced offers`
+
 ## Contexte minimal
 
 - **Produit** : Elevia, moteur de matching CV ↔ offres d'emploi.
@@ -1332,3 +1449,43 @@ Règles appliquées :
 
 **Operational note**:
 - on this machine, the baseline replay required `ELEVIA_SENTINEL_CV_ROOT=/Users/akimguentas/Downloads/cvtest` because the real CV corpus is stored outside the repo.
+
+## ✅ Ania DATA_IT Halo Patch (2026-05-19)
+
+**Status**: runtime calibration patch accepted locally, scoring core untouched.
+
+**Scope**:
+- file: `apps/api/src/compass/domain_uris.py`
+- change: local `DATA_IT` filter inside `build_domain_uris_for_text()`
+- blocked only:
+  - `analyse`
+  - `analyste`
+  - `coordination`
+  - `relations`
+
+**Why**:
+- `ania` still drifted `finance/compliance -> policy/privacy/SOC`
+- root cause was no longer canonical loss or compliance bridge fanout
+- remaining cause was profile-side `domain_library_uri DATA_IT` halo
+
+**Verified**:
+- unit/regression tests:
+  - `apps/api/.venv/bin/python -m pytest apps/api/tests/test_profile_domain_uri_data_it_policy.py apps/api/tests/test_runtime_canonical_injection.py apps/api/tests/test_esco_promotion_bridge.py apps/api/tests/test_run_sentinel_replay.py -q`
+  - `41 passed, 2 warnings`
+- sentinel replay:
+  - `ELEVIA_SENTINEL_CV_ROOT=/Users/akimguentas/Downloads/cvtest ELEVIA_RUNTIME_CANONICAL_INJECTION=1 ELEVIA_RUNTIME_OFFER_SKILLS_INJECTION=1 apps/api/.venv/bin/python scripts/run_sentinel_replay.py --limit 10`
+
+**Observed effect on `ania`**:
+- removed from top 10:
+  - `Global Digital Policy`
+  - `Analyste SOC`
+- finance block now occupies ranks `2` through `9`
+- residual false positives remain:
+  - `Quality Engineer` top `1`
+  - `DATA SCIENTIST` rank `10`
+
+**Do not do next by reflex**:
+- do not patch all `DATA_IT`
+- do not touch `Financial Analysis`
+- do not touch scoring core
+- next iteration should start from the new residual false positives only

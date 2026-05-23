@@ -1,0 +1,6494 @@
+{
+  "mode": "full",
+  "profiles": [
+    {
+      "id": "sample_delta_txt",
+      "source": "fixture_text",
+      "title": "Profile",
+      "expected_cluster": "DATA_ENGINEERING",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "DATA_ENGINEERING",
+        "candidate_clusters": [
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 24.0,
+            "eligible": true
+          },
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 6.5,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0,
+        "strong_matches": {
+          "DATA_ENGINEERING": [
+            "data engineer",
+            "etl",
+            "pipeline",
+            "pipelines",
+            "api"
+          ],
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "a/b testing"
+          ]
+        },
+        "weak_matches": {
+          "DATA_ENGINEERING": [
+            "sql"
+          ],
+          "BI_ANALYTICS": [
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "DATA_ENGINEERING": [
+            "airflow",
+            "dbt",
+            "sql"
+          ],
+          "BI_ANALYTICS": [
+            "power bi",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "DATA_ENGINEERING": [
+            "orchestrated_data_pipeline",
+            "warehouse_transformation_stack"
+          ],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "DATA_ENGINEERING": [
+            "data engineer"
+          ],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "DATA_ENGINEERING",
+          "score": 24.0,
+          "strong_matches": [
+            "data engineer",
+            "etl",
+            "pipeline",
+            "pipelines",
+            "api"
+          ],
+          "context_matches": [],
+          "negative_matches": [
+            "a/b testing"
+          ]
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": "DATA_ENGINEERING",
+          "candidate_clusters": [
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 24.0,
+              "eligible": true
+            },
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "DATA_ENGINEERING": [
+              "data engineer",
+              "etl",
+              "pipeline",
+              "pipelines",
+              "api"
+            ],
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "a/b testing"
+            ]
+          },
+          "weak_matches": {
+            "DATA_ENGINEERING": [
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "DATA_ENGINEERING": [
+              "airflow",
+              "dbt",
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "power bi",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "DATA_ENGINEERING": [
+              "orchestrated_data_pipeline",
+              "warehouse_transformation_stack"
+            ],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "DATA_ENGINEERING": [
+              "data engineer"
+            ],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "DATA_ENGINEERING",
+            "score": 24.0,
+            "strong_matches": [
+              "data engineer",
+              "etl",
+              "pipeline",
+              "pipelines",
+              "api"
+            ],
+            "context_matches": [],
+            "negative_matches": [
+              "a/b testing"
+            ]
+          }
+        },
+        "without_projects": {
+          "primary_cluster": "DATA_ENGINEERING",
+          "candidate_clusters": [
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 24.0,
+              "eligible": true
+            },
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "DATA_ENGINEERING": [
+              "data engineer",
+              "etl",
+              "pipeline",
+              "pipelines",
+              "api"
+            ],
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "a/b testing"
+            ]
+          },
+          "weak_matches": {
+            "DATA_ENGINEERING": [
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "DATA_ENGINEERING": [
+              "airflow",
+              "dbt",
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "power bi",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "DATA_ENGINEERING": [
+              "orchestrated_data_pipeline",
+              "warehouse_transformation_stack"
+            ],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "DATA_ENGINEERING": [
+              "data engineer"
+            ],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "DATA_ENGINEERING",
+            "score": 24.0,
+            "strong_matches": [
+              "data engineer",
+              "etl",
+              "pipeline",
+              "pipelines",
+              "api"
+            ],
+            "context_matches": [],
+            "negative_matches": [
+              "a/b testing"
+            ]
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": "DATA_ENGINEERING",
+          "candidate_clusters": [
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 24.0,
+              "eligible": true
+            },
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "DATA_ENGINEERING": [
+              "data engineer",
+              "etl",
+              "pipeline",
+              "pipelines",
+              "api"
+            ],
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "a/b testing"
+            ]
+          },
+          "weak_matches": {
+            "DATA_ENGINEERING": [
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "DATA_ENGINEERING": [
+              "airflow",
+              "dbt",
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "power bi",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "DATA_ENGINEERING": [
+              "orchestrated_data_pipeline",
+              "warehouse_transformation_stack"
+            ],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "DATA_ENGINEERING": [
+              "data engineer"
+            ],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "DATA_ENGINEERING",
+            "score": 24.0,
+            "strong_matches": [
+              "data engineer",
+              "etl",
+              "pipeline",
+              "pipelines",
+              "api"
+            ],
+            "context_matches": [],
+            "negative_matches": [
+              "a/b testing"
+            ]
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_fixture_v0",
+      "source": "fixture_text",
+      "title": "Marie Dupont — Data Analyst & BI Engineer",
+      "expected_cluster": null,
+      "expectation_mode": "ambiguous",
+      "expectation_note": "mixed BI + DE profile",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 28.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 27.0,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi",
+            "dashboard",
+            "dashboards",
+            "kpi"
+          ],
+          "DATA_ENGINEERING": [
+            "etl",
+            "data pipeline",
+            "pipeline",
+            "pipelines",
+            "api",
+            "apis"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "sql",
+            "excel",
+            "analysis",
+            "analytics"
+          ],
+          "DATA_ENGINEERING": [
+            "sql",
+            "python",
+            "warehouse"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "dashboard",
+            "kpi",
+            "sql",
+            "analytics"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "power bi",
+            "tableau",
+            "excel",
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "postgresql",
+            "python",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [
+            "power_bi_kpi_dashboard",
+            "reporting_stack"
+          ],
+          "DATA_ENGINEERING": [
+            "etl_api_postgres_pipeline"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [
+            "data analyst"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 28.5,
+          "strong_matches": [
+            "bi",
+            "dashboard",
+            "dashboards",
+            "kpi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 28.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 27.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi",
+              "dashboard",
+              "dashboards",
+              "kpi"
+            ],
+            "DATA_ENGINEERING": [
+              "etl",
+              "data pipeline",
+              "pipeline",
+              "pipelines",
+              "api",
+              "apis"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "sql",
+              "excel",
+              "analysis",
+              "analytics"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python",
+              "warehouse"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "dashboard",
+              "kpi",
+              "sql",
+              "analytics"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "postgresql",
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [
+              "power_bi_kpi_dashboard",
+              "reporting_stack"
+            ],
+            "DATA_ENGINEERING": [
+              "etl_api_postgres_pipeline"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 28.5,
+            "strong_matches": [
+              "bi",
+              "dashboard",
+              "dashboards",
+              "kpi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_projects": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 28.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 27.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi",
+              "dashboard",
+              "dashboards",
+              "kpi"
+            ],
+            "DATA_ENGINEERING": [
+              "etl",
+              "data pipeline",
+              "pipeline",
+              "pipelines",
+              "api",
+              "apis"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "sql",
+              "excel",
+              "analysis",
+              "analytics"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python",
+              "warehouse"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "dashboard",
+              "kpi",
+              "sql",
+              "analytics"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "postgresql",
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [
+              "power_bi_kpi_dashboard",
+              "reporting_stack"
+            ],
+            "DATA_ENGINEERING": [
+              "etl_api_postgres_pipeline"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 28.5,
+            "strong_matches": [
+              "bi",
+              "dashboard",
+              "dashboards",
+              "kpi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 28.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 24.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi",
+              "dashboard",
+              "dashboards",
+              "kpi"
+            ],
+            "DATA_ENGINEERING": [
+              "etl",
+              "pipeline",
+              "pipelines",
+              "api",
+              "apis"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "sql",
+              "excel",
+              "analysis",
+              "analytics"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python",
+              "warehouse"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "dashboard",
+              "kpi",
+              "sql",
+              "analytics"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "postgresql",
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [
+              "power_bi_kpi_dashboard",
+              "reporting_stack"
+            ],
+            "DATA_ENGINEERING": [
+              "etl_api_postgres_pipeline"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 28.5,
+            "strong_matches": [
+              "bi",
+              "dashboard",
+              "dashboards",
+              "kpi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": true,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "golden_01",
+      "source": "fixture_json",
+      "title": "",
+      "expected_cluster": "BI_ANALYTICS",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 9.0,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 4.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 2.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.75,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "sql",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [
+            "sql",
+            "python"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel",
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "python",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [
+            "data analyst"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 9.0,
+          "strong_matches": [
+            "bi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 9.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 4.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.75,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "sql",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 9.0,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_projects": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 9.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 4.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.75,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "sql",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 9.0,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 9.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 4.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.75,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "sql",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 9.0,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "golden_02",
+      "source": "fixture_json",
+      "title": "",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "software profile out of V0 scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "DATA_ENGINEERING": [
+            "sql",
+            "python"
+          ],
+          "BI_ANALYTICS": [
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "DATA_ENGINEERING": [
+            "python",
+            "sql"
+          ],
+          "BI_ANALYTICS": [
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_projects": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "BI_ANALYTICS": [
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "DATA_ENGINEERING": [],
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "akim_guentas_matching",
+      "source": "fixture_json",
+      "title": "",
+      "expected_cluster": "BI_ANALYTICS",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 22.0,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 7.0,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 2.5,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "business intelligence",
+            "bi",
+            "kpi"
+          ],
+          "DATA_ENGINEERING": [
+            "api"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "sql",
+            "excel",
+            "analysis"
+          ],
+          "DATA_ENGINEERING": [
+            "sql",
+            "python"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "kpi",
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "power bi",
+            "tableau",
+            "excel",
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "python",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [
+            "reporting_stack"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [
+            "data analyst"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 22.0,
+          "strong_matches": [
+            "business intelligence",
+            "bi",
+            "kpi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 22.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 7.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.5,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "business intelligence",
+              "bi",
+              "kpi"
+            ],
+            "DATA_ENGINEERING": [
+              "api"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "sql",
+              "excel",
+              "analysis"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "kpi",
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [
+              "reporting_stack"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 22.0,
+            "strong_matches": [
+              "business intelligence",
+              "bi",
+              "kpi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_projects": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 22.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 7.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.5,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "business intelligence",
+              "bi",
+              "kpi"
+            ],
+            "DATA_ENGINEERING": [
+              "api"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "sql",
+              "excel",
+              "analysis"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "kpi",
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [
+              "reporting_stack"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 22.0,
+            "strong_matches": [
+              "business intelligence",
+              "bi",
+              "kpi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 22.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 7.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.5,
+              "eligible": false
+            }
+          ],
+          "confidence": 1.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "business intelligence",
+              "bi",
+              "kpi"
+            ],
+            "DATA_ENGINEERING": [
+              "api"
+            ],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "sql",
+              "excel",
+              "analysis"
+            ],
+            "DATA_ENGINEERING": [
+              "sql",
+              "python"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "kpi",
+              "sql"
+            ]
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel",
+              "sql"
+            ],
+            "DATA_ENGINEERING": [
+              "python",
+              "sql"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "sql"
+            ]
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [
+              "reporting_stack"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [
+              "data analyst"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 22.0,
+            "strong_matches": [
+              "business intelligence",
+              "bi",
+              "kpi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_01_lina_morel",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Lina Morel",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "sales profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_projects": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_02_hugo_renaud",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Hugo Renaud",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "business development profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_projects": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_03_sarah_el_mansouri",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Sarah El Mansouri",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "supply profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_projects": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_04_benoit_caron",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Benoit Caron",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "operations profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "tableau",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_projects": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_05_camille_vasseur",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Camille Vasseur",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "communication profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_projects": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_06_yasmine_haddad",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Yasmine Haddad",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "marketing profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "excel"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "conversion"
+          ],
+          "DATA_ENGINEERING": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "tableau",
+            "looker",
+            "excel"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "conversion"
+            ],
+            "DATA_ENGINEERING": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "tableau",
+              "looker",
+              "excel"
+            ],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_projects": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "conversion"
+            ],
+            "DATA_ENGINEERING": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "tableau",
+              "looker",
+              "excel"
+            ],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "PRODUCT_ANALYTICS": [
+              "conversion"
+            ],
+            "DATA_ENGINEERING": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "looker",
+              "excel"
+            ],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "PRODUCT_ANALYTICS": [],
+            "DATA_ENGINEERING": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_07_pierre_lemaire",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Pierre Lemaire",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "finance profile out of scope",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 8.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 0.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.71,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "power bi",
+            "tableau",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 8.5,
+          "strong_matches": [
+            "bi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 8.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.71,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 8.5,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_projects": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 8.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.71,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 8.5,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 8.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.71,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "reporting",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "power bi",
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 8.5,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": true,
+        "false_positive": true,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_08_amel_dufour",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Amel Dufour",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "accounting profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_projects": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": null,
+          "candidate_clusters": [],
+          "confidence": 0.0,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "reason": "no cluster reached minimum strong-signal threshold"
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "cv_09_ines_barbier",
+      "source": "synthetic_cv_dataset_v1",
+      "title": "Ines Barbier",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "hr profile out of scope",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 6.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 0.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.54,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "tableau",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 6.5,
+          "strong_matches": [
+            "bi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "ablation": {
+        "without_tools": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.54,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 6.5,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_projects": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.54,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 6.5,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        },
+        "without_experiences": {
+          "primary_cluster": "BI_ANALYTICS",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "confidence": 0.54,
+          "strong_matches": {
+            "BI_ANALYTICS": [
+              "bi"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "weak_matches": {
+            "BI_ANALYTICS": [
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "tools_matched": {
+            "BI_ANALYTICS": [
+              "tableau",
+              "excel"
+            ],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "project_patterns_matched": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "trajectory_hints": {
+            "BI_ANALYTICS": [],
+            "DATA_ENGINEERING": [],
+            "PRODUCT_ANALYTICS": []
+          },
+          "evidence": {
+            "primary_cluster": "BI_ANALYTICS",
+            "score": 6.5,
+            "strong_matches": [
+              "bi"
+            ],
+            "context_matches": [],
+            "negative_matches": []
+          }
+        }
+      },
+      "flags": {
+        "ambiguous": true,
+        "false_positive": true,
+        "expected_mismatch": false
+      }
+    }
+  ],
+  "offers": [
+    {
+      "id": "vie_fixture_001",
+      "source": "vie_catalog",
+      "title": "Data Analyst VIE - KPI & Reporting",
+      "expected_cluster": "BI_ANALYTICS",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 23.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 5.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 3.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi",
+            "dashboard",
+            "kpi"
+          ],
+          "DATA_ENGINEERING": [
+            "api"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "sql",
+            "excel",
+            "analysis"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "dashboard",
+            "kpi",
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "power bi",
+            "excel",
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [
+            "power_bi_kpi_dashboard",
+            "reporting_stack"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [
+            "data analyst"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 23.5,
+          "strong_matches": [
+            "bi",
+            "dashboard",
+            "kpi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_002",
+      "source": "vie_catalog",
+      "title": "Business Intelligence Analyst VIE - Tableau",
+      "expected_cluster": "BI_ANALYTICS",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 29.0,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 3.0,
+            "eligible": false
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 2.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "business intelligence",
+            "bi",
+            "dashboard",
+            "dashboards",
+            "kpi",
+            "data visualization"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "dashboard",
+            "kpi",
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "tableau",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [
+            "reporting_stack"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [
+            "bi analyst",
+            "business intelligence analyst"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 29.0,
+          "strong_matches": [
+            "business intelligence",
+            "bi",
+            "dashboard",
+            "dashboards",
+            "kpi",
+            "data visualization"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_003",
+      "source": "vie_catalog",
+      "title": "Data Ops Analyst VIE - Normalisation",
+      "expected_cluster": "DATA_ENGINEERING",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql",
+            "python"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "python",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [
+            "reporting_stack"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": true
+      }
+    },
+    {
+      "id": "vie_fixture_004",
+      "source": "vie_catalog",
+      "title": "Analytics Engineer VIE - API & BI",
+      "expected_cluster": null,
+      "expectation_mode": "ambiguous",
+      "expectation_note": "analytics engineer overlaps BI and DE",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 12.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 12.0,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 3.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi",
+            "kpi"
+          ],
+          "DATA_ENGINEERING": [
+            "api",
+            "apis"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "sql",
+            "analysis",
+            "analytics"
+          ],
+          "DATA_ENGINEERING": [
+            "sql",
+            "python"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "kpi",
+            "sql",
+            "analytics"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "python",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [
+            "reporting_stack"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [
+            "analytics engineer"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 12.5,
+          "strong_matches": [
+            "bi",
+            "kpi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "flags": {
+        "ambiguous": true,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_005",
+      "source": "vie_catalog",
+      "title": "Reporting Analyst VIE - Power BI",
+      "expected_cluster": "BI_ANALYTICS",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 14.0,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.5,
+            "eligible": false
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi",
+            "kpi"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "excel",
+            "analysis"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "kpi"
+          ],
+          "DATA_ENGINEERING": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "power bi",
+            "tableau",
+            "excel"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [
+            "reporting analyst"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 14.0,
+          "strong_matches": [
+            "bi",
+            "kpi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_006",
+      "source": "vie_catalog",
+      "title": "Business Analyst VIE - Operations",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "operations profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_007",
+      "source": "vie_catalog",
+      "title": "Data Reporting Analyst VIE - CRM",
+      "expected_cluster": "BI_ANALYTICS",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 21.5,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 3.0,
+            "eligible": false
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 2.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "dashboard",
+            "dashboards",
+            "kpi",
+            "data visualization"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "sql",
+            "excel"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "dashboard",
+            "kpi",
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel",
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [
+            "reporting_stack"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [
+            "reporting analyst"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 21.5,
+          "strong_matches": [
+            "dashboard",
+            "dashboards",
+            "kpi",
+            "data visualization"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_008",
+      "source": "vie_catalog",
+      "title": "Data Ops VIE - Inventory",
+      "expected_cluster": "DATA_ENGINEERING",
+      "expectation_mode": "specific",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": true
+      }
+    },
+    {
+      "id": "vie_fixture_009",
+      "source": "vie_catalog",
+      "title": "Product Ops Analyst VIE - Metrics",
+      "expected_cluster": null,
+      "expectation_mode": "ambiguous",
+      "expectation_note": "product ops may overlap product analytics",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "kpi"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "analysis"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "kpi"
+          ],
+          "DATA_ENGINEERING": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_010",
+      "source": "vie_catalog",
+      "title": "Supply Analyst VIE - Forecasting",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "supply profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "excel",
+            "analysis"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_011",
+      "source": "vie_catalog",
+      "title": "ML Engineer VIE - Deep Learning",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "ml engineering out of current V0 scope",
+      "result": {
+        "primary_cluster": "DATA_ENGINEERING",
+        "candidate_clusters": [
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 6.0,
+            "eligible": true
+          },
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.5,
+        "strong_matches": {
+          "DATA_ENGINEERING": [
+            "pipeline",
+            "pipelines"
+          ],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "DATA_ENGINEERING",
+          "score": 6.0,
+          "strong_matches": [
+            "pipeline",
+            "pipelines"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "flags": {
+        "ambiguous": true,
+        "false_positive": true,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_012",
+      "source": "vie_catalog",
+      "title": "Backend Engineer VIE - Golang",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "backend profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_013",
+      "source": "vie_catalog",
+      "title": "DevOps Engineer VIE - Cloud",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "devops profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_014",
+      "source": "vie_catalog",
+      "title": "Quant Researcher VIE - Finance",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "quant finance profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "vie_fixture_015",
+      "source": "vie_catalog",
+      "title": "Fullstack Engineer VIE - React/Node",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "fullstack profile out of scope",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_238371",
+      "source": "domain_taxonomy_sample20",
+      "title": "VIE Functional Excellence Support (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_238287",
+      "source": "domain_taxonomy_sample20",
+      "title": "TALENT ACQUISITION SPECIALIST BERLIN (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 8.5,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 1.0,
+            "eligible": false
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.71,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi",
+            "kpi"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "kpi",
+            "conversion"
+          ],
+          "DATA_ENGINEERING": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [
+            "data analyst"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 8.5,
+          "strong_matches": [
+            "bi",
+            "kpi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "flags": {
+        "ambiguous": true,
+        "false_positive": true,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_236293",
+      "source": "domain_taxonomy_sample20",
+      "title": "Field Engineer (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_227195",
+      "source": "domain_taxonomy_sample20",
+      "title": "V.I.E JUNIOR ACCOUNTANT (M/W) (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "DATA_ENGINEERING": [
+            "api"
+          ],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_231644",
+      "source": "domain_taxonomy_sample20",
+      "title": "JR HR PMO (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": "BI_ANALYTICS",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 6.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 3.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.5,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.54,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi",
+            "kpi"
+          ],
+          "DATA_ENGINEERING": [
+            "pipeline"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": [
+            "kpi"
+          ]
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "primary_cluster": "BI_ANALYTICS",
+          "score": 6.5,
+          "strong_matches": [
+            "bi",
+            "kpi"
+          ],
+          "context_matches": [],
+          "negative_matches": []
+        }
+      },
+      "flags": {
+        "ambiguous": true,
+        "false_positive": true,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_238415",
+      "source": "domain_taxonomy_sample20",
+      "title": "Contract Management (m/f) (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_242519",
+      "source": "domain_taxonomy_sample20",
+      "title": "D&IS Product Marketing (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "DATA_ENGINEERING": [
+            "api"
+          ],
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_227716",
+      "source": "domain_taxonomy_sample20",
+      "title": "JUNIOR WAGON ENGINEER (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "analysis"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_242437",
+      "source": "domain_taxonomy_sample20",
+      "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_228714",
+      "source": "domain_taxonomy_sample20",
+      "title": "TECHNICIEN SERVICE CLIENT (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_242262",
+      "source": "domain_taxonomy_sample20",
+      "title": "VIA Chargé(e) de Développement Tech & Services | Art de Vivre & Santé à Sandton (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_237501",
+      "source": "domain_taxonomy_sample20",
+      "title": "Technology training support (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_238422",
+      "source": "domain_taxonomy_sample20",
+      "title": "Corporate Credit Analyst (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_237411",
+      "source": "domain_taxonomy_sample20",
+      "title": "INGÉNIEUR DÉVELOPPEMENT LABVIEW (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_237154",
+      "source": "domain_taxonomy_sample20",
+      "title": "Finance / Contrôle de gestion (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "kpi"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "kpi"
+          ],
+          "DATA_ENGINEERING": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "tableau"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_240151",
+      "source": "domain_taxonomy_sample20",
+      "title": "Talent Acquisition & Campus Management Professional (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [
+            "pipeline"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_231967",
+      "source": "domain_taxonomy_sample20",
+      "title": "COMPLIANCE ANALYST M/F (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_242205",
+      "source": "domain_taxonomy_sample20",
+      "title": "Marketing Campaign Coordinator (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_235316",
+      "source": "domain_taxonomy_sample20",
+      "title": "International Learning Development & HR Project Manager (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [
+            "api"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "analysis"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    },
+    {
+      "id": "sample20_237484",
+      "source": "domain_taxonomy_sample20",
+      "title": "OT Security Consultant (H/F)",
+      "expected_cluster": null,
+      "expectation_mode": "none",
+      "expectation_note": "",
+      "result": {
+        "primary_cluster": null,
+        "candidate_clusters": [],
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "tools_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "project_patterns_matched": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "trajectory_hints": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "evidence": {
+          "reason": "no cluster reached minimum strong-signal threshold"
+        }
+      },
+      "flags": {
+        "ambiguous": false,
+        "false_positive": false,
+        "expected_mismatch": false
+      }
+    }
+  ],
+  "summary": {
+    "profile_count": 14,
+    "offer_count": 35,
+    "false_positives_observed": [
+      {
+        "id": "cv_07_pierre_lemaire",
+        "source": "synthetic_cv_dataset_v1",
+        "title": "Pierre Lemaire",
+        "primary_cluster": "BI_ANALYTICS",
+        "confidence": 0.71,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        }
+      },
+      {
+        "id": "cv_09_ines_barbier",
+        "source": "synthetic_cv_dataset_v1",
+        "title": "Ines Barbier",
+        "primary_cluster": "BI_ANALYTICS",
+        "confidence": 0.54,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "excel"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        }
+      },
+      {
+        "id": "vie_fixture_003",
+        "source": "vie_catalog",
+        "title": "Data Ops Analyst VIE - Normalisation",
+        "primary_cluster": null,
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting",
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql",
+            "python"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        }
+      },
+      {
+        "id": "vie_fixture_008",
+        "source": "vie_catalog",
+        "title": "Data Ops VIE - Inventory",
+        "primary_cluster": null,
+        "confidence": 0.0,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "sql"
+          ],
+          "DATA_ENGINEERING": [
+            "sql"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "sql"
+          ]
+        }
+      },
+      {
+        "id": "vie_fixture_011",
+        "source": "vie_catalog",
+        "title": "ML Engineer VIE - Deep Learning",
+        "primary_cluster": "DATA_ENGINEERING",
+        "confidence": 0.5,
+        "strong_matches": {
+          "DATA_ENGINEERING": [
+            "pipeline",
+            "pipelines"
+          ],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "DATA_ENGINEERING": [],
+          "BI_ANALYTICS": [],
+          "PRODUCT_ANALYTICS": []
+        }
+      },
+      {
+        "id": "sample20_238287",
+        "source": "domain_taxonomy_sample20",
+        "title": "TALENT ACQUISITION SPECIALIST BERLIN (H/F)",
+        "primary_cluster": "BI_ANALYTICS",
+        "confidence": 0.71,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi",
+            "kpi"
+          ],
+          "PRODUCT_ANALYTICS": [],
+          "DATA_ENGINEERING": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting"
+          ],
+          "PRODUCT_ANALYTICS": [
+            "kpi",
+            "conversion"
+          ],
+          "DATA_ENGINEERING": []
+        }
+      },
+      {
+        "id": "sample20_231644",
+        "source": "domain_taxonomy_sample20",
+        "title": "JR HR PMO (H/F)",
+        "primary_cluster": "BI_ANALYTICS",
+        "confidence": 0.54,
+        "strong_matches": {
+          "BI_ANALYTICS": [
+            "bi",
+            "kpi"
+          ],
+          "DATA_ENGINEERING": [
+            "pipeline"
+          ],
+          "PRODUCT_ANALYTICS": []
+        },
+        "weak_matches": {
+          "BI_ANALYTICS": [
+            "reporting"
+          ],
+          "DATA_ENGINEERING": [],
+          "PRODUCT_ANALYTICS": [
+            "kpi"
+          ]
+        }
+      }
+    ],
+    "clusters_ambigus": [
+      {
+        "id": "cv_fixture_v0",
+        "source": "fixture_text",
+        "title": "Marie Dupont — Data Analyst & BI Engineer",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 28.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 27.0,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "cv_07_pierre_lemaire",
+        "source": "synthetic_cv_dataset_v1",
+        "title": "Pierre Lemaire",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 8.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 0.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.71
+      },
+      {
+        "id": "cv_09_ines_barbier",
+        "source": "synthetic_cv_dataset_v1",
+        "title": "Ines Barbier",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 6.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 0.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.54
+      },
+      {
+        "id": "vie_fixture_004",
+        "source": "vie_catalog",
+        "title": "Analytics Engineer VIE - API & BI",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 12.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 12.0,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 3.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 1.0
+      },
+      {
+        "id": "vie_fixture_009",
+        "source": "vie_catalog",
+        "title": "Product Ops Analyst VIE - Metrics",
+        "candidate_clusters": [],
+        "confidence": 0.0
+      },
+      {
+        "id": "vie_fixture_011",
+        "source": "vie_catalog",
+        "title": "ML Engineer VIE - Deep Learning",
+        "candidate_clusters": [
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 6.0,
+            "eligible": true
+          },
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.5
+      },
+      {
+        "id": "sample20_238287",
+        "source": "domain_taxonomy_sample20",
+        "title": "TALENT ACQUISITION SPECIALIST BERLIN (H/F)",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 8.5,
+            "eligible": true
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 1.0,
+            "eligible": false
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 0.0,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.71
+      },
+      {
+        "id": "sample20_231644",
+        "source": "domain_taxonomy_sample20",
+        "title": "JR HR PMO (H/F)",
+        "candidate_clusters": [
+          {
+            "cluster": "BI_ANALYTICS",
+            "score": 6.5,
+            "eligible": true
+          },
+          {
+            "cluster": "DATA_ENGINEERING",
+            "score": 3.0,
+            "eligible": false
+          },
+          {
+            "cluster": "PRODUCT_ANALYTICS",
+            "score": 0.5,
+            "eligible": false
+          }
+        ],
+        "confidence": 0.54
+      }
+    ],
+    "signaux_trop_generiques": [
+      {
+        "signal": "sql",
+        "count": 33
+      },
+      {
+        "signal": "reporting",
+        "count": 21
+      },
+      {
+        "signal": "excel",
+        "count": 18
+      },
+      {
+        "signal": "kpi",
+        "count": 11
+      },
+      {
+        "signal": "analysis",
+        "count": 9
+      },
+      {
+        "signal": "python",
+        "count": 6
+      },
+      {
+        "signal": "analytics",
+        "count": 4
+      },
+      {
+        "signal": "dashboard",
+        "count": 4
+      },
+      {
+        "signal": "conversion",
+        "count": 2
+      },
+      {
+        "signal": "warehouse",
+        "count": 1
+      }
+    ],
+    "signaux_reellement_discriminants": [
+      {
+        "signal": "sql",
+        "count": 18
+      },
+      {
+        "signal": "excel",
+        "count": 5
+      },
+      {
+        "signal": "power bi",
+        "count": 4
+      },
+      {
+        "signal": "reporting_stack",
+        "count": 4
+      },
+      {
+        "signal": "api",
+        "count": 3
+      },
+      {
+        "signal": "kpi",
+        "count": 3
+      },
+      {
+        "signal": "dashboard",
+        "count": 3
+      },
+      {
+        "signal": "tableau",
+        "count": 3
+      },
+      {
+        "signal": "business intelligence",
+        "count": 2
+      },
+      {
+        "signal": "dashboards",
+        "count": 2
+      },
+      {
+        "signal": "data visualization",
+        "count": 2
+      },
+      {
+        "signal": "python",
+        "count": 2
+      }
+    ],
+    "signaux_inutiles": [
+      "sql",
+      "reporting",
+      "excel",
+      "kpi",
+      "analysis",
+      "python",
+      "analytics",
+      "dashboard",
+      "conversion"
+    ],
+    "signaux_manquants": [
+      "No real local product-analytics tool signal observed (Amplitude/Mixpanel absent in corpus)",
+      "Airflow/dbt appear under-used in the audited corpus; DATA_ENGINEERING still leans on ETL/API/SQL/PostgreSQL",
+      "`reporting` remains too generic to discriminate BI vs non-BI alone",
+      "`bi` is too short and behaves like a noisy strong signal in out-of-scope texts"
+    ],
+    "patterns_projets_recurrents": [
+      {
+        "pattern": "reporting_stack",
+        "count": 7
+      },
+      {
+        "pattern": "power_bi_kpi_dashboard",
+        "count": 2
+      },
+      {
+        "pattern": "orchestrated_data_pipeline",
+        "count": 1
+      },
+      {
+        "pattern": "warehouse_transformation_stack",
+        "count": 1
+      },
+      {
+        "pattern": "etl_api_postgres_pipeline",
+        "count": 1
+      }
+    ],
+    "clusters_trop_larges": [
+      {
+        "cluster": "BI_ANALYTICS",
+        "count": 4
+      }
+    ],
+    "clusters_trop_faibles": [
+      "PRODUCT_ANALYTICS"
+    ],
+    "impact_profiles_ablation": {
+      "tools": {
+        "cluster_changed": 0,
+        "confidence_dropped": 0
+      },
+      "projects": {
+        "cluster_changed": 0,
+        "confidence_dropped": 0
+      },
+      "experiences": {
+        "cluster_changed": 0,
+        "confidence_dropped": 0
+      }
+    },
+    "focus_checks": {
+      "data_engineering_vs_bi_analytics": [
+        {
+          "id": "sample_delta_txt",
+          "title": "Profile",
+          "candidate_clusters": [
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 24.0,
+              "eligible": true
+            },
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "DATA_ENGINEERING"
+        },
+        {
+          "id": "cv_fixture_v0",
+          "title": "Marie Dupont — Data Analyst & BI Engineer",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 28.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 27.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "golden_01",
+          "title": "",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 9.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 4.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "akim_guentas_matching",
+          "title": "",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 22.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 7.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.5,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "cv_07_pierre_lemaire",
+          "title": "Pierre Lemaire",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 8.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "cv_09_ines_barbier",
+          "title": "Ines Barbier",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_001",
+          "title": "Data Analyst VIE - KPI & Reporting",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 23.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 5.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 3.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_002",
+          "title": "Business Intelligence Analyst VIE - Tableau",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 29.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 3.0,
+              "eligible": false
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_004",
+          "title": "Analytics Engineer VIE - API & BI",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 12.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 12.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 3.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_005",
+          "title": "Reporting Analyst VIE - Power BI",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 14.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.5,
+              "eligible": false
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_007",
+          "title": "Data Reporting Analyst VIE - CRM",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 21.5,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 3.0,
+              "eligible": false
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_011",
+          "title": "ML Engineer VIE - Deep Learning",
+          "candidate_clusters": [
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 6.0,
+              "eligible": true
+            },
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "DATA_ENGINEERING"
+        }
+      ],
+      "bi_analytics_vs_product_analytics": [
+        {
+          "id": "sample_delta_txt",
+          "title": "Profile",
+          "candidate_clusters": [
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 24.0,
+              "eligible": true
+            },
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "DATA_ENGINEERING"
+        },
+        {
+          "id": "cv_fixture_v0",
+          "title": "Marie Dupont — Data Analyst & BI Engineer",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 28.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 27.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "golden_01",
+          "title": "",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 9.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 4.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "akim_guentas_matching",
+          "title": "",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 22.0,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 7.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 2.5,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "cv_07_pierre_lemaire",
+          "title": "Pierre Lemaire",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 8.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "cv_09_ines_barbier",
+          "title": "Ines Barbier",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 6.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_001",
+          "title": "Data Analyst VIE - KPI & Reporting",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 23.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 5.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 3.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_002",
+          "title": "Business Intelligence Analyst VIE - Tableau",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 29.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 3.0,
+              "eligible": false
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_004",
+          "title": "Analytics Engineer VIE - API & BI",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 12.5,
+              "eligible": true
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 12.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 3.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_005",
+          "title": "Reporting Analyst VIE - Power BI",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 14.0,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.5,
+              "eligible": false
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_007",
+          "title": "Data Reporting Analyst VIE - CRM",
+          "candidate_clusters": [
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 21.5,
+              "eligible": true
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 3.0,
+              "eligible": false
+            },
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 2.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "BI_ANALYTICS"
+        },
+        {
+          "id": "vie_fixture_011",
+          "title": "ML Engineer VIE - Deep Learning",
+          "candidate_clusters": [
+            {
+              "cluster": "DATA_ENGINEERING",
+              "score": 6.0,
+              "eligible": true
+            },
+            {
+              "cluster": "BI_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            },
+            {
+              "cluster": "PRODUCT_ANALYTICS",
+              "score": 0.0,
+              "eligible": false
+            }
+          ],
+          "primary_cluster": "DATA_ENGINEERING"
+        }
+      ]
+    }
+  }
+}

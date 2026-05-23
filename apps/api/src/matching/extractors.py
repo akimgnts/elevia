@@ -32,6 +32,15 @@ except ImportError:
         map_skill = None
         collapse_to_uris = None
 
+try:
+    from compass.canonical.esco_bridge import build_canonical_esco_promoted
+except ImportError:
+    try:
+        _esco_bridge = importlib.import_module("compass.canonical.esco_bridge")
+        build_canonical_esco_promoted = _esco_bridge.build_canonical_esco_promoted
+    except ImportError:
+        build_canonical_esco_promoted = None
+
 # Mapping ordinal fixe pour les niveaux d'études (spec ligne 130-132)
 EDUCATION_LEVELS: Dict[str, int] = {
     "bac": 1,
@@ -67,9 +76,47 @@ _SKILL_PUNCT_RE = re.compile(r"[^\w\s\+#]", flags=re.UNICODE)
 
 logger = logging.getLogger(__name__)
 
+_RUNTIME_CANONICAL_GENERIC_IDS = {
+    "skill:english",
+    "skill:french",
+    "skill:arabic",
+    "skill:spanish",
+    "skill:communication",
+    "skill:data_analysis",
+    "skill:analysis",
+    "skill:management",
+    "skill:project_management",
+    "skill:reporting",
+}
+_RUNTIME_CANONICAL_GENERIC_LABELS = {
+    "english",
+    "french",
+    "arabic",
+    "spanish",
+    "communication",
+    "data analysis",
+    "analysis",
+    "management",
+    "project management",
+    "reporting",
+    "follow up",
+    "suivi",
+    "gestion",
+}
+
 
 def _debug_matching_enabled() -> bool:
     value = os.getenv("ELEVIA_DEBUG_MATCHING", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _runtime_canonical_injection_enabled() -> bool:
+    value = os.getenv("ELEVIA_RUNTIME_CANONICAL_INJECTION", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _debug_profile_effective_enabled() -> bool:
+    value = os.getenv("ELEVIA_DEBUG_PROFILE_EFFECTIVE", "").strip().lower()
     return value in {"1", "true", "yes", "on"}
 
 
@@ -118,6 +165,86 @@ def _dedupe_preserve_order(values: List[str]) -> List[str]:
         seen.add(value)
         result.append(value)
     return result
+
+
+def _extract_runtime_canonical_ids(raw_profile: Dict) -> List[str]:
+    canonical_skills = raw_profile.get("canonical_skills") if isinstance(raw_profile, dict) else []
+    if not isinstance(canonical_skills, list):
+        return []
+
+    seen: set[str] = set()
+    selected: List[str] = []
+    for item in canonical_skills:
+        if not isinstance(item, dict):
+            continue
+        canonical_id = str(item.get("canonical_id") or "").strip()
+        if not canonical_id or canonical_id in seen:
+            continue
+
+        label = normalize_skill_label(
+            str(item.get("label") or item.get("raw") or item.get("name") or "")
+        )
+        if canonical_id in _RUNTIME_CANONICAL_GENERIC_IDS:
+            continue
+        if label and label in _RUNTIME_CANONICAL_GENERIC_LABELS:
+            continue
+
+        seen.add(canonical_id)
+        selected.append(canonical_id)
+    return selected
+
+
+def _inject_runtime_canonical_uris(
+    raw_profile: Dict,
+    base_skills_uri: List[str],
+) -> dict:
+    debug = {
+        "enabled": False,
+        "canonical_runtime_ids": [],
+        "canonical_runtime_injected_uris": [],
+        "canonical_runtime_injected_count": 0,
+    }
+
+    if not isinstance(raw_profile, dict):
+        return debug
+    if not _runtime_canonical_injection_enabled():
+        return debug
+    if not build_canonical_esco_promoted:
+        return debug
+
+    canonical_ids = _extract_runtime_canonical_ids(raw_profile)
+    debug["enabled"] = True
+    debug["canonical_runtime_ids"] = canonical_ids
+    if not canonical_ids:
+        return debug
+
+    cluster_hint = None
+    career_profile = raw_profile.get("career_profile")
+    if isinstance(career_profile, dict):
+        cluster_hint = (
+            career_profile.get("role_detected")
+            or career_profile.get("role_family")
+            or career_profile.get("domain")
+        )
+
+    bridge_trace: dict = {}
+    promoted = build_canonical_esco_promoted(
+        canonical_ids,
+        base_skills_uri=base_skills_uri,
+        cluster=cluster_hint,
+        _promote_override=True,
+        trace=bridge_trace,
+    ) or []
+    promoted = _dedupe_preserve_order([
+        str(uri).strip()
+        for uri in promoted
+        if isinstance(uri, str) and str(uri).strip()
+    ])
+
+    debug["canonical_runtime_injected_uris"] = promoted
+    debug["canonical_runtime_injected_count"] = len(promoted)
+    debug.update(bridge_trace)
+    return debug
 
 
 def _expand_profile_skills(skills: List[str]) -> List[str]:
@@ -352,11 +479,31 @@ def extract_profile(raw_profile: Dict) -> ExtractedProfile:
         if domain_uri_list:
             skills_uri_list = _dedupe_preserve_order(skills_uri_list + domain_uri_list)
 
+    runtime_canonical_debug = _inject_runtime_canonical_uris(raw_profile, skills_uri_list)
+    injected_runtime_uris = runtime_canonical_debug.get("canonical_runtime_injected_uris") or []
+    if injected_runtime_uris:
+        skills_uri_list = _dedupe_preserve_order(skills_uri_list + injected_runtime_uris)
+
     # Sprint 6 Step 1: effective URI set (promoted channel, flag-gated).
     # When ELEVIA_PROMOTE_ESCO=0 (default) this is a simple frozenset(skills_uri_list)
     # — bit-for-bit identical to the pre-Sprint-6 path.
     from compass.profile.profile_effective_skills import build_effective_skills_uri
     skills_uri = build_effective_skills_uri(skills_uri_list, raw_profile)
+    if (_debug_matching_enabled() or _debug_profile_effective_enabled()) and isinstance(raw_profile, dict):
+        debug_payload = raw_profile.get("profile_effective_skills_debug")
+        if not isinstance(debug_payload, dict):
+            debug_payload = {}
+        debug_payload.update(runtime_canonical_debug)
+        debug_payload["effective_skills_uri_after_canonical"] = sorted(skills_uri)
+        raw_profile["profile_effective_skills_debug"] = debug_payload
+    if _debug_matching_enabled() and runtime_canonical_debug.get("enabled"):
+        logger.info(
+            "RUNTIME_CANONICAL_INJECTION profile_id=%s ids=%s injected=%s effective_count=%s",
+            profile_id,
+            runtime_canonical_debug.get("canonical_runtime_ids") or [],
+            runtime_canonical_debug.get("canonical_runtime_injected_uris") or [],
+            len(skills_uri),
+        )
 
     # Langues normalisées
     # Support both formats: "languages": ["str"] and "languages": [{code, level}]

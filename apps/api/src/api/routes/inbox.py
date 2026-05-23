@@ -9,7 +9,7 @@ import time
 import uuid
 from datetime import datetime, date, timezone, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -44,6 +44,7 @@ from ..utils.generic_skills_filter import (
     should_apply_generic_filter,
 )
 from ..utils.career_intelligence import build_career_intelligence
+from ..utils.elevia_metier import infer_elevia_metier
 from ..utils.rome_link import get_offer_rome_links, get_rome_competences_for_rome_codes
 from ..utils.rome_inferred import infer_rome_for_offers
 from semantic.semantic_service import compute_semantic_for_offer
@@ -261,6 +262,237 @@ def _career_intelligence_for_display(profile_skills_uri: List[str], offer: Dict)
         "strengths": _display_values(list(payload.get("strengths") or [])),
         "gaps": _display_values(list(payload.get("gaps") or [])),
     }
+
+
+def _stringify_signal_list(values: Any) -> List[str]:
+    if values is None:
+        return []
+    if isinstance(values, str):
+        return [values]
+    result: List[str] = []
+    if isinstance(values, list):
+        for item in values:
+            if isinstance(item, str):
+                text = item.strip()
+                if text:
+                    result.append(text)
+            elif isinstance(item, dict):
+                label = item.get("label") or item.get("name") or item.get("title") or item.get("raw_skill")
+                if label:
+                    result.append(str(label).strip())
+            else:
+                text = str(item).strip()
+                if text:
+                    result.append(text)
+    return result
+
+
+def _profile_elevia_input(profile_payload: Dict[str, Any]) -> Dict[str, Any]:
+    experiences_raw = profile_payload.get("experiences") or profile_payload.get("experience") or []
+    experiences: List[str] = []
+    if isinstance(experiences_raw, list):
+        for item in experiences_raw[:12]:
+            if isinstance(item, str):
+                text = item.strip()
+                if text:
+                    experiences.append(text)
+            elif isinstance(item, dict):
+                parts = [
+                    str(item.get("title") or "").strip(),
+                    str(item.get("company") or "").strip(),
+                    str(item.get("summary") or item.get("description") or "").strip(),
+                ]
+                text = " - ".join(part for part in parts if part)
+                if text:
+                    experiences.append(text)
+
+    skills = _stringify_signal_list(
+        profile_payload.get("matching_skills")
+        or profile_payload.get("skills")
+        or profile_payload.get("selected_skills")
+        or []
+    )
+    tools = _stringify_signal_list(profile_payload.get("tools") or []) or skills
+    projects = _stringify_signal_list(profile_payload.get("projects") or [])[:8]
+    return {
+        "title": (
+            profile_payload.get("title")
+            or profile_payload.get("headline")
+            or profile_payload.get("job_title")
+            or profile_payload.get("target_title")
+            or ""
+        ),
+        "summary": (
+            profile_payload.get("summary")
+            or profile_payload.get("cv_text")
+            or profile_payload.get("about")
+            or ""
+        ),
+        "skills": skills,
+        "tools": tools,
+        "projects": projects,
+        "experiences": experiences,
+    }
+
+
+def _offer_elevia_input(offer: Dict[str, Any]) -> Dict[str, Any]:
+    skills = _extract_skill_labels(offer.get("skills_display") or offer.get("skills") or [])
+    tools = _stringify_signal_list(offer.get("tools") or []) or skills
+    description = offer.get("description") or offer.get("display_description") or ""
+    return {
+        "title": offer.get("title") or "",
+        "summary": description,
+        "skills": skills,
+        "tools": tools,
+        "projects": [description] if description else [],
+        "experiences": [],
+    }
+
+
+def _elevia_candidate_names(result: Dict[str, Any], *, limit: int = 3) -> List[str]:
+    names: List[str] = []
+    for row in result.get("candidate_clusters") or []:
+        cluster = row.get("cluster")
+        if cluster:
+            names.append(str(cluster))
+        if len(names) >= limit:
+            break
+    return names
+
+
+def _elevia_shadow_summary(result: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "primary_cluster": result.get("primary_cluster"),
+        "candidate_clusters": result.get("candidate_clusters") or [],
+        "confidence": result.get("confidence", 0.0),
+        "evidence": result.get("evidence") or {},
+    }
+
+
+def _elevia_ambiguous_pairs(profile_result: Dict[str, Any], offer_result: Dict[str, Any]) -> List[str]:
+    candidate_names = set(_elevia_candidate_names(profile_result, limit=4) + _elevia_candidate_names(offer_result, limit=4))
+    pairs: List[str] = []
+    if {"BI_ANALYTICS", "FINANCE_CONTROL"}.issubset(candidate_names):
+        pairs.append("BI_ANALYTICS_vs_FINANCE_CONTROL")
+    if {"ENGINEERING_BUILD_RUN", "DATA_ENGINEERING"}.issubset(candidate_names):
+        pairs.append("ENGINEERING_BUILD_RUN_vs_DATA_ENGINEERING")
+    if {"SALES_BUSINESS_DEVELOPMENT", "BI_ANALYTICS"}.issubset(candidate_names):
+        pairs.append("SALES_BUSINESS_DEVELOPMENT_vs_BI_ANALYTICS")
+    return pairs
+
+
+def _elevia_alignment_payload(profile_result: Dict[str, Any], offer_result: Dict[str, Any]) -> Dict[str, Any]:
+    profile_primary = profile_result.get("primary_cluster")
+    offer_primary = offer_result.get("primary_cluster")
+    profile_candidates = _elevia_candidate_names(profile_result, limit=3)
+    offer_candidates = _elevia_candidate_names(offer_result, limit=3)
+    shared_candidates = sorted(set(profile_candidates) & set(offer_candidates))
+    ambiguous_pairs = _elevia_ambiguous_pairs(profile_result, offer_result)
+
+    if profile_primary and offer_primary and profile_primary == offer_primary:
+        status = "match"
+    elif profile_primary and profile_primary in offer_candidates:
+        status = "candidate_match"
+    elif offer_primary and offer_primary in profile_candidates:
+        status = "candidate_match"
+    elif not profile_primary or not offer_primary:
+        status = "unknown"
+    else:
+        status = "mismatch"
+
+    return {
+        "status": status,
+        "profile_primary_cluster": profile_primary,
+        "offer_primary_cluster": offer_primary,
+        "shared_candidate_clusters": shared_candidates,
+        "ambiguous_pairs": ambiguous_pairs,
+    }
+
+
+def _log_elevia_shadow_observations(*, profile_result: Dict[str, Any], items: List[InboxItem]) -> None:
+    if not _debug_matching_enabled():
+        return
+
+    logger.info(
+        "ELEVIA_SHADOW_PROFILE %s",
+        json.dumps(
+            {
+                "primary_cluster": profile_result.get("primary_cluster"),
+                "confidence": profile_result.get("confidence"),
+                "candidate_clusters": _elevia_candidate_names(profile_result, limit=4),
+            }
+        ),
+    )
+
+    for item in items:
+        offer_clusters = getattr(item, "offer_elevia_clusters", None)
+        alignment = getattr(item, "cluster_alignment", None)
+        confidence = getattr(item, "cluster_confidence", None)
+        if not isinstance(offer_clusters, dict) or not isinstance(alignment, dict):
+            continue
+
+        payload = {
+            "offer_id": item.offer_id,
+            "score": item.score,
+            "profile_primary_cluster": alignment.get("profile_primary_cluster"),
+            "offer_primary_cluster": alignment.get("offer_primary_cluster"),
+            "alignment": alignment.get("status"),
+            "offer_candidates": _elevia_candidate_names(offer_clusters, limit=4),
+            "ambiguous_pairs": alignment.get("ambiguous_pairs") or [],
+            "cluster_confidence": confidence or {},
+        }
+        logger.info("ELEVIA_SHADOW_OFFER %s", json.dumps(payload))
+
+        if item.score >= 80 and alignment.get("status") == "mismatch":
+            logger.info("ELEVIA_HIGH_SCORE_CLUSTER_MISMATCH %s", json.dumps(payload))
+        if 40 <= item.score < 80 and alignment.get("status") == "match":
+            logger.info("ELEVIA_MEDIUM_SCORE_CLUSTER_MATCH %s", json.dumps(payload))
+        if "BI_ANALYTICS_vs_FINANCE_CONTROL" in (alignment.get("ambiguous_pairs") or []):
+            logger.info("ELEVIA_AMBIGUITY_BI_FINANCE %s", json.dumps(payload))
+        if "ENGINEERING_BUILD_RUN_vs_DATA_ENGINEERING" in (alignment.get("ambiguous_pairs") or []):
+            logger.info("ELEVIA_AMBIGUITY_ENGINEERING_DATA %s", json.dumps(payload))
+        if "SALES_BUSINESS_DEVELOPMENT_vs_BI_ANALYTICS" in (alignment.get("ambiguous_pairs") or []):
+            logger.info("ELEVIA_AMBIGUITY_SALES_BI %s", json.dumps(payload))
+
+
+def _apply_elevia_shadow(
+    *,
+    profile_payload: Dict[str, Any],
+    items: List[InboxItem],
+    offer_lookup: Dict[str, Dict[str, Any]],
+    meta: InboxMeta,
+) -> None:
+    if not _debug_matching_enabled():
+        return
+
+    profile_result = infer_elevia_metier(_profile_elevia_input(profile_payload))
+    setattr(meta, "profile_elevia_cluster", _elevia_shadow_summary(profile_result))
+
+    for item in items:
+        offer_payload = offer_lookup.get(item.offer_id, {})
+        offer_result = infer_elevia_metier(_offer_elevia_input(offer_payload))
+        alignment = _elevia_alignment_payload(profile_result, offer_result)
+
+        setattr(item, "offer_elevia_clusters", _elevia_shadow_summary(offer_result))
+        setattr(item, "cluster_alignment", alignment)
+        setattr(
+            item,
+            "cluster_confidence",
+            {
+                "profile": profile_result.get("confidence", 0.0),
+                "offer": offer_result.get("confidence", 0.0),
+            },
+        )
+        setattr(
+            item,
+            "cluster_evidence",
+            {
+                "profile": profile_result.get("evidence") or {},
+                "offer": offer_result.get("evidence") or {},
+            },
+        )
+
+    _log_elevia_shadow_observations(profile_result=profile_result, items=items)
 
 
 def _load_profile(profile_id: str, payload: Dict) -> tuple[Dict, str]:
@@ -1506,6 +1738,12 @@ def get_inbox(
         neighbor_count=neighbor_count,
         out_count=out_count,
     )
+    _apply_elevia_shadow(
+        profile_payload=profile_payload,
+        items=items,
+        offer_lookup=offer_lookup,
+        meta=meta,
+    )
 
     return InboxResponse(
         profile_id=req.profile_id,
@@ -1990,6 +2228,12 @@ def _get_inbox_filtered(
         strict_count=gating_meta.get("strict_count"),
         neighbor_count=gating_meta.get("neighbor_count"),
         out_count=gating_meta.get("out_count"),
+    )
+    _apply_elevia_shadow(
+        profile_payload=profile_payload,
+        items=items,
+        offer_lookup=offer_lookup,
+        meta=meta,
     )
 
     return InboxResponse(

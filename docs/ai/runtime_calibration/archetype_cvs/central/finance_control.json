@@ -1,0 +1,543 @@
+{
+  "anchor_skills": [
+    {
+      "classification": "ANCHOR",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 2,
+      "offer_count": 2,
+      "skill_label": "financial analysis"
+    },
+    {
+      "classification": "ANCHOR",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "internal control"
+    }
+  ],
+  "experience_types": [
+    {
+      "evidence_count": 10,
+      "label": "h f"
+    },
+    {
+      "evidence_count": 4,
+      "label": "controller h"
+    },
+    {
+      "evidence_count": 2,
+      "label": "contr leur"
+    }
+  ],
+  "generic_skills_to_limit": [
+    {
+      "classification": "GENERIC",
+      "domain_tags": [
+        "finance",
+        "operations"
+      ],
+      "evidence_count": 6,
+      "offer_count": 6,
+      "skill_label": "budgeting"
+    },
+    {
+      "classification": "GENERIC",
+      "domain_tags": [
+        "finance",
+        "operations"
+      ],
+      "evidence_count": 7,
+      "offer_count": 7,
+      "skill_label": "business intelligence"
+    },
+    {
+      "classification": "GENERIC",
+      "domain_tags": [
+        "finance",
+        "operations"
+      ],
+      "evidence_count": 2,
+      "offer_count": 2,
+      "skill_label": "excel"
+    },
+    {
+      "classification": "GENERIC",
+      "domain_tags": [
+        "finance",
+        "operations"
+      ],
+      "evidence_count": 3,
+      "offer_count": 3,
+      "skill_label": "power bi"
+    }
+  ],
+  "market_evidence": {
+    "domain_tags": [
+      "finance",
+      "operations"
+    ],
+    "offer_count": 10,
+    "offer_ids": [
+      "business_france:238024",
+      "business_france:238321",
+      "business_france:238340",
+      "business_france:238355",
+      "business_france:238387",
+      "business_france:238423",
+      "business_france:240112",
+      "business_france:240125",
+      "business_france:242115",
+      "business_france:242185"
+    ]
+  },
+  "orientation": {
+    "domain_tags": [
+      "finance",
+      "operations"
+    ],
+    "offer_count": 10
+  },
+  "profile_summary": [
+    {
+      "evidence_count": 11,
+      "label": "f"
+    },
+    {
+      "evidence_count": 10,
+      "label": "h"
+    },
+    {
+      "evidence_count": 5,
+      "label": "controller"
+    }
+  ],
+  "project_types": [
+    {
+      "evidence_count": 12,
+      "label": "of the"
+    },
+    {
+      "evidence_count": 10,
+      "label": "de la"
+    },
+    {
+      "evidence_count": 8,
+      "label": "and benefits"
+    }
+  ],
+  "sector_slug": "finance_control",
+  "sector_type": "central",
+  "support_skills": [
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "bi reporting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "budget and forecast data consolidation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "budget and forecast management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "budget forecasting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "budget monitoring"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "budget preparation and forecasting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "compensation management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "compliance"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "cost analysis and variance reporting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "dashboard development"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 2,
+      "offer_count": 2,
+      "skill_label": "data analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "data consolidation and reporting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "excel and erp systems"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "finance business partnering"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial accuracy monitoring"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial analysis and modeling"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial guidance"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial modeling activities"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial performance analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial performance optimization"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial performance reporting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial reporting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial statement preparation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "hris management tools"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "hyperion"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "internal control self-assessment"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "internal finance procedures control"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "investment business plans analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "manufacturing environment experience"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "margins and profitability analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "monthly reporting and variance analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "online analytical reporting tools"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "operational performance monitoring"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "power bi development"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "powerpoint"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "project documentation preparation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "project kpis tracking"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "project management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "project performance management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "retrofit program leadership"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "sage x3 erp"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "sap by design"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "time series analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "variance analysis"
+    }
+  ],
+  "tools_technologies": [
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "finance"
+      ],
+      "evidence_count": 3,
+      "offer_count": 3,
+      "skill_label": "sap"
+    }
+  ]
+}

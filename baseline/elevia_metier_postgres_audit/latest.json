@@ -1,0 +1,5533 @@
+{
+  "generated_at": "2026-05-11T10:36:41.901407+00:00",
+  "mode": "full",
+  "scope": {
+    "source": "business_france",
+    "active_only": true,
+    "read_only": true,
+    "tables_detected": {
+      "offer_domain_enrichment": true,
+      "offer_skills": true,
+      "fact_offer_skills": false
+    }
+  },
+  "methodology": {
+    "approach": "SQL-first with light Python synthesis",
+    "steps": [
+      "Read active Business France offers from clean_offers",
+      "Join offer_domain_enrichment read-only on (source, external_id)",
+      "Join offer_skills if available, otherwise fact_offer_skills if available",
+      "Aggregate volume, titles, skills, tools, contextual keywords and representative examples by domain",
+      "Compute noisy generic signal spread and emerging pattern counts in Python"
+    ]
+  },
+  "domain_distribution": [
+    {
+      "domain": "data",
+      "offer_count": 65,
+      "pct": 7.42
+    },
+    {
+      "domain": "finance",
+      "offer_count": 107,
+      "pct": 12.21
+    },
+    {
+      "domain": "sales",
+      "offer_count": 129,
+      "pct": 14.73
+    },
+    {
+      "domain": "marketing",
+      "offer_count": 20,
+      "pct": 2.28
+    },
+    {
+      "domain": "hr",
+      "offer_count": 39,
+      "pct": 4.45
+    },
+    {
+      "domain": "supply",
+      "offer_count": 115,
+      "pct": 13.13
+    },
+    {
+      "domain": "operations",
+      "offer_count": 77,
+      "pct": 8.79
+    },
+    {
+      "domain": "engineering",
+      "offer_count": 272,
+      "pct": 31.05
+    },
+    {
+      "domain": "legal",
+      "offer_count": 12,
+      "pct": 1.37
+    },
+    {
+      "domain": "admin",
+      "offer_count": 28,
+      "pct": 3.2
+    },
+    {
+      "domain": "other",
+      "offer_count": 12,
+      "pct": 1.37
+    }
+  ],
+  "domains": [
+    {
+      "domain": "data",
+      "offer_count": 65,
+      "top_titles": [
+        {
+          "title": "Data Scientist (H/F)",
+          "count": 4
+        },
+        {
+          "title": "Business Analyst (H/F)",
+          "count": 3
+        },
+        {
+          "title": "SAP Functional Analyst - Spanish Speaker F/M (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Data engineer (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Analyste SOC & CTI (H/F)",
+          "count": 2
+        },
+        {
+          "title": "DATA ANALYST - DATA SCIENTIST - DATA ENGINEER H/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "BUSINESS ANALYST M/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Junior Group Sustainability Analyst VIE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "SOC/CERT Analyst (H/F)",
+          "count": 1
+        },
+        {
+          "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "data analysis",
+          "count": 19
+        },
+        {
+          "skill": "business intelligence",
+          "count": 19
+        },
+        {
+          "skill": "project management",
+          "count": 12
+        },
+        {
+          "skill": "power bi",
+          "count": 9
+        },
+        {
+          "skill": "sql querying",
+          "count": 9
+        },
+        {
+          "skill": "process optimization",
+          "count": 7
+        },
+        {
+          "skill": "machine learning",
+          "count": 6
+        },
+        {
+          "skill": "business analysis",
+          "count": 5
+        },
+        {
+          "skill": "excel",
+          "count": 5
+        },
+        {
+          "skill": "data engineering",
+          "count": 5
+        },
+        {
+          "skill": "python programming",
+          "count": 5
+        },
+        {
+          "skill": "data governance",
+          "count": 4
+        },
+        {
+          "skill": "compliance",
+          "count": 4
+        },
+        {
+          "skill": "international environment",
+          "count": 4
+        },
+        {
+          "skill": "requirements gathering",
+          "count": 3
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "python",
+          "count": 11
+        },
+        {
+          "tool": "power bi",
+          "count": 8
+        },
+        {
+          "tool": "sql",
+          "count": 7
+        },
+        {
+          "tool": "excel",
+          "count": 5
+        },
+        {
+          "tool": "spark",
+          "count": 3
+        },
+        {
+          "tool": "aws",
+          "count": 3
+        },
+        {
+          "tool": "tableau",
+          "count": 3
+        },
+        {
+          "tool": "sap",
+          "count": 2
+        },
+        {
+          "tool": "airflow",
+          "count": 2
+        },
+        {
+          "tool": "gitlab",
+          "count": 2
+        },
+        {
+          "tool": "docker",
+          "count": 2
+        },
+        {
+          "tool": "crm",
+          "count": 2
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "solutions",
+          "count": 54
+        },
+        {
+          "keyword": "donnees",
+          "count": 46
+        },
+        {
+          "keyword": "equipes",
+          "count": 42
+        },
+        {
+          "keyword": "processes",
+          "count": 41
+        },
+        {
+          "keyword": "clients",
+          "count": 40
+        },
+        {
+          "keyword": "projects",
+          "count": 38
+        },
+        {
+          "keyword": "teams",
+          "count": 38
+        },
+        {
+          "keyword": "performance",
+          "count": 37
+        },
+        {
+          "keyword": "project",
+          "count": 37
+        },
+        {
+          "keyword": "tools",
+          "count": 36
+        },
+        {
+          "keyword": "join",
+          "count": 33
+        },
+        {
+          "keyword": "technical",
+          "count": 32
+        },
+        {
+          "keyword": "ensure",
+          "count": 31
+        },
+        {
+          "keyword": "analyste",
+          "count": 31
+        },
+        {
+          "keyword": "integration",
+          "count": 31
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "242078",
+          "title": "AI Transformation & Adoption Manager (H/F)",
+          "company": "SERVIER INTERNATIONAL",
+          "country": "ARGENTINE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "data",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "238422",
+          "title": "Corporate Credit Analyst (H/F)",
+          "company": "BANQUE FEDERATIVE DU CREDIT MUTUEL",
+          "country": "ALLEMAGNE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "analyst",
+            "analyste",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "242187",
+          "title": "Privacy Analyst (H/F)",
+          "company": "M&L DISTRIBUTION (FRANCE) S.A.R.L.",
+          "country": "ETATS-UNIS",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "analyst",
+            "analyste"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "machine learning",
+          "count": 6,
+          "specificity": 0.667
+        },
+        {
+          "signal": "data engineering",
+          "count": 5,
+          "specificity": 0.625
+        },
+        {
+          "signal": "spark",
+          "count": 3,
+          "specificity": 0.6
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "analysis",
+          "count": 38
+        },
+        {
+          "signal": "management",
+          "count": 35
+        },
+        {
+          "signal": "reporting",
+          "count": 30
+        },
+        {
+          "signal": "communication",
+          "count": 11
+        },
+        {
+          "signal": "sql",
+          "count": 7
+        },
+        {
+          "signal": "kpi",
+          "count": 6
+        },
+        {
+          "signal": "excel",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "domain": "finance",
+      "offer_count": 107,
+      "top_titles": [
+        {
+          "title": "CONTROLEUR DE GESTION (H/F)",
+          "count": 8
+        },
+        {
+          "title": "Ingénieur qualité (H/F)",
+          "count": 3
+        },
+        {
+          "title": "INGENIEUR QUALITE H/F (H/F)",
+          "count": 2
+        },
+        {
+          "title": "VIE Management Controller (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Finance controller (H/F)",
+          "count": 2
+        },
+        {
+          "title": "V.I.E JUNIOR ACCOUNTANT (M/W) (H/F)",
+          "count": 1
+        },
+        {
+          "title": "DEVELOPPEUR SYSTEMES ET RESEAUX (H/F)",
+          "count": 1
+        },
+        {
+          "title": "KYC ANALYST M/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "V.I.E MECHANICAL ENGINEER (F/H) (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CONSULTANT INGENIEUR AUTOMATICIEN H/F (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "business intelligence",
+          "count": 45
+        },
+        {
+          "skill": "budgeting",
+          "count": 33
+        },
+        {
+          "skill": "excel",
+          "count": 23
+        },
+        {
+          "skill": "compliance",
+          "count": 18
+        },
+        {
+          "skill": "process optimization",
+          "count": 14
+        },
+        {
+          "skill": "project management",
+          "count": 14
+        },
+        {
+          "skill": "financial analysis",
+          "count": 14
+        },
+        {
+          "skill": "sap",
+          "count": 10
+        },
+        {
+          "skill": "data analysis",
+          "count": 10
+        },
+        {
+          "skill": "financial reporting",
+          "count": 10
+        },
+        {
+          "skill": "risk analysis",
+          "count": 7
+        },
+        {
+          "skill": "international environment",
+          "count": 7
+        },
+        {
+          "skill": "management control",
+          "count": 6
+        },
+        {
+          "skill": "budget management",
+          "count": 6
+        },
+        {
+          "skill": "power bi",
+          "count": 6
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "excel",
+          "count": 18
+        },
+        {
+          "tool": "sap",
+          "count": 8
+        },
+        {
+          "tool": "power bi",
+          "count": 4
+        },
+        {
+          "tool": "crm",
+          "count": 3
+        },
+        {
+          "tool": "powerpoint",
+          "count": 2
+        },
+        {
+          "tool": "linux",
+          "count": 1
+        },
+        {
+          "tool": "python",
+          "count": 1
+        },
+        {
+          "tool": "tableau",
+          "count": 1
+        },
+        {
+          "tool": "azure",
+          "count": 1
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "gestion",
+          "count": 146
+        },
+        {
+          "keyword": "controle",
+          "count": 143
+        },
+        {
+          "keyword": "suivi",
+          "count": 104
+        },
+        {
+          "keyword": "financial",
+          "count": 90
+        },
+        {
+          "keyword": "qualite",
+          "count": 90
+        },
+        {
+          "keyword": "finance",
+          "count": 82
+        },
+        {
+          "keyword": "groupe",
+          "count": 71
+        },
+        {
+          "keyword": "projets",
+          "count": 67
+        },
+        {
+          "keyword": "clients",
+          "count": 63
+        },
+        {
+          "keyword": "production",
+          "count": 61
+        },
+        {
+          "keyword": "performance",
+          "count": 61
+        },
+        {
+          "keyword": "equipe",
+          "count": 60
+        },
+        {
+          "keyword": "notre",
+          "count": 57
+        },
+        {
+          "keyword": "projet",
+          "count": 53
+        },
+        {
+          "keyword": "accounting",
+          "count": 50
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "242154",
+          "title": "Trade Finance Junior (H/F)",
+          "company": "ULTIMAT",
+          "country": "COTE D'IVOIRE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "finance"
+          ]
+        },
+        {
+          "external_id": "242156",
+          "title": "Contrôleur de Gestion (H/F)",
+          "company": "INNOHA",
+          "country": "ESPAGNE",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "controleur de gestion"
+          ]
+        },
+        {
+          "external_id": "236331",
+          "title": "Contrôleur des ventes et des opérations (S&OP) (H/F)",
+          "company": "RAIL LOGISTICS EUROPE",
+          "country": "BELGIQUE",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "business controller"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "financial analysis",
+          "count": 14,
+          "specificity": 0.636
+        },
+        {
+          "signal": "financial reporting",
+          "count": 10,
+          "specificity": 0.667
+        },
+        {
+          "signal": "management control",
+          "count": 6,
+          "specificity": 1.0
+        },
+        {
+          "signal": "accounting basics",
+          "count": 4,
+          "specificity": 1.0
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 63
+        },
+        {
+          "signal": "reporting",
+          "count": 47
+        },
+        {
+          "signal": "analysis",
+          "count": 41
+        },
+        {
+          "signal": "excel",
+          "count": 18
+        },
+        {
+          "signal": "kpi",
+          "count": 12
+        },
+        {
+          "signal": "communication",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "domain": "sales",
+      "offer_count": 129,
+      "top_titles": [
+        {
+          "title": "BUSINESS DEVELOPER (H/F)",
+          "count": 8
+        },
+        {
+          "title": "BUSINESS MANAGER (H/F)",
+          "count": 7
+        },
+        {
+          "title": "REPRESENTANT TECHNICO COMMERCIAL (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Accounting Specialist (H/F)",
+          "count": 2
+        },
+        {
+          "title": "COMMERCIAL TERRAIN (H/F)",
+          "count": 2
+        },
+        {
+          "title": "INTERNATIONAL BUSINESS DEVELOPPER (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Energy Advisory Analyst (H/F)",
+          "count": 2
+        },
+        {
+          "title": "BUSINESS MANAGER PAYS-BAS (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Sales Coordinator (H/F)",
+          "count": 2
+        },
+        {
+          "title": "TECH/SALES RESERVOIR SIMULATION SOFTWARE SOLUTIONS (H/F)",
+          "count": 2
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "b2b sales",
+          "count": 59
+        },
+        {
+          "skill": "market analysis",
+          "count": 40
+        },
+        {
+          "skill": "crm management",
+          "count": 26
+        },
+        {
+          "skill": "project management",
+          "count": 21
+        },
+        {
+          "skill": "business development",
+          "count": 15
+        },
+        {
+          "skill": "b2b prospecting",
+          "count": 15
+        },
+        {
+          "skill": "salesforce",
+          "count": 14
+        },
+        {
+          "skill": "data analysis",
+          "count": 14
+        },
+        {
+          "skill": "market research",
+          "count": 12
+        },
+        {
+          "skill": "lead generation",
+          "count": 12
+        },
+        {
+          "skill": "client relationship management",
+          "count": 10
+        },
+        {
+          "skill": "business intelligence",
+          "count": 10
+        },
+        {
+          "skill": "recruitment",
+          "count": 9
+        },
+        {
+          "skill": "account management",
+          "count": 9
+        },
+        {
+          "skill": "customer relationship management",
+          "count": 8
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "crm",
+          "count": 33
+        },
+        {
+          "tool": "salesforce",
+          "count": 10
+        },
+        {
+          "tool": "hubspot",
+          "count": 1
+        },
+        {
+          "tool": "sap",
+          "count": 1
+        },
+        {
+          "tool": "excel",
+          "count": 1
+        },
+        {
+          "tool": "powerpoint",
+          "count": 1
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "clients",
+          "count": 228
+        },
+        {
+          "keyword": "commercial",
+          "count": 181
+        },
+        {
+          "keyword": "sales",
+          "count": 179
+        },
+        {
+          "keyword": "development",
+          "count": 163
+        },
+        {
+          "keyword": "developpement",
+          "count": 160
+        },
+        {
+          "keyword": "notre",
+          "count": 127
+        },
+        {
+          "keyword": "client",
+          "count": 106
+        },
+        {
+          "keyword": "manager",
+          "count": 104
+        },
+        {
+          "keyword": "marche",
+          "count": 100
+        },
+        {
+          "keyword": "energy",
+          "count": 97
+        },
+        {
+          "keyword": "solutions",
+          "count": 96
+        },
+        {
+          "keyword": "technical",
+          "count": 89
+        },
+        {
+          "keyword": "marketing",
+          "count": 82
+        },
+        {
+          "keyword": "equipes",
+          "count": 81
+        },
+        {
+          "keyword": "customer",
+          "count": 79
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "242493",
+          "title": "COMMERCIAL EXPORT (H/F)",
+          "company": "CITE MARINE",
+          "country": "ETATS-UNIS",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "commercial"
+          ]
+        },
+        {
+          "external_id": "238425",
+          "title": "INTERNATIONAL BUSINESS DEVELOPPER (H/F)",
+          "company": "HEF MECANIQUE ET SURFACES",
+          "country": "INDE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "business",
+            "commercial",
+            "vente"
+          ]
+        },
+        {
+          "external_id": "232231",
+          "title": "REPRESENTANT TECHNICO COMMERCIAL (H/F)",
+          "company": "EJ PICARDIE",
+          "country": "ESPAGNE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "client",
+            "commercial"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "b2b sales",
+          "count": 59,
+          "specificity": 0.787
+        },
+        {
+          "signal": "market analysis",
+          "count": 40,
+          "specificity": 0.656
+        },
+        {
+          "signal": "crm",
+          "count": 33,
+          "specificity": 0.635
+        },
+        {
+          "signal": "crm management",
+          "count": 26,
+          "specificity": 0.65
+        },
+        {
+          "signal": "salesforce",
+          "count": 24,
+          "specificity": 0.727
+        },
+        {
+          "signal": "business development",
+          "count": 15,
+          "specificity": 0.833
+        },
+        {
+          "signal": "b2b prospecting",
+          "count": 15,
+          "specificity": 0.938
+        },
+        {
+          "signal": "market research",
+          "count": 12,
+          "specificity": 0.75
+        },
+        {
+          "signal": "client relationship management",
+          "count": 10,
+          "specificity": 0.625
+        },
+        {
+          "signal": "account management",
+          "count": 9,
+          "specificity": 0.692
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 86
+        },
+        {
+          "signal": "analysis",
+          "count": 59
+        },
+        {
+          "signal": "reporting",
+          "count": 38
+        },
+        {
+          "signal": "communication",
+          "count": 25
+        },
+        {
+          "signal": "kpi",
+          "count": 8
+        },
+        {
+          "signal": "excel",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "domain": "marketing",
+      "offer_count": 20,
+      "top_titles": [
+        {
+          "title": "REGIONAL DEALERS COMMUNICATION SPECIALIST H/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "GRAPHIC DESIGNER (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Consultant SEA/SMA (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CHEF DE PROJET MARKETING DIGITAL (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Marketing Campaign Planning Officer (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Junior Medical Advisor (H/F)",
+          "count": 1
+        },
+        {
+          "title": "GTM ENGINEER (GROWTH OPS) HF (H/F)",
+          "count": 1
+        },
+        {
+          "title": "West Africa Marketing Executive - Trade & Digital (H/F)",
+          "count": 1
+        },
+        {
+          "title": "B2B Marketing Officer (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CRM B2B Lifecycle Manager - VIE - Barcelona (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "data analysis",
+          "count": 5
+        },
+        {
+          "skill": "salesforce",
+          "count": 4
+        },
+        {
+          "skill": "crm management",
+          "count": 4
+        },
+        {
+          "skill": "business intelligence",
+          "count": 2
+        },
+        {
+          "skill": "digital marketing",
+          "count": 2
+        },
+        {
+          "skill": "project management",
+          "count": 2
+        },
+        {
+          "skill": "lead generation",
+          "count": 2
+        },
+        {
+          "skill": "sql querying",
+          "count": 2
+        },
+        {
+          "skill": "market analysis",
+          "count": 2
+        },
+        {
+          "skill": "dealer communication improvement",
+          "count": 1
+        },
+        {
+          "skill": "problem identification",
+          "count": 1
+        },
+        {
+          "skill": "asist - wit platform",
+          "count": 1
+        },
+        {
+          "skill": "long-term solution proposals",
+          "count": 1
+        },
+        {
+          "skill": "powerpoint",
+          "count": 1
+        },
+        {
+          "skill": "graphic design",
+          "count": 1
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "crm",
+          "count": 5
+        },
+        {
+          "tool": "salesforce",
+          "count": 4
+        },
+        {
+          "tool": "hubspot",
+          "count": 2
+        },
+        {
+          "tool": "sql",
+          "count": 2
+        },
+        {
+          "tool": "powerpoint",
+          "count": 1
+        },
+        {
+          "tool": "looker",
+          "count": 1
+        },
+        {
+          "tool": "looker studio",
+          "count": 1
+        },
+        {
+          "tool": "canva",
+          "count": 1
+        },
+        {
+          "tool": "github",
+          "count": 1
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "marketing",
+          "count": 75
+        },
+        {
+          "keyword": "product",
+          "count": 28
+        },
+        {
+          "keyword": "service",
+          "count": 27
+        },
+        {
+          "keyword": "across",
+          "count": 26
+        },
+        {
+          "keyword": "digital",
+          "count": 21
+        },
+        {
+          "keyword": "performance",
+          "count": 20
+        },
+        {
+          "keyword": "developpement",
+          "count": 16
+        },
+        {
+          "keyword": "commerciale",
+          "count": 15
+        },
+        {
+          "keyword": "campaigns",
+          "count": 15
+        },
+        {
+          "keyword": "services",
+          "count": 13
+        },
+        {
+          "keyword": "agents",
+          "count": 13
+        },
+        {
+          "keyword": "analyse",
+          "count": 12
+        },
+        {
+          "keyword": "clients",
+          "count": 12
+        },
+        {
+          "keyword": "lead",
+          "count": 12
+        },
+        {
+          "keyword": "teams",
+          "count": 12
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "230774",
+          "title": "REGIONAL DEALERS COMMUNICATION SPECIALIST H/F (H/F)",
+          "company": "CNH INDUSTRIAL FRANCE",
+          "country": "ITALIE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "communication"
+          ]
+        },
+        {
+          "external_id": "238205",
+          "title": "GTM ENGINEER (GROWTH OPS) HF (H/F)",
+          "company": "EFE INTERNATIONAL",
+          "country": "ETATS-UNIS",
+          "confidence": 0.9,
+          "method": "ai_fallback",
+          "evidence": [
+            "go-to-market systems",
+            "GTM experiments",
+            "TAM building",
+            "qualification agents",
+            "enrichment agents",
+            "personalization agents"
+          ]
+        },
+        {
+          "external_id": "242412",
+          "title": "Lead/Demand Generation Specialist (H/F)",
+          "company": "AMARIS FRANCE SAS",
+          "country": "ESPAGNE",
+          "confidence": 0.9,
+          "method": "ai_fallback",
+          "evidence": [
+            "Demand Generation",
+            "multi-channel campaigns",
+            "marketing automation",
+            "lead generation",
+            "event marketing"
+          ]
+        }
+      ],
+      "discriminant_signals": [],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 13
+        },
+        {
+          "signal": "communication",
+          "count": 11
+        },
+        {
+          "signal": "analysis",
+          "count": 10
+        },
+        {
+          "signal": "reporting",
+          "count": 4
+        },
+        {
+          "signal": "kpi",
+          "count": 2
+        },
+        {
+          "signal": "sql",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "domain": "hr",
+      "offer_count": 39,
+      "top_titles": [
+        {
+          "title": "JR HR PMO (H/F)",
+          "count": 3
+        },
+        {
+          "title": "BUSINESS MANAGER (H/F)",
+          "count": 2
+        },
+        {
+          "title": "CONSULTANT.E EN RECRUTEMENT (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Talent Acquisition Specialist (H/F)",
+          "count": 2
+        },
+        {
+          "title": "BUSINESS MANAGER BXL H/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "VMS Tool Officer (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Strategic Account Executive (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Internal comms & Employer brand Partner (H/F)",
+          "count": 1
+        },
+        {
+          "title": "INGÉNIEUR(E) AMÉLIORATION CONTINUE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Consultant en recrutement (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "recruitment",
+          "count": 19
+        },
+        {
+          "skill": "business intelligence",
+          "count": 8
+        },
+        {
+          "skill": "b2b sales",
+          "count": 6
+        },
+        {
+          "skill": "data analysis",
+          "count": 6
+        },
+        {
+          "skill": "project management",
+          "count": 6
+        },
+        {
+          "skill": "candidate sourcing",
+          "count": 5
+        },
+        {
+          "skill": "international environment",
+          "count": 5
+        },
+        {
+          "skill": "onboarding",
+          "count": 5
+        },
+        {
+          "skill": "lead generation",
+          "count": 4
+        },
+        {
+          "skill": "talent management",
+          "count": 4
+        },
+        {
+          "skill": "sap",
+          "count": 4
+        },
+        {
+          "skill": "process optimization",
+          "count": 4
+        },
+        {
+          "skill": "compliance",
+          "count": 4
+        },
+        {
+          "skill": "data analysis and reporting",
+          "count": 3
+        },
+        {
+          "skill": "hr project tracking",
+          "count": 3
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "sap",
+          "count": 4
+        },
+        {
+          "tool": "crm",
+          "count": 3
+        },
+        {
+          "tool": "sql",
+          "count": 2
+        },
+        {
+          "tool": "successfactors",
+          "count": 1
+        },
+        {
+          "tool": "salesforce",
+          "count": 1
+        },
+        {
+          "tool": "python",
+          "count": 1
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "talent",
+          "count": 53
+        },
+        {
+          "keyword": "recrutement",
+          "count": 46
+        },
+        {
+          "keyword": "equipe",
+          "count": 36
+        },
+        {
+          "keyword": "global",
+          "count": 36
+        },
+        {
+          "keyword": "votre",
+          "count": 34
+        },
+        {
+          "keyword": "manager",
+          "count": 33
+        },
+        {
+          "keyword": "acquisition",
+          "count": 33
+        },
+        {
+          "keyword": "recruitment",
+          "count": 33
+        },
+        {
+          "keyword": "across",
+          "count": 30
+        },
+        {
+          "keyword": "internal",
+          "count": 29
+        },
+        {
+          "keyword": "clients",
+          "count": 28
+        },
+        {
+          "keyword": "international",
+          "count": 28
+        },
+        {
+          "keyword": "ensure",
+          "count": 28
+        },
+        {
+          "keyword": "notre",
+          "count": 24
+        },
+        {
+          "keyword": "local",
+          "count": 24
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "232562",
+          "title": "BUSINESS MANAGER (H/F)",
+          "company": "ALPINEO CONSULTING LYON",
+          "country": "SUISSE",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "ressources humaines"
+          ]
+        },
+        {
+          "external_id": "242326",
+          "title": "HRIS Project Professional (H/F)",
+          "company": "OPMOBILITY GESTION",
+          "country": "ALLEMAGNE",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "human resources"
+          ]
+        },
+        {
+          "external_id": "231640",
+          "title": "JR HR PMO (H/F)",
+          "company": "TYCO ELECTRONICS FRANCE SAS",
+          "country": "SUISSE",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "human resources"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "candidate sourcing",
+          "count": 5,
+          "specificity": 0.556
+        },
+        {
+          "signal": "talent management",
+          "count": 4,
+          "specificity": 0.667
+        },
+        {
+          "signal": "hr project tracking",
+          "count": 3,
+          "specificity": 1.0
+        },
+        {
+          "signal": "hr systems and tools",
+          "count": 3,
+          "specificity": 1.0
+        },
+        {
+          "signal": "hr reporting and dashboards",
+          "count": 2,
+          "specificity": 1.0
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 29
+        },
+        {
+          "signal": "reporting",
+          "count": 14
+        },
+        {
+          "signal": "analysis",
+          "count": 12
+        },
+        {
+          "signal": "communication",
+          "count": 8
+        },
+        {
+          "signal": "kpi",
+          "count": 2
+        },
+        {
+          "signal": "sql",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "domain": "supply",
+      "offer_count": 115,
+      "top_titles": [
+        {
+          "title": "Purchasing VIE (H/F)",
+          "count": 3
+        },
+        {
+          "title": "Acheteur (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Fleet Coordinator (H/F)",
+          "count": 2
+        },
+        {
+          "title": "INGENIEUR MECANIQUE - INGENIERIE H/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "OPERATIONS MANAGER (H/F)",
+          "count": 1
+        },
+        {
+          "title": "BUSINESS DEVELOPER ALLEMAGNE - MUNICH H/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "INGENIEUR LEAN LOGISTIQUE CHANTIER D'AMELIORATION CONTINUE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "INGÉNIEUR LOGICIEL EMBARQUÉ AERO (H/F)",
+          "count": 1
+        },
+        {
+          "title": "INGÉNIEUR MÉCATRONIQUE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "ACHETEUR(SE) - APPROVISIONNEUR(SE) (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "project management",
+          "count": 37
+        },
+        {
+          "skill": "supply chain management",
+          "count": 31
+        },
+        {
+          "skill": "sap",
+          "count": 16
+        },
+        {
+          "skill": "market analysis",
+          "count": 12
+        },
+        {
+          "skill": "compliance",
+          "count": 11
+        },
+        {
+          "skill": "budgeting",
+          "count": 11
+        },
+        {
+          "skill": "process optimization",
+          "count": 10
+        },
+        {
+          "skill": "vendor management",
+          "count": 9
+        },
+        {
+          "skill": "supplier relationship management",
+          "count": 8
+        },
+        {
+          "skill": "power bi",
+          "count": 8
+        },
+        {
+          "skill": "procurement basics",
+          "count": 7
+        },
+        {
+          "skill": "business intelligence",
+          "count": 6
+        },
+        {
+          "skill": "data analysis",
+          "count": 6
+        },
+        {
+          "skill": "b2b sales",
+          "count": 5
+        },
+        {
+          "skill": "contract management",
+          "count": 4
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "sap",
+          "count": 12
+        },
+        {
+          "tool": "power bi",
+          "count": 6
+        },
+        {
+          "tool": "salesforce",
+          "count": 2
+        },
+        {
+          "tool": "excel",
+          "count": 2
+        },
+        {
+          "tool": "crm",
+          "count": 2
+        },
+        {
+          "tool": "spark",
+          "count": 2
+        },
+        {
+          "tool": "tableau",
+          "count": 2
+        },
+        {
+          "tool": "linux",
+          "count": 1
+        },
+        {
+          "tool": "python",
+          "count": 1
+        },
+        {
+          "tool": "aws",
+          "count": 1
+        },
+        {
+          "tool": "powerpoint",
+          "count": 1
+        },
+        {
+          "tool": "gcp",
+          "count": 1
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "supply",
+          "count": 159
+        },
+        {
+          "keyword": "chain",
+          "count": 138
+        },
+        {
+          "keyword": "performance",
+          "count": 83
+        },
+        {
+          "keyword": "purchasing",
+          "count": 81
+        },
+        {
+          "keyword": "procurement",
+          "count": 75
+        },
+        {
+          "keyword": "supplier",
+          "count": 73
+        },
+        {
+          "keyword": "production",
+          "count": 71
+        },
+        {
+          "keyword": "fournisseurs",
+          "count": 69
+        },
+        {
+          "keyword": "logistique",
+          "count": 69
+        },
+        {
+          "keyword": "gestion",
+          "count": 68
+        },
+        {
+          "keyword": "projets",
+          "count": 66
+        },
+        {
+          "keyword": "suivi",
+          "count": 65
+        },
+        {
+          "keyword": "achats",
+          "count": 65
+        },
+        {
+          "keyword": "program",
+          "count": 61
+        },
+        {
+          "keyword": "ensure",
+          "count": 61
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "242199",
+          "title": "ACHETEUR(SE) (H/F)",
+          "company": "FORTIL GROUP",
+          "country": "BELGIQUE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "acheteur"
+          ]
+        },
+        {
+          "external_id": "232738",
+          "title": "ACHETEUR(SE) - APPROVISIONNEUR(SE) (H/F)",
+          "company": "TWYCE",
+          "country": "CANADA",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "acheteur",
+            "fournisseur"
+          ]
+        },
+        {
+          "external_id": "242419",
+          "title": "INGÉNIEUR AMÉLIORATION CONTINUE (H/F)",
+          "company": "FORTIL GROUP",
+          "country": "BELGIQUE",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "approvisionnement"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "supply chain management",
+          "count": 31,
+          "specificity": 0.838
+        },
+        {
+          "signal": "supplier relationship management",
+          "count": 8,
+          "specificity": 0.8
+        },
+        {
+          "signal": "procurement basics",
+          "count": 7,
+          "specificity": 0.875
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 100
+        },
+        {
+          "signal": "analysis",
+          "count": 35
+        },
+        {
+          "signal": "reporting",
+          "count": 27
+        },
+        {
+          "signal": "communication",
+          "count": 17
+        },
+        {
+          "signal": "kpi",
+          "count": 12
+        },
+        {
+          "signal": "excel",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "domain": "operations",
+      "offer_count": 77,
+      "top_titles": [
+        {
+          "title": "PROJECT MANAGER (H/F)",
+          "count": 2
+        },
+        {
+          "title": "JUNIOR WAGON ENGINEER (H/F)",
+          "count": 1
+        },
+        {
+          "title": "INGENIEUR CONCEPTION ELECTRONIQUE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "ADJOINT CHEF DE FERME H/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CHEF(FE) DE PROJET ELECTRICITÉ (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CONSULTANT PROJECT MANAGER M/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "RESPONSABLE DE PROJETS ELECTRICITE - (H/F)",
+          "count": 1
+        },
+        {
+          "title": "International Learning Development & HR Project Manager (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CHIEF OF STAFF (H/F)",
+          "count": 1
+        },
+        {
+          "title": "ELECTRICAL PROJECT ENGINEER (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "project management",
+          "count": 40
+        },
+        {
+          "skill": "business intelligence",
+          "count": 14
+        },
+        {
+          "skill": "process optimization",
+          "count": 11
+        },
+        {
+          "skill": "budgeting",
+          "count": 9
+        },
+        {
+          "skill": "compliance",
+          "count": 8
+        },
+        {
+          "skill": "documentation",
+          "count": 7
+        },
+        {
+          "skill": "excel",
+          "count": 6
+        },
+        {
+          "skill": "data analysis",
+          "count": 5
+        },
+        {
+          "skill": "international environment",
+          "count": 5
+        },
+        {
+          "skill": "power bi",
+          "count": 4
+        },
+        {
+          "skill": "stakeholder management",
+          "count": 3
+        },
+        {
+          "skill": "b2b sales",
+          "count": 3
+        },
+        {
+          "skill": "incident management",
+          "count": 3
+        },
+        {
+          "skill": "stakeholder communication",
+          "count": 3
+        },
+        {
+          "skill": "financial analysis",
+          "count": 3
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "excel",
+          "count": 5
+        },
+        {
+          "tool": "jira",
+          "count": 3
+        },
+        {
+          "tool": "power bi",
+          "count": 2
+        },
+        {
+          "tool": "sap",
+          "count": 2
+        },
+        {
+          "tool": "tableau",
+          "count": 1
+        },
+        {
+          "tool": "powerpoint",
+          "count": 1
+        },
+        {
+          "tool": "servicenow",
+          "count": 1
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "project",
+          "count": 154
+        },
+        {
+          "keyword": "manager",
+          "count": 84
+        },
+        {
+          "keyword": "projet",
+          "count": 82
+        },
+        {
+          "keyword": "projets",
+          "count": 67
+        },
+        {
+          "keyword": "suivi",
+          "count": 59
+        },
+        {
+          "keyword": "operations",
+          "count": 58
+        },
+        {
+          "keyword": "equipes",
+          "count": 53
+        },
+        {
+          "keyword": "construction",
+          "count": 50
+        },
+        {
+          "keyword": "notre",
+          "count": 48
+        },
+        {
+          "keyword": "chef",
+          "count": 45
+        },
+        {
+          "keyword": "votre",
+          "count": 43
+        },
+        {
+          "keyword": "production",
+          "count": 42
+        },
+        {
+          "keyword": "performance",
+          "count": 42
+        },
+        {
+          "keyword": "clients",
+          "count": 40
+        },
+        {
+          "keyword": "coordination",
+          "count": 40
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "238393",
+          "title": "Conseiller/Conseillère en affaires publiques (H/F)",
+          "company": "GEOPOST",
+          "country": "BELGIQUE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "operations",
+            "coordination"
+          ]
+        },
+        {
+          "external_id": "242367",
+          "title": "Responsable financier H/F/X (H/F)",
+          "company": "INVENTEC PERFORMANCE CHEMICALS",
+          "country": "JAPON",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "operations",
+            "coordination"
+          ]
+        },
+        {
+          "external_id": "238074",
+          "title": "Approval Planner (H/F)",
+          "company": "EIFFAGE ENERGIE SYSTEMES - GESTION & DEVELOPPEMENT",
+          "country": "ALLEMAGNE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "project",
+            "coordination"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "budget tracking",
+          "count": 2,
+          "specificity": 0.667
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 60
+        },
+        {
+          "signal": "reporting",
+          "count": 22
+        },
+        {
+          "signal": "communication",
+          "count": 20
+        },
+        {
+          "signal": "analysis",
+          "count": 19
+        },
+        {
+          "signal": "kpi",
+          "count": 7
+        },
+        {
+          "signal": "excel",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "domain": "engineering",
+      "offer_count": 272,
+      "top_titles": [
+        {
+          "title": "Embedded Software Engineer (H/F)",
+          "count": 4
+        },
+        {
+          "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+          "count": 3
+        },
+        {
+          "title": "Ingénieur qualité (H/F)",
+          "count": 3
+        },
+        {
+          "title": "INGÉNIEUR PROCESS (H/F)",
+          "count": 3
+        },
+        {
+          "title": "CONSULTANT(E) ANALYSTE SECURITÉ (H/F)",
+          "count": 2
+        },
+        {
+          "title": "INGÉNIEUR AUTOMATICIEN (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Developpeur Java / Angular (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Industrial Injection Engineer (H/F)",
+          "count": 2
+        },
+        {
+          "title": "INGÉNIEUR MAINTENANCE (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Java Developer (H/F)",
+          "count": 2
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "project management",
+          "count": 54
+        },
+        {
+          "skill": "documentation",
+          "count": 43
+        },
+        {
+          "skill": "compliance",
+          "count": 39
+        },
+        {
+          "skill": "process optimization",
+          "count": 28
+        },
+        {
+          "skill": "data analysis",
+          "count": 20
+        },
+        {
+          "skill": "backend development",
+          "count": 14
+        },
+        {
+          "skill": "mechanical design",
+          "count": 11
+        },
+        {
+          "skill": "sql querying",
+          "count": 9
+        },
+        {
+          "skill": "version control",
+          "count": 9
+        },
+        {
+          "skill": "veille technologique",
+          "count": 8
+        },
+        {
+          "skill": "business intelligence",
+          "count": 8
+        },
+        {
+          "skill": "software testing",
+          "count": 8
+        },
+        {
+          "skill": "cloud architecture",
+          "count": 8
+        },
+        {
+          "skill": "containerization",
+          "count": 8
+        },
+        {
+          "skill": "risk analysis",
+          "count": 8
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "python",
+          "count": 12
+        },
+        {
+          "tool": "sql",
+          "count": 9
+        },
+        {
+          "tool": "linux",
+          "count": 8
+        },
+        {
+          "tool": "azure",
+          "count": 7
+        },
+        {
+          "tool": "docker",
+          "count": 6
+        },
+        {
+          "tool": "kubernetes",
+          "count": 6
+        },
+        {
+          "tool": "gitlab",
+          "count": 6
+        },
+        {
+          "tool": "aws",
+          "count": 5
+        },
+        {
+          "tool": "sap",
+          "count": 5
+        },
+        {
+          "tool": "crm",
+          "count": 3
+        },
+        {
+          "tool": "gcp",
+          "count": 3
+        },
+        {
+          "tool": "power bi",
+          "count": 3
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "ingenieur",
+          "count": 394
+        },
+        {
+          "keyword": "engineer",
+          "count": 195
+        },
+        {
+          "keyword": "projets",
+          "count": 187
+        },
+        {
+          "keyword": "quality",
+          "count": 186
+        },
+        {
+          "keyword": "techniques",
+          "count": 179
+        },
+        {
+          "keyword": "solutions",
+          "count": 172
+        },
+        {
+          "keyword": "developpement",
+          "count": 169
+        },
+        {
+          "keyword": "technique",
+          "count": 157
+        },
+        {
+          "keyword": "production",
+          "count": 157
+        },
+        {
+          "keyword": "software",
+          "count": 142
+        },
+        {
+          "keyword": "equipe",
+          "count": 140
+        },
+        {
+          "keyword": "clients",
+          "count": 138
+        },
+        {
+          "keyword": "equipes",
+          "count": 134
+        },
+        {
+          "keyword": "notre",
+          "count": 131
+        },
+        {
+          "keyword": "qualite",
+          "count": 130
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "242530",
+          "title": "INGÉNIEUR CONCEPTION MÉCANIQUE (H/F)",
+          "company": "FORTIL GROUP",
+          "country": "BELGIQUE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "ingenieur",
+            "ingénieur"
+          ]
+        },
+        {
+          "external_id": "238223",
+          "title": "Ingénieur Design (H/F)",
+          "company": "EJ PICARDIE",
+          "country": "ALLEMAGNE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "ingenieur",
+            "ingénieur"
+          ]
+        },
+        {
+          "external_id": "236333",
+          "title": "Ingénieur EHS & Ingénieur Général CAPEX (Industrie Pharmaceutique) (H/F)",
+          "company": "AMARIS FRANCE SAS",
+          "country": "BELGIQUE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "ingenieur",
+            "ingénieur",
+            "automatisation"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "backend development",
+          "count": 14,
+          "specificity": 0.875
+        },
+        {
+          "signal": "mechanical design",
+          "count": 11,
+          "specificity": 0.846
+        },
+        {
+          "signal": "version control",
+          "count": 9,
+          "specificity": 0.692
+        },
+        {
+          "signal": "veille technologique",
+          "count": 8,
+          "specificity": 0.615
+        },
+        {
+          "signal": "software testing",
+          "count": 8,
+          "specificity": 1.0
+        },
+        {
+          "signal": "azure",
+          "count": 8,
+          "specificity": 0.667
+        },
+        {
+          "signal": "containerization",
+          "count": 8,
+          "specificity": 0.8
+        },
+        {
+          "signal": "linux",
+          "count": 8,
+          "specificity": 0.8
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 107
+        },
+        {
+          "signal": "analysis",
+          "count": 71
+        },
+        {
+          "signal": "reporting",
+          "count": 35
+        },
+        {
+          "signal": "communication",
+          "count": 31
+        },
+        {
+          "signal": "kpi",
+          "count": 11
+        },
+        {
+          "signal": "sql",
+          "count": 9
+        },
+        {
+          "signal": "excel",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "domain": "legal",
+      "offer_count": 12,
+      "top_titles": [
+        {
+          "title": "Junior Legal Counsel (H/F)",
+          "count": 2
+        },
+        {
+          "title": "COMPLIANCE ANALYST M/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "VIE – JURISTE H/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Junior Legal Officer (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Associate Legal Advisor- VIE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Compliance Technician (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Contract Management (m/f) (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Finance Compliance (H/F)",
+          "count": 1
+        },
+        {
+          "title": "V.I.E – Juriste Data Privacy & Contrats Commerciaux (H/F)",
+          "count": 1
+        },
+        {
+          "title": "GMA Contract manager (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "compliance",
+          "count": 7
+        },
+        {
+          "skill": "legal analysis",
+          "count": 2
+        },
+        {
+          "skill": "contract management",
+          "count": 2
+        },
+        {
+          "skill": "business intelligence",
+          "count": 2
+        },
+        {
+          "skill": "financial analysis",
+          "count": 2
+        },
+        {
+          "skill": "regulatory compliance analysis",
+          "count": 1
+        },
+        {
+          "skill": "compliance process improvement",
+          "count": 1
+        },
+        {
+          "skill": "compliance risk monitoring",
+          "count": 1
+        },
+        {
+          "skill": "training and awareness programs",
+          "count": 1
+        },
+        {
+          "skill": "regulatory requirements translation",
+          "count": 1
+        },
+        {
+          "skill": "relecture et analyse des contrats",
+          "count": 1
+        },
+        {
+          "skill": "veille juridique",
+          "count": 1
+        },
+        {
+          "skill": "droit des societes",
+          "count": 1
+        },
+        {
+          "skill": "droit international prive",
+          "count": 1
+        },
+        {
+          "skill": "legal documentation interpretation",
+          "count": 1
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "sap",
+          "count": 1
+        },
+        {
+          "tool": "powerpoint",
+          "count": 1
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "compliance",
+          "count": 39
+        },
+        {
+          "keyword": "legal",
+          "count": 36
+        },
+        {
+          "keyword": "contrats",
+          "count": 15
+        },
+        {
+          "keyword": "contract",
+          "count": 15
+        },
+        {
+          "keyword": "clients",
+          "count": 12
+        },
+        {
+          "keyword": "votre",
+          "count": 10
+        },
+        {
+          "keyword": "international",
+          "count": 9
+        },
+        {
+          "keyword": "internal",
+          "count": 9
+        },
+        {
+          "keyword": "droit",
+          "count": 9
+        },
+        {
+          "keyword": "banque",
+          "count": 9
+        },
+        {
+          "keyword": "gestion",
+          "count": 9
+        },
+        {
+          "keyword": "training",
+          "count": 8
+        },
+        {
+          "keyword": "analyse",
+          "count": 8
+        },
+        {
+          "keyword": "juridique",
+          "count": 8
+        },
+        {
+          "keyword": "service",
+          "count": 8
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "238267",
+          "title": "Junior Legal Counsel (H/F)",
+          "company": "ARCELORMITTAL FRANCE",
+          "country": "LUXEMBOURG",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "legal counsel"
+          ]
+        },
+        {
+          "external_id": "242342",
+          "title": "V.I.E – Juriste Data Privacy & Contrats Commerciaux (H/F)",
+          "company": "ICOMERA FRANCE",
+          "country": "SUEDE",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "juriste"
+          ]
+        },
+        {
+          "external_id": "242490",
+          "title": "Junior Legal Counsel (H/F)",
+          "company": "GRAITEC INNOVATION",
+          "country": "ESPAGNE",
+          "confidence": 0.9,
+          "method": "rules",
+          "evidence": [
+            "legal counsel"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "legal analysis",
+          "count": 2,
+          "specificity": 1.0
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "analysis",
+          "count": 8
+        },
+        {
+          "signal": "management",
+          "count": 7
+        },
+        {
+          "signal": "reporting",
+          "count": 3
+        },
+        {
+          "signal": "communication",
+          "count": 2
+        },
+        {
+          "signal": "kpi",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "domain": "admin",
+      "offer_count": 28,
+      "top_titles": [
+        {
+          "title": "Technology training support (H/F)",
+          "count": 3
+        },
+        {
+          "title": "PRODUCT OWNER E-COMMERCE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Administrateur informatique adjoint (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Spécialiste Support Manufacturing & Conformité GMP (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CONSULTANT(E) (M/F) (H/F) - San Francisco, CA",
+          "count": 1
+        },
+        {
+          "title": "CONSULTANT(E) (M/F) (H/F) - Philadelphia, PA",
+          "count": 1
+        },
+        {
+          "title": "Assistant(e) – Customer Satisfaction Support (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CONSULTANT(E) (M/F) (H/F)",
+          "count": 1
+        },
+        {
+          "title": "GESTIONNAIRE DE PAIE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "IT Infrastructure & Network Administrator (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "project management",
+          "count": 9
+        },
+        {
+          "skill": "planisware solution deployment",
+          "count": 3
+        },
+        {
+          "skill": "client process understanding",
+          "count": 3
+        },
+        {
+          "skill": "project and portfolio management",
+          "count": 3
+        },
+        {
+          "skill": "educational content creation",
+          "count": 3
+        },
+        {
+          "skill": "compliance",
+          "count": 2
+        },
+        {
+          "skill": "planisware application support",
+          "count": 2
+        },
+        {
+          "skill": "user certification database management",
+          "count": 2
+        },
+        {
+          "skill": "blasting operational process mapping",
+          "count": 2
+        },
+        {
+          "skill": "international teamwork dynamics",
+          "count": 2
+        },
+        {
+          "skill": "vendor management",
+          "count": 2
+        },
+        {
+          "skill": "international environment",
+          "count": 2
+        },
+        {
+          "skill": "sap",
+          "count": 2
+        },
+        {
+          "skill": "pim/dam solutions",
+          "count": 1
+        },
+        {
+          "skill": "backlog management",
+          "count": 1
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "crm",
+          "count": 1
+        },
+        {
+          "tool": "aws",
+          "count": 1
+        },
+        {
+          "tool": "azure",
+          "count": 1
+        },
+        {
+          "tool": "sql",
+          "count": 1
+        },
+        {
+          "tool": "jira",
+          "count": 1
+        },
+        {
+          "tool": "sap",
+          "count": 1
+        },
+        {
+          "tool": "excel",
+          "count": 1
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "planisware",
+          "count": 30
+        },
+        {
+          "keyword": "office",
+          "count": 23
+        },
+        {
+          "keyword": "clients",
+          "count": 20
+        },
+        {
+          "keyword": "solutions",
+          "count": 20
+        },
+        {
+          "keyword": "client",
+          "count": 19
+        },
+        {
+          "keyword": "product",
+          "count": 16
+        },
+        {
+          "keyword": "project",
+          "count": 16
+        },
+        {
+          "keyword": "teams",
+          "count": 16
+        },
+        {
+          "keyword": "finance",
+          "count": 16
+        },
+        {
+          "keyword": "gestion",
+          "count": 15
+        },
+        {
+          "keyword": "part",
+          "count": 15
+        },
+        {
+          "keyword": "local",
+          "count": 15
+        },
+        {
+          "keyword": "skills",
+          "count": 14
+        },
+        {
+          "keyword": "systems",
+          "count": 14
+        },
+        {
+          "keyword": "participer",
+          "count": 13
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "242435",
+          "title": "Gestionnaire/administrateur(trice) de contrats F/H (H/F)",
+          "company": "ORANO MINING",
+          "country": "CANADA",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "gestionnaire"
+          ]
+        },
+        {
+          "external_id": "236352",
+          "title": "Spécialiste Support Manufacturing & Conformité GMP (H/F)",
+          "company": "AMARIS FRANCE SAS",
+          "country": "BELGIQUE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "support"
+          ]
+        },
+        {
+          "external_id": "238371",
+          "title": "VIE Functional Excellence Support (H/F)",
+          "company": "VALEO COMFORT AND DRIVING ASSISTANCE",
+          "country": "ALLEMAGNE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "support"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "planisware solution deployment",
+          "count": 3,
+          "specificity": 1.0
+        },
+        {
+          "signal": "client process understanding",
+          "count": 3,
+          "specificity": 1.0
+        },
+        {
+          "signal": "project and portfolio management",
+          "count": 3,
+          "specificity": 1.0
+        },
+        {
+          "signal": "educational content creation",
+          "count": 3,
+          "specificity": 1.0
+        },
+        {
+          "signal": "planisware application support",
+          "count": 2,
+          "specificity": 1.0
+        },
+        {
+          "signal": "user certification database management",
+          "count": 2,
+          "specificity": 1.0
+        },
+        {
+          "signal": "blasting operational process mapping",
+          "count": 2,
+          "specificity": 1.0
+        },
+        {
+          "signal": "international teamwork dynamics",
+          "count": 2,
+          "specificity": 1.0
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 21
+        },
+        {
+          "signal": "communication",
+          "count": 6
+        },
+        {
+          "signal": "analysis",
+          "count": 4
+        },
+        {
+          "signal": "sql",
+          "count": 1
+        },
+        {
+          "signal": "excel",
+          "count": 1
+        },
+        {
+          "signal": "reporting",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "domain": "other",
+      "offer_count": 12,
+      "top_titles": [
+        {
+          "title": "VIE - Strategy Consultant (H/F)",
+          "count": 2
+        },
+        {
+          "title": "PRODUCT OWNER JUNIOR (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Product Owner (H/F)",
+          "count": 1
+        },
+        {
+          "title": "OT Security Consultant (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Responsable Qualité – Spécialiste ISO 27001 (H/F)",
+          "count": 1
+        },
+        {
+          "title": "VIE CHARGÉ(E) DE MISSION - AFFAIRES PUBLIQUES EUROPÉENNES, énergie F/H (H/F)",
+          "count": 1
+        },
+        {
+          "title": "CHARGE (E) DE MISSION ENERGIE ET NOUVELLES TECHNOLOGIES (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Chargée(e) de mission \"numérique et start-ups\" au SER de Berlin (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Application Scientist (H/F)",
+          "count": 1
+        },
+        {
+          "title": "VIA Chargé(e) de mission coopération technique (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "compliance",
+          "count": 2
+        },
+        {
+          "skill": "project management",
+          "count": 2
+        },
+        {
+          "skill": "qualitative and quantitative analysis",
+          "count": 2
+        },
+        {
+          "skill": "research plan design",
+          "count": 2
+        },
+        {
+          "skill": "client engagement management",
+          "count": 2
+        },
+        {
+          "skill": "presentation materials development",
+          "count": 2
+        },
+        {
+          "skill": "strategic recommendations frameworks",
+          "count": 2
+        },
+        {
+          "skill": "documentation",
+          "count": 1
+        },
+        {
+          "skill": "functional specifications writing",
+          "count": 1
+        },
+        {
+          "skill": "business rules configuration",
+          "count": 1
+        },
+        {
+          "skill": "digital project implementation",
+          "count": 1
+        },
+        {
+          "skill": "agile backlog management",
+          "count": 1
+        },
+        {
+          "skill": "requirements gathering",
+          "count": 1
+        },
+        {
+          "skill": "process optimization",
+          "count": 1
+        },
+        {
+          "skill": "product backlog management",
+          "count": 1
+        }
+      ],
+      "top_tools": [],
+      "context_keywords": [
+        {
+          "keyword": "product",
+          "count": 24
+        },
+        {
+          "keyword": "service",
+          "count": 22
+        },
+        {
+          "keyword": "cooperation",
+          "count": 15
+        },
+        {
+          "keyword": "client",
+          "count": 14
+        },
+        {
+          "keyword": "etre",
+          "count": 12
+        },
+        {
+          "keyword": "charge",
+          "count": 11
+        },
+        {
+          "keyword": "affaires",
+          "count": 11
+        },
+        {
+          "keyword": "reseau",
+          "count": 11
+        },
+        {
+          "keyword": "clients",
+          "count": 10
+        },
+        {
+          "keyword": "publiques",
+          "count": 10
+        },
+        {
+          "keyword": "consultant",
+          "count": 10
+        },
+        {
+          "keyword": "pole",
+          "count": 10
+        },
+        {
+          "keyword": "travail",
+          "count": 10
+        },
+        {
+          "keyword": "information",
+          "count": 9
+        },
+        {
+          "keyword": "le/la",
+          "count": 9
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "238369",
+          "title": "Responsable Qualité – Spécialiste ISO 27001 (H/F)",
+          "company": "ASF ACT DIGITAL",
+          "country": "CANADA",
+          "confidence": 0.9,
+          "method": "ai_fallback",
+          "evidence": [
+            "Système de Management de la Sécurité de l’Information",
+            "ISO 27001",
+            "gestion des risques",
+            "conformité",
+            "protection des données"
+          ]
+        },
+        {
+          "external_id": "242398",
+          "title": "VIE - Strategy Consultant (H/F)",
+          "company": "SIA PARTNERS",
+          "country": "ETATS-UNIS",
+          "confidence": 0.9,
+          "method": "ai_fallback",
+          "evidence": [
+            "Strategy Consultant",
+            "support client engagements",
+            "analyzing and synthesizing insights",
+            "developing high-quality client deliverables"
+          ]
+        },
+        {
+          "external_id": "242399",
+          "title": "VIE - Strategy Consultant (H/F)",
+          "company": "SIA PARTNERS",
+          "country": "ETATS-UNIS",
+          "confidence": 0.9,
+          "method": "ai_fallback",
+          "evidence": [
+            "Strategy Consultant",
+            "support client engagements",
+            "analyzing and synthesizing insights",
+            "developing high-quality client deliverables"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "qualitative and quantitative analysis",
+          "count": 2,
+          "specificity": 1.0
+        },
+        {
+          "signal": "research plan design",
+          "count": 2,
+          "specificity": 1.0
+        },
+        {
+          "signal": "client engagement management",
+          "count": 2,
+          "specificity": 1.0
+        },
+        {
+          "signal": "presentation materials development",
+          "count": 2,
+          "specificity": 1.0
+        },
+        {
+          "signal": "strategic recommendations frameworks",
+          "count": 2,
+          "specificity": 1.0
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "management",
+          "count": 5
+        },
+        {
+          "signal": "communication",
+          "count": 4
+        },
+        {
+          "signal": "analysis",
+          "count": 3
+        },
+        {
+          "signal": "reporting",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "generic_signals": [
+    {
+      "signal": "reporting",
+      "total_count": 222,
+      "domains": [
+        {
+          "domain": "finance",
+          "count": 47
+        },
+        {
+          "domain": "sales",
+          "count": 38
+        },
+        {
+          "domain": "engineering",
+          "count": 35
+        },
+        {
+          "domain": "data",
+          "count": 30
+        },
+        {
+          "domain": "supply",
+          "count": 27
+        },
+        {
+          "domain": "operations",
+          "count": 22
+        },
+        {
+          "domain": "hr",
+          "count": 14
+        },
+        {
+          "domain": "marketing",
+          "count": 4
+        },
+        {
+          "domain": "legal",
+          "count": 3
+        },
+        {
+          "domain": "other",
+          "count": 1
+        },
+        {
+          "domain": "admin",
+          "count": 1
+        }
+      ],
+      "why_noisy": "appears across multiple business domains with weak standalone semantics",
+      "contextualizers": [
+        {
+          "domain": "finance",
+          "count": 47,
+          "tools": [
+            "excel",
+            "sap",
+            "power bi"
+          ],
+          "keywords": [
+            "gestion",
+            "controle",
+            "suivi"
+          ]
+        },
+        {
+          "domain": "sales",
+          "count": 38,
+          "tools": [
+            "crm",
+            "salesforce",
+            "hubspot"
+          ],
+          "keywords": [
+            "clients",
+            "commercial",
+            "sales"
+          ]
+        },
+        {
+          "domain": "engineering",
+          "count": 35,
+          "tools": [
+            "python",
+            "sql",
+            "linux"
+          ],
+          "keywords": [
+            "ingenieur",
+            "engineer",
+            "projets"
+          ]
+        },
+        {
+          "domain": "data",
+          "count": 30,
+          "tools": [
+            "python",
+            "power bi",
+            "sql"
+          ],
+          "keywords": [
+            "solutions",
+            "donnees",
+            "equipes"
+          ]
+        },
+        {
+          "domain": "supply",
+          "count": 27,
+          "tools": [
+            "sap",
+            "power bi",
+            "salesforce"
+          ],
+          "keywords": [
+            "supply",
+            "chain",
+            "performance"
+          ]
+        }
+      ]
+    },
+    {
+      "signal": "analysis",
+      "total_count": 300,
+      "domains": [
+        {
+          "domain": "engineering",
+          "count": 71
+        },
+        {
+          "domain": "sales",
+          "count": 59
+        },
+        {
+          "domain": "finance",
+          "count": 41
+        },
+        {
+          "domain": "data",
+          "count": 38
+        },
+        {
+          "domain": "supply",
+          "count": 35
+        },
+        {
+          "domain": "operations",
+          "count": 19
+        },
+        {
+          "domain": "hr",
+          "count": 12
+        },
+        {
+          "domain": "marketing",
+          "count": 10
+        },
+        {
+          "domain": "legal",
+          "count": 8
+        },
+        {
+          "domain": "admin",
+          "count": 4
+        },
+        {
+          "domain": "other",
+          "count": 3
+        }
+      ],
+      "why_noisy": "appears across multiple business domains with weak standalone semantics",
+      "contextualizers": [
+        {
+          "domain": "engineering",
+          "count": 71,
+          "tools": [
+            "python",
+            "sql",
+            "linux"
+          ],
+          "keywords": [
+            "ingenieur",
+            "engineer",
+            "projets"
+          ]
+        },
+        {
+          "domain": "sales",
+          "count": 59,
+          "tools": [
+            "crm",
+            "salesforce",
+            "hubspot"
+          ],
+          "keywords": [
+            "clients",
+            "commercial",
+            "sales"
+          ]
+        },
+        {
+          "domain": "finance",
+          "count": 41,
+          "tools": [
+            "excel",
+            "sap",
+            "power bi"
+          ],
+          "keywords": [
+            "gestion",
+            "controle",
+            "suivi"
+          ]
+        },
+        {
+          "domain": "data",
+          "count": 38,
+          "tools": [
+            "python",
+            "power bi",
+            "sql"
+          ],
+          "keywords": [
+            "solutions",
+            "donnees",
+            "equipes"
+          ]
+        },
+        {
+          "domain": "supply",
+          "count": 35,
+          "tools": [
+            "sap",
+            "power bi",
+            "salesforce"
+          ],
+          "keywords": [
+            "supply",
+            "chain",
+            "performance"
+          ]
+        }
+      ]
+    },
+    {
+      "signal": "communication",
+      "total_count": 146,
+      "domains": [
+        {
+          "domain": "engineering",
+          "count": 31
+        },
+        {
+          "domain": "sales",
+          "count": 25
+        },
+        {
+          "domain": "operations",
+          "count": 20
+        },
+        {
+          "domain": "supply",
+          "count": 17
+        },
+        {
+          "domain": "marketing",
+          "count": 11
+        },
+        {
+          "domain": "data",
+          "count": 11
+        },
+        {
+          "domain": "finance",
+          "count": 11
+        },
+        {
+          "domain": "hr",
+          "count": 8
+        },
+        {
+          "domain": "admin",
+          "count": 6
+        },
+        {
+          "domain": "other",
+          "count": 4
+        },
+        {
+          "domain": "legal",
+          "count": 2
+        }
+      ],
+      "why_noisy": "appears across multiple business domains with weak standalone semantics",
+      "contextualizers": [
+        {
+          "domain": "engineering",
+          "count": 31,
+          "tools": [
+            "python",
+            "sql",
+            "linux"
+          ],
+          "keywords": [
+            "ingenieur",
+            "engineer",
+            "projets"
+          ]
+        },
+        {
+          "domain": "sales",
+          "count": 25,
+          "tools": [
+            "crm",
+            "salesforce",
+            "hubspot"
+          ],
+          "keywords": [
+            "clients",
+            "commercial",
+            "sales"
+          ]
+        },
+        {
+          "domain": "operations",
+          "count": 20,
+          "tools": [
+            "excel",
+            "jira",
+            "power bi"
+          ],
+          "keywords": [
+            "project",
+            "manager",
+            "projet"
+          ]
+        },
+        {
+          "domain": "supply",
+          "count": 17,
+          "tools": [
+            "sap",
+            "power bi",
+            "salesforce"
+          ],
+          "keywords": [
+            "supply",
+            "chain",
+            "performance"
+          ]
+        },
+        {
+          "domain": "marketing",
+          "count": 11,
+          "tools": [
+            "crm",
+            "salesforce",
+            "hubspot"
+          ],
+          "keywords": [
+            "marketing",
+            "product",
+            "service"
+          ]
+        }
+      ]
+    },
+    {
+      "signal": "management",
+      "total_count": 526,
+      "domains": [
+        {
+          "domain": "engineering",
+          "count": 107
+        },
+        {
+          "domain": "supply",
+          "count": 100
+        },
+        {
+          "domain": "sales",
+          "count": 86
+        },
+        {
+          "domain": "finance",
+          "count": 63
+        },
+        {
+          "domain": "operations",
+          "count": 60
+        },
+        {
+          "domain": "data",
+          "count": 35
+        },
+        {
+          "domain": "hr",
+          "count": 29
+        },
+        {
+          "domain": "admin",
+          "count": 21
+        },
+        {
+          "domain": "marketing",
+          "count": 13
+        },
+        {
+          "domain": "legal",
+          "count": 7
+        },
+        {
+          "domain": "other",
+          "count": 5
+        }
+      ],
+      "why_noisy": "appears across multiple business domains with weak standalone semantics",
+      "contextualizers": [
+        {
+          "domain": "engineering",
+          "count": 107,
+          "tools": [
+            "python",
+            "sql",
+            "linux"
+          ],
+          "keywords": [
+            "ingenieur",
+            "engineer",
+            "projets"
+          ]
+        },
+        {
+          "domain": "supply",
+          "count": 100,
+          "tools": [
+            "sap",
+            "power bi",
+            "salesforce"
+          ],
+          "keywords": [
+            "supply",
+            "chain",
+            "performance"
+          ]
+        },
+        {
+          "domain": "sales",
+          "count": 86,
+          "tools": [
+            "crm",
+            "salesforce",
+            "hubspot"
+          ],
+          "keywords": [
+            "clients",
+            "commercial",
+            "sales"
+          ]
+        },
+        {
+          "domain": "finance",
+          "count": 63,
+          "tools": [
+            "excel",
+            "sap",
+            "power bi"
+          ],
+          "keywords": [
+            "gestion",
+            "controle",
+            "suivi"
+          ]
+        },
+        {
+          "domain": "operations",
+          "count": 60,
+          "tools": [
+            "excel",
+            "jira",
+            "power bi"
+          ],
+          "keywords": [
+            "project",
+            "manager",
+            "projet"
+          ]
+        }
+      ]
+    },
+    {
+      "signal": "sql",
+      "total_count": 21,
+      "domains": [
+        {
+          "domain": "engineering",
+          "count": 9
+        },
+        {
+          "domain": "data",
+          "count": 7
+        },
+        {
+          "domain": "hr",
+          "count": 2
+        },
+        {
+          "domain": "marketing",
+          "count": 2
+        },
+        {
+          "domain": "admin",
+          "count": 1
+        }
+      ],
+      "why_noisy": "appears across multiple business domains with weak standalone semantics",
+      "contextualizers": [
+        {
+          "domain": "engineering",
+          "count": 9,
+          "tools": [
+            "python",
+            "sql",
+            "linux"
+          ],
+          "keywords": [
+            "ingenieur",
+            "engineer",
+            "projets"
+          ]
+        },
+        {
+          "domain": "data",
+          "count": 7,
+          "tools": [
+            "python",
+            "power bi",
+            "sql"
+          ],
+          "keywords": [
+            "solutions",
+            "donnees",
+            "equipes"
+          ]
+        },
+        {
+          "domain": "hr",
+          "count": 2,
+          "tools": [
+            "sap",
+            "crm",
+            "sql"
+          ],
+          "keywords": [
+            "talent",
+            "recrutement",
+            "equipe"
+          ]
+        },
+        {
+          "domain": "marketing",
+          "count": 2,
+          "tools": [
+            "crm",
+            "salesforce",
+            "hubspot"
+          ],
+          "keywords": [
+            "marketing",
+            "product",
+            "service"
+          ]
+        },
+        {
+          "domain": "admin",
+          "count": 1,
+          "tools": [
+            "crm",
+            "aws",
+            "azure"
+          ],
+          "keywords": [
+            "planisware",
+            "office",
+            "clients"
+          ]
+        }
+      ]
+    },
+    {
+      "signal": "excel",
+      "total_count": 34,
+      "domains": [
+        {
+          "domain": "finance",
+          "count": 18
+        },
+        {
+          "domain": "operations",
+          "count": 5
+        },
+        {
+          "domain": "data",
+          "count": 5
+        },
+        {
+          "domain": "engineering",
+          "count": 2
+        },
+        {
+          "domain": "supply",
+          "count": 2
+        },
+        {
+          "domain": "admin",
+          "count": 1
+        },
+        {
+          "domain": "sales",
+          "count": 1
+        }
+      ],
+      "why_noisy": "appears across multiple business domains with weak standalone semantics",
+      "contextualizers": [
+        {
+          "domain": "finance",
+          "count": 18,
+          "tools": [
+            "excel",
+            "sap",
+            "power bi"
+          ],
+          "keywords": [
+            "gestion",
+            "controle",
+            "suivi"
+          ]
+        },
+        {
+          "domain": "operations",
+          "count": 5,
+          "tools": [
+            "excel",
+            "jira",
+            "power bi"
+          ],
+          "keywords": [
+            "project",
+            "manager",
+            "projet"
+          ]
+        },
+        {
+          "domain": "data",
+          "count": 5,
+          "tools": [
+            "python",
+            "power bi",
+            "sql"
+          ],
+          "keywords": [
+            "solutions",
+            "donnees",
+            "equipes"
+          ]
+        },
+        {
+          "domain": "engineering",
+          "count": 2,
+          "tools": [
+            "python",
+            "sql",
+            "linux"
+          ],
+          "keywords": [
+            "ingenieur",
+            "engineer",
+            "projets"
+          ]
+        },
+        {
+          "domain": "supply",
+          "count": 2,
+          "tools": [
+            "sap",
+            "power bi",
+            "salesforce"
+          ],
+          "keywords": [
+            "supply",
+            "chain",
+            "performance"
+          ]
+        }
+      ]
+    },
+    {
+      "signal": "kpi",
+      "total_count": 61,
+      "domains": [
+        {
+          "domain": "finance",
+          "count": 12
+        },
+        {
+          "domain": "supply",
+          "count": 12
+        },
+        {
+          "domain": "engineering",
+          "count": 11
+        },
+        {
+          "domain": "sales",
+          "count": 8
+        },
+        {
+          "domain": "operations",
+          "count": 7
+        },
+        {
+          "domain": "data",
+          "count": 6
+        },
+        {
+          "domain": "hr",
+          "count": 2
+        },
+        {
+          "domain": "marketing",
+          "count": 2
+        },
+        {
+          "domain": "legal",
+          "count": 1
+        }
+      ],
+      "why_noisy": "appears across multiple business domains with weak standalone semantics",
+      "contextualizers": [
+        {
+          "domain": "finance",
+          "count": 12,
+          "tools": [
+            "excel",
+            "sap",
+            "power bi"
+          ],
+          "keywords": [
+            "gestion",
+            "controle",
+            "suivi"
+          ]
+        },
+        {
+          "domain": "supply",
+          "count": 12,
+          "tools": [
+            "sap",
+            "power bi",
+            "salesforce"
+          ],
+          "keywords": [
+            "supply",
+            "chain",
+            "performance"
+          ]
+        },
+        {
+          "domain": "engineering",
+          "count": 11,
+          "tools": [
+            "python",
+            "sql",
+            "linux"
+          ],
+          "keywords": [
+            "ingenieur",
+            "engineer",
+            "projets"
+          ]
+        },
+        {
+          "domain": "sales",
+          "count": 8,
+          "tools": [
+            "crm",
+            "salesforce",
+            "hubspot"
+          ],
+          "keywords": [
+            "clients",
+            "commercial",
+            "sales"
+          ]
+        },
+        {
+          "domain": "operations",
+          "count": 7,
+          "tools": [
+            "excel",
+            "jira",
+            "power bi"
+          ],
+          "keywords": [
+            "project",
+            "manager",
+            "projet"
+          ]
+        }
+      ]
+    }
+  ],
+  "emerging_patterns": [
+    {
+      "pattern": "Compliance",
+      "count": 47,
+      "domains": [
+        "admin",
+        "data",
+        "engineering",
+        "finance",
+        "hr",
+        "legal",
+        "operations",
+        "sales",
+        "supply"
+      ],
+      "examples": [
+        {
+          "external_id": "231210",
+          "title": "KYC ANALYST M/F (H/F)",
+          "domain": "finance",
+          "matched_keywords": [
+            "compliance",
+            "regulatory"
+          ]
+        },
+        {
+          "external_id": "231967",
+          "title": "COMPLIANCE ANALYST M/F (H/F)",
+          "domain": "legal",
+          "matched_keywords": [
+            "compliance",
+            "regulatory"
+          ]
+        },
+        {
+          "external_id": "232829",
+          "title": "BIM MODELEUR STRUCTURES - (H/F)",
+          "domain": "finance",
+          "matched_keywords": [
+            "compliance",
+            "regulatory"
+          ]
+        },
+        {
+          "external_id": "236241",
+          "title": "Junior Construction Project Manager (H/F)",
+          "domain": "operations",
+          "matched_keywords": [
+            "compliance",
+            "regulatory"
+          ]
+        },
+        {
+          "external_id": "236352",
+          "title": "Spécialiste Support Manufacturing & Conformité GMP (H/F)",
+          "domain": "admin",
+          "matched_keywords": [
+            "compliance",
+            "regulatory",
+            "audit"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "Finance Ops",
+      "count": 39,
+      "domains": [
+        "finance"
+      ],
+      "examples": [
+        {
+          "external_id": "227195",
+          "title": "V.I.E JUNIOR ACCOUNTANT (M/W) (H/F)",
+          "domain": "finance",
+          "matched_keywords": [
+            "sap",
+            "process"
+          ]
+        },
+        {
+          "external_id": "231674",
+          "title": "CONSULTANT INGENIEUR AUTOMATICIEN H/F (H/F)",
+          "domain": "finance",
+          "matched_keywords": [
+            "reporting",
+            "process"
+          ]
+        },
+        {
+          "external_id": "232756",
+          "title": "INGENIEUR QUALITE H/F (H/F)",
+          "domain": "finance",
+          "matched_keywords": [
+            "reporting",
+            "process",
+            "control"
+          ]
+        },
+        {
+          "external_id": "233039",
+          "title": "INGENIEUR AUTOMATICIEN H/F (H/F)",
+          "domain": "finance",
+          "matched_keywords": [
+            "reporting",
+            "process"
+          ]
+        },
+        {
+          "external_id": "236331",
+          "title": "Contrôleur des ventes et des opérations (S&OP) (H/F)",
+          "domain": "finance",
+          "matched_keywords": [
+            "excel",
+            "reporting"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "Project Operations",
+      "count": 23,
+      "domains": [
+        "operations"
+      ],
+      "examples": [
+        {
+          "external_id": "232755",
+          "title": "CONSULTANT PROJECT MANAGER M/F (H/F)",
+          "domain": "operations",
+          "matched_keywords": [
+            "project",
+            "process",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "235316",
+          "title": "International Learning Development & HR Project Manager (H/F)",
+          "domain": "operations",
+          "matched_keywords": [
+            "project",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "235752",
+          "title": "CHIEF OF STAFF (H/F)",
+          "domain": "operations",
+          "matched_keywords": [
+            "project",
+            "process",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "236241",
+          "title": "Junior Construction Project Manager (H/F)",
+          "domain": "operations",
+          "matched_keywords": [
+            "project",
+            "process",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "237191",
+          "title": "SCRUM MASTER (H/F) (M/F)",
+          "domain": "operations",
+          "matched_keywords": [
+            "project",
+            "process"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "Backend Automation",
+      "count": 18,
+      "domains": [
+        "engineering"
+      ],
+      "examples": [
+        {
+          "external_id": "230524",
+          "title": "Software Quality & Automation Engineer (H/F)",
+          "domain": "engineering",
+          "matched_keywords": [
+            "api",
+            "automation"
+          ]
+        },
+        {
+          "external_id": "232979",
+          "title": "SOFTWARE QA & TEST AUTOMATION ENGINEER (M/F) (H/F)",
+          "domain": "engineering",
+          "matched_keywords": [
+            "api",
+            "automation",
+            "docker",
+            "kubernetes"
+          ]
+        },
+        {
+          "external_id": "236743",
+          "title": "QA (Quantitive Automation) (H/F)",
+          "domain": "engineering",
+          "matched_keywords": [
+            "backend",
+            "api",
+            "automation"
+          ]
+        },
+        {
+          "external_id": "237220",
+          "title": "Middle Developer (H/F)",
+          "domain": "engineering",
+          "matched_keywords": [
+            "api",
+            "automation"
+          ]
+        },
+        {
+          "external_id": "237986",
+          "title": "Mid Fullstack Developer Java w/ Angular (H/F)",
+          "domain": "engineering",
+          "matched_keywords": [
+            "backend",
+            "api",
+            "automation"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "Sales Ops",
+      "count": 16,
+      "domains": [
+        "sales"
+      ],
+      "examples": [
+        {
+          "external_id": "237770",
+          "title": "INGENIEUR D'AFFAIRES (H/F)",
+          "domain": "sales",
+          "matched_keywords": [
+            "crm",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "237862",
+          "title": "VIE – Business Development & Distribution Network Coordinator – Equine Veterinary Sector (Poland) (H/F)",
+          "domain": "sales",
+          "matched_keywords": [
+            "salesforce",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "237980",
+          "title": "DIGITAL SALES MANAGER UK (H/F)",
+          "domain": "sales",
+          "matched_keywords": [
+            "crm",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "238008",
+          "title": "Chargé(e) de développement commercial – Allemagne (H/F)",
+          "domain": "sales",
+          "matched_keywords": [
+            "salesforce",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "238032",
+          "title": "Sales & Business Development (H/F)",
+          "domain": "sales",
+          "matched_keywords": [
+            "crm",
+            "reporting"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "HR Operations",
+      "count": 14,
+      "domains": [
+        "hr"
+      ],
+      "examples": [
+        {
+          "external_id": "237619",
+          "title": "HR VIE (H/F)",
+          "domain": "hr",
+          "matched_keywords": [
+            "hris",
+            "onboarding",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "237922",
+          "title": "Junior Identity and Access Management (H/F)",
+          "domain": "hr",
+          "matched_keywords": [
+            "hris",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "238241",
+          "title": "VIE - HR Generalist (12 months) H/F (H/F)",
+          "domain": "hr",
+          "matched_keywords": [
+            "hris",
+            "onboarding",
+            "reporting",
+            "process"
+          ]
+        },
+        {
+          "external_id": "238330",
+          "title": "Corporate Recruiter – Campus & Employer Branding (H/F)",
+          "domain": "hr",
+          "matched_keywords": [
+            "onboarding",
+            "process"
+          ]
+        },
+        {
+          "external_id": "238402",
+          "title": "HR Coordinator (H/F)",
+          "domain": "hr",
+          "matched_keywords": [
+            "hris",
+            "onboarding"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "RevOps",
+      "count": 10,
+      "domains": [
+        "hr",
+        "marketing",
+        "sales",
+        "supply"
+      ],
+      "examples": [
+        {
+          "external_id": "191960",
+          "title": "FIELD SALES ENGINEER H/F (VIE NORDIC - STOCKHOLM) (H/F)",
+          "domain": "sales",
+          "matched_keywords": [
+            "crm",
+            "revenue"
+          ]
+        },
+        {
+          "external_id": "236537",
+          "title": "Strategic Account Manager (H/F)",
+          "domain": "sales",
+          "matched_keywords": [
+            "crm",
+            "hubspot"
+          ]
+        },
+        {
+          "external_id": "237770",
+          "title": "INGENIEUR D'AFFAIRES (H/F)",
+          "domain": "sales",
+          "matched_keywords": [
+            "crm",
+            "revenue"
+          ]
+        },
+        {
+          "external_id": "238205",
+          "title": "GTM ENGINEER (GROWTH OPS) HF (H/F)",
+          "domain": "marketing",
+          "matched_keywords": [
+            "crm",
+            "hubspot",
+            "salesforce",
+            "revenue"
+          ]
+        },
+        {
+          "external_id": "240124",
+          "title": "Spécialiste CRM & Digital (H/F)",
+          "domain": "marketing",
+          "matched_keywords": [
+            "crm",
+            "salesforce"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "Supply Analytics",
+      "count": 10,
+      "domains": [
+        "supply"
+      ],
+      "examples": [
+        {
+          "external_id": "236958",
+          "title": "Junior Asset Management & Fleet Performance Analyst (H/F)",
+          "domain": "supply",
+          "matched_keywords": [
+            "stock",
+            "analysis"
+          ]
+        },
+        {
+          "external_id": "237373",
+          "title": "Junior Industrial Controller (H/F)",
+          "domain": "supply",
+          "matched_keywords": [
+            "inventory",
+            "analysis"
+          ]
+        },
+        {
+          "external_id": "238126",
+          "title": "ACHETEUR STRATÉGIQUE (H/F)",
+          "domain": "supply",
+          "matched_keywords": [
+            "stock",
+            "analysis"
+          ]
+        },
+        {
+          "external_id": "238265",
+          "title": "Supply Chain Continuous Improvement Specialist (H/F)",
+          "domain": "supply",
+          "matched_keywords": [
+            "inventory",
+            "stock"
+          ]
+        },
+        {
+          "external_id": "238300",
+          "title": "Clinical Diagnostics Purchasing Analyst (H/F)",
+          "domain": "supply",
+          "matched_keywords": [
+            "excel",
+            "analysis"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "Marketing Ops",
+      "count": 5,
+      "domains": [
+        "marketing"
+      ],
+      "examples": [
+        {
+          "external_id": "235953",
+          "title": "Consultant SEA/SMA (H/F)",
+          "domain": "marketing",
+          "matched_keywords": [
+            "dashboard",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "237882",
+          "title": "CHEF DE PROJET MARKETING DIGITAL (H/F)",
+          "domain": "marketing",
+          "matched_keywords": [
+            "campaign",
+            "analytics"
+          ]
+        },
+        {
+          "external_id": "238276",
+          "title": "West Africa Marketing Executive - Trade & Digital (H/F)",
+          "domain": "marketing",
+          "matched_keywords": [
+            "reporting",
+            "analytics"
+          ]
+        },
+        {
+          "external_id": "242126",
+          "title": "Digital Product Manager (H/F)",
+          "domain": "marketing",
+          "matched_keywords": [
+            "automation",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "242412",
+          "title": "Lead/Demand Generation Specialist (H/F)",
+          "domain": "marketing",
+          "matched_keywords": [
+            "campaign",
+            "automation",
+            "analytics"
+          ]
+        }
+      ]
+    },
+    {
+      "pattern": "Cybersecurity",
+      "count": 2,
+      "domains": [
+        "engineering"
+      ],
+      "examples": [
+        {
+          "external_id": "229545",
+          "title": "CONSULTANT(E) ANALYSTE SECURITÉ (H/F)",
+          "domain": "engineering",
+          "matched_keywords": [
+            "security",
+            "network"
+          ]
+        },
+        {
+          "external_id": "229546",
+          "title": "CONSULTANT(E) ANALYSTE SECURITÉ (H/F)",
+          "domain": "engineering",
+          "matched_keywords": [
+            "security",
+            "network"
+          ]
+        }
+      ]
+    }
+  ],
+  "bi_absorption_analysis": {
+    "observation": "BI/data-oriented labels absorb cross-functional offers because generic analytics vocabulary is spread across finance, hr, operations, supply and sales.",
+    "main_generic_drivers": [
+      {
+        "signal": "reporting",
+        "total_count": 222,
+        "domains": [
+          {
+            "domain": "finance",
+            "count": 47
+          },
+          {
+            "domain": "sales",
+            "count": 38
+          },
+          {
+            "domain": "engineering",
+            "count": 35
+          },
+          {
+            "domain": "data",
+            "count": 30
+          },
+          {
+            "domain": "supply",
+            "count": 27
+          },
+          {
+            "domain": "operations",
+            "count": 22
+          },
+          {
+            "domain": "hr",
+            "count": 14
+          },
+          {
+            "domain": "marketing",
+            "count": 4
+          },
+          {
+            "domain": "legal",
+            "count": 3
+          },
+          {
+            "domain": "other",
+            "count": 1
+          },
+          {
+            "domain": "admin",
+            "count": 1
+          }
+        ],
+        "why_noisy": "appears across multiple business domains with weak standalone semantics",
+        "contextualizers": [
+          {
+            "domain": "finance",
+            "count": 47,
+            "tools": [
+              "excel",
+              "sap",
+              "power bi"
+            ],
+            "keywords": [
+              "gestion",
+              "controle",
+              "suivi"
+            ]
+          },
+          {
+            "domain": "sales",
+            "count": 38,
+            "tools": [
+              "crm",
+              "salesforce",
+              "hubspot"
+            ],
+            "keywords": [
+              "clients",
+              "commercial",
+              "sales"
+            ]
+          },
+          {
+            "domain": "engineering",
+            "count": 35,
+            "tools": [
+              "python",
+              "sql",
+              "linux"
+            ],
+            "keywords": [
+              "ingenieur",
+              "engineer",
+              "projets"
+            ]
+          },
+          {
+            "domain": "data",
+            "count": 30,
+            "tools": [
+              "python",
+              "power bi",
+              "sql"
+            ],
+            "keywords": [
+              "solutions",
+              "donnees",
+              "equipes"
+            ]
+          },
+          {
+            "domain": "supply",
+            "count": 27,
+            "tools": [
+              "sap",
+              "power bi",
+              "salesforce"
+            ],
+            "keywords": [
+              "supply",
+              "chain",
+              "performance"
+            ]
+          }
+        ]
+      },
+      {
+        "signal": "analysis",
+        "total_count": 300,
+        "domains": [
+          {
+            "domain": "engineering",
+            "count": 71
+          },
+          {
+            "domain": "sales",
+            "count": 59
+          },
+          {
+            "domain": "finance",
+            "count": 41
+          },
+          {
+            "domain": "data",
+            "count": 38
+          },
+          {
+            "domain": "supply",
+            "count": 35
+          },
+          {
+            "domain": "operations",
+            "count": 19
+          },
+          {
+            "domain": "hr",
+            "count": 12
+          },
+          {
+            "domain": "marketing",
+            "count": 10
+          },
+          {
+            "domain": "legal",
+            "count": 8
+          },
+          {
+            "domain": "admin",
+            "count": 4
+          },
+          {
+            "domain": "other",
+            "count": 3
+          }
+        ],
+        "why_noisy": "appears across multiple business domains with weak standalone semantics",
+        "contextualizers": [
+          {
+            "domain": "engineering",
+            "count": 71,
+            "tools": [
+              "python",
+              "sql",
+              "linux"
+            ],
+            "keywords": [
+              "ingenieur",
+              "engineer",
+              "projets"
+            ]
+          },
+          {
+            "domain": "sales",
+            "count": 59,
+            "tools": [
+              "crm",
+              "salesforce",
+              "hubspot"
+            ],
+            "keywords": [
+              "clients",
+              "commercial",
+              "sales"
+            ]
+          },
+          {
+            "domain": "finance",
+            "count": 41,
+            "tools": [
+              "excel",
+              "sap",
+              "power bi"
+            ],
+            "keywords": [
+              "gestion",
+              "controle",
+              "suivi"
+            ]
+          },
+          {
+            "domain": "data",
+            "count": 38,
+            "tools": [
+              "python",
+              "power bi",
+              "sql"
+            ],
+            "keywords": [
+              "solutions",
+              "donnees",
+              "equipes"
+            ]
+          },
+          {
+            "domain": "supply",
+            "count": 35,
+            "tools": [
+              "sap",
+              "power bi",
+              "salesforce"
+            ],
+            "keywords": [
+              "supply",
+              "chain",
+              "performance"
+            ]
+          }
+        ]
+      },
+      {
+        "signal": "sql",
+        "total_count": 21,
+        "domains": [
+          {
+            "domain": "engineering",
+            "count": 9
+          },
+          {
+            "domain": "data",
+            "count": 7
+          },
+          {
+            "domain": "hr",
+            "count": 2
+          },
+          {
+            "domain": "marketing",
+            "count": 2
+          },
+          {
+            "domain": "admin",
+            "count": 1
+          }
+        ],
+        "why_noisy": "appears across multiple business domains with weak standalone semantics",
+        "contextualizers": [
+          {
+            "domain": "engineering",
+            "count": 9,
+            "tools": [
+              "python",
+              "sql",
+              "linux"
+            ],
+            "keywords": [
+              "ingenieur",
+              "engineer",
+              "projets"
+            ]
+          },
+          {
+            "domain": "data",
+            "count": 7,
+            "tools": [
+              "python",
+              "power bi",
+              "sql"
+            ],
+            "keywords": [
+              "solutions",
+              "donnees",
+              "equipes"
+            ]
+          },
+          {
+            "domain": "hr",
+            "count": 2,
+            "tools": [
+              "sap",
+              "crm",
+              "sql"
+            ],
+            "keywords": [
+              "talent",
+              "recrutement",
+              "equipe"
+            ]
+          },
+          {
+            "domain": "marketing",
+            "count": 2,
+            "tools": [
+              "crm",
+              "salesforce",
+              "hubspot"
+            ],
+            "keywords": [
+              "marketing",
+              "product",
+              "service"
+            ]
+          },
+          {
+            "domain": "admin",
+            "count": 1,
+            "tools": [
+              "crm",
+              "aws",
+              "azure"
+            ],
+            "keywords": [
+              "planisware",
+              "office",
+              "clients"
+            ]
+          }
+        ]
+      },
+      {
+        "signal": "excel",
+        "total_count": 34,
+        "domains": [
+          {
+            "domain": "finance",
+            "count": 18
+          },
+          {
+            "domain": "operations",
+            "count": 5
+          },
+          {
+            "domain": "data",
+            "count": 5
+          },
+          {
+            "domain": "engineering",
+            "count": 2
+          },
+          {
+            "domain": "supply",
+            "count": 2
+          },
+          {
+            "domain": "admin",
+            "count": 1
+          },
+          {
+            "domain": "sales",
+            "count": 1
+          }
+        ],
+        "why_noisy": "appears across multiple business domains with weak standalone semantics",
+        "contextualizers": [
+          {
+            "domain": "finance",
+            "count": 18,
+            "tools": [
+              "excel",
+              "sap",
+              "power bi"
+            ],
+            "keywords": [
+              "gestion",
+              "controle",
+              "suivi"
+            ]
+          },
+          {
+            "domain": "operations",
+            "count": 5,
+            "tools": [
+              "excel",
+              "jira",
+              "power bi"
+            ],
+            "keywords": [
+              "project",
+              "manager",
+              "projet"
+            ]
+          },
+          {
+            "domain": "data",
+            "count": 5,
+            "tools": [
+              "python",
+              "power bi",
+              "sql"
+            ],
+            "keywords": [
+              "solutions",
+              "donnees",
+              "equipes"
+            ]
+          },
+          {
+            "domain": "engineering",
+            "count": 2,
+            "tools": [
+              "python",
+              "sql",
+              "linux"
+            ],
+            "keywords": [
+              "ingenieur",
+              "engineer",
+              "projets"
+            ]
+          },
+          {
+            "domain": "supply",
+            "count": 2,
+            "tools": [
+              "sap",
+              "power bi",
+              "salesforce"
+            ],
+            "keywords": [
+              "supply",
+              "chain",
+              "performance"
+            ]
+          }
+        ]
+      },
+      {
+        "signal": "kpi",
+        "total_count": 61,
+        "domains": [
+          {
+            "domain": "finance",
+            "count": 12
+          },
+          {
+            "domain": "supply",
+            "count": 12
+          },
+          {
+            "domain": "engineering",
+            "count": 11
+          },
+          {
+            "domain": "sales",
+            "count": 8
+          },
+          {
+            "domain": "operations",
+            "count": 7
+          },
+          {
+            "domain": "data",
+            "count": 6
+          },
+          {
+            "domain": "hr",
+            "count": 2
+          },
+          {
+            "domain": "marketing",
+            "count": 2
+          },
+          {
+            "domain": "legal",
+            "count": 1
+          }
+        ],
+        "why_noisy": "appears across multiple business domains with weak standalone semantics",
+        "contextualizers": [
+          {
+            "domain": "finance",
+            "count": 12,
+            "tools": [
+              "excel",
+              "sap",
+              "power bi"
+            ],
+            "keywords": [
+              "gestion",
+              "controle",
+              "suivi"
+            ]
+          },
+          {
+            "domain": "supply",
+            "count": 12,
+            "tools": [
+              "sap",
+              "power bi",
+              "salesforce"
+            ],
+            "keywords": [
+              "supply",
+              "chain",
+              "performance"
+            ]
+          },
+          {
+            "domain": "engineering",
+            "count": 11,
+            "tools": [
+              "python",
+              "sql",
+              "linux"
+            ],
+            "keywords": [
+              "ingenieur",
+              "engineer",
+              "projets"
+            ]
+          },
+          {
+            "domain": "sales",
+            "count": 8,
+            "tools": [
+              "crm",
+              "salesforce",
+              "hubspot"
+            ],
+            "keywords": [
+              "clients",
+              "commercial",
+              "sales"
+            ]
+          },
+          {
+            "domain": "operations",
+            "count": 7,
+            "tools": [
+              "excel",
+              "jira",
+              "power bi"
+            ],
+            "keywords": [
+              "project",
+              "manager",
+              "projet"
+            ]
+          }
+        ]
+      }
+    ],
+    "why_context_matters": [
+      "SQL becomes discriminant only when paired with warehouse/API/ETL/backend signals.",
+      "Excel and reporting become discriminant only when paired with finance control, supply forecasting, HRIS, CRM or campaign context.",
+      "KPI alone is cross-domain; it needs product, finance, sales, operations or marketing anchors."
+    ],
+    "data_domain_snapshot": {
+      "domain": "data",
+      "offer_count": 65,
+      "top_titles": [
+        {
+          "title": "Data Scientist (H/F)",
+          "count": 4
+        },
+        {
+          "title": "Business Analyst (H/F)",
+          "count": 3
+        },
+        {
+          "title": "SAP Functional Analyst - Spanish Speaker F/M (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Data engineer (H/F)",
+          "count": 2
+        },
+        {
+          "title": "Analyste SOC & CTI (H/F)",
+          "count": 2
+        },
+        {
+          "title": "DATA ANALYST - DATA SCIENTIST - DATA ENGINEER H/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "BUSINESS ANALYST M/F (H/F)",
+          "count": 1
+        },
+        {
+          "title": "Junior Group Sustainability Analyst VIE (H/F)",
+          "count": 1
+        },
+        {
+          "title": "SOC/CERT Analyst (H/F)",
+          "count": 1
+        },
+        {
+          "title": "BUSINESS ANALYST/MOA (F/M) (H/F)",
+          "count": 1
+        }
+      ],
+      "top_skills": [
+        {
+          "skill": "data analysis",
+          "count": 19
+        },
+        {
+          "skill": "business intelligence",
+          "count": 19
+        },
+        {
+          "skill": "project management",
+          "count": 12
+        },
+        {
+          "skill": "power bi",
+          "count": 9
+        },
+        {
+          "skill": "sql querying",
+          "count": 9
+        },
+        {
+          "skill": "process optimization",
+          "count": 7
+        },
+        {
+          "skill": "machine learning",
+          "count": 6
+        },
+        {
+          "skill": "business analysis",
+          "count": 5
+        },
+        {
+          "skill": "excel",
+          "count": 5
+        },
+        {
+          "skill": "data engineering",
+          "count": 5
+        },
+        {
+          "skill": "python programming",
+          "count": 5
+        },
+        {
+          "skill": "data governance",
+          "count": 4
+        },
+        {
+          "skill": "compliance",
+          "count": 4
+        },
+        {
+          "skill": "international environment",
+          "count": 4
+        },
+        {
+          "skill": "requirements gathering",
+          "count": 3
+        }
+      ],
+      "top_tools": [
+        {
+          "tool": "python",
+          "count": 11
+        },
+        {
+          "tool": "power bi",
+          "count": 8
+        },
+        {
+          "tool": "sql",
+          "count": 7
+        },
+        {
+          "tool": "excel",
+          "count": 5
+        },
+        {
+          "tool": "spark",
+          "count": 3
+        },
+        {
+          "tool": "aws",
+          "count": 3
+        },
+        {
+          "tool": "tableau",
+          "count": 3
+        },
+        {
+          "tool": "sap",
+          "count": 2
+        },
+        {
+          "tool": "airflow",
+          "count": 2
+        },
+        {
+          "tool": "gitlab",
+          "count": 2
+        },
+        {
+          "tool": "docker",
+          "count": 2
+        },
+        {
+          "tool": "crm",
+          "count": 2
+        }
+      ],
+      "context_keywords": [
+        {
+          "keyword": "solutions",
+          "count": 54
+        },
+        {
+          "keyword": "donnees",
+          "count": 46
+        },
+        {
+          "keyword": "equipes",
+          "count": 42
+        },
+        {
+          "keyword": "processes",
+          "count": 41
+        },
+        {
+          "keyword": "clients",
+          "count": 40
+        },
+        {
+          "keyword": "projects",
+          "count": 38
+        },
+        {
+          "keyword": "teams",
+          "count": 38
+        },
+        {
+          "keyword": "performance",
+          "count": 37
+        },
+        {
+          "keyword": "project",
+          "count": 37
+        },
+        {
+          "keyword": "tools",
+          "count": 36
+        },
+        {
+          "keyword": "join",
+          "count": 33
+        },
+        {
+          "keyword": "technical",
+          "count": 32
+        },
+        {
+          "keyword": "ensure",
+          "count": 31
+        },
+        {
+          "keyword": "analyste",
+          "count": 31
+        },
+        {
+          "keyword": "integration",
+          "count": 31
+        }
+      ],
+      "representative_offers": [
+        {
+          "external_id": "242078",
+          "title": "AI Transformation & Adoption Manager (H/F)",
+          "company": "SERVIER INTERNATIONAL",
+          "country": "ARGENTINE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "data",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "238422",
+          "title": "Corporate Credit Analyst (H/F)",
+          "company": "BANQUE FEDERATIVE DU CREDIT MUTUEL",
+          "country": "ALLEMAGNE",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "analyst",
+            "analyste",
+            "reporting"
+          ]
+        },
+        {
+          "external_id": "242187",
+          "title": "Privacy Analyst (H/F)",
+          "company": "M&L DISTRIBUTION (FRANCE) S.A.R.L.",
+          "country": "ETATS-UNIS",
+          "confidence": 1.0,
+          "method": "rules",
+          "evidence": [
+            "analyst",
+            "analyste"
+          ]
+        }
+      ],
+      "discriminant_signals": [
+        {
+          "signal": "machine learning",
+          "count": 6,
+          "specificity": 0.667
+        },
+        {
+          "signal": "data engineering",
+          "count": 5,
+          "specificity": 0.625
+        },
+        {
+          "signal": "spark",
+          "count": 3,
+          "specificity": 0.6
+        }
+      ],
+      "generic_or_noisy_signals": [
+        {
+          "signal": "analysis",
+          "count": 38
+        },
+        {
+          "signal": "management",
+          "count": 35
+        },
+        {
+          "signal": "reporting",
+          "count": 30
+        },
+        {
+          "signal": "communication",
+          "count": 11
+        },
+        {
+          "signal": "sql",
+          "count": 7
+        },
+        {
+          "signal": "kpi",
+          "count": 6
+        },
+        {
+          "signal": "excel",
+          "count": 5
+        }
+      ]
+    }
+  },
+  "corpus_strength": {
+    "well_represented": [
+      "data",
+      "finance",
+      "sales",
+      "supply",
+      "operations",
+      "engineering"
+    ],
+    "weak": [
+      "legal",
+      "other"
+    ]
+  },
+  "recommendations_v1": [
+    "Keep the current V0 clusters out of runtime until generic cross-domain analytics vocabulary is better contextualized.",
+    "Introduce domain-context rules before adding new clusters: SQL, Excel, KPI, reporting and analysis should never be strong standalone anchors.",
+    "Prioritize non-data cluster discovery from strongly represented domains first: finance, sales, supply, engineering, operations and HR if confirmed by corpus volume.",
+    "Use representative title+tooling+skill triples to define future clusters instead of title-only labels.",
+    "Finance Ops appears naturally enough to study as a future V1 cluster family, but not implement yet.",
+    "HR Operations appears as a better framing than generic BI for HR dashboard/reporting roles.",
+    "Backend Automation can help separate engineering automation from data-centric pipeline logic."
+  ],
+  "data_centric_bias_risks": [
+    "Cross-domain generic analytics signals can over-route offers toward data/BI interpretations.",
+    "A data-heavy seed set would under-represent finance, HR, legal and admin nuances even if the DB contains them.",
+    "If future calibration relies too much on SQL/Power BI/reporting frequency, BI will absorb finance control, HR digital, supply analytics and sales operations roles.",
+    "Lower-volume domains like legal/admin may be overshadowed unless calibrated with domain-specific title and context anchors.",
+    "SQL is widespread enough in the corpus that it must be treated as contextual, not domain-defining."
+  ]
+}

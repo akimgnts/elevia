@@ -14,6 +14,12 @@ from .cluster_library import ClusterLibraryStore, get_library, normalize_token, 
 from .cv_enricher import extract_candidate_tokens
 
 DOMAIN_URI_PREFIX = "compass:skill"
+_DATA_IT_TRANSVERSE_PROFILE_TOKEN_BLOCKLIST = {
+    "analyse",
+    "analyste",
+    "coordination",
+    "relations",
+}
 
 
 def build_domain_uri(cluster: Optional[str], token: str) -> Optional[str]:
@@ -65,11 +71,17 @@ def build_domain_uris_for_text(
 
     domain_tokens: List[str] = []
     seen = set()
+    cluster_key = str(cluster).strip().upper()
     for token in filtered_candidates:
         norm = normalize_token(str(token))
         if not norm or norm in seen:
             continue
         seen.add(norm)
+        if (
+            cluster_key == "DATA_IT"
+            and norm in _DATA_IT_TRANSVERSE_PROFILE_TOKEN_BLOCKLIST
+        ):
+            continue
         if norm in active_set:
             domain_tokens.append(norm)
 

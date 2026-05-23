@@ -4,6 +4,121 @@
 
 ---
 
+## 2026-05-22 — Archetype Replay Task 4
+
+### 1. Commandes exécutées
+- Tests :
+  - `apps/api/.venv/bin/python -m pytest apps/api/tests/test_run_archetype_replay.py -q`
+- Replay :
+  - `apps/api/.venv/bin/python scripts/run_archetype_replay.py`
+
+### 2. Scope réellement rejoué
+- Archetypes centraux uniquement, depuis :
+  - `docs/ai/runtime_calibration/archetype_cvs/central/`
+- Archetypes rejoués :
+  - `finance_control`
+  - `hr_recruitment`
+  - `operations_process`
+- Aucun hybride inclus.
+
+### 3. Sortie générée
+- Rapport écrit dans :
+  - `docs/ai/runtime_calibration/latest_archetype_replay.md`
+
+### 4. Dominant observed drifts
+- `finance_control` :
+  - aucun top item observé dans le replay courant
+- `hr_recruitment` :
+  - aucun top item observé dans le replay courant
+- `operations_process` :
+  - aucun top item observé dans le replay courant
+
+### 5. Interprétation minimale
+- Le script de replay fonctionne end-to-end sur les JSON centraux et écrit bien un rapport observation-only.
+- Le drift dominant observé sur ce run est une absence de rappel exploitable, pas une dérive sémantique positive/négative identifiable à partir de tops.
+- La section `Interpreted` du rapport reste volontairement à `pending`.
+
+## 2026-05-22 — Archetype CV Generator Task 5 (quick-mode fallback)
+
+### 1. Commandes exécutées
+- Tests :
+  - `apps/api/.venv/bin/python -m pytest apps/api/tests/test_generate_archetype_cvs.py -q`
+- Générateur :
+  - `apps/api/.venv/bin/python scripts/generate_archetype_cvs.py`
+
+### 2. Mode réellement utilisé
+- `DATABASE_URL` indisponible au run local.
+- Le script a donc utilisé le mode `quick` automatique, pas un chargement PostgreSQL réel.
+
+### 3. Emplacement des sorties
+- `docs/ai/runtime_calibration/archetype_cvs/central/`
+- `docs/ai/runtime_calibration/archetype_cvs/hybrid/`
+
+### 4. Sorties créées
+- Centrals acceptés :
+  - `finance_control`
+  - `data_analytics`
+  - `operations_process`
+- Fichiers générés :
+  - `docs/ai/runtime_calibration/archetype_cvs/central/finance_control.md`
+  - `docs/ai/runtime_calibration/archetype_cvs/central/finance_control.json`
+  - `docs/ai/runtime_calibration/archetype_cvs/central/data_analytics.md`
+  - `docs/ai/runtime_calibration/archetype_cvs/central/data_analytics.json`
+  - `docs/ai/runtime_calibration/archetype_cvs/central/operations_process.md`
+  - `docs/ai/runtime_calibration/archetype_cvs/central/operations_process.json`
+
+### 5. Refus explicites
+- Centrals refusés :
+  - `hr_recruitment` — `insufficient evidence: anchor skills missing`
+  - `software_engineering` — `insufficient evidence: anchor skills missing`
+- Hybrides refusés :
+  - `finance_bi` — `hybrid sector finance_bi requires at least 10 offers`
+  - `hr_operations` — `hybrid sector hr_operations requires at least 10 offers`
+  - `data_software` — `hybrid sector data_software requires at least 10 offers`
+  - `operations_supply` — `hybrid sector operations_supply requires at least 10 offers`
+
+### 6. Weak zones restantes
+- Le run validé ici n’est **pas** un run BF réel ; il faut rerun avec `DATABASE_URL` disponible.
+- Le mode `quick` prouve la CLI, l’écriture des artefacts et les refus hybrides, mais pas encore la qualité métier sur le corpus live.
+- Les centrals `data_analytics` et `operations_process` acceptés en quick mode viennent du fixture minimal et ne doivent pas être interprétés comme calibration métier validée.
+
+### 7. Correctif blocant Task 5 — chargement auto de `apps/api/.env`
+- Blocage observé :
+  - `apps/api/.venv/bin/python scripts/generate_archetype_cvs.py` retombait en `quick`
+  - cause : lecture de `DATABASE_URL` via `os.getenv(...)` seulement, sans précharger `apps/api/.env`
+- Correctif appliqué dans `scripts/generate_archetype_cvs.py` :
+  - ajout de `_load_repo_env()`
+  - chargement de `apps/api/.env` avant la décision `--mode auto`
+- Test ajouté :
+  - `main(... --mode auto ...)` peut choisir le chemin PostgreSQL après chargement `.env`
+
+### 8. Run réel après correctif
+- Commande :
+  - `apps/api/.venv/bin/python scripts/generate_archetype_cvs.py`
+- Mode utilisé :
+  - PostgreSQL réel via `DATABASE_URL` chargé depuis `apps/api/.env`
+- Résumé console :
+  - created:
+    - `finance_control`
+    - `hr_recruitment`
+    - `operations_process`
+  - refused central:
+    - `data_analytics` — `insufficient evidence: anchor skills missing`
+    - `software_engineering` — `insufficient evidence: anchor skills missing`
+  - refused hybrid:
+    - `finance_bi` — `requires at least 10 evidenced offers`
+    - `hr_operations` — `requires at least 10 evidenced offers`
+    - `data_software` — `requires at least 10 evidenced offers`
+    - `operations_supply` — `requires at least 10 evidenced offers`
+
+### 9. Artefacts présents après run PostgreSQL
+- `docs/ai/runtime_calibration/archetype_cvs/central/finance_control.md`
+- `docs/ai/runtime_calibration/archetype_cvs/central/finance_control.json`
+- `docs/ai/runtime_calibration/archetype_cvs/central/hr_recruitment.md`
+- `docs/ai/runtime_calibration/archetype_cvs/central/hr_recruitment.json`
+- `docs/ai/runtime_calibration/archetype_cvs/central/operations_process.md`
+- `docs/ai/runtime_calibration/archetype_cvs/central/operations_process.json`
+
 ## 2026-05-09 — Structured CV AI + ProfilePage Contamination Audit
 
 ## 2026-05-11 — Runtime Offer Skills URI Injection (Business France, flag-gated)
@@ -3133,3 +3248,30 @@ Plus aucune occurrence de `skill:statistical_programming` sur les rôles non-dat
 - No changes to `matching_v1.py`, `idf.py`, `weights_*`.
 - Human verdict first, metrics later.
 - One patch family per iteration.
+
+## 2026-05-19 — Ania DATA_IT Halo Narrowing
+
+### Objective
+- Treat only the residual `ania` drift `finance/compliance -> policy/privacy/SOC` after the prior `skill:compliance` patch.
+
+### Patch
+- Localized `domain_library_uri` filtering in `apps/api/src/compass/domain_uris.py`.
+- Blocked only these tokens when `cluster == DATA_IT`:
+  - `analyse`
+  - `analyste`
+  - `coordination`
+  - `relations`
+
+### Verification
+- `apps/api/.venv/bin/python -m pytest apps/api/tests/test_profile_domain_uri_data_it_policy.py apps/api/tests/test_runtime_canonical_injection.py apps/api/tests/test_esco_promotion_bridge.py apps/api/tests/test_run_sentinel_replay.py -q`
+  - result: `41 passed, 2 warnings`
+- `ELEVIA_SENTINEL_CV_ROOT=/Users/akimguentas/Downloads/cvtest ELEVIA_RUNTIME_CANONICAL_INJECTION=1 ELEVIA_RUNTIME_OFFER_SKILLS_INJECTION=1 apps/api/.venv/bin/python scripts/run_sentinel_replay.py --limit 10`
+  - result: replay report updated
+
+### Outcome
+- `Global Digital Policy` leaves `ania` top 10.
+- `Analyste SOC` leaves `ania` top 10.
+- Finance offers occupy ranks `2` through `9`.
+- Residual noise remains:
+  - `Quality Engineer` rank `1`
+  - `DATA SCIENTIST` rank `10`

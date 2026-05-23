@@ -10,8 +10,9 @@ import sqlite3
 import logging
 import html
 import re
+import importlib
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from .offer_skills import get_offer_skills_by_offer_ids
 from compass.offer_canonicalization import normalize_offers_to_uris
@@ -29,6 +30,44 @@ _P_OPEN_RE = re.compile(r"(?i)<p[^>]*>")
 _P_CLOSE_RE = re.compile(r"(?i)</p>")
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\\s+")
+
+try:
+    from compass.canonical.esco_bridge import build_canonical_esco_promoted
+except ImportError:
+    try:
+        _esco_bridge = importlib.import_module("compass.canonical.esco_bridge")
+        build_canonical_esco_promoted = _esco_bridge.build_canonical_esco_promoted
+    except ImportError:
+        build_canonical_esco_promoted = None
+
+_RUNTIME_OFFER_GENERIC_IDS = {
+    "skill:english",
+    "skill:french",
+    "skill:arabic",
+    "skill:spanish",
+    "skill:communication",
+    "skill:data_analysis",
+    "skill:analysis",
+    "skill:management",
+    "skill:project_management",
+    "skill:reporting",
+    "skill:coordination",
+}
+_RUNTIME_OFFER_GENERIC_LABELS = {
+    "english",
+    "french",
+    "arabic",
+    "spanish",
+    "communication",
+    "data analysis",
+    "analysis",
+    "management",
+    "project management",
+    "reporting",
+    "coordination",
+    "suivi",
+    "gestion",
+}
 
 
 def _clean_description(text: str) -> str:
@@ -59,6 +98,30 @@ def _database_url() -> str:
     return os.getenv("DATABASE_URL", "").strip()
 
 
+def _runtime_offer_skills_injection_enabled() -> bool:
+    value = os.getenv("ELEVIA_RUNTIME_OFFER_SKILLS_INJECTION", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _dedupe_preserve_order(values: List[str]) -> List[str]:
+    seen = set()
+    result: List[str] = []
+    for value in values:
+        key = str(value or "").strip()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        result.append(key)
+    return result
+
+
+def _normalize_offer_skill_label(value: str) -> str:
+    normalized = str(value or "").strip().lower()
+    normalized = re.sub(r"[^\w\s\+#]", " ", normalized, flags=re.UNICODE)
+    normalized = re.sub(r"\s+", " ", normalized, flags=re.UNICODE).strip()
+    return normalized
+
+
 def _catalog_cache_key() -> str:
     if not DB_PATH.exists():
         return "db:missing"
@@ -81,6 +144,147 @@ def _set_cached_catalog(offers: List[Dict]) -> List[Dict]:
     _CATALOG_CACHE = offers
     _CATALOG_CACHE_KEY = _catalog_cache_key()
     return offers
+
+
+def _extract_skills_uri_from_payload(payload: Dict[str, Any]) -> List[str]:
+    raw = payload.get("skills_uri") or payload.get("esco_skills_uri") or []
+    if isinstance(raw, list):
+        return _dedupe_preserve_order([str(item) for item in raw if str(item or "").strip()])
+    return []
+
+
+def _fetch_business_france_offer_skills_rows(
+    conn,
+    external_ids: List[str],
+) -> Dict[str, List[Dict[str, Any]]]:
+    if not external_ids:
+        return {}
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT DISTINCT ON (external_id, canonical_id)
+                       external_id, canonical_id, label, importance_level, skill_type, source_method
+                FROM offer_skills
+                WHERE source = %s
+                  AND external_id = ANY(%s)
+                ORDER BY external_id, canonical_id, created_at DESC NULLS LAST
+                """,
+                ("business_france", list(external_ids)),
+            )
+            rows = cur.fetchall()
+    except Exception:
+        return {}
+
+    mapping: Dict[str, List[Dict[str, Any]]] = {}
+    for row in rows:
+        external_id = str(row[0] or "").strip()
+        canonical_id = str(row[1] or "").strip()
+        label = str(row[2] or "").strip()
+        if not external_id or not canonical_id or not label:
+            continue
+        mapping.setdefault(external_id, []).append(
+            {
+                "canonical_id": canonical_id,
+                "label": label,
+                "importance_level": str(row[3] or "").strip().upper() or "SECONDARY",
+                "skill_type": str(row[4] or "").strip(),
+                "source_method": str(row[5] or "").strip(),
+            }
+        )
+    return mapping
+
+
+def _extract_runtime_offer_canonical_ids(rows: List[Dict[str, Any]]) -> List[str]:
+    scored: List[tuple[int, str, str]] = []
+    seen: set[str] = set()
+    for row in rows:
+        canonical_id = str(row.get("canonical_id") or "").strip()
+        if not canonical_id or canonical_id in seen:
+            continue
+        label = _normalize_offer_skill_label(str(row.get("label") or ""))
+        if canonical_id in _RUNTIME_OFFER_GENERIC_IDS:
+            continue
+        if label and label in _RUNTIME_OFFER_GENERIC_LABELS:
+            continue
+        seen.add(canonical_id)
+        importance = str(row.get("importance_level") or "").strip().upper()
+        score = 0 if importance == "CORE" else 1
+        scored.append((score, canonical_id, label))
+    scored.sort(key=lambda item: (item[0], item[2], item[1]))
+    return [canonical_id for _, canonical_id, _ in scored]
+
+
+def _apply_runtime_offer_skills_enrichment(
+    offer: Dict[str, Any],
+    skill_rows: List[Dict[str, Any]],
+) -> None:
+    if not _runtime_offer_skills_injection_enabled():
+        return
+    if not isinstance(offer, dict) or not skill_rows:
+        return
+
+    existing_uris = _dedupe_preserve_order([str(uri) for uri in (offer.get("skills_uri") or [])])
+    existing_labels = _dedupe_preserve_order([str(label) for label in (offer.get("skills") or []) if str(label or "").strip()])
+    row_labels = _dedupe_preserve_order([str(row.get("label") or "") for row in skill_rows if str(row.get("label") or "").strip()])
+
+    canonical_ids = _extract_runtime_offer_canonical_ids(skill_rows)
+    unresolved_labels: List[str] = []
+    specialized_count = len(canonical_ids)
+    injected_uris: List[str] = []
+    bridge_trace: Dict[str, Any] = {}
+
+    if canonical_ids and build_canonical_esco_promoted:
+        injected_uris = build_canonical_esco_promoted(
+            canonical_ids,
+            base_skills_uri=existing_uris,
+            _promote_override=True,
+            trace=bridge_trace,
+        ) or []
+        injected_uris = _dedupe_preserve_order([str(uri) for uri in injected_uris if str(uri or "").strip()])
+
+    unresolved_ids = set(bridge_trace.get("unresolved_canonical_ids") or [])
+    if unresolved_ids:
+        unresolved_labels = [
+            str(row.get("label") or "")
+            for row in skill_rows
+            if str(row.get("canonical_id") or "").strip() in unresolved_ids
+            and str(row.get("label") or "").strip()
+        ]
+        unresolved_labels = _dedupe_preserve_order(unresolved_labels)
+
+    merged_labels = _dedupe_preserve_order(existing_labels + row_labels)
+    if merged_labels and not offer.get("skills"):
+        offer["skills"] = merged_labels
+    elif merged_labels:
+        offer["skills"] = merged_labels
+
+    merged_uris = _dedupe_preserve_order(existing_uris + injected_uris)
+    net_injected_count = len([uri for uri in merged_uris if uri not in set(existing_uris)])
+    if merged_uris:
+        offer["skills_uri"] = merged_uris
+
+    if existing_uris and injected_uris:
+        source = "payload_plus_offer_skills"
+    elif existing_uris:
+        source = "payload"
+    elif injected_uris:
+        source = "offer_skills_db"
+    else:
+        source = "offer_skills_labels_only"
+
+    if merged_uris:
+        offer["skills_source"] = source
+    offer["runtime_offer_skills_uri_source"] = source
+    offer["runtime_offer_injected_from_offer_skills"] = net_injected_count
+    offer["runtime_offer_skills_uri_count"] = len(merged_uris)
+    offer["runtime_offer_unresolved_skills"] = unresolved_labels
+    offer["runtime_offer_specialized_count"] = specialized_count
+    if bridge_trace.get("canonical_resolution_success") is not None:
+        offer["runtime_offer_canonical_resolution_success"] = bridge_trace.get("canonical_resolution_success")
+    if bridge_trace.get("canonical_bridge_source") is not None:
+        offer["runtime_offer_canonical_bridge_source"] = bridge_trace.get("canonical_bridge_source")
 
 
 def _load_business_france_from_postgres() -> List[Dict]:
@@ -106,6 +310,10 @@ def _load_business_france_from_postgres() -> List[Dict]:
                     ("business_france",),
                 )
                 rows = cur.fetchall()
+            offer_skills_rows = _fetch_business_france_offer_skills_rows(
+                conn,
+                [str(row[0]) for row in rows if row and row[0]],
+            )
         offers = [
             {
                 "id": row[0],
@@ -125,6 +333,10 @@ def _load_business_france_from_postgres() -> List[Dict]:
         ]
         for offer in offers:
             _attach_payload_fields(offer)
+            _apply_runtime_offer_skills_enrichment(
+                offer,
+                offer_skills_rows.get(str(offer.get("id") or ""), []),
+            )
             offer.pop("payload_json", None)
         return offers
     except Exception as e:
@@ -209,6 +421,11 @@ def _attach_payload_fields(offer: Dict) -> None:
 
     if offer.get("is_vie") is None and isinstance(payload.get("is_vie"), bool):
         offer["is_vie"] = payload.get("is_vie")
+
+    payload_skills_uri = _extract_skills_uri_from_payload(payload)
+    if payload_skills_uri and not offer.get("skills_uri"):
+        offer["skills_uri"] = payload_skills_uri
+        offer["skills_source"] = offer.get("skills_source") or "payload"
 
     if not offer.get("skills"):
         offer["skills"] = _extract_skills_from_payload(payload)

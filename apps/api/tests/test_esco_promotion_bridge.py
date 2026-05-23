@@ -160,6 +160,72 @@ def test_bridge_known_canonical_id_resolved():
     )
 
 
+def test_bridge_financial_analysis_resolved():
+    store = get_canonical_store()
+    result = build_canonical_esco_promoted(
+        ["skill:financial_analysis"],
+        base_skills_uri=[],
+        cluster="FINANCE_BUSINESS_OPERATIONS",
+        store=store,
+        _promote_override=True,
+    )
+    assert any(uri.startswith(_ESCO_PREFIX) for uri in result)
+
+
+def test_bridge_recruitment_resolved():
+    store = get_canonical_store()
+    result = build_canonical_esco_promoted(
+        ["skill:recruitment"],
+        base_skills_uri=[],
+        cluster="FINANCE_BUSINESS_OPERATIONS",
+        store=store,
+        _promote_override=True,
+    )
+    assert len(result) >= 1
+    assert all(uri.startswith(_ESCO_PREFIX) for uri in result)
+
+
+def test_bridge_compliance_resolved():
+    store = get_canonical_store()
+    result = build_canonical_esco_promoted(
+        ["skill:compliance"],
+        base_skills_uri=[],
+        cluster="FINANCE_BUSINESS_OPERATIONS",
+        store=store,
+        _promote_override=True,
+    )
+    assert len(result) >= 1
+    assert all(uri.startswith(_ESCO_PREFIX) for uri in result)
+
+
+def test_bridge_compliance_promotes_single_uri_to_limit_transverse_fanout():
+    store = get_canonical_store()
+    result = build_canonical_esco_promoted(
+        ["skill:compliance"],
+        base_skills_uri=[],
+        cluster="FINANCE_BUSINESS_OPERATIONS",
+        store=store,
+        _promote_override=True,
+    )
+    assert len(result) == 1, (
+        "Compliance should promote exactly one runtime ESCO URI to reduce "
+        "policy/privacy/quality transverse fanout."
+    )
+
+
+def test_bridge_legal_analysis_resolved():
+    store = get_canonical_store()
+    result = build_canonical_esco_promoted(
+        ["skill:legal_analysis"],
+        base_skills_uri=[],
+        cluster="FINANCE_BUSINESS_OPERATIONS",
+        store=store,
+        _promote_override=True,
+    )
+    assert len(result) >= 1
+    assert all(uri.startswith(_ESCO_PREFIX) for uri in result)
+
+
 def test_bridge_multiple_ids_resolved():
     """3 known DATA_IT canonical IDs with esco_fr_label → 3 URIs promoted."""
     store = get_canonical_store()
@@ -187,6 +253,24 @@ def test_bridge_unknown_id_skipped():
         _promote_override=True,
     )
     assert result == [], "ID with no esco_fr_label must be skipped, not cause an error"
+
+
+def test_bridge_trace_reports_resolution_and_unresolved_ids():
+    store = get_canonical_store()
+    trace = {}
+    result = build_canonical_esco_promoted(
+        ["skill:recruitment", "skill:unknown_bridge_case"],
+        base_skills_uri=[],
+        cluster="FINANCE_BUSINESS_OPERATIONS",
+        store=store,
+        _promote_override=True,
+        trace=trace,
+    )
+    assert result
+    assert "skill:recruitment" in trace.get("canonical_resolution_success", [])
+    assert "skill:unknown_bridge_case" in trace.get("unresolved_canonical_ids", [])
+    assert trace.get("canonical_bridge_source", {}).get("skill:recruitment")
+    assert trace.get("promoted_runtime_uris") == sorted(result)
 
 
 def test_bridge_dedup_base_uri():
@@ -448,8 +532,10 @@ def test_invariant_scoring_frozen():
     assert "weights_" not in import_block, "esco_bridge must not import weights files"
 
 
-def test_invariant_esco_bridge_not_imported_by_extractor():
-    """extractors.py must not import esco_bridge — bridge is a pipeline concern only."""
+def test_invariant_esco_bridge_import_in_extractor_stays_scoring_safe():
+    """extractors.py may call the bridge, but must still avoid frozen scoring imports."""
     extractors_src = (API_SRC / "matching/extractors.py").read_text(encoding="utf-8")
-    assert "esco_bridge" not in extractors_src
-    assert "build_canonical_esco_promoted" not in extractors_src
+    assert "build_canonical_esco_promoted" in extractors_src
+    assert "matching_v1" not in extractors_src
+    assert "idf" not in extractors_src
+    assert "weights_" not in extractors_src

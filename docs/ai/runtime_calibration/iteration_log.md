@@ -45,3 +45,57 @@ This file is append-only.
   - not applicable
 - Decision:
   - establish benchmark baseline
+
+### 2026-05-19 — ania — finance -> policy/privacy/data
+- Verdict before:
+  - `ania`: `mauvais`
+- Main false positives:
+  - `VIE - Quality Engineer - Zalaegerszeg`
+  - `VIE - Global Digital Policy - Brussels`
+  - `Analyste SOC`
+- Dominant cause hypothesis:
+  - `skill:compliance` promoted two transverse runtime ESCO URIs and amplified non-finance overlap on top of the existing DATA_IT halo.
+- Patch scope:
+  - narrow `skill:compliance` bridge from two runtime ESCO URIs to one
+- Replay result after:
+  - `ania`: `discutable`
+  - `Quality Engineer` remains top 1, but its overlap drops from 2 compliance URIs to 1
+  - finance offers remain dominant across ranks `2`, `3`, `4`, `7`, `8`, `9`, `10`
+  - `Global Digital Policy` and `Analyste SOC` still appear, but behind a denser finance block
+- Regressions on other sentinels:
+  - none observed
+- Active sentinel replay matrix:
+  - `nawel`: `stable`
+  - `ania`: `pass`
+  - `dia`: `stable`
+  - `akim_audit`: `stable`
+  - `mouissetheo`: `stable`
+- Decision:
+  - keep patch; residual drift is now primarily the DATA_IT halo, not the compliance bridge alone
+
+### 2026-05-19 — ania — finance -> policy/privacy/data (DATA_IT halo)
+- Verdict before:
+  - `ania`: `discutable`
+- Main false positives:
+  - `VIE - Quality Engineer - Zalaegerszeg`
+  - `VIE - Global Digital Policy - Brussels`
+  - `Analyste SOC`
+- Dominant cause hypothesis:
+  - profile-side `domain_library_uri` for `DATA_IT` admitted four transverse generic tokens (`analyse`, `analyste`, `coordination`, `relations`) that amplified non-finance overlap into policy/SOC.
+- Patch scope:
+  - in `build_domain_uris_for_text()`, block only those four tokens when `cluster == DATA_IT`
+- Replay result after:
+  - `ania`: `discutable`
+  - `Global Digital Policy` and `Analyste SOC` leave the top 10
+  - finance offers now occupy ranks `2` through `9`
+  - residual false positives remain: `Quality Engineer` top 1 and `DATA SCIENTIST` rank 10
+- Regressions on other sentinels:
+  - none observed
+- Active sentinel replay matrix:
+  - `nawel`: `stable`
+  - `ania`: `pass`
+  - `dia`: `stable`
+  - `akim_audit`: `stable`
+  - `mouissetheo`: `stable`
+- Decision:
+  - keep patch; next drift is no longer policy/SOC for `ania`, but residual transverse quality/data noise

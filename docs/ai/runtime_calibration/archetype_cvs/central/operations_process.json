@@ -1,0 +1,561 @@
+{
+  "anchor_skills": [
+    {
+      "classification": "ANCHOR",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial analysis"
+    }
+  ],
+  "experience_types": [
+    {
+      "evidence_count": 10,
+      "label": "h f"
+    },
+    {
+      "evidence_count": 3,
+      "label": "project manager"
+    }
+  ],
+  "generic_skills_to_limit": [],
+  "market_evidence": {
+    "domain_tags": [
+      "operations",
+      "supply"
+    ],
+    "offer_count": 10,
+    "offer_ids": [
+      "business_france:227716",
+      "business_france:236241",
+      "business_france:237102",
+      "business_france:237191",
+      "business_france:238176",
+      "business_france:242091",
+      "business_france:242142",
+      "business_france:242176",
+      "business_france:242179",
+      "business_france:242313"
+    ]
+  },
+  "orientation": {
+    "domain_tags": [
+      "operations",
+      "supply"
+    ],
+    "offer_count": 10
+  },
+  "profile_summary": [
+    {
+      "evidence_count": 11,
+      "label": "f"
+    },
+    {
+      "evidence_count": 10,
+      "label": "h"
+    },
+    {
+      "evidence_count": 4,
+      "label": "project"
+    }
+  ],
+  "project_types": [
+    {
+      "evidence_count": 21,
+      "label": "of the"
+    },
+    {
+      "evidence_count": 13,
+      "label": "in the"
+    },
+    {
+      "evidence_count": 13,
+      "label": "to the"
+    }
+  ],
+  "sector_slug": "operations_process",
+  "sector_type": "central",
+  "support_skills": [
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "abnormal load transport coordination"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "agile methodologies"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "budget follow-up and cost analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "budget monitoring"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 2,
+      "offer_count": 2,
+      "skill_label": "budgeting"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "clinical study execution"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "cloud architecture"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "compliance"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "continuous improvement methodologies"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "cross-functional team leadership"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "data driven monitoring"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "data engineering"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "digitalization in logistics"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "excel"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "financial and commercial activities"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "french or dutch and english fluency"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "good clinical practice (gcp)"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "heavy lift logistics project management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "hoshin workshops facilitation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "international and multicultural environment"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "international environment"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "inventory accuracy management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "it solutions implementation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "kheops"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "kpi monitoring"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "lean manufacturing standards development"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "lean tools coordination"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 2,
+      "offer_count": 2,
+      "skill_label": "logistics coordination"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "logistics flow analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "logistics flow coordination"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "logistics solutions design"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "maintenance documentation validation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "operational management of logistics projects"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "parts management in kheops"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "performance and risk review"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 3,
+      "offer_count": 3,
+      "skill_label": "process optimization"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "production control & logistics tools"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "project execution management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 5,
+      "offer_count": 5,
+      "skill_label": "project management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "qhse compliance supervision"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "sap master data management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "scrum ceremonies facilitation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "scrum methodology"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "smed workshops facilitation"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "stakeholder communication"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "standardized training program development"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "supply chain activities oversight"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "supply chain data integrity"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "supply"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "supply chain management"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "technical inspections and audits"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "technical understanding and analysis"
+    },
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "training operations coordination"
+    }
+  ],
+  "tools_technologies": [
+    {
+      "classification": "SUPPORT",
+      "domain_tags": [
+        "operations"
+      ],
+      "evidence_count": 1,
+      "offer_count": 1,
+      "skill_label": "sap"
+    }
+  ]
+}

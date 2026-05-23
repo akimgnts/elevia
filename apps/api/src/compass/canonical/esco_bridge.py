@@ -37,6 +37,41 @@ from .canonical_store import CanonicalStore, get_canonical_store
 logger = logging.getLogger(__name__)
 
 _MAX_BRIDGE_PROMOTED = 20
+_MAX_PER_CANONICAL = 2
+
+_EXPLICIT_BRIDGE_CANDIDATES: Dict[str, List[dict]] = {
+    "skill:recruitment": [
+        {"label": "recruter des employés", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+        {"label": "recruter du personnel", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+    ],
+    "skill:financial_analysis": [
+        {"label": "analyse financière", "source": "esco_fr_label", "allow_fuzzy": False},
+        {"label": "effectuer un bilan financier", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+    ],
+    "skill:compliance": [
+        {"label": "assurer la conformité aux exigences légales", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+    ],
+    "skill:training_coordination": [
+        {"label": "organiser des formations", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+        {"label": "préparer des événements de formation pour des enseignants", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+    ],
+    "skill:audit": [
+        {"label": "audit interne", "source": "potential_esco_mapping_label", "allow_fuzzy": False},
+        {"label": "réaliser des audits de conformité contractuelle", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+    ],
+    "skill:internal_control": [
+        {"label": "contrôler les ressources financières", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+        {"label": "contrôler les comptes financiers", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+    ],
+    "skill:legal_analysis": [
+        {"label": "analyser des preuves juridiques", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+        {"label": "se conformer aux réglementations juridiques", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+    ],
+    "skill:wealth_management": [
+        {"label": "gestion de patrimoine totale", "source": "explicit_runtime_exact", "allow_fuzzy": False},
+        {"label": "activité bancaire", "source": "explicit_runtime_fuzzy", "allow_fuzzy": True},
+    ],
+}
 
 
 def _bridge_enabled(override: Optional[bool] = None) -> bool:
@@ -55,6 +90,74 @@ def _build_esco_fr_index(store: CanonicalStore) -> Dict[str, str]:
     return index
 
 
+def _append_candidate(
+    candidates: List[dict],
+    seen: set[str],
+    *,
+    label: Optional[str],
+    source: str,
+    allow_fuzzy: bool = False,
+) -> None:
+    if not label or not isinstance(label, str):
+        return
+    normalized = label.strip()
+    if not normalized:
+        return
+    key = f"{source}|{allow_fuzzy}|{normalized.lower()}"
+    if key in seen:
+        return
+    seen.add(key)
+    candidates.append({
+        "label": normalized,
+        "source": source,
+        "allow_fuzzy": allow_fuzzy,
+    })
+
+
+def _candidate_specs_for_canonical_id(
+    canonical_id: str,
+    entry: Optional[dict],
+) -> List[dict]:
+    entry = entry or {}
+    candidates: List[dict] = []
+    seen: set[str] = set()
+
+    _append_candidate(
+        candidates,
+        seen,
+        label=entry.get("esco_fr_label"),
+        source="esco_fr_label",
+        allow_fuzzy=False,
+    )
+    _append_candidate(
+        candidates,
+        seen,
+        label=entry.get("potential_esco_mapping_label"),
+        source="potential_esco_mapping_label",
+        allow_fuzzy=False,
+    )
+
+    for item in _EXPLICIT_BRIDGE_CANDIDATES.get(canonical_id, []):
+        _append_candidate(
+            candidates,
+            seen,
+            label=item.get("label"),
+            source=str(item.get("source") or "explicit_runtime_exact"),
+            allow_fuzzy=bool(item.get("allow_fuzzy")),
+        )
+
+    for alias in entry.get("aliases") or []:
+        _append_candidate(
+            candidates,
+            seen,
+            label=alias,
+            source="alias",
+            allow_fuzzy=False,
+        )
+
+    return candidates
+
+
 def build_canonical_esco_promoted(
     resolved_canonical_ids: List[str],
     base_skills_uri: Optional[List[str]] = None,
@@ -62,6 +165,7 @@ def build_canonical_esco_promoted(
     store: Optional[CanonicalStore] = None,
     _promote_override: Optional[bool] = None,
     max_promoted: int = _MAX_BRIDGE_PROMOTED,
+    trace: Optional[dict] = None,
 ) -> List[str]:
     """
     Map resolved canonical skill IDs to ESCO URIs.
@@ -104,8 +208,6 @@ def build_canonical_esco_promoted(
             if isinstance(u, str) and str(u).strip()
         }
 
-        fr_index = _build_esco_fr_index(store)
-
         promoted: List[str] = []
         promoted_set: set = set()
         stats = {
@@ -115,36 +217,66 @@ def build_canonical_esco_promoted(
             "duplicate_base": 0,
             "cap": 0,
         }
+        resolved_ids: List[str] = []
+        unresolved_ids: List[str] = []
+        bridge_sources: Dict[str, List[str]] = {}
 
         for cid in resolved_canonical_ids:
             if len(promoted) >= max_promoted:
                 stats["cap"] += 1
                 break
 
-            fr_label = fr_index.get(cid)
-            if not fr_label:
+            entry = store.id_to_skill.get(cid) or {}
+            candidate_specs = _candidate_specs_for_canonical_id(cid, entry)
+            if not candidate_specs:
                 stats["unresolved_no_fr_label"] += 1
+                unresolved_ids.append(cid)
                 continue
 
-            result = map_skill(fr_label, enable_fuzzy=False)
-            if not result or not result.get("esco_id"):
+            promoted_for_id = 0
+            bridge_sources[cid] = []
+            for spec in candidate_specs:
+                if len(promoted) >= max_promoted:
+                    stats["cap"] += 1
+                    break
+                if promoted_for_id >= _MAX_PER_CANONICAL:
+                    break
+
+                result = map_skill(
+                    spec["label"],
+                    enable_fuzzy=bool(spec.get("allow_fuzzy")),
+                )
+                if not result or not result.get("esco_id"):
+                    continue
+
+                uri = str(result["esco_id"]).strip()
+                if not uri:
+                    continue
+
+                if uri in base_set or uri in promoted_set:
+                    stats["duplicate_base"] += 1
+                    continue
+
+                promoted.append(uri)
+                promoted_set.add(uri)
+                promoted_for_id += 1
+                stats["promoted_from_canonical"] += 1
+                bridge_sources[cid].append(str(spec.get("source") or "unknown"))
+
+            if promoted_for_id > 0:
+                resolved_ids.append(cid)
+            else:
                 stats["esco_miss"] += 1
-                continue
-
-            uri = str(result["esco_id"]).strip()
-            if not uri:
-                stats["esco_miss"] += 1
-                continue
-
-            if uri in base_set or uri in promoted_set:
-                stats["duplicate_base"] += 1
-                continue
-
-            promoted.append(uri)
-            promoted_set.add(uri)
-            stats["promoted_from_canonical"] += 1
+                unresolved_ids.append(cid)
+                bridge_sources.pop(cid, None)
 
         promoted_sorted = sorted(promoted)
+
+        if isinstance(trace, dict):
+            trace["canonical_resolution_success"] = resolved_ids
+            trace["unresolved_canonical_ids"] = unresolved_ids
+            trace["canonical_bridge_source"] = bridge_sources
+            trace["promoted_runtime_uris"] = promoted_sorted
 
         if stats["promoted_from_canonical"] > 0 or stats["esco_miss"] > 0:
             logger.info(
@@ -152,6 +284,8 @@ def build_canonical_esco_promoted(
                     "event": "ESCO_PROMOTION_STATS",
                     "cluster": cluster or "none",
                     "canonical_ids_in": len(resolved_canonical_ids),
+                    "resolved_ids": resolved_ids,
+                    "unresolved_ids": unresolved_ids,
                     "promoted_from_canonical": stats["promoted_from_canonical"],
                     "unresolved_no_fr_label": stats["unresolved_no_fr_label"],
                     "esco_miss": stats["esco_miss"],

@@ -257,6 +257,8 @@ class InboxItem(BaseModel):
     distance: Optional[str] = None
     next_move: Optional[str] = None
 
+    model_config = {"extra": "allow"}
+
 
 class InboxMeta(BaseModel):
     profile_cluster: Optional[str] = None
@@ -273,6 +275,8 @@ class InboxMeta(BaseModel):
     strict_count: Optional[int] = None
     neighbor_count: Optional[int] = None
     out_count: Optional[int] = None
+
+    model_config = {"extra": "allow"}
 
 
 class InboxResponse(BaseModel):

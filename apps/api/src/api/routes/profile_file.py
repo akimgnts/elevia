@@ -10,6 +10,7 @@ POST /profile/parse-file
 """
 from __future__ import annotations
 
+from copy import deepcopy
 import sys
 import uuid
 from pathlib import Path
@@ -20,11 +21,54 @@ from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from compass.pipeline.canonical_mapping_stage import (
+    dedupe_canonical_skills_for_display,
+    merge_preserved_explicit_canonical_skills,
+)
 from compass.pipeline import build_parse_file_response_payload
 from compass.pipeline.contracts import ParseFilePipelineRequest, PipelineHTTPError
 from api.utils.profiles_db import save_profile
 
 router = APIRouter(tags=["profile"])
+
+
+def _build_matching_input_trace(response_payload: dict) -> dict:
+    trace = response_payload.get("matching_input_trace") if isinstance(response_payload, dict) else {}
+    return trace if isinstance(trace, dict) else {}
+
+
+def _build_persisted_profile_data(response_payload: dict) -> dict:
+    profile = deepcopy(response_payload.get("profile") or {})
+    if not isinstance(profile, dict):
+        profile = {}
+
+    canonical_skills = deepcopy(response_payload.get("canonical_skills") or [])
+    preserved_explicit_skills = deepcopy(response_payload.get("preserved_explicit_skills") or [])
+    canonical_skills = merge_preserved_explicit_canonical_skills(
+        canonical_skills,
+        preserved_explicit_skills,
+    )
+    if canonical_skills:
+        canonical_skills, _canonical_debug = dedupe_canonical_skills_for_display(
+            canonical_skills,
+            [],
+        )
+    resolved_canonical_count = sum(
+        1 for item in canonical_skills if isinstance(item, dict) and item.get("canonical_id")
+    )
+
+    additive_fields = (
+        "preserved_explicit_skills",
+        "profile_summary_skills",
+    )
+    for field in additive_fields:
+        if field in response_payload:
+            profile[field] = deepcopy(response_payload.get(field))
+
+    profile["canonical_skills"] = canonical_skills
+    profile["canonical_skills_count"] = resolved_canonical_count
+
+    return profile
 
 
 class ParseFileResponse(BaseModel):
@@ -131,11 +175,12 @@ async def parse_file(
         raise HTTPException(status_code=500, detail="Extraction failed") from exc
 
     # Save profile to DB (best-effort, doesn't fail the request if DB unavailable)
-    profile_data = response_payload.get("profile", {})
+    profile_data = _build_persisted_profile_data(response_payload)
     save_profile(profile_id, profile_data, user_id=None)
 
     # Add profile_id to response
     response_payload["profile_id"] = profile_id
+    response_payload["matching_input_trace"] = _build_matching_input_trace(response_payload)
 
     return ParseFileResponse(**response_payload)
 
