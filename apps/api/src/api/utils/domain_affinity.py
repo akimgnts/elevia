@@ -30,6 +30,10 @@ STRONG_SIGNALS: dict[str, frozenset[str]] = {
         "skill:financial_reporting", "skill:audit", "skill:controlling",
         "skill:tax", "skill:treasury", "skill:financial_modeling",
         "skill:cost_accounting", "skill:management_accounting",
+        # French equivalents for runtime compatibility
+        "skill:analyse financière", "skill:comptabilité", "skill:budgeting",
+        "skill:audit", "skill:contrôle de gestion", "skill:contrôle interne",
+        "skill:audit interne", "skill:trésorier", "skill:modélisation financière",
     }),
     "hr": frozenset({
         "skill:recruitment", "skill:talent_acquisition", "skill:human_resources_management",
@@ -93,6 +97,23 @@ ADJACENCY: frozenset[frozenset[str]] = frozenset({
     frozenset({"admin", "operations"}),
 })
 
+# ── Adjacency weight tuning (soft re-ranking signal, display-only) ─────────────
+# Tighter adjacency pairings that should be downweighted in soft re-rank signal.
+# Adjacent pairs not in this set receive weight 1.0 (standard).
+# Pairs in this set receive weight 0.5 (downweighted).
+#
+# Rationale (2026-06-09 adjacency tuning):
+# - finance↔data: Too permissive on profiles like Ania (Finance/Compliance) that
+#   match Data offers too readily due to overlapping BI/analysis skills.
+#   Downweight to prefer finance-aligned offers.
+# - data↔engineering: Keep standard weight (legitimate career path).
+# - sales↔operations: Permissive due to 11-tag DB collapse of operations.
+#   Downweight to reduce operational noise.
+DOWNWEIGHTED_ADJACENCY: frozenset[frozenset[str]] = frozenset({
+    frozenset({"finance", "data"}),
+    frozenset({"sales", "operations"}),
+})
+
 
 _AFFINITY_VERSION = "v1_3_level_aligned_adjacent_distant"
 _INFERENCE_VERSION = "v1_strong_only"
@@ -130,14 +151,34 @@ def domain_affinity(cv_domain: str, offer_domain: Optional[str]) -> str:
     return "distant"
 
 
-def affinity_score(label: Optional[str]) -> Optional[int]:
-    """Return a numeric score for the affinity label (aligned=2, adjacent=1, distant=0)."""
+def affinity_score(label: Optional[str], cv_domain: Optional[str] = None, offer_domain: Optional[str] = None) -> Optional[float]:
+    """Return a numeric score for the affinity label, with optional downweighting for specific adjacent pairs.
+
+    Scores (display-only, soft signal):
+    - aligned: 2.0
+    - adjacent (standard): 1.0
+    - adjacent (downweighted): 0.5
+    - distant: 0.0
+
+    Args:
+        label: The affinity classification (aligned/adjacent/distant/neutral).
+        cv_domain: CV domain (optional, used for downweighting specific pairs).
+        offer_domain: Offer domain (optional, used for downweighting specific pairs).
+
+    Returns:
+        Numeric score or None.
+    """
     if label == "aligned":
-        return 2
+        return 2.0
     if label == "adjacent":
-        return 1
+        # Check if this pair is downweighted
+        if cv_domain and offer_domain:
+            pair = frozenset({cv_domain, offer_domain})
+            if pair in DOWNWEIGHTED_ADJACENCY:
+                return 0.5
+        return 1.0
     if label == "distant":
-        return 0
+        return 0.0
     return None
 
 

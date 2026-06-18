@@ -41,7 +41,9 @@ from ..utils.inbox_catalog import load_catalog_offers, load_catalog_offers_filte
 from ..utils.generic_skills_filter import (
     HARD_GENERIC_URIS,
     filter_skills_uri_for_scoring,
+    generic_only_overlap_block_enabled,
     should_apply_generic_filter,
+    should_block_generic_only_overlap,
 )
 from ..utils.career_intelligence import build_career_intelligence
 from ..utils.elevia_metier import infer_elevia_metier
@@ -804,7 +806,7 @@ def _apply_domain_affinity_enrichment(
             tag = tags.get(item.offer_id)
             label = domain_affinity(cv_domain, tag)
             item.domain_affinity = label
-            score = affinity_score(label)
+            score = affinity_score(label, cv_domain=cv_domain, offer_domain=tag)
             if score is not None:
                 item.domain_affinity_score = score
     except Exception as exc:  # pragma: no cover - soft signal
@@ -1086,6 +1088,11 @@ def _score_offers(
             profile_uri_count = skills_debug.get("profile_skill_uri_count")
         if scoring_unit is None:
             scoring_unit = "uri" if offer.get("skills_uri") is not None else "string"
+        if generic_only_overlap_block_enabled() and should_block_generic_only_overlap(
+            matched_values=matched_skills if isinstance(matched_skills, list) else [],
+            scoring_unit=scoring_unit,
+        ):
+            continue
         if intersection_count is None:
             intersection_count = len(matched_display)
         if profile_uri_count is None:
@@ -1662,7 +1669,7 @@ def get_inbox(
                 item,
                 offer_payload=_offer_c,
                 precomputed_payload=offer_intelligence_map.get(item.offer_id),
-                allow_recompute=False,
+                allow_recompute=True,
             )
             _apply_semantic_explainability(
                 item,
@@ -1715,6 +1722,28 @@ def get_inbox(
         )
 
     _apply_domain_affinity_enrichment(items, extracted=extracted, source_map=source_map)
+
+    # Soft re-rank by affinity (secondary sort for items at equal score)
+    # Applied always after domain affinity enrichment (independent of sector_signal rerank flag)
+    if items:
+        _bucket_rank = {"strict": 2, "neighbor": 1, "out": 0}
+        _conf_rank = {"HIGH": 2, "MED": 1, "LOW": 0}
+        _sig_rank = {"HIGH": 2, "MED": 1, "LOW": 0}
+
+        def _affinity_rerank_key(item: InboxItem) -> tuple:
+            ev1 = item.explain_v1
+            affinity_score_val = item.domain_affinity_score if item.domain_affinity_score is not None else 0.0
+            return (
+                -_bucket_rank.get(item.domain_bucket or "out", 0),
+                -item.score,
+                -affinity_score_val,  # Secondary: prefer aligned/adjacent over distant
+                -_conf_rank.get(ev1.confidence if ev1 else "LOW", 0),
+                -_sig_rank.get(ev1.rare_signal_level if ev1 else "LOW", 0),
+                -(ev1.sector_signal if ev1 and ev1.sector_signal is not None else 0.0),
+                item.offer_id,
+            )
+        items = sorted(items, key=_affinity_rerank_key)
+
     try:
         _apply_fit_score_v2_shadow(
             items,
@@ -2050,7 +2079,7 @@ def _get_inbox_filtered(
             item,
             offer_payload=offer,
             precomputed_payload=offer_intelligence_map.get(item.offer_id),
-            allow_recompute=False,
+            allow_recompute=True,
         )
         _apply_semantic_explainability(
             item,
@@ -2206,6 +2235,28 @@ def _get_inbox_filtered(
         )
 
     _apply_domain_affinity_enrichment(items, extracted=extracted, source_map=source_map)
+
+    # Soft re-rank by affinity (secondary sort for items at equal score)
+    # Applied always after domain affinity enrichment (independent of sector_signal rerank flag)
+    if items:
+        _bucket_rank = {"strict": 2, "neighbor": 1, "out": 0}
+        _conf_rank = {"HIGH": 2, "MED": 1, "LOW": 0}
+        _sig_rank = {"HIGH": 2, "MED": 1, "LOW": 0}
+
+        def _affinity_rerank_key(item: InboxItem) -> tuple:
+            ev1 = item.explain_v1
+            affinity_score_val = item.domain_affinity_score if item.domain_affinity_score is not None else 0.0
+            return (
+                -_bucket_rank.get(item.domain_bucket or "out", 0),
+                -item.score,
+                -affinity_score_val,  # Secondary: prefer aligned/adjacent over distant
+                -_conf_rank.get(ev1.confidence if ev1 else "LOW", 0),
+                -_sig_rank.get(ev1.rare_signal_level if ev1 else "LOW", 0),
+                -(ev1.sector_signal if ev1 and ev1.sector_signal is not None else 0.0),
+                item.offer_id,
+            )
+        items = sorted(items, key=_affinity_rerank_key)
+
     try:
         _apply_fit_score_v2_shadow(
             items,

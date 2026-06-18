@@ -121,6 +121,11 @@ class OfferIntelligence(BaseModel):
     role_hypotheses: List[OfferRoleHypothesis] = Field(default_factory=list)
     offer_summary: str
     role_block_scores: List[Dict[str, Any]] = Field(default_factory=list)
+    job_family: Optional[str] = None
+    primary_function: Optional[str] = None
+    purity_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    hybrid_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    needs_review: Optional[bool] = None
     debug: Optional[Dict[str, Any]] = None
 
 
@@ -242,7 +247,7 @@ class InboxItem(BaseModel):
     domain_affinity: Optional[str] = Field(
         default=None, pattern="^(aligned|adjacent|distant|neutral)$"
     )
-    domain_affinity_score: Optional[int] = Field(default=None, ge=0, le=2)
+    domain_affinity_score: Optional[float] = Field(default=None, ge=0.0, le=2.0)
     explain_v1: Optional[CompassExplainCompact] = None  # compass signal (always computed)
     near_match_count: Optional[int] = None  # compact, display-only (list view)
     match_strength: Optional[str] = Field(default=None, pattern="^(STRONG|MEDIUM|WEAK)$")
