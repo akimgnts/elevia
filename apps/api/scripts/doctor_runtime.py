@@ -22,6 +22,13 @@ _REPO_ROOT = _API_ROOT.parent.parent    # repo root (elevia-compass/)
 _OFFERS_DB = _API_ROOT / "data" / "db" / "offers.db"
 _AUTH_DB = _API_ROOT / "data" / "db" / "auth.db"
 _TEMPLATES_DIR = _REPO_ROOT / "templates"
+_RUNTIME_REQUIRED = ("offers.db", "auth.db")
+_RUNTIME_OPTIONAL = (
+    "context.db",
+    "embeddings.db",
+    "onet.db",
+    "semantic_corpus_v1.jsonl",
+)
 
 # ---------------------------------------------------------------------------
 # ANSI helpers
@@ -241,11 +248,30 @@ def check_schema_version():
     )
 
 
+def check_runtime_assets():
+    required_assets = {
+        "offers.db": _OFFERS_DB,
+        "auth.db": _AUTH_DB,
+    }
+    missing_required = [
+        name for name in _RUNTIME_REQUIRED if not required_assets[name].exists()
+    ]
+    if missing_required:
+        return (
+            "FAIL",
+            "runtime assets missing",
+            "missing required files: " + ", ".join(sorted(missing_required)),
+        )
+
+    return ("OK", "runtime assets present", "")
+
+
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
 
 _CHECKS = [
+    check_runtime_assets,
     check_offers_db,
     check_auth_db,
     check_templates_dir,
