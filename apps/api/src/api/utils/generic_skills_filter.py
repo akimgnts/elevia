@@ -24,6 +24,8 @@ Calibration sources:
 from __future__ import annotations
 
 import os
+import re
+import unicodedata
 from typing import Dict, List
 
 # Minimum scorable URIs required after filtering. Offers reduced below this
@@ -78,6 +80,64 @@ STRONG_DATA_URIS: frozenset = frozenset({
 TAG_GENERIC_HARD = "generic_hard"
 TAG_GENERIC_WEAK = "generic_weak"
 TAG_DOMAIN = "domain"
+
+SOLO_BLOCK_GENERIC_URIS: frozenset = frozenset(
+    set(HARD_GENERIC_URIS)
+    | {
+        "http://data.europa.eu/esco/skill/97bd1c21-66b2-4b7e-ad0f-e3cda590e378",  # analyse de données
+        "http://data.europa.eu/esco/skill/0a9acb6b-1139-4be9-b431-3a80a959f2f4",  # gestion de projets agile
+        "http://data.europa.eu/esco/skill/33d49d4f-31ec-473f-9b8a-b555aa5116bb",  # développement par itérations
+    }
+)
+
+NOISE_LABELS: frozenset[str] = frozenset({"gestion", "suivi", "participation"})
+SOLO_BLOCK_GENERIC_LABELS: frozenset[str] = frozenset(
+    {
+        "analyse de donnees",
+        "analyse de donnees",
+        "analyse de donnée",
+        "analyse de données",
+        "data analysis",
+        "reporting",
+        "communication",
+        "project management",
+        "gestion de projets",
+        "gestion de projets agile",
+        "developpement par iterations",
+        "développement par itérations",
+        "excel",
+        "logiciel tableur",
+        "anglais",
+        *NOISE_LABELS,
+    }
+)
+_SPACE_RE = re.compile(r"\s+")
+
+
+def generic_only_overlap_block_enabled() -> bool:
+    return os.getenv("ELEVIA_BLOCK_GENERIC_ONLY_OVERLAP", "0").strip() == "1"
+
+
+def _normalize_label(value: str) -> str:
+    text = unicodedata.normalize("NFKD", str(value or "").strip().lower())
+    text = "".join(char for char in text if not unicodedata.combining(char))
+    return _SPACE_RE.sub(" ", text)
+
+
+def should_block_generic_only_overlap(
+    *,
+    matched_values: List[str],
+    scoring_unit: str | None,
+) -> bool:
+    if not matched_values:
+        return False
+
+    if scoring_unit == "uri":
+        normalized_values = {str(value or "").strip() for value in matched_values if str(value or "").strip()}
+        return bool(normalized_values) and normalized_values <= SOLO_BLOCK_GENERIC_URIS
+
+    normalized_labels = {_normalize_label(value) for value in matched_values if str(value or "").strip()}
+    return bool(normalized_labels) and normalized_labels <= SOLO_BLOCK_GENERIC_LABELS
 
 
 def is_enabled() -> bool:

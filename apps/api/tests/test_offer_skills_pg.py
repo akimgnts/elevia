@@ -10,6 +10,222 @@ def _database_url() -> str | None:
     return cfg.get("DATABASE_URL") or os.getenv("DATABASE_URL")
 
 
+def test_canonicalize_ai_skill_labels_absorbs_p0_labels_into_existing_canonical_vocab():
+    from api.utils.offer_skills_pg import _canonicalize_ai_skill_labels
+
+    normalized = _canonicalize_ai_skill_labels(
+        [
+            "SAP",
+            "Technical Sales",
+            "Contract Management",
+            "Data Management",
+            "Amélioration des processus",
+            "sales engineering",
+            "amelioration des processus",
+        ]
+    )
+
+    assert normalized == [
+        "sap",
+        "b2b sales",
+        "vendor management",
+        "data governance",
+        "process optimization",
+    ]
+
+
+def test_canonicalize_ai_labels_to_rows_converts_p0_labels_into_persistable_rows():
+    from api.utils.offer_skills_pg import _canonicalize_ai_labels_to_rows
+
+    rows = _canonicalize_ai_labels_to_rows(
+        offer_id=1,
+        source="business_france",
+        external_id="BF-P0-1",
+        base_offer={"id": "1", "title": "x", "description": "x", "skills": [], "skills_display": []},
+        ai_labels=[
+            "SAP",
+            "Technical Sales",
+            "Contract Management",
+            "Data Management",
+            "Amélioration des processus",
+        ],
+        existing_canonical_ids=set(),
+        content_hash="hash",
+        now="2026-06-06T00:00:00+00:00",
+        canonical_builder=None,
+        enrichment_version="offer_skills_v2",
+    )
+
+    assert {row["canonical_id"] for row in rows} == {
+        "skill:sap",
+        "skill:b2b_sales",
+        "skill:vendor_management",
+        "skill:data_governance",
+        "skill:process_optimization",
+    }
+
+
+def test_canonicalize_ai_skill_labels_absorbs_public_affairs_labels_without_generic_overreach():
+    from api.utils.offer_skills_pg import _canonicalize_ai_skill_labels
+
+    normalized = _canonicalize_ai_skill_labels(
+        [
+            "Political Analysis",
+            "Event Organization",
+            "Public Relations",
+            "Website Management",
+            "Communication Management",
+        ]
+    )
+
+    assert normalized == [
+        "public affairs analysis",
+        "event coordination",
+        "public relations",
+        "website management",
+        "Communication Management",
+    ]
+
+
+def test_canonicalize_ai_labels_to_rows_converts_public_affairs_labels_and_leaves_generic_comm_unresolved():
+    from api.utils.offer_skills_pg import _canonicalize_ai_labels_to_rows
+
+    rows = _canonicalize_ai_labels_to_rows(
+        offer_id=2,
+        source="business_france",
+        external_id="BF-P1A-1",
+        base_offer={"id": "2", "title": "x", "description": "x", "skills": [], "skills_display": []},
+        ai_labels=[
+            "Political Analysis",
+            "Event Organization",
+            "Public Relations",
+            "Website Management",
+            "Communication Management",
+        ],
+        existing_canonical_ids=set(),
+        content_hash="hash",
+        now="2026-06-06T00:00:00+00:00",
+        canonical_builder=None,
+        enrichment_version="offer_skills_v2",
+    )
+
+    assert {row["canonical_id"] for row in rows} == {
+        "skill:public_affairs_analysis",
+        "skill:event_coordination",
+        "skill:public_relations",
+        "skill:website_management",
+    }
+
+
+def test_canonicalize_ai_skill_labels_absorbs_scientific_pharma_labels_with_controlled_scope():
+    from api.utils.offer_skills_pg import _canonicalize_ai_skill_labels
+
+    normalized = _canonicalize_ai_skill_labels(
+        [
+            "HPLC",
+            "UPLC",
+            "GLP",
+            "GMP",
+            "Validation of Computerized Systems",
+        ]
+    )
+
+    assert normalized == [
+        "hplc",
+        "uplc",
+        "glp",
+        "gmp",
+        "computerized systems validation",
+    ]
+
+
+def test_canonicalize_ai_labels_to_rows_converts_scientific_pharma_labels_into_persistable_rows():
+    from api.utils.offer_skills_pg import _canonicalize_ai_labels_to_rows
+
+    rows = _canonicalize_ai_labels_to_rows(
+        offer_id=3,
+        source="business_france",
+        external_id="BF-P1B-1",
+        base_offer={"id": "3", "title": "x", "description": "x", "skills": [], "skills_display": []},
+        ai_labels=[
+            "HPLC",
+            "UPLC",
+            "GLP",
+            "GMP",
+            "Validation of Computerized Systems",
+        ],
+        existing_canonical_ids=set(),
+        content_hash="hash",
+        now="2026-06-06T00:00:00+00:00",
+        canonical_builder=None,
+        enrichment_version="offer_skills_v2",
+    )
+
+    assert {row["canonical_id"] for row in rows} == {
+        "skill:hplc",
+        "skill:uplc",
+        "skill:glp",
+        "skill:gmp",
+        "skill:computerized_systems_validation",
+    }
+
+
+def test_canonicalize_ai_skill_labels_absorbs_industrial_quality_labels_with_high_roi_only():
+    from api.utils.offer_skills_pg import _canonicalize_ai_skill_labels
+
+    normalized = _canonicalize_ai_skill_labels(
+        [
+            "supplier performance",
+            "documentation management",
+            "quality assurance",
+            "contract negotiation",
+            "quality audits",
+            "EHS reporting",
+        ]
+    )
+
+    assert normalized == [
+        "vendor management",
+        "process documentation",
+        "quality engineering",
+        "negotiation",
+        "audit",
+        "EHS reporting",
+    ]
+
+
+def test_canonicalize_ai_labels_to_rows_converts_industrial_quality_labels_and_leaves_ehs_reporting_out():
+    from api.utils.offer_skills_pg import _canonicalize_ai_labels_to_rows
+
+    rows = _canonicalize_ai_labels_to_rows(
+        offer_id=4,
+        source="business_france",
+        external_id="BF-P1C-1",
+        base_offer={"id": "4", "title": "x", "description": "x", "skills": [], "skills_display": []},
+        ai_labels=[
+            "supplier performance",
+            "documentation management",
+            "quality assurance",
+            "contract negotiation",
+            "quality audits",
+            "EHS reporting",
+        ],
+        existing_canonical_ids=set(),
+        content_hash="hash",
+        now="2026-06-06T00:00:00+00:00",
+        canonical_builder=None,
+        enrichment_version="offer_skills_v2",
+    )
+
+    assert {row["canonical_id"] for row in rows} == {
+        "skill:vendor_management",
+        "skill:process_documentation",
+        "skill:quality_engineering",
+        "skill:negotiation",
+        "skill:audit",
+    }
+
+
 @pytest.mark.skipif(not _database_url(), reason="DATABASE_URL not configured")
 def test_offer_skills_table_insert_and_idempotent_skip():
     import psycopg

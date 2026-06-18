@@ -25,6 +25,9 @@ from api.utils.clean_offers_pg import (
     persist_ingestion_run_with_connection,
     sync_business_france_offer_presence_with_connection,
 )
+from api.utils.offer_domain_enrichment import classify_and_persist_business_france_offer_domains
+from api.utils.offer_skills_pg import backfill_offer_skills
+from api.utils.offer_skills_uri_backfill import run_offer_skills_uri_backfill
 
 FLAG_ENABLE_TELEGRAM_REPORT = "ELEVIA_ENABLE_TELEGRAM_REPORT"
 ENV_TELEGRAM_BOT_TOKEN = "TELEGRAM_BOT_TOKEN"
@@ -204,13 +207,20 @@ def send_telegram_message(text: str, env: dict[str, str]) -> dict[str, Any]:
         return {"enabled": True, "sent": False, "warning": str(exc)}
 
 
-def run_ingestion(*, repo_root: Path, log_path: Path) -> dict[str, Any]:
+def run_ingestion(
+    *,
+    repo_root: Path,
+    log_path: Path,
+    scrape_limit: int | None = None,
+    scrape_batch_size: int = 200,
+    scrape_timeout: int = 30,
+    skip_restart: bool = False,
+) -> dict[str, Any]:
     env = build_env(repo_root)
     database_url = (env.get("DATABASE_URL") or "").strip() or None
     python_bin = repo_root / "apps" / "api" / ".venv" / "bin" / "python"
     scrape_script = repo_root / "scripts" / "scrape_business_france_raw_offers.py"
     load_script = repo_root / "scripts" / "load_business_france_clean_offers.py"
-    domain_script = repo_root / "scripts" / "enrich_business_france_offer_domains.py"
     started_at = utc_now()
     previous_active_ids: set[str] = set()
     current_ids: set[str] = set()
@@ -220,6 +230,7 @@ def run_ingestion(*, repo_root: Path, log_path: Path) -> dict[str, Any]:
         "missing_count": 0,
         "active_total": 0,
     }
+    presence_sync_skipped = False
 
     record: dict[str, Any] = {
         "timestamp": started_at,
@@ -241,10 +252,17 @@ def run_ingestion(*, repo_root: Path, log_path: Path) -> dict[str, Any]:
             database_url,
             lambda conn: get_business_france_active_ids_with_connection(conn),
         )
-        scrape = run_json_command(
-            [str(python_bin), str(scrape_script), "--batch-size", "200"],
-            env,
-        )
+        scrape_cmd = [
+            str(python_bin),
+            str(scrape_script),
+            "--batch-size",
+            str(int(scrape_batch_size or 200)),
+            "--timeout",
+            str(int(scrape_timeout or 30)),
+        ]
+        if scrape_limit is not None and int(scrape_limit) > 0:
+            scrape_cmd.extend(["--limit", str(int(scrape_limit))])
+        scrape = run_json_command(scrape_cmd, env)
         current_ids = with_database_connection(
             database_url,
             lambda conn: get_latest_business_france_raw_ids_with_connection(conn),
@@ -253,26 +271,47 @@ def run_ingestion(*, repo_root: Path, log_path: Path) -> dict[str, Any]:
             [str(python_bin), str(load_script)],
             env,
         )
-        domain_enrichment: dict[str, Any] | None = None
-        domain_enrichment_error: str | None = None
-        try:
-            domain_enrichment = run_json_command(
-                [str(python_bin), str(domain_script)],
-                env,
-            )
-        except Exception as exc:
-            domain_enrichment_error = str(exc)
-        tracking_stats = with_database_connection(
-            database_url,
-            lambda conn: sync_business_france_offer_presence_with_connection(
-                conn,
-                current_ids=current_ids,
-                previous_active_ids=previous_active_ids,
-                seen_at=utc_now(),
-            ),
+        current_ids_sorted = sorted(current_ids)
+        offer_skills = backfill_offer_skills(
+            database_url=database_url,
+            source="business_france",
+            external_ids=current_ids_sorted,
         )
-        restart_pid = restart_api(repo_root, env)
-        health_ok = verify_api_health(60)
+        skills_uri = run_offer_skills_uri_backfill(
+            database_url=database_url,
+            external_ids=current_ids_sorted,
+            write_reports=False,
+            rerun_domain_enrichment=True,
+        )
+        domain_enrichment = classify_and_persist_business_france_offer_domains(
+            database_url=database_url,
+            external_ids=current_ids_sorted,
+            enable_ai_fallback=False,
+        )
+        if scrape_limit is not None and int(scrape_limit) > 0:
+            presence_sync_skipped = True
+            tracking_stats = {
+                "new_count": 0,
+                "existing_count": len(current_ids),
+                "missing_count": 0,
+                "active_total": len(previous_active_ids),
+            }
+        else:
+            tracking_stats = with_database_connection(
+                database_url,
+                lambda conn: sync_business_france_offer_presence_with_connection(
+                    conn,
+                    current_ids=current_ids,
+                    previous_active_ids=previous_active_ids,
+                    seen_at=utc_now(),
+                ),
+            )
+        if skip_restart:
+            restart_pid = 0
+            health_ok = True
+        else:
+            restart_pid = restart_api(repo_root, env)
+            health_ok = verify_api_health(60)
 
         record.update(
             {
@@ -286,15 +325,21 @@ def run_ingestion(*, repo_root: Path, log_path: Path) -> dict[str, Any]:
                 "active_total": int(tracking_stats.get("active_total") or 0),
                 "restart_pid": restart_pid,
                 "api_healthy": health_ok,
+                "presence_sync_skipped": presence_sync_skipped,
                 "status": "success" if scrape.get("error") is None and load.get("error") is None and health_ok else "failure",
             }
         )
-        if domain_enrichment is not None:
-            record["domain_processed_count"] = int(domain_enrichment.get("processed_count") or 0)
-            record["domain_ai_fallback_count"] = int(domain_enrichment.get("ai_fallback_count") or 0)
-            record["domain_needs_review_count"] = int(domain_enrichment.get("needs_review_count") or 0)
-        if domain_enrichment_error is not None:
-            record["domain_enrichment_error"] = domain_enrichment_error
+        record["current_batch_count"] = len(current_ids_sorted)
+        record["offer_skills_rows_written"] = int(offer_skills.get("rows_written") or 0)
+        record["offer_skills_ai_triggered_offers"] = int(offer_skills.get("ai_triggered_offers") or 0)
+        record["offer_skills_ai_added_rows"] = int(offer_skills.get("ai_added_rows") or 0)
+        record["offer_skills_fixed_offers"] = int(offer_skills.get("fixed_offers") or 0)
+        record["skills_uri_rows_updated"] = int(skills_uri.get("rows_updated") or 0)
+        record["skills_uri_coverage_before"] = float((skills_uri.get("before") or {}).get("skills_uri_coverage") or 0.0)
+        record["skills_uri_coverage_after"] = float((skills_uri.get("after") or {}).get("skills_uri_coverage") or 0.0)
+        record["domain_processed_count"] = int(domain_enrichment.get("processed_count") or 0)
+        record["domain_ai_fallback_count"] = int(domain_enrichment.get("ai_fallback_count") or 0)
+        record["domain_needs_review_count"] = int(domain_enrichment.get("needs_review_count") or 0)
         if scrape.get("error") is not None:
             record["scrape_error"] = scrape.get("error")
         if load.get("error") is not None:
@@ -345,9 +390,22 @@ def run_ingestion(*, repo_root: Path, log_path: Path) -> dict[str, Any]:
 
 
 def main() -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run full Business France refresh pipeline.")
+    parser.add_argument("--limit", type=int, default=None, help="Maximum number of BF offers to scrape in this run")
+    parser.add_argument("--batch-size", type=int, default=200, help="BF search page size")
+    parser.add_argument("--timeout", type=int, default=30, help="BF scraper HTTP timeout in seconds")
+    parser.add_argument("--skip-restart", action="store_true", help="Skip API restart and health check")
+    args = parser.parse_args()
+
     result = run_ingestion(
         repo_root=REPO_ROOT,
         log_path=REPO_ROOT / "logs" / "business_france_ingestion.log",
+        scrape_limit=args.limit,
+        scrape_batch_size=args.batch_size,
+        scrape_timeout=args.timeout,
+        skip_restart=args.skip_restart,
     )
     print(json.dumps(result, ensure_ascii=False))
     return 0 if result.get("status") == "success" else 1

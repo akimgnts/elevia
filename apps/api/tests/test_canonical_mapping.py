@@ -179,6 +179,22 @@ def test_store_v13_logistics_procurement_overlay_aliases_are_available():
     assert store.alias_to_id.get("coordination avec les prestataires") == "skill:logistics_coordination"
 
 
+def test_store_hr_recruitment_archetype_signals_have_canonical_targets():
+    store = get_canonical_store()
+    assert store.id_to_skill.get("skill:talent_acquisition")
+    assert store.id_to_skill.get("skill:candidate_assessment")
+    assert store.id_to_skill.get("skill:employer_branding")
+    assert store.id_to_skill.get("skill:human_resources_management")
+    assert store.alias_to_id.get("talent acquisition management") == "skill:talent_acquisition"
+    assert store.alias_to_id.get("candidate sourcing") == "skill:talent_acquisition"
+    assert store.alias_to_id.get("candidate qualification and evaluation") == "skill:candidate_assessment"
+    assert store.alias_to_id.get("phone pre screening interviews") == "skill:candidate_assessment"
+    assert store.alias_to_id.get("employer branding strategy") == "skill:employer_branding"
+    assert store.alias_to_id.get("talent management") == "skill:human_resources_management"
+    assert store.alias_to_id.get("recruitment platforms") == "skill:human_resources_management"
+    assert store.alias_to_id.get("hr systems and tools") == "skill:human_resources_management"
+
+
 def test_store_label_indexed_as_alias():
     """Skill label ('Machine Learning') must resolve via alias_to_id (label-as-self-alias fix)."""
     store = _make_store()

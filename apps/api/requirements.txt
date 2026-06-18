@@ -1,24 +1,11 @@
+# Production API dependencies only.
+# Keep this file lean: anything notebook/data-science/local-ML heavy belongs in
+# requirements-data.txt, requirements-notebook.txt, or requirements-ml.txt.
+
 # Core dependencies
 requests>=2.31.0
 python-dotenv>=1.0.0
 psycopg[binary]>=3.2.1
-
-# Data analysis & processing
-pandas>=2.0.0
-numpy>=1.24.0
-pyarrow>=12.0.0
-
-# Graph & network analysis
-networkx>=3.0
-
-# Visualization
-matplotlib>=3.7.0
-seaborn>=0.12.0
-
-# Jupyter notebook
-jupyter>=1.0.0
-ipykernel>=6.25.0
-notebook>=7.0.0
 
 # API (Sprint 7)
 fastapi>=0.109.0
@@ -30,6 +17,3 @@ python-multipart>=0.0.9
 
 # LLM providers
 openai>=1.0.0
-
-# Embeddings (optional, behind ELEVIA_EMBEDDINGS_LOCAL)
-sentence-transformers>=2.5.1

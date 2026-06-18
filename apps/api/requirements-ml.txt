@@ -1,0 +1,5 @@
+# Optional local embeddings stack.
+# This is intentionally excluded from production because torch is too heavy for
+# the deployment image and the feature is gated by ELEVIA_EMBEDDINGS_LOCAL.
+
+sentence-transformers>=2.5.1

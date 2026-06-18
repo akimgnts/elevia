@@ -24,6 +24,10 @@ _venv_site_packages = sorted((REPO_ROOT / "apps" / "api" / ".venv" / "lib").glob
 if _venv_site_packages:
     sys.path.insert(0, str(_venv_site_packages[0]))
 
+from compass.canonical.canonical_store import get_canonical_store, normalize_canonical_key
+from compass.canonical.esco_bridge import build_canonical_esco_promoted
+from esco.mapper import map_skill
+
 DEFAULT_ARCHETYPE_DIR = REPO_ROOT / "docs" / "ai" / "runtime_calibration" / "archetype_cvs" / "central"
 DEFAULT_OUTPUT_PATH = REPO_ROOT / "docs" / "ai" / "runtime_calibration" / "latest_archetype_replay.md"
 app: Any | None = None
@@ -57,17 +61,84 @@ def _dedupe_preserve_order(values: list[str]) -> list[str]:
     return deduped
 
 
+def _resolve_runtime_canonical_skills(skill_labels: list[str]) -> list[dict[str, str]]:
+    store = get_canonical_store()
+    resolved: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for label in skill_labels:
+        key = normalize_canonical_key(label)
+        if not key:
+            continue
+        canonical_id = store.alias_to_id.get(key)
+        strategy = "synonym_match"
+        if not canonical_id:
+            for cid, skill in store.id_to_skill.items():
+                if normalize_canonical_key(str(skill.get("label") or "")) == key:
+                    canonical_id = cid
+                    strategy = "label_match"
+                    break
+        if not canonical_id:
+            continue
+        if canonical_id in seen:
+            continue
+        seen.add(canonical_id)
+        skill = store.id_to_skill.get(canonical_id, {})
+        resolved.append(
+            {
+                "canonical_id": canonical_id,
+                "label": str(skill.get("label") or canonical_id),
+                "strategy": strategy,
+            }
+        )
+    return resolved
+
+
+def _resolve_runtime_skills_uri(
+    skill_labels: list[str],
+    canonical_skills: list[dict[str, str]],
+) -> list[str]:
+    resolved_uris: list[str] = []
+    seen: set[str] = set()
+
+    for label in skill_labels:
+        result = map_skill(label, enable_fuzzy=False)
+        uri = str((result or {}).get("esco_id") or "").strip()
+        if uri and uri not in seen:
+            seen.add(uri)
+            resolved_uris.append(uri)
+
+    canonical_ids = [
+        str(item.get("canonical_id") or "").strip()
+        for item in canonical_skills
+        if str(item.get("canonical_id") or "").strip()
+    ]
+    promoted = build_canonical_esco_promoted(
+        canonical_ids,
+        base_skills_uri=resolved_uris,
+        _promote_override=True,
+    )
+    for uri in promoted or []:
+        clean_uri = str(uri or "").strip()
+        if clean_uri and clean_uri not in seen:
+            seen.add(clean_uri)
+            resolved_uris.append(clean_uri)
+
+    return resolved_uris
+
+
 def build_runtime_profile_from_archetype(payload: dict[str, object]) -> dict[str, object]:
     sector_slug = str(payload["sector_slug"])
     profile_name = f"archetype:{sector_slug}"
     skill_labels = extract_runtime_skill_labels(payload)
     deduplicated_skills = _dedupe_preserve_order(skill_labels)
+    canonical_skills = _resolve_runtime_canonical_skills(deduplicated_skills)
+    skills_uri = _resolve_runtime_skills_uri(deduplicated_skills, canonical_skills)
     profile_summary = [
         str(item.get("label") or "").strip()
         for item in payload.get("profile_summary", [])
         if str(item.get("label") or "").strip()
     ]
-    return {
+    runtime_profile = {
         "profile_id": profile_name,
         "profile_name": profile_name,
         "sector_slug": sector_slug,
@@ -77,6 +148,11 @@ def build_runtime_profile_from_archetype(payload: dict[str, object]) -> dict[str
         "skills": deduplicated_skills,
         "matching_skills": deduplicated_skills,
     }
+    if canonical_skills:
+        runtime_profile["canonical_skills"] = canonical_skills
+    if skills_uri:
+        runtime_profile["skills_uri"] = skills_uri
+    return runtime_profile
 
 
 def load_env() -> None:

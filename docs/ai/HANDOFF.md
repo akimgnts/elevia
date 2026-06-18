@@ -4,6 +4,198 @@
 
 ---
 
+## ✅ Runtime Offer Intelligence Alignment validated (2026-06-08)
+
+**Status**: les champs métier persistés dans `offer_domain_enrichment` sont maintenant exposés de façon cohérente jusqu’aux réponses runtime utilisées par les audits.
+
+**Chaîne validée**:
+- `DB -> inbox_catalog -> runtime offer -> build_offer_intelligence -> /inbox | /v1/match | /debug/match`
+
+**Source de vérité figée**:
+- `offer_domain_enrichment`
+- champs concernés :
+  - `job_family`
+  - `primary_function`
+  - `purity_score`
+  - `hybrid_score`
+  - `needs_review`
+
+**Root cause confirmée**:
+- `inbox_catalog.py` chargeait déjà `job_family`, `primary_function`, `purity_score`, `hybrid_score`, mais pas `needs_review`
+- `build_offer_intelligence(...)` reconstruisait une autre couche (`dominant_role_block`, `dominant_domains`, `top_offer_signals`) sans réinjecter les champs persistés
+- le schéma `/inbox` ne transportait pas ces champs
+- `/v1/match` et `/debug/match` n’exposaient pas `offer_intelligence`
+
+**Modifié**:
+- `apps/api/src/api/utils/inbox_catalog.py`
+- `apps/api/src/compass/offer/offer_intelligence.py`
+- `apps/api/src/api/schemas/inbox.py`
+- `apps/api/src/api/schemas/matching.py`
+- `apps/api/src/api/routes/inbox.py`
+- `apps/api/src/api/routes/matching.py`
+- `apps/api/src/api/routes/debug_match.py`
+- `apps/api/tests/test_offer_intelligence.py`
+- `apps/api/tests/test_runtime_offer_intelligence_alignment.py`
+- `apps/api/tests/test_inbox_filters_v2.py`
+- `docs/ai/reports/runtime_alignment_validation.md`
+
+**Validation DB vs Runtime**:
+- contrôle sur `25` offres actives BF :
+  - `5` HR
+  - `5` Finance
+  - `5` Data
+  - `5` Sales
+  - `5` Engineering
+- résultat :
+  - `offers_checked=25`
+  - `perfect_matches=25`
+  - `mismatches=0`
+  - `missing_fields=0`
+
+**Tests exécutés**:
+- `PYTHONPATH=apps/api/src apps/api/.venv/bin/python -m pytest apps/api/tests/test_offer_intelligence.py apps/api/tests/test_runtime_offer_intelligence_alignment.py -q`
+  - résultat : `14 passed`
+- `PYTHONPATH=apps/api/src apps/api/.venv/bin/python -m pytest apps/api/tests/test_offer_intelligence.py apps/api/tests/test_runtime_offer_intelligence_alignment.py apps/api/tests/test_inbox_filters_v2.py::test_inbox_guest_flow_exposes_offer_intelligence_for_returned_items apps/api/tests/test_inbox_catalog_offer_skills_runtime.py -q`
+  - résultat : `20 passed`
+
+**Benchmark synthétique revalidé**:
+- avant fix runtime :
+  - `same_offer_top1=8`
+  - `same_family_top1=0`
+  - `same_family_top3=0`
+  - `same_family_top10_profiles=0`
+- après fix runtime :
+  - `same_offer_top1=8`
+  - `same_family_top1=21`
+  - `same_family_top3=28`
+  - `same_family_top10_profiles=31`
+  - `same_family_top10_average_share_pct=38.4`
+
+**Lecture produit**:
+- le ranking brut n’a pas changé
+- les métriques famille/métier redeviennent lisibles
+- les anciens audits matching étaient partiellement pollués sur la lecture `job_family / primary_function`
+- les conclusions sur les `generic-only overlaps` restent valides
+- les faiblesses résiduelles viennent maintenant du moteur métier réel, pas d’une perte Base → Runtime
+
+**Next step**:
+- rerun des audits matching / sentinelles sur runtime aligné
+- puis décision produit :
+  - stabilisation taxonomie / adjacent domains
+  - ou gel V1 si le bruit résiduel est jugé acceptable
+
+---
+
+## ✅ Fresh Pipeline Completion validated (2026-06-06)
+
+**Status**: la chaîne fraîcheur Business France est maintenant exécutable de bout en bout via une **commande unique**.
+
+**Commande canonique**:
+- `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py`
+
+**Chaîne validée**:
+- `Scrape -> Raw -> Clean -> offer_skills (+ fallback IA) -> canonical -> skills_uri -> domain enrichment -> Offer Intelligence -> runtime`
+
+**Modifié**:
+- `scripts/run_business_france_ingestion.py`
+- `apps/api/src/api/utils/offer_skills_pg.py`
+- `apps/api/src/api/utils/offer_skills_uri_backfill.py`
+- `apps/api/src/api/utils/offer_domain_enrichment.py`
+- `apps/api/tests/test_business_france_ingestion_automation.py`
+- `apps/api/tests/test_offer_skills_uri_backfill_guardrails.py`
+
+**Règle importante**:
+- en mode borné `--limit`, la presence sync est **skippée** (`presence_sync_skipped=true`)
+- raison : un batch partiel ne doit jamais désactiver le reste du corpus `is_active`
+
+**Runs bornés validés**:
+- `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py --limit 15 --skip-restart`
+- résultat:
+  - `current_batch_count=15`
+  - `offer_skills_rows_written=0`
+  - `skills_uri_rows_updated=24`
+  - `domain_processed_count=15`
+  - `presence_sync_skipped=true`
+- `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py --limit 50 --skip-restart`
+- résultat:
+  - `current_batch_count=50`
+  - `offer_skills_rows_written=36`
+  - `offer_skills_ai_triggered_offers=23`
+  - `offer_skills_ai_added_rows=20`
+  - `offer_skills_fixed_offers=13`
+  - `skills_uri_rows_updated=164`
+  - `skills_uri_coverage_before=80.99`
+  - `skills_uri_coverage_after=83.24`
+  - `domain_processed_count=50`
+  - `domain_needs_review_count=9`
+  - `presence_sync_skipped=true`
+
+**Vérification batch 50**:
+- `47/50` avec `offer_skills`
+- `47/50` avec `canonical`
+- `47/50` avec `skills_uri`
+- `50/50` avec `job_family`
+- `50/50` avec `primary_function`
+- `50/50` avec `purity_score`
+- `50/50` avec `hybrid_score`
+
+**Full manual run validé**:
+- commande:
+  - `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py`
+- résultat:
+  - `fetched_count=799`
+  - `persisted_count_clean=1453`
+  - `new_count=540`
+  - `existing_count=259`
+  - `missing_count=630`
+  - `active_total=799`
+  - `offer_skills_rows_written=1437`
+  - `offer_skills_ai_triggered_offers=560`
+  - `offer_skills_ai_added_rows=990`
+  - `offer_skills_fixed_offers=472`
+  - `skills_uri_rows_updated=2903`
+  - `skills_uri_coverage_before=51.59`
+  - `skills_uri_coverage_after=89.44`
+  - `domain_processed_count=799`
+  - `domain_needs_review_count=86`
+  - `restart_pid=97829`
+  - `api_healthy=true`
+
+**État global post-run**:
+- `1453` offres BF totales en base
+- `799` offres actives
+- `771/799` actives avec `offer_skills`
+- `771/799` actives avec `canonical`
+- `753/799` actives avec `skills_uri`
+- `799/799` actives avec `job_family`
+- `799/799` actives avec `primary_function`
+- `799/799` actives avec `purity_score`
+- `799/799` actives avec `hybrid_score`
+- `other_count=77`
+- `needs_review=86`
+
+**OpenAI / coût observable**:
+- le fallback IA offer-side est bien consommé dans le full run
+- signal observable disponible dans le log:
+  - `offer_skills_ai_triggered_offers=560`
+  - `offer_skills_ai_added_rows=990`
+  - `offer_skills_fixed_offers=472`
+- limite actuelle:
+  - aucun comptage tokens / coût monétaire n’est encore persisté
+
+**Tests de non-régression**:
+- `PYTHONPATH=apps/api/src apps/api/.venv/bin/python -m pytest apps/api/tests/test_business_france_ingestion_automation.py apps/api/tests/test_offer_skills_pg.py apps/api/tests/test_offer_skills_uri_resolver.py apps/api/tests/test_offer_skills_uri_backfill_guardrails.py apps/api/tests/test_inbox_catalog_offer_skills_runtime.py apps/api/tests/test_offer_domain_enrichment.py -q`
+- résultat: `57 passed`
+
+**Next step**:
+- `Cron Coolify`
+- mais seulement après:
+  - documentation opératoire minimale
+  - health check post-cron
+  - si possible, ajout ultérieur d’une observabilité coût/tokens OpenAI
+
+---
+
 ## ✅ Archetype Replay Task 4 Executed (2026-05-22)
 
 **Status**: central archetype replay CLI implemented and executed end-to-end. Report writing is working; current replay output is observation-only and shows no returned top items on this run.

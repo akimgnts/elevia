@@ -34,7 +34,9 @@ from api.utils.career_intelligence import build_career_intelligence  # noqa: E40
 from api.utils.generic_skills_filter import (  # noqa: E402
     HARD_GENERIC_URIS,
     filter_skills_uri_for_scoring,
+    generic_only_overlap_block_enabled,
     should_apply_generic_filter,
+    should_block_generic_only_overlap,
     summarize_skill_tags,
 )
 from semantic.semantic_service import compute_semantic_for_offer  # noqa: E402
@@ -369,6 +371,15 @@ async def dev_metrics(req: MetricsRequest) -> Dict[str, Any]:
                 offer.get("skills_uri") or [],
             )
         result = engine.score_offer(extracted, offer_view)
+        match_debug = getattr(result, "match_debug", None)
+        skills_debug = match_debug.get("skills") if isinstance(match_debug, dict) else {}
+        matched_values = skills_debug.get("matched") or [] if isinstance(skills_debug, dict) else []
+        scoring_unit = skills_debug.get("scoring_unit") if isinstance(skills_debug, dict) else None
+        if generic_only_overlap_block_enabled() and should_block_generic_only_overlap(
+            matched_values=matched_values if isinstance(matched_values, list) else [],
+            scoring_unit=scoring_unit,
+        ):
+            continue
         score_value = int(result.score)
         scores.append(score_value)
         scored_offers.append((offer, score_value))

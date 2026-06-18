@@ -220,13 +220,30 @@ def test_score_invariance_inbox(tmp_path, monkeypatch):
             assert base_items[oid] == filt_items[oid]
 
 
-def test_inbox_guest_flow_does_not_recompute_offer_intelligence(tmp_path, monkeypatch):
+def test_inbox_guest_flow_exposes_offer_intelligence_for_returned_items(tmp_path, monkeypatch):
     db_path = tmp_path / "offers.db"
     _seed_db(db_path)
     monkeypatch.setattr(inbox_catalog, "DB_PATH", db_path)
     monkeypatch.setattr(inbox_routes, "_load_decided_ids", lambda _: set())
 
-    build_mock = Mock(side_effect=AssertionError("build_offer_intelligence should not run for guest inbox list"))
+    build_mock = Mock(
+        side_effect=lambda offer: {
+            "dominant_role_block": "data_analytics",
+            "secondary_role_blocks": [],
+            "dominant_domains": ["data"],
+            "top_offer_signals": ["python", "sql"],
+            "required_skills": ["python"],
+            "optional_skills": ["sql"],
+            "role_hypotheses": [],
+            "offer_summary": "Poste orienté data.",
+            "role_block_scores": [],
+            "job_family": offer.get("job_family"),
+            "primary_function": offer.get("primary_function"),
+            "purity_score": offer.get("purity_score"),
+            "hybrid_score": offer.get("hybrid_score"),
+            "needs_review": offer.get("needs_review"),
+        }
+    )
     monkeypatch.setattr(inbox_routes, "build_offer_intelligence", build_mock)
 
     profile = {"id": "p1", "skills": ["python", "sql"]}
@@ -240,8 +257,8 @@ def test_inbox_guest_flow_does_not_recompute_offer_intelligence(tmp_path, monkey
     assert resp.status_code == 200
     items = resp.json()["items"]
     assert items
-    assert build_mock.call_count == 0
-    assert all(item.get("offer_intelligence") is None for item in items)
+    assert build_mock.call_count == len(items)
+    assert all(isinstance(item.get("offer_intelligence"), dict) for item in items)
 
 
 def test_filtered_inbox_returns_frontend_usable_items(tmp_path, monkeypatch):

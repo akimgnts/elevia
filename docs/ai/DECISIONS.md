@@ -238,6 +238,60 @@
   - `confidence = 0.9`
   - `needs_ai_review = false`
 - Le scoring fallback reste déterministe seulement.
+
+### R28 — Offer Intelligence persistée = vérité runtime pour `job_family` / `primary_function`
+- La source de vérité runtime pour :
+  - `job_family`
+  - `primary_function`
+  - `purity_score`
+  - `hybrid_score`
+  - `needs_review`
+  est `offer_domain_enrichment`.
+- `inbox_catalog.py` doit charger ces champs depuis PostgreSQL et les conserver sur l’objet `offer` runtime.
+- `build_offer_intelligence(...)` peut continuer à produire une couche sémantique additive (`dominant_role_block`, `dominant_domains`, `top_offer_signals`, etc.), mais il doit aussi transporter explicitement les champs persistés.
+- `/inbox`, `/v1/match` et `/debug/match` doivent exposer ces champs sans les recalculer autrement.
+- Aucun endpoint runtime ne doit inventer une “autre vérité” famille/fonction pour remplacer la classification persistée.
+- Cette décision est strictement additive :
+  - aucun changement scoring
+  - aucun changement `matching_v1.py`
+  - aucun changement `idf.py`
+  - aucun changement `weights_*`
+  - aucun changement pipeline fraîcheur
+
+### R28 — Business France refresh canonique = commande unique
+- La commande canonique de refresh Business France est :
+  - `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py`
+- Cette commande est la seule entrée opératoire autorisée pour un refresh complet.
+- Elle doit enchaîner, dans cet ordre :
+  - scrape BF
+  - load `clean_offers`
+  - `offer_skills` (+ fallback IA si nécessaire)
+  - `skills_uri`
+  - `offer_domain_enrichment`
+  - Offer Intelligence MVP
+  - restart API + vérification `/health` pour un full run
+- Toute autre séquence manuelle n’est acceptable que pour debug ou audit borné.
+
+### R29 — Refresh borné `--limit` = jamais de sync présence
+- Quand `scripts/run_business_france_ingestion.py` est exécuté avec `--limit`, la sync présence Business France doit être **skippée**.
+- Raison :
+  - un batch partiel n’est pas un snapshot du marché
+  - il ne doit jamais marquer le reste du corpus `is_active=false`
+- En mode borné, le log doit exposer :
+  - `presence_sync_skipped=true`
+- La sync présence complète n’est autorisée que sur un run non borné.
+
+### R30 — Cron interdit avant full manual run validé
+- Un cron / scheduler Coolify n’est autorisé qu’après validation d’au moins un full manual run propre de :
+  - `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py`
+- Le full manual run de référence a été validé le `2026-06-06` avec :
+  - restart API OK
+  - `/health` OK
+  - `skills_uri_coverage_before=51.59`
+  - `skills_uri_coverage_after=89.44`
+- La prochaine industrialisation autorisée est donc :
+  - configurer le cron Coolify
+  - puis ajouter un health check post-cron
 - `ELEVIA_DOMAIN_AI_FALLBACK = 0` reste le défaut.
 - La réduction de `needs_ai_review` doit venir d'abord de la qualité des règles, pas de l'activation de l'IA.
 

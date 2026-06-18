@@ -33,6 +33,11 @@ def _offer() -> dict:
         "country": "Allemagne",
         "city": "Frankfurt",
         "publication_date": "2026-03-20",
+        "job_family": "Finance",
+        "primary_function": "Controlling",
+        "purity_score": 0.8,
+        "hybrid_score": 0.1,
+        "needs_review": False,
     }
 
 
@@ -40,6 +45,11 @@ def test_offer_intelligence_payload_is_schema_compatible():
     payload = OfferIntelligence(**build_offer_intelligence(offer=_offer()))
     assert payload.dominant_role_block
     assert payload.offer_summary
+    assert payload.job_family == "Finance"
+    assert payload.primary_function == "Controlling"
+    assert payload.purity_score == 0.8
+    assert payload.hybrid_score == 0.1
+    assert payload.needs_review is False
 
 
 def test_offer_intelligence_is_exposed_in_inbox_route(monkeypatch):
@@ -70,6 +80,11 @@ def test_offer_intelligence_is_exposed_in_inbox_route(monkeypatch):
     item = resp.json()["items"][0]
     assert item["offer_intelligence"]["dominant_role_block"] == "finance_ops"
     assert item["offer_intelligence"]["offer_summary"].startswith("Poste orienté")
+    assert item["offer_intelligence"]["job_family"] == "Finance"
+    assert item["offer_intelligence"]["primary_function"] == "Controlling"
+    assert item["offer_intelligence"]["purity_score"] == 0.8
+    assert item["offer_intelligence"]["hybrid_score"] == 0.1
+    assert item["offer_intelligence"]["needs_review"] is False
     assert item["semantic_explainability"]["role_alignment"]["alignment"] == "high"
     assert item["semantic_explainability"]["alignment_summary"].startswith("Ton profil et ce poste")
 

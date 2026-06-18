@@ -165,7 +165,8 @@ def _fetch_business_france_offer_skills_rows(
             cur.execute(
                 """
                 SELECT DISTINCT ON (external_id, canonical_id)
-                       external_id, canonical_id, label, importance_level, skill_type, source_method
+                       external_id, canonical_id, label, importance_level, skill_type, source_method,
+                       COALESCE(resolved_esco_uris, '[]'::jsonb)
                 FROM offer_skills
                 WHERE source = %s
                   AND external_id = ANY(%s)
@@ -191,6 +192,11 @@ def _fetch_business_france_offer_skills_rows(
                 "importance_level": str(row[3] or "").strip().upper() or "SECONDARY",
                 "skill_type": str(row[4] or "").strip(),
                 "source_method": str(row[5] or "").strip(),
+                "resolved_esco_uris": [
+                    str(uri)
+                    for uri in (row[6] if isinstance(row[6], list) else [])
+                    if str(uri or "").strip()
+                ],
             }
         )
     return mapping
@@ -228,31 +234,63 @@ def _apply_runtime_offer_skills_enrichment(
     existing_uris = _dedupe_preserve_order([str(uri) for uri in (offer.get("skills_uri") or [])])
     existing_labels = _dedupe_preserve_order([str(label) for label in (offer.get("skills") or []) if str(label or "").strip()])
     row_labels = _dedupe_preserve_order([str(row.get("label") or "") for row in skill_rows if str(row.get("label") or "").strip()])
+    row_precomputed_uris = _dedupe_preserve_order(
+        [
+            str(uri)
+            for row in skill_rows
+            for uri in (row.get("resolved_esco_uris") or [])
+            if str(uri or "").strip()
+        ]
+    )
 
     canonical_ids = _extract_runtime_offer_canonical_ids(skill_rows)
+    resolved_precomputed_ids = {
+        str(row.get("canonical_id") or "").strip()
+        for row in skill_rows
+        if str(row.get("canonical_id") or "").strip() and (row.get("resolved_esco_uris") or [])
+    }
+    canonical_ids_to_bridge = [canonical_id for canonical_id in canonical_ids if canonical_id not in resolved_precomputed_ids]
     unresolved_labels: List[str] = []
     specialized_count = len(canonical_ids)
-    injected_uris: List[str] = []
+    injected_uris: List[str] = list(row_precomputed_uris)
     bridge_trace: Dict[str, Any] = {}
 
-    if canonical_ids and build_canonical_esco_promoted:
-        injected_uris = build_canonical_esco_promoted(
-            canonical_ids,
-            base_skills_uri=existing_uris,
+    if canonical_ids_to_bridge and build_canonical_esco_promoted:
+        bridged_uris = build_canonical_esco_promoted(
+            canonical_ids_to_bridge,
+            base_skills_uri=_dedupe_preserve_order(existing_uris + row_precomputed_uris),
             _promote_override=True,
             trace=bridge_trace,
         ) or []
-        injected_uris = _dedupe_preserve_order([str(uri) for uri in injected_uris if str(uri or "").strip()])
+        injected_uris = _dedupe_preserve_order(
+            list(row_precomputed_uris) + [str(uri) for uri in bridged_uris if str(uri or "").strip()]
+        )
 
     unresolved_ids = set(bridge_trace.get("unresolved_canonical_ids") or [])
+    unresolved_labels = [
+        str(row.get("label") or "")
+        for row in skill_rows
+        if not (row.get("resolved_esco_uris") or [])
+        and not str(row.get("canonical_id") or "").strip()
+        and str(row.get("label") or "").strip()
+    ]
     if unresolved_ids:
-        unresolved_labels = [
-            str(row.get("label") or "")
+        unresolved_labels.extend(
+            [
+                str(row.get("label") or "")
+                for row in skill_rows
+                if str(row.get("canonical_id") or "").strip() in unresolved_ids
+                and str(row.get("label") or "").strip()
+            ]
+        )
+    unresolved_labels = _dedupe_preserve_order(unresolved_labels)
+
+    if row_precomputed_uris and not bridge_trace.get("canonical_bridge_source"):
+        bridge_trace["canonical_bridge_source"] = {
+            str(row.get("canonical_id") or "").strip(): ["persisted_offer_skills_row_uri"]
             for row in skill_rows
-            if str(row.get("canonical_id") or "").strip() in unresolved_ids
-            and str(row.get("label") or "").strip()
-        ]
-        unresolved_labels = _dedupe_preserve_order(unresolved_labels)
+            if str(row.get("canonical_id") or "").strip() in resolved_precomputed_ids
+        }
 
     merged_labels = _dedupe_preserve_order(existing_labels + row_labels)
     if merged_labels and not offer.get("skills"):
@@ -300,12 +338,15 @@ def _load_business_france_from_postgres() -> List[Dict]:
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT external_id, source, title, description, company,
+                    SELECT c.external_id, c.source, c.title, c.description, c.company,
                            location, country, publication_date, start_date,
-                           payload_json, contract_type
-                    FROM clean_offers
-                    WHERE source = %s
-                    ORDER BY publication_date DESC NULLS LAST
+                           payload_json, contract_type,
+                           e.needs_ai_review, e.job_family, e.primary_function, e.purity_score, e.hybrid_score
+                    FROM clean_offers c
+                    LEFT JOIN offer_domain_enrichment e
+                      ON e.source = c.source AND e.external_id = c.external_id
+                    WHERE c.source = %s
+                    ORDER BY c.publication_date DESC NULLS LAST
                     """,
                     ("business_france",),
                 )
@@ -314,23 +355,41 @@ def _load_business_france_from_postgres() -> List[Dict]:
                 conn,
                 [str(row[0]) for row in rows if row and row[0]],
             )
-        offers = [
-            {
-                "id": row[0],
-                "source": row[1],
-                "title": row[2],
-                "description": row[3],
-                "company": row[4],
-                "city": row[5],
-                "country": row[6],
-                "publication_date": str(row[7]) if row[7] else None,
-                "contract_duration": None,
-                "start_date": str(row[8]) if row[8] else None,
-                "payload_json": json.dumps(row[9], ensure_ascii=False) if isinstance(row[9], dict) else row[9],
-                "contract_type": row[10],
-            }
-            for row in rows
-        ]
+        offers = []
+        for row in rows:
+            if len(row) > 15:
+                needs_review = bool(row[11]) if row[11] is not None else None
+                job_family = row[12]
+                primary_function = row[13]
+                purity_score = float(row[14]) if row[14] is not None else None
+                hybrid_score = float(row[15]) if row[15] is not None else None
+            else:
+                needs_review = None
+                job_family = row[11] if len(row) > 11 else None
+                primary_function = row[12] if len(row) > 12 else None
+                purity_score = float(row[13]) if len(row) > 13 and row[13] is not None else None
+                hybrid_score = float(row[14]) if len(row) > 14 and row[14] is not None else None
+            offers.append(
+                {
+                    "id": row[0],
+                    "source": row[1],
+                    "title": row[2],
+                    "description": row[3],
+                    "company": row[4],
+                    "city": row[5],
+                    "country": row[6],
+                    "publication_date": str(row[7]) if row[7] else None,
+                    "contract_duration": None,
+                    "start_date": str(row[8]) if row[8] else None,
+                    "payload_json": json.dumps(row[9], ensure_ascii=False) if isinstance(row[9], dict) else row[9],
+                    "contract_type": row[10],
+                    "job_family": job_family,
+                    "primary_function": primary_function,
+                    "purity_score": purity_score,
+                    "hybrid_score": hybrid_score,
+                    "needs_review": needs_review,
+                }
+            )
         for offer in offers:
             _attach_payload_fields(offer)
             _apply_runtime_offer_skills_enrichment(

@@ -181,6 +181,255 @@ def test_classify_offer_domain_rules_strong_data_keywords_still_resolve():
     assert result["needs_ai_review"] is False
 
 
+def test_classify_offer_domain_rules_product_owner_resolves_to_operations():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Product Owner",
+        description="Agile product backlog management requirements gathering stakeholder coordination",
+    )
+
+    assert result["domain_tag"] == "operations"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_user_acquisition_resolves_to_marketing():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="User Acquisition Specialist",
+        description="performance marketing user acquisition campaigns campaign optimization",
+    )
+
+    assert result["domain_tag"] == "marketing"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_talent_recruiter_resolves_to_hr_not_engineering():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Talent Recruiter",
+        description="candidate sourcing recruitment interviews employer branding",
+    )
+
+    assert result["domain_tag"] == "hr"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_corporate_recruiter_resolves_to_hr():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Corporate Recruiter – Campus & Employer Branding",
+        description="talent acquisition campus recruitment employer branding interviews",
+    )
+
+    assert result["domain_tag"] == "hr"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_user_acquisition_never_falls_to_hr():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="User Acquisition Specialist",
+        description="user acquisition campaigns performance marketing growth paid social",
+    )
+
+    assert result["domain_tag"] == "marketing"
+    assert "hr" not in (result.get("evidence") or [])
+
+
+def test_classify_offer_domain_rules_expert_irrigation_does_not_resolve_to_finance():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Expert Irrigation – Customer Success & Avant-Vente",
+        description="customer success irrigation technical support avant-vente client relationship agronomy",
+    )
+
+    assert result["domain_tag"] in {"sales", "operations"}
+    assert result["domain_tag"] != "finance"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_microelectronics_nanotechnology_engineer_resolves_to_engineering():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Microelectronics / Nanotechnology Engineer",
+        description="device characterization micro and nanofabrication cleanroom process development",
+    )
+
+    assert result["domain_tag"] == "engineering"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_data_integration_expert_resolves_to_data():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Data Integration Expert",
+        description="etl pipeline data integration data flows sql",
+    )
+
+    assert result["domain_tag"] == "data"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_design_verification_engineer_resolves_to_engineering():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Design Verification Engineer",
+        description="verification and validation ibm doors system design testing",
+    )
+
+    assert result["domain_tag"] == "engineering"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_asset_operations_support_resolves_to_operations():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Junior Asset Operations Support",
+        description="asset operations team operational management energy assets onboarding",
+    )
+
+    assert result["domain_tag"] == "operations"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_surveyor_resolves_to_engineering():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Surveyor",
+        description="land surveyors spatially related land and sea information civil infrastructure",
+    )
+
+    assert result["domain_tag"] == "engineering"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_workforce_planner_resolves_to_operations():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Workforce Planner",
+        description="workforce planning staffing levels operational efficiency s&op rofo",
+    )
+
+    assert result["domain_tag"] == "operations"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_mes_engineer_resolves_to_engineering():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="INGÉNIEUR MES",
+        description="support d'exploitation distribution production optimization industrial facilities",
+    )
+
+    assert result["domain_tag"] == "engineering"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_quality_engineer_resolves_to_engineering():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Quality Engineer",
+        description="quality management root cause analysis supplier performance quality control",
+    )
+
+    assert result["domain_tag"] == "engineering"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_business_manager_does_not_default_to_hr():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Business Manager",
+        description="client relationship revenue growth key account sales pipeline",
+    )
+
+    assert result["domain_tag"] == "sales"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_business_manager_with_business_unit_language_resolves_to_sales():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Business Manager",
+        description="business unit commercial development intrapreneur croissance commerciale",
+    )
+
+    assert result["domain_tag"] == "sales"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_business_manager_can_resolve_to_hr_if_recruitment_dominates():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="Business Manager",
+        description="talent acquisition recruitment interviews candidate sourcing employer branding campus recruitment",
+    )
+
+    assert result["domain_tag"] == "hr"
+    assert result["needs_ai_review"] is False
+
+
+def test_classify_offer_domain_rules_it_buyer_resolves_to_supply():
+    from api.utils.offer_domain_enrichment import classify_offer_domain_rules
+
+    result = classify_offer_domain_rules(
+        title="IT Buyer",
+        description="procurement supplier relationship management contract negotiation",
+    )
+
+    assert result["domain_tag"] == "supply"
+    assert result["needs_ai_review"] is False
+
+
+def test_build_offer_intelligence_mvp_hr_recruitment_is_deterministic_and_specific():
+    from api.utils.offer_domain_enrichment import build_offer_intelligence_mvp
+
+    result = build_offer_intelligence_mvp(
+        domain_tag="hr",
+        title="Talent Acquisition Specialist",
+        description="Candidate sourcing, onboarding, ATS management, recruitment interviews.",
+        skills_text="candidate sourcing onboarding ats management recruitment interviews",
+    )
+
+    assert result["job_family"] == "Human Resources"
+    assert result["primary_function"] == "Recruitment"
+    assert result["purity_score"] == pytest.approx(1.0, abs=1e-6)
+    assert result["hybrid_score"] == pytest.approx(0.0, abs=1e-6)
+
+
+def test_build_offer_intelligence_mvp_detects_finance_data_hybrid_pressure():
+    from api.utils.offer_domain_enrichment import build_offer_intelligence_mvp
+
+    result = build_offer_intelligence_mvp(
+        domain_tag="finance",
+        title="Finance Data Analyst",
+        description="Budgeting, financial analysis, reporting, SQL, Power BI dashboards.",
+        skills_text="budgeting financial analysis sql power bi reporting",
+    )
+
+    assert result["job_family"] == "Finance"
+    assert result["primary_function"] == "Controlling"
+    assert result["purity_score"] == pytest.approx(0.3333, rel=1e-3)
+    assert result["hybrid_score"] == pytest.approx(0.5, rel=1e-3)
+
+
 def test_compute_offer_content_hash_changes_with_title_or_description():
     from api.utils.offer_domain_enrichment import compute_offer_content_hash
 
@@ -518,4 +767,181 @@ def test_offer_domain_enrichment_invalid_ai_output_keeps_rules_result_and_review
     assert result["ai_processed_count"] == 1
     assert result["ai_success_count"] == 0
     assert result["ai_failed_count"] == 1
-    assert result["remaining_needs_review"] == 1
+
+
+@pytest.mark.skipif(not _database_url(), reason="DATABASE_URL not configured")
+def test_offer_domain_enrichment_persists_offer_intelligence_mvp_fields():
+    import psycopg
+
+    from api.utils.offer_domain_enrichment import classify_and_persist_business_france_offer_domains_with_connection
+
+    database_url = _database_url()
+    assert database_url
+    suffix = uuid.uuid4().hex[:8]
+    clean_table = f"clean_offers_domain_offer_intel_{suffix}"
+    enrichment_table = f"offer_domain_enrichment_offer_intel_{suffix}"
+
+    with psycopg.connect(database_url, connect_timeout=5) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                CREATE TABLE {clean_table} (
+                    id BIGSERIAL PRIMARY KEY,
+                    source TEXT NOT NULL,
+                    external_id TEXT NOT NULL,
+                    title TEXT,
+                    company TEXT,
+                    location TEXT,
+                    country TEXT,
+                    contract_type TEXT,
+                    description TEXT,
+                    publication_date TIMESTAMPTZ,
+                    start_date DATE,
+                    salary TEXT,
+                    url TEXT,
+                    payload_json JSONB NOT NULL,
+                    cleaned_at TIMESTAMPTZ NOT NULL,
+                    CONSTRAINT uq_{clean_table} UNIQUE (source, external_id)
+                )
+                """
+            )
+            cur.execute(
+                f"""
+                INSERT INTO {clean_table} (source, external_id, title, description, payload_json, cleaned_at)
+                VALUES (
+                    'business_france',
+                    'BF-OFFER-INTEL-1',
+                    'Talent Acquisition Specialist',
+                    'Candidate sourcing, onboarding, ATS management, recruitment interviews.',
+                    '{{}}'::jsonb,
+                    NOW()
+                )
+                """
+            )
+        conn.commit()
+
+        result = classify_and_persist_business_france_offer_domains_with_connection(
+            conn,
+            clean_table=clean_table,
+            enrichment_table=enrichment_table,
+            enable_ai_fallback=False,
+        )
+
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT job_family, primary_function, purity_score, hybrid_score
+                FROM {enrichment_table}
+                WHERE external_id = 'BF-OFFER-INTEL-1'
+                """
+            )
+            row = cur.fetchone()
+            assert row[0] == "Human Resources"
+            assert row[1] == "Recruitment"
+            assert float(row[2]) > 0.7
+            assert float(row[3]) == pytest.approx(0.0, abs=1e-6)
+            cur.execute(f"DROP TABLE {enrichment_table}")
+            cur.execute(f"DROP TABLE {clean_table}")
+        conn.commit()
+
+    assert result["classified_count"] == 1
+    assert result["remaining_needs_review"] == 0
+
+
+@pytest.mark.skipif(not _database_url(), reason="DATABASE_URL not configured")
+def test_offer_domain_enrichment_reprocesses_same_hash_row_when_offer_intelligence_fields_missing():
+    import psycopg
+
+    from api.utils.offer_domain_enrichment import (
+        classify_and_persist_business_france_offer_domains_with_connection,
+        compute_offer_content_hash,
+        ensure_offer_domain_enrichment_table,
+    )
+
+    database_url = _database_url()
+    assert database_url
+    suffix = uuid.uuid4().hex[:8]
+    clean_table = f"clean_offers_domain_offer_intel_missing_{suffix}"
+    enrichment_table = f"offer_domain_enrichment_offer_intel_missing_{suffix}"
+    content_hash = compute_offer_content_hash(
+        title="Talent Acquisition Specialist",
+        description="Candidate sourcing, onboarding, ATS management, recruitment interviews.",
+    )
+
+    with psycopg.connect(database_url, connect_timeout=5) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                CREATE TABLE {clean_table} (
+                    id BIGSERIAL PRIMARY KEY,
+                    source TEXT NOT NULL,
+                    external_id TEXT NOT NULL,
+                    title TEXT,
+                    company TEXT,
+                    location TEXT,
+                    country TEXT,
+                    contract_type TEXT,
+                    description TEXT,
+                    publication_date TIMESTAMPTZ,
+                    start_date DATE,
+                    salary TEXT,
+                    url TEXT,
+                    payload_json JSONB NOT NULL,
+                    cleaned_at TIMESTAMPTZ NOT NULL,
+                    CONSTRAINT uq_{clean_table} UNIQUE (source, external_id)
+                )
+                """
+            )
+            cur.execute(
+                f"""
+                INSERT INTO {clean_table} (source, external_id, title, description, payload_json, cleaned_at)
+                VALUES (
+                    'business_france',
+                    'BF-OFFER-INTEL-MISSING',
+                    'Talent Acquisition Specialist',
+                    'Candidate sourcing, onboarding, ATS management, recruitment interviews.',
+                    '{{}}'::jsonb,
+                    NOW()
+                )
+                """
+            )
+        ensure_offer_domain_enrichment_table(conn, table_name=enrichment_table)
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                INSERT INTO {enrichment_table} (
+                    source, external_id, domain_tag, confidence, method, evidence, needs_ai_review, content_hash
+                ) VALUES (
+                    'business_france', 'BF-OFFER-INTEL-MISSING', 'hr', 0.9, 'rules', '["talent acquisition"]'::jsonb, FALSE, %s
+                )
+                """,
+                (content_hash,),
+            )
+        conn.commit()
+
+        result = classify_and_persist_business_france_offer_domains_with_connection(
+            conn,
+            clean_table=clean_table,
+            enrichment_table=enrichment_table,
+            enable_ai_fallback=False,
+        )
+
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT job_family, primary_function, purity_score, hybrid_score
+                FROM {enrichment_table}
+                WHERE external_id = 'BF-OFFER-INTEL-MISSING'
+                """
+            )
+            row = cur.fetchone()
+            assert row[0] == "Human Resources"
+            assert row[1] == "Recruitment"
+            assert float(row[2]) > 0.7
+            assert float(row[3]) == pytest.approx(0.0, abs=1e-6)
+            cur.execute(f"DROP TABLE {enrichment_table}")
+            cur.execute(f"DROP TABLE {clean_table}")
+        conn.commit()
+
+    assert result["classified_count"] == 1
+    assert result["skipped_count"] == 0

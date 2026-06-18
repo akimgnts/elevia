@@ -28,10 +28,13 @@ from matching.extractors import extract_profile
 from matching.match_trace import trace_matching_batch
 
 from ..utils.inbox_catalog import load_catalog_offers
+from compass.offer.offer_intelligence import build_offer_intelligence
 from ..utils.generic_skills_filter import (
     HARD_GENERIC_URIS,
     filter_skills_uri_for_scoring,
+    generic_only_overlap_block_enabled,
     should_apply_generic_filter,
+    should_block_generic_only_overlap,
 )
 
 logger = logging.getLogger(__name__)
@@ -113,10 +116,17 @@ async def debug_match(req: DebugMatchRequest) -> DebugMatchResponse:
 
     # Trace matching
     result = trace_matching_batch(req.profile, scoring_offers, engine, max_traces=req.limit)
+    offer_lookup = {str(offer.get("id") or ""): offer for offer in offers}
 
     # Convert traces to dicts
     traces_dicts = []
     for trace in result["traces"]:
+        if generic_only_overlap_block_enabled() and should_block_generic_only_overlap(
+            matched_values=trace.matched_skills if isinstance(trace.matched_skills, list) else [],
+            scoring_unit="uri",
+        ):
+            continue
+        offer_payload = offer_lookup.get(str(trace.offer_id or "")) or {}
         traces_dicts.append({
             "offer_id": trace.offer_id,
             "total_score": trace.total_score,
@@ -130,6 +140,7 @@ async def debug_match(req: DebugMatchRequest) -> DebugMatchResponse:
             "profile_skills_count": trace.profile_skills_norm_count,
             "offer_skills_count": trace.offer_skills_norm_count,
             "reasons": trace.reasons,
+            "offer_intelligence": build_offer_intelligence(offer=offer_payload) if offer_payload else None,
         })
 
     return DebugMatchResponse(

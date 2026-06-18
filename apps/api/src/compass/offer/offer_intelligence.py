@@ -1267,6 +1267,23 @@ def build_offer_intelligence(
         if score > 0
     ]
 
+    job_family = str(offer.get("job_family") or "").strip() or None
+    primary_function = str(offer.get("primary_function") or "").strip() or None
+    purity_score_raw = offer.get("purity_score")
+    hybrid_score_raw = offer.get("hybrid_score")
+    needs_review_raw = offer.get("needs_review")
+    if needs_review_raw is None:
+        needs_review_raw = offer.get("needs_ai_review")
+
+    try:
+        purity_score = float(purity_score_raw) if purity_score_raw is not None else None
+    except Exception:
+        purity_score = None
+    try:
+        hybrid_score = float(hybrid_score_raw) if hybrid_score_raw is not None else None
+    except Exception:
+        hybrid_score = None
+
     result = {
         "dominant_role_block": dominant_role_block,
         "secondary_role_blocks": secondary_role_blocks,
@@ -1277,6 +1294,11 @@ def build_offer_intelligence(
         "role_hypotheses": role_hypotheses,
         "offer_summary": offer_summary,
         "role_block_scores": role_block_scores,
+        "job_family": job_family,
+        "primary_function": primary_function,
+        "purity_score": purity_score,
+        "hybrid_score": hybrid_score,
+        "needs_review": bool(needs_review_raw) if needs_review_raw is not None else None,
         "debug": {
             "title_probe": {
                 "raw_title": role_resolution.get("raw_title"),

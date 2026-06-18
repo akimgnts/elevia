@@ -10,7 +10,7 @@ WORKDIR /app
 COPY apps/api/requirements.txt /tmp/requirements.txt
 
 RUN pip install --upgrade pip && \
-    pip install -r /tmp/requirements.txt
+    pip install --no-cache-dir -r /tmp/requirements.txt
 
 COPY apps/api /app/apps/api
 
@@ -19,4 +19,3 @@ WORKDIR /app/apps/api
 EXPOSE 8000
 
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--root-path", "/api"]
-

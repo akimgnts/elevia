@@ -21,7 +21,9 @@ from ..utils.career_intelligence import build_career_intelligence
 from ..utils.generic_skills_filter import (
     HARD_GENERIC_URIS,
     filter_skills_uri_for_scoring,
+    generic_only_overlap_block_enabled,
     should_apply_generic_filter,
+    should_block_generic_only_overlap,
 )
 
 from ..schemas.matching import (
@@ -40,6 +42,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from matching import MatchingEngine, compute_diagnostic, Verdict
 from matching.extractors import extract_profile
+from compass.offer.offer_intelligence import build_offer_intelligence
 
 
 router = APIRouter(tags=["matching"])
@@ -257,6 +260,15 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
             else:
                 offer_view = offer
             match_result = engine.score_offer(extracted_profile, offer_view)
+            match_debug = getattr(match_result, "match_debug", None)
+            skills_debug = match_debug.get("skills") if isinstance(match_debug, dict) else {}
+            matched_values = skills_debug.get("matched") or [] if isinstance(skills_debug, dict) else []
+            scoring_unit = skills_debug.get("scoring_unit") if isinstance(skills_debug, dict) else None
+            if generic_only_overlap_block_enabled() and should_block_generic_only_overlap(
+                matched_values=matched_values if isinstance(matched_values, list) else [],
+                scoring_unit=scoring_unit,
+            ):
+                continue
 
             # 4. Convertir diagnostic en schema
             diagnostic_result = DiagnosticResult(
@@ -299,6 +311,7 @@ async def match_profile(request: MatchingRequest) -> MatchingResponse:
                     profile_skills_uri,
                     offer.get("skills_uri") or [],
                 ),
+                offer_intelligence=build_offer_intelligence(offer=offer),
                 score_is_partial=match_result.score_is_partial,
                 diagnostic=diagnostic_result,
             ))

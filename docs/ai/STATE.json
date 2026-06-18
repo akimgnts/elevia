@@ -1,12 +1,141 @@
 {
   "product": "elevia-compass",
   "product_summary": "CV ↔ offers matching engine",
-  "current_sprint": "domain_aware_soft_signal_v1",
-  "status": "domain_aware_soft_signal_v1_shipped_pure_enrichment_no_score_change",
+  "current_sprint": "runtime_offer_intelligence_alignment",
+  "status": "runtime_offer_intelligence_aligned_db_catalog_response_validated",
   "validated": true,
-  "last_completed_step": "domain_aware_soft_signal_v1_inbox_response_only",
-  "next_step": "observe_domain_affinity_in_frontend_then_decide_v2_taxonomy_refinement",
-  "next_step_mode": "production_payload_enrichment_observation_window",
+  "last_completed_step": "runtime_offer_intelligence_alignment_validated",
+  "next_step": "rerun_matching_audits_on_aligned_runtime",
+  "next_step_mode": "audit_after_runtime_consistency_fix",
+  "last_runtime_offer_intelligence_alignment": {
+    "date": "2026-06-08",
+    "scope": "transport and schema alignment only so persisted Offer Intelligence fields are exposed consistently from PostgreSQL to runtime responses",
+    "source_of_truth": "offer_domain_enrichment",
+    "fields_aligned": [
+      "job_family",
+      "primary_function",
+      "purity_score",
+      "hybrid_score",
+      "needs_review"
+    ],
+    "files_modified": [
+      "apps/api/src/api/utils/inbox_catalog.py",
+      "apps/api/src/compass/offer/offer_intelligence.py",
+      "apps/api/src/api/schemas/inbox.py",
+      "apps/api/src/api/schemas/matching.py",
+      "apps/api/src/api/routes/inbox.py",
+      "apps/api/src/api/routes/matching.py",
+      "apps/api/src/api/routes/debug_match.py",
+      "apps/api/tests/test_offer_intelligence.py",
+      "apps/api/tests/test_runtime_offer_intelligence_alignment.py",
+      "apps/api/tests/test_inbox_filters_v2.py"
+    ],
+    "validation": {
+      "targeted_tests": [
+        "14 passed on offer_intelligence + runtime alignment contract",
+        "20 passed on widened runtime subset including inbox guest flow"
+      ],
+      "db_vs_runtime_control": {
+        "offers_checked": 25,
+        "perfect_matches": 25,
+        "mismatches": 0,
+        "missing_fields": 0
+      },
+      "synthetic_benchmark_revalidation": {
+        "before": {
+          "same_offer_top1": 8,
+          "same_family_top1": 0,
+          "same_family_top3": 0,
+          "same_family_top10_profiles": 0
+        },
+        "after": {
+          "same_offer_top1": 8,
+          "same_family_top1": 21,
+          "same_family_top3": 28,
+          "same_family_top10_profiles": 31,
+          "same_family_top10_average_share_pct": 38.4
+        }
+      },
+      "sentinel_revalidation": {
+        "runtime_flags": [
+          "ELEVIA_RUNTIME_CANONICAL_INJECTION=1",
+          "ELEVIA_RUNTIME_OFFER_SKILLS_INJECTION=1",
+          "ELEVIA_FILTER_GENERIC_URIS=1",
+          "ELEVIA_BLOCK_GENERIC_ONLY_OVERLAP=1"
+        ],
+        "result": "families are now visible and trustworthy in runtime responses; remaining noise is matching or taxonomy related, not DB-to-runtime field loss"
+      }
+    },
+    "verdict": {
+      "runtime_aligned_with_db": true,
+      "ranking_changed": false,
+      "previous_matching_audits_family_reading_was_biased": true,
+      "next_action": "rerun matching and métier audits on aligned runtime before any product freeze decision"
+    }
+  },
+  "last_fresh_pipeline_completion": {
+    "date": "2026-06-06",
+    "scope": "single command business france refresh from scrape to runtime enrichment without scoring or frontend change",
+    "command": "apps/api/.venv/bin/python scripts/run_business_france_ingestion.py",
+    "bounded_commands": [
+      "apps/api/.venv/bin/python scripts/run_business_france_ingestion.py --limit 15 --skip-restart",
+      "apps/api/.venv/bin/python scripts/run_business_france_ingestion.py --limit 50 --skip-restart"
+    ],
+    "pipeline": [
+      "scrape_business_france_raw_offers.py",
+      "load_business_france_clean_offers.py",
+      "offer_skills backfill with AI fallback",
+      "skills_uri deterministic backfill",
+      "offer_domain_enrichment",
+      "Offer Intelligence MVP",
+      "runtime restart and /health check on full run"
+    ],
+    "critical_rule": "limited refresh skips presence sync so partial batches never deactivate the rest of the corpus",
+    "full_manual_run": {
+      "fetched_count": 799,
+      "persisted_count_clean": 1453,
+      "new_count": 540,
+      "existing_count": 259,
+      "missing_count": 630,
+      "active_total": 799,
+      "offer_skills_rows_written": 1437,
+      "offer_skills_ai_triggered_offers": 560,
+      "offer_skills_ai_added_rows": 990,
+      "offer_skills_fixed_offers": 472,
+      "skills_uri_rows_updated": 2903,
+      "skills_uri_coverage_before": 51.59,
+      "skills_uri_coverage_after": 89.44,
+      "domain_processed_count": 799,
+      "domain_needs_review_count": 86,
+      "api_healthy": true
+    },
+    "post_run_corpus": {
+      "total_offers": 1453,
+      "active_offers": 799,
+      "offers_with_offer_skills": 771,
+      "offers_with_canonical_skills": 771,
+      "offers_with_skills_uri": 753,
+      "offers_with_job_family": 799,
+      "offers_with_primary_function": 799,
+      "offers_with_purity_score": 799,
+      "offers_with_hybrid_score": 799,
+      "other_count": 77,
+      "needs_review_count": 86
+    },
+    "validation": {
+      "tests": "57 passed on ingestion + offer_skills + skills_uri + domain enrichment + runtime targeted suite",
+      "batch_50": {
+        "with_offer_skills": 47,
+        "with_canonical": 47,
+        "with_uri": 47,
+        "with_job_family": 50,
+        "with_primary_function": 50,
+        "with_purity": 50,
+        "with_hybrid": 50
+      }
+    },
+    "remaining_gap": "OpenAI usage is visible through ai_triggered_offers/ai_added_rows/fixed_offers, but token/cost accounting is not yet persisted."
+  },
   "last_domain_aware_soft_signal_v1": {
     "date": "2026-04-26",
     "scope": "inbox_response_payload_only_no_score_no_filter_no_rank_no_db_mutation_no_ai",

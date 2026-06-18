@@ -13,7 +13,7 @@ import hashlib
 import json
 import os
 from datetime import datetime, timezone
-from typing import Any, Callable, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping, Sequence
 
 from compass.canonical.weighted_store import (
     get_weighted_store,
@@ -58,6 +58,25 @@ _AI_SKILL_NORMALIZATION_RULES: tuple[tuple[str, str], ...] = (
     ("customer relationship", "crm management"),
     ("prospecting", "lead generation"),
     ("lead generation", "lead generation"),
+    ("technical sales", "b2b sales"),
+    ("sales engineering", "b2b sales"),
+    ("contract management", "vendor management"),
+    ("data management", "data governance"),
+    ("political analysis", "public affairs analysis"),
+    ("event organization", "event coordination"),
+    ("public relations", "public relations"),
+    ("website management", "website management"),
+    ("hplc", "hplc"),
+    ("uplc", "uplc"),
+    ("glp", "glp"),
+    ("gmp", "gmp"),
+    ("validation of computerized systems", "computerized systems validation"),
+    ("supplier performance", "vendor management"),
+    ("documentation management", "process documentation"),
+    ("quality assurance", "quality engineering"),
+    ("contract negotiation", "negotiation"),
+    ("quality audits", "audit"),
+    ("ehs reporting", "EHS reporting"),
     ("reporting", "business intelligence"),
     ("dashboard", "business intelligence"),
     ("business intelligence", "business intelligence"),
@@ -70,6 +89,8 @@ _AI_SKILL_NORMALIZATION_RULES: tuple[tuple[str, str], ...] = (
     ("budget", "budgeting"),
     ("financial analysis", "financial analysis"),
     ("compliance", "compliance"),
+    ("amélioration des processus", "process optimization"),
+    ("amelioration des processus", "process optimization"),
     ("sql", "sql"),
     ("python", "python"),
     ("excel", "excel"),
@@ -670,6 +691,7 @@ def backfill_offer_skills_with_connection(
     ai_skill_generator: Callable[..., list[str]] | None = None,
     ai_batch_generator: Callable[[list[Mapping[str, Any]]], Mapping[str, list[str]]] | None = None,
     source: str | None = None,
+    external_ids: Sequence[str] | None = None,
     fallback_batch_size: int = DEFAULT_FALLBACK_BATCH_SIZE,
     limit: int | None = None,
     dry_run: bool = False,
@@ -683,6 +705,16 @@ def backfill_offer_skills_with_connection(
     if source:
         where_clauses.append(sql.SQL("source = %s"))
         params.append(source)
+    normalized_external_ids = sorted(
+        {
+            str(external_id).strip()
+            for external_id in (external_ids or [])
+            if str(external_id).strip()
+        }
+    )
+    if normalized_external_ids:
+        where_clauses.append(sql.SQL("external_id = ANY(%s)"))
+        params.append(normalized_external_ids)
     where_sql = (
         sql.SQL("WHERE ") + sql.SQL(" AND ").join(where_clauses) if where_clauses else sql.SQL("")
     )
@@ -876,6 +908,7 @@ def backfill_offer_skills(
     offer_skills_table: str = "offer_skills",
     enrichment_version: str = ENRICHMENT_VERSION,
     source: str | None = None,
+    external_ids: Sequence[str] | None = None,
     fallback_batch_size: int = DEFAULT_FALLBACK_BATCH_SIZE,
     limit: int | None = None,
     dry_run: bool = False,
@@ -908,6 +941,7 @@ def backfill_offer_skills(
             offer_skills_table=offer_skills_table,
             enrichment_version=enrichment_version,
             source=source,
+            external_ids=external_ids,
             fallback_batch_size=fallback_batch_size,
             limit=limit,
             dry_run=dry_run,

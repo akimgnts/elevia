@@ -156,6 +156,29 @@ gestion des paies -> skill:hr_administration
 administration du personnel -> skill:hr_administration
 suivi rh -> skill:hr_administration
 gestion des contrats -> skill:hr_administration
+talent acquisition -> skill:talent_acquisition
+talent acquisition management -> skill:talent_acquisition
+candidate sourcing -> skill:talent_acquisition
+candidate headhunting -> skill:talent_acquisition
+campus recruitment -> skill:talent_acquisition
+candidate qualification and evaluation -> skill:candidate_assessment
+phone pre-screening interviews -> skill:candidate_assessment
+phone pre screening interviews -> skill:candidate_assessment
+candidate assessment -> skill:candidate_assessment
+employer branding -> skill:employer_branding
+employer branding strategy -> skill:employer_branding
+employer branding projects -> skill:employer_branding
+employer branding development -> skill:employer_branding
+linkedin promotion -> skill:employer_branding
+job openings publication -> skill:employer_branding
+talent management -> skill:human_resources_management
+career path management -> skill:human_resources_management
+hr systems and tools -> skill:human_resources_management
+internal recruitment process management -> skill:human_resources_management
+local hr action plan implementation -> skill:human_resources_management
+recruitment platforms -> skill:human_resources_management
+applicant tracking system -> skill:human_resources_management
+ats -> skill:human_resources_management
 
 # ── Finance / Contrôle ────────────────────────────────────────────────────────
 analyse financiere -> skill:financial_analysis

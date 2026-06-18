@@ -1,0 +1,6 @@
+# Optional notebook stack for local exploration.
+# Install manually when working on notebook flows.
+
+jupyter>=1.0.0
+ipykernel>=6.25.0
+notebook>=7.0.0

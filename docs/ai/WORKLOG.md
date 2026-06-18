@@ -4,6 +4,228 @@
 
 ---
 
+## 2026-06-08 — Runtime Offer Intelligence Alignment
+
+### 1. Objectif
+- Réparer l’alignement :
+  - `DB -> Catalog -> Runtime -> Response`
+- Scope strict :
+  - aucun changement scoring
+  - aucun changement `matching_v1.py`
+  - aucun changement `idf.py`
+  - aucun changement `weights_*`
+  - aucun changement référentiel
+  - aucun changement pipeline fraîcheur
+
+### 2. Root cause confirmée
+- `offer_domain_enrichment` contenait déjà la vérité persistée pour :
+  - `job_family`
+  - `primary_function`
+  - `purity_score`
+  - `hybrid_score`
+  - `needs_review`
+- `inbox_catalog.py` chargeait correctement `job_family`, `primary_function`, `purity_score`, `hybrid_score`, mais pas `needs_review`
+- `build_offer_intelligence(...)` reconstruisait une autre couche sémantique (`dominant_role_block`, `dominant_domains`, `top_offer_signals`) sans transporter la vérité persistée
+- `/inbox`, `/v1/match`, `/debug/match` n’exposaient donc pas les champs attendus pour les audits métier
+
+### 3. Correctifs appliqués
+- `apps/api/src/api/utils/inbox_catalog.py`
+  - chargement de `needs_review`
+  - compatibilité conservée avec les anciens shapes de tuples de tests
+- `apps/api/src/compass/offer/offer_intelligence.py`
+  - passthrough des champs persistés dans `build_offer_intelligence(...)`
+- `apps/api/src/api/schemas/inbox.py`
+  - ajout de :
+    - `job_family`
+    - `primary_function`
+    - `purity_score`
+    - `hybrid_score`
+    - `needs_review`
+- `apps/api/src/api/schemas/matching.py`
+  - `ResultItem.offer_intelligence` exposé côté `/v1/match`
+- `apps/api/src/api/routes/inbox.py`
+  - `offer_intelligence` peut maintenant être exposée pour les items retournés, même hors `profile_intelligence`
+- `apps/api/src/api/routes/matching.py`
+  - exposition additive de `offer_intelligence`
+- `apps/api/src/api/routes/debug_match.py`
+  - exposition additive de `offer_intelligence`
+
+### 4. Tests exécutés
+- `PYTHONPATH=apps/api/src apps/api/.venv/bin/python -m pytest apps/api/tests/test_offer_intelligence.py apps/api/tests/test_runtime_offer_intelligence_alignment.py -q`
+  - `14 passed`
+- `PYTHONPATH=apps/api/src apps/api/.venv/bin/python -m pytest apps/api/tests/test_offer_intelligence.py apps/api/tests/test_runtime_offer_intelligence_alignment.py apps/api/tests/test_inbox_filters_v2.py::test_inbox_guest_flow_exposes_offer_intelligence_for_returned_items apps/api/tests/test_inbox_catalog_offer_skills_runtime.py -q`
+  - `20 passed`
+
+### 5. Validation DB vs Runtime
+- contrôle sur `25` offres actives BF :
+  - `5` RH
+  - `5` Finance
+  - `5` Data
+  - `5` Sales
+  - `5` Engineering
+- résultat :
+  - `offers_checked=25`
+  - `perfect_matches=25`
+  - `mismatches=0`
+  - `missing_fields=0`
+
+### 6. Revalidation benchmark synthétique
+- Avant correction runtime :
+  - `same_offer_top1=8`
+  - `same_family_top1=0`
+  - `same_family_top3=0`
+  - `same_family_top10_profiles=0`
+- Après correction runtime :
+  - `same_offer_top1=8`
+  - `same_family_top1=21`
+  - `same_family_top3=28`
+  - `same_family_top10_profiles=31`
+  - `same_family_top10_average_share_pct=38.4`
+
+### 7. Revalidation sentinelles
+- Replay relancé avec :
+  - `ELEVIA_SENTINEL_CV_ROOT=/Users/akimguentas/Downloads/cvtest`
+  - `ELEVIA_RUNTIME_CANONICAL_INJECTION=1`
+  - `ELEVIA_RUNTIME_OFFER_SKILLS_INJECTION=1`
+  - `ELEVIA_FILTER_GENERIC_URIS=1`
+  - `ELEVIA_BLOCK_GENERIC_ONLY_OVERLAP=1`
+- Lecture :
+  - les familles affichées sont désormais lisibles
+  - le ranking n’a pas changé de nature
+  - les audits précédents étaient biaisés sur la projection famille/fonction, pas forcément sur le ranking brut
+
+### 8. Verdict
+- le runtime est maintenant aligné avec la base pour les champs métier persistés
+- les prochains audits matching/métier redeviennent exploitables
+- les faibles performances restantes doivent désormais être lues comme de vrais problèmes moteur/taxonomie/adjacent domains, pas comme une incohérence Base → Runtime
+
+
+## 2026-06-06 — Fresh Pipeline Completion
+
+### 1. Objectif
+- Transformer la fraîcheur Business France en pipeline réellement bout-en-bout :
+  - `Scrape -> Raw -> Clean -> offer_skills (+ fallback IA) -> canonical -> skills_uri -> domain enrichment -> Offer Intelligence -> runtime`
+- Contraintes respectées :
+  - aucun changement scoring
+  - aucun changement `matching_v1.py`
+  - aucun changement `idf.py`
+  - aucun changement `weights_*`
+  - aucun changement frontend
+
+### 2. Ce qui a été branché
+- `scripts/run_business_france_ingestion.py`
+  - devient la commande canonique de refresh
+  - enchaîne désormais :
+    - scrape BF
+    - load `clean_offers`
+    - `offer_skills`
+    - `skills_uri`
+    - `offer_domain_enrichment`
+    - restart API + `/health` en full run
+- `apps/api/src/api/utils/offer_skills_pg.py`
+  - accepte un scoping `external_ids` pour traiter uniquement le batch frais
+- `apps/api/src/api/utils/offer_skills_uri_backfill.py`
+  - accepte un scoping `external_ids`
+  - garde-fous compatibles avec un refresh borné
+- `apps/api/src/api/utils/offer_domain_enrichment.py`
+  - accepte un scoping `external_ids`
+
+### 3. Correctifs opérationnels découverts
+- **Bug 1** :
+  - le scoping `external_ids` dans `offer_skills_uri_backfill.py` avait introduit une erreur de `f-string` sur `COALESCE(..., '{}'::jsonb)`
+  - corrigé
+- **Bug 2** :
+  - un run borné `--limit 15` traitait le batch partiel comme un corpus complet et mettait presque tout `is_active=false`
+  - décision : en mode borné, la sync présence est **skippée**
+  - champ ajouté dans le log :
+    - `presence_sync_skipped=true`
+- **Restauration locale effectuée** :
+  - l’état `is_active` a été restauré depuis le dernier batch complet avant de rerun les validations
+
+### 4. Validation tests
+- `PYTHONPATH=apps/api/src apps/api/.venv/bin/python -m pytest apps/api/tests/test_business_france_ingestion_automation.py apps/api/tests/test_offer_skills_pg.py apps/api/tests/test_offer_skills_uri_resolver.py apps/api/tests/test_offer_domain_enrichment.py -q`
+  - `49 passed`
+- `PYTHONPATH=apps/api/src apps/api/.venv/bin/python -m pytest apps/api/tests/test_business_france_ingestion_automation.py apps/api/tests/test_offer_skills_pg.py apps/api/tests/test_offer_skills_uri_resolver.py apps/api/tests/test_offer_skills_uri_backfill_guardrails.py apps/api/tests/test_inbox_catalog_offer_skills_runtime.py apps/api/tests/test_offer_domain_enrichment.py -q`
+  - `57 passed`
+
+### 5. Runs bornés validés
+- `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py --limit 15 --skip-restart`
+  - `status=success`
+  - `current_batch_count=15`
+  - `offer_skills_rows_written=0`
+  - `skills_uri_rows_updated=24`
+  - `domain_processed_count=15`
+  - `presence_sync_skipped=true`
+- `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py --limit 50 --skip-restart`
+  - `status=success`
+  - `current_batch_count=50`
+  - `offer_skills_rows_written=36`
+  - `offer_skills_ai_triggered_offers=23`
+  - `offer_skills_ai_added_rows=20`
+  - `offer_skills_fixed_offers=13`
+  - `skills_uri_rows_updated=164`
+  - `skills_uri_coverage_before=80.99`
+  - `skills_uri_coverage_after=83.24`
+  - `domain_processed_count=50`
+  - `domain_needs_review_count=9`
+  - `presence_sync_skipped=true`
+
+### 6. Vérification du batch 50
+- `50` offres dans le dernier batch
+- `47/50` avec `offer_skills`
+- `47/50` avec `canonical`
+- `47/50` avec `skills_uri`
+- `50/50` avec `job_family`
+- `50/50` avec `primary_function`
+- `50/50` avec `purity_score`
+- `50/50` avec `hybrid_score`
+
+### 7. Full manual run
+- commande:
+  - `apps/api/.venv/bin/python scripts/run_business_france_ingestion.py`
+- résultat final :
+  - `fetched_count=799`
+  - `persisted_count_clean=1453`
+  - `new_count=540`
+  - `existing_count=259`
+  - `missing_count=630`
+  - `active_total=799`
+  - `offer_skills_rows_written=1437`
+  - `offer_skills_ai_triggered_offers=560`
+  - `offer_skills_ai_added_rows=990`
+  - `offer_skills_fixed_offers=472`
+  - `skills_uri_rows_updated=2903`
+  - `skills_uri_coverage_before=51.59`
+  - `skills_uri_coverage_after=89.44`
+  - `domain_processed_count=799`
+  - `domain_needs_review_count=86`
+  - `restart_pid=97829`
+  - `api_healthy=true`
+
+### 8. État corpus post-run
+- `1453` offres BF totales
+- `799` actives
+- `771/799` actives avec `offer_skills`
+- `771/799` actives avec `canonical`
+- `753/799` actives avec `skills_uri`
+- `799/799` actives avec `job_family`
+- `799/799` actives avec `primary_function`
+- `799/799` actives avec `purity_score`
+- `799/799` actives avec `hybrid_score`
+- `other_count=77`
+- `needs_review=86`
+
+### 9. Lecture produit
+- Le référentiel est désormais **vivant** :
+  - les nouvelles offres passent automatiquement dans toute la chaîne utile
+- Le point bloquant principal n’est plus le refresh manuel
+- Le prochain chantier logique devient :
+  - `Cron Coolify`
+- Limite restante :
+  - le log capture bien l’usage IA (`ai_triggered_offers`, `ai_added_rows`, `fixed_offers`)
+  - mais pas encore le coût/tokens OpenAI
+
+
 ## 2026-05-22 — Archetype Replay Task 4
 
 ### 1. Commandes exécutées

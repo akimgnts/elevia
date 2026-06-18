@@ -111,31 +111,38 @@ def test_build_runtime_profile_from_archetype_uses_only_allowed_sections():
 
     runtime_profile = module.build_runtime_profile_from_archetype(payload)
 
-    assert runtime_profile == {
-        "profile_id": "archetype:finance_control",
-        "profile_name": "archetype:finance_control",
-        "sector_slug": "finance_control",
-        "orientation": {
-            "domain_tags": ["finance", "operations"],
-            "offer_count": 12,
-        },
-        "profile_summary": ["financial", "controller"],
-        "skill_labels": [
-            "internal control",
-            "stakeholder communication",
-            "sap",
-        ],
-        "skills": [
-            "internal control",
-            "stakeholder communication",
-            "sap",
-        ],
-        "matching_skills": [
-            "internal control",
-            "stakeholder communication",
-            "sap",
-        ],
+    assert runtime_profile["profile_id"] == "archetype:finance_control"
+    assert runtime_profile["profile_name"] == "archetype:finance_control"
+    assert runtime_profile["sector_slug"] == "finance_control"
+    assert runtime_profile["orientation"] == {
+        "domain_tags": ["finance", "operations"],
+        "offer_count": 12,
     }
+    assert runtime_profile["profile_summary"] == ["financial", "controller"]
+    assert runtime_profile["skill_labels"] == [
+        "internal control",
+        "stakeholder communication",
+        "sap",
+    ]
+    assert runtime_profile["skills"] == [
+        "internal control",
+        "stakeholder communication",
+        "sap",
+    ]
+    assert runtime_profile["matching_skills"] == [
+        "internal control",
+        "stakeholder communication",
+        "sap",
+    ]
+    assert "canonical_skills" in runtime_profile
+    assert "skills_uri" in runtime_profile
+    assert {item["canonical_id"] for item in runtime_profile["canonical_skills"]} >= {
+        "skill:internal_control",
+        "skill:sap",
+    }
+    assert {
+        "http://data.europa.eu/esco/skill/7111b95d-0ce3-441a-9d92-4c75d05c4388"
+    }.isdisjoint(set(runtime_profile["skills_uri"]))
     assert "education" not in runtime_profile
     assert "certifications" not in runtime_profile
     assert "years_experience" not in runtime_profile
@@ -191,6 +198,71 @@ def test_build_runtime_profile_from_archetype_emits_deduplicated_runtime_skill_f
     assert runtime_profile["matching_skills"] == runtime_profile["skills"]
     assert "excel" not in runtime_profile["skills"]
     assert "education" not in runtime_profile
+
+
+def test_build_runtime_profile_from_archetype_enriches_scoring_fields(monkeypatch):
+    module = _load_module()
+
+    payload = {
+        "sector_slug": "hr_recruitment",
+        "profile_summary": [{"label": "hr"}],
+        "anchor_skills": [{"skill_label": "recruitment"}],
+        "support_skills": [{"skill_label": "onboarding"}],
+        "tools_technologies": [{"skill_label": "sap"}],
+    }
+
+    monkeypatch.setattr(
+        module,
+        "_resolve_runtime_canonical_skills",
+        lambda labels: [
+            {"canonical_id": "skill:recruitment", "label": "Recruitment", "strategy": "synonym_match"},
+            {"canonical_id": "skill:onboarding", "label": "Onboarding", "strategy": "synonym_match"},
+        ],
+    )
+    monkeypatch.setattr(
+        module,
+        "_resolve_runtime_skills_uri",
+        lambda labels, canonical_skills: [
+            "http://data.europa.eu/esco/skill/recruitment",
+            "http://data.europa.eu/esco/skill/onboarding",
+            "http://data.europa.eu/esco/skill/sap",
+        ],
+    )
+
+    runtime_profile = module.build_runtime_profile_from_archetype(payload)
+
+    assert runtime_profile["canonical_skills"] == [
+        {"canonical_id": "skill:recruitment", "label": "Recruitment", "strategy": "synonym_match"},
+        {"canonical_id": "skill:onboarding", "label": "Onboarding", "strategy": "synonym_match"},
+    ]
+    assert runtime_profile["skills_uri"] == [
+        "http://data.europa.eu/esco/skill/recruitment",
+        "http://data.europa.eu/esco/skill/onboarding",
+        "http://data.europa.eu/esco/skill/sap",
+    ]
+    assert runtime_profile["matching_skills"] == [
+        "recruitment",
+        "onboarding",
+        "sap",
+    ]
+
+
+def test_build_runtime_profile_from_archetype_omits_empty_scoring_enrichment(monkeypatch):
+    module = _load_module()
+
+    payload = {
+        "sector_slug": "operations_process",
+        "profile_summary": [{"label": "operations"}],
+        "anchor_skills": [{"skill_label": "unknown skill"}],
+    }
+
+    monkeypatch.setattr(module, "_resolve_runtime_canonical_skills", lambda labels: [])
+    monkeypatch.setattr(module, "_resolve_runtime_skills_uri", lambda labels, canonical_skills: [])
+
+    runtime_profile = module.build_runtime_profile_from_archetype(payload)
+
+    assert "canonical_skills" not in runtime_profile
+    assert "skills_uri" not in runtime_profile
 
 
 def test_summarize_archetype_top_items_defaults_verdict_to_pending():
