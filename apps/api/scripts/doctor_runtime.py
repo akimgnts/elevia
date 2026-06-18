@@ -21,14 +21,18 @@ _API_ROOT = _SCRIPT_DIR.parent          # apps/api/
 _REPO_ROOT = _API_ROOT.parent.parent    # repo root (elevia-compass/)
 _OFFERS_DB = _API_ROOT / "data" / "db" / "offers.db"
 _AUTH_DB = _API_ROOT / "data" / "db" / "auth.db"
+_SEMANTIC_CORPUS = _API_ROOT / "data" / "semantic_retrieval" / "semantic_corpus_v1.jsonl"
 _TEMPLATES_DIR = _REPO_ROOT / "templates"
-_RUNTIME_REQUIRED = ("offers.db", "auth.db")
-_RUNTIME_OPTIONAL = (
-    "context.db",
-    "embeddings.db",
-    "onet.db",
-    "semantic_corpus_v1.jsonl",
-)
+_RUNTIME_REQUIRED = {
+    "offers.db": _OFFERS_DB,
+    "auth.db": _AUTH_DB,
+}
+_RUNTIME_OPTIONAL = {
+    "context.db": _API_ROOT / "data" / "db" / "context.db",
+    "embeddings.db": _API_ROOT / "data" / "db" / "embeddings.db",
+    "onet.db": _API_ROOT / "data" / "db" / "onet.db",
+    "semantic_corpus_v1.jsonl": _SEMANTIC_CORPUS,
+}
 
 # ---------------------------------------------------------------------------
 # ANSI helpers
@@ -249,18 +253,24 @@ def check_schema_version():
 
 
 def check_runtime_assets():
-    required_assets = {
-        "offers.db": _OFFERS_DB,
-        "auth.db": _AUTH_DB,
-    }
     missing_required = [
-        name for name in _RUNTIME_REQUIRED if not required_assets[name].exists()
+        name for name, path in _RUNTIME_REQUIRED.items() if not path.exists()
     ]
     if missing_required:
         return (
             "FAIL",
             "runtime assets missing",
             "missing required files: " + ", ".join(sorted(missing_required)),
+        )
+
+    missing_optional = [
+        name for name, path in _RUNTIME_OPTIONAL.items() if not path.exists()
+    ]
+    if missing_optional:
+        return (
+            "WARN",
+            "runtime assets partially available",
+            "missing optional files: " + ", ".join(sorted(missing_optional)),
         )
 
     return ("OK", "runtime assets present", "")
