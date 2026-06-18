@@ -37,6 +37,24 @@ def _patch_runtime_assets(module, monkeypatch, api_root):
     monkeypatch.setattr(module, "_RUNTIME_OPTIONAL", optional)
 
 
+def test_runtime_asset_manifests_match_expected_config():
+    module = _load_module()
+
+    assert set(module._RUNTIME_REQUIRED) == {"offers.db", "auth.db"}
+    assert set(module._RUNTIME_OPTIONAL) == {
+        "context.db",
+        "embeddings.db",
+        "onet.db",
+        "semantic_corpus_v1.jsonl",
+    }
+    assert module._RUNTIME_OPTIONAL["semantic_corpus_v1.jsonl"] == (
+        module._API_ROOT / "data" / "semantic_retrieval" / "semantic_corpus_v1.jsonl"
+    )
+    assert module._RUNTIME_OPTIONAL["semantic_corpus_v1.jsonl"].parent == (
+        module._API_ROOT / "data" / "semantic_retrieval"
+    )
+
+
 def test_required_runtime_assets_report_missing_db(monkeypatch, tmp_path):
     module = _load_module()
     _patch_runtime_assets(module, monkeypatch, tmp_path / "apps" / "api")
