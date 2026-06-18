@@ -30,9 +30,12 @@ build/
 
 # Data / local state
 apps/api/data/db/
+apps/api/data/db/backups/
 apps/api/data/raw/
 apps/api/data/processed/backtests/
+apps/api/data/semantic_retrieval/
 apps/api/data/sample_*.json
+!apps/api/data/esco/v1_2_1/fr/skills_fr.csv
 *.sqlite
 *.db
 
@@ -41,6 +44,8 @@ apps/api/data/sample_*.json
 .run/
 
 # Scraping artifacts (raw data dumps — never commit)
+data/raw/
+data/test/
 data/*.csv
 data/*.json
 !data/action_verbs.json
