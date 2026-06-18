@@ -19,6 +19,16 @@ def _check_ignore(path: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _check_not_ignored(path: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "check-ignore", path],
+        cwd=_repo_root(),
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+
 def test_gitignore_blocks_runtime_and_archive_assets():
     expected_rules = {
         "data/raw/example.json": "data/raw/",
@@ -48,6 +58,5 @@ def test_gitignore_keeps_skills_reference_tracked():
     text = (repo_root / ".gitignore").read_text()
     assert allow_rule in text
 
-    result = _check_ignore("apps/api/data/esco/v1_2_1/fr/skills_fr.csv")
-    assert result.returncode == 0, result.stderr
-    assert allow_rule in result.stdout, result.stdout
+    result = _check_not_ignored("apps/api/data/esco/v1_2_1/fr/skills_fr.csv")
+    assert result.returncode == 1, result.stdout
