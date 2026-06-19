@@ -140,20 +140,6 @@ export function primaryDisplayScore(
   return typeof item.explanation.score === "number" ? item.explanation.score : item.score;
 }
 
-function blockersCount(item: Pick<NormalizedInboxItem, "explanation">): number {
-  return Array.isArray(item.explanation.blockers) ? item.explanation.blockers.length : 0;
-}
-
-function strengthsCount(item: Pick<NormalizedInboxItem, "explanation">): number {
-  return Array.isArray(item.explanation.strengths) ? item.explanation.strengths.length : 0;
-}
-
-function recencyValue(publicationDate?: string | null): number {
-  if (!publicationDate) return 0;
-  const parsed = Date.parse(publicationDate);
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
-
 export function sortInboxItemsForDisplay(items: NormalizedInboxItem[]): NormalizedInboxItem[] {
   return [...items].sort((a, b) => {
     // Match backend sort exactly: score desc, signal_score desc, offer_id asc

@@ -27,7 +27,7 @@ import {
   type InboxFilters,
 } from "../lib/api";
 import { buildMatchingProfile, type SkillsSource, type ProfileMatchingV1 } from "../lib/profileMatching";
-import { normalizeAndSortInboxItems, sortInboxItemsForDisplay, type NormalizedInboxItem } from "../lib/inboxItems";
+import { normalizeAndSortInboxItems, type NormalizedInboxItem } from "../lib/inboxItems";
 import { useProfileStore } from "../store/profileStore";
 import { SEED_PROFILE } from "../fixtures/seedProfile";
 import { OfferDetailModal, type OfferDetail } from "../components/OfferDetailModal";
