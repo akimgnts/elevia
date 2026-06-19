@@ -47,3 +47,22 @@ The compose stack mounts these host paths from `ELEVIA_STATE_DIR`:
 Run on the VPS:
 
 `deploy/staging/scripts/backup_sqlite.sh`
+
+## Runtime asset policy
+
+The repository no longer treats SQLite runtime state as source-controlled deploy input.
+
+Required runtime state is mounted from `ELEVIA_STATE_DIR/db`:
+- `offers.db`
+- `auth.db`
+
+Additional optional runtime state may also be mounted if the related features are used:
+- `context.db`
+- `onet.db`
+- `embeddings.db`
+
+Archive and raw data directories are intentionally excluded from Git and are not deployed:
+- `data/raw/`
+- `data/test/`
+- `apps/api/data/raw/`
+- `apps/api/data/db/backups/`
