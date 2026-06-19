@@ -1,7 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Tuple
-
-import numpy as np
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from .embeddings import can_embed_with_model, embed_texts_with_model
 from .embedding_store import get_embedding, get_profile_text_info, store_embedding
@@ -9,9 +7,23 @@ from .text_utils import chunk_text, hash_text, normalize_text
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    import numpy as np
 
-def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+
+def _load_numpy() -> Any | None:
+    try:
+        import numpy as np
+        return np
+    except Exception:
+        return None
+
+
+def _cosine_similarity(a: Any, b: Any) -> float:
     if a is None or b is None:
+        return 0.0
+    np = _load_numpy()
+    if np is None:
         return 0.0
     denom = (np.linalg.norm(a) * np.linalg.norm(b)) + 1e-8
     if denom == 0:
@@ -19,7 +31,10 @@ def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b) / denom)
 
 
-def _load_or_embed(text: str, kind: str, model_version: str) -> Optional[np.ndarray]:
+def _load_or_embed(text: str, kind: str, model_version: str) -> Optional[Any]:
+    np = _load_numpy()
+    if np is None:
+        return None
     key = hash_text(text)
     cached = get_embedding(key, model_version, kind)
     if cached is not None:
@@ -38,7 +53,7 @@ def _load_or_embed(text: str, kind: str, model_version: str) -> Optional[np.ndar
 
 def _extract_relevant_passages(
     description: str,
-    profile_vector: np.ndarray,
+    profile_vector: Any,
     model_version: str,
     top_k: int = 3,
 ) -> List[str]:

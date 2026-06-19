@@ -1,12 +1,22 @@
 import sqlite3
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional, TYPE_CHECKING
 import threading
-import numpy as np
 from datetime import datetime, timezone
+
+if TYPE_CHECKING:
+    import numpy as np
 
 DB_PATH = Path(__file__).resolve().parents[2] / "data" / "db" / "embeddings.db"
 _DB_LOCK = threading.Lock()
+
+
+def _load_numpy() -> Any | None:
+    try:
+        import numpy as np
+        return np
+    except Exception:
+        return None
 
 
 def _utc_now() -> str:
@@ -57,8 +67,11 @@ def _get_conn() -> sqlite3.Connection:
     return conn
 
 
-def get_embedding(key: str, model_version: str, kind: str) -> Optional[np.ndarray]:
+def get_embedding(key: str, model_version: str, kind: str) -> Optional[Any]:
     if not key or not model_version or not kind:
+        return None
+    np = _load_numpy()
+    if np is None:
         return None
     with _DB_LOCK:
         conn = _get_conn()
@@ -75,8 +88,11 @@ def get_embedding(key: str, model_version: str, kind: str) -> Optional[np.ndarra
             conn.close()
 
 
-def store_embedding(key: str, model_version: str, kind: str, vector: np.ndarray) -> None:
+def store_embedding(key: str, model_version: str, kind: str, vector: Any) -> None:
     if not key or not model_version or not kind or vector is None:
+        return
+    np = _load_numpy()
+    if np is None:
         return
     arr = np.asarray(vector, dtype=np.float32)
     blob = arr.tobytes()
