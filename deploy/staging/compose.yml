@@ -36,8 +36,7 @@ services:
       STAGING_BASIC_AUTH_HASH: ${STAGING_BASIC_AUTH_HASH}
       API_UPSTREAM: ${API_UPSTREAM:-api:8000}
     depends_on:
-      api:
-        condition: service_healthy
+      - api
     restart: unless-stopped
     ports:
       - "80:80"
