@@ -38,9 +38,9 @@ services:
     depends_on:
       - api
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+    expose:
+      - "80"
+      - "443"
     volumes:
       - type: bind
         source: ${ELEVIA_STATE_DIR}/caddy-data
