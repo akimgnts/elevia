@@ -5,10 +5,6 @@
 :80 {
 	encode zstd gzip
 
-	basicauth /* {
-		{$STAGING_BASIC_AUTH_USER} {$STAGING_BASIC_AUTH_HASH}
-	}
-
 	handle_path /api/* {
 		reverse_proxy {$API_UPSTREAM:api:8000}
 	}
