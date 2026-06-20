@@ -2,7 +2,7 @@
 	admin off
 }
 
-{$APP_SITE_ADDRESS} {
+:80 {
 	encode zstd gzip
 
 	basicauth /* {
@@ -25,4 +25,3 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 }
-
