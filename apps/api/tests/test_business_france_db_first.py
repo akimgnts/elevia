@@ -75,6 +75,24 @@ def test_business_france_catalog_returns_explicit_missing_driver_detail(monkeypa
     assert payload["detail"] == "MISSING_DRIVER"
 
 
+def test_business_france_catalog_falls_back_to_fixture_when_db_missing_and_enabled(monkeypatch):
+    monkeypatch.setattr(
+        offers_routes,
+        "_load_catalog_db_first",
+        lambda limit, source: ([], 0, "error", offers_routes.FallbackReason.DB_MISSING),
+    )
+    monkeypatch.setenv("ELEVIA_INBOX_USE_VIE_FIXTURES", "1")
+
+    with TestClient(app) as client:
+        response = client.get("/offers/catalog?source=business_france&limit=5")
+
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["meta"]["data_source"] == "fixture"
+    assert payload["meta"]["fallback_reason"] == "DB_MISSING"
+    assert payload["offers"]
+
+
 def test_business_france_detail_uses_postgres_mapping(monkeypatch):
     monkeypatch.setattr(
         offers_routes,

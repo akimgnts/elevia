@@ -21,6 +21,7 @@ from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 
 from ..utils.obs_logger import obs_log
+from ..utils import inbox_catalog
 
 
 # ============================================================================
@@ -78,6 +79,33 @@ from compass.scoring.scoring_v3 import build_scoring_v3
 
 # Path to SQLite database
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
+
+
+def _use_vie_fixtures() -> bool:
+    value = os.getenv("ELEVIA_INBOX_USE_VIE_FIXTURES", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _load_catalog_fixture_fallback(
+    limit: int,
+    source: CatalogSource,
+) -> Tuple[List[Dict[str, Any]], int, str, Optional[FallbackReason]]:
+    if not _use_vie_fixtures():
+        return [], 0, "error", FallbackReason.DB_MISSING
+
+    offers = list(inbox_catalog._load_vie_fixtures())
+    if source == CatalogSource.france_travail:
+        offers = []
+    elif source == CatalogSource.business_france:
+        offers = [offer for offer in offers if offer.get("source") == "business_france"]
+
+    normalized = [_normalize_offer(offer, source_hint=str(offer.get("source") or "business_france")) for offer in offers]
+    normalized.sort(
+        key=lambda offer: (str(offer.get("publication_date") or ""), str(offer.get("id") or "")),
+        reverse=True,
+    )
+    total_count = len(normalized)
+    return normalized[: min(limit, 500)], total_count, "fixture", None
 
 
 def _normalize_offer(raw: Dict[str, Any], source_hint: str = "unknown") -> Dict[str, Any]:
@@ -503,6 +531,35 @@ def get_catalog_offers(
     source_enum = CatalogSource(source_clean)
 
     offers, total_count, data_source, failure_reason = _load_catalog_db_first(limit, source_enum)
+
+    if failure_reason is not None and source_enum in (CatalogSource.business_france, CatalogSource.all):
+        fixture_offers, fixture_total, fixture_source, fixture_failure = _load_catalog_fixture_fallback(limit, source_enum)
+        if fixture_failure is None:
+            duration_ms = int((time.time() - start_time) * 1000)
+            obs_log(
+                "catalog_fetch",
+                run_id=run_id,
+                status="success",
+                duration_ms=duration_ms,
+                extra={
+                    "data_source": fixture_source,
+                    "returned": len(fixture_offers),
+                    "source_filter": source_clean,
+                    "fallback_reason": failure_reason.value if failure_reason else None,
+                },
+            )
+            return JSONResponse(
+                content={
+                    "offers": fixture_offers,
+                    "meta": {
+                        "total_available": fixture_total,
+                        "returned": len(fixture_offers),
+                        "data_source": fixture_source,
+                        "fallback_reason": failure_reason.value if failure_reason else None,
+                    },
+                },
+                headers={"X-Data-Source": fixture_source},
+            )
 
     if failure_reason is None:
         duration_ms = int((time.time() - start_time) * 1000)
