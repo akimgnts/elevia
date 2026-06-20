@@ -220,6 +220,32 @@ def test_score_invariance_inbox(tmp_path, monkeypatch):
             assert base_items[oid] == filt_items[oid]
 
 
+def test_filtered_inbox_returns_empty_response_when_runtime_fails(monkeypatch):
+    monkeypatch.setenv("ELEVIA_INBOX_FAIL_OPEN", "1")
+    monkeypatch.setattr(inbox_routes, "_load_decided_ids", lambda _: set())
+    monkeypatch.setattr(
+        inbox_routes,
+        "_get_inbox_filtered",
+        lambda **_: (_ for _ in ()).throw(RuntimeError("boom")),
+    )
+
+    profile = {"id": "p1", "skills": ["python", "sql"]}
+
+    with TestClient(app) as client:
+        resp = client.post(
+            "/inbox?domain_mode=all&page=1&page_size=2&sort=published_desc",
+            json={"profile_id": "p1", "profile": profile, "min_score": 0, "limit": 5},
+        )
+
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload["profile_id"] == "p1"
+    assert payload["items"] == []
+    assert payload["total_matched"] == 0
+    assert payload["page"] == 1
+    assert payload["page_size"] == 2
+
+
 def test_inbox_guest_flow_exposes_offer_intelligence_for_returned_items(tmp_path, monkeypatch):
     db_path = tmp_path / "offers.db"
     _seed_db(db_path)

@@ -105,6 +105,29 @@ _engine_cache_catalog_id: Optional[int] = None
 _engine_cache: Optional[MatchingEngine] = None
 
 
+def _empty_inbox_response(
+    *,
+    profile_id: str,
+    total_decided: int = 0,
+    profile_source: Optional[str] = None,
+    page: Optional[int] = None,
+    page_size: Optional[int] = None,
+    applied_filters: Optional[Dict[str, Any]] = None,
+) -> InboxResponse:
+    meta = InboxMeta(profile_source=profile_source) if profile_source else None
+    return InboxResponse(
+        profile_id=profile_id,
+        items=[],
+        total_matched=0,
+        total_decided=total_decided,
+        total_estimate=0 if applied_filters else None,
+        applied_filters=applied_filters,
+        page=page,
+        page_size=page_size,
+        meta=meta,
+    )
+
+
 def _build_or_get_cluster_idf(catalog: List[Dict]) -> Dict[str, Dict[str, float]]:
     """
     Build and cache cluster-level IDF tables from the catalog.
@@ -179,6 +202,11 @@ _ADJACENCY: Dict[str, List[str]] = {
 
 def _debug_matching_enabled() -> bool:
     value = os.getenv("ELEVIA_DEBUG_MATCHING", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _inbox_fail_open_enabled() -> bool:
+    value = os.getenv("ELEVIA_INBOX_FAIL_OPEN", "").strip().lower()
     return value in {"1", "true", "yes", "on"}
 
 
@@ -1375,27 +1403,55 @@ def get_inbox(
         )
     )
     if use_filters:
-        return _get_inbox_filtered(
-            req=req,
-            profile_payload=profile_payload,
-            profile_source=profile_source,
-            domain_mode=domain_mode,
-            q_company=q_company,
-            country=country,
-            city=city,
-            contract_type=contract_type,
-            published_from=published_from,
-            published_to=published_to,
-            domain_bucket=domain_bucket,
-            min_score=min_score,
-            confidence=confidence,
-            rare_level=rare_level,
-            sector_level=sector_level,
-            has_tool_unspecified=has_tool_unspecified,
-            page=page,
-            page_size=page_size,
-            sort=sort,
-        )
+        try:
+            return _get_inbox_filtered(
+                req=req,
+                profile_payload=profile_payload,
+                profile_source=profile_source,
+                domain_mode=domain_mode,
+                q_company=q_company,
+                country=country,
+                city=city,
+                contract_type=contract_type,
+                published_from=published_from,
+                published_to=published_to,
+                domain_bucket=domain_bucket,
+                min_score=min_score,
+                confidence=confidence,
+                rare_level=rare_level,
+                sector_level=sector_level,
+                has_tool_unspecified=has_tool_unspecified,
+                page=page,
+                page_size=page_size,
+                sort=sort,
+            )
+        except Exception as exc:
+            if not _inbox_fail_open_enabled():
+                raise
+            logger.exception("[inbox] filtered inbox failed for profile_id=%s: %s", req.profile_id, exc)
+            return _empty_inbox_response(
+                profile_id=req.profile_id,
+                total_decided=len(_load_decided_ids(req.profile_id)),
+                profile_source=profile_source,
+                page=page or 1,
+                page_size=page_size or req.limit,
+                applied_filters={
+                    "q_company": q_company,
+                    "country": country,
+                    "city": city,
+                    "contract_type": contract_type,
+                    "published_from": published_from,
+                    "published_to": published_to,
+                    "domain_bucket": domain_bucket,
+                    "min_score": min_score if min_score is not None else req.min_score,
+                    "confidence": confidence,
+                    "rare_level": rare_level,
+                    "sector_level": sector_level,
+                    "has_tool_unspecified": has_tool_unspecified,
+                    "sort": sort or "published_desc",
+                    "domain_mode": domain_mode,
+                },
+            )
     decided_ids = _load_decided_ids(req.profile_id)
     t_decisions = time.perf_counter()
     catalog = _load_catalog_offers()
