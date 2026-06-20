@@ -21,6 +21,7 @@ from offer.offer_cluster import detect_offer_cluster
 logger = logging.getLogger(__name__)
 
 DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "db" / "offers.db"
+_OFFERS_FIXTURE_PATH = Path(__file__).parent.parent.parent.parent / "fixtures" / "offers" / "vie_catalog.json"
 MAX_DESCRIPTION_SNIPPET = 280
 _CATALOG_CACHE: Optional[List[Dict]] = None
 _CATALOG_CACHE_KEY: Optional[str] = None
@@ -96,6 +97,11 @@ def _description_snippet(text: str, limit: int = MAX_DESCRIPTION_SNIPPET) -> str
 
 def _database_url() -> str:
     return os.getenv("DATABASE_URL", "").strip()
+
+
+def _use_vie_fixtures() -> bool:
+    value = os.getenv("ELEVIA_INBOX_USE_VIE_FIXTURES", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
 
 
 def _runtime_offer_skills_injection_enabled() -> bool:
@@ -498,6 +504,39 @@ def _attach_payload_fields(offer: Dict) -> None:
             offer["education"] = education
 
 
+def _load_vie_fixtures() -> List[Dict]:
+    if not _OFFERS_FIXTURE_PATH.exists():
+        logger.warning("[inbox] VIE fixture catalog missing at %s", _OFFERS_FIXTURE_PATH)
+        return []
+
+    try:
+        raw = json.loads(_OFFERS_FIXTURE_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        logger.error("[inbox] Failed to read VIE fixture catalog: %s", exc)
+        return []
+
+    if not isinstance(raw, list):
+        logger.error("[inbox] VIE fixture catalog malformed: expected list")
+        return []
+
+    offers: List[Dict] = []
+    for index, item in enumerate(raw):
+        if not isinstance(item, dict):
+            continue
+        offer = dict(item)
+        offer.setdefault("id", f"vie_fixture_{index}")
+        offer.setdefault("source", "business_france")
+        offer.setdefault("publication_date", None)
+        offer.setdefault("contract_duration", None)
+        offer.setdefault("start_date", None)
+        if offer.get("is_vie") is None:
+            offer["is_vie"] = True
+        offers.append(offer)
+
+    logger.warning("[inbox] Using VIE fixture catalog fallback (%s offers)", len(offers))
+    return offers
+
+
 def _extract_skill_labels_for_cluster(offer: Dict) -> list:
     """Extract flat skill label list for cluster detection."""
     skills = offer.get("skills_display") or offer.get("skills") or []
@@ -584,6 +623,8 @@ def load_catalog_offers() -> List[Dict]:
         ft_error = e
 
     if bf_error and ft_error:
+        if _use_vie_fixtures():
+            return _set_cached_catalog(_apply_esco_normalization(_load_vie_fixtures()))
         raise RuntimeError(
             f"[inbox] Both catalog sources unavailable — BF: {bf_error} | FT: {ft_error}"
         )

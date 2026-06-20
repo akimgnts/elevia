@@ -5,6 +5,8 @@ services:
       dockerfile: deploy/staging/api.Dockerfile
     env_file:
       - ./api.env
+    environment:
+      ELEVIA_INBOX_USE_VIE_FIXTURES: ${ELEVIA_INBOX_USE_VIE_FIXTURES:-1}
     restart: unless-stopped
     volumes:
       - type: bind

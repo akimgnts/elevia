@@ -135,6 +135,27 @@ def test_inbox_catalog_does_not_fallback_to_fixtures_for_business_france(monkeyp
     assert bf_offers[0]["id"] == "BF-123"
 
 
+def test_inbox_catalog_falls_back_to_vie_fixtures_only_when_enabled(monkeypatch):
+    monkeypatch.setattr(
+        inbox_catalog,
+        "_load_business_france_from_postgres",
+        lambda: (_ for _ in ()).throw(RuntimeError("bf down")),
+    )
+    monkeypatch.setattr(
+        inbox_catalog,
+        "_load_france_travail_from_sqlite",
+        lambda: (_ for _ in ()).throw(RuntimeError("ft down")),
+    )
+    monkeypatch.setattr(inbox_catalog, "_get_cached_catalog", lambda: None)
+    monkeypatch.setenv("ELEVIA_INBOX_USE_VIE_FIXTURES", "1")
+
+    offers = inbox_catalog.load_catalog_offers()
+
+    assert offers
+    assert offers[0]["source"] == "business_france"
+    assert any(offer.get("is_vie") for offer in offers)
+
+
 def test_inbox_catalog_business_france_propagates_is_vie_from_payload(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgres://example")
 
