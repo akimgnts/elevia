@@ -9,6 +9,9 @@ import logging
 import sqlite3
 import subprocess
 import sys
+import threading
+import time
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict
 
@@ -16,6 +19,7 @@ from fastapi import APIRouter, Request
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from ..repositories.offers_pg import OffersPgRepository
 from api.utils.env import get_llm_api_key
 
 try:
@@ -35,6 +39,16 @@ _DB_PATH = _API_ROOT / "data" / "db" / "offers.db"
 _ESCO_DIR = _API_ROOT / "data" / "esco" / "v1_2_1" / "fr"
 # Offers fixture (static fallback — always present)
 _OFFERS_FIXTURE = _API_ROOT / "fixtures" / "offers" / "vie_catalog.json"
+_POSTGRES_SIGNAL_TTL_SECONDS = 60.0
+_POSTGRES_SIGNAL_LOCK = threading.Lock()
+_POSTGRES_SIGNAL_REFRESHING = False
+_POSTGRES_SIGNAL_CHECKED_AT = 0.0
+_POSTGRES_SIGNAL_CACHE: Dict[str, Any] = {
+    "ok": False,
+    "source": "business_france",
+    "latest_ingestion_at": None,
+    "error": "pending",
+}
 
 
 def _git_sha() -> str:
@@ -49,17 +63,97 @@ def _git_sha() -> str:
         return "unknown"
 
 
+def _serialize_date_like(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    return str(value)
+
+
+def _fetch_postgres_signal() -> Dict[str, Any]:
+    try:
+        latest_ingestion_at = OffersPgRepository().fetch_latest_ingestion_timestamp(
+            source="business_france"
+        )
+        if latest_ingestion_at is None:
+            return {
+                "ok": False,
+                "source": "business_france",
+                "latest_ingestion_at": None,
+                "error": "no_data",
+            }
+        return {
+            "ok": True,
+            "source": "business_france",
+            "latest_ingestion_at": _serialize_date_like(latest_ingestion_at),
+        }
+    except Exception as exc:
+        logger.warning("[health] postgres signal unavailable: %s", exc)
+        return {
+            "ok": False,
+            "source": "business_france",
+            "latest_ingestion_at": None,
+            "error": "unavailable",
+        }
+
+
+def _refresh_postgres_signal_sync() -> Dict[str, Any]:
+    signal = _fetch_postgres_signal()
+    global _POSTGRES_SIGNAL_CHECKED_AT
+    with _POSTGRES_SIGNAL_LOCK:
+        _POSTGRES_SIGNAL_CACHE.clear()
+        _POSTGRES_SIGNAL_CACHE.update(signal)
+        _POSTGRES_SIGNAL_CHECKED_AT = time.monotonic()
+    return dict(signal)
+
+
+def _refresh_postgres_signal_task() -> None:
+    global _POSTGRES_SIGNAL_REFRESHING
+    try:
+        _refresh_postgres_signal_sync()
+    finally:
+        with _POSTGRES_SIGNAL_LOCK:
+            _POSTGRES_SIGNAL_REFRESHING = False
+
+
+def _schedule_postgres_signal_refresh() -> None:
+    global _POSTGRES_SIGNAL_REFRESHING
+    now = time.monotonic()
+    with _POSTGRES_SIGNAL_LOCK:
+        is_stale = (now - _POSTGRES_SIGNAL_CHECKED_AT) >= _POSTGRES_SIGNAL_TTL_SECONDS
+        if not is_stale or _POSTGRES_SIGNAL_REFRESHING:
+            return
+        _POSTGRES_SIGNAL_REFRESHING = True
+
+    thread = threading.Thread(
+        target=_refresh_postgres_signal_task,
+        name="elevia-health-postgres-signal",
+        daemon=True,
+    )
+    thread.start()
+
+
+def _get_postgres_signal_snapshot() -> Dict[str, Any]:
+    with _POSTGRES_SIGNAL_LOCK:
+        return dict(_POSTGRES_SIGNAL_CACHE)
+
+
 # ── /health ────────────────────────────────────────────────────────────────────
 
 @router.get("/health")
 async def health(request: Request):
     """Liveness probe — returns quickly, never touches data."""
     request_id = getattr(request.state, "request_id", "n/a")
+    _schedule_postgres_signal_refresh()
     return {
         "status": "ok",
         "service": "api",
         "version": _git_sha(),
         "request_id": request_id,
+        "postgres": _get_postgres_signal_snapshot(),
     }
 
 
