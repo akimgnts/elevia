@@ -32,6 +32,7 @@ from .routes.auth import router as auth_router
 from .routes.matching import router as matching_router
 from .routes.metrics import router as metrics_router
 from .routes.offers import router as offers_router
+from .routes.offers_v1 import router as offers_v1_router
 from .routes.profile import router as profile_router
 from .routes.profile_baseline import router as profile_baseline_router
 from .routes.profile_file import router as profile_file_router
@@ -50,6 +51,7 @@ from .routes.cluster_library_api import router as cluster_library_router
 from .routes.analyze_recovery import router as analyze_recovery_router
 from .routes.analyze_ai_quality import router as analyze_ai_quality_router
 from .routes.market_insights import router as market_insights_router
+from .routes.ingestion_v1 import router as ingestion_v1_router
 from .routes.ai_justify import router as ai_justify_router
 from .routes.ai_structure import router as ai_structure_router
 from .routes.profile_understanding import router as profile_understanding_router
@@ -94,6 +96,8 @@ app.include_router(auth_router)
 app.include_router(matching_router, prefix="/v1")
 app.include_router(metrics_router, prefix="/metrics")
 app.include_router(offers_router, prefix="/offers")
+app.include_router(offers_v1_router, prefix="/offers")
+app.include_router(ingestion_v1_router)
 app.include_router(profile_router, prefix="/profile")
 app.include_router(profile_baseline_router)    # POST /profile/parse-baseline (no LLM)
 app.include_router(profile_file_router)        # POST /profile/parse-file (multipart, no LLM)
@@ -127,6 +131,8 @@ app.include_router(auth_router,                prefix=_P)
 app.include_router(matching_router,            prefix=f"{_P}/v1")
 app.include_router(metrics_router,             prefix=f"{_P}/metrics")
 app.include_router(offers_router,              prefix=f"{_P}/offers")
+app.include_router(offers_v1_router,           prefix=f"{_P}/offers")
+app.include_router(ingestion_v1_router,        prefix=_P)
 app.include_router(profile_router,             prefix=f"{_P}/profile")
 app.include_router(profile_baseline_router,    prefix=_P)
 app.include_router(profile_file_router,        prefix=_P)

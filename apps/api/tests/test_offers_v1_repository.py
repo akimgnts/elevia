@@ -1,0 +1,212 @@
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+from types import ModuleType
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from api.repositories.offers_pg import OffersPgRepository
+
+
+class FakeCursor:
+    def __init__(self, *, rows=None, row=None):
+        self.rows = rows or []
+        self.row = row
+        self.executed: list[tuple[str, object]] = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def execute(self, query, params=None):
+        self.executed.append((str(query), params))
+
+    def fetchall(self):
+        return self.rows
+
+    def fetchone(self):
+        return self.row
+
+
+class FakeConnection:
+    def __init__(self, cursor: FakeCursor):
+        self._cursor = cursor
+
+    def cursor(self):
+        return self._cursor
+
+
+def test_fetch_recent_offers_filters_active_and_orders_latest_first():
+    cursor = FakeCursor(
+        rows=[
+            {
+                "id": 11,
+                "source": "business_france",
+                "external_id": "BF-11",
+                "title": "Senior Analyst",
+                "company": "Acme",
+                "location": "Berlin",
+                "country": "Germany",
+                "contract_type": "VIE",
+                "publication_date": "2026-06-21T00:00:00+00:00",
+                "start_date": "2026-09-01",
+                "url": "https://example.test/offers/11",
+                "last_seen_at": "2026-06-25T09:30:00+00:00",
+            }
+        ]
+    )
+    repo = OffersPgRepository(lambda: FakeConnection(cursor))
+
+    offers = repo.fetch_recent_offers(limit=5)
+
+    assert offers == cursor.rows
+    query, params = cursor.executed[0]
+    assert "FROM clean_offers" in query
+    assert "WHERE source = %s" in query
+    assert "AND is_active = TRUE" in query
+    assert "ORDER BY last_seen_at DESC NULLS LAST, publication_date DESC NULLS LAST, id DESC" in query
+    assert "LIMIT %s" in query
+    assert params == ("business_france", 5)
+
+
+def test_fetch_recent_offers_applies_optional_country_filter():
+    cursor = FakeCursor(rows=[])
+    repo = OffersPgRepository(lambda: FakeConnection(cursor))
+
+    repo.fetch_recent_offers(limit=3, country="Germany")
+
+    query, params = cursor.executed[0]
+    assert "AND country = %s" in query
+    assert params == ("business_france", "Germany", 3)
+
+
+def test_fetch_offer_detail_includes_domain_enrichment_when_available():
+    cursor = FakeCursor(
+        row={
+            "id": 42,
+            "source": "business_france",
+            "external_id": "BF-42",
+            "title": "Data Analyst",
+            "company": "Acme",
+            "country": "Germany",
+            "domain_tag": "data",
+            "confidence": 0.91,
+            "method": "rules",
+            "evidence": ["sql", "dashboard"],
+            "needs_ai_review": False,
+            "job_family": "Data",
+            "primary_function": "Analytics",
+            "purity_score": 0.82,
+            "hybrid_score": 0.18,
+        }
+    )
+    repo = OffersPgRepository(lambda: FakeConnection(cursor))
+
+    offer = repo.fetch_offer_detail(42)
+
+    assert offer == cursor.row
+    query, params = cursor.executed[0]
+    assert "LEFT JOIN offer_domain_enrichment AS ode" in query
+    assert "ode.domain_tag" in query
+    assert "ode.confidence" in query
+    assert "ode.method" in query
+    assert "ode.needs_ai_review" in query
+    assert "ode.job_family" in query
+    assert "co.id = %s" in query
+    assert params == (42,)
+
+
+def test_fetch_offer_detail_without_enrichment_keeps_evidence_as_empty_list():
+    cursor = FakeCursor(
+        row={
+            "id": 43,
+            "source": "business_france",
+            "external_id": "BF-43",
+            "title": "Generalist",
+            "company": "Acme",
+            "country": "Germany",
+            "domain_tag": None,
+            "confidence": None,
+            "method": None,
+            "evidence": [],
+            "needs_ai_review": None,
+            "job_family": None,
+            "primary_function": None,
+            "purity_score": None,
+            "hybrid_score": None,
+        }
+    )
+    repo = OffersPgRepository(lambda: FakeConnection(cursor))
+
+    offer = repo.fetch_offer_detail(43)
+
+    assert offer is not None
+    assert offer["evidence"] == []
+    query, params = cursor.executed[0]
+    assert "COALESCE(ode.evidence, '[]'::jsonb) AS evidence" in query
+    assert params == (43,)
+
+
+def test_fetch_latest_ingestion_orders_by_started_at_desc():
+    cursor = FakeCursor(
+        row={
+            "id": 7,
+            "source": "business_france",
+            "status": "success",
+            "started_at": "2026-06-25T08:00:00+00:00",
+            "finished_at": "2026-06-25T08:03:00+00:00",
+        }
+    )
+    repo = OffersPgRepository(lambda: FakeConnection(cursor))
+
+    row = repo.fetch_latest_ingestion()
+
+    assert row == cursor.row
+    query, params = cursor.executed[0]
+    assert "FROM ingestion_runs" in query
+    assert "WHERE source = %s" in query
+    assert "ORDER BY started_at DESC" in query
+    assert "LIMIT 1" in query
+    assert params == ("business_france",)
+
+
+def test_fetch_latest_ingestion_timestamp_returns_started_at_value_from_dict_row():
+    cursor = FakeCursor(row={"started_at": "2026-06-25T08:00:00+00:00"})
+    repo = OffersPgRepository(lambda: FakeConnection(cursor))
+
+    value = repo.fetch_latest_ingestion_timestamp()
+
+    assert value == "2026-06-25T08:00:00+00:00"
+    query, params = cursor.executed[0]
+    assert "SELECT started_at" in query
+    assert params == ("business_france",)
+
+
+def test_connect_uses_explicit_timeout(monkeypatch):
+    import api.repositories.offers_pg as offers_pg
+
+    fake_psycopg = ModuleType("psycopg")
+    captured: dict[str, object] = {}
+
+    def fake_connect(database_url, **kwargs):
+        captured["database_url"] = database_url
+        captured["kwargs"] = kwargs
+        return object()
+
+    fake_psycopg.connect = fake_connect
+
+    rows_module = ModuleType("psycopg.rows")
+    rows_module.dict_row = object()
+
+    monkeypatch.setenv("DATABASE_URL", "postgres://example.test/db")
+    monkeypatch.setitem(sys.modules, "psycopg", fake_psycopg)
+    monkeypatch.setitem(sys.modules, "psycopg.rows", rows_module)
+
+    conn = offers_pg._connect()
+
+    assert conn is not None
+    assert captured["database_url"] == "postgres://example.test/db"
+    assert captured["kwargs"] == {"row_factory": rows_module.dict_row, "connect_timeout": 5}
