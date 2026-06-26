@@ -1,5 +1,6 @@
 import json
 import importlib.util
+import sys
 from pathlib import Path
 
 
@@ -30,6 +31,14 @@ def test_append_json_log_line_writes_one_record(tmp_path):
     lines = log_path.read_text(encoding="utf-8").splitlines()
     assert len(lines) == 1
     assert json.loads(lines[0]) == payload
+
+
+def test_resolve_python_bin_falls_back_to_current_interpreter(tmp_path):
+    mod = _load_script_module()
+
+    resolved = mod.resolve_python_bin(tmp_path)
+
+    assert resolved == sys.executable
 
 
 def test_build_telegram_message_includes_top_domains_and_ai_count():
@@ -173,6 +182,8 @@ def test_run_ingestion_sequence_uses_existing_scripts_and_logs(monkeypatch, tmp_
     )
     monkeypatch.setattr(mod, "persist_ingestion_run_with_connection", lambda conn, run_data: calls.append(("persist", run_data["status"])))
 
+    monkeypatch.setattr(mod, "resolve_python_bin", lambda repo_root: sys.executable)
+
     result = mod.run_ingestion(
         repo_root=tmp_path,
         log_path=tmp_path / "logs" / "ingestion.log",
@@ -204,7 +215,7 @@ def test_run_ingestion_sequence_uses_existing_scripts_and_logs(monkeypatch, tmp_
         (
             "json",
             [
-                str(tmp_path / "apps" / "api" / ".venv" / "bin" / "python"),
+                sys.executable,
                 str(tmp_path / "scripts" / "scrape_business_france_raw_offers.py"),
                 "--batch-size",
                 "200",
@@ -215,7 +226,7 @@ def test_run_ingestion_sequence_uses_existing_scripts_and_logs(monkeypatch, tmp_
         (
             "json",
             [
-                str(tmp_path / "apps" / "api" / ".venv" / "bin" / "python"),
+                sys.executable,
                 str(tmp_path / "scripts" / "load_business_france_clean_offers.py"),
             ],
         ),
@@ -332,3 +343,4 @@ def test_run_ingestion_supports_limited_refresh_and_skip_restart(monkeypatch, tm
     assert calls[0][1][-2:] == ["--limit", "15"]
     assert calls[1][0] == "json"
     assert calls[2][1]["external_ids"] == ["BF-10", "BF-11"]
+    monkeypatch.setattr(mod, "resolve_python_bin", lambda repo_root: sys.executable)
