@@ -17,7 +17,7 @@ def _connect():
     database_url = get_database_url()
     if not database_url:
         raise RuntimeError("DATABASE_URL is not set")
-    return psycopg.connect(database_url, row_factory=dict_row)
+    return psycopg.connect(database_url, row_factory=dict_row, connect_timeout=5)
 
 
 class OffersPgRepository:
@@ -75,7 +75,7 @@ class OffersPgRepository:
             query += "\n              AND country = %s"
             params.append(country)
         query += """
-            ORDER BY last_seen_at DESC, publication_date DESC, id DESC
+            ORDER BY last_seen_at DESC NULLS LAST, publication_date DESC NULLS LAST, id DESC
             LIMIT %s
         """
         params.append(limit)

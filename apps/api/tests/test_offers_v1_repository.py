@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from types import ModuleType
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -66,7 +67,7 @@ def test_fetch_recent_offers_filters_active_and_orders_latest_first():
     assert "FROM clean_offers" in query
     assert "WHERE source = %s" in query
     assert "AND is_active = TRUE" in query
-    assert "ORDER BY last_seen_at DESC, publication_date DESC, id DESC" in query
+    assert "ORDER BY last_seen_at DESC NULLS LAST, publication_date DESC NULLS LAST, id DESC" in query
     assert "LIMIT %s" in query
     assert params == ("business_france", 5)
 
@@ -182,3 +183,30 @@ def test_fetch_latest_ingestion_timestamp_returns_started_at_value_from_dict_row
     query, params = cursor.executed[0]
     assert "SELECT started_at" in query
     assert params == ("business_france",)
+
+
+def test_connect_uses_explicit_timeout(monkeypatch):
+    import api.repositories.offers_pg as offers_pg
+
+    fake_psycopg = ModuleType("psycopg")
+    captured: dict[str, object] = {}
+
+    def fake_connect(database_url, **kwargs):
+        captured["database_url"] = database_url
+        captured["kwargs"] = kwargs
+        return object()
+
+    fake_psycopg.connect = fake_connect
+
+    rows_module = ModuleType("psycopg.rows")
+    rows_module.dict_row = object()
+
+    monkeypatch.setenv("DATABASE_URL", "postgres://example.test/db")
+    monkeypatch.setitem(sys.modules, "psycopg", fake_psycopg)
+    monkeypatch.setitem(sys.modules, "psycopg.rows", rows_module)
+
+    conn = offers_pg._connect()
+
+    assert conn is not None
+    assert captured["database_url"] == "postgres://example.test/db"
+    assert captured["kwargs"] == {"row_factory": rows_module.dict_row, "connect_timeout": 5}
