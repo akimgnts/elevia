@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 
 DateLike = str | date | datetime | None
@@ -78,6 +78,13 @@ class OfferDetailResponse(_OffersV1BaseModel):
     primary_function: str | None = None
     purity_score: float | None = None
     hybrid_score: float | None = None
+
+    @field_validator("evidence", mode="before")
+    @classmethod
+    def _default_empty_evidence(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        return value
 
 
 class IngestionLatestResponse(_OffersV1BaseModel):

@@ -118,6 +118,37 @@ def test_fetch_offer_detail_includes_domain_enrichment_when_available():
     assert params == (42,)
 
 
+def test_fetch_offer_detail_without_enrichment_keeps_evidence_as_empty_list():
+    cursor = FakeCursor(
+        row={
+            "id": 43,
+            "source": "business_france",
+            "external_id": "BF-43",
+            "title": "Generalist",
+            "company": "Acme",
+            "country": "Germany",
+            "domain_tag": None,
+            "confidence": None,
+            "method": None,
+            "evidence": [],
+            "needs_ai_review": None,
+            "job_family": None,
+            "primary_function": None,
+            "purity_score": None,
+            "hybrid_score": None,
+        }
+    )
+    repo = OffersPgRepository(lambda: FakeConnection(cursor))
+
+    offer = repo.fetch_offer_detail(43)
+
+    assert offer is not None
+    assert offer["evidence"] == []
+    query, params = cursor.executed[0]
+    assert "COALESCE(ode.evidence, '[]'::jsonb) AS evidence" in query
+    assert params == (43,)
+
+
 def test_fetch_latest_ingestion_orders_by_started_at_desc():
     cursor = FakeCursor(
         row={
@@ -141,8 +172,8 @@ def test_fetch_latest_ingestion_orders_by_started_at_desc():
     assert params == ("business_france",)
 
 
-def test_fetch_latest_ingestion_timestamp_returns_started_at_value():
-    cursor = FakeCursor(row=("2026-06-25T08:00:00+00:00",))
+def test_fetch_latest_ingestion_timestamp_returns_started_at_value_from_dict_row():
+    cursor = FakeCursor(row={"started_at": "2026-06-25T08:00:00+00:00"})
     repo = OffersPgRepository(lambda: FakeConnection(cursor))
 
     value = repo.fetch_latest_ingestion_timestamp()

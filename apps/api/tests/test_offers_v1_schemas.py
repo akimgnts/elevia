@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -78,12 +79,47 @@ def test_offer_detail_response_accepts_real_enrichment_fields():
     assert data["payload_json"] == {"raw": True}
 
 
+def test_offer_detail_response_defaults_evidence_to_empty_list_for_unenriched_offer():
+    payload = OfferDetailResponse(
+        id=43,
+        source="business_france",
+        external_id="BF-43",
+        title="Generalist",
+        evidence=[],
+    )
+
+    data = payload.model_dump()
+
+    assert data["evidence"] == []
+
+
+def test_schema_serializers_handle_real_date_and_datetime_objects():
+    payload = RecentOffersResponse(
+        offers=[
+            OfferSummaryResponse(
+                id=44,
+                source="business_france",
+                external_id="BF-44",
+                publication_date=datetime(2026, 6, 21, 8, 30, tzinfo=timezone.utc),
+                start_date=date(2026, 9, 1),
+                last_seen_at=datetime(2026, 6, 25, 9, 30, tzinfo=timezone.utc),
+            )
+        ]
+    )
+
+    data = payload.model_dump()
+
+    assert data["offers"][0]["publication_date"] == "2026-06-21T08:30:00+00:00"
+    assert data["offers"][0]["start_date"] == "2026-09-01"
+    assert data["offers"][0]["last_seen_at"] == "2026-06-25T09:30:00+00:00"
+
+
 def test_ingestion_latest_response_serializes_counters_and_timestamps():
     payload = IngestionLatestResponse(
         id=7,
         source="business_france",
-        started_at="2026-06-25T08:00:00+00:00",
-        finished_at="2026-06-25T08:03:00+00:00",
+        started_at=datetime(2026, 6, 25, 8, 0, tzinfo=timezone.utc),
+        finished_at=datetime(2026, 6, 25, 8, 3, tzinfo=timezone.utc),
         status="success",
         fetched_count=10,
         persisted_count_raw=10,
@@ -99,5 +135,6 @@ def test_ingestion_latest_response_serializes_counters_and_timestamps():
     data = payload.model_dump()
 
     assert data["status"] == "success"
+    assert data["started_at"] == "2026-06-25T08:00:00+00:00"
     assert data["active_total"] == 123
     json.dumps(data)

@@ -82,7 +82,7 @@ class OffersPgRepository:
 
         return self._run_fetchall(query, tuple(params))
 
-    def fetch_offer_detail(self, id: int) -> dict[str, Any] | None:
+    def fetch_offer_detail(self, offer_id: int) -> dict[str, Any] | None:
         query = """
             SELECT
                 co.id,
@@ -105,7 +105,7 @@ class OffersPgRepository:
                 ode.domain_tag,
                 ode.confidence,
                 ode.method,
-                ode.evidence,
+                COALESCE(ode.evidence, '[]'::jsonb) AS evidence,
                 ode.needs_ai_review,
                 ode.job_family,
                 ode.primary_function,
@@ -117,7 +117,7 @@ class OffersPgRepository:
              AND ode.external_id = co.external_id
             WHERE co.id = %s
         """
-        return self._run_fetchone(query, (id,))
+        return self._run_fetchone(query, (offer_id,))
 
     def fetch_latest_ingestion(
         self,
