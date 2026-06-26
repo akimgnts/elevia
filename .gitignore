@@ -42,6 +42,7 @@ apps/api/data/sample_*.json
 # Claude tooling
 .claude/
 .run/
+.worktrees/
 
 # Scraping artifacts (raw data dumps — never commit)
 data/raw/
