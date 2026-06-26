@@ -52,6 +52,13 @@ def build_env(repo_root: Path) -> dict[str, str]:
     return env
 
 
+def resolve_python_bin(repo_root: Path) -> str:
+    preferred = repo_root / "apps" / "api" / ".venv" / "bin" / "python"
+    if preferred.exists():
+        return str(preferred)
+    return sys.executable
+
+
 def telegram_reporting_enabled(env: dict[str, str]) -> bool:
     return (env.get(FLAG_ENABLE_TELEGRAM_REPORT) or "0").strip() == "1"
 
@@ -218,7 +225,7 @@ def run_ingestion(
 ) -> dict[str, Any]:
     env = build_env(repo_root)
     database_url = (env.get("DATABASE_URL") or "").strip() or None
-    python_bin = repo_root / "apps" / "api" / ".venv" / "bin" / "python"
+    python_bin = resolve_python_bin(repo_root)
     scrape_script = repo_root / "scripts" / "scrape_business_france_raw_offers.py"
     load_script = repo_root / "scripts" / "load_business_france_clean_offers.py"
     started_at = utc_now()
@@ -253,7 +260,7 @@ def run_ingestion(
             lambda conn: get_business_france_active_ids_with_connection(conn),
         )
         scrape_cmd = [
-            str(python_bin),
+            python_bin,
             str(scrape_script),
             "--batch-size",
             str(int(scrape_batch_size or 200)),
@@ -268,7 +275,7 @@ def run_ingestion(
             lambda conn: get_latest_business_france_raw_ids_with_connection(conn),
         )
         load = run_json_command(
-            [str(python_bin), str(load_script)],
+            [python_bin, str(load_script)],
             env,
         )
         current_ids_sorted = sorted(current_ids)
