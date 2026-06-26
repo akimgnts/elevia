@@ -102,10 +102,15 @@ class OffersPgRepository:
                 co.first_seen_at,
                 co.last_seen_at,
                 co.is_active,
-                ode.domain,
-                ode.subdomain,
-                ode.domain_confidence,
-                ode.domain_source
+                ode.domain_tag,
+                ode.confidence,
+                ode.method,
+                ode.evidence,
+                ode.needs_ai_review,
+                ode.job_family,
+                ode.primary_function,
+                ode.purity_score,
+                ode.hybrid_score
             FROM clean_offers AS co
             LEFT JOIN offer_domain_enrichment AS ode
               ON ode.source = co.source

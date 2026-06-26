@@ -69,10 +69,15 @@ class OfferDetailResponse(_OffersV1BaseModel):
     first_seen_at: DateLike = None
     last_seen_at: DateLike = None
     is_active: bool = True
-    domain: str | None = None
-    subdomain: str | None = None
-    domain_confidence: float | None = None
-    domain_source: str | None = None
+    domain_tag: str | None = None
+    confidence: float | None = None
+    method: str | None = None
+    evidence: list[str] = Field(default_factory=list)
+    needs_ai_review: bool | None = None
+    job_family: str | None = None
+    primary_function: str | None = None
+    purity_score: float | None = None
+    hybrid_score: float | None = None
 
 
 class IngestionLatestResponse(_OffersV1BaseModel):

@@ -91,10 +91,15 @@ def test_fetch_offer_detail_includes_domain_enrichment_when_available():
             "title": "Data Analyst",
             "company": "Acme",
             "country": "Germany",
-            "domain": "data",
-            "subdomain": "analytics",
-            "domain_confidence": 0.91,
-            "domain_source": "rules",
+            "domain_tag": "data",
+            "confidence": 0.91,
+            "method": "rules",
+            "evidence": ["sql", "dashboard"],
+            "needs_ai_review": False,
+            "job_family": "Data",
+            "primary_function": "Analytics",
+            "purity_score": 0.82,
+            "hybrid_score": 0.18,
         }
     )
     repo = OffersPgRepository(lambda: FakeConnection(cursor))
@@ -104,6 +109,11 @@ def test_fetch_offer_detail_includes_domain_enrichment_when_available():
     assert offer == cursor.row
     query, params = cursor.executed[0]
     assert "LEFT JOIN offer_domain_enrichment AS ode" in query
+    assert "ode.domain_tag" in query
+    assert "ode.confidence" in query
+    assert "ode.method" in query
+    assert "ode.needs_ai_review" in query
+    assert "ode.job_family" in query
     assert "co.id = %s" in query
     assert params == (42,)
 

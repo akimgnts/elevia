@@ -41,7 +41,7 @@ def test_recent_offers_response_serializes_expected_shape():
     json.dumps(data)
 
 
-def test_offer_detail_response_accepts_additive_domain_fields():
+def test_offer_detail_response_accepts_real_enrichment_fields():
     payload = OfferDetailResponse(
         id=42,
         source="business_france",
@@ -59,15 +59,22 @@ def test_offer_detail_response_accepts_additive_domain_fields():
         payload_json={"raw": True},
         first_seen_at="2026-06-20T09:30:00+00:00",
         last_seen_at="2026-06-25T09:30:00+00:00",
-        domain="data",
-        subdomain="analytics",
-        domain_confidence=0.91,
-        domain_source="rules",
+        domain_tag="data",
+        confidence=0.91,
+        method="rules",
+        evidence=["sql", "dashboard"],
+        needs_ai_review=False,
+        job_family="Data",
+        primary_function="Analytics",
+        purity_score=0.82,
+        hybrid_score=0.18,
     )
 
     data = payload.model_dump()
 
-    assert data["domain"] == "data"
+    assert data["domain_tag"] == "data"
+    assert data["method"] == "rules"
+    assert data["needs_ai_review"] is False
     assert data["payload_json"] == {"raw": True}
 
 
