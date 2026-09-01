@@ -64,6 +64,12 @@ except ImportError:
     sys.exit(1)
 
 from api.utils.raw_offers_pg import persist_raw_offers
+from api.utils.business_france_scrape_fallback import (
+    FALLBACK_MAX_OFFERS,
+    FallbackResult,
+    is_fallback_available,
+    scrape_business_france_offers,
+)
 
 # ==============================================================================
 # PATHS (anchored to repo root — jamais relatif au CWD)
@@ -674,6 +680,69 @@ def test_endpoint_viability() -> bool:
         session.close()
 
 
+def test_scrapegraph_viability(limit: int = 5) -> bool:
+    """Teste UNIQUEMENT le fallback ScrapeGraphAI. Aucune écriture DB."""
+    print("=" * 60)
+    print("SCRAPEGRAPHAI FALLBACK — VIABILITY TEST")
+    print("=" * 60)
+
+    if not is_fallback_available():
+        print("[ERROR] Fallback indisponible (venv /opt/scrape-fallback-venv ou runner script manquant)")
+        print("        → voir apps/api/requirements-scrape-fallback.txt et le Dockerfile")
+        return False
+
+    fb = scrape_business_france_offers(limit=limit)
+    print(f"Moteur        : {fb.engine}")
+    print(f"Page utilisée : {fb.page_used}")
+    print(f"Statut        : {fb.status}")
+    print(f"Offres        : {fb.offers_recovered}")
+    if fb.offers:
+        ids = [o.get("id") for o in fb.offers]
+        print(f"IDs récupérés : {ids}")
+        first = fb.offers[0]
+        print(f"Champs dispo  : {sorted(k for k, v in first.items() if v)}")
+    if fb.error:
+        print(f"Erreur        : {fb.error}")
+
+    ok = fb.status == "success" and fb.offers_recovered > 0
+    print()
+    print("[VIABILITY] PASS — fallback opérationnel" if ok else "[VIABILITY] FAIL — fallback indisponible/vide")
+    return ok
+
+
+def test_auto_viability(limit: int = 5) -> bool:
+    """
+    Teste le comportement réel primary→fallback sans jamais écrire en DB :
+    tente l'API, et seulement si elle échoue, tente ScrapeGraphAI.
+    """
+    print("=" * 60)
+    print("AUTO — API PRIMARY THEN SCRAPEGRAPH FALLBACK")
+    print("=" * 60)
+
+    primary_ok = test_endpoint_viability()
+    fallback_triggered = not primary_ok
+    fb: Optional[FallbackResult] = None
+    offers_recovered = 0
+
+    if fallback_triggered:
+        print()
+        print("→ primaire en échec, déclenchement du fallback ScrapeGraphAI")
+        if is_fallback_available():
+            fb = scrape_business_france_offers(limit=limit)
+            offers_recovered = fb.offers_recovered
+        else:
+            print("[ERROR] Fallback indisponible (venv non provisionné)")
+
+    print()
+    print(f"primary_provider   : api")
+    print(f"primary_result     : {'PASS' if primary_ok else 'FAIL'}")
+    print(f"fallback_triggered : {fallback_triggered}")
+    print(f"fallback_result    : {fb.status if fb else 'not_attempted'}")
+    print(f"offers_recovered   : {offers_recovered}")
+
+    return primary_ok or offers_recovered > 0
+
+
 # ==============================================================================
 # ÉCRITURE JSONL — format envelope obligatoire pour ingest_business_france.py
 # ==============================================================================
@@ -756,6 +825,10 @@ def main() -> None:
         help="Tester la viabilité de l'endpoint seulement",
     )
     parser.add_argument(
+        "--provider", choices=["auto", "api", "scrapegraph"], default="auto",
+        help="auto (défaut) = API puis fallback ScrapeGraphAI si échec ; api = API seule ; scrapegraph = fallback seul",
+    )
+    parser.add_argument(
         "--dry-run", action="store_true",
         help="Exécuter le scrape mais ne pas écrire sur disque",
     )
@@ -768,7 +841,12 @@ def main() -> None:
 
     # ── MODE TEST ──────────────────────────────────────────────────────────────
     if args.test:
-        ok = test_endpoint_viability()
+        if args.provider == "api":
+            ok = test_endpoint_viability()
+        elif args.provider == "scrapegraph":
+            ok = test_scrapegraph_viability(limit=5)
+        else:
+            ok = test_auto_viability(limit=5)
         sys.exit(0 if ok else 1)
 
     # ── Limite effective ───────────────────────────────────────────────────────
@@ -799,46 +877,78 @@ def main() -> None:
 
     # ── MODE LIVE ──────────────────────────────────────────────────────────────
     else:
-        session = requests.Session()
-        counter: Dict[str, int] = {"total": 0, "failed": 0}
+        final_offers: List[Dict[str, Any]] = []
+        primary_error: Optional[str] = None
+        api_total = 0
 
-        try:
-            # 1. Catalog
-            catalog_offers, api_total = fetch_catalog(
-                session, counter, logger, max_offers
-            )
+        # PRIMARY — API Civiweb (sauf si --provider scrapegraph force le fallback direct)
+        if args.provider != "scrapegraph":
+            session = requests.Session()
+            counter: Dict[str, int] = {"total": 0, "failed": 0}
+            catalog_offers: List[Dict[str, Any]] = []
+            try:
+                catalog_offers, api_total = fetch_catalog(session, counter, logger, max_offers)
+                if not catalog_offers:
+                    primary_error = "Aucune offre récupérée depuis le catalog"
+                elif skip_details:
+                    final_offers = [normalize_payload(o) for o in catalog_offers]
+                else:
+                    enriched = enrich_with_details(catalog_offers, session, counter, logger)
+                    final_offers = [normalize_payload(o) for o in enriched]
+            except AbortScrapeError as exc:
+                primary_error = str(exc)
+                logger.log("abort", "error",
+                           error=primary_error,
+                           duration_ms=int((time.time() - start_time) * 1000),
+                           extra={
+                               "catalog_source":    "BF_AZURE",
+                               "reason":            "error_rate_exceeded",
+                               "http_errors_count": counter["failed"],
+                               "total_attempts":    counter["total"],
+                           })
+            finally:
+                session.close()
 
-            if not catalog_offers:
-                logger.log("scraper_summary", "error",
+            if primary_error and not final_offers:
+                logger.log("scraper_summary", "warn",
                            duration_ms=int((time.time() - start_time) * 1000),
                            offers_processed=0,
-                           error="Aucune offre récupérée depuis le catalog",
+                           error=primary_error,
                            extra={"catalog_source": "BF_AZURE",
                                   "api_total": api_total,
-                                  "hint": "Vérifier endpoint avec --test"})
-                sys.exit(1)
+                                  "hint": "Vérifier endpoint avec --test --provider api"})
 
-            # 2. Détails (optionnel)
-            if skip_details:
-                enriched = catalog_offers
+        # FALLBACK — ScrapeGraphAI, uniquement si le primaire n'a rien produit
+        # et que --provider n'exclut pas explicitement le fallback (api-only)
+        if not final_offers and args.provider != "api":
+            logger.log("fallback_triggered", "info",
+                       extra={"catalog_source": "BF_AZURE",
+                              "reason": primary_error or "provider=scrapegraph (fallback forcé)"})
+            if not is_fallback_available():
+                logger.log("fallback_result", "unavailable",
+                           error="scrape-fallback venv non provisionné",
+                           extra={"catalog_source": "BF_AZURE", "engine": "scrapegraph"})
             else:
-                enriched = enrich_with_details(catalog_offers, session, counter, logger)
+                fallback_limit = min(max_offers, FALLBACK_MAX_OFFERS)
+                fb = scrape_business_france_offers(limit=fallback_limit)
+                logger.log("fallback_result", fb.status,
+                           offers_processed=fb.offers_recovered,
+                           error=fb.error,
+                           extra={"catalog_source": "BF_AZURE", "engine": fb.engine,
+                                  "page_used": fb.page_used})
+                if fb.status == "success" and fb.offers:
+                    # Offres déjà normalisées par business_france_scrape_fallback —
+                    # ne PAS repasser par normalize_payload() (écraserait bf_source).
+                    final_offers = fb.offers
 
-            final_offers = [normalize_payload(o) for o in enriched]
-
-        except AbortScrapeError as exc:
-            logger.log("abort", "error",
-                       error=str(exc),
+        if not final_offers:
+            logger.log("scraper_summary", "error",
                        duration_ms=int((time.time() - start_time) * 1000),
-                       extra={
-                           "catalog_source":    "BF_AZURE",
-                           "reason":            "error_rate_exceeded",
-                           "http_errors_count": counter["failed"],
-                           "total_attempts":    counter["total"],
-                       })
+                       offers_processed=0,
+                       error="Aucune offre récupérée (API et fallback ScrapeGraphAI)",
+                       extra={"catalog_source": "BF_AZURE", "api_total": api_total,
+                              "primary_error": primary_error})
             sys.exit(1)
-        finally:
-            session.close()
 
     # ── Validation volume minimum ──────────────────────────────────────────────
     if len(final_offers) < MIN_OFFERS_SUCCESS:

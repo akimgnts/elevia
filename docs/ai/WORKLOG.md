@@ -3544,3 +3544,50 @@ cd apps/api && python3 scripts/scrape_business_france_azure.py --test
 
 ### 8. Non-régression
 - Aucun changement scoring / matching / `clean_offers` / `offer_skills` / pipeline CV / frontend / migrations / schéma PostgreSQL / données existantes / Coolify.
+
+## 2026-09-01 (suite) — Confirmation production HTTP 401 + expérimentation fallback ScrapeGraphAI
+
+### 1. Confirmation production
+- Reproduction réelle depuis le conteneur Coolify (`python3 scripts/scrape_business_france_azure.py --test`) : `HTTP Status: 401`, `Content-Type: N/A`, body vide.
+- Le site officiel confirme que `POST .../api/Offers/latest` (payload `{"skip":0,"limit":6}`) renvoie `HTTP 200` avec des offres — mais `/latest` n'est pas prouvé comme permettant de parcourir tout le catalogue (probablement limité aux offres les plus récentes).
+- Tentative de comparer la requête frontend réelle : bloquée par la politique réseau de cette session (même blocage documenté précédemment sur `mon-vie-via.businessfrance.fr` et `civiweb-api-prd.azurewebsites.net`). Cause exacte du 401 toujours non prouvée.
+
+### 2. Décision produit
+- Plutôt que de deviner un correctif d'authentification (interdit sans preuve), mise en place d'un **chemin d'acquisition alternatif expérimental** : ScrapeGraphAI, en fallback strict du scraper API existant, dans le même repo Elevia (pas de microservice séparé pour l'instant).
+
+### 3. Analyse de compatibilité des dépendances (avant tout ajout)
+- `pip install --dry-run -r requirements.txt scrapegraphai==1.76.0` exécuté pour vérifier la compatibilité (Étape 1 de la tâche) : la résolution **réussit** mais force des montées de version majeures sur `fastapi` (0.109→0.141), `pydantic` (→2.13), `httpx` (→0.28), `openai` (1.x→3.6), `pypdf`, `python-multipart`, `uvicorn` — car `scrapegraphai` exige `langchain>=1.2.0`, `pydantic>=2.12.5`, etc.
+- Conclusion : ajouter `scrapegraphai` directement dans `requirements.txt` casserait la contrainte "ne casse aucune dépendance existante". Décision : isolation stricte dans un **venv séparé**, jamais fusionné avec le resolver principal.
+
+### 4. Implémentation
+- **Nouveau fichier** `apps/api/requirements-scrape-fallback.txt` : `scrapegraphai>=1.76.0` seul, installé dans un venv dédié.
+- **Nouveau fichier** `apps/api/scripts/scrapegraph_bf_runner.py` : script qui tourne UNIQUEMENT dans ce venv isolé (jamais importé par le process FastAPI principal), invoqué en sous-processus. Utilise `SmartScraperGraph` de `scrapegraphai` avec le prompt d'extraction minimal demandé (external_id, title, company, location, description, profile, publication_date, offer_url). Contrat de sortie : une ligne JSON sur stdout (`status`, `engine`, `page_used`, `offers`, `offers_found`, `error`). Ne persiste jamais rien lui-même.
+- **Nouveau fichier** `apps/api/src/api/utils/business_france_scrape_fallback.py` : abstraction appelée par le process principal (`scrape_business_france_offers(url, limit, timeout) -> FallbackResult`). Résout le python du venv isolé (`SCRAPEGRAPH_VENV_PYTHON` ou `/opt/scrape-fallback-venv/bin/python` par défaut), lance le runner en sous-processus, parse son JSON, reshape chaque offre vers les mêmes clés que `normalize_payload()` (`id`/`title`/`description`/`company`/`city`/`country`/`publicationDate`/`offerUrl`), avec `bf_source="BF_SCRAPEGRAPH_FALLBACK"` pour distinguer l'origine sans changer `source` (`business_france` inchangé). Ne persiste jamais rien elle-même. Ne garde jamais une offre sans id réel (dérivé de `external_id`/`id` explicite, ou à défaut du dernier segment de l'URL — jamais un id aléatoire). Déduplique par id au sein d'un même batch.
+- **Modifié** `apps/api/scripts/scrape_business_france_azure.py` :
+  - nouvel argument `--provider {auto,api,scrapegraph}` (défaut `auto`).
+  - mode live : primaire = `fetch_catalog()` (API Civiweb) inchangé ; si vide/échec ET `--provider != api` → log `fallback_triggered` puis `scrape_business_france_offers(limit=min(max_offers, 20))` ; si le fallback réussit, ses offres (déjà normalisées) alimentent directement `final_offers` **sans repasser par `normalize_payload()`** (qui écraserait `bf_source`) ; si les deux échouent → `scraper_summary` erreur propre, `sys.exit(1)`, aucune persistance.
+  - `--test` supporte désormais `--provider api` (comportement historique inchangé), `--provider scrapegraph` (fallback seul, aucune écriture DB), `--provider auto` (rejoue exactement la logique primary→fallback réelle, affiche `primary_provider`/`primary_result`/`fallback_triggered`/`fallback_result`/`offers_recovered`, aucune écriture DB).
+  - Volume : `MIN_OFFERS_SUCCESS=10` existant s'applique aussi aux offres de fallback — un run fallback trop petit sort en code 2 sans jamais persister, garde-fou déjà présent, non modifié.
+- **Modifié** `apps/api/Dockerfile` : ajout d'un venv séparé (`/opt/scrape-fallback-venv`) installant `requirements-scrape-fallback.txt` puis `playwright install --with-deps chromium`, en best-effort (`|| echo ...`) — un échec de cette étape optionnelle ne bloque jamais le build/déploiement de l'API principale. Port et `CMD` inchangés.
+- Pas de fichier `.env.example` dans le repo (vérifié) — variables documentées ici et dans les docstrings des nouveaux fichiers.
+
+### 5. Vérification de non-casse
+- `pip install --dry-run -r requirements.txt scrapegraphai` (voir section 3) — confirme la nécessité de l'isolation, choix architectural déjà appliqué.
+- Aucun changement à `requirements.txt` lui-même.
+- `scrape_business_france_azure.py` n'importe **jamais** `scrapegraphai` — seulement `api.utils.business_france_scrape_fallback`, qui elle-même ne fait que du `subprocess`/`json`/`pathlib` (aucune dépendance lourde importée dans le process principal).
+
+### 6. Tests automatisés ajoutés
+- `apps/api/tests/test_business_france_scrape_fallback.py` (8 tests) : normalisation des offres fallback, dérivation d'id depuis l'URL, jamais d'id inventé, venv indisponible → `status=unavailable`, parsing du contrat JSON du runner, déduplication par id, erreur propre si le runner échoue.
+- `apps/api/tests/test_scrapegraph_bf_runner.py` (6 tests) : extraction d'id (champ explicite / URL / aucun), normalisation de la sortie ScrapeGraphAI (liste brute ou dict enveloppé), jamais d'id inventé, respect de la limite.
+- `apps/api/tests/test_business_france_azure_primary_fallback.py` (6 tests) : API réussit → fallback jamais appelé ; catalog vide (reproduit le cas réel HTTP 401) → fallback déclenché exactement une fois ; offres de fallback non altérées par `normalize_payload()` ; API+fallback échouent → `sys.exit(1)` propre, aucun appel à `persist_raw_offers` ; `--provider api` ne déclenche jamais le fallback même si le catalog est vide.
+- Résultat : `python3 -m pytest tests/test_business_france_scrape_fallback.py tests/test_scrapegraph_bf_runner.py tests/test_business_france_azure_primary_fallback.py -q` → **19 passed**.
+- Non-régression vérifiée sur la suite BF existante : `test_business_france_raw_scraper.py`, `test_business_france_db_first.py`, `test_business_france_ingestion_tracking.py` → tous verts. `test_business_france_ingestion_automation.py` a 3 échecs **préexistants** (fonction `restart_api` supprimée de `run_business_france_ingestion.py` par le commit `6ee80e8` du 2026-06-26, tests jamais mis à jour depuis) — confirmé non lié à ce travail (`git diff` ne touche pas ce fichier), signalé pour un futur nettoyage mais hors scope ici.
+
+### 7. Ce qui n'a PAS pu être validé depuis cette session
+- Aucun appel réseau réel à `civiweb-api-prd.azurewebsites.net` ni `mon-vie-via.businessfrance.fr` n'a pu être fait (même blocage d'egress documenté précédemment). Test B (ScrapeGraphAI réel) et Test C (auto réel) n'ont donc été validés qu'en local avec le venv fallback absent (`status=unavailable`, comportement propre confirmé) — **jamais avec un vrai navigateur headless + LLM contre le vrai site**.
+- La correction réelle du contrat ScrapeGraphAI (nom exact de la classe/API `scrapegraphai`, forme exacte du prompt) n'a pas pu être exercée contre un LLM réel ni un vrai rendu de page depuis cette session — à valider en premier lors du Test B en Coolify.
+
+### 8. Non-régression
+- Aucun changement scoring / matching / CV pipeline / frontend / taxonomy / `offer_skills` / domain enrichment / schéma PostgreSQL / migrations / autres sources d'offres / scheduled task Coolify / authentification utilisateur.
+- Aucun microservice, Redis, Celery, queue, scheduler, GUI, agent ou MCP créé.
+- Aucune ingestion massive ni backfill lancé.

@@ -342,6 +342,15 @@
 - Ne pas retirer cette capture lors d'un futur refactor du scraper : c'est la seule preuve exploitable en cas de nouvel incident silencieux.
 - Cette règle ne change ni l'URL, ni le payload, ni les headers, ni l'orchestrateur `run_business_france_ingestion.py`, ni aucune autre partie d'Elevia.
 
+### R32 — ScrapeGraphAI est un fallback isolé et plafonné du scraper BF, jamais un remplacement
+- Contexte : `POST .../api/Offers/search` renvoie `HTTP 401` en production (2026-09-01), cause exacte non prouvée. Plutôt que de deviner un correctif d'authentification (interdit sans preuve — voir contexte R31), un chemin d'acquisition alternatif expérimental a été ajouté.
+- **Isolation dépendances obligatoire** : `scrapegraphai` ne doit **jamais** être ajouté à `apps/api/requirements.txt`. Preuve : `pip install --dry-run -r requirements.txt scrapegraphai==1.76.0` force `fastapi` 0.109→0.141, `pydantic`→2.13, `httpx`→0.28, `openai` 1.x→3.6, `pypdf`, `python-multipart`, `uvicorn` (transitifs `langchain>=1.2.0`, `pydantic>=2.12.5`). Il reste dans `apps/api/requirements-scrape-fallback.txt`, installé dans un venv séparé (`/opt/scrape-fallback-venv`), jamais importé par le process FastAPI principal — uniquement invoqué en sous-processus depuis `apps/api/scripts/scrapegraph_bf_runner.py`.
+- **Fallback strict, jamais primaire** : `scrape_business_france_azure.py` tente toujours l'API Civiweb en premier (`--provider auto`, défaut). ScrapeGraphAI n'est déclenché que si le catalog API est vide (HTTP non-2xx, JSON invalide, exception, zéro offre). `--provider api` désactive totalement le fallback ; `--provider scrapegraph` force le fallback seul (usage test/expérimentation uniquement).
+- **Plafond dur** : `FALLBACK_MAX_OFFERS = 20`, indépendant de `--max-offers`. Aucune ingestion massive via ce chemin tant qu'il n'est pas validé en conditions réelles.
+- **Jamais d'id inventé** : un offre extraite sans `external_id`/`id`/`reference` explicite ni segment d'URL exploitable est **rejetée**, jamais persistée avec un identifiant généré aléatoirement — préserve `UNIQUE(source, external_id)` et l'idempotence existante. `source` reste `business_france` ; seul `bf_source` (`BF_AZURE` vs `BF_SCRAPEGRAPH_FALLBACK`) distingue l'origine.
+- **Best-effort au build** : l'installation du venv fallback dans le Dockerfile ne doit jamais faire échouer le build/déploiement de l'API principale (`|| echo ...`) — un échec dégrade proprement vers `status=unavailable` au runtime, jamais un crash.
+- Promotion de ScrapeGraphAI en source primaire, en microservice séparé, ou relèvement du plafond de 20 offres : nécessite une validation réelle (Test A/B/C en conditions Coolify) et une décision produit explicite documentée ici — pas une extension silencieuse.
+
 ---
 
 ## Paramétrage figé du filtre V1
