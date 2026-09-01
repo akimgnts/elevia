@@ -336,6 +336,12 @@
 - Soft-signal : toute exception du helper est swallowed et loggée — ne casse jamais `/api/inbox`.
 - Sortie shadow uniquement. Promotion en non-shadow nécessite calibration empirique sur panel via `scripts/compare_v1_v2_panel.py` et décision produit explicite documentée ici.
 
+### R31 — Toute erreur de parsing JSON du scraper BF Azure doit capturer la preuve HTTP, jamais juste un message générique
+- Contexte : incident `ingestion_runs id=144` (2026-08-31), `raw_offers` gelée depuis `2026-07-08` — l'échec loggé (`"Réponse search non-JSON"`) ne contenait ni status HTTP, ni Content-Type, ni URL finale, ni extrait de body, rendant la cause racine impossible à confirmer a posteriori.
+- Règle : dans `apps/api/scripts/scrape_business_france_azure.py`, tout échec `resp.json()` (catalog `fetch_catalog()` et outil `--test` `test_endpoint_viability()`) doit désormais logger/afficher au minimum `http_status`, `content_type`, `final_url` (post-redirection), `redirected`, et un `body_excerpt` borné (300 caractères, aucun secret — l'API Civiweb est publique et sans credential).
+- Ne pas retirer cette capture lors d'un futur refactor du scraper : c'est la seule preuve exploitable en cas de nouvel incident silencieux.
+- Cette règle ne change ni l'URL, ni le payload, ni les headers, ni l'orchestrateur `run_business_france_ingestion.py`, ni aucune autre partie d'Elevia.
+
 ---
 
 ## Paramétrage figé du filtre V1

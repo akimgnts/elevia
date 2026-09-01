@@ -3497,3 +3497,50 @@ Plus aucune occurrence de `skill:statistical_programming` sur les rôles non-dat
 - Residual noise remains:
   - `Quality Engineer` rank `1`
   - `DATA SCIENTIST` rank `10`
+
+## 2026-09-01 — BF Azure search "Réponse search non-JSON" incident — diagnostic + robustesse minimale
+
+### 1. Contexte
+- `raw_offers` gelée à `3087` lignes depuis `2026-07-08 17:02:34` (aucune écriture depuis).
+- Dernier run `ingestion_runs` (`id=144`, `started_at=2026-08-31 17:00:05 UTC`) : `status=failure`, `fetched_count=0`.
+- Erreur exacte loggée : `step=parse_error error="Réponse search non-JSON" page=0`, puis `step=scraper_summary error="Aucune offre récupérée depuis le catalog"`.
+- Fichiers autorisés pour ce diagnostic : `apps/api/scripts/scrape_business_france_azure.py`, `apps/api/scripts/run_business_france_ingestion.py`.
+
+### 2. Tentative de reproduction (Étape 1)
+- `POST https://civiweb-api-prd.azurewebsites.net/api/Offers/search` (mêmes headers/payload que le scraper) tentée depuis cette session : **bloquée par la politique d'egress réseau de la session elle-même** (`curl` → `403 Forbidden` sur le CONNECT au proxy ; confirmé via `/root/.ccr/__agentproxy/status` comme `connect_rejected — policy denial`, pas une erreur du site cible). Même blocage sur `mon-vie-via.businessfrance.fr` (WebFetch → `EGRESS_BLOCKED`).
+- Résolution DNS de `civiweb-api-prd.azurewebsites.net` toujours fonctionnelle (Azure App Service, France Central) → exclut une disparition totale du domaine, ne prouve rien de plus.
+- **Conséquence** : impossible d'observer depuis cette session le status HTTP réel, le `Content-Type`, une éventuelle redirection ou le corps de la réponse renvoyée en production. Aucune hypothèse sur la cause exacte (endpoint déplacé, WAF, appli Azure arrêtée, contrat modifié, etc.) n'a donc été retenue faute de preuve — conformément à la consigne "ne fais aucune hypothèse sans preuve".
+
+### 3. Constat de code (sans lien avec la cause réseau elle-même)
+- `fetch_catalog()` loggait `"Réponse search non-JSON"` sans aucun détail exploitable (pas de status, pas de content-type, pas de body).
+- `test_endpoint_viability()` (mode `--test`, l'outil de reproduction lui-même) appelait `resp.json()` **sans filet** sur le chemin 2xx : une réponse `200 OK` mais non-JSON (ex. page HTML "app stopped" d'Azure) aurait fait planter l'outil de diagnostic avant même d'afficher le status/Content-Type/body — soit exactement les informations demandées à l'Étape 1.
+
+### 4. Correctif appliqué (robustesse minimale, Étape 5)
+- Fichier modifié : `apps/api/scripts/scrape_business_france_azure.py` uniquement.
+  - Ajout de `_describe_response_for_diagnostics(resp)` : `http_status`, `content_type`, `final_url` (post-redirection), `redirected`, `body_excerpt` (300 caractères, sans secret — l'API est publique et sans credential).
+  - `fetch_catalog()` : la ligne `parse_error` inclut désormais ces champs.
+  - `test_endpoint_viability()` : `resp.json()` est maintenant protégé par `try/except`, et le status HTTP / Content-Type / URL finale / flag de redirection / extrait de body sont affichés sur **tous** les chemins d'échec (401/403/429/4xx/5xx et 2xx-non-JSON).
+- Aucun changement sur `SEARCH_API_URL`, `DETAILS_API_URL`, `DEFAULT_SEARCH_PAYLOAD`, `HEADERS`, ni sur `run_business_france_ingestion.py` — aucune preuve ne justifiait de les modifier.
+
+### 5. Tests exécutés
+- `python3 -m py_compile apps/api/scripts/scrape_business_france_azure.py` → OK.
+- `python3 scripts/scrape_business_france_azure.py --test` (depuis `apps/api`, `psycopg[binary]` installé pour lever le seul import bloquant) → le script s'exécute intégralement jusqu'à l'appel réseau, qui échoue avec le même blocage de politique d'egress documenté ci-dessus (confirme que le patch ne casse rien).
+- Test unitaire ciblé (sans réseau) : `fetch_catalog()` appelé avec `_fetch` monkeypatché pour renvoyer une réponse simulée `200 / text/html` dont `.json()` lève `ValueError` → la ligne `parse_error` produite contient bien `http_status=200`, `content_type="text/html; charset=utf-8"`, `final_url`, `redirected=false`, `body_excerpt="<html>...This web app is stopped...</html>"`. Confirme que la prochaine exécution réelle en échec produira enfin la preuve manquante.
+
+### 6. Résultat
+```
+Search endpoint : NOT TESTED (bloqué par la politique réseau de cette session, pas par le site cible)
+JSON parsing    : NOT TESTED
+Offers returned : 0 (aucun changement — cause réelle non confirmée)
+Persistence     : NOT TESTED
+```
+- Aucune ingestion complète, aucun backfill, aucune donnée de production touchée.
+
+### 7. Prochaine étape (à exécuter hors de cette session, avec accès réseau réel)
+```
+cd apps/api && python3 scripts/scrape_business_france_azure.py --test
+```
+- Lire le status HTTP, le `Content-Type`, l'URL finale et l'extrait de body désormais affichés/loggés pour confirmer la cause exacte avant tout correctif sur l'URL/payload/headers.
+
+### 8. Non-régression
+- Aucun changement scoring / matching / `clean_offers` / `offer_skills` / pipeline CV / frontend / migrations / schéma PostgreSQL / données existantes / Coolify.

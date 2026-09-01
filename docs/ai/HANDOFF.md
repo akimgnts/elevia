@@ -4,6 +4,22 @@
 
 ---
 
+## 🔴 INCIDENT EN COURS — Ingestion Business France arrêtée (depuis 2026-07-08), cause racine non confirmée (2026-09-01)
+
+**Statut** : `raw_offers`/`clean_offers` gelées à `3087` lignes depuis `2026-07-08 17:02:34`. Le scheduler Coolify tourne toujours, mais chaque run échoue (`ingestion_runs id=144`, `2026-08-31`) avec `error: "Réponse search non-JSON"` sur `POST .../api/Offers/search`.
+
+**Cause racine** : **non confirmée**. La reproduction live de l'appel HTTP n'a pas pu être faite depuis la session de diagnostic (politique d'egress réseau de cette session bloquant `civiweb-api-prd.azurewebsites.net` — voir `docs/ai/WORKLOG.md` section `2026-09-01`). Ne pas modifier `SEARCH_API_URL` / `DETAILS_API_URL` / `DEFAULT_SEARCH_PAYLOAD` / `HEADERS` sans avoir d'abord obtenu la preuve HTTP réelle (status, Content-Type, body) via la commande ci-dessous.
+
+**Ce qui a été fait** : `apps/api/scripts/scrape_business_france_azure.py` a été instrumenté (voir `DECISIONS.md` R31) pour que le prochain échec capture enfin `http_status`, `content_type`, `final_url`, `redirected`, `body_excerpt` — au lieu du message générique précédent.
+
+**Prochaine action pour qui reprend ceci** — exécuter depuis un environnement avec accès réseau réel (poste dev ou shell Coolify) :
+```
+cd apps/api && python3 scripts/scrape_business_france_azure.py --test
+```
+Lire les champs affichés/loggés pour identifier la vraie cause (endpoint déplacé, WAF, app Azure arrêtée, contrat API changé) **avant** tout correctif sur l'URL/payload/headers. Détails complets : `docs/ai/STATE.json` clé `last_business_france_search_parse_diagnostics_patch`.
+
+---
+
 ## ✅ Runtime Offer Intelligence Alignment validated (2026-06-08)
 
 **Status**: les champs métier persistés dans `offer_domain_enrichment` sont maintenant exposés de façon cohérente jusqu’aux réponses runtime utilisées par les audits.
