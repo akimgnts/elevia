@@ -2010,6 +2010,14 @@
       "do not raise FALLBACK_MAX_OFFERS above 20 without a validated Test B/C",
       "do not remove the isolated venv and merge scrapegraphai into requirements.txt",
       "do not make scrapegraph the primary acquisition path"
-    ]
+    ],
+    "correction_2026_09_01": {
+      "bug": "apps/api/Dockerfile is NOT the Dockerfile Coolify builds this service from — it was edited by mistake",
+      "evidence": "build log showed build context = repo root (53.75MB), steps COPY apps/api/requirements.txt /tmp/requirements.txt -> RUN pip install -> COPY apps/api /app/apps/api -> WORKDIR /app/apps/api, none of which match apps/api/Dockerfile; Coolify Build Pipeline settings confirmed Base directory='/' and Dockerfile location='/deploy/staging/api.Dockerfile'",
+      "real_file": "deploy/staging/api.Dockerfile",
+      "fix": "same isolated-venv scrape-fallback step ported into deploy/staging/api.Dockerfile with repo-root-relative paths (apps/api/requirements-scrape-fallback.txt); deploy/staging/api.env.example documented with SCRAPEGRAPH_LLM_MODEL and SCRAPEGRAPH_VENV_PYTHON",
+      "apps_api_dockerfile_status": "left untouched, harmless, but not the file that matters for this deployment",
+      "next_step": "redeploy, then run scripts/scrape_business_france_azure.py --test --provider scrapegraph from the Coolify container shell and confirm /opt/scrape-fallback-venv/bin/python exists"
+    }
   }
 }
