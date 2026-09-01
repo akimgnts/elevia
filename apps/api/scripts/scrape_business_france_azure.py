@@ -181,6 +181,25 @@ class AbortScrapeError(RuntimeError):
     """Levée quand le taux d'erreur dépasse ABORT_THRESHOLD_PCT."""
 
 
+def _describe_response_for_diagnostics(resp: "requests.Response", *, body_limit: int = 300) -> Dict[str, Any]:
+    """
+    Résumé sûr (sans secret) d'une réponse HTTP, utilisé uniquement quand le parsing
+    JSON échoue — pour distinguer endpoint déplacé / redirection / page d'erreur HTML /
+    blocage WAF sans avoir à rejouer la requête manuellement.
+    """
+    try:
+        body_excerpt = resp.text[:body_limit]
+    except Exception:
+        body_excerpt = "<body illisible>"
+    return {
+        "http_status":   resp.status_code,
+        "content_type":  resp.headers.get("Content-Type", "N/A"),
+        "final_url":     resp.url,
+        "redirected":    bool(resp.history),
+        "body_excerpt":  body_excerpt,
+    }
+
+
 def _check_abort(counter: Dict[str, int]) -> None:
     total  = counter.get("total", 0)
     failed = counter.get("failed", 0)
@@ -330,7 +349,8 @@ def fetch_catalog(
         except (ValueError, json.JSONDecodeError):
             logger.log("parse_error", "error",
                        error="Réponse search non-JSON",
-                       extra={"catalog_source": "BF_AZURE", "page": page})
+                       extra={"catalog_source": "BF_AZURE", "page": page,
+                              **_describe_response_for_diagnostics(resp)})
             counter["failed"] += 1
             _check_abort(counter)
             break
@@ -605,19 +625,28 @@ def test_endpoint_viability() -> bool:
                             json=payload, timeout=TIMEOUT_SEC)
         print(f"HTTP Status   : {resp.status_code}")
         print(f"Content-Type  : {resp.headers.get('Content-Type', 'N/A')}")
+        print(f"Final URL     : {resp.url}")
+        print(f"Redirected    : {bool(resp.history)}")
 
         if resp.status_code in (401, 403):
             print("[ERROR] Accès refusé — vérifier les headers Origin/Referer")
+            print(f"Body (extrait): {resp.text[:300]!r}")
             return False
         if resp.status_code == 429:
             print("[ERROR] Rate limited")
             return False
         if resp.status_code >= 400:
             print(f"[ERROR] HTTP {resp.status_code}")
-            print(f"Réponse : {resp.text[:300]}")
+            print(f"Réponse : {resp.text[:300]!r}")
             return False
 
-        data = resp.json()
+        try:
+            data = resp.json()
+        except (ValueError, json.JSONDecodeError) as exc:
+            print(f"[ERROR] Réponse non-JSON malgré HTTP {resp.status_code} : {exc}")
+            print(f"Body (extrait): {resp.text[:300]!r}")
+            return False
+
         total = data.get("count", "N/A")
         results = data.get("result", [])
         print(f"Total offres  : {total}")

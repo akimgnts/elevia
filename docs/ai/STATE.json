@@ -1908,5 +1908,43 @@
       "validator patterns",
       "backend parsing pipeline"
     ]
+  },
+  "last_business_france_search_parse_diagnostics_patch": {
+    "date": "2026-09-01",
+    "scope": "raw_offers ingestion incident only — no scoring/matching/clean_offers/offer_skills/frontend/schema change",
+    "incident": {
+      "symptom": "ingestion_runs id=144, started_at=2026-08-31 17:00:05 UTC, status=failure, fetched_count=0",
+      "error_chain": [
+        "step=parse_error error=\"Réponse search non-JSON\" page=0",
+        "step=scraper_summary error=\"Aucune offre récupérée depuis le catalog\""
+      ],
+      "raw_offers_last_scraped_at": "2026-07-08 17:02:34",
+      "impact": "raw_offers/clean_offers frozen at 3087 rows since 2026-07-08, offer_skills frozen at 5880 rows"
+    },
+    "root_cause_confirmed": false,
+    "reason_root_cause_not_confirmed": "Live reproduction of the Civiweb/Business France search endpoint (POST civiweb-api-prd.azurewebsites.net/api/Offers/search) was attempted from this session but blocked at the network layer by this session's own egress policy (proxy returned 403 on CONNECT for civiweb-api-prd.azurewebsites.net and mon-vie-via.businessfrance.fr — confirmed via /root/.ccr/__agentproxy/status as a policy denial, not a target-site error). DNS resolution for civiweb-api-prd.azurewebsites.net still succeeds (Azure App Service, France Central) which only rules out full domain decommission.",
+    "modified": [
+      "apps/api/scripts/scrape_business_france_azure.py"
+    ],
+    "change_description": "Added _describe_response_for_diagnostics(resp) helper capturing http_status, content_type, final_url (post-redirect), redirected flag, and a 300-char sanitized body excerpt. Wired into fetch_catalog()'s existing parse_error log line (previously only logged \"Réponse search non-JSON\" with no HTTP evidence). Fixed test_endpoint_viability() (--test mode) which called resp.json() unguarded on the 2xx path — a non-JSON 200 response (e.g. an Azure 'app stopped' HTML page) crashed the diagnostic tool itself before it could print status/content-type/body. --test now always prints HTTP status, Content-Type, final URL, redirect flag, and a body excerpt on any failure path.",
+    "not_changed": [
+      "SEARCH_API_URL / DETAILS_API_URL",
+      "DEFAULT_SEARCH_PAYLOAD",
+      "HEADERS",
+      "run_business_france_ingestion.py orchestration",
+      "clean_offers / offer_skills / scoring / matching / frontend / DB schema"
+    ],
+    "validation": {
+      "syntax_check": "python3 -m py_compile apps/api/scripts/scrape_business_france_azure.py — OK",
+      "import_smoke": "python3 scripts/scrape_business_france_azure.py --test — script runs end-to-end, module imports resolve (psycopg present), fails only at the network hop with the same sandbox 403 proxy policy denial documented above",
+      "unit_level_diagnostics_check": "fetch_catalog() exercised with _fetch monkeypatched to return a mocked 200/text-html response with resp.json() raising ValueError — confirmed the parse_error log line now includes http_status=200, content_type='text/html; charset=utf-8', final_url, redirected=false, and a body_excerpt of the mocked HTML — no live network involved"
+    },
+    "next_step": "Run `python3 apps/api/scripts/scrape_business_france_azure.py --test` from an environment with real network access to civiweb-api-prd.azurewebsites.net (Coolify service shell or a developer machine) and read ingestion_runs/logs for the newly captured http_status/content_type/final_url/body_excerpt fields to identify the actual API contract change before attempting any endpoint/payload/header fix.",
+    "do_not_do_yet": [
+      "do not change SEARCH_API_URL, DETAILS_API_URL, DEFAULT_SEARCH_PAYLOAD or HEADERS without the HTTP evidence above",
+      "do not run a full/unbounded ingestion",
+      "do not run a backfill",
+      "do not touch Coolify configuration beyond running the --test validation command"
+    ]
   }
 }
