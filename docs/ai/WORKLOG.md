@@ -3591,3 +3591,33 @@ cd apps/api && python3 scripts/scrape_business_france_azure.py --test
 - Aucun changement scoring / matching / CV pipeline / frontend / taxonomy / `offer_skills` / domain enrichment / schéma PostgreSQL / migrations / autres sources d'offres / scheduled task Coolify / authentification utilisateur.
 - Aucun microservice, Redis, Celery, queue, scheduler, GUI, agent ou MCP créé.
 - Aucune ingestion massive ni backfill lancé.
+
+## 2026-09-01 (suite 2) — Correction : mauvais Dockerfile édité, venv fallback jamais construit
+
+### 1. Symptôme observé en production
+- `find /app -name requirements-scrape-fallback.txt` et `scrapegraph_bf_runner.py` → fichiers bien présents dans le conteneur déployé (`/app/apps/api/...`).
+- `ls -la /opt/scrape-fallback-venv/bin/python` → `No such file or directory`. `ls -la /opt/` → répertoire totalement vide.
+- Reproduction manuelle `python3 -m venv /tmp/sgai-test && pip install -r requirements-scrape-fallback.txt` **réussit intégralement** dans ce même conteneur (`scrapegraphai-1.76.0` installé sans erreur réseau/disque/résolution).
+- Conclusion : le problème n'est pas la commande elle-même, mais le fait qu'elle n'a jamais été exécutée pendant le build.
+
+### 2. Cause racine confirmée via le log de build Coolify
+- Log de build : contexte de build = **racine du repo** (`transferring context: 53.75MB`), étapes `COPY apps/api/requirements.txt /tmp/requirements.txt` → `RUN pip install -r /tmp/requirements.txt` → `COPY apps/api /app/apps/api` → `WORKDIR /app/apps/api`.
+- Ces étapes ne correspondent **pas** à `apps/api/Dockerfile` (celui édité lors du travail précédent) — aucune trace de `[scrape-fallback]`, `venv`, ou `playwright install` dans le log.
+- Configuration Coolify confirmée par l'utilisateur (Build pipeline) : **Build strategy = Dockerfile**, **Base directory = `/`**, **Dockerfile location = `/deploy/staging/api.Dockerfile`**.
+- `deploy/staging/api.Dockerfile` est un fichier **distinct** de `apps/api/Dockerfile`, jamais consulté lors du sprint précédent. C'est le vrai fichier utilisé en production/staging pour ce service.
+
+### 3. Correctif appliqué
+- **Modifié** `deploy/staging/api.Dockerfile` : ajout de la même étape venv isolé (`COPY apps/api/requirements-scrape-fallback.txt /tmp/...`, `RUN python -m venv /opt/scrape-fallback-venv && pip install ... && playwright install --with-deps chromium`, best-effort `|| echo ...`), insérée après le `RUN pip install -r /tmp/requirements.txt` principal et avant `COPY apps/api /app/apps/api` — chemins adaptés au contexte racine réel (`apps/api/requirements-scrape-fallback.txt`, pas `requirements-scrape-fallback.txt` seul).
+- **Modifié** `deploy/staging/api.env.example` : ajout de `SCRAPEGRAPH_LLM_MODEL` (défaut `openai/gpt-4o-mini`) et `SCRAPEGRAPH_VENV_PYTHON` (commenté, override seulement) — `OPENAI_API_KEY` déjà présent, réutilisé tel quel.
+- `apps/api/Dockerfile` (édité précédemment) **laissé inchangé** — inoffensif (jamais utilisé par ce service), pas retiré au cas où un autre environnement l'utiliserait un jour, mais **ce n'est plus le fichier de référence pour la production/staging Coolify**.
+
+### 4. Non-régression
+- Seule l'étape ajoutée est nouvelle ; les étapes existantes de `deploy/staging/api.Dockerfile` (installation `requirements.txt`, `COPY apps/api`, `WORKDIR`, `EXPOSE`, `CMD`) sont strictement inchangées.
+- `PYTHONPATH=/app/apps/api/src` (déclaré en `ENV` globale de l'image) sera hérité par le sous-processus du venv isolé au runtime — sans impact identifié : le runner ScrapeGraphAI n'importe que `scrapegraphai` et la stdlib, aucune collision de nom avec les packages du dossier `src/`.
+
+### 5. À valider après déploiement
+```
+cd apps/api
+python3 scripts/scrape_business_france_azure.py --test --provider scrapegraph
+```
+Doit maintenant afficher `[VIABILITY] PASS` (ou au moins ne plus dire "Fallback indisponible") si le build a bien créé `/opt/scrape-fallback-venv`.
