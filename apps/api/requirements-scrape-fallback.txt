@@ -1,0 +1,13 @@
+# Optional, isolated dependency for the Business France ScrapeGraphAI fallback.
+#
+# Installed in its OWN virtualenv (/opt/scrape-fallback-venv, see Dockerfile) —
+# never merged into requirements.txt. Verified via:
+#   pip install --dry-run -r requirements.txt scrapegraphai
+# which forces major upgrades of fastapi, pydantic, httpx, openai, pypdf and
+# python-multipart to satisfy scrapegraphai's transitive floor pins
+# (langchain>=1.2.0, pydantic>=2.12.5, ...). That risk stays out of the main
+# API process entirely by keeping this in its own venv.
+#
+# Runner: apps/api/scripts/scrapegraph_bf_runner.py
+# Caller: apps/api/src/api/utils/business_france_scrape_fallback.py (subprocess only)
+scrapegraphai>=1.76.0

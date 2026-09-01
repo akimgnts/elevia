@@ -1946,5 +1946,70 @@
       "do not run a backfill",
       "do not touch Coolify configuration beyond running the --test validation command"
     ]
+  },
+  "last_business_france_scrapegraph_fallback_experiment": {
+    "date": "2026-09-01",
+    "scope": "business_france acquisition path only — no scoring/matching/CV pipeline/frontend/taxonomy/offer_skills/domain enrichment/schema/migrations/other sources/Coolify scheduled task/user auth",
+    "trigger": {
+      "confirmed_production_error": "HTTP 401, Content-Type N/A, empty body on POST civiweb-api-prd.azurewebsites.net/api/Offers/search (reproduced via --test from the Coolify container)",
+      "root_cause_of_401": "still not proven — live comparison against the real mon-vie-via.businessfrance.fr frontend request was blocked by this diagnosis session's own network egress policy",
+      "decision": "rather than guess an auth fix, add ScrapeGraphAI as a strict fallback acquisition path, in-repo, no separate microservice yet"
+    },
+    "architecture": "API Civiweb (primary, unchanged) -> if empty/failed and --provider != api -> ScrapeGraphAI fallback (isolated venv, subprocess) -> same raw_offers envelope -> persist_raw_offers()",
+    "dependency_isolation": {
+      "evidence": "`pip install --dry-run -r requirements.txt scrapegraphai==1.76.0` resolves but forces major upgrades: fastapi 0.109->0.141, pydantic->2.13, httpx->0.28, openai 1.x->3.6, pypdf, python-multipart, uvicorn (scrapegraphai requires langchain>=1.2.0, pydantic>=2.12.5)",
+      "decision": "scrapegraphai installed in an isolated venv (/opt/scrape-fallback-venv), never merged into requirements.txt's resolver; invoked only via subprocess from a runner script",
+      "files": [
+        "apps/api/requirements-scrape-fallback.txt (new, scrapegraphai>=1.76.0 only)",
+        "apps/api/Dockerfile (new isolated venv + playwright chromium install, best-effort, never fails the main build)"
+      ]
+    },
+    "new_files": [
+      "apps/api/scripts/scrapegraph_bf_runner.py",
+      "apps/api/src/api/utils/business_france_scrape_fallback.py",
+      "apps/api/requirements-scrape-fallback.txt",
+      "apps/api/tests/test_business_france_scrape_fallback.py",
+      "apps/api/tests/test_scrapegraph_bf_runner.py",
+      "apps/api/tests/test_business_france_azure_primary_fallback.py"
+    ],
+    "modified_files": [
+      "apps/api/scripts/scrape_business_france_azure.py",
+      "apps/api/Dockerfile"
+    ],
+    "cli_contract": {
+      "flag": "--provider {auto,api,scrapegraph}",
+      "default": "auto",
+      "test_mode": "--test --provider api|scrapegraph|auto — all three write nothing to the DB",
+      "live_mode": "auto (default) tries API first, falls back to ScrapeGraphAI only on empty/failed catalog; api disables fallback entirely; scrapegraph forces fallback-only acquisition"
+    },
+    "invariants_enforced": [
+      "source stays 'business_france' — only bf_source distinguishes 'BF_AZURE' vs 'BF_SCRAPEGRAPH_FALLBACK'",
+      "external_id is never invented — dropped if no explicit id/reference and no derivable URL tail",
+      "UNIQUE(source, external_id) idempotence preserved — fallback batch is additionally deduped by id before returning",
+      "fallback offers bypass normalize_payload() (which would overwrite bf_source) and go straight to persist_raw_offers()",
+      "fallback capped at FALLBACK_MAX_OFFERS=20 regardless of --max-offers — never a backfill",
+      "MIN_OFFERS_SUCCESS=10 gate (pre-existing) still applies to fallback offers before any persistence"
+    ],
+    "env_vars": {
+      "OPENAI_API_KEY": "required, reused as-is from existing Elevia config",
+      "SCRAPEGRAPH_LLM_MODEL": "optional, default openai/gpt-4o-mini",
+      "SCRAPEGRAPH_VENV_PYTHON": "optional override, default /opt/scrape-fallback-venv/bin/python (matches Dockerfile)"
+    },
+    "tests": {
+      "new_suite": "test_business_france_scrape_fallback.py + test_scrapegraph_bf_runner.py + test_business_france_azure_primary_fallback.py = 19 passed",
+      "regression_check": "test_business_france_raw_scraper.py / test_business_france_db_first.py / test_business_france_ingestion_tracking.py all still pass; test_business_france_ingestion_automation.py has 3 pre-existing failures unrelated to this change (restart_api removed from run_business_france_ingestion.py by commit 6ee80e8 on 2026-06-26, tests never updated — not touched by this work, git diff confirms)"
+    },
+    "not_validated_from_this_session": [
+      "no real network call reached civiweb-api-prd.azurewebsites.net or mon-vie-via.businessfrance.fr (same egress block documented in the prior incident) — Test A/B/C live were NOT run for real",
+      "the exact scrapegraphai SmartScraperGraph call surface was not exercised against a real LLM or a real rendered page from this session",
+      "fallback venv was never actually built (/opt/scrape-fallback-venv does not exist in this sandbox) — is_fallback_available() correctly reports 'unavailable', confirmed by manual run"
+    ],
+    "next_step": "Deploy to Coolify, then run --test --provider api, --test --provider scrapegraph, --test --provider auto from the Coolify container (real network + real OPENAI_API_KEY) before any real ingestion use of the fallback",
+    "do_not_do_yet": [
+      "do not run a full ingestion using the fallback",
+      "do not raise FALLBACK_MAX_OFFERS above 20 without a validated Test B/C",
+      "do not remove the isolated venv and merge scrapegraphai into requirements.txt",
+      "do not make scrapegraph the primary acquisition path"
+    ]
   }
 }
