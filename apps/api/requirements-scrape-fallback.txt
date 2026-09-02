@@ -10,4 +10,15 @@
 #
 # Runner: apps/api/scripts/scrapegraph_bf_runner.py
 # Caller: apps/api/src/api/utils/business_france_scrape_fallback.py (subprocess only)
+#
+# Pin below works around an upstream scrapegraphai packaging bug: its own
+# `langchain-community>=0.4.0` floor (no ceiling) lets pip resolve 0.4.2,
+# which removed `ChatOllama` from `langchain_community.chat_models` — a name
+# scrapegraphai's own node modules (html_analyzer_node.py, generate_answer_node.py,
+# etc.) still import unconditionally at module load time, even though we only
+# use the OpenAI path. Confirmed: 0.4.1 still has ChatOllama, 0.4.2 does not.
+# Without this pin, `from scrapegraphai.graphs import SmartScraperGraph` raises
+# ImportError before any scraping is attempted (observed in production,
+# 2026-09-02: "cannot import name 'ChatOllama' from 'langchain_community.chat_models'").
 scrapegraphai>=1.76.0
+langchain-community<0.4.2
