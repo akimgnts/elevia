@@ -3621,3 +3621,31 @@ cd apps/api
 python3 scripts/scrape_business_france_azure.py --test --provider scrapegraph
 ```
 Doit maintenant afficher `[VIABILITY] PASS` (ou au moins ne plus dire "Fallback indisponible") si le build a bien créé `/opt/scrape-fallback-venv`.
+
+## 2026-09-02 — Correction : bug packaging upstream `scrapegraphai` (`ChatOllama` introuvable)
+
+### 1. Résultat des trois tests en production après redeploy de `d53b17b`
+- Venv isolé confirmé opérationnel : `/opt/scrape-fallback-venv/bin/python -c "import scrapegraphai"` → `scrapegraphai OK`.
+- `--test --provider api` : toujours `HTTP 401` (attendu, cause distincte non traitée ici).
+- `--test --provider scrapegraph` : **échec** —
+  ```
+  scrapegraphai not importable in this venv: cannot import name 'ChatOllama' from 'langchain_community.chat_models'
+  ```
+- `--test --provider auto` : primaire échoue (401) → fallback déclenché → même erreur.
+
+### 2. Cause exacte confirmée
+- Extraction du wheel `scrapegraphai==1.76.0` : une dizaine de modules (`nodes/html_analyzer_node.py`, `nodes/generate_answer_node.py`, `nodes/prompt_refiner_node.py`, etc.) font `from langchain_community.chat_models import ChatOllama` de façon **inconditionnelle** au chargement du module, uniquement pour un `isinstance(...)` sur un chemin Ollama que nous n'utilisons pas (nous utilisons OpenAI).
+- `scrapegraphai` déclare `langchain-community>=0.4.0` **sans plafond**. Vérifié par téléchargement direct des wheels : `ChatOllama` est présent dans `langchain_community.chat_models` jusqu'à la version `0.4.1` incluse, et **retiré en `0.4.2`**.
+- Sans contrainte de version, `pip install` résout `langchain-community==0.4.2` (dernière compatible avec le `>=0.4.0` de scrapegraphai) → `from scrapegraphai.graphs import SmartScraperGraph` lève `ImportError` avant même la moindre tentative de scraping. C'est un bug de packaging upstream de `scrapegraphai`, pas une erreur de notre côté.
+
+### 3. Correctif appliqué
+- **Modifié** `apps/api/requirements-scrape-fallback.txt` : ajout de `langchain-community<0.4.2` à côté de `scrapegraphai>=1.76.0`.
+- Validé par reproduction locale : `pip install "scrapegraphai>=1.76.0" "langchain-community<0.4.2"` dans un venv neuf → résout `langchain-community-0.4.1` sans conflit, puis `from scrapegraphai.graphs import SmartScraperGraph` → `SmartScraperGraph import OK`.
+- Aucun autre fichier touché — le pin est strictement local au venv isolé, ne concerne pas `apps/api/requirements.txt`.
+
+### 4. À valider après redeploiement
+```
+cd apps/api
+python3 scripts/scrape_business_france_azure.py --test --provider scrapegraph
+```
+Doit maintenant dépasser l'étape d'import et effectivement tenter le scraping de `https://mon-vie-via.businessfrance.fr/offres` (verdict réel : offres récupérées ou nouvelle erreur, à ce stade probablement liée à `OPENAI_API_KEY` ou au rendu de la page — à observer, pas à anticiper).
