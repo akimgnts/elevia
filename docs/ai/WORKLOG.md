@@ -3649,3 +3649,31 @@ cd apps/api
 python3 scripts/scrape_business_france_azure.py --test --provider scrapegraph
 ```
 Doit maintenant dépasser l'étape d'import et effectivement tenter le scraping de `https://mon-vie-via.businessfrance.fr/offres` (verdict réel : offres récupérées ou nouvelle erreur, à ce stade probablement liée à `OPENAI_API_KEY` ou au rendu de la page — à observer, pas à anticiper).
+
+## 2026-09-02 (suite) — Cause du HTTP 401 confirmée : header `x-api-key` requis
+
+### 1. Preuve apportée
+- Document utilisateur (documentation d'un autre projet, `BusinessFranceVieAdapter`, hors du repo Elevia) décrivant le même endpoint exact `POST civiweb-api-prd.azurewebsites.net/api/Offers/search` avec `Auth: x-api-key header`, et une section troubleshooting `401` = "Key expired or invalid".
+- Confirmation utilisateur que l'ajout de ce header fonctionne réellement contre l'API en conditions réelles.
+
+### 2. Correctif appliqué
+- **Modifié** `apps/api/scripts/scrape_business_france_azure.py` :
+  - Nouvelle constante `BF_AZURE_API_KEY`, lue depuis l'environnement (`BF_AZURE_API_KEY` en priorité, `BUSINESS_FRANCE_VIE_API_KEY` en repli — nom déjà utilisé dans la doc source), **jamais hardcodée**.
+  - Si définie, injectée dans `HEADERS["x-api-key"]` au chargement du module — sinon comportement strictement inchangé (pas de régression si la variable est absente).
+  - `test_endpoint_viability()` (`--test --provider api`) affiche désormais `x-api-key : set / NOT SET` — jamais la valeur elle-même, conforme à R31 (aucun secret loggé).
+- Aucun autre fichier touché. Aucune autre partie du contrat (URL, payload, autres headers) modifiée — seule la pièce manquante prouvée a été ajoutée.
+
+### 3. Tests
+- `python3 -m py_compile scripts/scrape_business_france_azure.py` → OK.
+- Suite existante `test_business_france_azure_primary_fallback.py` + `test_business_france_scrape_fallback.py` + `test_scrapegraph_bf_runner.py` → **19 passed**, aucune régression.
+- Vérification manuelle (sans réseau) : `BF_AZURE_API_KEY=dummy python3 -c "..."` → confirme que `x-api-key` est bien injecté dans `HEADERS` quand la variable est définie, absent sinon.
+
+### 4. Configuration Coolify requise
+- Ajouter `BF_AZURE_API_KEY=<clé réelle>` aux variables d'environnement du service (jamais commitée, jamais dans les logs).
+
+### 5. Validation après déploiement
+```
+cd apps/api
+python3 scripts/scrape_business_france_azure.py --test --provider api
+```
+Doit maintenant afficher `HTTP Status: 200` et des offres — le chemin primaire (API Civiweb) redevient la source normale ; le fallback ScrapeGraphAI (livré précédemment) reste en réserve pour toute panne future.

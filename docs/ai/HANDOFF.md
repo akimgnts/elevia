@@ -4,24 +4,22 @@
 
 ---
 
-## 🔴 INCIDENT EN COURS — Ingestion Business France arrêtée (depuis 2026-07-08) — HTTP 401 confirmé, cause exacte non prouvée, fallback ScrapeGraphAI ajouté en expérimentation (2026-09-01)
+## 🟡 Incident Business France — cause du HTTP 401 corrigée (2026-09-02), à confirmer en production après redeploy
 
-**Statut** : `raw_offers`/`clean_offers` gelées à `3087` lignes depuis `2026-07-08 17:02:34`. Le scheduler Coolify tourne toujours.
+**Historique** : `raw_offers`/`clean_offers` gelées à `3087` lignes depuis `2026-07-08 17:02:34` suite à `POST .../api/Offers/search` renvoyant `HTTP 401`.
 
-**Cause confirmée en production** (reproduite depuis le conteneur Coolify) : `POST .../api/Offers/search` répond désormais `HTTP 401`, `Content-Type: N/A`, body vide. Le site officiel confirme que `POST .../api/Offers/latest` (`{"skip":0,"limit":6}`) répond `HTTP 200` avec des offres, mais **rien ne prouve encore que `/latest` permette de parcourir tout le catalogue**.
+**Cause confirmée** : l'endpoint exige désormais un header `x-api-key`, absent du scraper Elevia. Confirmé via une documentation externe décrivant le même endpoint (`Auth: x-api-key header`) et validé en conditions réelles par l'utilisateur.
 
-**Cause exacte du 401** : **non prouvée**. Comparer la requête réelle du frontend `mon-vie-via.businessfrance.fr` (DevTools navigateur) reste nécessaire — non faisable depuis les sessions de diagnostic (egress réseau bloqué). Ne pas modifier `SEARCH_API_URL` / `DETAILS_API_URL` / `DEFAULT_SEARCH_PAYLOAD` / `HEADERS` sans cette preuve.
+**Correctif appliqué** : `apps/api/scripts/scrape_business_france_azure.py` lit `BF_AZURE_API_KEY` (ou `BUSINESS_FRANCE_VIE_API_KEY`) depuis l'environnement et l'injecte dans `HEADERS["x-api-key"]` — jamais hardcodée, jamais loggée en clair (voir `DECISIONS.md` R33). **Nécessite que `BF_AZURE_API_KEY` soit configurée dans les variables d'environnement Coolify** pour prendre effet.
 
-**Nouveau chemin d'acquisition expérimental ajouté** : ScrapeGraphAI en **fallback strict** (jamais primaire) de `scrape_business_france_azure.py`, isolé dans un venv séparé (`/opt/scrape-fallback-venv`) pour ne pas casser les dépendances de l'API principale (`fastapi`/`pydantic`/`httpx`/`openai` seraient forcés en majeur sinon — preuve dans `WORKLOG.md`). Voir `DECISIONS.md` R32 et `STATE.json` clé `last_business_france_scrapegraph_fallback_experiment`. 19 tests automatisés passent ; **le fallback réel (navigateur + LLM contre le vrai site) n'a pas pu être exécuté depuis une session de diagnostic** — à valider en premier depuis Coolify avant tout usage réel.
+**En parallèle** : un fallback ScrapeGraphAI a été ajouté (isolé dans un venv séparé pour ne pas casser les dépendances de l'API principale — `DECISIONS.md` R32, `STATE.json` clé `last_business_france_scrapegraph_fallback_experiment`). Reste un chemin de secours, jamais primaire, plafonné à 20 offres.
 
-**Prochaine action pour qui reprend ceci** — depuis le conteneur Coolify (après déploiement) :
+**Prochaine action** — après redeploy avec `BF_AZURE_API_KEY` configurée, depuis le conteneur Coolify :
 ```
 cd apps/api
 python3 scripts/scrape_business_france_azure.py --test --provider api
-python3 scripts/scrape_business_france_azure.py --test --provider scrapegraph
-python3 scripts/scrape_business_france_azure.py --test --provider auto
 ```
-Aucune écriture DB sur ces trois commandes. Ne pas lancer d'ingestion complète tant que Test B n'a pas prouvé au moins quelques offres réelles récupérées.
+Doit afficher `HTTP Status: 200` et des offres. Aucune écriture DB sur cette commande. Une fois confirmé, relancer l'ingestion normale (Scheduled Task Coolify existant) — pas besoin du fallback ScrapeGraphAI si l'API primaire est de nouveau saine.
 
 ---
 

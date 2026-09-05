@@ -351,6 +351,12 @@
 - **Best-effort au build** : l'installation du venv fallback dans le Dockerfile ne doit jamais faire échouer le build/déploiement de l'API principale (`|| echo ...`) — un échec dégrade proprement vers `status=unavailable` au runtime, jamais un crash.
 - Promotion de ScrapeGraphAI en source primaire, en microservice séparé, ou relèvement du plafond de 20 offres : nécessite une validation réelle (Test A/B/C en conditions Coolify) et une décision produit explicite documentée ici — pas une extension silencieuse.
 
+### R33 — Civiweb search exige un header `x-api-key`, jamais hardcodé
+- Contexte : le `HTTP 401` de R31/R32 est dû à un header `x-api-key` désormais exigé par `civiweb-api-prd.azurewebsites.net/api/Offers/search`, absent du contrat historique du scraper. Confirmé par une documentation externe (`BusinessFranceVieAdapter`, hors repo Elevia) décrivant le même endpoint avec `Auth: x-api-key header`, et validé en conditions réelles par l'utilisateur.
+- Règle : la clé est lue depuis l'environnement (`BF_AZURE_API_KEY`, repli `BUSINESS_FRANCE_VIE_API_KEY`) dans `apps/api/scripts/scrape_business_france_azure.py` — **jamais en dur dans le code**, jamais commitée, jamais affichée en clair dans les logs (`--test` affiche seulement `set`/`NOT SET`).
+- Si la variable est absente, le comportement reste celui d'avant ce patch (pas de header ajouté) — pas de régression silencieuse déguisée en fix.
+- Toute rotation future de cette clé se fait uniquement via la variable d'environnement Coolify, jamais par un commit.
+
 ---
 
 ## Paramétrage figé du filtre V1

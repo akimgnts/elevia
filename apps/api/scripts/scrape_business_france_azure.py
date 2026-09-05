@@ -111,7 +111,7 @@ ABORT_THRESHOLD_PCT = 30.0
 ABORT_MIN_SAMPLE    = 10
 MIN_OFFERS_SUCCESS  = 10   # seuil en dessous duquel on sort en code 2
 
-# Headers — statiques, navigation publique, aucun secret
+# Headers — statiques, navigation publique
 HEADERS: Dict[str, str] = {
     "Accept":          "application/json, text/plain, */*",
     "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
@@ -125,6 +125,16 @@ HEADERS: Dict[str, str] = {
         "Chrome/134.0.0.0 Safari/537.36"
     ),
 }
+
+# API key requise par Civiweb depuis leur changement de contrat (HTTP 401 sans
+# elle). Jamais hardcodée : lue depuis l'environnement, jamais loggée en clair.
+BF_AZURE_API_KEY = (
+    os.environ.get("BF_AZURE_API_KEY")
+    or os.environ.get("BUSINESS_FRANCE_VIE_API_KEY")
+    or ""
+).strip()
+if BF_AZURE_API_KEY:
+    HEADERS["x-api-key"] = BF_AZURE_API_KEY
 
 # Payload de recherche par défaut (toutes offres, pas de filtre)
 DEFAULT_SEARCH_PAYLOAD: Dict[str, Any] = {
@@ -621,6 +631,7 @@ def test_endpoint_viability() -> bool:
     print("=" * 60)
     print(f"Search URL : {SEARCH_API_URL}")
     print(f"Details URL: {DETAILS_API_URL}")
+    print(f"x-api-key  : {'set' if BF_AZURE_API_KEY else 'NOT SET'}")
     print()
 
     session = requests.Session()
