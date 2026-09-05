@@ -2034,5 +2034,24 @@
       "status": "code merged to main; production validation (--test --provider api showing HTTP 200 + offers) pending the next redeploy",
       "fallback_relevance": "the ScrapeGraphAI fallback (R32) remains as a safety net for any future acquisition failure, but is no longer the active path once the API key restores the primary route"
     }
+  },
+  "last_business_france_closed_at_history": {
+    "date": "2026-09-05",
+    "scope": "clean_offers schema only — additive column, no other table/schema/scoring/matching/frontend change",
+    "modified": [
+      "apps/api/src/api/utils/clean_offers_pg.py",
+      "apps/api/tests/test_business_france_ingestion_tracking.py"
+    ],
+    "schema_change": "ALTER TABLE clean_offers ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ (additive, same pattern as first_seen_at/last_seen_at/is_active)",
+    "semantics": {
+      "on_present_or_reactivated": "is_active=TRUE, last_seen_at=seen_at, first_seen_at=COALESCE(first_seen_at, seen_at), closed_at=NULL",
+      "on_missing": "is_active=FALSE, closed_at=COALESCE(closed_at, seen_at) — set only on the first observed disappearance, not overwritten on subsequent runs while still missing"
+    },
+    "snapshots_decision": "reuse ingestion_runs (already timestamped, already carries new_count/missing_count/active_total per run) as the collection snapshot source for trend analysis; no new per-offer snapshot table created — revisit only if fine-grained per-offer historical reconstruction becomes a real need",
+    "validation": {
+      "method": "real PostgreSQL 16 started locally (not just code review) — DATABASE_URL=postgresql://postgres:postgres@localhost:5432/elevia_test",
+      "targeted": "python3 -m pytest tests/test_business_france_ingestion_tracking.py -q -> 1 passed (extended with run 3 closed_at-set and new run 4 closed_at-cleared-on-reactivation assertions)",
+      "regression": "test_business_france_ingestion_automation.py + test_business_france_db_first.py + test_business_france_raw_scraper.py + test_business_france_azure_primary_fallback.py + test_business_france_scrape_fallback.py + test_scrapegraph_bf_runner.py -> 32 passed, same 3 pre-existing unrelated failures as before (restart_api removed by 6ee80e8)"
+    }
   }
 }

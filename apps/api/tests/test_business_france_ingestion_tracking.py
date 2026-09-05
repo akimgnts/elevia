@@ -227,6 +227,47 @@ def test_business_france_tracking_first_second_and_missing_runs():
                 (0, 2, 1, 2),
             ]
 
+            # BF-2 went missing in run 3: closed_at must be set, others must stay NULL.
+            cur.execute(
+                f"SELECT external_id, closed_at IS NOT NULL FROM {clean_table} WHERE source='business_france' ORDER BY external_id"
+            )
+            assert cur.fetchall() == [("BF-1", False), ("BF-2", True), ("BF-3", False)]
+            cur.execute(f"SELECT closed_at FROM {clean_table} WHERE external_id='BF-2'")
+            closed_at_run3 = cur.fetchone()[0]
+            assert closed_at_run3 is not None
+
+        # Run 4: BF-2 reappears — closed_at must be cleared, is_active back to TRUE.
+        persist_raw_offer_records_with_connection(
+            conn,
+            "business_france",
+            [
+                {"external_id": "BF-1", "scraped_at": "2026-04-25T10:00:00Z", "payload": _payload("BF-1", "Offer 1")},
+                {"external_id": "BF-2", "scraped_at": "2026-04-25T10:00:00Z", "payload": _payload("BF-2", "Offer 2")},
+                {"external_id": "BF-3", "scraped_at": "2026-04-25T10:00:00Z", "payload": _payload("BF-3", "Offer 3")},
+            ],
+            table_name=raw_table,
+        )
+        previous_ids = get_business_france_active_ids_with_connection(conn, clean_table=clean_table)
+        current_ids = get_latest_business_france_raw_ids_with_connection(conn, raw_table=raw_table)
+        load_business_france_raw_into_clean_with_connection(conn, raw_table=raw_table, clean_table=clean_table)
+        fourth_stats = sync_business_france_offer_presence_with_connection(
+            conn,
+            current_ids=current_ids,
+            previous_active_ids=previous_ids,
+            clean_table=clean_table,
+            source="business_france",
+            seen_at="2026-04-25T10:05:00Z",
+        )
+        assert fourth_stats["active_total"] == 3
+
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT external_id, is_active, closed_at FROM {clean_table} WHERE source='business_france' ORDER BY external_id"
+            )
+            rows = cur.fetchall()
+            assert [(r[0], r[1]) for r in rows] == [("BF-1", True), ("BF-2", True), ("BF-3", True)]
+            assert all(r[2] is None for r in rows)
+
             cur.execute(f"DROP TABLE {runs_table}")
             cur.execute(f"DROP TABLE {clean_table}")
             cur.execute(f"DROP TABLE {raw_table}")
