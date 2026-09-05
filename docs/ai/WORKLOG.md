@@ -3677,3 +3677,23 @@ cd apps/api
 python3 scripts/scrape_business_france_azure.py --test --provider api
 ```
 Doit maintenant afficher `HTTP Status: 200` et des offres — le chemin primaire (API Civiweb) redevient la source normale ; le fallback ScrapeGraphAI (livré précédemment) reste en réserve pour toute panne future.
+
+## 2026-09-05 — Sprint historique BF : `closed_at`
+
+### 1. Objectif
+- Compléter `first_seen_at`/`last_seen_at`/`is_active` (déjà existants) avec `closed_at` : horodatage du moment où une offre Business France disparaît du catalogue.
+- "Snapshots de collecte" : décision de réutiliser `ingestion_runs` (déjà horodaté, déjà `active_total`/`new_count`/`missing_count` par run) plutôt que créer une nouvelle table — suffisant pour détecter des tendances (accélération d'embauche) sans duplication de schéma.
+
+### 2. Modifié
+- `apps/api/src/api/utils/clean_offers_pg.py` :
+  - `ensure_clean_offers_table()` : `ALTER TABLE ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ` (additif, même pattern que les colonnes précédentes).
+  - `sync_business_france_offer_presence_with_connection()` : quand une offre reste/redevient présente → `closed_at = NULL` (plus "fermée"). Quand une offre disparaît → `closed_at = COALESCE(closed_at, seen_at)` (pose la date de la **première** disparition constatée, ne l'écrase pas si elle reste manquante sur plusieurs runs consécutifs).
+- `apps/api/tests/test_business_france_ingestion_tracking.py` : étendu avec des assertions sur `closed_at` au run 3 (offre disparue → `closed_at` posé) et un nouveau run 4 (offre réapparue → `closed_at` remis à `NULL`, `is_active=TRUE`).
+
+### 3. Validation
+- PostgreSQL 16 local démarré dans l'environnement de dev pour valider réellement le SQL (pas seulement une relecture) : `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/elevia_test python3 -m pytest tests/test_business_france_ingestion_tracking.py -q` → **1 passed**.
+- Suite BF élargie sur la même DB : `test_business_france_ingestion_automation.py` + `test_business_france_db_first.py` + `test_business_france_raw_scraper.py` + `test_business_france_azure_primary_fallback.py` + `test_business_france_scrape_fallback.py` + `test_scrapegraph_bf_runner.py` → **32 passed**, mêmes 3 échecs préexistants et sans rapport dans `test_business_france_ingestion_automation.py` (fonction `restart_api` supprimée par le commit `6ee80e8` du 2026-06-26).
+
+### 4. Non-régression
+- `SELECT *` non utilisé sur `clean_offers` nulle part dans le code (`inbox_catalog.py`, `offers_pg.py` vérifiés) — colonne additive sans risque de collision.
+- Aucun changement scoring / matching / CV pipeline / frontend / `offer_skills` / domain enrichment / autres tables / scheduled task Coolify.

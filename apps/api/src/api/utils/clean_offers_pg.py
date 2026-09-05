@@ -157,6 +157,11 @@ def ensure_clean_offers_table(conn, *, table_name: str = "clean_offers") -> None
                 table_name=sql.Identifier(table_name)
             )
         )
+        cursor.execute(
+            sql.SQL("ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ").format(
+                table_name=sql.Identifier(table_name)
+            )
+        )
 
 
 def ensure_ingestion_runs_table(conn, *, table_name: str = "ingestion_runs") -> None:
@@ -374,7 +379,8 @@ def sync_business_france_offer_presence_with_connection(
                     SET
                         is_active = TRUE,
                         last_seen_at = %s,
-                        first_seen_at = COALESCE(first_seen_at, %s)
+                        first_seen_at = COALESCE(first_seen_at, %s),
+                        closed_at = NULL
                     WHERE source = %s
                       AND external_id = ANY(%s)
                     """
@@ -386,12 +392,14 @@ def sync_business_france_offer_presence_with_connection(
                 sql.SQL(
                     """
                     UPDATE {clean_table}
-                    SET is_active = FALSE
+                    SET
+                        is_active = FALSE,
+                        closed_at = COALESCE(closed_at, %s)
                     WHERE source = %s
                       AND external_id = ANY(%s)
                     """
                 ).format(clean_table=sql.Identifier(clean_table)),
-                (source, sorted(missing_ids)),
+                (seen_at_value, source, sorted(missing_ids)),
             )
 
     conn.commit()

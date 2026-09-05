@@ -357,6 +357,11 @@
 - Si la variable est absente, le comportement reste celui d'avant ce patch (pas de header ajouté) — pas de régression silencieuse déguisée en fix.
 - Toute rotation future de cette clé se fait uniquement via la variable d'environnement Coolify, jamais par un commit.
 
+### R34 — `closed_at` = date de la première disparition constatée ; `ingestion_runs` fait office de snapshot de collecte
+- `clean_offers.closed_at` (additive, `TIMESTAMPTZ`) est posée uniquement quand une offre passe de `is_active=TRUE` à `FALSE`, via `COALESCE(closed_at, seen_at)` — ne jamais écraser une date de fermeture déjà connue tant que l'offre reste absente sur des runs consécutifs.
+- Si l'offre réapparaît, `closed_at` est remise à `NULL` (elle n'est plus "fermée").
+- Décision explicite : pas de nouvelle table de snapshots par offre. `ingestion_runs` (déjà horodaté, déjà `new_count`/`missing_count`/`active_total` par run) sert de source pour toute analyse de tendance (accélération d'embauche, vagues de fermeture). Revoir cette décision seulement si un besoin concret de reconstruction fine offre-par-offre apparaît.
+
 ---
 
 ## Paramétrage figé du filtre V1
