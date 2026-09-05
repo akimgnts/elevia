@@ -2018,6 +2018,21 @@
       "fix": "same isolated-venv scrape-fallback step ported into deploy/staging/api.Dockerfile with repo-root-relative paths (apps/api/requirements-scrape-fallback.txt); deploy/staging/api.env.example documented with SCRAPEGRAPH_LLM_MODEL and SCRAPEGRAPH_VENV_PYTHON",
       "apps_api_dockerfile_status": "left untouched, harmless, but not the file that matters for this deployment",
       "next_step": "redeploy, then run scripts/scrape_business_france_azure.py --test --provider scrapegraph from the Coolify container shell and confirm /opt/scrape-fallback-venv/bin/python exists"
+    },
+    "correction_2026_09_02_langchain_community_pin": {
+      "bug": "scrapegraphai==1.76.0 unconditionally imports ChatOllama from langchain_community.chat_models in ~10 node modules, only used for an isinstance() check on an Ollama path we never use (we use OpenAI)",
+      "evidence": "scrapegraphai declares langchain-community>=0.4.0 with no ceiling; downloaded langchain-community wheels directly and confirmed ChatOllama present through 0.4.1, removed in 0.4.2; pip resolved 0.4.2 unbounded, breaking `from scrapegraphai.graphs import SmartScraperGraph` with ImportError before any scraping was attempted (observed in production --test --provider scrapegraph)",
+      "fix": "added langchain-community<0.4.2 to apps/api/requirements-scrape-fallback.txt; verified in a fresh venv that pip resolves langchain-community-0.4.1 with no conflicts and SmartScraperGraph then imports successfully",
+      "scope": "isolated to the scrape-fallback venv only, apps/api/requirements.txt untouched"
+    },
+    "root_cause_401_confirmed_2026_09_02": {
+      "cause": "civiweb-api-prd.azurewebsites.net/api/Offers/search now requires an `x-api-key` header, which the scraper never sent",
+      "evidence": "external documentation for a different project (BusinessFranceVieAdapter) describing the exact same endpoint with Auth: x-api-key header, plus a 401 troubleshooting section matching our exact symptom; confirmed working against the real API by the user",
+      "fix": "apps/api/scripts/scrape_business_france_azure.py reads BF_AZURE_API_KEY (fallback BUSINESS_FRANCE_VIE_API_KEY) from the environment and injects it as HEADERS['x-api-key'] — never hardcoded, never logged in clear (only 'set'/'NOT SET' printed by --test)",
+      "no_regression": "if the env var is absent, header injection is skipped and behavior is identical to before this patch",
+      "required_config": "BF_AZURE_API_KEY must be set in Coolify's environment variables for the fix to take effect",
+      "status": "code merged to main; production validation (--test --provider api showing HTTP 200 + offers) pending the next redeploy",
+      "fallback_relevance": "the ScrapeGraphAI fallback (R32) remains as a safety net for any future acquisition failure, but is no longer the active path once the API key restores the primary route"
     }
   }
 }
